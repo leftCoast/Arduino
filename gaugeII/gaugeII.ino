@@ -47,8 +47,8 @@ void setup(void) {
   Point inDest;
 
   //Serial.begin(9600);
-  //pinMode(pumpPin,OUTPUT);      // Whatever happens, shut off the pump.
-  //digitalWrite(pumpPin,LOW);
+  pinMode(pumpPin,OUTPUT);      // Whatever happens, shut off the pump.
+  digitalWrite(pumpPin,HIGH);
   if (initScreen(INV_PORTRAIT)) {
     screen->fillScreen(WHITE);
     if (initSDCard()) {
