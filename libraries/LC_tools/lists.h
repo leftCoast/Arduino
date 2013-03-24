@@ -1,0 +1,92 @@
+#ifndef lists_h
+#define lists_h
+
+#include <Arduino.h>
+
+
+// **********************
+// Your basic single linked list. Good for lists and stacks.
+// One issue is that the list objects can not unlink themselves.
+// This is because they have no idea who points at them. 
+// So, unlike the double linked list, the list owner must manage 
+// the list objects.
+// **********************
+
+class linkListObj {
+  
+  public:
+    linkListObj(void);
+    ~linkListObj(void);
+    
+    void linkAfter(linkListObj* present);
+    void linkToEnd(linkListObj* present);
+    
+    linkListObj* next;
+};
+
+
+class linkList {
+  
+  public:
+    linkList(boolean doWeOwnThem);
+    ~linkList(void);
+    
+    virtual void         addToTop(linkListObj* newObj);
+    virtual void         addToEnd(linkListObj* newObj);
+    virtual void         deleteFromTop(void);             // Push off or kill the first one.
+    virtual void         deleteObj(linkListObj* oldObj);  // Find it and push it off. Maybe kill it?
+    virtual boolean      isEmpty(void);
+    virtual void         dumpList(void);
+            linkListObj* getList(void);
+            
+    linkListObj* theList;
+    boolean      weOwn;
+};
+
+
+//*******************************************************
+// stack
+// In the stack we have push, pop, top, dump & empty.
+// We also assume we own the objecs. So, when we pop one,
+// we delete it. This is the most common way I've seen them
+// used. If you want something else, there's enough legos
+// here to make it up.
+//*******************************************************
+
+class stack : public linkList {
+
+  public:
+    stack(void);
+    ~stack(void);
+    
+    virtual void         push(linkListObj* newObj);
+    virtual void         pop(void);
+    virtual linkListObj* top(void);
+    virtual void         dump(void);
+    virtual boolean      empty(void);
+  };
+
+
+//*******************************************************
+// queue
+// Just like in the stack, in the queue we have push, pop, 
+// top, dump & empty. But, when we add an object we don't
+// add it to the top of the list, we add it to the end. 
+// Like the stack, we also assume we own the objecs. So,
+// when we pop one, we delete it.
+//*******************************************************
+
+class queue : public linkList {
+
+  public:
+    queue(void);
+    ~queue(void);
+    
+    virtual void         push(linkListObj* newObj);
+    virtual void         pop(void);
+    virtual linkListObj* top(void);
+    virtual void         dump(void);
+    virtual boolean      empty(void);
+  };
+
+#endif
