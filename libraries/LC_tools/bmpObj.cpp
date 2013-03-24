@@ -1,10 +1,15 @@
 #include "bmpObj.h" 
 
+// Needed to draw bitmaps from SD card to screen. For lack of a better idea
+// I just wrapped up all the code in here. Its a bit of a patchwok now.
+// Maybe later I can find a better home for this.
+
+
 int8_t savedSPI;            // When we init, we'll set this.
 
 boolean initSDCard(void) {
 
-  if (SD.begin(SD_CS)) {
+  if (SD.begin(SD_CS)) {  // This also sets up the SPCR reg.
     savedSPI = SPCR;      // Good this is what it wants..
     SPCR = 0;             // We're not using it now, stomp it.
     return true;
@@ -15,18 +20,22 @@ boolean initSDCard(void) {
 }
 
 
+// Constructor fires up the comunication port.
+// This is accomplished by returning it to the
+// State that SD.begin() left it in.
 SPIControl::SPIControl(void) { 
   SPCR = savedSPI; 
 }
 
 
+// Destructor saves the comunication port and then shuts it down.
 SPIControl::~SPIControl(void) {
 
   savedSPI = SPCR;
   SPCR = 0;
 }
 
-
+// Wrapper functions with the SPIControl calls.
 File openSD(char* fileName) {
   
   SPIControl ourSPI;
@@ -56,8 +65,9 @@ int readBuff(File inFile,void* buf, uint16_t nbyte) {
 }
 
 
-// Seems that the file thing swaps bytes and words. These swap 'em back when you read from it.
-// Swap bytes 
+// .bmp files have the 2 & 4 byte numbers stored in reverse byte order
+// than what we use here in Arduinoland. These two routines swap 'em back.
+// For 2 byte numbers.
 uint16_t read16(File f) {
   uint16_t result;
   SPIControl ourSPI;
@@ -66,6 +76,7 @@ uint16_t read16(File f) {
   return result;
 }
 
+// For 4 byte numbers.
 uint32_t read32(File f) {
   uint32_t result;
   SPIControl ourSPI;
@@ -77,45 +88,48 @@ uint32_t read32(File f) {
 }
 
 
+// Constructor for bmpObj. Takes a filename & point to draw it.
 bmpObj::bmpObj(char* inFileName, Point inDest) {
 
-  fileName = (char*)malloc(strlen(inFileName+1));
-  strcpy(fileName,inFileName);
-  dest = inDest;
-  haveInfo = false;
-  imageOffset = 0;
+  fileName = (char*)malloc(strlen(inFileName+1)); // Grab just enoug RAM to store the string.
+  strcpy(fileName,inFileName);                    // Save the filename.
+  dest = inDest;                                  // Save the location we want to draw this.
+  haveInfo = false;                               // We ain't read the file header yet..
 }
 
 
+// I hope free() is theright thing to call. It is an object.
 bmpObj::~bmpObj(void) { 
   free(fileName); 
 }
 
 
+// Move the point used for locating the drawing.
 void bmpObj::setDest(Point inDest) { 
   dest = inDest; 
 }
 
 
+// This reads the .bmp file header info and decides if we can draw it or not.
 void bmpObj::getInfo(void) {
 
   uint32_t temp;
 
-  source = openSD(fileName);                  // Time to see if we can open the file.
-  if (source) {                                // We get a file handle?
-    if (read16(source) == 0x4D42) {            // If we have something or other.. 
-      temp = read32(source);                   // We grab the fiele size.
-      temp = read32(source);                   // Creator bits
-      imageOffset = read32(source);            // image offset
-      temp = read32(source);                   // read DIB header size?
-      imageWidth = read32(source);
-      imageHeight = read32(source);            // negative means the data is right side up. Go figure..
-      if (read16(source) == 1) {               // if the next word is 1? What's this mean?
-        imageDepth = read16(source);           // color depth.
-        if (imageDepth==24||imageDepth==32) {
-          pixBytes = imageDepth/8;
-          if (!read32(source)) {                 // And no compression!
-            haveInfo = true;
+  source = openSD(fileName);                    // Time to see if we can open the file.
+  if (source) {                                 // We get a file handle?
+    if (read16(source) == 0x4D42) {             // If we have something or other.. 
+      temp = read32(source);                    // We grab the file size.
+      temp = read32(source);                    // Creator bits
+      imageOffset = read32(source);             // image offset, save this.
+      temp = read32(source);                    // read DIB header size?
+      imageWidth = read32(source);              // width? Good thing to sae for later.
+      imageHeight = read32(source);             // Height? Negative means the data is right side up. Go figure..
+      if (read16(source) == 1) {                // if the next word is 1? What's this mean? Needs to be though.
+        imageDepth = read16(source);            // color depth.
+        if (imageDepth==24||imageDepth==32) {   // We can do 24 or 32 bits..
+          pixBytes = imageDepth/8;              // Bytes / pixel
+          if (!read32(source)) {                // And no compression!
+            haveInfo = true;                    // Mde it thi far? We can do this!
           }
         }
       }
@@ -124,46 +138,39 @@ void bmpObj::getInfo(void) {
 }
 
   
+// Called by plotBmp(), this does one line.  
 void bmpObj::plotLine(int y) {
 
   uint16_t  color16;
   uint8_t   buf[pixBytes];
   int       x;
   
-  for (x=dest.x; x<dest.x+imageWidth; x++) {
-    readBuff(source,buf,pixBytes);
-    color16 = screen->Color565(buf[2],buf[1],buf[0]);
-    screen->drawPixel(x,y,color16);
+  for (x=dest.x; x<dest.x+imageWidth; x++) {            // Ok, x does dest to max image width.
+    readBuff(source,buf,pixBytes);                      // Grab a pixel.
+    color16 = screen->Color565(buf[2],buf[1],buf[0]);   // Convert it to 565 color.
+    screen->drawPixel(x,y,color16);                     // Spat it out to the screen.
   }
 }
 
 
+// Plots tebitmap file to the screen.
 void bmpObj::plotBmp(void) {
 
   int   y;
   
-  if (haveInfo) {
-    if (fileSeek(source,imageOffset)) {
-      if (imageHeight>0) {
-        for (y=dest.y+imageHeight; y>=dest.y; y--) {
-          plotLine(y);
+  if (haveInfo) {                                     // We sucessfully got the info?
+    if (fileSeek(source,imageOffset)) {               // Move to trh bitmap data.
+      if (imageHeight>0) {                            // The image is upside down?
+        for (y=dest.y+imageHeight; y>=dest.y; y--) {  // Loop from the bottom of the image to the top.
+          plotLine(y);                                // Draw this line.
         }
       } 
-      else {
-        long temp = -imageHeight;
-        for (y=dest.y; y<=dest.y+temp; y++) {
-          plotLine(y);
-        }
+      else {                                          // Image must be stored right side up.
+        long temp = -imageHeight;                     // We need the absolut value. But don't loose the info.
+        for (y=dest.y; y<=dest.y+temp; y++) {         // Loop from the top down.
+          plotLine(y);                                // Draw this line.
+        }       
       }
     }
   }
 }
-
-
-
-
-
-
-
-
-
