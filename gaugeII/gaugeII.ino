@@ -121,13 +121,13 @@ void loop(void) {
   inPt = screen->getPoint();
   if (screen->pressed(inPt)) {
     if (mHotSpotOff.inRect(inPt)) {
-      digitalWrite(pumpPin,LOW);
+      digitalWrite(pumpPin,HIGH);
       screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height);
       delay(200);
       screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height);
     } 
     else if (mHotSpotOn.inRect(inPt)) { 
-      digitalWrite(pumpPin,HIGH);
+      digitalWrite(pumpPin,LOW);
       screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height);
       delay(200);
       screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height);
