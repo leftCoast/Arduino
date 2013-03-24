@@ -36,7 +36,6 @@ void PulseOut::idle(void) {
   unsigned long startTime;
   unsigned long endPulse;
 
-  Serial.println("servo idle");
   if(ding()) {
     startTime = micros();
     digitalWrite(pin, HIGH);
