@@ -1,28 +1,49 @@
+#include <PinChangeInt.h>
+#include <blinker.h>
+#include <idlers.h>
+#include <lists.h>
+#include <mapper.h>
+#include <multiMap.h>
+#include <PulseOut.h>
+#include <servo.h>
+#include <timeObj.h>
+
+#include "RCReciver.h"
 #include "multiWii.h"
 
-int led =  RED_LED;
-int led2 = GREEN_LED;
-int led3 = BLUE_LED;
-int led4 = AMBER_LED;
+servo theServo(PIN_D46);
+reciverPin* theInPin;
+mapper servoMpr(1100,1928,-100,100);
+blinker blueBlinker(BLUE_LED,200,400);
 
 void setup() {                
-
-   pinMode(led, OUTPUT);
-   pinMode(led2, OUTPUT); 
-   pinMode(led3, OUTPUT);
-   pinMode(led4, OUTPUT);
+  
+  //Serial.begin(9600);
+  //Serial.println(A8);
+  theInPin = new reciverPin(A8);
+  theServo.setServo(50);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  blueBlinker.setBlink(true);
 }
 
 void loop() {
-   digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
-   digitalWrite(led2, HIGH);
-   digitalWrite(led3, HIGH);
-   digitalWrite(led4, HIGH);
-   delay(100);               // wait for a second
-   digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
-   digitalWrite(led2, LOW);
-   digitalWrite(led3, LOW);
-   digitalWrite(led4, LOW);
-   delay(100);               // wait for a second
+   
+   unsigned long value;
+   float servoVal;
+   
+   theIdlers.idle();
+   //theInPin->dataDump();
+   value = theInPin->pinResult();
+   if (value) {
+      servoVal = servoMpr.Map(value);
+      theServo.setServo(servoVal);
+      digitalWrite(GREEN_LED, LOW);
+      digitalWrite(RED_LED,LOW);
+   } else {
+      digitalWrite(GREEN_LED, HIGH);
+      digitalWrite(RED_LED,HIGH);
+   }
+   
 }
 

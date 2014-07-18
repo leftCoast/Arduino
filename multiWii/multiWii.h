@@ -1,4 +1,4 @@
-#ifndef multiWii_h
+#ifndef multiWii_h {
 #define multiWii_h
 
 // Pinouts for the LEDs we can control.
@@ -47,3 +47,4 @@
 
 
 #endif // multiWii_h
+
