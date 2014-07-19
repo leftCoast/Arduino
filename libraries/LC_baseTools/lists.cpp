@@ -59,10 +59,12 @@ linkList::~linkList(void) {
 
 void linkList::addToTop(linkListObj* newObj) {
 
-  Serial.print("addToTop list: "); 
-  Serial.print((unsigned long)this); 
-  Serial.print("  newObj: "); 
+  /*
+   Serial.print("addToTop list: ");
+  Serial.print((unsigned long)this);
+  Serial.print("  newObj: ");
   Serial.println((unsigned long) newObj);
+   */
   newObj->next = theList;  // Empty or not, it does the right thing.
   theList = newObj;
 }
@@ -70,10 +72,12 @@ void linkList::addToTop(linkListObj* newObj) {
 
 void linkList::addToEnd(linkListObj* newObj) {
 
-  Serial.print("addToEnd list: "); 
+  /*
+   Serial.print("addToEnd list: ");
   Serial.print((unsigned long)this); 
   Serial.print("  newObj: "); 
   Serial.println((unsigned long) newObj);
+   */
   if (theList==NULL) {          // No list huh?
     theList = newObj;
   } 

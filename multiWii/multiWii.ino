@@ -1,3 +1,4 @@
+#include <Wire.h>
 #include <PinChangeInt.h>
 #include <blinker.h>
 #include <idlers.h>
@@ -9,30 +10,50 @@
 #include <timeObj.h>
 
 #include "RCReciver.h"
+#include "gyro.h"
 #include "multiWii.h"
 
 servo theServo(PIN_D46);
 reciverPin* theInPin;
 mapper servoMpr(1100,1928,-100,100);
 blinker blueBlinker(BLUE_LED,200,400);
+gyro* theGyro;
 
 void setup() {                
-  
-  //Serial.begin(9600);
-  //Serial.println(A8);
-  theInPin = new reciverPin(A8);
-  theServo.setServo(50);
-  pinMode(RED_LED, OUTPUT);
-  pinMode(GREEN_LED, OUTPUT);
-  blueBlinker.setBlink(true);
+
+   Serial.begin(9600);
+   Wire.begin();
+   theInPin = new reciverPin(A8);
+   theGyro = new gyro();
+   theServo.setServo(50);
+   pinMode(RED_LED, OUTPUT);
+   pinMode(GREEN_LED, OUTPUT);
+   pinMode(AMBER_LED, OUTPUT);
+   //blueBlinker.setBlink(true);
 }
 
 void loop() {
-   
+
    unsigned long value;
    float servoVal;
    
+   int  xVal;
+   int  yVal;
+   int  zVal;
+  
+   //delay(100);
+   digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
+  
+   if (theGyro->newReadings()) {
+      theGyro->readValues(&xVal,&yVal,&zVal);
+      Serial.print("x = ");Serial.println(xVal);  // print the values
+      Serial.print("y = ");Serial.println(yVal);
+      Serial.print("z = ");Serial.println(zVal);
+      Serial.println();
+   }
+   digitalWrite(AMBER_LED, HIGH);         // yellow off.
+
    //theInPin->dataDump();
    value = theInPin->pinResult();
    if (value) {
@@ -40,10 +61,14 @@ void loop() {
       theServo.setServo(servoVal);
       digitalWrite(GREEN_LED, LOW);
       digitalWrite(RED_LED,LOW);
-   } else {
+   } 
+   else {
       digitalWrite(GREEN_LED, HIGH);
       digitalWrite(RED_LED,HIGH);
    }
-   
+
+
+
 }
+
 
