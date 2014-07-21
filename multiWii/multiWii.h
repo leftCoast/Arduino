@@ -1,37 +1,35 @@
 #ifndef multiWii_h {
 #define multiWii_h
 
+// This is ripped from the shared multiWii code about this board.
+#define ITG3200
+#define BMA180
+#define BMP085
+#define HMC5883
+#define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -X; imu.accADC[PITCH]  = -Y; imu.accADC[YAW]  =  Z;}
+#define GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  Y; imu.gyroADC[PITCH] = -X; imu.gyroADC[YAW] = -Z;}
+#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Y; imu.magADC[PITCH]  = -X; imu.magADC[YAW]  = -Z;}
+  
+  
 // Pinouts for the LEDs we can control.
 #define RED_LED   13  // HIGH is on
 #define GREEN_LED 30  // LOW  is on
 #define BLUE_LED  31  // LOW  is on
 #define AMBER_LED 32  // LOW  is on
 
-
-// Pinout mappings from silkscreen names to pin numbers.
-// Port side of board. Port K? seem's fishy to me..
-#define PIN_A8  A0
-#define PIN_A9  A1
-#define PIN_A10 A2
-#define PIN_A11 A3
-#define PIN_A12 A4
-#define PIN_A13 A5
-#define PIN_A14 A6
-#define PIN_A15 A7
-  
   
 // Just in case, this is the standard multiWii mapping.
-#define THROTTLEPIN PIN_A8
-#define ROLLPIN     PIN_A9
-#define PITCHPIN    PIN_A10
-#define YAWPIN      PIN_A11
-#define AUX1PIN     PIN_A12
-#define AUX2PIN     PIN_A13
-#define AUX3PIN     PIN_A14
-#define AUX4PIN     PIN_A15
+#define THROTTLEPIN A8
+#define ROLLPIN     A9
+#define PITCHPIN    A10
+#define YAWPIN      A11
+#define AUX1PIN     A12
+#define AUX2PIN     A13
+#define AUX3PIN     A14
+#define AUX4PIN     A15
 
 
-// Starboard side of board.
+// Starboard side of board. Silkscreen mapping..
 #define PIN_D10 10
 #define PIN_D9   9
 #define PIN_D8   8

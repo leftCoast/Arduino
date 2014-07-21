@@ -17,7 +17,6 @@
  
  /*
  Next chips to code..
- BMA180
  BMP085
  HMC5883
  */

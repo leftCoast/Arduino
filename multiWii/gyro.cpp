@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include "sensors.h"
+#include "gyro.h"
 
 #define GYRO_ADDR  B01101000   // Figured out that much.
 

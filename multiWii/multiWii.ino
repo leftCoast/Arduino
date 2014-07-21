@@ -11,6 +11,7 @@
 
 #include "RCReciver.h"
 #include "gyro.h"
+#include "accell.h"
 #include "multiWii.h"
 
 servo theServo(PIN_D46);
@@ -18,6 +19,7 @@ reciverPin* theInPin;
 mapper servoMpr(1100,1928,-100,100);
 blinker blueBlinker(BLUE_LED,200,400);
 gyro* theGyro;
+accell* theAccell;
 
 void setup() {                
 
@@ -25,6 +27,7 @@ void setup() {
    Wire.begin();
    theInPin = new reciverPin(A8);
    theGyro = new gyro();
+   theAccell = new accell();
    theServo.setServo(50);
    pinMode(RED_LED, OUTPUT);
    pinMode(GREEN_LED, OUTPUT);
@@ -47,14 +50,22 @@ void loop() {
   
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
-      Serial.print("x = ");Serial.println(xVal);  // print the values
-      Serial.print("y = ");Serial.println(yVal);
-      Serial.print("z = ");Serial.println(zVal);
+      Serial.println();
+      Serial.print("x rotation = ");Serial.println(xVal);  // print the values
+      Serial.print("y rotation = ");Serial.println(yVal);
+      Serial.print("z rotation = ");Serial.println(zVal);
+      Serial.println();
+   }
+   
+   if (theAccell->newReadings()) {
+      theAccell->readValues(&xVal,&yVal,&zVal);
+      Serial.print("x accell  = ");Serial.println(xVal);  // print the values
+      Serial.print("y accell  = ");Serial.println(yVal);
+      Serial.print("z accell  = ");Serial.println(zVal);
       Serial.println();
    }
    digitalWrite(AMBER_LED, HIGH);         // yellow off.
 
-   //theInPin->dataDump();
    value = theInPin->pinResult();
    if (value) {
       servoVal = servoMpr.Map(value);
