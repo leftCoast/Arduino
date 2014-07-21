@@ -13,6 +13,7 @@
 #include "gyro.h"
 #include "accell.h"
 #include "multiWii.h"
+//#include "barometer.h"
 
 servo theServo(PIN_D46);
 reciverPin* theInPin;
@@ -63,7 +64,9 @@ void loop() {
       Serial.print("y accell  = ");Serial.println(yVal);
       Serial.print("z accell  = ");Serial.println(zVal);
       Serial.println();
-   }
+   }//else
+   //theAccell->dataDump();
+   
    digitalWrite(AMBER_LED, HIGH);         // yellow off.
 
    value = theInPin->pinResult();

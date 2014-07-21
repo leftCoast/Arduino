@@ -1,9 +1,12 @@
 #ifndef accell_h
 #define accell_h
 
+#include "mapper.h"
 #include "idlers.h"
+#include "timeObj.h"
 
-#define ACC_1G 255
+// in case no one told you, this code is for running the Bosch BMA 180 accell chip.
+extern mapper accellMapper;
 
 class accell : public idler {
 
@@ -14,14 +17,15 @@ public:
    virtual void    idle(void);
    boolean newReadings(void);
    void    readValues(int* x,int* y,int* z);
- //void    dataDump(void);
+ void    dataDump(void);
 
 protected:
-   byte    readRegister(byte regNum);
-   boolean writeRegister(byte regNum, byte value);
-   void    initAccell(void);
-   void    checkAccell(void);
-   void    readAccell(void);
+   timeObj*   chipTimer;
+   byte       readRegister(byte regNum);
+   boolean    writeRegister(byte regNum, byte value);
+   void       initAccell(void);
+   void       checkAccell(void);
+   void       readAccell(void);
 
    byte    state;
    boolean dataReady;

@@ -3,10 +3,10 @@
 
 timeObj::timeObj(float inMs) {
 
-  setTime(inMs);
   startTime = 0;
   endTime = 0;
   crossing = false;
+  setTime(inMs);        // This sets startTime and endTime. Best go here?
 }
 
 
