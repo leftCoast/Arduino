@@ -158,15 +158,15 @@ void accell::readAccell(void) {
       if(Wire.requestFrom(ACCELL_ADDR,6) == 6) {    // Must read LSB first - 52 BMA 180 Databook
          x_accell = Wire.read();
          x_accell |= Wire.read() << 8;
-         x_accell >>= 2;                            // The low register has 2 bits of fluff. Dump it.
+         x_accell = x_accell >> 2;                            // The low register has 2 bits of fluff. Dump it.
 
          y_accell = Wire.read();
          y_accell |= Wire.read() << 8;
-         y_accell >>= 2;
+         y_accell = y_accell >> 2; 
 
          z_accell = Wire.read();
          z_accell |= Wire.read() << 8;
-         z_accell >>= 2;
+         z_accell = z_accell >> 2; 
 
          state = calculating;                      // If we made it here, we're doing ok!
          dataReady = true;
