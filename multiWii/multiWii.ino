@@ -21,11 +21,13 @@ mapper servoMpr(1100,1928,-100,100);
 blinker blueBlinker(BLUE_LED,200,400);
 gyro* theGyro;
 accell* theAccell;
+long iteration;
 
 void setup() {                
 
    Serial.begin(9600);
    Wire.begin();
+   delay(15000);   // time to get the screen up.
    theInPin = new reciverPin(A8);
    theGyro = new gyro();
    theAccell = new accell();
@@ -34,7 +36,9 @@ void setup() {
    pinMode(GREEN_LED, OUTPUT);
    pinMode(AMBER_LED, OUTPUT);
    //blueBlinker.setBlink(true);
+   iteration = 0;
 }
+
 
 void loop() {
 
@@ -45,10 +49,15 @@ void loop() {
    int  yVal;
    int  zVal;
   
-   //delay(100);
+   
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
-  
+   
+   if (iteration==4) {
+      Serial.print("Calibrating..");
+      theAccell->calibrate();
+      iteration++;
+   }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
       Serial.println();
@@ -64,6 +73,7 @@ void loop() {
       Serial.print("y accell  = ");Serial.println(yVal);
       Serial.print("z accell  = ");Serial.println(zVal);
       Serial.println();
+      iteration++;
    }//else
    //theAccell->dataDump();
    
@@ -80,7 +90,7 @@ void loop() {
       digitalWrite(GREEN_LED, HIGH);
       digitalWrite(RED_LED,HIGH);
    }
-
+   
 
 
 }

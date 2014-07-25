@@ -14,24 +14,32 @@ public:
    accell(void);
    ~accell(void);
 
-   virtual void    idle(void);
-   boolean newReadings(void);
-   void    readValues(int* x,int* y,int* z);
- void    dataDump(void);
+   virtual void idle(void);
+   boolean      newReadings(void);
+   void         readRawValues(int* x,int* y,int* z);           // Without calibration..
+   void         readValues(int* x,int* y,int* z);              // With calibration. (use this one)
+ 
+   void calibrate(void);                                       // Calculate the offsets. (Needs to be running first)
+   void readOffsets(int* xOffset,int* yOffset,int* zOffset);   // Lets say we wanted to save these in Flash memory?
+   void setOffsets(int xOffset,int yOffset,int zOffset);
+ //void dataDump(void);
 
 protected:
-   timeObj*   chipTimer;
-   byte       readRegister(byte regNum);
-   boolean    writeRegister(byte regNum, byte value);
-   void       initAccell(void);
-   void       checkAccell(void);
-   void       readAccell(void);
-
-   byte    state;
-   boolean dataReady;
-   int     x_accell;
-   int     y_accell;
-   int     z_accell;
+   byte    readRegister(byte regNum);
+   boolean writeRegister(byte regNum, byte value);
+   void    initAccell(void);
+   void    checkAccell(void);
+   void    readAccell(void);
+   
+   timeObj* chipTimer;
+   byte     state;
+   boolean  dataReady;
+   int      x_offset;
+   int      y_offset;
+   int      z_offset;
+   int      x_accell;
+   int      y_accell;
+   int      z_accell;
 };
 
 
