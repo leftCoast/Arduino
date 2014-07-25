@@ -1,10 +1,10 @@
-#include "multiMap.h"
-#include "blinker.h"
+#include <multiMap.h>
+#include <blinker.h>
 
 #define NUM_MAPPERS 3
-blinker  aBlinker;
-multiMap testMapper[NUM_MAPPERS];
 
+multiMap testMapper[NUM_MAPPERS];
+blinker  aBlinker;
 char command[80];
 byte index;
 
@@ -12,7 +12,7 @@ void setup(void) {
   index = 0;
   Serial.begin(9600);
   Serial.setTimeout(100);
-  aBlinker.init();
+  //aBlinker.init();
 }
 
 boolean checkMapperNum(int mapperNum) {
@@ -80,7 +80,7 @@ void loop(void) {
 
   byte inByte;
 
-  aBlinker.idle();
+  idle();
   if (Serial.available() > 0) {
     inByte = Serial.read();
     if (isalpha(inByte)) {
