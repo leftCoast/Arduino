@@ -23,9 +23,11 @@
 #define X_HIGH         29
 #define X_LOW          30
 #define Y_HIGH         31
-#define Y_LOW           32
+#define Y_LOW          32
 #define Z_HIGH         33
 #define Z_LOW          34
+
+#define CALIB_ITR      500
 
 enum gyroStates { unInitilized, calculating, valueReady };
 
@@ -33,9 +35,17 @@ gyro::gyro(void) {
    
    state = unInitilized;
    dataReady = false;
+   x_offset = 0;
+   y_offset = 0;
+   z_offset = 0;
    x_rotation = 0;
    y_rotation = 0;
    z_rotation = 0;
+   lastRead = 0;
+   currentRead = 0;
+   x_angle = 0;
+   y_angle = 0;
+   z_angle = 0;
 }
 
    
@@ -82,9 +92,6 @@ byte gyro::readRegister(byte regNum) {
 }
  
  
- 
- 
-
 boolean gyro::writeRegister(byte regNum, byte value) {
 
    //Serial.print("Writing Reg : ");Serial.print(regNum);Serial.print("  Value : ");Serial.println(value,BIN);
@@ -111,7 +118,10 @@ void gyro::checkGyro(void) {
    byte gyroStatus;
    
    gyroStatus = readRegister(INT_STATUS);
-   if(gyroStatus & READY_MASK) state = valueReady;
+   if(gyroStatus & READY_MASK) {
+      currentRead = micros();               // We see data, note the time
+      state = valueReady;
+   }
 }
 
 
@@ -120,27 +130,97 @@ void gyro::readGyro(void) {
    
    int high;
    int low;
+   unsigned long deltaT;
+   
+   if(lastRead!=0 && lastRead<currentRead) {   // If we have 2 time values and we're not crossing the 0 line..
+      deltaT = currentRead - lastRead;
+      x_angle = x_angle + ((deltaT * x_rotation)/1000000);  // And these units would be degrees?
+      y_angle = y_angle + ((deltaT * y_rotation)/1000000);
+      z_angle = z_angle + ((deltaT * z_rotation)/1000000);
+   }
+   lastRead = currentRead;
    
    high = readRegister(X_HIGH);
    low = readRegister(X_LOW);
    high = high << 8;
    x_rotation = high + low;
+   x_rotation = x_rotation - x_offset;
    
    high = readRegister(Y_HIGH);
    low = readRegister(Y_LOW);
    high = high << 8;
    y_rotation = high + low;
+   y_rotation = y_rotation - y_offset;
    
    high = readRegister(Z_HIGH);
    low = readRegister(Z_LOW);
    high = high << 8;
    z_rotation = high + low;
+   z_rotation = z_rotation - z_offset;
    
    state = calculating;
    dataReady = true;
 }
  
+ 
+ // Calibrate routine must be called when the controller board is being held level and not moving.
+void gyro::calibrate(void) {
+   
+   int  x;
+   int  y;
+   int  z;
+   long rotX = 0;
+   long rotY = 0;
+   long rotZ = 0;
+   int  i = 0;
+   
+   if (state!=unInitilized) {   // Only bother if we're running.
+      setOffsets(0,0,0);        // Clear offsets to start..
+      while(i<CALIB_ITR) {
+         while(!newReadings()) theIdlers.idle();   // let -everyone- have some time..
+         readValues(&x,&y,&z);
+         rotX = rotX + x;
+         rotY = rotY + y;
+         rotZ = rotZ + z;
+         i++;
+      }
+      setOffsets(rotX/CALIB_ITR,rotY/CALIB_ITR,rotZ/CALIB_ITR); // Send in the avarages.
+   }
+}
 
+
+void gyro::readOffsets(int* xOffset,int* yOffset,int* zOffset) {
+   
+   *xOffset = x_offset;
+   *yOffset = y_offset;
+   *zOffset = z_offset;
+}
+
+
+void gyro::setOffsets(int xOffset,int yOffset,int zOffset) {
+   
+   x_offset = xOffset;
+   y_offset = yOffset;
+   z_offset = zOffset;
+}
+
+
+void gyro::readAngles(int* xAngle,int* yAngle,int* zAngle) {
+     
+   *xAngle = x_angle;
+   *yAngle = y_angle;
+   *zAngle = z_angle;
+}
+
+
+void gyro::setAngles(int xAngle,int yAngle,int zAngle) {
+ 
+   x_angle = xAngle;
+   y_angle = yAngle;
+   z_angle = zAngle;
+}
+   
+   
 /*  
 void gyro::dataDump(void) {
    

@@ -34,6 +34,9 @@
 
 #define OLSB1       0x35
 
+#define CALIB_ITR   500
+#define ONE_G       -1024   // Board level gives negitive numbers, go figure.
+
 mapper accellMapper(-8191,8192,-8,7.999);   // Make up a mapper for them's that will need it.
 
 enum accellStates { unInitilized, calculating, valueReady };
@@ -43,6 +46,9 @@ accell::accell(void) {
    chipTimer = new timeObj(10);   // Wait 10 ms after powerup - PG 26 BMA 180 Databook
    state = unInitilized;
    dataReady = false;
+   x_offset = 0;
+   y_offset = 0;
+   z_offset = 0;
    x_accell = 0;
    y_accell = 0;
    z_accell = 0;
@@ -61,7 +67,7 @@ boolean accell::newReadings(void) {
 }
 
 
-void accell::readValues(int* x,int* y,int* z) {
+void accell::readRawValues(int* x,int* y,int* z) {
 
    *x = x_accell;
    *y = y_accell;
@@ -69,6 +75,15 @@ void accell::readValues(int* x,int* y,int* z) {
    dataReady = false; // You done read it. I'll let you know when there's a fresh batch.
 }
 
+
+void accell::readValues(int* x,int* y,int* z) {
+   
+   readRawValues(x,y,z);   // Make sure we run the state engine..
+   *x = *x - x_offset;
+   *y = *y - y_offset;
+   *z = *z - z_offset;
+}
+   
 
 void accell::idle(void) {
 
@@ -116,20 +131,16 @@ void accell::initAccell(void) {
       temp = readRegister(CTRLREG0);         // Grab CTRLREG0.. - PG 47 BMA 180 Databook
       temp = temp | B00010000;               // Set bit ee_w to 1 to enable writing.
       if (writeRegister(CTRLREG0,temp)) {    // Write it in.
-         delay(20);
          temp = readRegister(BW_TCS);        // Copy the BW_TCS register. - PG 29 BMA 180 Databook
          temp = temp & B00001111;            // Stomp bw reg.. setting low pass filter to 10Hz (bits value = 0000xxxx)
          if (writeRegister(BW_TCS, temp)) {  // Set it back in.
-            delay(20);
             temp = readRegister(TCO_Z);         // Copy the TCO_Z register. - PG 29 BMA 180 Databook
             temp = temp & B11111110;            // Set mode_config to 0. Why? Low noise, high current. Full bandwidth!
             if (writeRegister(TCO_Z, temp)) {   // Send it back in.
-               delay(20);
                temp = readRegister(OLSB1);      // Copy the OLSB1 register. - PG 28 BMA 180 Databook
-               temp = temp & B00001111;         // Clear range bits.
-               temp = temp | B01010000;         // Set range bits to 8G (MW again..) and this means? 8G = 4096 units. 512 per g?
+               temp = temp & B11110001;         // Clear range bits.
+               temp = temp | B00001010;         // Set range bits to 8G (MW again..) and this means? 8G = fullscale.
                if (writeRegister(OLSB1, temp)) {   // Send it back in.
-                  delay(20);
                   state = calculating;             // At this point, we're good!
                }
             }
@@ -173,6 +184,50 @@ void accell::readAccell(void) {
       }
    }
 }
+
+
+// Calibrate routine must be called when the controller board is being held level and not moving.
+void accell::calibrate(void) {
+   
+   int  x;
+   int  y;
+   int  z;
+   long accX = 0;
+   long accY = 0;
+   long accZ = 0;
+   int  i = 0;
+   
+   if (state!=unInitilized) {   // Only bother if we're running.
+      while(i<CALIB_ITR) {
+         while(!newReadings()) theIdlers.idle();   // let -everyone- have some time..
+         readRawValues(&x,&y,&z);
+         accX = accX + x;
+         accY = accY + y;
+         accZ = accZ + z;
+         i++;
+      }
+      x_offset = (accX/CALIB_ITR) - 0;
+      y_offset = (accY/CALIB_ITR) - 0;
+      z_offset = (accZ/CALIB_ITR) - ONE_G;
+   }
+}
+  
+  
+void accell::readOffsets(int* xOffset,int* yOffset,int* zOffset) {
+   
+   *xOffset = x_offset;
+   *yOffset = y_offset;
+   *zOffset = z_offset;
+}
+
+
+void accell::setOffsets(int xOffset,int yOffset,int zOffset) {
+   
+   x_offset = xOffset;
+   y_offset = yOffset;
+   z_offset = zOffset;
+}
+
 
 /*
 void accell::dataDump(void) {
