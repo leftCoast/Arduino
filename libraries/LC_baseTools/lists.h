@@ -18,8 +18,8 @@ class linkListObj {
     linkListObj(void);
     ~linkListObj(void);
     
-    void linkAfter(linkListObj* present);
-    void linkToEnd(linkListObj* present);
+    void linkAfter(linkListObj* present); // Given a pointer to a node, link yourself after it.
+    void linkToEnd(linkListObj* present); // Given a pointer to a node, link yourself after the last in the chain.
     
     linkListObj* next;
 };
