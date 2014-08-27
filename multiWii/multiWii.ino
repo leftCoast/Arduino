@@ -27,7 +27,6 @@ void setup() {
 
    Serial.begin(9600);
    Wire.begin();
-   delay(15000);   // time to get the screen up.
    theInPin = new reciverPin(A8);
    theGyro = new gyro();
    theAccell = new accell();
@@ -37,6 +36,7 @@ void setup() {
    pinMode(AMBER_LED, OUTPUT);
    //blueBlinker.setBlink(true);
    iteration = 0;
+   delay(15000);   // time to get the screen up.
 }
 
 
@@ -53,10 +53,13 @@ void loop() {
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
    
-   if (iteration==4) {
-      Serial.print("Calibrating..");
-      theAccell->calibrate();
-      iteration++;
+   if (iteration==40) {
+      Serial.println("Calibrating..");
+      Serial.println("Calibrating..");
+      Serial.println("Calibrating..");
+      Serial.println("Calibrating..");
+      theGyro->calibrate();
+      theGyro->setAngles(0,0,0);        //Ok, lets assume we're flat..
    }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
@@ -69,13 +72,14 @@ void loop() {
    
    if (theAccell->newReadings()) {
       theAccell->readValues(&xVal,&yVal,&zVal);
+      /*
       Serial.print("x accell  = ");Serial.println(xVal);  // print the values
       Serial.print("y accell  = ");Serial.println(yVal);
       Serial.print("z accell  = ");Serial.println(zVal);
       Serial.println();
-      iteration++;
-   }//else
-   //theAccell->dataDump();
+      */
+   }
+   iteration++;
    
    digitalWrite(AMBER_LED, HIGH);         // yellow off.
 

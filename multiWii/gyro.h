@@ -41,6 +41,7 @@ public:
    //void    dataDump(void);
 
 protected:
+   boolean readRegisters(byte regNum,byte* buff,int numBytes);
    byte    readRegister(byte regNum);
    boolean writeRegister(byte regNum, byte value);
    void    initGyro(void);
@@ -49,15 +50,18 @@ protected:
 
    byte    state;
    boolean dataReady;
+   
    int     x_offset;      // Calibration offset
    int     y_offset;
    int     z_offset;
+   
    int     x_rotation;    // How fast is it changing now? (raw values)
    int     y_rotation;
    int     z_rotation;
    
-   long          lastRead;      // When was the last read seen?
+   unsigned long lastRead;      // When was the last read seen?
    unsigned long currentRead;   // What time was the current reading seen?
+   
    int           x_angle;       // Integrated, accumulated angle
    int           y_angle;
    int           z_angle;
