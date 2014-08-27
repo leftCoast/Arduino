@@ -154,12 +154,14 @@ void gyro::readGyro(void) {
   int low;
   unsigned long deltaT;
   byte buff[6];          // Data goes in here!
-
+  float seconds;
+  
   if(lastRead!=0 && lastRead<currentRead) {   // If we have 2 time values and we're not crossing the 0 line..
     deltaT = currentRead - lastRead;
-    x_angle = x_angle + ((deltaT * x_rotation)/1000000);  // And these units would be degrees?
-    y_angle = y_angle + ((deltaT * y_rotation)/1000000);
-    z_angle = z_angle + ((deltaT * z_rotation)/1000000);
+    seconds = deltaT / 1000000.0;
+    x_angle = x_angle + round(x_rotation * seconds);           // And these units would be degrees?
+    y_angle = y_angle + round(y_rotation * seconds); 
+    z_angle = z_angle + round(z_rotation * seconds); 
   }
   lastRead = currentRead;
 

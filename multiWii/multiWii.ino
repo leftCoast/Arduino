@@ -49,6 +49,9 @@ void loop() {
    int  yVal;
    int  zVal;
   
+   int xPos;
+   int  yPos;
+   int  zPos;
    
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
@@ -63,10 +66,11 @@ void loop() {
    }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
+      theGyro->readAngles(&xPos,&yPos,&zPos);
       Serial.println();
-      Serial.print("x rotation = ");Serial.println(xVal);  // print the values
-      Serial.print("y rotation = ");Serial.println(yVal);
-      Serial.print("z rotation = ");Serial.println(zVal);
+      Serial.print("x rotation = ");Serial.print(xVal);Serial.print("   pos = ");Serial.println(xPos);    // print the values
+      Serial.print("y rotation = ");Serial.print(yVal);Serial.print("   pos = ");Serial.println(yPos);
+      Serial.print("z rotation = ");Serial.print(zVal);Serial.print("   pos = ");Serial.println(zPos);
       Serial.println();
    }
    
