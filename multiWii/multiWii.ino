@@ -27,7 +27,7 @@ void setup() {
 
    Serial.begin(9600);
    Wire.begin();
-   delay(15000);   // time to get the screen up.
+   delay(10000);   // time to get the screen up.
    theInPin = new reciverPin(A8);
    theGyro = new gyro();
    theAccell = new accell();
@@ -48,25 +48,39 @@ void loop() {
    int  xVal;
    int  yVal;
    int  zVal;
-  
+   int x_offset;
+   int y_offset;
+   int z_offset;
    
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
-   
+   iteration++;
    if (iteration==4) {
       Serial.print("Calibrating..");
       theAccell->calibrate();
-      iteration++;
+      theGyro->calibrate();
+      theGyro->setAngles(0,0,0);
+      theGyro->readOffsets(&x_offset,&y_offset,&z_offset);
+      Serial.println();
+      Serial.print("Offset X : ");Serial.println(x_offset);
+      Serial.print("Offset Y : ");Serial.println(y_offset);
+      Serial.print("Offset Z : ");Serial.println(z_offset);
    }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
       Serial.println();
-      Serial.print("x rotation = ");Serial.println(xVal);  // print the values
-      Serial.print("y rotation = ");Serial.println(yVal);
-      Serial.print("z rotation = ");Serial.println(zVal);
+      Serial.print("x Rotation = ");Serial.println(xVal);  // print the values
+      Serial.print("y Rotation = ");Serial.println(yVal);
+      Serial.print("z Rotation = ");Serial.println(zVal);
+      Serial.println();
+      theGyro->readAngles(&xVal,&yVal,&zVal);
+      Serial.println();
+      Serial.print("x Angle = ");Serial.println(xVal);  // print the values
+      Serial.print("y Angle = ");Serial.println(yVal);
+      Serial.print("z Angle = ");Serial.println(zVal);
       Serial.println();
    }
-   
+   /*
    if (theAccell->newReadings()) {
       theAccell->readValues(&xVal,&yVal,&zVal);
       Serial.print("x accell  = ");Serial.println(xVal);  // print the values
@@ -76,7 +90,7 @@ void loop() {
       iteration++;
    }//else
    //theAccell->dataDump();
-   
+   */
    digitalWrite(AMBER_LED, HIGH);         // yellow off.
 
    value = theInPin->pinResult();

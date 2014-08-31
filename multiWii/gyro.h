@@ -56,11 +56,10 @@ protected:
    int     y_rotation;
    int     z_rotation;
    
-   long          lastRead;      // When was the last read seen?
-   unsigned long currentRead;   // What time was the current reading seen?
-   int           x_angle;       // Integrated, accumulated angle
-   int           y_angle;
-   int           z_angle;
+   unsigned long lastRead;      // When was the last read seen?
+   float           x_angle;       // Integrated, accumulated angle
+   float           y_angle;
+   float           z_angle;
 };
 
 

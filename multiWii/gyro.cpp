@@ -42,7 +42,6 @@ gyro::gyro(void) {
    y_rotation = 0;
    z_rotation = 0;
    lastRead = 0;
-   currentRead = 0;
    x_angle = 0;
    y_angle = 0;
    z_angle = 0;
@@ -115,11 +114,24 @@ void gyro::initGyro(void) {
 // Assume its initialized and ready to go. Check for new readings.
 void gyro::checkGyro(void) {
    
-   byte gyroStatus;
+   byte          gyroStatus;
+   unsigned long deltaT;
+   unsigned long now;
+   float         deltaSec;
    
    gyroStatus = readRegister(INT_STATUS);
    if(gyroStatus & READY_MASK) {
-      currentRead = micros();               // We see data, note the time
+      now = micros();                         // We see data, note the time.
+      if(lastRead != 0 && lastRead < now) {   // If we have 2 time values and we're not crossing the 0 line..
+         deltaT = now - lastRead;
+         deltaSec = deltaT/1000000.0;
+         //Serial.println(deltaT);
+         //Serial.println(deltaSec,4);
+         x_angle = x_angle + (deltaSec * x_rotation);  // And these units would be degrees?
+         y_angle = y_angle + (deltaSec * y_rotation);
+         z_angle = z_angle + (deltaSec * z_rotation);
+      }
+      lastRead = now;
       state = valueReady;
    }
 }
@@ -130,16 +142,7 @@ void gyro::readGyro(void) {
    
    int high;
    int low;
-   unsigned long deltaT;
-   
-   if(lastRead!=0 && lastRead<currentRead) {   // If we have 2 time values and we're not crossing the 0 line..
-      deltaT = currentRead - lastRead;
-      x_angle = x_angle + ((deltaT * x_rotation)/1000000);  // And these units would be degrees?
-      y_angle = y_angle + ((deltaT * y_rotation)/1000000);
-      z_angle = z_angle + ((deltaT * z_rotation)/1000000);
-   }
-   lastRead = currentRead;
-   
+  
    high = readRegister(X_HIGH);
    low = readRegister(X_LOW);
    high = high << 8;
