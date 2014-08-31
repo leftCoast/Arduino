@@ -33,49 +33,29 @@ enum gyroStates {
   unInitilized, calculating, valueReady };
 
 gyro::gyro(void) {
-<<<<<<< HEAD
-   
-   state = unInitilized;
-   dataReady = false;
-   x_offset = 0;
-   y_offset = 0;
-   z_offset = 0;
-   x_rotation = 0;
-   y_rotation = 0;
-   z_rotation = 0;
-   lastRead = 0;
-   x_angle = 0;
-   y_angle = 0;
-   z_angle = 0;
-}
-
-   
-gyro::~gyro(void) {  }
-   
-   
-=======
 
   state = unInitilized;
   dataReady = false;
+  
   x_offset = 0;
   y_offset = 0;
   z_offset = 0;
+  
   x_rotation = 0;
   y_rotation = 0;
   z_rotation = 0;
+  
   lastRead = 0;
-  currentRead = 0;
+  
   x_angle = 0;
   y_angle = 0;
   z_angle = 0;
 }
 
 
-gyro::~gyro(void) {  
-}
+gyro::~gyro(void) {  }
 
 
->>>>>>> FETCH_HEAD
 boolean gyro::newReadings(void) { 
 
   hookup();           // First time we ask for readings, hook up.
@@ -124,7 +104,6 @@ boolean gyro::readRegisters(byte regNum,byte* buff,int numBytes) {
 }
 
 
-
 byte gyro::readRegister(byte regNum) {
 
   byte result;
@@ -158,7 +137,6 @@ void gyro::initGyro(void) {
 
 // We know its initialized and ready to go. Check for new readings.
 void gyro::checkGyro(void) {
-<<<<<<< HEAD
    
    byte          gyroStatus;
    unsigned long deltaT;
@@ -180,60 +158,15 @@ void gyro::checkGyro(void) {
       lastRead = now;
       state = valueReady;
    }
-=======
-
-  byte gyroStatus;
-
-  gyroStatus = readRegister(INT_STATUS);
-  if(gyroStatus & READY_MASK) {
-    currentRead = micros();               // We see data, note the time
-    state = valueReady;
-  }
->>>>>>> FETCH_HEAD
 }
 
 
 // We know its initialized and there is new data waiting.
 void gyro::readGyro(void) {
-<<<<<<< HEAD
-   
-   int high;
-   int low;
-  
-   high = readRegister(X_HIGH);
-   low = readRegister(X_LOW);
-   high = high << 8;
-   x_rotation = high + low;
-   x_rotation = x_rotation - x_offset;
-   
-   high = readRegister(Y_HIGH);
-   low = readRegister(Y_LOW);
-   high = high << 8;
-   y_rotation = high + low;
-   y_rotation = y_rotation - y_offset;
-   
-   high = readRegister(Z_HIGH);
-   low = readRegister(Z_LOW);
-   high = high << 8;
-   z_rotation = high + low;
-   z_rotation = z_rotation - z_offset;
-   
-   state = calculating;
-   dataReady = true;
-=======
 
   int high;
   int low;
-  unsigned long deltaT;
   byte buff[6];          // Data goes in here!
-
-  if(lastRead!=0 && lastRead<currentRead) {   // If we have 2 time values and we're not crossing the 0 line..
-    deltaT = currentRead - lastRead;
-    x_angle = x_angle + ((deltaT * x_rotation)/1000000);  // And these units would be degrees?
-    y_angle = y_angle + ((deltaT * y_rotation)/1000000);
-    z_angle = z_angle + ((deltaT * z_rotation)/1000000);
-  }
-  lastRead = currentRead;
 
   if (readRegisters(X_HIGH,buff,6)) {
     high = buff[0];                       
@@ -257,7 +190,6 @@ void gyro::readGyro(void) {
     state = calculating;
     dataReady = true;
   }
->>>>>>> FETCH_HEAD
 }
 
 
