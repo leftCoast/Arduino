@@ -173,18 +173,21 @@ void gyro::readGyro(void) {
     low = buff[1];                        
     high = high << 8;
     x_rotation = high + low;
+    x_rotation >> 2;                     // Its 14 bits, clip off the last 2 random ones.
     x_rotation = x_rotation - x_offset;
 
     high = buff[2];                        
     low = buff[3];                         
     high = high << 8;
     y_rotation = high + low;
+    y_rotation >> 2;
     y_rotation = y_rotation - y_offset;
 
     high = buff[4];                        
     low = buff[5];                         
     high = high << 8;
     z_rotation = high + low;
+    z_rotation >> 2;
     z_rotation = z_rotation - z_offset;
 
     state = calculating;
