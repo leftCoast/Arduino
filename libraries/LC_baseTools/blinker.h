@@ -12,19 +12,22 @@
 class blinker : public idler, timeObj {
 	
 public:
-	blinker(int inPin=defPin,float inOnMs=defOnMs, float inPeriodMs=defPeriodMs);
+	blinker(int inPin=defPin,float inOnMs=defOnMs, float inPeriodMs=defPeriodMs,boolean inInverse=false);
 	
-	void setBlink(boolean onOff);		// Start or stop the blinking..
+	void setInverse(boolean inInverse);  // Toggle ground as oppoed to power.
+    void setLight(boolean onOff);
+    void setBlink(boolean onOff);		// Start or stop the blinking..
 	virtual void idle(void);	        // What to do in our spare time?
 	
 	void setTimes(float inOnMs, float inPeriodMs);	// Want to change the blink?
 	
 private:
-        boolean  init;
-        timeObj* onTimer;
+    boolean  init;
+    timeObj* onTimer;
 	boolean  running;
-	boolean  pinHigh;
+	boolean  lightOn;
 	int      pin;
+    boolean  inverse;
 };
 
 #endif
