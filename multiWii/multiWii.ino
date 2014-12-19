@@ -1,5 +1,3 @@
-#include <Wire.h>
-#include <PinChangeInt.h>
 #include <blinker.h>
 #include <idlers.h>
 #include <lists.h>
@@ -9,11 +7,15 @@
 #include <servo.h>
 #include <timeObj.h>
 
+#include <Wire.h>
+#include <PinChangeInt.h>
+
 #include "RCReciver.h"
 #include "gyro.h"
 #include "accell.h"
 #include "multiWii.h"
 //#include "barometer.h"
+#include "runningAvg.h"
 
 servo theServo(PIN_D46);
 reciverPin* theInPin;
@@ -22,6 +24,9 @@ blinker blueBlinker(BLUE_LED,200,400);
 gyro* theGyro;
 accell* theAccell;
 long iteration;
+
+boolean calibrated;
+timeObj calibrationTimer(200);
 
 void setup() {                
 
@@ -35,8 +40,9 @@ void setup() {
    pinMode(GREEN_LED, OUTPUT);
    pinMode(AMBER_LED, OUTPUT);
    //blueBlinker.setBlink(true);
-   iteration = 0;
    delay(15000);   // time to get the screen up.
+   calibrated = false;
+   calibrationTimer.start();
 }
 
 
@@ -48,41 +54,59 @@ void loop() {
    int  xVal;
    int  yVal;
    int  zVal;
+<<<<<<< HEAD
   
    int xPos;
    int  yPos;
    int  zPos;
+=======
+   int x_offset;
+   int y_offset;
+   int z_offset;
+>>>>>>> FETCH_HEAD
    
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
    
-   if (iteration==40) {
+   if (!calibrated && calibrationTimer.ding()) {
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       theGyro->calibrate();
       theGyro->setAngles(0,0,0);        //Ok, lets assume we're flat..
+      calibrated = true;
    }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
       theGyro->readAngles(&xPos,&yPos,&zPos);
       Serial.println();
+<<<<<<< HEAD
       Serial.print("x rotation = ");Serial.print(xVal);Serial.print("   pos = ");Serial.println(xPos);    // print the values
       Serial.print("y rotation = ");Serial.print(yVal);Serial.print("   pos = ");Serial.println(yPos);
       Serial.print("z rotation = ");Serial.print(zVal);Serial.print("   pos = ");Serial.println(zPos);
+=======
+      Serial.print("x Rotation = ");Serial.println(xVal);  // print the values
+      Serial.print("y Rotation = ");Serial.println(yVal);
+      Serial.print("z Rotation = ");Serial.println(zVal);
+      Serial.println();
+      theGyro->readAngles(&xVal,&yVal,&zVal);
+      Serial.println();
+      Serial.print("x Angle = ");Serial.println(xVal);  // print the values
+      Serial.print("y Angle = ");Serial.println(yVal);
+      Serial.print("z Angle = ");Serial.println(zVal);
+>>>>>>> FETCH_HEAD
       Serial.println();
    }
-   
+   /*
    if (theAccell->newReadings()) {
       theAccell->readValues(&xVal,&yVal,&zVal);
-      /*
       Serial.print("x accell  = ");Serial.println(xVal);  // print the values
       Serial.print("y accell  = ");Serial.println(yVal);
       Serial.print("z accell  = ");Serial.println(zVal);
       Serial.println();
-      */
    }
+   */
    iteration++;
    
    digitalWrite(AMBER_LED, HIGH);         // yellow off.
@@ -99,8 +123,6 @@ void loop() {
       digitalWrite(RED_LED,HIGH);
    }
    
-
-
 }
 
 

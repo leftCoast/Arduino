@@ -36,22 +36,24 @@ gyro::gyro(void) {
 
   state = unInitilized;
   dataReady = false;
+  
   x_offset = 0;
   y_offset = 0;
   z_offset = 0;
+  
   x_rotation = 0;
   y_rotation = 0;
   z_rotation = 0;
+  
   lastRead = 0;
-  currentRead = 0;
+  
   x_angle = 0;
   y_angle = 0;
   z_angle = 0;
 }
 
 
-gyro::~gyro(void) {  
-}
+gyro::~gyro(void) {  }
 
 
 boolean gyro::newReadings(void) { 
@@ -102,7 +104,6 @@ boolean gyro::readRegisters(byte regNum,byte* buff,int numBytes) {
 }
 
 
-
 byte gyro::readRegister(byte regNum) {
 
   byte result;
@@ -136,14 +137,27 @@ void gyro::initGyro(void) {
 
 // We know its initialized and ready to go. Check for new readings.
 void gyro::checkGyro(void) {
-
-  byte gyroStatus;
-
-  gyroStatus = readRegister(INT_STATUS);
-  if(gyroStatus & READY_MASK) {
-    currentRead = micros();               // We see data, note the time
-    state = valueReady;
-  }
+   
+   byte          gyroStatus;
+   unsigned long deltaT;
+   unsigned long now;
+   float         deltaSec;
+   
+   gyroStatus = readRegister(INT_STATUS);
+   if(gyroStatus & READY_MASK) {
+      now = micros();                         // We see data, note the time.
+      if(lastRead != 0 && lastRead < now) {   // If we have 2 time values and we're not crossing the 0 line..
+         deltaT = now - lastRead;
+         deltaSec = deltaT/1000000.0;
+         //Serial.println(deltaT);
+         //Serial.println(deltaSec,4);
+         x_angle = x_angle + (deltaSec * x_rotation);  // And these units would be degrees?
+         y_angle = y_angle + (deltaSec * y_rotation);
+         z_angle = z_angle + (deltaSec * z_rotation);
+      }
+      lastRead = now;
+      state = valueReady;
+   }
 }
 
 
@@ -152,8 +166,8 @@ void gyro::readGyro(void) {
 
   int high;
   int low;
-  unsigned long deltaT;
   byte buff[6];          // Data goes in here!
+<<<<<<< HEAD
   float seconds;
   
   if(lastRead!=0 && lastRead<currentRead) {   // If we have 2 time values and we're not crossing the 0 line..
@@ -164,6 +178,8 @@ void gyro::readGyro(void) {
     z_angle = z_angle + round(z_rotation * seconds); 
   }
   lastRead = currentRead;
+=======
+>>>>>>> FETCH_HEAD
 
   if (readRegisters(X_HIGH,buff,6)) {
     high = buff[0];                       
