@@ -2,15 +2,32 @@
 #include <arduino.h>
 #include "blinker.h"
 
-blinker::blinker(int inPin,float inOnMs, float inPeriodMs) : 
+blinker::blinker(int inPin,float inOnMs, float inPeriodMs,boolean inInverse) :
 timeObj(inPeriodMs) {
 
 
   init = false;
   running = false;
-  pinHigh = false;
+  lightOn = false;
   pin = inPin;
+  setInverse(inInverse);
   onTimer = new timeObj(inOnMs);
+}
+
+
+void blinker::setInverse(boolean inInverse) { inverse = inInverse; }
+
+
+void blinker::setLight(boolean onOff) {
+    
+    if(onOff) { // light on!
+        if (inverse) digitalWrite(pin,LOW);
+        else digitalWrite(pin,HIGH);
+    } else { // light off!
+        if (inverse) digitalWrite(pin,HIGH);
+        else digitalWrite(pin,LOW);
+    }
+    lightOn = onOff;
 }
 
 
@@ -25,15 +42,13 @@ void blinker::setBlink(boolean onOff) {
         init = true;                    // Note it.
       }
       start();                          // Starting NOW!
-      digitalWrite(pin,HIGH);	        // light on!
+      setLight(true);                   // light on!
       onTimer->start();                 // set the time on timer.
-      pinHigh = true;		        // set state.
       running = true;
     } 
     else {			         // Stop blinking..
-      digitalWrite(pin,LOW);		// light off.
+      setLight(false);                  // light off.
       running = false;		        // set state.
-      pinHigh = false;
     }
   }
 }
@@ -42,17 +57,15 @@ void blinker::setBlink(boolean onOff) {
 void blinker::idle(void) {
 
   if (running) {
-    if(pinHigh) {                     // light is on.
+    if(lightOn) {                     // light is on.
       if (onTimer->ding()) {          // time to turn it off..
-        digitalWrite(pin,LOW);	      // light off!
-        pinHigh = false;              // note that.
+        setLight(false);              // light off.
       }
     } 
     else {                           // light's off
       if (ding()) {                  // time to turn it on!
-        digitalWrite(pin,HIGH);      // on it goes.
+        setLight(true);              // on it goes.
         onTimer->start();            // set the time on timer.
-        pinHigh = true;		     // set state.
         stepTime();                  // Reset timer for next on cycle.
       }
     }

@@ -1,5 +1,3 @@
-#include <Wire.h>
-#include <PinChangeInt.h>
 #include <blinker.h>
 #include <idlers.h>
 #include <lists.h>
@@ -8,6 +6,9 @@
 #include <PulseOut.h>
 #include <servo.h>
 #include <timeObj.h>
+
+#include <Wire.h>
+#include <PinChangeInt.h>
 
 #include "RCReciver.h"
 #include "gyro.h"
@@ -24,6 +25,9 @@ gyro* theGyro;
 accell* theAccell;
 long iteration;
 
+boolean calibrated;
+timeObj calibrationTimer(200);
+
 void setup() {                
 
    Serial.begin(9600);
@@ -36,8 +40,9 @@ void setup() {
    pinMode(GREEN_LED, OUTPUT);
    pinMode(AMBER_LED, OUTPUT);
    //blueBlinker.setBlink(true);
-   iteration = 0;
    delay(15000);   // time to get the screen up.
+   calibrated = false;
+   calibrationTimer.start();
 }
 
 
@@ -56,13 +61,14 @@ void loop() {
    digitalWrite(AMBER_LED, LOW);         // yellow on.
    theIdlers.idle();
    
-   if (iteration==40) {
+   if (!calibrated && calibrationTimer.ding()) {
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       Serial.println("Calibrating..");
       theGyro->calibrate();
       theGyro->setAngles(0,0,0);        //Ok, lets assume we're flat..
+      calibrated = true;
    }
    if (theGyro->newReadings()) {
       theGyro->readValues(&xVal,&yVal,&zVal);
