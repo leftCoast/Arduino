@@ -13,9 +13,8 @@ class liteLine {
       
       int      getLength(void);
       void     setLength(int inLength);
-      virtual colorObj calcColor(int index);
+      virtual colorObj calcColor(int index,int i);     // index our head position, i our internal pixel
       colorObj getColor(int index);
-      //void     setLights(Adafruit_NeoPixel* lites,colorObj* aColor,int index,boolean wrap=false);
       void     setLights(Adafruit_NeoPixel* lites,int index,boolean wrap=false);
       
    private:   
@@ -34,7 +33,7 @@ class monoColorLine : public liteLine {
    public :
    monoColorLine(int inLength);
    
-   virtual colorObj calcColor(int index);
+   virtual colorObj calcColor(int index,int i);
    void    setColor(word inColor);
    void    setColor(byte red,byte green,byte blue);
    void    setColor(colorObj aColor);
@@ -56,7 +55,7 @@ class multiColorLine : public liteLine {
     multiColorLine(int inLength);
     ~multiColorLine(void);
     
-   virtual colorObj calcColor(int index);
+   virtual colorObj calcColor(int index,int i);               
    void    setColor(byte red,byte green,byte blue,int index);
    void    setColor(colorObj* inColor,int index);
    

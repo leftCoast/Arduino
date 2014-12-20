@@ -11,10 +11,10 @@
 int liteLine::getLength(void) { return length; }
 
 
-colorObj liteLine::getColor(int index) { return calcColor(index); }
+colorObj liteLine::getColor(int index) { return calcColor(index,0); }
  
  
-colorObj  liteLine::calcColor(int index) { 
+colorObj  liteLine::calcColor(int index,int i) { 
 
    colorObj aColor(10,10,10);
   return aColor;
@@ -27,7 +27,7 @@ void liteLine::setLights(Adafruit_NeoPixel* lites,int index,boolean wrap) {
    colorObj color;
    if (wrap) {
       for(int i=0;i<length;i++) {
-         color = calcColor(i);
+         color = calcColor(index,i);
          liteIndex = index-i;
          if (liteIndex<0) {
             liteIndex = liteIndex + lites->numPixels();
@@ -36,7 +36,7 @@ void liteLine::setLights(Adafruit_NeoPixel* lites,int index,boolean wrap) {
       }
    } else {
       for(int i=0;i<length;i++) {
-         color = calcColor(i);
+         color = calcColor(index,i);
          lites->setPixelColor(index-i, color.getRed(), color.getGreen(), color.getBlue());
       }
    }
@@ -56,7 +56,7 @@ void liteLine::setLights(Adafruit_NeoPixel* lites,int index,boolean wrap) {
     { }
     
 
-colorObj monoColorLine::calcColor(int index) { return theColor; }
+colorObj monoColorLine::calcColor(int index,int i) { return theColor; }
 
 
 void monoColorLine::setColor(word inColor) { theColor.setColor(inColor); }
@@ -92,10 +92,10 @@ void monoColorLine::setColor(colorObj aColor) { theColor = aColor; }
  }
  
     
-colorObj multiColorLine::calcColor(int index) { 
+colorObj multiColorLine::calcColor(int index,int i) { 
    
    if (colors) {
-      return colors[index];
+      return colors[i];
    } else {
       return defColor;
    }

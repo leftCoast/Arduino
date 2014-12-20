@@ -18,47 +18,71 @@
 // ******************************************
 #define DEF_FLASH_TIME 100
 
-/*
-class flash public idler, timeObj {
+
+class glowLite : public liteLine {
    
    public:
    
-   flash(Adafruit_NeoPixel* inLites);
-   ~flash(void);
+   glowLite(Adafruit_NeoPixel* inLites,int inLength);
+   ~glowLite(void);
    
-   virtual void trigger(int index,float inMs);
-   virtual void idle(void) {
-      
-      
-   private :
- 
-   Adafruit_NeoPixel* theLites;
+   void setMult(float inMult);
+   virtual colorObj calcColor(int index,int i);
+   
+   private:
+   
+   Adafruit_NeoPixel* lites;
+   float              mult;
 };
+      
 
 
- flash::flash(Adafruit_NeoPixel* inLites) { theLites = inLites; }
+ glowLite::glowLite(Adafruit_NeoPixel* inLites,int inLength) 
  
- flash::~flash(void) {  }
- 
+   : liteLine(inLength)
+   { lites = inLites; }
    
- void flash::trigger(int index,float inMs) {
-    
-    index = inIndex;
-    setTime(inMs);
+ 
+ glowLite::~glowLite(void) {  }
+ 
+ void glowLite::setMult(float inMult) { mult = inMult; }
+   
+ colorObj glowLite::calcColor(int index,int i) {
+   
+   uint8_t* colorBuff;
+   uint32_t colorValue;
+   colorObj aColor;
+   byte red = 0;
+   byte green = 0;
+   byte blue = 0;
+   
+   colorValue = lites->getPixelColor(index);
+   colorBuff = (uint8_t*) &colorValue;
+   
+   blue = colorBuff[0];
+   green = colorBuff[1]; 
+   red = colorBuff[2];
+   /*
+   Serial.print("index : ");Serial.println(index);
+   Serial.print("red : ");Serial.println(red);
+   Serial.print("green : ");Serial.println(green);
+   Serial.print("blue : ");Serial.println(blue);
+   Serial.println("Mult : ");Serial.println(mult);
+   Serial.println();
+   */
+   red = red * mult;
+   green = green * mult;
+   blue = blue * mult;
+   /*
+   Serial.print("red : ");Serial.println(red);
+   Serial.print("green : ");Serial.println(green);
+   Serial.print("blue : ");Serial.println(blue);
+   Serial.println();
+   */
+   aColor.setColor(red,green,blue);
+   return aColor;
  }
     
-    
- void flash::idle(void) {
-    
-      if (!ding()) {
-         theLights.setPixelColor(index,255,255,255);
-         theLights.show();
-      }
- }
- */  
-   
-   
-   
 #define NUM_LEDS 8
 #define LED_PIN 3
 #define WAIT 20 
@@ -71,19 +95,19 @@ colorObj bColor;
 
 monoColorLine  offLites(LINE_LEN);
 multiColorLine lites(LINE_LEN);
+glowLite Alen(&theLights,2);
 
 timeObj timer(WAIT);
+timeObj AlenTimer(750);
+
 int     liteIndex = 0;
+int      alenIndex = 3;
 
 void setup(void) {
    
    //Serial.begin(9600);
    offLites.setColor(BLACK);
-      
-   //lites.setColor(0,0,1,10);
-   //lites.setColor(0,0,1,9);
-   //lites.setColor(0,0,2,8);
-   //lites.setColor(0,0,3,7);
+
    lites.setColor(0,0,5,6);
    lites.setColor(0,0,8,5);
    lites.setColor(0,0,10,4);
@@ -93,7 +117,9 @@ void setup(void) {
    lites.setColor(20,20,50,0);
    
    theLights.begin();
+   Alen.setMult(0);
    timer.start();
+   AlenTimer.start();
    clearLights();
 }
 
@@ -129,8 +155,16 @@ void loop(void) {
         liteIndex = 0;
      }
      lites.setLights(&theLights,liteIndex,false);
+     Alen.setLights(&theLights,alenIndex);
      timer.stepTime();
   }  
+  if (AlenTimer.ding()) {
+    alenIndex--;
+    if (alenIndex<0) {
+      alenIndex = NUM_LEDS-1;
+    }
+    AlenTimer.stepTime();
+  } 
 }
 
 
