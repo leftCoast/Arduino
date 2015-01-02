@@ -98,7 +98,7 @@ bmpObj::bmpObj(char* inFileName, Point inDest) {
 }
 
 
-// I hope free() is theright thing to call. It is an object.
+// I hope free() is the right thing to call. It is an object.
 bmpObj::~bmpObj(void) { 
   free(fileName); 
 }
@@ -122,14 +122,14 @@ void bmpObj::getInfo(void) {
       temp = read32(source);                    // Creator bits
       imageOffset = read32(source);             // image offset, save this.
       temp = read32(source);                    // read DIB header size?
-      imageWidth = read32(source);              // width? Good thing to sae for later.
+      imageWidth = read32(source);              // width? Good thing to save for later.
       imageHeight = read32(source);             // Height? Negative means the data is right side up. Go figure..
       if (read16(source) == 1) {                // if the next word is 1? What's this mean? Needs to be though.
         imageDepth = read16(source);            // color depth.
         if (imageDepth==24||imageDepth==32) {   // We can do 24 or 32 bits..
           pixBytes = imageDepth/8;              // Bytes / pixel
           if (!read32(source)) {                // And no compression!
-            haveInfo = true;                    // Mde it thi far? We can do this!
+            haveInfo = true;                    // Made it thi far? We can do this!
           }
         }
       }
@@ -153,7 +153,7 @@ void bmpObj::plotLine(int y) {
 }
 
 
-// Plots tebitmap file to the screen.
+// Plots the bitmap file to the screen.
 void bmpObj::plotBmp(void) {
 
   int   y;

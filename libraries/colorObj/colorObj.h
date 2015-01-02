@@ -13,6 +13,9 @@
 #define YELLOW          0xFFE0 
 #define WHITE           0xFFFF
 
+// mask extremes..
+#define TRANSPARENT     0       // 0%   just background.
+#define OPAQUE          100     // 100% covering background.
 
 class colorObj {
 
@@ -24,17 +27,16 @@ public:
   void setColor(byte inRed, byte inGreen, byte inBlue);
   void setColor(word color16);
   word getColor16(void);
-
+    
   byte getRed(void);
   byte getGreen(void);
   byte getBlue(void);
 
+  colorObj blend(colorObj* background,byte alpha);
+    
   void printRGB(void);
 
 private :
-
-  word  convertRGB(byte red, byte green, byte bue);
-
   byte red;
   byte green;
   byte blue;
@@ -46,11 +48,13 @@ private :
 class colorMapper {
 
 public:
+  colorMapper(void);
   colorMapper(colorObj* inStart, colorObj* inEnd);
   colorMapper(word startC16,word endC16);
   ~colorMapper(void);
   
-  //word     Map(float percent);
+  void setColors(colorObj* inStart, colorObj* inEnd);
+
   colorObj Map(float percent);
   void     printColors(void);
   

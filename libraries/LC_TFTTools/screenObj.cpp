@@ -88,8 +88,10 @@ void colorObj::setColor(word color16) {
 }
 
 
-word colorObj::getColor16(void) { 
-  return convertRGB(red,green,blue); 
+word colorObj::getColor16(void) {
+    
+  return
+
 }
 
 
