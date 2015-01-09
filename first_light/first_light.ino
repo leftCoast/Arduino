@@ -114,7 +114,7 @@ colorObj glowLite::calcColor(int index,int i) {
 #define THROTTLE_PIN 4
 #define ROLL_PIN     5
 #define PITCH_PIN    6
-#define YAW_PIN      7
+#define YAW_PIN      8
 
 #define MIN_ROLL        50    // Percent value drop at full roll
 #define MIN_ROLL_CUTOFF 47
