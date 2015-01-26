@@ -138,7 +138,7 @@ void showControls(void) {
 // Grab all the analog values from the pins, scale 'em and stuff 'em into the channel array.
 void readValues(void) {
 
-  //channels[THROTTLE] = round(throttleMapper.Map(analogRead(THROTTLE_PIN)));
+  channels[THROTTLE] = round(throttleMapper.Map(analogRead(THROTTLE_PIN)));
   channels[AILERON] = round(rollMapper.Map(analogRead(ROLL_PIN)));
   channels[ELEVATOR] = round(pitchMapper.Map(analogRead(PITCH_PIN)));
   channels[RUDDER] = round(yawMapper.Map(analogRead(YAW_PIN)));
