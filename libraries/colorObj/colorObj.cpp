@@ -1,5 +1,8 @@
 #include "colorObj.h"
 
+enum hat {
+    off, forward, back, left, right };
+
 // colormapper extremes..
 #define START_COLOR     0
 #define END_COLOR       100
