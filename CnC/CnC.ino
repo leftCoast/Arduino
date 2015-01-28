@@ -72,14 +72,9 @@ enum state {
   running, calibStick, calibPetals };
 state currState = running;
 
-//enum hat {
-//off, forward, back, left, right };
-
-#define off 0
-#define forward 1
-#define back 2
-#define left 3
-#define right 4
+enum hat {
+off, forward, back, left, right };
+hat lastHat = off;
 
 multiMap rollMapper;
 multiMap pitchMapper;
@@ -121,15 +116,6 @@ void setup(void) {
   //digitalWrite(OUT_PIN, IDLE_STATE);
   IDLE_STATE;
   
-  // Lights, if we use 'em.
-  /*
-  ring.begin();
-  for (int i=0;i<=NUM_LEDS;i++) {
-    ring.setPixelColor(i,&black);
-  }
-  ring.show();
-  */
-  
   // Fire up the timer..
   outTimer.start();
   
@@ -137,27 +123,8 @@ void setup(void) {
   currState = running;
 }
 
-
-/*
-// Run the light display, if there is one.
-void showControls(void) {
-  
-  colorObj green(GREEN);
-  green = green.blend(&black,20);
-  colorObj red(RED);
-  red = red.blend(&black,20);
-  mapper roll2light(MIN_PULSE,MAX_PULSE,TRANSPARENT,OPAQUE);
-  mapper pitch2light(MIN_PULSE,MAX_PULSE,TRANSPARENT,OPAQUE);
-  colorObj result = green.blend(&red,roll2light.Map(channels[AILERON]));
-  result = result.blend(&black,pitch2light.Map(channels[ELEVAOTOR]));
-  for (int i=0;i<=NUM_LEDS;i++) {
-    ring.setPixelColor(i,&result);
-  }
-  ring.show();
-}
-*/
-
-int readHat(void) {
+hat readHat(void); 
+hat readHat(void) {
   
   int hatVal = analogRead(HAT_PIN);
   if (hatVal>=HAT_FWD_LOW && hatVal<=HAT_FWD_HIGH) return(forward);
@@ -178,7 +145,9 @@ void readValues(void) {
   //channels[AUX] = round(auxMapper.Map(analogRead(AUX_PIN)));
   
   
-  int hatVal = readHat();
+  hat hatVal = readHat();
+  handleHat(hatVal);
+  /*
   Serial.print("THROTTLE  : ");Serial.println(channels[THROTTLE]);
   Serial.print("AILERON   : ");Serial.print(channels[AILERON]);Serial.print("  Raw :");Serial.println(analogRead(ROLL_PIN));
   Serial.print("ELEVATOR  : ");Serial.print(channels[ELEVATOR]);Serial.print("  Raw :");Serial.println(analogRead(PITCH_PIN));
@@ -194,7 +163,7 @@ void readValues(void) {
   }
   Serial.print("  Raw :");Serial.println(analogRead(HAT_PIN));
   Serial.println();
-
+  */
 }
 
 
@@ -212,18 +181,6 @@ void sendPulse(int* pulseList,byte numChannels) {
   ACTIVE_STATE;       // end pulse.
   delayMicroseconds(TIMING_PULSE);               
   IDLE_STATE;
-  /*
-  for (int i=0;i<numChannels;i++) {
-    digitalWrite(OUT_PIN, ACTIVE_STATE);     // Wake up!
-    delayMicroseconds(TIMING_PULSE);               
-    digitalWrite(OUT_PIN, IDLE_STATE);       // Now listen!
-    delayMicroseconds(pulseList[i]-PULSE_OFFSET);         // time this!
-  }
-  digitalWrite(OUT_PIN, ACTIVE_STATE);       // end pulse.
-  delayMicroseconds(TIMING_PULSE);               
-  digitalWrite(OUT_PIN, IDLE_STATE);
-  */
-  
 }
 
 
