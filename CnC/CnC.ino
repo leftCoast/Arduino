@@ -176,9 +176,9 @@ void setupMappers(void) {
   rollMapper.addPoint(512,MID_PULSE);
   rollMapper.addPoint(0,MAX_PULSE);
 
-  pitchMapper.addPoint(1023,MIN_PULSE);
+  pitchMapper.addPoint(1023,MAX_PULSE);
   pitchMapper.addPoint(512,MID_PULSE);
-  pitchMapper.addPoint(0,MAX_PULSE);
+  pitchMapper.addPoint(0,MIN_PULSE);
 
   yawMapper.addPoint(0,MIN_PULSE);
   yawMapper.addPoint(512,MID_PULSE);
@@ -188,7 +188,7 @@ void setupMappers(void) {
 
 void setup(void) {
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
   setupMappers();
 
   // Give the array some nice non-crazy defaults.
