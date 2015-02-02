@@ -10,7 +10,7 @@ touchList theTouchList;
 touchObj::touchObj() { state = active; }
 
 
-touchObj::touchObj(Point inLoc, word inWidth,word inHeight) :
+touchObj::touchObj(TSPoint inLoc, word inWidth,word inHeight) :
 drawObj(inLoc,inWidth,inHeight) {
 
   state = active;
@@ -51,7 +51,7 @@ void touchObj::setState(byte inState) {
 }
 
 
-boolean touchObj::checkActiveTouch(Point where) {
+boolean touchObj::checkActiveTouch(TSPoint where) {
 
   if (screen->pressed(where)) {    // Its a touch
     if (inRect(where)) {           // and its in us!
@@ -63,10 +63,10 @@ boolean touchObj::checkActiveTouch(Point where) {
 }
 
 
-boolean touchObj::checkInactiveTouch(Point where) { return(false); }
+boolean touchObj::checkInactiveTouch(TSPoint where) { return(false); }
 
 
-boolean touchObj::checkTouchedTouch(Point where) {
+boolean touchObj::checkTouchedTouch(TSPoint where) {
 
   if (!screen->pressed(where)) {    // It a lift!
     if (inRect(where)) {            // And its in us!
@@ -91,13 +91,13 @@ boolean touchObj::checkTouchedTouch(Point where) {
 } 
 
 
-boolean touchObj::checkDraggingTouch(Point where) {
+boolean touchObj::checkDraggingTouch(TSPoint where) {
 
   // Lets write this code later..
 }
 
 
-boolean touchObj::checkTouch(Point where) {
+boolean touchObj::checkTouch(TSPoint where) {
 
   switch(state) {
   case active :  return (checkActiveTouch(where)); break;
@@ -108,7 +108,7 @@ boolean touchObj::checkTouch(Point where) {
 }
 
 
-void touchObj::doAction(Point where) {  }
+void touchObj::doAction(TSPoint where) {  }
 
 
 
@@ -140,7 +140,7 @@ void touchList::deselect(void) {
 
 void touchList::idle(void) {
 
-  Point      where;
+  TSPoint      where;
   boolean    done;
 
   where = screen->getPoint();

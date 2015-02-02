@@ -28,13 +28,13 @@ drawObj() {
 }
 
 
-label::label(Point inLoc, int inWidth,int inHeight) : 
+label::label(TSPoint inLoc, int inWidth,int inHeight) :
 drawObj(inLoc,inWidth,inHeight) {
   initLabel();
 }
 
 
-label::label(Point inLoc, int inWidth,int inHeight, char* inText) :
+label::label(TSPoint inLoc, int inWidth,int inHeight, char* inText) :
 drawObj(inLoc,inWidth,inHeight) {
   initLabel();
   setValue(inText);

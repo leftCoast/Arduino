@@ -89,7 +89,7 @@ uint32_t read32(File f) {
 
 
 // Constructor for bmpObj. Takes a filename & point to draw it.
-bmpObj::bmpObj(char* inFileName, Point inDest) {
+bmpObj::bmpObj(char* inFileName, TSPoint inDest) {
 
   fileName = (char*)malloc(strlen(inFileName+1)); // Grab just enoug RAM to store the string.
   strcpy(fileName,inFileName);                    // Save the filename.
@@ -105,7 +105,7 @@ bmpObj::~bmpObj(void) {
 
 
 // Move the point used for locating the drawing.
-void bmpObj::setDest(Point inDest) { 
+void bmpObj::setDest(TSPoint inDest) {
   dest = inDest; 
 }
 

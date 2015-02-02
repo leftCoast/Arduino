@@ -22,8 +22,8 @@ public :
   label();
   label(char* inText);
   label(char* inText, word inSize);
-  label(Point inLoc, int inWidth,int inHeight);
-  label(Point inLoc, int inWidth,int inHeight, char* inText);
+  label(TSPoint inLoc, int inWidth,int inHeight);
+  label(TSPoint inLoc, int inWidth,int inHeight, char* inText);
   ~label();
   
   void setTextSize(word size);  // Multiples of 8 pixals.

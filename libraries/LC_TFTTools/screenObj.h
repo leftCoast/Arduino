@@ -12,8 +12,6 @@
 #error "For use with the shield, make sure to #define USE_ADAFRUIT_SHIELD_PINOUT in the TFTLCD.h library file"
 #endif
 
-#define Point TSPoint   // Quick band ade cause they changed the name.
-
 // These are the pins for the shield!
 #define YP A1  // must be an analog pin, use "An" notation!
 #define XM A2  // must be an analog pin, use "An" notation!
@@ -56,9 +54,9 @@ public:
   void    fillScreenGradient(word startColor16,word endColor16,boolean vertical=true);
   void    fillScreenGradient(colorObj* startColor,colorObj* endColor,boolean vertical=true);
   void    drawPixelInvert(word x,word y);
-  void    frameRectInvert(Point loc, word width,word height);
-  Point   getPoint(void);
-  boolean pressed(Point inPt);
+  void    frameRectInvert(TSPoint loc, word width,word height);
+  TSPoint   getPoint(void);
+  boolean pressed(TSPoint inPt);
   
 
 private :

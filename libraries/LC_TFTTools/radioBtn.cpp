@@ -46,7 +46,7 @@ void radioBtnSet::draw(void) {
 void radioBtnSet::drawSelf(void) {  }
 
 
-boolean radioBtnSet::checkTouch(Point where) {
+boolean radioBtnSet::checkTouch(TSPoint where) {
   
   linkListObj* trace;
   boolean      done;

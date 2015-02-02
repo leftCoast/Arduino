@@ -20,17 +20,17 @@ class SPIControl {
 class bmpObj {
   
   public:
-    bmpObj(char* inFileName, Point inDest);
+    bmpObj(char* inFileName, TSPoint inDest);
     ~bmpObj(void);
     
-    void setDest(Point inDest);
+    void setDest(TSPoint inDest);
     void getInfo(void);
     void plotLine(int y);
     void plotBmp(void);
     
     char*   fileName;
     File    source;
-    Point   dest;
+    TSPoint   dest;
     boolean haveInfo;
     int    imageOffset;
     int    imageWidth;

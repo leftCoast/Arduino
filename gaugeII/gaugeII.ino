@@ -45,7 +45,7 @@ drawObj mObject;
 
 void setup(void) {
 
-  Point inDest;
+TSPoint inDest;
 
   //Serial.begin(9600);
   pinMode(pumpPin,OUTPUT);      // Whatever happens, shut off the pump.
@@ -116,7 +116,7 @@ void readings(void) {
 
 
 void loop(void) {
-  Point inPt;
+  TSPoint inPt;
 
   readings();
   inPt = screen->getPoint();

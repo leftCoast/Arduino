@@ -27,7 +27,7 @@ class radioBtnSet : public touchObj, public linkList {
     virtual void    addObj(radioBtn* newObj);
     virtual void    draw(void);
     virtual void    drawSelf(void);
-    virtual boolean checkTouch(Point where);
+    virtual boolean checkTouch(TSPoint where);
     virtual void    setStates(radioBtn* hitBtn);
 };
 
