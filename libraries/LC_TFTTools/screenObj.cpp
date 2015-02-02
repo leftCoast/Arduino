@@ -8,7 +8,7 @@ screenObj* screen;  // Now we have a global screen so we don't have
 #define TS_MAXX 920
 #define TS_MAXY 940
 
-
+/*
 // ****** colorObj ******
 
 colorObj::colorObj(byte inRed, byte inGreen, byte inBlue) { 
@@ -176,7 +176,7 @@ void colorMapper::printColors(void) {
   endColor.printRGB();
 }
 
-
+*/
 
 // ****** screenObj ******
 
@@ -235,13 +235,13 @@ void screenObj::fillRectGradient(word inX,word inY,word inXSize,word inYSize,col
   if (vertical) {
     posMapper.setValues(inY,inY+inYSize,0,100);
     for (int y=inY;y<inY+inYSize;y++) {
-      drawFastHLine(inX, y, inXSize, gradient.Map(posMapper.Map(y)));
+        drawFastHLine(inX, y, inXSize, (gradient.Map(posMapper.Map(y)).getColor16()));
     }
   } 
   else {
     posMapper.setValues(inX,inX+inXSize,0,100);
     for (int x=inX;x<inX+inXSize;x++) {
-      drawFastVLine(x, inY, inYSize, gradient.Map(posMapper.Map(x)));
+      drawFastVLine(x, inY, inYSize, (gradient.Map(posMapper.Map(x)).getColor16()));
     }
   }
 }

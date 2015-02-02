@@ -25,7 +25,7 @@ void setup(void) {
 
 void loop(void) {
   // a point object holds x y and z coordinates
-  Point p = ts.getPoint();
+  TSPoint p = ts.getPoint();
   
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!

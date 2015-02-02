@@ -345,10 +345,15 @@ boolean SDClass::begin(uint8_t csPin, int8_t mosi, int8_t miso, int8_t sck) {
          root.openRoot(volume);
 }
 
+//call this when a card is removed. It will allow you to inster and initialise a new card.
+void SDClass::end()
+{
+  root.close();
+}
 
 
 // this little helper is used to traverse paths
-SdFile SDClass::getParentDir(char *filepath, int *index) {
+SdFile SDClass::getParentDir(const char *filepath, int *index) {
   // get parent directory
   SdFile d1 = root; // start with the mostparent, root!
   SdFile d2;
@@ -357,7 +362,7 @@ SdFile SDClass::getParentDir(char *filepath, int *index) {
   SdFile *parent = &d1;
   SdFile *subdir = &d2;
   
-  char *origpath = filepath;
+  const char *origpath = filepath;
 
   while (strchr(filepath, '/')) {
 
@@ -404,7 +409,7 @@ SdFile SDClass::getParentDir(char *filepath, int *index) {
 }
 
 
-File SDClass::open(char *filepath, uint8_t mode) {
+File SDClass::open(const char *filepath, uint8_t mode) {
   /*
 
      Open the supplied file path for reading or writing.

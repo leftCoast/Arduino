@@ -1,9 +1,10 @@
-
-#include <SD.h>              // Thing for SD card
+#include <SD.h>
+#include <SPI.h>
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
 
+#include <colorObj.h>
 #include <screenObj.h>
 #include <drawObj.h>
 #include <label.h>
