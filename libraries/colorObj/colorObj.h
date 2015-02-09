@@ -14,8 +14,8 @@
 #define WHITE           0xFFFF
 
 // mask extremes..
-#define TRANSPARENT     0       // 0%   just background.
-#define OPAQUE          100     // 100% covering background.
+#define OPAQUE       100   // All the new color
+#define TRANSPARENT  0     // None of the new color
 
 class colorObj {
 

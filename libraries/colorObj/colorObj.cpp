@@ -96,12 +96,12 @@ byte colorObj::getGreen(void) { return green; }
 byte colorObj::getBlue(void) { return blue; }
 
 
-colorObj colorObj::blend(colorObj* background,byte alpha) {
+colorObj colorObj::blend(colorObj* added,byte alpha) {
     
-    if (alpha>=OPAQUE) return *this;
-    else if (alpha<=TRANSPARENT) return *background;
+    if (alpha>=OPAQUE) return *added;
+    else if (alpha<=TRANSPARENT) return *this;
     else {
-        alphaMapper.setColors(background,this);
+        alphaMapper.setColors(this,added);
         return alphaMapper.Map(alpha);
     }
 }
