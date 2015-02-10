@@ -51,7 +51,7 @@
 
 #define TIMING_PULSE 200         // microseconds.
 #define OUT_PIN      7
-#define REFRESH_TIME 22          // miliseconds.  mili, NOT micro!
+#define REFRESH_TIME 21          // miliseconds.  mili, NOT micro!
 
 #define NUM_CHANNELS 6          // Oddly, DX5e has 6 channels.
 #define THROTTLE     0
@@ -234,7 +234,7 @@ void trimUp(void) {
 
 void trimLeft(void) {
 
-  rollTrim -= TRIM_AMOUNT;
+  rollTrim += TRIM_AMOUNT;
   if (rollTrim!=0){
     theBeeper.beep(BEEP_TIME);
   }
@@ -246,7 +246,7 @@ void trimLeft(void) {
 
 void trimRight(void) {
 
-  rollTrim += TRIM_AMOUNT;
+  rollTrim -= TRIM_AMOUNT;
   if (rollTrim!=0) {
     theBeeper.beep(BEEP_TIME);
   } 
