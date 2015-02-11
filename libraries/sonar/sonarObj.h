@@ -1,15 +1,20 @@
 #ifndef sonarObj_h
 #define sonarObj_h
 
+#include "idlers.h"
 #include "timeObj.h"
 
-class sonarObj {
+// As this is written you can only use pin one or two.
+// Forget why. I'm betting its something to do with
+// intrupt handlers or timers or something.
+
+class sonarObj : public idler {
 
 public:
   sonarObj(int inPin);
   ~sonarObj(void);
   
-  void idle(void);
+  virtual void idle(void);
   float distanceCm(void);
 
 private:

@@ -9,7 +9,7 @@ void idle(void) {
 
 
 // *******************************
-// idler, base object to give things the ability to run behnd the scenes.
+// idler, base object to give things the ability to run behind the scenes.
 // *******************************
 
 idler::idler(void) { 

@@ -2,7 +2,7 @@
 #include "mapper.h"
 
 #define pulseOut   5      //µs
-#define delaayTime 0.2    //ms
+#define delayTime 0.2    //ms
 
 #define pulseMin   115    //µs
 #define pulseMax   18500  //µs
@@ -49,7 +49,7 @@ enum {
 
 sonarObj::sonarObj(int inPin) {
   
-  endTimer = new timeObj(delaayTime);
+  endTimer = new timeObj(delayTime);
   pin = inPin;
   result = 0;  // default value.
   state = ready;
