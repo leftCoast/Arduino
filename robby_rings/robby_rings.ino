@@ -29,7 +29,7 @@
 #define DARK_BLEND   95
 #define LIGHT_BLEND  20
 
-#define MAX_MS       5000
+#define MAX_MS       3000
 #define SLICE_MS     25
 
 #define STARTUP_MS   8000
