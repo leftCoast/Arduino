@@ -26,6 +26,7 @@ public:
 
   void setColor(byte inRed, byte inGreen, byte inBlue);
   void setColor(word color16);
+  void setColor(colorObj* inColor);
   word getColor16(void);
     
   byte getRed(void);

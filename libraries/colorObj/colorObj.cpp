@@ -81,6 +81,14 @@ void colorObj::setColor(word color16) {
 }
 
 
+void colorObj::setColor(colorObj* inColor) {
+    
+    red =inColor->getRed();
+    green =inColor->getGreen();
+    blue = inColor->getBlue();
+}
+
+
 // Copied from Adafruit'
 word colorObj::getColor16(void) { 
   return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);

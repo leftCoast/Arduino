@@ -23,7 +23,7 @@ class reciverPin {
       byte          index;
       byte          currentState;
       unsigned long startMicros;
-      unsigned long endMicros;
+      unsigned long endMicros;                      
       unsigned long result;
 };
 

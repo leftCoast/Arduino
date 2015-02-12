@@ -9,7 +9,7 @@
 class timeObj {
 
 public:
-  timeObj(float inMs);
+  timeObj(float inMs=10);
 
   virtual void setTime(float inMs,bool startNow=true);    // Change the time duration for next start..
   void start(void);                                       // Start the timer "now".
