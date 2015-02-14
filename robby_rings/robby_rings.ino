@@ -6,22 +6,12 @@
 #include <mapper.h>
 #include <multiMap.h>
 #include <PulseOut.h>
-#include <RCReciver.h>
 #include <servo.h>
 #include <timeObj.h>
 #include <colorObj.h>
 
-#include <PinChangeInt.h>
-
-#include "RCReciver.h"
-
 #include <Adafruit_NeoPixel.h>
 
-// ******************************************
-
-
-
-// ******************************************
 
 #define NUM_LEDS 12
 #define LED_PIN 3
@@ -49,6 +39,7 @@ unsigned long startMS;
 void setup(void) {
 
    //Serial.begin(9600);
+   
    colorObj blue(BLUE);
    colorObj green(GREEN);
    colorObj red(RED);

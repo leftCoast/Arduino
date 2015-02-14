@@ -4,12 +4,13 @@
 #include <Adafruit_NeoPixel.h>
 #include <colorObj.h>
 
+/*
 extern colorObj red;
 extern colorObj blue;
 extern colorObj white;
 extern colorObj black;
 extern colorObj green;
-
+*/
 
 class neoPixel : public Adafruit_NeoPixel {
    
