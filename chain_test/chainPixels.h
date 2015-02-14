@@ -1,6 +1,10 @@
+#ifndef chainPixels_h
+#define chainPixels_h
+
+#include <colorObj.h>
 #include <neoPixel.h>
 #include <idlers.h>
-#include "lists.h"
+#include <lists.h>
 
 class pixelGroup;
 
@@ -11,10 +15,13 @@ class chainPixels : public queue, public idler {
             chainPixels(byte inPin);
             ~chainPixels(void);
               
-              void resetGroups(void);
-              void addGroup(pixelGroup* inGroup);
-              void needRefresh(void);
-     virtual  void idle(void);
+              void      resetChain(void);
+     virtual  void      push(linkListObj* item);
+     virtual  void      pop(void);
+              void      addGroup(pixelGroup* inGroup);
+     virtual  void      idle(void);
+              colorObj  getPixel(word index);
+              void      setPixel(word index,colorObj* inColor);
              
   protected:
     byte      pin;
@@ -27,18 +34,22 @@ class chainPixels : public queue, public idler {
 class pixelGroup : public linkListObj {
 
     public:
-            pixelGroup(word inNumPixels);
-            ~pixelGroup(void);
+              pixelGroup(word inNumPixels);
+              ~pixelGroup(void);
             
-              void setIndex(word inIndex);
-              void setPixelDriver(neoPixel* inDriver);
-              void setChain(chainPixels* inChain);
-              word getNumPixels(void);
-      virtual void setPixels(void);                      // This will be called repeatedly.
+              void       setIndex(word inIndex);
+              void       setChain(chainPixels* inChain);
+              word       getNumPixels(void);
+              
+              colorObj   getPixel(word pixelNum);
+              void       setPixel(word pixelNum, colorObj* color);
+              
+      virtual void       setPixels(void);                      // This will be called repeatedly.
     
     protected:
       chainPixels*  ourChain;
-      neoPixel*     pixelDriver;
-      word          index;
       word          numPixels;
+      word          index;
 };
+
+#endif

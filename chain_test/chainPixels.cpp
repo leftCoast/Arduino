@@ -13,7 +13,7 @@
 chainPixels::chainPixels(byte inPin) {
   
   pin = inPin;
-  pixelDriver  = NULL;
+  pixelDriver  = NULL;  // A NULL pixelDriver is the flag saying- "Things have changed"; Need reset.
   numPixels = 0;
   dirtyBit = false;
 }
@@ -22,12 +22,9 @@ chainPixels::chainPixels(byte inPin) {
 chainPixels::~chainPixels(void) { if (pixelDriver) delete pixelDriver; }
   
   
-// If there is a deletion, this can be called
-// to reset everyone's indexes and things.
-// But really, how often would someone want to
-// change the wiring of the different bits of
-// hardware on the fly?
-void chainPixels::resetGroups(void) {
+// If there is a change in configuration,
+// reset all the values and things.
+void chainPixels::resetChain(void) {
   
   linkListObj* trace;
   
@@ -38,15 +35,32 @@ void chainPixels::resetGroups(void) {
     numPixels = numPixels + ((pixelGroup*)trace)->getNumPixels();
     trace = trace->next;
   }
-  if (pixelDriver) {
+  if (pixelDriver) {        // Just in case, we don't want to leak this.
       delete pixelDriver;
   }
   pixelDriver = new neoPixel(numPixels,pin);
-  trace = top();
-  while(trace) {
-    ((pixelGroup*)trace)->setPixelDriver(pixelDriver);
-    trace = trace->next;
-  }
+}
+
+
+// Hook into push to show a change in config.
+void chainPixels::push(linkListObj* item) {
+  
+   if (pixelDriver) {       // Configuration is changing! Dump the driver!
+      delete pixelDriver;
+      pixelDriver = NULL;
+   }
+   queue::push(item);       // Then do what a queue would do.
+}
+
+
+// Hook into pop to show a change in config.
+void chainPixels::pop(void) {
+  
+   if (pixelDriver) {        // Configuration is changing! Dump the driver!
+      delete pixelDriver;
+      pixelDriver = NULL;
+    }
+   queue::pop();            // Then do what a queue would do.
 }
 
 
@@ -55,41 +69,46 @@ void chainPixels::resetGroups(void) {
 void chainPixels::addGroup(pixelGroup* inGroup) {
   
   if (inGroup) {
-    push((linkListObj*)inGroup);
-    inGroup->setIndex(numPixels);
-    numPixels = numPixels + inGroup->getNumPixels();
-    if (pixelDriver) {
-      delete pixelDriver;
-    }
-    pixelDriver = new neoPixel(numPixels,pin);
-    inGroup->setPixelDriver(pixelDriver);
-    inGroup->setChain(this);
+    inGroup->setChain(this);      // Luke, I AM your father!
+    push((linkListObj*)inGroup);  // And in it goes!
   }
 }
 
 
-// Groups can call this to note that something
-// as changed and LEDs need to be re-written.
-void chainPixels::needRefresh(void) { dirtyBit = true; }
-
-
 // During idle time we give all the groups
-// some time to do stuff.
+// a slice to do stuff.
 void chainPixels::idle(void) {
   
   linkListObj* trace;
   
+  if (!pixelDriver) {        // Ok, do we need a reset? NULL diver is the flag.
+    resetChain();
+  }
   trace = top();
-  while(trace) {
+  while(trace) {            // Now everyone gets time to change thigns if they want.
     ((pixelGroup*)trace)->setPixels();
     trace = trace->next;
   }
-  if (dirtyBit) {
-    pixelDriver->show();
-    dirtyBit = false;
+  if (dirtyBit) {          // If someone did change something..
+    pixelDriver->show();   // Lest show it!
+    dirtyBit = false;      // Cleanup.
   }
 }
 
+
+// Groups call this to see what color a pixel is in their set.
+colorObj chainPixels::getPixel(word index) { return pixelDriver->getPixelColor(index); }
+  
+
+// Groups call this to set a color to a pixel in their set.  
+void chainPixels::setPixel(word index,colorObj* inColor) {
+  
+  pixelDriver->setPixelColor(index,inColor);
+  dirtyBit = true;
+}
+  
+               
+               
 
 // *******************************************
 //
@@ -104,7 +123,6 @@ pixelGroup::pixelGroup(word inNumPixels) {
   
   numPixels = inNumPixels;
   ourChain = NULL;
-  pixelDriver = NULL;
   index = 0;
 }
 
@@ -115,14 +133,17 @@ pixelGroup::~pixelGroup(void) { }
 void pixelGroup::setIndex(word inIndex) { index = inIndex; }
 
 
-void pixelGroup::setPixelDriver(neoPixel* inDriver) { pixelDriver = inDriver; }
-
-
 void pixelGroup::setChain(chainPixels* inChain) { ourChain = inChain; }
 
 
 word pixelGroup::getNumPixels(void) { return numPixels; }
 
 
+colorObj pixelGroup::getPixel(word pixelNum) { return ourChain->getPixel(index+pixelNum); }
+
+
+void pixelGroup::setPixel(word pixelNum, colorObj* color) { ourChain->setPixel(index+pixelNum,color); }
+
+ 
 void pixelGroup::setPixels(void) {  } // This will be called repeatedly. Fill with your drawing code.
  
