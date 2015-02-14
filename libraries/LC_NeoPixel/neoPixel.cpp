@@ -1,12 +1,12 @@
  #include "neoPixel.h"
 
-/*
- colorObj red(RED);
+
+colorObj red(RED);
 colorObj blue(BLUE);
 colorObj white(WHITE);
 colorObj black(BLACK);
 colorObj green(GREEN);
- */
+ 
 
 
  neoPixel::neoPixel(uint16_t n, uint8_t p, uint8_t t)

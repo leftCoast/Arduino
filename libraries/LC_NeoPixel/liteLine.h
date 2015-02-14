@@ -1,3 +1,6 @@
+#ifndef liteLine_h
+#define liteLine_h
+
 #include <Adafruit_NeoPixel.h>
 #include "colorObj.h"
 
@@ -64,3 +67,4 @@ class multiColorLine : public liteLine {
    colorObj*  colors;
 };
    
+#endif
