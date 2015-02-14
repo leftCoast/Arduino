@@ -41,10 +41,11 @@ class pixelGroup : public linkListObj {
               void       setChain(chainPixels* inChain);
               word       getNumPixels(void);
               
-              colorObj   getPixel(word pixelNum);
-              void       setPixel(word pixelNum, colorObj* color);
+              colorObj   getPixel(word pixelNum);                   // What color is THIS pixel now?
+              void       setPixel(word pixelNum, colorObj* color);  // Set THIS pixle this color.
+              void       setPixels(colorObj* color);                // Set ALL our pixles this color.
               
-      virtual void       setPixels(void);                      // This will be called repeatedly.
+      virtual void       draw(void);                                // This will be called repeatedly.
     
     protected:
       chainPixels*  ourChain;

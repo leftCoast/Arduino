@@ -13,14 +13,25 @@
 
 #include <liteLine.h>
 #include <neoPixel.h>
-         
+  
+#include "chainPixels.h"
+#include "robbyRing.h"
 
+#define NUM_LEDS 12
+#define LED_PIN 3
+
+chainPixels theChain(LED_PIN);
+robbyRing* ring1;
+  
+  
 void setup() {
-  // put your setup code here, to run once:
-
+  
+  //Serial.begin(9600);
+  //delay(10000);  // 10 seconds to get screen up.
+  
+  ring1 = new robbyRing(NUM_LEDS);
+  theChain.addGroup(ring1);
+  theChain.hookup();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}
+void loop() { idle(); }

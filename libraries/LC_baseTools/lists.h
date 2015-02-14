@@ -86,7 +86,7 @@ class queue : public linkList {
     virtual void         pop(void);
     virtual linkListObj* top(void);
     virtual void         dump(void);
-    virtual boolean      empty(void);
+    //virtual boolean      empty(void);
   };
 
 #endif

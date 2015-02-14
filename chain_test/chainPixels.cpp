@@ -39,6 +39,7 @@ void chainPixels::resetChain(void) {
       delete pixelDriver;
   }
   pixelDriver = new neoPixel(numPixels,pin);
+  pixelDriver->begin();
 }
 
 
@@ -86,7 +87,7 @@ void chainPixels::idle(void) {
   }
   trace = top();
   while(trace) {            // Now everyone gets time to change thigns if they want.
-    ((pixelGroup*)trace)->setPixels();
+    ((pixelGroup*)trace)->draw();
     trace = trace->next;
   }
   if (dirtyBit) {          // If someone did change something..
@@ -144,6 +145,14 @@ colorObj pixelGroup::getPixel(word pixelNum) { return ourChain->getPixel(index+p
 
 void pixelGroup::setPixel(word pixelNum, colorObj* color) { ourChain->setPixel(index+pixelNum,color); }
 
+
+void pixelGroup::setPixels(colorObj* color) {
+
+   for(int i=0;i<numPixels;i++) {
+      setPixel(i,color);
+   }
+}
  
-void pixelGroup::setPixels(void) {  } // This will be called repeatedly. Fill with your drawing code.
+ 
+void pixelGroup::draw(void) {  } // This will be called repeatedly. Fill with your drawing code.
  
