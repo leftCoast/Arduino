@@ -18,7 +18,7 @@ unsigned long  startMS;
 
 
 // To set up the shared robbyRing resources. If we are cloned.
-void ringSetup(void) {
+void sharedSetup(void) {
 
   //Serial.println("Calling shared init.");
   
@@ -72,7 +72,7 @@ void robbyRing::draw(void) {
   colorObj result;
 
   if (!sharedInit) {
-    ringSetup();
+    sharedSetup();
   } else if (!ourInit) {
     //Serial.println("Calling local init.");
     setPixels(&black);
@@ -84,5 +84,24 @@ void robbyRing::draw(void) {
     result = result.blend(&black, startMapper.Map(millis() - startMS));
     setPixels(&result);
     lightTimer.stepTime();
+  }
+}
+
+
+
+robbyTailLight::robbyTailLight(word numLEDs) 
+  : pixelGroup(numLEDs) { drawn = false; }
+  
+  
+robbyTailLight::~robbyTailLight(void) {  }
+        
+            
+void robbyTailLight::draw(void) {
+  
+  if (!sharedInit) {
+    sharedSetup();
+  } else if (!drawn) {
+    colorObj result = lightMapper.Map(100);
+    setPixels(&result);
   }
 }

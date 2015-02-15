@@ -2,7 +2,7 @@
 #define robbyRing_h
 
 #include <timeObj.h>
-#include "chainPixels.h"
+#include <chainPixels.h>
 
 
 class robbyRing : public pixelGroup {
@@ -20,4 +20,19 @@ class robbyRing : public pixelGroup {
           boolean  ourInit;
 };
  
+ 
+ class robbyTailLight : public pixelGroup {
+  
+  public:
+            robbyTailLight(word numLEDs);
+            ~robbyTailLight(void);
+            
+    virtual void   draw(void);
+    
+  private:
+         
+          boolean  drawn;
+};
+
+
 #endif   

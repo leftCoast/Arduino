@@ -1,8 +1,10 @@
 #ifndef liteLine_h
 #define liteLine_h
 
+#include <colorObj.h>
 #include <Adafruit_NeoPixel.h>
-#include "colorObj.h"
+#include <neoPixel.h>
+
 
 // ****************** liteLine ******************
 //   Basic mechanix for drawing a line segment.
@@ -18,7 +20,7 @@ class liteLine {
       void     setLength(int inLength);
       virtual colorObj calcColor(int index,int i);     // index our head position, i our internal pixel
       colorObj getColor(int index);
-      void     setLights(Adafruit_NeoPixel* lites,int index,boolean wrap=false);
+      void     setLights(neoPixel* lites,int index,boolean wrap=false);
       
    private:   
       int       length;

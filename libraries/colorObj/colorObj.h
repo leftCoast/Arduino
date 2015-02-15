@@ -13,6 +13,7 @@
 #define YELLOW          0xFFE0 
 #define WHITE           0xFFFF
 
+
 // mask extremes..
 #define OPAQUE       100   // All the new color
 #define TRANSPARENT  0     // None of the new color
@@ -33,7 +34,7 @@ public:
   byte getGreen(void);
   byte getBlue(void);
 
-  colorObj blend(colorObj* background,byte alpha);
+  colorObj blend(colorObj* mixinColor,byte mixPercent);
     
   void printRGB(void);
 
@@ -42,6 +43,15 @@ private :
   byte green;
   byte blue;
 };
+
+extern colorObj red;
+extern colorObj blue;
+extern colorObj white;
+extern colorObj black;
+extern colorObj green;
+extern colorObj cyan;
+extern colorObj magenta;
+extern colorObj yellow;
 
 
 // ****** colorMapper ******

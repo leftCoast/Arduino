@@ -1,5 +1,15 @@
 #include "colorObj.h"
 
+// Having the basics handy is very handy!
+colorObj red(RED);
+colorObj blue(BLUE);
+colorObj white(WHITE);
+colorObj black(BLACK);
+colorObj green(GREEN);
+colorObj cyan(CYAN);
+colorObj magenta(MAGENTA);
+colorObj yellow(YELLOW);
+
 enum hat {
     off, forward, back, left, right };
 
@@ -7,7 +17,7 @@ enum hat {
 #define START_COLOR     0
 #define END_COLOR       100
 
-colorMapper alphaMapper;
+colorMapper mixMapper;
 
 // ****** colorObj ******
 
@@ -104,13 +114,13 @@ byte colorObj::getGreen(void) { return green; }
 byte colorObj::getBlue(void) { return blue; }
 
 
-colorObj colorObj::blend(colorObj* added,byte alpha) {
+colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
     
-    if (alpha>=OPAQUE) return *added;
-    else if (alpha<=TRANSPARENT) return *this;
+    if (mixPercent>=OPAQUE) return *mixinColor;
+    else if (mixPercent<=TRANSPARENT) return *this;
     else {
-        alphaMapper.setColors(this,added);
-        return alphaMapper.Map(alpha);
+        mixMapper.setColors(this,mixinColor);
+        return mixMapper.Map(mixPercent);
     }
 }
 

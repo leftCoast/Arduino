@@ -21,7 +21,7 @@ colorObj  liteLine::calcColor(int index,int i) {
   }
 
 
-void liteLine::setLights(Adafruit_NeoPixel* lites,int index,boolean wrap) {
+void liteLine::setLights(neoPixel* lites,int index,boolean wrap) {
 
    int liteIndex;
    colorObj color;
@@ -32,15 +32,14 @@ void liteLine::setLights(Adafruit_NeoPixel* lites,int index,boolean wrap) {
          if (liteIndex<0) {
             liteIndex = liteIndex + lites->numPixels();
          }
-         lites->setPixelColor(liteIndex, color.getRed(), color.getGreen(), color.getBlue());
+         lites->setPixelColor(liteIndex, &color);
       }
    } else {
       for(int i=0;i<length;i++) {
          color = calcColor(index,i);
-         lites->setPixelColor(index-i, color.getRed(), color.getGreen(), color.getBlue());
+         lites->setPixelColor(index-i, &color);
       }
    }
-   lites->show();
 }
 
 
