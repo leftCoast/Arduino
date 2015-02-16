@@ -24,6 +24,8 @@
 #include <PulseOut.h>
 #include <servo.h>
 #include <timeObj.h>
+#include <runningAvg.h>
+
 #include "LM35.h"
 
 #define NUM_SIZE   2
@@ -33,11 +35,14 @@
 #define PRECISION  1
 
 timeObj printTimer(100);
-LM35 tempSensor1(A4);
-LM35 tempSensor2(A5);
+LM35 shrimpSensor(A4);
+LM35 seaSensor(A5);
 
-label temp1("-000.0",NUM_SIZE);
-label temp2("-000.0",NUM_SIZE);
+label shrimpLabel("-000.0",NUM_SIZE);
+label seaLabel("-000.0",NUM_SIZE);
+
+runningAvg  shrimpSmooth(5);
+runningAvg  seaSmooth(5);
 
 void setup() {
   
@@ -58,13 +63,13 @@ void setup() {
       }
     }
     */
-    temp1.setLocation(LEFT_EDGE,BASELINE1);
-    temp1.setJustify(TEXT_RIGHT);
-    temp1.setPrecision(PRECISION);
+    shrimpLabel.setLocation(LEFT_EDGE,BASELINE1);
+    shrimpLabel.setJustify(TEXT_RIGHT);
+    shrimpLabel.setPrecision(PRECISION);
 
-    temp2.setLocation(LEFT_EDGE,BASELINE2);
-    temp2.setJustify(TEXT_RIGHT);
-    temp2.setPrecision(PRECISION);
+    seaLabel.setLocation(LEFT_EDGE,BASELINE2);
+    seaLabel.setJustify(TEXT_RIGHT);
+    seaLabel.setPrecision(PRECISION);
     
     label label1("Shrimp :       Deg F",NUM_SIZE);
  
@@ -87,12 +92,17 @@ void setup() {
 
 void loop() {
 
+  float shrimpTemp;
+  float seaTemp;
+  
   if (printTimer.ding()) {
-    temp1.setValue(tempSensor1.tempF());
-    temp1.draw();
+    shrimpTemp = shrimpSmooth.addData(shrimpSensor.tempF());
+    shrimpLabel.setValue(shrimpTemp);
+    shrimpLabel.draw();
     
-    temp2.setValue(tempSensor2.tempF());
-    temp2.draw();
+    seaTemp = shrimpSmooth.addData(seaSensor.tempF());
+    seaLabel.setValue(seaTemp);
+    seaLabel.draw();
     /*
     Serial.print("Temp C  : ");
     Serial.println(tempSensor.tempC());
