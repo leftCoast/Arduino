@@ -32,7 +32,7 @@
 #define BASELINE2  80
 #define PRECISION  1
 
-timeObj printTimer(1000);
+timeObj printTimer(100);
 LM35 tempSensor1(A4);
 LM35 tempSensor2(A5);
 
