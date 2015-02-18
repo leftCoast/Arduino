@@ -34,19 +34,19 @@
 #define BASELINE2  80
 #define PRECISION  1
 
-timeObj printTimer(100);
+timeObj tempTimer(20);
 LM35 shrimpSensor(A4);
 LM35 seaSensor(A5);
 
 label shrimpLabel("-000.0",NUM_SIZE);
 label seaLabel("-000.0",NUM_SIZE);
 
-runningAvg  shrimpSmooth(5);
-runningAvg  seaSmooth(5);
+runningAvg  shrimpSmooth(20);
+runningAvg  seaSmooth(20);
 
 void setup() {
   
-  TSPoint inDest;
+  //TSPoint inDest;
   
   //Serial.begin(9600);
   if (initScreen(INV_LANDSCAPE)) {
@@ -87,7 +87,7 @@ void setup() {
     label1.draw();
     */
   } 
-  printTimer.start();
+  tempTimer.start();
 }
 
 void loop() {
@@ -95,7 +95,7 @@ void loop() {
   float shrimpTemp;
   float seaTemp;
   
-  if (printTimer.ding()) {
+  if (tempTimer.ding()) {
     shrimpTemp = shrimpSmooth.addData(shrimpSensor.tempF());
     shrimpLabel.setValue(shrimpTemp);
     shrimpLabel.draw();
@@ -110,7 +110,7 @@ void loop() {
     Serial.println(tempSensor.tempF());
     Serial.println();
     */
-    printTimer.stepTime();
+    tempTimer.stepTime();
   }
 }
 
