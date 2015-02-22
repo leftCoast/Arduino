@@ -27,6 +27,7 @@ private:
   int           state;
   int           pin;
   float         result;
+  timeObj*      timeoutTimer;
   timeObj*      endTimer;
   bool          isAttached;
 };

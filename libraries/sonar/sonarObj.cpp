@@ -2,8 +2,8 @@
 #include "mapper.h"
 
 #define pulseOut   5      //µs
-#define delayTime 0.2    //ms
-
+#define delayTime 0.2     //ms
+#define timeoutTime  5    //ms
 #define pulseMin   115    //µs
 #define pulseMax   18500  //µs
 #define minCm      2      //cm
@@ -49,6 +49,7 @@ enum {
 
 sonarObj::sonarObj(int inPin) {
   
+  timeoutTimer = new timeObj(timeoutTime);
   endTimer = new timeObj(delayTime);
   pin = inPin;
   result = 0;  // default value.
@@ -59,6 +60,7 @@ sonarObj::sonarObj(int inPin) {
 
 sonarObj::~sonarObj(void) {
   
+  delete(timeoutTimer);
   delete(endTimer);
   if (isAttached) {
     detachHandler();
@@ -146,14 +148,14 @@ void sonarObj::idle(void) {
     switch (state) {
     case ready :
       clearTime();                    // Set both to zero as flags..
+      timeoutTimer->start();          // I suspect its missing the pulse & timing out. We'll see..
+      state = waitforPulse;           // All done, let the processor do other things.
       pinMode(pin, OUTPUT);           // Pulse out to start hardware.
       digitalWrite(pin, HIGH);
       delayMicroseconds(pulseOut);
       digitalWrite(pin, LOW);
       pinMode(pin, INPUT);            // I assume this is ok, we are going to listen.
       attachHandler();                // Hook up the handler.
-      clearTime();                    // I don't trust this thing, clear again, just in case.. (seems to help)
-      state = waitforPulse;           // All done, let the processor do other things.
       break;
     case waitforPulse :
       if (pulseDone()) {                     // Checks to see if both are non zero.
@@ -162,6 +164,10 @@ void sonarObj::idle(void) {
         if (readTime() > 0)  {               // If the numbers make sense, do the calculations.
           result = cmMapper.Map(readTime());
         }
+        state = waitToComplete;              // Wait for the settling timer expires.
+      } else if (timeoutTimer->ding()) {
+        detachHandler();                     // Maybe someone else needs this.
+        endTimer->start();                   // we need to wait for a minimum settle time.
         state = waitToComplete;              // Wait for the settling timer expires.
       }
       break;

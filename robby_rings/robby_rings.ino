@@ -33,7 +33,6 @@ mapper trigMapper(0,0,0,0);
 
 timeObj lightTimer(SLICE_MS);
 int currentSlice;
-colorObj black(BLACK);
 unsigned long startMS;
 
 void setup(void) {

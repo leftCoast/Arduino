@@ -125,7 +125,7 @@ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
 }
 
 
-/*
+
  void colorObj::printRGB(void) {
 
   Serial.print( "ColorObj RGB : ");
@@ -135,7 +135,7 @@ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
   Serial.print(", ");
   Serial.println(blue);
 }
-*/
+
 
 
 // ****** colorMapper ******
