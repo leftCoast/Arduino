@@ -5,6 +5,7 @@
 
 class mapper {
 public:
+  mapper(void);
   mapper(double x1,double x2,double y1,double y2);
 
   double Map(double inNum);

@@ -1,5 +1,8 @@
 #include "mapper.h"
 
+mapper::mapper(void) { setValues(0,1,0,1); }
+
+
 mapper::mapper(double x1,double x2,double y1,double y2) {
 
   setValues(x1,x2,y1,y2);
