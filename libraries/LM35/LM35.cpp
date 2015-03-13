@@ -1,7 +1,7 @@
 #include "LM35.h"
 #include <mapper.h>
 
-// We all need the mappers and tey are always the same. So just
+// We all need the mappers and they are always the same. So just
 // make up the two and share em.
 mapper intToVolts(0,1023,0,5.0);    // From Arduinoland..
 mapper voltsToTemp(0,1.5,0,150);    // From the LM35 datasheet.

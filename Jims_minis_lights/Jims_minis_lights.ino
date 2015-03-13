@@ -17,8 +17,6 @@
 #include <PinChangeInt.h>
 
 #include "RCReciver.h"
-
-
 #include "RCTaillight.h"
 
 
@@ -72,9 +70,7 @@ void floodLight::draw(void) {
 // ***************************
 
 
-
 #define WAIT 33
-
 
 #define MAX_RC       1900
 #define MIN_RC       1100
@@ -111,6 +107,7 @@ void setup(void) {
       MAX_RC,  // pitchDn
       MIN_RC,  // pitchUp
       false);  // reverse
+      
   theChain.addGroup(theTailLight);
   
   flood1 = new floodLight();
