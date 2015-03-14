@@ -4,11 +4,12 @@
 #define LIGHT_BLEND    20
 #define PERCENT_RED    15
 #define PERCENT_GREEN  5
+#define PERCENT_WHITE  20
 
-#define MAX_MS       3000
+#define MAX_MS       2000
 #define SLICE_MS     25
 
-#define STARTUP_MS   8000
+#define STARTUP_MS   2000
 
 boolean        sharedInit = false;
 colorMapper    lightMapper;
@@ -23,7 +24,8 @@ void sharedSetup(void) {
   //Serial.println("Calling shared init.");
   
   colorObj lightBlue = blue.blend(&red, PERCENT_RED);
-  lightBlue = lightBlue.blend(&green, 5);
+  lightBlue = lightBlue.blend(&green, PERCENT_GREEN);
+  lightBlue = lightBlue.blend(&white, PERCENT_WHITE);
 
   colorObj darkBlue = blue.blend(&black, DARK_BLEND);
   lightBlue = lightBlue.blend(&black, LIGHT_BLEND);
