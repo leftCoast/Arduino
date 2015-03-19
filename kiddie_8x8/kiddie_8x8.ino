@@ -8,9 +8,55 @@
 #include <Adafruit_LEDBackpack.h>
 
 //#define KID_NAME " Kayla"
-#define KID_NAME " Shelbers"
+#define KID_NAME " Kayla"
+#define KID_FOOD " Cheeseburger!!"
 
 static const uint8_t PROGMEM
+
+eyeR_bmp[] =
+{ B00000000,
+  B00000000,
+  B01100110,
+  B10011001,
+  B11011101,
+  B01100110,
+  B00000000,
+  B00000000
+},
+
+eyeL_bmp[] =
+{ B00000000,
+  B00000000,
+  B01100110,
+  B10011001,
+  B10111011,
+  B01100110,
+  B00000000,
+  B00000000
+},
+
+eyeS1_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B10011001,
+  B10011001,
+  B01100110,
+  B00000000,
+  B00000000
+},
+
+eyeS2_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B10011001,
+  B01100110,
+  B00000000,
+  B00000000
+},
+
 heart1_bmp[] =
 { B00000000,
   B00100100,
@@ -136,25 +182,41 @@ void runFace(void) {
 
 }
 
+
+void ROMbitmapAndHold(const uint8_t* bitmap,unsigned long inMs) {
+  
+  matrix.clear();
+  matrix.drawBitmap(0, 0, bitmap, 8, 8, LED_ON);
+  matrix.writeDisplay();
+  delay(inMs);
+}
+
+
+void runEyes(void) {
+  
+  ROMbitmapAndHold(eyeS2_bmp,100);
+  ROMbitmapAndHold(eyeS1_bmp,100);
+  ROMbitmapAndHold(eyeL_bmp,500);
+  ROMbitmapAndHold(eyeR_bmp,500);
+  ROMbitmapAndHold(eyeL_bmp,500);
+  ROMbitmapAndHold(eyeR_bmp,500);
+  ROMbitmapAndHold(eyeS1_bmp,100);
+  ROMbitmapAndHold(eyeS2_bmp,100);
+  matrix.clear();
+}
+
+
 void runHeart(void) {
 
   for (int i = 0; i < 4; i++) {
-    matrix.clear();
-    matrix.drawBitmap(0, 0, heart1_bmp, 8, 8, LED_ON);
-    matrix.writeDisplay();
-    delay(50);
-    matrix.clear();
-    matrix.drawBitmap(0, 0, heart2_bmp, 8, 8, LED_ON);
-    matrix.writeDisplay();
-    delay(50);
+    ROMbitmapAndHold(heart1_bmp,50);
+    ROMbitmapAndHold(heart2_bmp,50);
   }
-  matrix.clear();
-  matrix.drawBitmap(0, 0, heart1_bmp, 8, 8, LED_ON);
-  matrix.writeDisplay();
-  delay(500);
+  ROMbitmapAndHold(heart1_bmp,500);
 }
 
-void runStr(char* inStr) {
+
+void runStr(char* inStr,unsigned int inDelay) {
 
   matrix.setTextSize(1);
   matrix.setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
@@ -165,7 +227,7 @@ void runStr(char* inStr) {
     matrix.setCursor(x, 0);
     matrix.print(inStr);
     matrix.writeDisplay();
-    delay(100);
+    delay(inDelay);
   }
 
 }
@@ -178,7 +240,11 @@ void loop() {
   if (animeTimer.ding()) {
     int rNum = random(0, 500);
     if (rNum == 0) {
-      runStr(KID_NAME);
+      runStr(KID_NAME,100);
+      slowTimer.start();
+      fastTimer.start();
+    } else if (rNum == 25) {
+      runStr(KID_FOOD,50);
       slowTimer.start();
       fastTimer.start();
     } else if (rNum == 10) {
@@ -187,6 +253,10 @@ void loop() {
       fastTimer.start();
     } else if (rNum == 40) {
       runHeart();
+      slowTimer.start();
+      fastTimer.start();
+    } else if (rNum == 30) {
+      runEyes();
       slowTimer.start();
       fastTimer.start();
     }
