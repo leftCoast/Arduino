@@ -7,7 +7,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_LEDBackpack.h>
 
-//#define KID_NAME " Kayla"
 #define KID_NAME " Kayla"
 #define KID_FOOD " Cheeseburger!!"
 
@@ -163,32 +162,20 @@ void addMap(byte *bitMap) {
 }
 
 
-void runFace(void) {
-
-  matrix.clear();
-  matrix.drawBitmap(0, 0, frown_bmp, 8, 8, LED_ON);
-  matrix.writeDisplay();
-  delay(500);
-
-  matrix.clear();
-  matrix.drawBitmap(0, 0, neutral_bmp, 8, 8, LED_ON);
-  matrix.writeDisplay();
-  delay(500);
-
-  matrix.clear();
-  matrix.drawBitmap(0, 0, smile_bmp, 8, 8, LED_ON);
-  matrix.writeDisplay();
-  delay(1500);
-
-}
-
-
 void ROMbitmapAndHold(const uint8_t* bitmap,unsigned long inMs) {
   
   matrix.clear();
   matrix.drawBitmap(0, 0, bitmap, 8, 8, LED_ON);
   matrix.writeDisplay();
   delay(inMs);
+}
+
+
+void runFace(void) {
+
+  ROMbitmapAndHold(frown_bmp,500);
+  ROMbitmapAndHold(neutral_bmp,500);
+  ROMbitmapAndHold(smile_bmp,1500);
 }
 
 

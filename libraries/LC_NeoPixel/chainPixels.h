@@ -42,7 +42,7 @@ class pixelGroup : public linkListObj {
               word       getNumPixels(void);
               
               colorObj   getPixel(word pixelNum);                   // What color is THIS pixel now?
-              void       setPixel(word pixelNum, colorObj* color);  // Set THIS pixle this color.
+              void       setPixel(word pixelNum, colorObj* color);  // Set THIS pixel this color.
               void       setPixels(colorObj* color);                // Set ALL our pixles this color.
               
       virtual void       draw(void);                                // This will be called repeatedly.
