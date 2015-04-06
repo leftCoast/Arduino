@@ -8,12 +8,14 @@ class runningAvg {
     ~runningAvg(void);
     
     float addData(float inData);
+    float getAve(void);
     
   protected:
     int    maxData;     // Total amount allowed.
     int    numValues;   // The amount we have.
     int    index;       // Write the text value, here.
     float  *theValues;  // The arrag of values.
+    float  result;      // Just in case they ask, we'll keep a copy.
 };
 
 #endif

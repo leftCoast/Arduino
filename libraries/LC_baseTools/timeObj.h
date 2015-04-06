@@ -15,7 +15,8 @@ public:
   void start(void);                                       // Start the timer "now".
   void stepTime(void);                                    // Restart the timer from last end time.
   bool ding(void);                                        // Timer has expired.
-
+  unsigned long getTime(void);                            // How long does this go for?
+    
 private:
   unsigned long waitTime;
   unsigned long startTime;

@@ -47,3 +47,6 @@ bool timeObj::ding(void) {
     return now >= endTime;
 }
 
+
+unsigned long timeObj::getTime(void) { return waitTime; }
+

@@ -7,6 +7,7 @@ runningAvg::runningAvg(int inNumData) {
   maxData = inNumData;
   numValues = 0;
   index = 0;
+  result = 0;
 }
 
  
@@ -35,7 +36,10 @@ float runningAvg::addData(float inData) {
   for (int i=0;i<numValues;i++) {   // We loop up to numValues but not including numValues.
     sum = sum + theValues[i];
   }
-  return sum/numValues; 
+  result = sum/numValues;
+  return result;
 }
+
+float runningAvg::getAve(void) { return result; }
 
   
