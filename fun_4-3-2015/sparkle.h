@@ -1,3 +1,4 @@
+/*
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -30,7 +31,7 @@ class sparkle : public linkListObj, idler {
   sparkleState  state = dormant;
 };
 
-
+*/
   
   
   

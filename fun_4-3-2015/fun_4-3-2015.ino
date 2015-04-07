@@ -36,13 +36,23 @@ shakeNTinkle sensors(SENS1_SWITCH_PIN,SENS2_SWITCH_PIN);
 
 neoPixel lightStick(8, 4);
 
-sparkle* sparkles = NULL;
+//sparkle* sparkles = NULL;
+colorMultiMap  cMap;
+int MapCount = 0;
 
 void setup() {
   //Serial.begin(9600);
   lightStick.begin();
   aBlinker.setBlink(true);  // This starts the blinking..
   sensors.begin();          // Sets up & starts the sensors.
+  
+  cMap.addColor(0,&green);
+  cMap.addColor(100,&blue);
+  cMap.addColor(50,&magenta);
+  cMap.addColor(150,&red);
+  cMap.addColor(175,&yellow);
+  cMap.addColor(200,&cyan);
+  cMap.addColor(250,&green);
 }
 
 
@@ -57,38 +67,26 @@ void setPixels(colorObj* color) {
 
 void createSparkle(int maxIndex) {
   
-  
-  
+ 
 }
 
-WONT WORK, LOOK AT THE LIST STUFF, GOODNIGHT
 
 void checkSparkles(void) {
-  
-  sparkle* deadSparkle;
-  sparkle* trace;
-  
-  trace = sparkles;
-  while(trace) {
-    if (!trace->checkSparkle()) {
-      deadSparkle = trace;
-      trace = trace->next;
-      delete(deadSparkle);
-    } else {
-      trace = trace->next;
-    }
+
 }
-
-
 
 void loop() {
   float periodMs;
 
   idle();
   if (lightTimer.ding()) {
-    colorObj result = black.blend(&blue,sensors.getTinkle());
-    result = result.blend(&green,sensors.getShake()/4);
+    //colorObj result = black.blend(&blue,sensors.getTinkle());
+    //result = result.blend(&green,sensors.getShake()/4);
+    
+    colorObj result = cMap.Map(MapCount++);
+    result = result.blend(&black,75);
     setPixels(&result);
+    if (MapCount>=250) MapCount=0;
     lightTimer.stepTime();
   }
   
@@ -108,6 +106,6 @@ void loop() {
       writeTimer.stepTime();
     }
   }
-    */
+  */
 
 }

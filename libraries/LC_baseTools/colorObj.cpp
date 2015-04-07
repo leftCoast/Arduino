@@ -212,3 +212,44 @@ void colorMapper::printColors(void) {
 }
 
 
+// ****** colorMultiMap ******
+
+
+
+colorMultiMap::colorMultiMap(void) {  }
+
+
+colorMultiMap::~colorMultiMap(void) {  }
+
+void colorMultiMap::addColor(double inX, colorObj* color) {
+    
+    if (color) {
+        redMap.addPoint(inX,color->getRed());
+        greenMap.addPoint(inX,color->getGreen());
+        blueMap.addPoint(inX,color->getBlue());
+    }
+}
+
+
+void colorMultiMap::clearMap(void) {
+    
+    redMap.clearMap();
+    greenMap.clearMap();
+    blueMap.clearMap();
+}
+
+
+colorObj colorMultiMap::Map(double inVal) {
+    
+    colorObj  result;
+    byte      red;
+    byte      green;
+    byte      blue;
+    
+    red = round(redMap.Map(inVal));
+    green = round(greenMap.Map(inVal));
+    blue = round(blueMap.Map(inVal));
+    result.setColor(red,green,blue);
+    return result;
+}
+

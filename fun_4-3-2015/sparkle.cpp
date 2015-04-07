@@ -1,3 +1,4 @@
+/*
 #include "sparkle.h"
 
 sparkle::sparkle(int inIndex, colorObj* color, float onTime, float dormantTime, float buildTime, float decayTime) {
@@ -110,4 +111,6 @@ colorObj sparkle::getColor(colorObj * backgroundColor) {
     case dead :     return *backgroundColor; break;
   }
 }
+
+*/
 

@@ -2,6 +2,7 @@
 #define colorObj_h
 
 #include "mapper.h"
+#include "multiMap.h"
 
 // Color definitions
 #define	BLACK           0x0000
@@ -74,5 +75,26 @@ private :
   mapper* greenMapper;
   mapper* blueMapper;
 };
+
+
+// ****** colorMultiMap ******
+
+
+class colorMultiMap {
+    
+    public :
+    colorMultiMap(void);
+    ~colorMultiMap(void);
+    
+    void      addColor(double inX, colorObj* color);  // At some numeric value we resolve to this color.
+    void      clearMap(void);
+    colorObj  Map(double inVal);
+    
+    protected :
+    multiMap  redMap;
+    multiMap  greenMap;
+    multiMap  blueMap;
+};
+
 
 #endif
