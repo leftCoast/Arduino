@@ -36,7 +36,7 @@ shakeNTinkle sensors(SENS1_SWITCH_PIN,SENS2_SWITCH_PIN);
 
 neoPixel lightStick(8, 4);
 
-//sparkle* sparkles = NULL;
+sparkle* sparkles = NULL;
 colorMultiMap  cMap;
 int MapCount = 0;
 

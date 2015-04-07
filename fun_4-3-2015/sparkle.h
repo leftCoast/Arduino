@@ -1,13 +1,12 @@
-/*
+
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
-#include <mapper.h>
+#include <multiMap.h>
 #include <timeObj.h>
 
 #define DEF_ONTIME 20  // ms
 
-enum sparkleState { dormant, building, glowing, decaying, dead };
 
 class sparkle : public linkListObj, idler {
   
@@ -21,17 +20,11 @@ class sparkle : public linkListObj, idler {
   
   protected :
   
-  int           index;
-  colorObj      baseColor;
-  timeObj*      onTimer = NULL;
-  timeObj*      dormantTimer = NULL;
-  timeObj*      buildTimer = NULL;
-  timeObj*      decayTimer = NULL;
-  mapper*       blendPercent = NULL;
-  sparkleState  state = dormant;
+  int          index;
+  colorObj     baseColor;
+  multiMap     blendMapper;
+  timeObj*      lifeTimer;
 };
-
-*/
   
   
   
