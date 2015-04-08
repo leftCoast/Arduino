@@ -8,15 +8,16 @@
 #define DEF_ONTIME 20  // ms
 
 
-class sparkle : public linkListObj, idler {
+class sparkle : public linkListObj {
   
   public :
             sparkle(int inIndex, colorObj* color=&white, float onTime=DEF_ONTIME, float dormantTime=0, float buildTime=0, float decayTime=0);
             ~sparkle(void);
   
-  virtual void      idle(void);
           boolean   checkSparkle(void);
           colorObj  getColor(colorObj * backgroundColor);
+          int       getIndex(void);
+          sparkle*  getNext(void);
   
   protected :
   
@@ -28,3 +29,13 @@ class sparkle : public linkListObj, idler {
   
   
   
+class sparkleList : public linkList, public idler {
+    
+    public :
+                      sparkleList(void);
+                      ~sparkleList(void);
+                      
+                sparkle*  getSparkles(void);
+                int       numSparkles(void);
+        virtual void      idle(void);
+  };

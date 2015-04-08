@@ -61,3 +61,4 @@ class shakeNTinkle : public idler {
   runningAvg* shake = NULL;
   runningAvg* tinkle = NULL;
 };
+

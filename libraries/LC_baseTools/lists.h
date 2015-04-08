@@ -37,7 +37,7 @@ class linkList {
     virtual void         deleteObj(linkListObj* oldObj);  // Find it and push it off. Maybe kill it?
     virtual boolean      isEmpty(void);
     virtual void         dumpList(void);
-            linkListObj* getList(void);
+    virtual linkListObj* getList(void);
             
     linkListObj* theList;
     boolean      weOwn;

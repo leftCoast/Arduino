@@ -18,16 +18,15 @@
 #include "shakeNTinkle.h"
 #include "sparkle.h"
 
-#define BEEP_ON_MS        .1
-#define BEEP_MIN_PEROID   .3
-#define BEEP_MAX_PERIOD  4.55
+#define MAX_SPARKLES  2
+#define MIN_SHAKE     30
+#define MIN_TINKLE    20
 
-blinker aBlinker(13, BEEP_ON_MS, 1, false);
-mapper aToBeep(0, 1023, BEEP_MIN_PEROID, BEEP_MAX_PERIOD);
+blinker aBlinker;
 
-timeObj  readTimer(10);
-timeObj  writeTimer(1000);
-timeObj  lightTimer(20);
+//timeObj  readTimer(10);
+//timeObj  writeTimer(1000);
+timeObj  lightTimer(5);
 
 #define SENS1_SWITCH_PIN  2
 #define SENS2_SWITCH_PIN  3
@@ -36,15 +35,17 @@ shakeNTinkle sensors(SENS1_SWITCH_PIN,SENS2_SWITCH_PIN);
 
 neoPixel lightStick(8, 4);
 
-sparkle* sparkles = NULL;
+sparkleList sparkles;
+
 colorMultiMap  cMap;
 int MapCount = 0;
 
 void setup() {
   //Serial.begin(9600);
   lightStick.begin();
-  aBlinker.setBlink(true);  // This starts the blinking..
+  //aBlinker.setBlink(true);  // This starts the blinking..
   sensors.begin();          // Sets up & starts the sensors.
+  sparkles.hookup();        // Starts garbage collection on the sparkle list.
   
   cMap.addColor(0,&green);
   cMap.addColor(100,&blue);
@@ -65,47 +66,63 @@ void setPixels(colorObj* color) {
 }
 
 
-void createSparkle(int maxIndex) {
+void createSparkle(float shake,float tinkle) {
   
+  int      index;
+  colorObj color;
+  float    onTime;
+  float dormantTime;
+  float buildTime;
+  float decayTime;
  
+  if ((sparkles.numSparkles()<MAX_SPARKLES)&&(shake>MIN_SHAKE)) {
+    index = random(0,8);
+    color = white;
+    onTime = 100;
+    buildTime = 0;
+    decayTime = 250;
+    if (tinkle>MIN_TINKLE) {
+      dormantTime = random(0,1000);
+    } else {
+      dormantTime = random(0,100);
+    }
+    sparkle* newSparkle = new sparkle(index,&color,onTime,dormantTime,buildTime,decayTime);
+    sparkles.addToTop(newSparkle);
+  }
 }
 
 
-void checkSparkles(void) {
-
+void doSparkles(void) {
+  
+  int      index;
+  colorObj backgroundColor;
+  colorObj result;
+  sparkle* sparklePtr;
+  
+  sparklePtr = sparkles.getSparkles();
+  while(sparklePtr) {
+    index = sparklePtr->getIndex();
+    backgroundColor = lightStick.getPixelColor(index);
+    result = sparklePtr->getColor(&backgroundColor);
+    lightStick.setPixelColor(index, &result);
+    sparklePtr = sparklePtr->getNext();
+  }
+  lightStick.show();
 }
+
 
 void loop() {
   float periodMs;
 
   idle();
   if (lightTimer.ding()) {
-    //colorObj result = black.blend(&blue,sensors.getTinkle());
-    //result = result.blend(&green,sensors.getShake()/4);
-    
+    createSparkle(sensors.getShake(),sensors.getTinkle());
     colorObj result = cMap.Map(MapCount++);
-    result = result.blend(&black,75);
+    result = result.blend(&black,90);
     setPixels(&result);
     if (MapCount>=250) MapCount=0;
+    doSparkles();
     lightTimer.stepTime();
   }
-  
-  /*
-  if (writeTimer.ding()) {
-    Serial.print("tSum1 : "); Serial.print(tSum1); Serial.print(" tSum2 : "); Serial.println(tSum2);
-    writeTimer.stepTime();
-  }
-  
-  if (readTimer.ding()) {
-    periodMs = aToBeep.Map(analogRead(0));
-    aBlinker.setTimes(BEEP_ON_MS,periodMs);
-    readTimer.stepTime();
-
-    if (writeTimer.ding()) {
-      Serial.println(periodMs);
-      writeTimer.stepTime();
-    }
-  }
-  */
-
 }
+
