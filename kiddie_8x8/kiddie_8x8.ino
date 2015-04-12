@@ -1,6 +1,3 @@
-#include <lists.h>
-#include <mapper.h>
-#include <PulseOut.h>
 #include <timeObj.h>
 
 #include <Wire.h>
