@@ -120,6 +120,7 @@ byte bitmap[8];
 void setup() {
 
   matrix.begin(0x70);  // pass in the address
+  matrix.setRotation(2);
   slowTimer.start();
   fastTimer.start();
   animeTimer.start();
