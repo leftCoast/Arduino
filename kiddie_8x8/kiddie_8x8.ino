@@ -4,8 +4,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_LEDBackpack.h>
 
-#define KID_NAME " Kayla"
-#define KID_FOOD " Cheeseburger!!"
+#define KID_NAME " Julie"
+#define KID_FOOD " Shrimp, Yum!!"
 
 static const uint8_t PROGMEM
 

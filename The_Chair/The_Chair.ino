@@ -180,9 +180,9 @@ void setupMappers(void) {
   pitchMapper.addPoint(512,MID_PULSE);
   pitchMapper.addPoint(0,MIN_PULSE);
 
-  yawMapper.addPoint(0,MIN_PULSE);
+  yawMapper.addPoint(1023,MIN_PULSE);
   yawMapper.addPoint(512,MID_PULSE);
-  yawMapper.addPoint(1023,MAX_PULSE);
+  yawMapper.addPoint(0,MAX_PULSE);
 }
 
 
