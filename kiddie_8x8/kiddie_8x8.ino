@@ -2,7 +2,11 @@
 
 #include <Wire.h>
 #include <Adafruit_GFX.h>
+
 #include <Adafruit_LEDBackpack.h>
+
+
+#include "sprit.h"
 
 #define KID_NAME " Julie"
 #define KID_FOOD " Shrimp, Yum!!"
@@ -106,6 +110,36 @@ frown_bmp[] =
   B00111100
 };
 
+
+class smileSprit : public sprit8x8 {
+  
+  public :
+                smileSprit(Adafruit_8x8matrix* inMatrix);
+                ~smileSprit(void);
+  
+  virtual void  idle(void);
+};
+
+smileSprit::smileSprit(Adafruit_8x8matrix* inMatrix) 
+: sprit8x8(inMatrix)
+{ numFrames = 3; }
+
+
+smileSprit::~smileSprit(void) {  }
+
+
+void smileSprit::idle(void) {
+  
+  if (changeFrame()) {
+    switch(frameNum) {
+      case 0 : showFrame(frown_bmp,500); break;
+      case 1 : showFrame(neutral_bmp,500); break;
+      case 2 : showFrame(smile_bmp,1500);  break;
+    }
+  }
+}
+
+  
 Adafruit_8x8matrix matrix;
 
 timeObj slowTimer(300);
@@ -114,6 +148,8 @@ timeObj animeTimer(100);
 
 byte bitmap[8];
 
+sprit8x8 theSmileSprit(&matrix);
+
 void setup() {
 
   matrix.begin(0x70);  // pass in the address
@@ -121,6 +157,8 @@ void setup() {
   slowTimer.start();
   fastTimer.start();
   animeTimer.start();
+  
+  theSmileSprit.startSprit();
 }
 
 
@@ -214,13 +252,18 @@ void runStr(char* inStr,unsigned int inDelay) {
     matrix.writeDisplay();
     delay(inDelay);
   }
-
 }
 
 
 void loop() {
 
 
+  idle();
+  if (!theSmileSprit.active() && animeTimer.ding()) {
+    theSmileSprit.startSprit();
+    animeTimer.stepTime();
+  }
+  /*
   bool change =  false;
   if (animeTimer.ding()) {
     int rNum = random(0, 500);
@@ -261,4 +304,5 @@ void loop() {
     fastTimer.stepTime();
   }
   if (change) matrix.writeDisplay();  // write the changes we just made to the display
+  */
 }
