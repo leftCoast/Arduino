@@ -257,13 +257,13 @@ void runStr(char* inStr,unsigned int inDelay) {
 
 void loop() {
 
-
+  /*
   idle();
   if (!theSmileSprit.active() && animeTimer.ding()) {
     theSmileSprit.startSprit();
     animeTimer.stepTime();
   }
-  /*
+  */
   bool change =  false;
   if (animeTimer.ding()) {
     int rNum = random(0, 500);
@@ -304,5 +304,5 @@ void loop() {
     fastTimer.stepTime();
   }
   if (change) matrix.writeDisplay();  // write the changes we just made to the display
-  */
+  
 }

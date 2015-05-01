@@ -12,6 +12,8 @@ class sprit : public idler {
     
     virtual void      startSprit(void);
     virtual boolean   active(void);
+    
+    boolean spritRunning;
 };
 
 
