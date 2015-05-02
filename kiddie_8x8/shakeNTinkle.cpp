@@ -1,7 +1,6 @@
 #include "shakeNTinkle.h"
 
 
-
 shakeNTinkle::shakeNTinkle(int inShakePin,int inTinklePin,float sumTime,int numData) {
   
   shakeSum = 0;
@@ -57,5 +56,6 @@ float  shakeNTinkle::getShake(void) { return shake->getAve(); }
 
 
 float  shakeNTinkle::getTinkle(void) { return tinkle->getAve(); }
+
 
 

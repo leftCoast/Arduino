@@ -8,30 +8,47 @@ class sprit : public idler {
   
   public :
                     sprit(void);
-                    ~sprit(void);
     
     virtual void      startSprit(void);
+    virtual void      stopSprit(void);
     virtual boolean   active(void);
     
     boolean spritRunning;
 };
 
 
-class sprit8x8 : public sprit {
+// For showing bitmaps stored in program memory.
+class bitmap8x8 : public sprit {
   
   public :
-                      sprit8x8(Adafruit_8x8matrix* inMatrix);
-                      ~sprit8x8(void);
+                      bitmap8x8(Adafruit_8x8matrix* inMatrix);  // Set numFrames in here.
     
     virtual void      startSprit(void);
-    virtual boolean   active(void);
     virtual void      idle(void);
-    virtual void      showFrame(const uint8_t* bitmap,unsigned long inMs);
-    virtual boolean   changeFrame(void);
+    virtual void      showFrame(void);                        // fill in this to call showBitmap()
+    virtual void      showBitmap(const uint8_t* bitmap,unsigned long Ms);
             
             Adafruit_8x8matrix* matrix;
-            boolean             starting;
             timeObj             frameTimer;
             int                 frameNum;
             int                 numFrames;
 };
+
+
+class text8x8 : public sprit {
+   
+  public :
+                      text8x8(Adafruit_8x8matrix* inMatrix,char* inStr, float inStepDelay);
+                      ~text8x8(void);
+    
+    virtual void      startSprit(void);
+    virtual void      idle(void);
+    
+            Adafruit_8x8matrix* matrix;
+            char*               theStr;
+            timeObj             stepTimer;
+            float               stepDelay;
+            int                 stepNum;
+            int                 endNum;
+};
+
