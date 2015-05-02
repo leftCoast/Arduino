@@ -41,7 +41,7 @@ void shakeNTinkle::idle(void) {
   }
   if (!digitalRead(tinklePin)) {          // have tap!
     while (!digitalRead(tinklePin));      // hold 'till clear.
-    tapSum++;                          // got a tap, add it.
+    tapSum++;                             // got a tap, add it.
   }
   if (tapTimer->ding()) {               // time to add the sums to the averagers?
     shake->addData(shakeSum);
