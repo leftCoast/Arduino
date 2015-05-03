@@ -1,3 +1,6 @@
+#ifndef sprit_h
+#define sprit_h
+
 #include <timeObj.h>
 #include <idlers.h>
 
@@ -52,3 +55,4 @@ class text8x8 : public sprit {
             int                 endNum;
 };
 
+#endif // sprit_h

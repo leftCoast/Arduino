@@ -19,7 +19,7 @@ the inputted value numData.
 
 Why in the world do we do all of this?
 The sensors only give instant binary readouts. This is good for, say.. Turning something on and off
-but that's about it. Also, you need to watching the input pin when it happens. By counting the amount 
+but that's about it. Also, you need to be watching the input pin when it happens. By counting the amount 
 of triggers over a given time period. (integrating) We can get a more analog value representing how
 much vibration is going on. By using the two different types of sensors we can get an idea of the
 type of vibration as well. We run this through the running averagers to smooth the values through
