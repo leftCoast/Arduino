@@ -11,9 +11,12 @@
 
 #define MIN_SHAKE     5      // Threshold vibration value for trigering reset of the sleep timer.
 #define MIN_TINKLE    20     // currently ignored
-#define RUN_TIME      15000  // Ms to time out to sleep mode.
-#define SUM_TIME      50     // Ms
-#define NUM_DATA      5      // data points per.
+#define WAKE_TIME     35000  // Ms before dimming the lights some
+#define RUN_TIME      45000  // Ms to time out to sleep mode.
+#define SUM_TIME      50     // Ms to gather shakes and tinkles.
+#define NUM_DATA      5      // Data points per.
+#define FULL_BRIGHT   15     // 15 is the max drightness setting.
+#define DIM_LIGHT     2      // Dim light setting
 
 #define SENS1_SWITCH_PIN 3
 #define SENS2_SWITCH_PIN 4
@@ -27,6 +30,7 @@ Adafruit_8x8matrix matrix;
 
 timeObj  animeTimer(750);
 timeObj  sleepTimer(RUN_TIME);
+timeObj  drowsyTimer(WAKE_TIME);
 
 thinkSprit background(&matrix);
 smileSprit theSmileSprit(&matrix);
@@ -38,6 +42,7 @@ text8x8    foodStr(&matrix, KID_FOOD, 75);
 sprit* currentSprit = NULL;
 
 boolean  awake;
+boolean  lightState;
 
 void setup() {
 
@@ -45,6 +50,8 @@ void setup() {
   matrix.begin(0x70);  // pass in the address
   matrix.setRotation(2);
   awake = true;
+  lightState = LOW;    // So the next call will work.
+  lowLight(false);
   startBackground();
 }
 
@@ -120,10 +127,28 @@ void showSleepTimer(void) {
 } 
 */
 
+
+void lowLight(boolean makeLow) {
+  
+  
+  if (makeLow && lightState != LOW) {
+    matrix.setBrightness(DIM_LIGHT);
+    lightState = LOW;
+  } else if (!makeLow && lightState != HIGH) {
+    matrix.setBrightness(FULL_BRIGHT);
+    lightState = HIGH;
+    drowsyTimer.start();
+  }
+}
+
+
 void loop(void) {
 
   idle();
   if (awake) {
+    if (drowsyTimer.ding()){
+      lowLight(true);
+    }
     if (sleepTimer.ding()) {
       sleep();
     } else if (runningSprit()) {
@@ -140,6 +165,7 @@ void loop(void) {
     if (!awake) {
       wakeUp();
     }
+    lowLight(false);
     sleepTimer.start();
   } 
 }

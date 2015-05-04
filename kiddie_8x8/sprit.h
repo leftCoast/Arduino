@@ -38,6 +38,8 @@ class bitmap8x8 : public sprit {
 };
 
 
+// For scrolling text. Use a leading space so it'll
+// scroll onto the screen.
 class text8x8 : public sprit {
    
   public :
