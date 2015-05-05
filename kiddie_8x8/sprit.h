@@ -6,6 +6,29 @@
 
 #include <Adafruit_LEDBackpack.h>
 
+static const uint8_t PROGMEM
+off_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+on_bmp[] =
+{ B11111111,
+  B11111111,
+  B11111111,
+  B11111111,
+  B11111111,
+  B11111111,
+  B11111111,
+  B11111111
+};
+
+
 //Base class just adds startSprit() & active() to idler.
 class sprit : public idler {
   
@@ -29,7 +52,7 @@ class bitmap8x8 : public sprit {
     virtual void      startSprit(void);
     virtual void      idle(void);
     virtual void      showFrame(void);                        // fill in this to call showBitmap()
-    virtual void      showBitmap(const uint8_t* bitmap,unsigned long Ms);
+    virtual void      showBitmap(const uint8_t* bitmap,unsigned long Ms,boolean inverse=false);
             
             Adafruit_8x8matrix* matrix;
             timeObj             frameTimer;

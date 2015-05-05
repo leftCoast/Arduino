@@ -51,10 +51,15 @@ void bitmap8x8::idle(void) {
 }
 
 
-void bitmap8x8::showBitmap(const uint8_t* bitmap, unsigned long Ms) {
+void bitmap8x8::showBitmap(const uint8_t* bitmap, unsigned long Ms,boolean inverse) {
 
-  matrix->clear();
-  matrix->drawBitmap(0, 0, bitmap, 8, 8, LED_ON);
+  if (!inverse) {
+    matrix->clear();
+    matrix->drawBitmap(0, 0, bitmap, 8, 8, LED_ON);
+  } else {
+    matrix->drawBitmap(0, 0, on_bmp, 8, 8, LED_ON);  // Clear by setting all on.
+    matrix->drawBitmap(0, 0, bitmap, 8, 8, LED_OFF); // Draw by turning LEDs off.
+  }
   matrix->writeDisplay();
   frameTimer.setTime(Ms);
   frameTimer.start();

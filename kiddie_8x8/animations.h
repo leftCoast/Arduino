@@ -33,6 +33,24 @@ class heartSprit : public bitmap8x8 {
 };
 
 
+class starSprit : public bitmap8x8 {
+
+  public :
+    starSprit(Adafruit_8x8matrix* inMatrix);
+
+    virtual void  showFrame(void);
+};
+
+
+class twelveSprit : public bitmap8x8 {
+
+  public :
+    twelveSprit(Adafruit_8x8matrix* inMatrix);
+
+    virtual void  showFrame(void);
+};
+
+
 class thinkSprit : public sprit {
 
   public :

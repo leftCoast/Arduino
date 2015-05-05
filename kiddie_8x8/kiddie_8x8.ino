@@ -32,10 +32,13 @@ timeObj  animeTimer(750);
 timeObj  sleepTimer(RUN_TIME);
 timeObj  drowsyTimer(WAKE_TIME);
 
-thinkSprit background(&matrix);
-smileSprit theSmileSprit(&matrix);
-eyesSprit  theEyesSprit(&matrix);
-heartSprit theHeartSprit(&matrix);
+thinkSprit  background(&matrix);
+smileSprit  theSmileSprit(&matrix);
+eyesSprit   theEyesSprit(&matrix);
+heartSprit  theHeartSprit(&matrix);
+starSprit   theStarSprit(&matrix);
+twelveSprit theTwelveSprit(&matrix);
+
 text8x8    nameStr(&matrix, KID_NAME, 75);
 text8x8    foodStr(&matrix, KID_FOOD, 75);
 
@@ -91,6 +94,12 @@ boolean trySprit() {
      startSprit(&theHeartSprit);
   } else if (rNum == 30) {
     startSprit(&theEyesSprit);
+  }
+   else if (rNum == 20) {
+    startSprit(&theStarSprit);
+  }
+  else if (rNum == 60) {
+    startSprit(&theTwelveSprit);
   }
   return runningSprit();
 }
