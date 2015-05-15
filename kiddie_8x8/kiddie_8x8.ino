@@ -94,8 +94,7 @@ boolean trySprit() {
      startSprit(&theHeartSprit);
   } else if (rNum == 30) {
     startSprit(&theEyesSprit);
-  }
-   else if (rNum == 20) {
+  } else if (rNum == 20) {
     startSprit(&theStarSprit);
   }
   else if (rNum == 60) {
