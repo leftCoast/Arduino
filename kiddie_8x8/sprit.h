@@ -39,6 +39,8 @@ class sprit : public idler {
     virtual void      stopSprit(void);
     virtual boolean   active(void);
     
+  protected :
+  
     boolean spritRunning;
 };
 
@@ -53,7 +55,8 @@ class bitmap8x8 : public sprit {
     virtual void      idle(void);
     virtual void      showFrame(void);                        // fill in this to call showBitmap()
     virtual void      showBitmap(const uint8_t* bitmap,unsigned long Ms,boolean inverse=false);
-            
+      
+  protected :       
             Adafruit_8x8matrix* matrix;
             timeObj             frameTimer;
             int                 frameNum;
@@ -71,7 +74,9 @@ class text8x8 : public sprit {
     
     virtual void      startSprit(void);
     virtual void      idle(void);
-    
+  
+  protected :
+  
             Adafruit_8x8matrix* matrix;
             char*               theStr;
             timeObj             stepTimer;

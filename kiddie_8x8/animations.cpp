@@ -327,7 +327,7 @@ void starSprit::showFrame(void) {
   } else if (frameNum == 44) {
     showBitmap(starE3_bmp, 50);
   } else if (frameNum == 45) {
-    showBitmap(off_bmp, 100);
+    showBitmap(off_bmp, 200);
   } else {
     switch (frameNum % 5) {
       case 0 :  showBitmap(star1_bmp, 50);  break;
