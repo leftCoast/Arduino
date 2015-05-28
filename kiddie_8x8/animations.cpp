@@ -229,8 +229,426 @@ shockFace_bmp[] =
   B00100100,
   B00011000,
   B00000000
-};
+},
 
+scott1_bmp[] =
+{ B10000001,
+  B00000000,
+  B00000000,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B10000001
+},
+
+scott2_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott3_bmp[] =
+{ B10000001,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B10000001
+},
+
+scott4_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott5_bmp[] =
+{ B10000001,
+  B00000000,
+  B00000000,
+  B00011000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B10000001
+},
+
+scott6_bmp[] =
+{ B10000001,
+  B01000010,
+  B00000000,
+  B00011000,
+  B00001000,
+  B00000000,
+  B01000010,
+  B10000001
+},
+
+scott7_bmp[] =
+{ B10000001,
+  B01000010,
+  B00100100,
+  B00011000,
+  B00011000,
+  B00100100,
+  B01000010,
+  B10000001
+},
+
+scott8_bmp[] =
+{ B10000001,
+  B01000010,
+  B00111100,
+  B00100100,
+  B00100100,
+  B00111100,
+  B01000010,
+  B10000001
+},
+
+scott9_bmp[] =
+{ B10000001,
+  B01111110,
+  B01000010,
+  B01000010,
+  B01000010,
+  B01000010,
+  B01111110,
+  B10000001
+},
+
+scott10_bmp[] =
+{ B11111111,
+  B10000001,
+  B10000001,
+  B10011001,
+  B10011001,
+  B10000001,
+  B10000001,
+  B11111111
+},
+
+scott11_bmp[] =
+{ B00000000,
+  B00000000,
+  B00011000,
+  B00100100,
+  B00100100,
+  B00011000,
+  B00000000,
+  B00000000
+},
+
+scott12_bmp[] =
+{ B00000000,
+  B00100100,
+  B01000010,
+  B00000000,
+  B00000000,
+  B01000010,
+  B00100100,
+  B00000000
+},
+
+scott13_bmp[] =
+{ B01000010,
+  B10000001,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B10000001,
+  B01000010
+},
+
+scott14_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00011000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott15_bmp[] =
+{ B00000000,
+  B00000000,
+  B00001000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott16_bmp[] =
+{ B00000000,
+  B00001000,
+  B00001000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott17_bmp[] =
+{ B00010000,
+  B00001000,
+  B00001000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott18_bmp[] =
+{ B00100000,
+  B00010000,
+  B00010000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott19_bmp[] =
+{ B01000000,
+  B00100000,
+  B00010000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott20_bmp[] =
+{ B10000000,
+  B01000000,
+  B00100000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott21_bmp[] =
+{ B00000000,
+  B11000000,
+  B00100000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott22_bmp[] =
+{ B00000000,
+  B00000000,
+  B11100000,
+  B00010000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott23_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B01110000,
+  B10000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott24_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B01110000,
+  B10000000,
+  B00000000,
+  B00000000
+},
+
+scott25_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00110000,
+  B01000000,
+  B10000000,
+  B10000000
+},
+
+scott26_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B00100000,
+  B01000000,
+  B01000000
+},
+
+scott27_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B00100000,
+  B00100000,
+  B00100000
+},
+
+scott28_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00010000,
+  B00010000,
+  B00010000,
+  B00001000
+},
+
+scott29_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00011000,
+  B00001000,
+  B00001000,
+  B00000100
+},
+
+scott30_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00001000,
+  B00001000,
+  B00000100,
+  B00000010
+},
+
+scott31_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00011000,
+  B00000100,
+  B00000011,
+  B00000000
+},
+
+scott32_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00001000,
+  B00000111,
+  B00000000,
+  B00000000
+},
+
+
+scott33_bmp[] =
+{ B00000000,
+  B00000000,
+  B00000000,
+  B00000001,
+  B00001110,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott34_bmp[] =
+{ B00000000,
+  B00000011,
+  B00001100,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott35_bmp[] =
+{ B00000001,
+  B00000010,
+  B00000100,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott36_bmp[] =
+{ B00000010,
+  B00000010,
+  B00000100,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott37_bmp[] =
+{ B00001000,
+  B00000100,
+  B00000100,
+  B00001000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+},
+
+scott38_bmp[] =
+{ B00010000,
+  B00001000,
+  B00001000,
+  B00011000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+};
 // class smileSprit
 
 smileSprit::smileSprit(Adafruit_8x8matrix* inMatrix)
@@ -362,6 +780,63 @@ void twelveSprit::showFrame(void) {
     case 9 : showBitmap(off_bmp, 100);         break;
   }
 }
+
+
+// class scottSprit
+
+#define SCOTT_FMS  100
+
+scottSprit::scottSprit(Adafruit_8x8matrix* inMatrix)
+  : bitmap8x8(inMatrix)
+{
+  numFrames = 38;
+}
+
+
+void scottSprit::showFrame(void) {
+
+  switch (frameNum) {
+    case 0 : showBitmap(scott1_bmp, SCOTT_FMS);  break;
+    case 1 : showBitmap(scott2_bmp, SCOTT_FMS);  break;
+    case 3 : showBitmap(scott4_bmp, SCOTT_FMS);  break;
+    case 4 : showBitmap(scott5_bmp, SCOTT_FMS);  break;
+    case 5 : showBitmap(scott6_bmp, SCOTT_FMS);  break;
+    case 6 : showBitmap(scott7_bmp, SCOTT_FMS);  break;
+    case 7 : showBitmap(scott8_bmp, SCOTT_FMS);  break;
+    case 8 : showBitmap(scott9_bmp, SCOTT_FMS);  break;
+    case 9 : showBitmap(scott10_bmp, SCOTT_FMS);  break;
+    case 10 : showBitmap(scott11_bmp, SCOTT_FMS);  break;
+    case 11 : showBitmap(scott12_bmp, SCOTT_FMS);  break;
+    case 12 : showBitmap(scott13_bmp, SCOTT_FMS);  break;
+    case 13 : showBitmap(scott14_bmp, SCOTT_FMS);  break;
+    case 14 : showBitmap(scott15_bmp, SCOTT_FMS);  break;
+    case 15 : showBitmap(scott16_bmp, SCOTT_FMS);  break;
+    case 16 : showBitmap(scott17_bmp, SCOTT_FMS);  break;
+    case 17 : showBitmap(scott18_bmp, SCOTT_FMS);  break;
+    case 18 : showBitmap(scott19_bmp, SCOTT_FMS);  break;
+    case 19 : showBitmap(scott20_bmp, SCOTT_FMS);  break;
+    case 20 : showBitmap(scott21_bmp, SCOTT_FMS);  break;
+    case 21 : showBitmap(scott22_bmp, SCOTT_FMS);  break;
+    case 22 : showBitmap(scott23_bmp, SCOTT_FMS);  break;
+    case 23 : showBitmap(scott24_bmp, SCOTT_FMS);  break;
+    case 24 : showBitmap(scott25_bmp, SCOTT_FMS);  break;
+    case 25 : showBitmap(scott26_bmp, SCOTT_FMS);  break;
+    case 26 : showBitmap(scott27_bmp, SCOTT_FMS);  break;
+    case 27 : showBitmap(scott28_bmp, SCOTT_FMS);  break;
+    case 28 : showBitmap(scott29_bmp, SCOTT_FMS);  break;
+    case 29 : showBitmap(scott30_bmp, SCOTT_FMS);  break;
+    case 30 : showBitmap(scott31_bmp, SCOTT_FMS);  break;
+    case 31 : showBitmap(scott32_bmp, SCOTT_FMS);  break;
+    case 32 : showBitmap(scott33_bmp, SCOTT_FMS);  break;
+    case 33 : showBitmap(scott34_bmp, SCOTT_FMS);  break;
+    case 34 : showBitmap(scott35_bmp, SCOTT_FMS);  break;
+    case 35 : showBitmap(scott36_bmp, SCOTT_FMS);  break;
+    case 36 : showBitmap(scott37_bmp, SCOTT_FMS);  break;
+    case 37 : showBitmap(scott38_bmp, SCOTT_FMS);  break;
+  }
+}
+
+
 
 
 // class thinkSprit

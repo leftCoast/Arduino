@@ -25,8 +25,8 @@
 
 shakeNTinkle sensors(SENS1_SWITCH_PIN, SENS2_SWITCH_PIN,SUM_TIME,NUM_DATA);
 
-#define KID_NAME " Ella"
-#define KID_FOOD " Chicken & Noodles!!"
+#define KID_NAME " Scott"
+#define KID_FOOD " Pasta!!"
 
 Adafruit_8x8matrix matrix;
 
@@ -40,6 +40,7 @@ eyesSprit   theEyesSprit(&matrix);
 heartSprit  theHeartSprit(&matrix);
 starSprit   theStarSprit(&matrix);
 twelveSprit theTwelveSprit(&matrix);
+scottSprit theScottSprit(&matrix);
 
 text8x8    nameStr(&matrix, KID_NAME, 75);
 text8x8    foodStr(&matrix, KID_FOOD, 75);
@@ -118,7 +119,7 @@ boolean trySprit() {
 
 void chooseAnimation(void) {
   
-  int rNum = random(0, 7);
+  int rNum = random(0, 8);
   switch (rNum) {
     case 0 :  startSprit(&nameStr); break;
     case 1 :  startSprit(&foodStr); break;
@@ -127,6 +128,7 @@ void chooseAnimation(void) {
     case 4 :  startSprit(&theEyesSprit); break;
     case 5 :  startSprit(&theStarSprit); break;
     case 6 :  startSprit(&theTwelveSprit); break;
+    case 7 :  startSprit(&theScottSprit); break;
   } 
 }
 

@@ -51,6 +51,15 @@ class twelveSprit : public bitmap8x8 {
 };
 
 
+class scottSprit : public bitmap8x8 {
+
+  public :
+    scottSprit(Adafruit_8x8matrix* inMatrix);
+
+    virtual void  showFrame(void);
+};
+
+
 class thinkSprit : public sprit {
 
   public :
