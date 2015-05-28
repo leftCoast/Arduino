@@ -210,27 +210,6 @@ starE3_bmp[] =
   B11000000
 },
 
-restFace_bmp[] =
-{ B00000000,
-  B00000000,
-  B11100111,
-  B00000000,
-  B00000000,
-  B00111100,
-  B00000000,
-  B00000000
-},
-shockFace_bmp[] =
-{ B00000000,
-  B01000010,
-  B11100111,
-  B01000010,
-  B00011000,
-  B00100100,
-  B00011000,
-  B00000000
-},
-
 scott1_bmp[] =
 { B10000001,
   B00000000,
@@ -648,7 +627,63 @@ scott38_bmp[] =
   B00000000,
   B00000000,
   B00000000
+},
+
+restFace1_bmp[] =
+{ B00000000,
+  B00000000,
+  B11100111,
+  B10000100,
+  B00000000,
+  B00111100,
+  B00000000,
+  B00000000
+},
+
+restFace2_bmp[] =
+{ B00000000,
+  B00000000,
+  B11100111,
+  B01000010,
+  B00000000,
+  B00111100,
+  B00000000,
+  B00000000
+},
+
+restFace3_bmp[] =
+{ B00000000,
+  B00000000,
+  B11100111,
+  B00100001,
+  B00000000,
+  B00111100,
+  B00000000,
+  B00000000
+},
+
+shockFace1_bmp[] =
+{ B00000000,
+  B01000010,
+  B11100111,
+  B01000010,
+  B00011000,
+  B00100100,
+  B00011000,
+  B00000000
+},
+
+shockFace2_bmp[] =
+{ B00000000,
+  B01000010,
+  B10100101,
+  B01000010,
+  B00000000,
+  B00111100,
+  B00000000,
+  B00000000
 };
+
 // class smileSprit
 
 smileSprit::smileSprit(Adafruit_8x8matrix* inMatrix)
@@ -778,6 +813,42 @@ void twelveSprit::showFrame(void) {
     case 5 : showBitmap(twelve_bmp, 50,true);  break;
     case 6 : showBitmap(twelve_bmp, 50);       break;
     case 9 : showBitmap(off_bmp, 100);         break;
+  }
+}
+
+
+// class restFaceSprit
+
+#define REST_FMS  700
+
+restFaceSprit::restFaceSprit(Adafruit_8x8matrix* inMatrix)
+  : bitmap8x8(inMatrix)
+{ numFrames = 7; }
+
+
+void restFaceSprit::showFrame(void) {  
+  
+  switch (frameNum % 4) {   
+    case 0 : showBitmap(restFace1_bmp, REST_FMS); break;
+    case 1 : showBitmap(restFace2_bmp, REST_FMS); break;
+    case 2 : showBitmap(restFace3_bmp, REST_FMS); break;
+    case 3 : showBitmap(restFace2_bmp, REST_FMS); break;
+  }
+}
+
+// class shockFaceSprit
+#define SHOCK_FMS  75
+
+shockFaceSprit::shockFaceSprit(Adafruit_8x8matrix* inMatrix)
+  : bitmap8x8(inMatrix)
+{ numFrames = 6; }
+
+
+void shockFaceSprit::showFrame(void) {  
+  
+  switch (frameNum % 2) {   
+    case 0 : showBitmap(shockFace1_bmp, SHOCK_FMS); break; 
+    case 1 : showBitmap(shockFace2_bmp, SHOCK_FMS); break;
   }
 }
 

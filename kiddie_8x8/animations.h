@@ -51,6 +51,24 @@ class twelveSprit : public bitmap8x8 {
 };
 
 
+class restFaceSprit : public bitmap8x8 {
+
+  public :
+    restFaceSprit(Adafruit_8x8matrix* inMatrix);
+
+    virtual void  showFrame(void);
+};
+
+
+class shockFaceSprit : public bitmap8x8 {
+
+  public :
+    shockFaceSprit(Adafruit_8x8matrix* inMatrix);
+
+    virtual void  showFrame(void);
+};
+
+
 class scottSprit : public bitmap8x8 {
 
   public :

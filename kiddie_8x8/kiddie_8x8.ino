@@ -34,13 +34,15 @@ timeObj  animeTimer(ANIME_TIME);
 timeObj  sleepTimer(RUN_TIME);
 timeObj  drowsyTimer(WAKE_TIME);
 
-thinkSprit  background(&matrix);
-smileSprit  theSmileSprit(&matrix);
-eyesSprit   theEyesSprit(&matrix);
-heartSprit  theHeartSprit(&matrix);
-starSprit   theStarSprit(&matrix);
-twelveSprit theTwelveSprit(&matrix);
-scottSprit theScottSprit(&matrix);
+thinkSprit     background(&matrix);
+smileSprit     theSmileSprit(&matrix);
+eyesSprit      theEyesSprit(&matrix);
+heartSprit     theHeartSprit(&matrix);
+starSprit      theStarSprit(&matrix);
+twelveSprit    theTwelveSprit(&matrix);
+scottSprit     theScottSprit(&matrix);
+restFaceSprit  theRestFaceSprit(&matrix);
+shockFaceSprit theShockFaceSprit(&matrix);
 
 text8x8    nameStr(&matrix, KID_NAME, 75);
 text8x8    foodStr(&matrix, KID_FOOD, 75);
@@ -119,7 +121,7 @@ boolean trySprit() {
 
 void chooseAnimation(void) {
   
-  int rNum = random(0, 8);
+  int rNum = random(0, 9);
   switch (rNum) {
     case 0 :  startSprit(&nameStr); break;
     case 1 :  startSprit(&foodStr); break;
@@ -128,7 +130,8 @@ void chooseAnimation(void) {
     case 4 :  startSprit(&theEyesSprit); break;
     case 5 :  startSprit(&theStarSprit); break;
     case 6 :  startSprit(&theTwelveSprit); break;
-    case 7 :  startSprit(&theScottSprit); break;
+    case 7 :  startSprit(&theRestFaceSprit); break;
+    case 8 :  startSprit(&theScottSprit); break;
   } 
 }
 
@@ -161,6 +164,10 @@ void loop(void) {
     }
     lowLight(false);                    // Make the lights bright!
     sleepTimer.start();                 // Restart bed time timer.
+    if (currentSprit == &theRestFaceSprit) {
+      currentSprit->stopSprit();
+      startSprit(&theShockFaceSprit);
+    }
   } 
 }
 
