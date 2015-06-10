@@ -2,35 +2,13 @@
 #define screenObj_h
 
 #include <Adafruit_GFX.h>       // Core graphics library
-#include <Adafruit_TFTLCD.h>    // Hardware-specific library
-#include <TouchScreen.h>
+#include <SPI.h>       // this is needed for display
+#include <Adafruit_ILI9341.h>
+#include <Wire.h>      // this is needed for FT6206
+#include <Adafruit_FT6206.h>
 
-#include "mapper.h"
-#include "colorObj.h"
-
-#if not defined USE_ADAFRUIT_SHIELD_PINOUT 
-#error "For use with the shield, make sure to #define USE_ADAFRUIT_SHIELD_PINOUT in the TFTLCD.h library file"
-#endif
-
-// These are the pins for the shield!
-#define YP A1  // must be an analog pin, use "An" notation!
-#define XM A2  // must be an analog pin, use "An" notation!
-#define YM 7   // can be a digital pin
-#define XP 6   // can be a digital pin
-
-// For better pressure precision, we need to know the resistance
-// between X+ and X- Use any multimeter to read it
-// For the one we're using, its 300 ohms across the X plate
-
-#define OHMS   300
-#define LCD_CS A3
-#define LCD_CD A2
-#define LCD_WR A1
-#define LCD_RD A0 
-
-// Limits for detecting touches
-#define MINPRESSURE 10
-#define MAXPRESSURE 1000
+#include <mapper.h>
+#include <colorObj.h>
 
 // Rotation
 #define PORTRAIT      0  // USB up
@@ -39,10 +17,22 @@
 #define INV_LANDSCAPE 3  // USB right
 
 
+// The FT6206 uses hardware I2C (SCL/SDA)
+//Adafruit_FT6206 ctp = Adafruit_FT6206();
+
+// The display also uses hardware SPI, plus #9 & #10
+#define TFT_CS 10
+#define TFT_DC 9
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+
+
+
+
+
 // ****** screenObj ******
 
 class screenObj : 
-public Adafruit_TFTLCD {
+public Adafruit_ILI9341 {
 
 public:
   screenObj(void);
@@ -60,9 +50,9 @@ public:
   
 
 private :
-  mapper* xMapper;
-  mapper* yMapper;
-  TouchScreen* ts;
+  mapper*          xMapper;
+  mapper*          yMapper;
+  Adafruit_FT6206* ts;
 };
 
 extern screenObj* screen;

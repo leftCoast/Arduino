@@ -1,8 +1,5 @@
 #include <colorObj.h>
 #include <SPI.h>
-#include <TouchScreen.h>
-#include <Adafruit_TFTLCD.h>
-#include <pin_magic.h>
 
 
 #include <SD.h>
@@ -22,7 +19,7 @@
 #include <mapper.h>
 #include <multiMap.h>
 #include <PulseOut.h>
-#include <servo.h>
+//#include <servo.h>
 #include <timeObj.h>
 #include <runningAvg.h>
 

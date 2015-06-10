@@ -23,9 +23,9 @@ boolean initScreen(int inRotation) {
 
 screenObj::screenObj(void) 
 :
-Adafruit_TFTLCD(LCD_CS, LCD_CD, LCD_WR, LCD_RD, 0)
+Adafruit_ILI9341(TFT_CS, TFT_DC)
 {
-  ts = new TouchScreen(XP, YP, XM, YM, OHMS);
+    ts = Adafruit_FT6206();
   xMapper  = new mapper(TS_MINX, TS_MAXX, width(), 0);
   yMapper  = new mapper(TS_MINY, TS_MAXY, height(), 0);
 }
