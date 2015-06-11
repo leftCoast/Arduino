@@ -1,4 +1,5 @@
 #include "bmpObj.h" 
+#include <colorObj.h>
 
 // Needed to draw bitmaps from SD card to screen. For lack of a better idea
 // I just wrapped up all the code in here. Its a bit of a patchwok now.
@@ -89,7 +90,7 @@ uint32_t read32(File f) {
 
 
 // Constructor for bmpObj. Takes a filename & point to draw it.
-bmpObj::bmpObj(char* inFileName, TSPoint inDest) {
+bmpObj::bmpObj(char* inFileName, TS_Point inDest) {
 
   fileName = (char*)malloc(strlen(inFileName+1)); // Grab just enoug RAM to store the string.
   strcpy(fileName,inFileName);                    // Save the filename.
@@ -105,7 +106,7 @@ bmpObj::~bmpObj(void) {
 
 
 // Move the point used for locating the drawing.
-void bmpObj::setDest(TSPoint inDest) {
+void bmpObj::setDest(TS_Point inDest) {
   dest = inDest; 
 }
 
@@ -129,7 +130,7 @@ void bmpObj::getInfo(void) {
         if (imageDepth==24||imageDepth==32) {   // We can do 24 or 32 bits..
           pixBytes = imageDepth/8;              // Bytes / pixel
           if (!read32(source)) {                // And no compression!
-            haveInfo = true;                    // Made it thi far? We can do this!
+            haveInfo = true;                    // Made it this far? We can do this!
           }
         }
       }
@@ -141,13 +142,15 @@ void bmpObj::getInfo(void) {
 // Called by plotBmp(), this does one line.  
 void bmpObj::plotLine(int y) {
 
+  colorObj  thePixal;
   uint16_t  color16;
   uint8_t   buf[pixBytes];
   int       x;
   
   for (x=dest.x; x<dest.x+imageWidth; x++) {            // Ok, x does dest to max image width.
     readBuff(source,buf,pixBytes);                      // Grab a pixel.
-    color16 = screen->Color565(buf[2],buf[1],buf[0]);   // Convert it to 565 color.
+      thePixal.setColor(buf[2],buf[1],buf[0]);          // Load colorObj.
+      color16 = thePixal.getColor16();                  // Convert it to 565 color.
     screen->drawPixel(x,y,color16);                     // Spat it out to the screen.
   }
 }

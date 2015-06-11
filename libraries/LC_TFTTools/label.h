@@ -3,7 +3,7 @@
 
 #include "drawObj.h"
 
-#define DEF_TEXT_SIZE  1  // If not set what size do we want?
+#define DEF_TEXT_SIZE  1  // If not set, what size do we want?
 #define CHAR_WIDTH 6      // Actual size is 6 * text size.
 #define CHAR_HEIGHT 8     // Actual size is 8 * text size.
 #define DEF_PRECISION 2   // Number of digits past decimal point.
@@ -22,8 +22,8 @@ public :
   label();
   label(char* inText);
   label(char* inText, word inSize);
-  label(TSPoint inLoc, int inWidth,int inHeight);
-  label(TSPoint inLoc, int inWidth,int inHeight, char* inText);
+  label(TS_Point inLoc, int inWidth,int inHeight);
+  label(TS_Point inLoc, int inWidth,int inHeight, char* inText);
   ~label();
   
   void setTextSize(word size);  // Multiples of 8 pixals.

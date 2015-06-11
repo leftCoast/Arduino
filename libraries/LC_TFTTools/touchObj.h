@@ -16,17 +16,17 @@ class touchObj : public drawObj, public linkListObj {
   
   public:
     touchObj(void);
-    touchObj(TSPoint inLoc, word inWidth,word inHeight);
+    touchObj(TS_Point inLoc, word inWidth,word inHeight);
     ~touchObj(void);
   
     virtual void    setState(byte inState);
-    virtual boolean checkActiveTouch(TSPoint where);
-    virtual boolean checkInactiveTouch(TSPoint where);
-    virtual boolean checkTouchedTouch(TSPoint where);
-    virtual boolean checkDraggingTouch(TSPoint where);
-    virtual boolean checkTouch(TSPoint where);
+    virtual boolean checkActiveTouch(TS_Point where);
+    virtual boolean checkInactiveTouch(TS_Point where);
+    virtual boolean checkTouchedTouch(TS_Point where);
+    virtual boolean checkDraggingTouch(TS_Point where);
+    virtual boolean checkTouch(TS_Point where);
     virtual void    drawSelf(void);
-    virtual void    doAction(TSPoint where);      // Override me for action!
+    virtual void    doAction(TS_Point where);      // Override me for action!
 
   protected:
             byte    state;

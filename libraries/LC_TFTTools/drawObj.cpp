@@ -19,7 +19,7 @@
  }
  
  
- rect::rect(TSPoint location, word inWidth,word inHeight) {
+ rect::rect(TS_Point location, word inWidth,word inHeight) {
    
    setLocation(location);
    setSize(inWidth,inHeight);
@@ -38,7 +38,7 @@ void  rect::setLocation(word x, word y) {
 }
 
 
-void  rect::setLocation(TSPoint inLoc) {
+void  rect::setLocation(TS_Point inLoc) {
 
   location.x = inLoc.x;
   location.y = inLoc.y;
@@ -64,7 +64,7 @@ word rect::maxY(void)  { return(location.y + height); }
 word rect::minX(void) { return(location.x); }
 word rect::minY(void)  { return(location.y); }
 
-bool rect::inRect(TSPoint inPt) {
+bool rect::inRect(TS_Point inPt) {
 
   return(
   inPt.x >= minX() &&
@@ -83,7 +83,7 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(TSPoint inLoc, word inWidth,word inHeight) : rect(inLoc,inWidth,inHeight) {
+drawObj::drawObj(TS_Point inLoc, word inWidth,word inHeight) : rect(inLoc,inWidth,inHeight) {
 
   needRefresh = true;
 }

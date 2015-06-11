@@ -3,10 +3,6 @@
 screenObj* screen;  // Now we have a global screen so we don't have
                     // to pass the silly thing around all the time.
 
-#define TS_MINX 150
-#define TS_MINY 120
-#define TS_MAXX 920
-#define TS_MAXY 940
 
 // ****** screenObj ******
 
@@ -21,40 +17,21 @@ boolean initScreen(int inRotation) {
 }
 
 
-screenObj::screenObj(void) 
-:
-Adafruit_ILI9341(TFT_CS, TFT_DC)
-{
-    ts = Adafruit_FT6206();
-  xMapper  = new mapper(TS_MINX, TS_MAXX, width(), 0);
-  yMapper  = new mapper(TS_MINY, TS_MAXY, height(), 0);
+screenObj::screenObj(void) :
+    Adafruit_ILI9341(TFT_CS, TFT_DC) {
+        
+    ts = new Adafruit_FT6206();
 }
 
 
 boolean screenObj::init(int inRotation) {
 
-  uint16_t identifier;
-
-  pinMode(XM, OUTPUT);
-  pinMode(YP, OUTPUT);
-  reset();
-  identifier = readID();
-  if (identifier == 0x9325 || identifier == 0x9328) {
-    begin(identifier); 
+    begin();
+    if (! ts->begin(40)) {  // pass in 'sensitivity' coefficient
+        return false;
+    }
     setRotation(inRotation);
     return true;
-  } 
-  else
-    return false;
-}
-
-
-void screenObj::fillRectGradient(word inX,word inY,word inXSize,word inYSize,word startColor16,word endColor16,boolean vertical) {
-
-  colorObj startColor(startColor16);
-  colorObj endColor(endColor16);
-
-  fillRectGradient(inX,inY,inXSize,inYSize,&startColor,&endColor,vertical);
 }
 
 
@@ -76,11 +53,6 @@ void screenObj::fillRectGradient(word inX,word inY,word inXSize,word inYSize,col
   }
 }
 
-void screenObj::fillScreenGradient(word startColor16,word endColor16,boolean vertical) {
-
-  fillRectGradient(0,0,_width,_height,startColor16,endColor16,vertical);
-}
-
 
 void screenObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,boolean vertical) {
 
@@ -88,7 +60,8 @@ void screenObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,boole
 }
 
 
-void screenObj::drawPixelInvert(word x,word y) {
+/*
+ void screenObj::drawPixelInvert(word x,word y) {
 
   word color;
 
@@ -98,7 +71,7 @@ void screenObj::drawPixelInvert(word x,word y) {
   drawPixel(x,y,color);
 }
 
-void screenObj::frameRectInvert(TSPoint loc, word width,word height) {
+void screenObj::frameRectInvert(TS_Point loc, word width,word height) {
 
   word traceX;
   word traceY;
@@ -121,17 +94,13 @@ void screenObj::frameRectInvert(TSPoint loc, word width,word height) {
     traceY++;
   }
 }
+*/
 
+TS_Point screenObj::getPoint(void) {
 
-TSPoint screenObj::getPoint(void) {
-
-  TSPoint pt;
+  TS_Point pt;
 
   pt = ts->getPoint();
-  pinMode(XM, OUTPUT);
-  pinMode(YP, OUTPUT);
-  pt.x = xMapper->Map(pt.x);
-  pt.y = yMapper->Map(pt.y);
   switch (getRotation()) {
   case 0:
     break;
@@ -154,6 +123,14 @@ TSPoint screenObj::getPoint(void) {
 }
 
 
-boolean screenObj::pressed(TSPoint inPt) { return(inPt.z > MINPRESSURE && inPt.z < MAXPRESSURE); }
+boolean screenObj::touched(TS_Point inPt) {
+    
+    if (ts->touched()) {
+        inPt = getPoint();
+        return true;
+    } else {
+        return false;
+    }
+}
 
 

@@ -14,6 +14,8 @@
   MIT license, all text above must be included in any redistribution
  ****************************************************/
 
+#ifndef Adafruit_FT6206_h
+#define Adafruit_FT6206_h
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -75,4 +77,7 @@ class Adafruit_FT6206 {
   uint16_t touchX[2], touchY[2], touchID[2];
 
 };
+
+
+#endif
 

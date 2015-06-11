@@ -10,7 +10,7 @@ touchList theTouchList;
 touchObj::touchObj() { state = active; }
 
 
-touchObj::touchObj(TSPoint inLoc, word inWidth,word inHeight) :
+touchObj::touchObj(TS_Point inLoc, word inWidth,word inHeight) :
 drawObj(inLoc,inWidth,inHeight) {
 
   state = active;
@@ -51,9 +51,9 @@ void touchObj::setState(byte inState) {
 }
 
 
-boolean touchObj::checkActiveTouch(TSPoint where) {
+boolean touchObj::checkActiveTouch(TS_Point where) {
 
-  if (screen->pressed(where)) {    // Its a touch
+  if (screen->touched(where)) {    // Its a touch
     if (inRect(where)) {           // and its in us!
       setState(touched);           // we are so touched!
       return(true);                // we delt with it!
@@ -63,12 +63,12 @@ boolean touchObj::checkActiveTouch(TSPoint where) {
 }
 
 
-boolean touchObj::checkInactiveTouch(TSPoint where) { return(false); }
+boolean touchObj::checkInactiveTouch(TS_Point where) { return(false); }
 
 
-boolean touchObj::checkTouchedTouch(TSPoint where) {
+boolean touchObj::checkTouchedTouch(TS_Point where) {
 
-  if (!screen->pressed(where)) {    // It a lift!
+  if (!screen->touched(where)) {    // It a lift!
     if (inRect(where)) {            // And its in us!
       doAction(where);
       setState(active);
@@ -91,13 +91,13 @@ boolean touchObj::checkTouchedTouch(TSPoint where) {
 } 
 
 
-boolean touchObj::checkDraggingTouch(TSPoint where) {
+boolean touchObj::checkDraggingTouch(TS_Point where) {
 
   // Lets write this code later..
 }
 
 
-boolean touchObj::checkTouch(TSPoint where) {
+boolean touchObj::checkTouch(TS_Point where) {
 
   switch(state) {
   case active :  return (checkActiveTouch(where)); break;
@@ -108,7 +108,7 @@ boolean touchObj::checkTouch(TSPoint where) {
 }
 
 
-void touchObj::doAction(TSPoint where) {  }
+void touchObj::doAction(TS_Point where) {  }
 
 
 
@@ -140,13 +140,13 @@ void touchList::deselect(void) {
 
 void touchList::idle(void) {
 
-  TSPoint      where;
+  TS_Point   where;
   boolean    done;
 
-  where = screen->getPoint();
+  //where = screen->getPoint();
   //screen->drawPixel(where.x, where.y, RED);
   if (selected == NULL) {                                            // If no one is selected.
-    if (screen->pressed(where)) {                                    // And the thing is pressed.
+    if (screen->touched(where)) {                                    // And the thing is pressed.
       selected = (touchObj*) theList;                                // Set up to search.
       done = false;                                                  // Not done yet..
       while(selected!=NULL&&!done) {                                 // See if anyone wants this
