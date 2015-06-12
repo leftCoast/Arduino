@@ -17,6 +17,7 @@ class touchObj : public drawObj, public linkListObj {
   public:
     touchObj(void);
     touchObj(TS_Point inLoc, word inWidth,word inHeight);
+    touchObj(word locX, word locY, word inWidth,word inHeight);
     ~touchObj(void);
   
     virtual void    setState(byte inState);

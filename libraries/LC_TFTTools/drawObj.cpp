@@ -88,6 +88,10 @@ drawObj::drawObj(TS_Point inLoc, word inWidth,word inHeight) : rect(inLoc,inWidt
   needRefresh = true;
 }
 
+drawObj::drawObj(word locX, word locY, word inWidth,word inHeight) : rect(locX,locY,inWidth,inHeight) {
+    
+    needRefresh = true;
+}
 
 drawObj::~drawObj() { }
 

@@ -16,6 +16,11 @@ drawObj(inLoc,inWidth,inHeight) {
   state = active;
 }
 
+touchObj::touchObj(word locX, word locY, word inWidth,word inHeight) :
+drawObj(locX,locY,inWidth,inHeight) {
+    
+    state = active;
+}
 
 touchObj::~touchObj() { }
 
@@ -143,8 +148,6 @@ void touchList::idle(void) {
   TS_Point   where;
   boolean    done;
 
-  //where = screen->getPoint();
-  //screen->drawPixel(where.x, where.y, RED);
   if (selected == NULL) {                                            // If no one is selected.
     if (screen->touched(where)) {                                    // And the thing is pressed.
       selected = (touchObj*) theList;                                // Set up to search.

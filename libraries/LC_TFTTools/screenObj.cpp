@@ -27,7 +27,7 @@ screenObj::screenObj(void) :
 boolean screenObj::init(int inRotation) {
 
     begin();
-    if (! ts->begin(40)) {  // pass in 'sensitivity' coefficient
+    if (!ts->begin(40)) {  // pass in 'sensitivity' coefficient
         return false;
     }
     setRotation(inRotation);
@@ -102,18 +102,18 @@ TS_Point screenObj::getPoint(void) {
 
   pt = ts->getPoint();
   switch (getRotation()) {
-  case 0:
+  case INV_PORTRAIT:
     break;
-  case 1:
+  case INV_LANDSCAPE:
     swap(pt.x,pt.y);
     pt.x = pt.x;
     pt.y = height() - pt.y;
     break;
-  case 2:
+  case PORTRAIT:
     pt.x = width() - pt.x;
     pt.y = height() - pt.y;
     break;
-  case 3:
+  case LANDSCAPE:
     swap(pt.x,pt.y);
     pt.x = width() - pt.x;
     pt.y = pt.y;

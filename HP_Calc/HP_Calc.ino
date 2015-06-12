@@ -3,12 +3,12 @@
 #include <lists.h>
 #include <mapper.h>
 
+#include <touchObj.h>
 #include <drawObj.h>
 #include <label.h>
 #include <screenObj.h>
 
 
-#include <SD.h>
 #include <SPI.h>
 #include <Wire.h>
 
@@ -17,6 +17,7 @@
 #include <Adafruit_GFX.h>
 
 #include <calculator.h>
+#include "calcButton.h"
 
 #define  BACK_COLOR BLACK
 #define  DISP_COLOR RED
@@ -25,11 +26,16 @@
 #define  TEXT_SIZE  2
 
 calculator mCalc;
+boolean    buttonPressed;
 label XReg("0000000000000000");
 
-Adafruit_GFX_Button btn1;
+//(char* inFStr,word locX, word locY,byte width, byte height);
+calcButton btn1 = calcButton("1",30,100,50,20);
+calcButton btn2 = calcButton("2",100,100,50,20);
+
 
 void setup() {
+  
   if (initScreen(INV_PORTRAIT)) {
     screen->fillScreen(BACK_COLOR);
   }
@@ -40,32 +46,19 @@ void setup() {
   XReg.setPrecision(mCalc.getFixVal());
   XReg.draw();
   
-  btn1.initButton((Adafruit_GFX*)screen, 30, 100, 
-		      50, 20, 
-		      WHITE, WHITE,BLACK,
-		      "1",2);
-  btn1.drawButton();
-  mCalc.buttonClick("1");
-  mCalc.buttonClick("4");
-  mCalc.buttonClick("Enter");
-  mCalc.buttonClick("3");
-  mCalc.buttonClick("x");
-}
-
-boolean pressButton() {
-  if (btn1.justReleased()) {
-    mCalc.buttonClick("1");
-    return true;
-  }
-  return false;
+  btn1.drawSelf();
+  buttonPressed = false;
 }
 
 
 void loop() {
-  if (pressButton) {
+    
+  idle();
+  if (buttonPressed) {
     XReg.setPrecision(mCalc.getFixVal());
     XReg.setValue(mCalc.getX());
     XReg.draw();
+    buttonPressed = false;
   }
 }
 

@@ -42,6 +42,7 @@ class drawObj : public rect {
 public:
   drawObj();
   drawObj(TS_Point inLoc, word inWidth,word inHeight);
+  drawObj(word locX, word locY, word inWidth,word inHeight);
   ~drawObj();
 
           boolean  getRefresh(void);    // These are for later. When we get clipping support.
