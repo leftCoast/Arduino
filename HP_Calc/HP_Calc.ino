@@ -45,7 +45,11 @@ void setup() {
 		      WHITE, WHITE,BLACK,
 		      "1",2);
   btn1.drawButton();
-
+  mCalc.buttonClick("1");
+  mCalc.buttonClick("4");
+  mCalc.buttonClick("Enter");
+  mCalc.buttonClick("3");
+  mCalc.buttonClick("x");
 }
 
 boolean pressButton() {
@@ -64,3 +68,4 @@ void loop() {
     XReg.draw();
   }
 }
+
