@@ -202,5 +202,76 @@ void queue::dump(void) {
 }
 
 
+// ********** double linked list ****************
+
+
+dblLinkListObj::dblLinkListObj(void) {
+    
+    prev = NULL;
+    next = NULL;
+}
+
+
+dblLinkListObj::~dblLinkListObj(void) { unhook(); }
+    
+
+// Given a pointer to a node, link yourself after it.
+void dblLinkListObj::linkAfter(dblLinkListObj* present) {
+    
+    if (present) {
+        next = present->next;
+        prev = present;
+        present->next = this;
+    }
+}
+
+
+// Given a pointer to a node, link yourself before it.
+void dblLinkListObj::linkBefore(dblLinkListObj* present) {
+    
+    if (present) {
+        prev = present->prev;
+        next = present;
+        present->prev = this;
+    }
+}
+
+
+dblLinkListObj* dblLinkListObj::getFirst(void) {
+    
+    dblLinkListObj trace = this;
+    while(trace->prev) {
+        trace = trace->prev;
+    }
+    return trace;
+}
+
+
+dblLinkListObj* dblLinkListObj::getLast(void) {
+    
+    dblLinkListObj trace = this;
+    while(trace->next) {
+        trace = trace->next;
+    }
+    return trace;
+}
+
+
+// Given a pointer to a node, link yourself after the last in the chain.
+void dblLinkListObj::linkToEnd(dblLinkListObj* present) { if (present) linkAfter(present->getLast()); }
+
+
+// Given a pointer to a node, link yourself before the first in the chain.
+void dblLinkListObj::linkToStart(dblLinkListObj* present) { if (present) linkBefore(present->getFirst()); }
+
+
+// Unlink us and, if in list, patch the hole.
+void dblLinkListObj::unhook(void) {
+    
+    if (prev) prev->next = next;
+    if (next) next->prev = prev;
+    next = NULL;
+    prev = NULL;
+}
 
 

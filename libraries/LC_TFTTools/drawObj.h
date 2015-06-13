@@ -24,7 +24,7 @@ public :
   virtual word  maxY(void);                             // Same as obove but in the Y direction.
   virtual word  minX(void);                             // Where's our first pixel?
   virtual word  minY(void);                             // Same as obove but in the Y direction.
-  virtual bool  inRect(TS_Point inPt);                     // Is this point in this rect?
+  virtual bool  inRect(TS_Point inPt);                  // Is this point in us?
 
 //protected:
   TS_Point location;
@@ -33,27 +33,41 @@ public :
 };
 
 
-// *********************  
+// ***************************************************************
 // Base class for an object that can be drawn on the screen.
-// *********************
+// Possibly clicked on.
+// ***************************************************************
 
-class drawObj : public rect {
+class drawObj : public rect, public dblLinkListObj {
 
 public:
   drawObj();
-  drawObj(TS_Point inLoc, word inWidth,word inHeight);
-  drawObj(word locX, word locY, word inWidth,word inHeight);
+  drawObj(TS_Point inLoc, word inWidth,word inHeight,boolean inClicks=false);
+  drawObj(word locX, word locY, word inWidth,word inHeight,boolean inClicks=false);
   ~drawObj();
 
-          boolean  getRefresh(void);    // These are for later. When we get clipping support.
-          void     setRefresh(void);    //
-          void     draw(void);          // Don't inherit this one.
-  virtual void     drawSelf(void);      // Inherit this one and make it yours.
+          void  draw(void);                    // Call this one. Don't inherit this one.
+  virtual void  drawSelf(void);                // Inherit this one and make it yours.
+  virtual void  doAction(TS_Point where);      // Override me for action!
   
 protected:
   boolean        needRefresh;
+  boolean        wantsClicks;
 };
 
+
+viewMgr : public idler {
+    
+public:
+                    viewMgr(void);
+                    ~viewMgr(void);
+    
+            void    addObj(drawObj* newObj);
+    virtual void    idle(void);
+    
+            drawObj*    theList;    // Pointer to top of list;
+            drawObj*    theTouched; // Pointer to who's been touched.
+};
 
 #endif
 

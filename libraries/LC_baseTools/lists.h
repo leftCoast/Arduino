@@ -89,4 +89,34 @@ class queue : public linkList {
     //virtual boolean      empty(void);
   };
 
+
+//*******************************************************
+// Double linked list. Handy if you'd like to traverse both
+// ways. Also handy 'cause it can be self managing.
+// Deleting nodes will, first pull them from the list
+// patching the hole, then delete them.
+//*******************************************************
+
+class dblLinkListObj {
+    
+public:
+    dblLinkListObj(void);
+    ~dblLinkListObj(void);
+    
+    
+    void            linkAfter(dblLinkListObj* present); // Given a pointer to a node, link yourself after it.
+
+    void            linkBefore(dblLinkListObj* present); // Given a pointer to a node, link yourself before it.
+    dblLinkListObj* getFirst(void) {
+
+    dblLinkListObj* getLast(void) {
+
+    void            linkToEnd(dblLinkListObj* present); // Given a pointer to a node, link yourself after the last in the chain.
+    void            linkToStart(dblLinkListObj* present); // Given a pointer to a node, link yourself before the first in the chain.
+    void            unhook(void);
+    
+    dblLinkListObj* prev;
+    dblLinkListObj* next;
+};
+
 #endif

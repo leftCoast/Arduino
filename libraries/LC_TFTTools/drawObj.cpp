@@ -26,9 +26,7 @@
  }
  
  
- rect::~rect(void) {
-   
- }
+ rect::~rect(void) { }
  
  
 void  rect::setLocation(word x, word y) {
@@ -79,29 +77,32 @@ bool rect::inRect(TS_Point inPt) {
 
 drawObj::drawObj() {
 
-  needRefresh = true;                // Well Duh! We never been drawn yet!
+  needRefresh = true;       // Well Duh! We never been drawn yet!
+  wantsClicks = false;    // 'Cause this is actually the default.
 }
 
 
-drawObj::drawObj(TS_Point inLoc, word inWidth,word inHeight) : rect(inLoc,inWidth,inHeight) {
+drawObj::drawObj(TS_Point inLoc, word inWidth,word inHeight,boolean inClicks)
+    : rect(inLoc,inWidth,inHeight) {
 
-  needRefresh = true;
+    needRefresh = true;
+    wantsClicks = inClicks;
 }
 
-drawObj::drawObj(word locX, word locY, word inWidth,word inHeight) : rect(locX,locY,inWidth,inHeight) {
+
+drawObj::drawObj(word locX, word locY, word inWidth,word inHeight,boolean inClicks)
+    : rect(locX,locY,inWidth,inHeight) {
     
     needRefresh = true;
+    wantsClicks = inClicks;
 }
+
 
 drawObj::~drawObj() { }
 
 
-boolean  drawObj::getRefresh(void) { return(needRefresh); }
-
-void  drawObj::setRefresh(void) { needRefresh = true; }
-
-
-void  drawObj::draw(void) { 
+// Call this one to draw..
+void  drawObj::draw(void) {
 
   drawSelf();
   needRefresh = false;
@@ -113,6 +114,52 @@ void  drawObj::drawSelf(void) {
   
   screen->fillRect(location.x, location.y, width, height, BLACK); // Default draw.
   screen->drawRect(location.x, location.y, width, height, WHITE);
+}
+
+
+// Override me for action!
+void drawObj::doAction(TS_Point where) {  }
+
+
+
+// ***************************************************
+// viewMgr, This is they guy that runs the screenshow.
+// Handles redrawing, clicks, etc.
+// ***************************************************
+
+viewMgr::viewMgr(void) {
+    
+    theList = NULL;
+    theTouched = NULL;
+}
+
+
+viewMgr::~viewMgr(void) {
+    
+    if (theList) {
+        while(theList->next) delete theList->next;
+        while(theList->prev) delete theList->prev;
+        delete theList;
+        theList = NULL;
+    }
+    theTouched = NULL;
+}
+
+
+// We're going to add from the bottom up.
+void viewMgr::addObj(drawObj* newObj) {
+    
+    if (theList) {                      // We got a list?
+        theList->linkToStart(newObj);   // Put the new guy at the top of the list.
+    } else {
+        hookup();                       // On our first addition, hook up idling.
+    }
+    theList = newObj;                   // Either way, point to the top of the list.
+}
+
+// We have time to do stuff, not a lot!
+void viewMgr::idle(void) {
+    
 }
 
 
