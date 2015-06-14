@@ -17,29 +17,15 @@
    setLocation(x,y);
    setSize(inWidth,inHeight);
  }
- 
- 
- rect::rect(TS_Point location, word inWidth,word inHeight) {
-   
-   setLocation(location);
-   setSize(inWidth,inHeight);
- }
- 
+
  
  rect::~rect(void) { }
  
  
 void  rect::setLocation(word x, word y) {
   
-  location.x = x;
-  location.y = y;
-}
-
-
-void  rect::setLocation(TS_Point inLoc) {
-
-  location.x = inLoc.x;
-  location.y = inLoc.y;
+  locX = x;
+  locY = y;
 }
 
 
@@ -52,23 +38,23 @@ void  rect::setSize(word inWidth,word inHeight) {
 
 void rect::setRect(rect inRect) {
   
-  setLocation(inRect.location);
-  setSize(inRect.location.x,inRect.location.y);
+  setLocation(inRect.locX,inRect.locY);
+  setSize(inRect.width,inRect.height);
 }
 
 
-word rect::maxX(void) { return(location.x + width); }
-word rect::maxY(void)  { return(location.y + height); }
-word rect::minX(void) { return(location.x); }
-word rect::minY(void)  { return(location.y); }
+word rect::maxX(void) { return(locX + width); }
+word rect::maxY(void)  { return(locY + height); }
+word rect::minX(void) { return(locX); }
+word rect::minY(void)  { return(locY); }
 
-bool rect::inRect(TS_Point inPt) {
+bool rect::inRect(word x, word y) {
 
   return(
-  inPt.x >= minX() &&
-  inPt.x <= maxX() &&
-  inPt.y >= minY() &&
-  inPt.y <= maxY()
+  x >= minX() &&
+  x <= maxX() &&
+  y >= minY() &&
+  y <= maxY()
   );
 }
 
@@ -82,23 +68,20 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(TS_Point inLoc, word inWidth,word inHeight,boolean inClicks)
-    : rect(inLoc,inWidth,inHeight) {
-
-    needRefresh = true;
-    wantsClicks = inClicks;
-}
-
-
-drawObj::drawObj(word locX, word locY, word inWidth,word inHeight,boolean inClicks)
-    : rect(locX,locY,inWidth,inHeight) {
+drawObj::drawObj(word inLocX, word inLocY, word inWidth,word inHeight,boolean inClicks)
+    : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
+    clicked = false;
     wantsClicks = inClicks;
 }
 
 
 drawObj::~drawObj() { }
+
+
+// When the manager asks if we want a refresh..
+boolean drawObj::wantRefresh(void) { return needRefresh; }
 
 
 // Call this one to draw..
@@ -112,13 +95,36 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
-  screen->fillRect(location.x, location.y, width, height, BLACK); // Default draw.
-  screen->drawRect(location.x, location.y, width, height, WHITE);
+  screen->fillRect(locX, locY, width, height, BLACK); // Default draw.
+  screen->drawRect(locX, locY, width, height, WHITE);
 }
 
 
+// Manager has detected a fresh click, is it ours?
+boolean   drawObj::acceptClick(TS_Point where) {
+    
+    if (wantsClicks) {
+        if (inRect(where.x,where.y)) {
+            needRefresh = true;
+            clicked = true;
+            doAction();
+            return true;
+        }
+    }
+    return false;
+}
+   
+            
+// We accepted a click. Well, now its over, deal with it.
+void   drawObj::clickOver(void) {
+    
+    needRefresh = true;
+    clicked = false;
+}
+            
+            
 // Override me for action!
-void drawObj::doAction(TS_Point where) {  }
+void drawObj::doAction(void) {  }
 
 
 
@@ -126,6 +132,8 @@ void drawObj::doAction(TS_Point where) {  }
 // viewMgr, This is they guy that runs the screenshow.
 // Handles redrawing, clicks, etc.
 // ***************************************************
+
+viewMgr viewList;
 
 viewMgr::viewMgr(void) {
     
@@ -157,10 +165,74 @@ void viewMgr::addObj(drawObj* newObj) {
     theList = newObj;                   // Either way, point to the top of the list.
 }
 
+
+// Checking clicks, non-empty list already checked.
+boolean viewMgr::checkClicks(void) {
+    
+    drawObj*    trace;
+    TS_Point    where;
+    boolean     done;
+    boolean     success;
+    
+    Serial.println("checkClicks");
+    success = false;                                                // Did we change anything? Not yet.
+    if (!theTouched) {                                              // No current touch.
+        if (screen->touched(where)) {                               // New touch, go look.
+            trace = (drawObj*)theList->getFirst();                  // make sure we're at the top.
+            done = false;
+            while(!done) {                                          // While were not done
+                if (trace->acceptClick(where)) {                    // If the object accepts the click
+                    theTouched = trace;                             // Save that badboy's address.
+                    success = true;                                 // We changed something.
+                    done = true;                                    // Loop's done
+                } else if (trace->next) {                           // Else if we have a next object.
+                    trace = (drawObj*)trace->next;                  // Hop to the next.
+                } else  {                                           // in this last case.
+                    done = true;                                    // The loop is through.
+                }
+            }
+        }
+    } else {                                                        // We've been touched and delt with it.
+        if (!screen->touched(where)) {                              // Touch has finally passed.
+            theTouched->clickOver();                                // Tell the last touched guy its over.
+            theTouched = NULL;                                      // Clear out our flag/pointer.
+            success = true;                                         // We changed something.
+        }
+    }
+    return success;                                                 // Tell the calling method if we changed something.
+}
+    
+
+// Checking for redraws, non-empty list already checked.
+void viewMgr::checkRefresh(void) {
+    
+    drawObj*    trace;
+    TS_Point    where;
+    boolean     done;
+
+    trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.
+    done = false;                           // Well, were not done yet are we?
+    while(!done) {                          // And while we're not done..
+        if (trace->wantRefresh()) {         // Does this guy want  refresh?
+            trace->draw();                  // Call his Draw method.
+        }
+        if (trace->prev) {                  // Ok, we have another up the list?
+            trace = (drawObj*)trace->prev;  // if so lets go there.
+        } else {                            // No one else?
+            done = true;                    // Then I guess we are done.
+        }
+    }
+}
+            
+            
 // We have time to do stuff, not a lot!
 void viewMgr::idle(void) {
     
+    Serial.println("idle");
+    if (theList) {
+        if (!checkClicks()){
+            checkRefresh();
+        }
+   }
 }
-
-
-
+ 

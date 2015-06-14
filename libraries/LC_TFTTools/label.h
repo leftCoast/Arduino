@@ -22,8 +22,8 @@ public :
   label();
   label(char* inText);
   label(char* inText, word inSize);
-  label(TS_Point inLoc, int inWidth,int inHeight);
-  label(TS_Point inLoc, int inWidth,int inHeight, char* inText);
+  label(word inLocX, word inLocY, int inWidth,int inHeight);
+  label(word inLocX, word inLocY, int inWidth,int inHeight, char* inText);
   ~label();
   
   void setTextSize(word size);  // Multiples of 8 pixals.
@@ -40,7 +40,7 @@ public :
   word getTextWidth(void);    // How wide in pixels is our text?
   word getTextHeight(void);   // How tall in pixels are the charactors?
   
-  virtual void draw(void);
+  virtual void drawSelf(void);
 
 //private :
   void initLabel(void);

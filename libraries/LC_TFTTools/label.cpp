@@ -28,14 +28,14 @@ drawObj() {
 }
 
 
-label::label(TS_Point inLoc, int inWidth,int inHeight) :
-drawObj(inLoc,inWidth,inHeight) {
+label::label(word inLocX, word inLocY, int inWidth,int inHeight) :
+drawObj(inLocX,inLocY,inWidth,inHeight) {
   initLabel();
 }
 
 
-label::label(TS_Point inLoc, int inWidth,int inHeight, char* inText) :
-drawObj(inLoc,inWidth,inHeight) {
+label::label(word inLocX, word inLocY, int inWidth,int inHeight, char* inText) :
+drawObj(inLocX,inLocY,inWidth,inHeight) {
   initLabel();
   setValue(inText);
 }
@@ -68,14 +68,14 @@ void label::freeBuff(void) {
 void label::setTextSize(word inSize) {
 
   textSize = inSize;
-  setRefresh();
+  needRefresh = true;
 }
 
 
 void label::setJustify(word inJustify) {
 
   justify = inJustify;
-  setRefresh();
+  needRefresh = true;
 }
 
 
@@ -83,7 +83,7 @@ void label::setColors(word inTextColor, word inBackColor) {
 
   textColor = inTextColor;
   backColor = inBackColor;
-  setRefresh();
+  needRefresh = true;
 }
 
 
@@ -97,7 +97,7 @@ void label::setPrecision(int inPrec) {
 
   if (inPrec>=0) {
     prec = inPrec;
-    setRefresh();
+    needRefresh = true;
   }
 }
 
@@ -106,7 +106,7 @@ void label::setValue(int val) {
 
   snprintf (temp,TEMP_BUFF_SIZE,"%d",val);
   setValue(temp);
-  setRefresh();
+  needRefresh = true;
 }
 
 
@@ -114,7 +114,7 @@ void label::setValue(unsigned long val) {
 
   snprintf (temp,TEMP_BUFF_SIZE,"%u",val);
   setValue(temp);
-  setRefresh();
+  needRefresh = true;
 }
 
 
@@ -122,7 +122,7 @@ void label::setValue(double val) {
 
   dtostrf(val,0,prec,temp);	
   setValue(temp);
-  setRefresh();
+  needRefresh = true;
 }
 
 void label::setValue(float val) { 
@@ -137,7 +137,7 @@ void label::setValue(char* str) {
   numChars = strlen(str) + 1;
   buff = (char*) malloc(numChars);
   strcpy (buff,str);
-  setRefresh(); 
+  needRefresh = true;
 }
 
 
@@ -152,7 +152,7 @@ word label::getTextHeight(void) {
 }
 
 
-void label::draw(void) {
+void label::drawSelf(void) {
 
   word numCharsDisp;  // How many we have room for?
   int charDif;     
@@ -161,7 +161,7 @@ void label::draw(void) {
     screen->setTextColor(textColor,backColor);
     screen->setTextSize(textSize);
     screen->setTextWrap(false);
-    screen->setCursor(location.x, location.y);
+    screen->setCursor(locX,locY);
 
     numCharsDisp = width/(CHAR_WIDTH*textSize);
     charDif =  numCharsDisp - strlen(buff);
@@ -171,6 +171,7 @@ void label::draw(void) {
     else if (charDif>0) {          // Needs padding..
       switch (justify) {
       case TEXT_LEFT :
+        screen->print(buff);
         for(int i=1;i<=charDif;i++) screen->print(" ");
         break;
       case TEXT_RIGHT :

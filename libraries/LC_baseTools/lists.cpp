@@ -239,7 +239,7 @@ void dblLinkListObj::linkBefore(dblLinkListObj* present) {
 
 dblLinkListObj* dblLinkListObj::getFirst(void) {
     
-    dblLinkListObj trace = this;
+    dblLinkListObj* trace = this;
     while(trace->prev) {
         trace = trace->prev;
     }
@@ -249,7 +249,7 @@ dblLinkListObj* dblLinkListObj::getFirst(void) {
 
 dblLinkListObj* dblLinkListObj::getLast(void) {
     
-    dblLinkListObj trace = this;
+    dblLinkListObj* trace = this;
     while(trace->next) {
         trace = trace->next;
     }

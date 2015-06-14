@@ -1,46 +1,50 @@
 #include "calcButton.h"
 #include <calculator.h>
 
+#define TEXT_SIZE     2
+#define CHAR_WIDTH    6
+#define BUTTON_HEIGHT 18
+#define RADIUS        3
+
 extern calculator mCalc;
 extern boolean    buttonPressed;
 
-calcButton::calcButton(char* inFStr,word locX, word locY,byte width, byte height) 
-  : touchObj(locX,locY,width,height) {
-    
-    int numChars = strlen(inFStr) + 1;
-    fStr = (char*) malloc(numChars);
-    strcpy(fStr,inFStr);
-  }
-  
+calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width)
+  : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
+
+  int numChars = strlen(inFStr) + 1;
+  fStr = (char*) malloc(numChars);
+  strcpy(fStr, inFStr);
+}
+
 void calcButton::drawSelf(void) {
-  
-    colorObj activeColor(white);
-    activeColor.blend(&black,30);
-    colorObj inactiveColor(white);
-    activeColor.blend(&black,90);
-    colorObj touchedColor(GREEN);
-    
-   switch (state) {
-    case active :
-      screen->fillRoundRect(location.x, location.y, width, height, 3, activeColor.getColor16());
-      break;
-    case inactive :
-      screen->fillRoundRect(location.x, location.y, width, height, 3, inactiveColor.getColor16());
-      break;
-    case touched :
-      screen->fillRoundRect(location.x+1, location.y+1, width, height, 3, touchedColor.getColor16());
-      delay(100);
-      break;
-    case dragging :
-      screen->fillRoundRect(location.x, location.y, width, height, 3, BLUE);
-      break;
-  };
+
+  colorObj activeColor(blue);
+  activeColor.blend(&black, 40);
+  activeColor.blend(&red, 10);
+  colorObj touchedColor(white);
+
+  if (clicked) {
+    screen->fillRoundRect(locX, locY, width, height, RADIUS, touchedColor.getColor16());
+    screen->setTextColor(BLACK, touchedColor.getColor16());
+  } else {
+    screen->fillRoundRect(locX, locY, width, height, RADIUS, activeColor.getColor16());
+    screen->setTextColor(BLACK, activeColor.getColor16());
+  }
+  screen->setTextSize(TEXT_SIZE);
+  screen->setTextWrap(false);
+  word dispWidth = width - (2 * RADIUS);
+  word textWidth = CHAR_WIDTH * TEXT_SIZE;
+  if (dispWidth > textWidth) {
+    screen->setCursor(locX + ((dispWidth - textWidth) / 2), locY + 1);
+    screen->print(fStr);
+  }
 }
 
 
+void calcButton::doAction(void) {
 
-void calcButton::doAction(TS_Point where) {
-
-  mCalc.buttonClick(fStr);
-  buttonPressed = true;
+  mCalc.buttonClick(fStr);    // Send our fuction label to the calculator object to parse.
+  buttonPressed = true;       // Tell the calling program we changed something.
 }
+

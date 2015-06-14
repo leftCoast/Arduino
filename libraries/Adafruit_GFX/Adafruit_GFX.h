@@ -87,6 +87,7 @@ class Adafruit_GFX : public Print {
     wrap; // If set, 'wrap' text at right edge of display
 };
 
+/*
 class Adafruit_GFX_Button {
 
  public:
@@ -113,5 +114,6 @@ class Adafruit_GFX_Button {
 
   boolean currstate, laststate;
 };
+*/
 
 #endif // _ADAFRUIT_GFX_H

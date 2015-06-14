@@ -107,10 +107,8 @@ public:
     void            linkAfter(dblLinkListObj* present); // Given a pointer to a node, link yourself after it.
 
     void            linkBefore(dblLinkListObj* present); // Given a pointer to a node, link yourself before it.
-    dblLinkListObj* getFirst(void) {
-
-    dblLinkListObj* getLast(void) {
-
+    dblLinkListObj* getFirst(void);
+    dblLinkListObj* getLast(void);
     void            linkToEnd(dblLinkListObj* present); // Given a pointer to a node, link yourself after the last in the chain.
     void            linkToStart(dblLinkListObj* present); // Given a pointer to a node, link yourself before the first in the chain.
     void            unhook(void);

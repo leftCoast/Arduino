@@ -1,15 +1,15 @@
 #ifndef calcButton_h
 #define calcButton_h
 
-#include <touchObj.h>
+#include <drawObj.h>
 
-class calcButton : public touchObj {
+class calcButton : public drawObj {
   
   public :
-                  calcButton(char* inFStr,word locX, word locY,byte width, byte height);
+                  calcButton(char* inFStr,word locX, word locY,byte width);
   
   virtual void    drawSelf(void);
-  virtual void    doAction(TS_Point where); 
+  virtual void    doAction(void); 
   
   protected :
           char* fStr;
