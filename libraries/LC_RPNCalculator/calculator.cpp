@@ -94,6 +94,7 @@ void calculator::buttonClick(const char* inButtonID) {
 		xyFunction(intX % intY);
 	}
 	else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
+    else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
 	else if (!strcmp(buttonID,"Y^X")) { xyFunction(pow(y,x)); }
     else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
 	else if (!strcmp(buttonID,"1/X")) { xFunction(1/x); }

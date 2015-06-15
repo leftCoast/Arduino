@@ -84,7 +84,7 @@ calcButton btnSto = calcButton("Sto", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN)
 calcButton btnRcl = calcButton("Rcl", BTN_COL_4, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 */
 
-calcButton btnSin = calcButton(F("sin"),BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
 calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
 calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
 

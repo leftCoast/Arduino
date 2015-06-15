@@ -27,7 +27,7 @@ screenObj::screenObj(void) :
 boolean screenObj::init(int inRotation) {
 
     begin();
-    if (!ts->begin(40)) {  // pass in 'sensitivity' coefficient
+    if (!ts->begin(30)) {  // pass in 'sensitivity' coefficient
         return false;
     }
     setRotation(inRotation);

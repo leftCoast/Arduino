@@ -11,13 +11,13 @@ extern boolean    buttonPressed;
 
 colorObj numberActiveBColor(WHITE);
 colorObj numberActiveTColor(BLACK);
-colorObj numberClickedBColor(WHITE);
-colorObj numberClickedTColor(BLACK);
+colorObj numberClickedBColor(BLACK);
+colorObj numberClickedTColor(WHITE);
 
 colorObj editActiveBColor(BLUE);
-colorObj editActiveTColor(BLACK);
-colorObj editClickedBColor(BLUE);
-colorObj editClickedTColor(WHITE);
+colorObj editActiveTColor(WHITE);
+colorObj editClickedBColor(WHITE);
+colorObj editClickedTColor(BLACK);
 
 colorObj fxActiveBColor(BLACK);
 colorObj fxActiveTColor(WHITE);
@@ -30,13 +30,13 @@ void setupButtonColors(void) {
   numberActiveBColor = numberActiveBColor.blend(&black, 40);
   numberActiveBColor = numberActiveBColor.blend(&yellow, 25);
   //numberClickedBColor = numberClickedBColor(&white, 100);
-  //numberActiveTColor = numberActiveTColor.blend(&black, 100);
-  numberClickedTColor = numberClickedTColor.blend(&red, 80);
+  numberActiveTColor = numberActiveTColor.blend(&black, 60);
+  //numberClickedTColor = numberClickedTColor.blend(&red, 80);
 
-  editActiveBColor = editActiveBColor.blend(&white, 20);
+  editActiveBColor = editActiveBColor.blend(&white, 40);
   //editClickedBColor = editClickedBColor(&white, 100);
   //editActiveTColor = editActiveTColor.blend(&black, 100);
-  editClickedTColor = editClickedTColor.blend(&red, 80);
+  //editClickedTColor = editClickedTColor.blend(&red, 80);
 
   fxActiveBColor = fxActiveBColor.blend(&white, 20);
   //fxActiveTColor = fxActiveTColor.blend();
@@ -116,8 +116,11 @@ void calcButton::drawSelf(void) {
 
   if (clicked) {
     screen->fillRoundRect(locX, locY, width, height, RADIUS, touchedBaseColor->getColor16());
+    screen->drawRoundRect(locX-1, locY-1, width+2, height+2, RADIUS+1, WHITE);
+    screen->drawRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, WHITE);
     screen->setTextColor(touchedTextColor->getColor16(), touchedBaseColor->getColor16());
   } else {
+    screen->fillRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, BLACK); // Need to access BACK_COLOR from main.
     screen->fillRoundRect(locX, locY, width, height, RADIUS, activeBaseColor->getColor16());
     screen->setTextColor(activeTextColor->getColor16(), activeBaseColor->getColor16());
   }
