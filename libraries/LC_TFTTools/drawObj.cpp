@@ -128,6 +128,7 @@ void drawObj::doAction(void) {  }
 
 
 
+
 // ***************************************************
 // viewMgr, This is they guy that runs the screenshow.
 // Handles redrawing, clicks, etc.
@@ -154,7 +155,7 @@ viewMgr::~viewMgr(void) {
 }
 
 
-// We're going to add from the bottom up.
+// New objects go on top.
 void viewMgr::addObj(drawObj* newObj) {
     
     if (theList) {                      // We got a list?
@@ -228,7 +229,6 @@ void viewMgr::checkRefresh(void) {
 // We have time to do stuff, not a lot!
 void viewMgr::idle(void) {
     
-    Serial.println("idle");
     if (theList) {
         if (!checkClicks()){
             checkRefresh();
