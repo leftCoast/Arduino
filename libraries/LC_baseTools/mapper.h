@@ -16,7 +16,7 @@ public:
   double getMinX(void);
   double getMaxX(void);
   double getIntercept(void);
-  void   printMap(void);      // For debugging.
+  //void   printMap(void);      // For debugging.
 private:
   double minX;
   double maxX;

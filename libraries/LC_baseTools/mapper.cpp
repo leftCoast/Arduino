@@ -36,7 +36,7 @@ double mapper::getIntercept(void) {
   return intercept; 
 }
 
-
+/*
 void mapper::printMap(void) {
 
   Serial.print("maxX, minX, slope, intercept : ");
@@ -48,6 +48,7 @@ void mapper::printMap(void) {
   Serial.print(", ");
   Serial.println(intercept);
 }
+*/
 
 double mapper::Map(double inNum) {
 

@@ -334,7 +334,17 @@ bool calculator::isEditing(void) { return editing; }
 bool calculator::getDegrees(void) { return degrees; }
 
 
-int  calculator::getFixVal(void) { return fix; }
+int  calculator::getFixVal(void) {
+    
+    if(editing) {
+        if (!point) {
+            return 0;
+        } else {
+            return (-log10(multiplyer))-1;
+        }
+    } else
+        return fix;
+}
 
 
 bool calculator::getFix(void) { return fixPressed; }

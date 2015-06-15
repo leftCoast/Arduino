@@ -37,7 +37,7 @@ public:
 
   colorObj blend(colorObj* mixinColor,byte mixPercent);
     
-  void printRGB(void);
+ // void printRGB(void);
 
 private :
   byte red;
@@ -68,7 +68,7 @@ public:
   void setColors(colorObj* inStart, colorObj* inEnd);
 
   colorObj Map(float percent);
-  void     printColors(void);
+  //void     printColors(void);
   
 private :
   mapper* redMapper;

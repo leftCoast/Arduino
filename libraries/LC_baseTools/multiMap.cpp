@@ -111,6 +111,7 @@ double mapItem::doMap(double inVal) {  // We have been choosen to map this value
 }
 
 
+/*
 void mapItem::outputItem() {
 
   Serial.print("x = ");
@@ -118,7 +119,7 @@ void mapItem::outputItem() {
   Serial.print(", y = ");
   Serial.println(y);
 }
-
+*/
 // ***********************
 
 multiMap::multiMap() {
