@@ -82,6 +82,7 @@ void calculator::buttonClick(const char* inButtonID) {
     }
 	
 	else if (!strcmp(buttonID,"CLX")) { handleClx();}
+    else if (!strcmp(buttonID,"CX")) { handleClx();}    // For arduino.
 	else if (!strcmp(buttonID,"RDN")) { handleRollDown();}
 	else if (!strcmp(buttonID,"+")) { xyFunction(y+x); }
 	else if (!strcmp(buttonID,"-")) { xyFunction(y-x); }
@@ -97,6 +98,7 @@ void calculator::buttonClick(const char* inButtonID) {
     else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
 	else if (!strcmp(buttonID,"1/X")) { xFunction(1/x); }
 	else if (!strcmp(buttonID,"π")) { xFunction(M_PI); }
+    else if (!strcmp(buttonID,"PI")) { xFunction(M_PI); }   // arduino
 	else if (!strcmp(buttonID,"X‹›Y")) {
 		double temp;
 		temp = x;

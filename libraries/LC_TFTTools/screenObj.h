@@ -37,7 +37,7 @@ public:
   //void    drawPixelInvert(word x,word y);
   //void    frameRectInvert(TS_Point loc, word width,word height);
   TS_Point  getPoint(void);
-  boolean   touched(TS_Point inPt);
+  boolean   touched(void);
   
 
 private :

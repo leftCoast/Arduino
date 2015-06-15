@@ -123,14 +123,6 @@ TS_Point screenObj::getPoint(void) {
 }
 
 
-boolean screenObj::touched(TS_Point inPt) {
-    
-    if (ts->touched()) {
-        inPt = getPoint();
-        return true;
-    } else {
-        return false;
-    }
-}
+boolean screenObj::touched(void) { return ts->touched(); }
 
 

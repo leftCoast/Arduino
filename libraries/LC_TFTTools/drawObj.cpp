@@ -158,7 +158,7 @@ viewMgr::~viewMgr(void) {
 void viewMgr::addObj(drawObj* newObj) {
     
     if (theList) {                      // We got a list?
-        theList->linkToStart(newObj);   // Put the new guy at the top of the list.
+        newObj->linkToStart(theList);   // Put the new guy at the top of the list.
     } else {
         hookup();                       // On our first addition, hook up idling.
     }
@@ -174,10 +174,10 @@ boolean viewMgr::checkClicks(void) {
     boolean     done;
     boolean     success;
     
-    Serial.println("checkClicks");
     success = false;                                                // Did we change anything? Not yet.
     if (!theTouched) {                                              // No current touch.
-        if (screen->touched(where)) {                               // New touch, go look.
+        if (screen->touched()) {                                    // New touch, go look.
+            where = screen->getPoint();                             // Touch was here..
             trace = (drawObj*)theList->getFirst();                  // make sure we're at the top.
             done = false;
             while(!done) {                                          // While were not done
@@ -193,7 +193,7 @@ boolean viewMgr::checkClicks(void) {
             }
         }
     } else {                                                        // We've been touched and delt with it.
-        if (!screen->touched(where)) {                              // Touch has finally passed.
+        if (!screen->touched()) {                                   // Touch has finally passed.
             theTouched->clickOver();                                // Tell the last touched guy its over.
             theTouched = NULL;                                      // Clear out our flag/pointer.
             success = true;                                         // We changed something.

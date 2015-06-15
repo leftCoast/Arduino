@@ -34,11 +34,16 @@ void calcButton::drawSelf(void) {
   screen->setTextSize(TEXT_SIZE);
   screen->setTextWrap(false);
   word dispWidth = width - (2 * RADIUS);
-  word textWidth = CHAR_WIDTH * TEXT_SIZE;
+  word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(fStr))-1;
   if (dispWidth > textWidth) {
-    screen->setCursor(locX + ((dispWidth - textWidth) / 2), locY + 1);
+    screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
     screen->print(fStr);
   }
+  /*
+  if (clicked) {
+    delay(250);  // SO BAD! Fix this!
+  }
+  */
 }
 
 
