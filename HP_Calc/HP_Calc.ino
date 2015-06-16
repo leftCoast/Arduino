@@ -75,6 +75,7 @@ calcButton btnPi = calcButton("Pi", BTN_COL_4, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN
 
 calcButton btnInvrse = calcButton("1/x", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+//calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 
 /*
@@ -158,11 +159,7 @@ void loop() {
 
   idle();
   if (buttonPressed) {
-    if (mCalc.isEditing()) {
-      XReg.setPrecision(mCalc.getFixVal());
-    } else {
-      XReg.setPrecision(mCalc.getFixVal());
-    }
+    XReg.setPrecision(mCalc.getFixVal());
     XReg.setValue(mCalc.getX());
     buttonPressed = false;
   }
