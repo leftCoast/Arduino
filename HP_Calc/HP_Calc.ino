@@ -16,22 +16,26 @@
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_GFX.h>
 
+#include "remoteRPNCalc.h"
+#include "RPNClient.h"
+#include "RPNServer.h"
+
 #include <calculator.h>
 #include "calcButton.h"
 
 #define  BACK_COLOR BLACK
 #define  DISP_COLOR RED
-#define  DISP_Y     20
+#define  DISP_Y     10
 #define  TEXT_SIZE  2
 
 #define BTN_WIDTH1  30
 #define BTN_WIDTH2  50
 #define BTN_WIDTH3  80
 
-#define BTN_ROWA_1    60
-#define BTN_ROWA_2    95
-#define BTN_ROWA_3    130
-//#define BTN_ROWA_4    150
+#define BTN_ROWA_1    40
+#define BTN_ROWA_2    70
+#define BTN_ROWA_3    100
+#define BTN_ROWA_4    130
 
 #define BTN_COLA_1    25
 #define BTN_COLA_2    90
@@ -73,10 +77,10 @@ calcButton btnClrX = calcButton("Cx", BTN_COL_4, BTN_ROW_1, BTN_WIDTH1, EDIT_BTN
 calcButton btnPt = calcButton(".", BTN_COL_3, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN);
 calcButton btnPi = calcButton("Pi", BTN_COL_4, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN);
 
-calcButton btnInvrse = calcButton("1/x", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-//calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnInvrse = calcButton("1/x", BTN_COLA_1, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+//calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 
 /*
 calcButton btnSwapXY = calcButton("x‹›y", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
@@ -85,13 +89,13 @@ calcButton btnSto = calcButton("Sto", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN)
 calcButton btnRcl = calcButton("Rcl", BTN_COL_4, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 */
 
-calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
-calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
-calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 
 /*
-calcButton btnASin = calcButton("asn",BTN_COLA_1, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnACos = calcButton("acs",BTN_COLA_2, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnASin = calcButton("asn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnACos = calcButton("acs",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
 calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
 */
 
