@@ -2,7 +2,6 @@
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
-#include <timeObj.h>
 
 #include <drawObj.h>
 #include <label.h>
@@ -75,7 +74,7 @@ calcButton btnPi = calcButton("Pi", BTN_COL_4, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN
 
 calcButton btnInvrse = calcButton("1/x", BTN_COLA_1, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-//calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+//calcButton btnRoot = calcButton("\xFBx", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 
 /*
@@ -85,14 +84,14 @@ calcButton btnSto = calcButton("Sto", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN)
 calcButton btnRcl = calcButton("Rcl", BTN_COL_4, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 */
 
-calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
 
 /*
-calcButton btnASin = calcButton("asn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnACos = calcButton("acs",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnASin = calcButton("asn",BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnACos = calcButton("acs",BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 */
 
 calculator mCalc;

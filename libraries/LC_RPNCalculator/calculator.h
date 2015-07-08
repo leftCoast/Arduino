@@ -26,6 +26,8 @@ public:
 	void	setDegrees(bool inDegrees);
 	bool	toggleDegrees(void);
 	bool	getDegrees(void);
+    double  rad_2_deg(double x);
+    double  deg_2_rad(double x);
 	int		getFixVal(void);
 	bool	getFix();
     bool	getSto();

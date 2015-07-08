@@ -4,9 +4,6 @@
 #include <math.h>
 
 
-#define rad_2_deg(x) x*180/M_PI
-#define deg_2_rad(x) x*M_PI/180
-
 calculator::calculator(void) {
 
 	x = 0;
@@ -81,7 +78,7 @@ void calculator::buttonClick(const char* inButtonID) {
         return;
     }
 	
-	else if (!strcmp(buttonID,"CLX")) { handleClx();}
+	//else if (!strcmp(buttonID,"CLX")) { handleClx();}
     else if (!strcmp(buttonID,"CX")) { handleClx();}    // For arduino.
 	else if (!strcmp(buttonID,"RDN")) { handleRollDown();}
 	else if (!strcmp(buttonID,"+")) { xyFunction(y+x); }
@@ -93,7 +90,7 @@ void calculator::buttonClick(const char* inButtonID) {
 		int intY = y;
 		xyFunction(intX % intY);
 	}
-	else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
+	//else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
     else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
 	else if (!strcmp(buttonID,"Y^X")) { xyFunction(pow(y,x)); }
     else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
@@ -319,6 +316,10 @@ double calculator::getT() { return t; }
 
 double calculator::getStoVal(int i) { return sto[i]; }
 
+
+bool calculator::isEditing(void) { return editing; }
+
+
 void calculator::setDegrees(bool inDegrees) { degrees = inDegrees; }
 
 
@@ -329,10 +330,13 @@ bool calculator::toggleDegrees(void) {
 }
 
 
-bool calculator::isEditing(void) { return editing; }
-
-
 bool calculator::getDegrees(void) { return degrees; }
+
+
+double calculator::rad_2_deg(double x) { return x*180/M_PI; }
+
+
+double calculator::deg_2_rad(double x) { return x*M_PI/180; }
 
 
 int  calculator::getFixVal(void) {

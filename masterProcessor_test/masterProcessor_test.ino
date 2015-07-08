@@ -22,19 +22,26 @@ void setup() {
   screen->setTextSize(1);
   screen->setTextWrap(true);
   screen->setCursor(10, 10);
-  screen->println("waiting for data");
-  screen->print(">");
+  screen->println("waiting for data..");
 
   Serial.begin(9600);
-  Serial.setTimeout(50);
+  //Serial.setTimeout(1500);
   
 }
 
 void loop() {
 
-  char buff[20];
-
-  Serial.readBytes(buff,20);
-  screen->print(buff);
+  char  buff[20];
+  byte  numChars;
+  
+  numChars = Serial.readBytes(buff,19);
+  if(numChars) {
+    buff[numChars] = '\0';
+    screen->print("Recieved : ");
+    screen->print(numChars);
+    screen->print(" Bytes : ");
+    screen->print(buff);
+    screen->println();
+  }hello?
 }
 
