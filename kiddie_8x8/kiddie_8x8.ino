@@ -25,8 +25,8 @@
 
 shakeNTinkle sensors(SENS1_SWITCH_PIN, SENS2_SWITCH_PIN,SUM_TIME,NUM_DATA);
 
-#define KID_NAME " Scott"
-#define KID_FOOD " Pasta!!"
+#define KID_NAME " Alex"
+#define KID_FOOD " Sharp Chedder Cheese!!"
 
 Adafruit_8x8matrix matrix;
 
