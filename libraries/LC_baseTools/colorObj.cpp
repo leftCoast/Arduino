@@ -124,6 +124,14 @@ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
     }
 }
 
+/*  Better one. But not today.
+ void blend(colorObj* mixinColor,byte mixPercent) {
+    
+    colorObj temp = blend(mixinColor,mixPercent);
+    setColor(&temp);
+}
+*/
+
 
 /*
  void colorObj::printRGB(void) {
