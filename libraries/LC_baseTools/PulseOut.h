@@ -11,7 +11,7 @@
 class PulseOut : public timeObj, public idler {
    
   public:
-              PulseOut(byte inPin , float inPeriod);   // inPeriod in ms
+              PulseOut(byte inPin , float inPeriod,boolean inverse=false);   // inPeriod in ms
               void setWidth(float inWidth);            // inWidth in ms
       virtual void idle(void);
    
@@ -19,6 +19,7 @@ class PulseOut : public timeObj, public idler {
       boolean       init;
       byte          pin;
       unsigned long width;
+	  boolean		pullDown;
 };
    
 #endif

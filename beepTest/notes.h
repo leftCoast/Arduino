@@ -4,6 +4,9 @@
 #include <PulseOut.h>
 #include <lists.h>
 
+// *********************
+// The notes themselves. How long in Ms is the note's period.
+
 #define C3     7.644675484
 #define CD3    7.215527816
 #define D3     6.810597289
@@ -43,32 +46,88 @@
 #define AB5    
 #define B5    
 
+// *********************
+// The written note types. How long in counts does the note last for?
 
-class note : public linkListObj {
+#define   WhN     4     // Whole note.
+#define   dHfN    3     // Dotted half note.
+#define   HfN     2     // Half note.
+#define   dQN     1.5   // Dotted quarter note.
+#define   QN      1     // Quarter note.
+#define   EthN    0.5   // Eighth note.
+#define   SthN    0.25  // Sixteenth note.
+#define   ThsN    0.125 // Thirty second note.
+
+#define   DEF_COUNTS_MEASURE  4
+#define   DEF_SOUNTS_SEC      2
+
+// The idea behind the note is a small package that holds a "refined" note.
+// And controls a voice for a specified time.
+
+#define PULSE_ON_MS .075  // How long to wait with the power on.
+
+
+
+// The idea behind the voice is something that can set up a wave form.
+// (Square wave) and run this wave in the background.
+
+// The plan is to have a voice for every sound output. 
+// Notes will look for an unused voice and set it up to play
+// a sound forever or for a specified time.
+
+class voice : public PulseOut, public linkListObj {
 
   public:
-             note(int countsPerMeasure,float countsPerSec,int measure,float count, byte noteType, float pitch);
-             note(float startMs, float durationMs, float periodMs);
+        voice(byte inPinNum,boolean invert);
+  
+        void    setUpSound(float periodMs);         // Set up the sound we will play.
+        void    play(boolean playStop);             // True, playes whatever note is set up. False, stops it.
+        boolean isPlaying(void);                    // Are we playing? Does anyone care?
+        boolean isTimedPlaying(void);               // Are we timed playing?
+        void    timedPlay(float durationMs);        // Playes for this long and stops.
+virtual void    idle(void);                         // Our idle time.
 
-     boolean overlap(note* inNote);
+        boolean playing;
+        boolean timedPlaying;
+        timeObj noteTimer;
+};
 
+/*
+class musicBox {
+
+  public: 
+              musicBox(int numNotes);                               // How many note buffers will we need? >= # Voices
+
+        void  addVoice(int inPinNum, boolean inverse=true);         // Add a voice, assume its wired LOW = Sound.
+        void  setupSong(int countsPerMeasure,float countsPerSec);   // Setup up our timing.
+        void  startSong(void);                                      // Play the lovely melody.
+        void  endSong(void);                                        // Stop all this noise!
+        note* getNote(void);                                        // Grab a idle note.
+
+        note*         notePtr;
+        voice*        voicePtr;
+        int           countsPerMeasure;
+        float         countsPerSec;
+        boolean       playing;
+        unsigned long songStart;
+}
+
+
+class note : public timeObj, public linkListObj {
+
+  public:
+                note(musicBox* boxPtr);
+                
+                setNote(int measure,float count, byte noteType, float pitch);
+             
+        void    setNote(float startMs, float durationMs, float periodMs);
+        
   private:
     unsigned long start;      // Absolute start time from song start.
-    unsigned long duration;   // How long the note will play for.
-    unsigned long period;     // The note. 1/Freq x 1,000,000.
+    float        duration;   // How long the note will play for.
+    float         period;     // The note. 1/Freq x 1,000. (Period in Ms)
+     boolean     waiting;
 };
-
-
-class voice : public PulseOut, public linkList {
-
-  public:
-            voice(byte inPinNum);
-
-    void    play(void);             // Play this list of notes.
-    void    pause(void);            // Stop this list of notes.
-    boolean playing(void);          // Are we playing?
-  
-    boolean addNote(note* inNote);  // Try to add a note, returns success.
-};
+*/
 
 #endif
