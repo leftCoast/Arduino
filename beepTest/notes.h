@@ -34,17 +34,17 @@
 #define B4     2.024783348
 
 #define C5     1.911132346
-#define CD5    
-#define D5     
-#define DE5    
-#define E5      
-#define F5     
-#define FG5    
-#define G5     
-#define GA5    
-#define A5     
-#define AB5    
-#define B5    
+#define CD5    1.803849415
+#define D5     1.702620333
+#define DE5    1.607071113
+#define E5     1.516852228
+#define F5     1.431721215
+#define FG5    1.351369613
+#define G5     1.275626474
+#define GA5    1.203934458
+#define A5     1.136363636 
+#define AB5    1.072581597
+#define B5     1.012381425
 
 // *********************
 // The written note types. How long in counts does the note last for?
@@ -64,7 +64,7 @@
 // The idea behind the note is a small package that holds a "refined" note.
 // And controls a voice for a specified time.
 
-#define PULSE_ON_MS .075  // How long to wait with the power on.
+#define PULSE_ON_MS .5  // How long to wait with the power on.
 
 
 

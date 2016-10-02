@@ -2,26 +2,27 @@
 #include <Adafruit_NeoPixel.h>
 
 #include <liteLine.h>
-#include <blinker.h>
-#include <idlers.h>
-#include <lists.h>
+//#include <blinker.h>
+//#include <idlers.h>
+//#include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
-#include <PulseOut.h>
-#include <servo.h>
+//#include <PulseOut.h>
+//#include <servo.h>
 #include <timeObj.h>
 #include <colorObj.h>
 #include <neoPixel.h>
-#include <runningAvg.h>
+//#include <runningAvg.h>
 
 
 #define NUM_LEDS 12
 
-#define MIN_TIME  25    // Fast
-#define MAX_TIME  250   // Slow
+#define MIN_TIME    25    // Fast
+#define MAX_TIME    250   // Slow
+#define BLUR_CUTOFF 50  // When we add a blur effect.
 
-#define BACK_TIME 40  // ms to change background color.
-#define BACK_STEPS 200  // Number of steps for backgrond color wash.
+#define BACK_TIME   30  // ms to change background color.
+#define BACK_STEPS  200  // Number of steps for backgrond color wash.
 
 neoPixel ring(NUM_LEDS, 5);
 
@@ -62,7 +63,7 @@ void setup(void) {
   backgroundDimmer.addColor(0, &background);
   backgroundDimmer.addColor(BACK_STEPS, &background);
   background.setColor(&blue);
-  background = background.blend(&black, 95);
+  background = background.blend(&black, 80);
   backgroundDimmer.addColor(BACK_STEPS / 2, &background);
   backCount = 0;
   backTimer.setTime(BACK_TIME);
@@ -70,9 +71,9 @@ void setup(void) {
 
   slowDot.setColor(&blue);
   fastDot.setColor(&red);
-  slowDot = slowDot.blend(&black, 90);
+  slowDot = slowDot.blend(&black, 80);
   fastDot = fastDot.blend(&yellow, 10);
-  fastDot = fastDot.blend(&black, 85);
+  fastDot = fastDot.blend(&black, 75);
 
   foregroundDimmer.setColors(&fastDot, &slowDot);
 
@@ -80,7 +81,7 @@ void setup(void) {
   drawTimer.start();
 }
 
-// Sets in memory, call Show() to see the change.
+// Sets in memory, call Show(); to see the change.
 void setRingColor(colorObj inColor) {
 
   for (int i = 0; i <= NUM_LEDS; i++) {
@@ -137,7 +138,7 @@ void drawRing(void) {
   setRingColor(background);
   if (oldTime < MAX_TIME) {
     ring.setPixelColor(count, &dotColor);
-    if (oldTime < 50) {
+    if (oldTime < BLUR_CUTOFF) {
       if (count == 0) {
         ring.setPixelColor(NUM_LEDS - 1, &tail1);
         ring.setPixelColor(NUM_LEDS - 2, &tail2);
