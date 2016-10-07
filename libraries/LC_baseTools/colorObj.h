@@ -3,6 +3,8 @@
 
 #include "mapper.h"
 #include "multiMap.h"
+// uncomment for debug stuff.
+//#define PRINT_COLOR
 
 // Color definitions
 #define	BLACK           0x0000
@@ -23,6 +25,7 @@ class colorObj {
 
 public:
   colorObj(byte inRed, byte inGreen, byte inBlue);
+  //colorObj(colorObj* inColor);
   colorObj(word color16);
   colorObj(void);
 
@@ -38,8 +41,9 @@ public:
   colorObj blend(colorObj* mixinColor,byte mixPercent); // Create a color.
   //void blend(colorObj* mixinColor,byte mixPercent);     // Just blend with myself.
     
-    
- // void printRGB(void);
+#ifdef PRINT_COLOR    
+  void printRGB(void);
+#endif
 
 private :
   byte red;
@@ -70,7 +74,10 @@ public:
   void setColors(colorObj* inStart, colorObj* inEnd);
 
   colorObj Map(float percent);
-  //void     printColors(void);
+
+#ifdef PRINT_COLOR
+  void     printColors(void);
+#endif
   
 private :
   mapper* redMapper;

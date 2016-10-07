@@ -19,10 +19,10 @@
 
 #define MIN_TIME    25    // Fast
 #define MAX_TIME    250   // Slow
-#define BLUR_CUTOFF 50  // When we add a blur effect.
+#define BLUR_CUTOFF 50    // When we add a blur effect.
 
-#define BACK_TIME   30  // ms to change background color.
-#define BACK_STEPS  200  // Number of steps for backgrond color wash.
+#define BACK_TIME   30    // ms between background color changes.
+#define BACK_STEPS  200   // Number of steps for backgrond color wash.
 
 neoPixel ring(NUM_LEDS, 5);
 
@@ -34,8 +34,13 @@ colorObj tail1;
 colorObj tail2;
 colorObj tail3;
 
-mapper potToTimer(0, 675, MIN_TIME, MAX_TIME);
-mapper potToLEDMapper(MIN_TIME, MAX_TIME, 0, 100);
+//#define CALIBRATE
+
+//#define INPUT_PIN A0
+#define INPUT_PIN A4
+//mapper inputToTimer(0, 675, MIN_TIME, MAX_TIME);
+mapper inputToTimer(946, 949, MIN_TIME, MAX_TIME);
+mapper inputToLEDMapper(MIN_TIME, MAX_TIME, 0, 100);
 
 colorMapper foregroundDimmer;
 
@@ -54,10 +59,11 @@ void setup(void) {
   oldTime = -1;
   count = 0;
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
   ring.begin();
 
-  background.setColor(&black);
+  background.setColor(&blue);
+  background = background.blend(&black, 99);
   setRingColor(background);
   ring.show();
   backgroundDimmer.addColor(0, &background);
@@ -108,8 +114,8 @@ boolean setForegroundColor(void) {
   float newTime;
   float percent;
 
-  newTime = analogRead(A0);
-  newTime = potToTimer.Map(newTime);
+  newTime = analogRead(INPUT_PIN);
+  newTime = inputToTimer.Map(newTime);
   if (drawTimer.ding()) {
     count++;
     if (count > 11) {
@@ -117,7 +123,7 @@ boolean setForegroundColor(void) {
     }
     if (newTime != oldTime) {
       drawTimer.setTime(newTime);
-      percent = potToLEDMapper.Map(newTime);
+      percent = inputToLEDMapper.Map(newTime);
       dotColor = foregroundDimmer.Map(percent);
       if (newTime == MIN_TIME) dotColor.setColor(&white);
       tail1 = dotColor.blend(&background, 40);
@@ -161,7 +167,14 @@ void drawRing(void) {
   ring.show();
 }
 
+#ifdef CALIBRATE
+void loop(void) {
+  float reading = analogRead(INPUT_PIN);
+  Serial.println(reading);
+}
+#endif
 
+#ifndef CALIBRATE
 void loop(void) {
 
   boolean refresh1;
@@ -173,3 +186,4 @@ void loop(void) {
     drawRing();
   }
 }
+#endif

@@ -23,9 +23,9 @@ colorMapper mixMapper;
 
 colorObj::colorObj(byte inRed, byte inGreen, byte inBlue) { setColor(inRed,inGreen,inBlue); }
 
+//colorObj::colorObj(colorObj* inColor) { setColor(inColor); }
 
 colorObj::colorObj(word inColor16) { setColor(inColor16); }
-
 
 colorObj::colorObj(void) { setColor(0,0,0); }
 
@@ -133,7 +133,7 @@ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
 */
 
 
-/*
+#ifdef PRINT_COLOR	
  void colorObj::printRGB(void) {
 
   Serial.print( "ColorObj RGB : ");
@@ -143,7 +143,7 @@ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
   Serial.print(", ");
   Serial.println(blue);
 }
-*/
+#endif
 
 
 // ****** colorMapper ******
@@ -202,7 +202,7 @@ colorObj colorMapper::Map(float percent) {
 }
   
 
-/*
+#ifdef PRINT_COLOR
 void colorMapper::printColors(void) {
 
   colorObj startColor(
@@ -219,7 +219,7 @@ void colorMapper::printColors(void) {
   startColor.printRGB();
   endColor.printRGB();
 }
-*/
+#endif
 
 // ****** colorMultiMap ******
 

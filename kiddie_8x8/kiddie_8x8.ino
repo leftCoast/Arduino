@@ -25,8 +25,9 @@
 
 shakeNTinkle sensors(SENS1_SWITCH_PIN, SENS2_SWITCH_PIN,SUM_TIME,NUM_DATA);
 
-#define KID_NAME " Alex"
-#define KID_FOOD " Sharp Chedder Cheese!!"
+// Start each string with a blank so it'll scroll correctly.
+#define STR_1 " Alex"
+#define STR_2 " Sharp Chedder Cheese!!"
 
 Adafruit_8x8matrix matrix;
 
@@ -44,8 +45,8 @@ scottSprit     theScottSprit(&matrix);
 restFaceSprit  theRestFaceSprit(&matrix);
 shockFaceSprit theShockFaceSprit(&matrix);
 
-text8x8    nameStr(&matrix, KID_NAME, 75);
-text8x8    foodStr(&matrix, KID_FOOD, 75);
+text8x8    nameStr(&matrix, STR_1, 75);
+text8x8    foodStr(&matrix, STR_2, 75);
 
 sprit* currentSprit = NULL;
 
