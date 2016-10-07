@@ -34,12 +34,12 @@ colorObj tail1;
 colorObj tail2;
 colorObj tail3;
 
-//#define CALIBRATE
+//#define CALIBRATE // Un-comment to run as a calibration program.
 
 //#define INPUT_PIN A0
 #define INPUT_PIN A4
 //mapper inputToTimer(0, 675, MIN_TIME, MAX_TIME);
-mapper inputToTimer(946, 949, MIN_TIME, MAX_TIME);
+mapper inputToTimer(944, 949, MIN_TIME, MAX_TIME);
 mapper inputToLEDMapper(MIN_TIME, MAX_TIME, 0, 100);
 
 colorMapper foregroundDimmer;
@@ -59,7 +59,10 @@ void setup(void) {
   oldTime = -1;
   count = 0;
 
+  #ifdef CALIBRATE
   Serial.begin(9600);
+  #endif
+  
   ring.begin();
 
   background.setColor(&blue);
