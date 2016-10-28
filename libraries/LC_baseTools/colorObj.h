@@ -38,8 +38,8 @@ public:
   byte getGreen(void);
   byte getBlue(void);
 
-  colorObj blend(colorObj* mixinColor,byte mixPercent); // Create a color.
-  //void blend(colorObj* mixinColor,byte mixPercent);     // Just blend with myself.
+  //colorObj blend(colorObj* mixinColor,byte mixPercent); // Create a color.
+  void     blend(colorObj* mixinColor,byte mixPercent);     // Just blend with myself.
     
 #ifdef PRINT_COLOR    
   void printRGB(void);

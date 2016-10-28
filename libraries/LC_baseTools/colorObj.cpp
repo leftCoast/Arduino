@@ -114,23 +114,30 @@ byte colorObj::getGreen(void) { return green; }
 byte colorObj::getBlue(void) { return blue; }
 
 
-colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
+/*
+ colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
     
-    if (mixPercent>=OPAQUE) return *mixinColor;
+    if (mixPercent>=100) return *mixinColor;
     else if (mixPercent<=TRANSPARENT) return *this;
     else {
         mixMapper.setColors(this,mixinColor);
         return mixMapper.Map(mixPercent);
     }
 }
-
-/*  Better one. But not today.
- void blend(colorObj* mixinColor,byte mixPercent) {
-    
-    colorObj temp = blend(mixinColor,mixPercent);
-    setColor(&temp);
-}
 */
+
+//Better one. But not today.
+void colorObj::blend(colorObj* mixinColor,byte mixPercent) {
+    
+    if (mixPercent>=100) {          // If >= 100 means totally mixin color.
+        setColor(mixinColor);
+    } else if (mixPercent>0) {      // So its NOT >= 100 but it is > 0.. Blend it.
+        mixMapper.setColors(this,mixinColor);
+        colorObj temp = mixMapper.Map(mixPercent);
+        setColor(&temp);
+    }                               // Otherwise, there is no change.
+}
+
 
 
 #ifdef PRINT_COLOR	
