@@ -1,4 +1,4 @@
-
+         
 #include <Adafruit_NeoPixel.h>
 
 #include <liteLine.h>
@@ -14,6 +14,8 @@
 #include <neoPixel.h>
 //#include <runningAvg.h>
 
+//#define CALIBRATE // Un-comment to run as a calibration program.
+
 
 #define NUM_LEDS 12
 
@@ -23,6 +25,9 @@
 
 #define BACK_TIME   30    // ms between background color changes.
 #define BACK_STEPS  200   // Number of steps for backgrond color wash.
+
+#define INPUT_PIN A0
+//#define INPUT_PIN A4
 
 neoPixel ring(NUM_LEDS, 5);
 
@@ -34,12 +39,13 @@ colorObj tail1;
 colorObj tail2;
 colorObj tail3;
 
-//#define CALIBRATE // Un-comment to run as a calibration program.
 
-//#define INPUT_PIN A0
-#define INPUT_PIN A4
-//mapper inputToTimer(0, 675, MIN_TIME, MAX_TIME);
-mapper inputToTimer(944, 949, MIN_TIME, MAX_TIME);
+//mapper inputToTimer(0, 675, MIN_TIME, MAX_TIME);   // history
+//mapper inputToTimer(944, 949, MIN_TIME, MAX_TIME); // Uno bong
+//mapper inputToTimer(940, 946, MIN_TIME, MAX_TIME);   // Trinket bong 1
+mapper inputToTimer(944, 948, MIN_TIME, MAX_TIME);   // Trinket bong 2
+
+
 mapper inputToLEDMapper(MIN_TIME, MAX_TIME, 0, 100);
 
 colorMapper foregroundDimmer;
@@ -66,13 +72,13 @@ void setup(void) {
   ring.begin();
 
   background.setColor(&blue);
-  background = background.blend(&black, 99);
+  background = background.mixColors(&black, 99);
   setRingColor(background);
   ring.show();
   backgroundDimmer.addColor(0, &background);
   backgroundDimmer.addColor(BACK_STEPS, &background);
   background.setColor(&blue);
-  background = background.blend(&black, 80);
+  background = background.mixColors(&black, 80);
   backgroundDimmer.addColor(BACK_STEPS / 2, &background);
   backCount = 0;
   backTimer.setTime(BACK_TIME);
@@ -80,9 +86,9 @@ void setup(void) {
 
   slowDot.setColor(&blue);
   fastDot.setColor(&red);
-  slowDot = slowDot.blend(&black, 80);
-  fastDot = fastDot.blend(&yellow, 10);
-  fastDot = fastDot.blend(&black, 75);
+  slowDot = slowDot.mixColors(&black, 80);
+  fastDot = fastDot.mixColors(&yellow, 10);
+  fastDot = fastDot.mixColors(&black, 75);
 
   foregroundDimmer.setColors(&fastDot, &slowDot);
 
@@ -129,9 +135,9 @@ boolean setForegroundColor(void) {
       percent = inputToLEDMapper.Map(newTime);
       dotColor = foregroundDimmer.Map(percent);
       if (newTime == MIN_TIME) dotColor.setColor(&white);
-      tail1 = dotColor.blend(&background, 40);
-      tail2 = dotColor.blend(&background, 60);
-      tail3 = dotColor.blend(&background, 90);
+      tail1 = dotColor.mixColors(&background, 40);
+      tail2 = dotColor.mixColors(&background, 60);
+      tail3 = dotColor.mixColors(&background, 90);
       oldTime = newTime;
       return true;
     } else {

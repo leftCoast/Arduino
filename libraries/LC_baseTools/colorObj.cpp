@@ -114,8 +114,8 @@ byte colorObj::getGreen(void) { return green; }
 byte colorObj::getBlue(void) { return blue; }
 
 
-/*
- colorObj colorObj::blend(colorObj* mixinColor,byte mixPercent) {
+//Creates a new color by mixing yourself with some new color.
+colorObj colorObj::mixColors(colorObj* mixinColor,byte mixPercent) {
     
     if (mixPercent>=100) return *mixinColor;
     else if (mixPercent<=TRANSPARENT) return *this;
@@ -124,9 +124,9 @@ byte colorObj::getBlue(void) { return blue; }
         return mixMapper.Map(mixPercent);
     }
 }
-*/
 
-//Better one. But not today.
+
+//Changes yourself by blending in some new color.
 void colorObj::blend(colorObj* mixinColor,byte mixPercent) {
     
     if (mixPercent>=100) {          // If >= 100 means totally mixin color.

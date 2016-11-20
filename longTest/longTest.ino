@@ -8,6 +8,7 @@
 #include <multiMap.h>
 
 
+
 #include <timeObj.h>
 
 #include <chainPixels.h>
@@ -15,7 +16,7 @@
 #include <neoPixel.h>
 
 
-#define FAST_DELAY    125     // How long is the timer?
+#define FAST_DELAY    1025     // How long is the timer?
 #define DARK_PERCENT  75
 
 #define MAX_LIGHTS    120

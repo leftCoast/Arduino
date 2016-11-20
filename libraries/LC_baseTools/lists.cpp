@@ -3,7 +3,7 @@
 
 
 // *************** linkListObj ********************
-// A none too right node with a tail.
+// A none too bright node with a tail.
 
 linkListObj::linkListObj(void) {  
   next = NULL; 
