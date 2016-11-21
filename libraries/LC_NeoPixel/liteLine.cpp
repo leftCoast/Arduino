@@ -2,120 +2,76 @@
 #include "liteLine.h"
 
 
- liteLine::liteLine(int inLength) { length = inLength; }
-    
-    
- liteLine::~liteLine(void) { }
+liteLine::liteLine(neoPixel* inLites,int inLength) {
+ 
+ 	lites = inLites;
+ 	length = inLength;
+}
+  
+
+// I don't think we "own" the neoPixel object. So don't delete it.   
+liteLine::~liteLine(void) { }
      
-      
+ 
+// Forgot how long it was?     
 int liteLine::getLength(void) { return length; }
 
 
-colorObj liteLine::getColor(int index) { return calcColor(index,0); }
+// Well, maybe they want to change it?
+void liteLine::setLength(int inLength) { length = inLength; }	
+
+
+// How many pixels are out there?
+int liteLine::getNumPixels(void) {
+	
+	if (lites)
+		return lites->numPixels();
+	else
+		return 0;
+}
+
+
+// What color is already here?
+colorObj liteLine::getColor(int index) { 
+
+	if (lites)
+		return lites->getPixelColor(index);
+	else 
+		return BLACK;
+}
  
  
+//inherited and filled out to figure each pixel. 
 colorObj  liteLine::calcColor(int index,int i) { 
 
-   colorObj aColor(10,10,10);
-  return aColor;
-  }
+	colorObj aColor(10,10,10);
+  	return aColor;
+}
 
 
-void liteLine::setLights(neoPixel* lites,int index,boolean wrap) {
+// This is used to "draw" the line. Wrap is used by things like circles.
+void liteLine::setLights(int index,boolean wrap) {
 
    int liteIndex;
    colorObj color;
-   if (wrap) {
-      for(int i=0;i<length;i++) {
-         color = calcColor(index,i);
-         liteIndex = index-i;
-         if (liteIndex<0) {
-            liteIndex = liteIndex + lites->numPixels();
-         }
-         lites->setPixelColor(liteIndex, &color);
-      }
-   } else {
-      for(int i=0;i<length;i++) {
-         color = calcColor(index,i);
-         lites->setPixelColor(index-i, &color);
-      }
+   
+   if (lites) {
+   	if (wrap) {
+      	for(int i=0;i<length;i++) {
+         	color = calcColor(index,i);
+         	liteIndex = index-i;
+         	if (liteIndex<0) {
+            	liteIndex = liteIndex + lites->numPixels();
+         	}
+         	lites->setPixelColor(liteIndex, &color);
+      	}
+   	} else {
+      	for(int i=0;i<length;i++) {
+         	color = calcColor(index,i);
+         	lites->setPixelColor(index-i, &color);
+      	}
+   	}
    }
 }
 
-
-// *************** monoColorLine ****************
-//    One color for the entire line. Simple.
-// **********************************************
-
-
-
- monoColorLine::monoColorLine(int inLength)
- 
-    : liteLine(inLength)
-    { }
-    
-
-colorObj monoColorLine::calcColor(int index,int i) { return theColor; }
-
-
-void monoColorLine::setColor(word inColor) { theColor.setColor(inColor); }
    
-   
-void monoColorLine::setColor(byte red,byte green,byte blue) { theColor.setColor(red,green,blue); }
-
-
-void monoColorLine::setColor(colorObj aColor) { theColor = aColor; }
-   
-   
-   
-// *************** multiColorLine ****************
-//       A color for each pixel. Fancier..
-// **********************************************
-
-
- multiColorLine::multiColorLine(int inLength) 
-    
-    :liteLine(inLength)
-    { 
-       defColor.setColor(255,0,0);
-       colors = (colorObj*)malloc(sizeof(colorObj)*getLength());
-    }
-   
-    
- multiColorLine::~multiColorLine(void) {
-    
-    if (colors) {
-       free(colors);
-       colors = NULL;
-    }
- }
- 
-    
-colorObj multiColorLine::calcColor(int index,int i) { 
-   
-   if (colors) {
-      return colors[i];
-   } else {
-      return defColor;
-   }
-}
-
-
-void multiColorLine::setColor(byte red,byte green,byte blue,int index) {
-   
-   colorObj aColor(red,green,blue);
-   setColor(&aColor,index);
-}
-
-
-void multiColorLine::setColor(colorObj* inColor,int index) { 
-   
-   if (index>=0 && index<getLength()) {
-      if (colors) {
-         colors[index] = *inColor;
-      } else {
-         defColor = *inColor;
-      }
-   }
-}
-
