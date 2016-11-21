@@ -5,6 +5,7 @@
 // Set the timer and wait 'till it goes "ding". 
 // Great for blinking LEDs, updating readings, etc.
 // Not fast & accurate enough for RC Servos.
+// *** Takes care of roll ever issues ***
 
 class timeObj {
 
