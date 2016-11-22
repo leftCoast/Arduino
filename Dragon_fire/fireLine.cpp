@@ -18,8 +18,9 @@ void fireLine::begin(void) {
 
   fireHead.setColor(&yellow);
   fireHead.blend(&black,70);
-  
-  flameMapper.setColors(&(red.mixColors(&black,70)),&black);
+  colorObj temp(RED);
+  temp.blend(&black,70);
+  flameMapper.setColors(&temp,&black);
   
   indexToColor.setValues(1,getLength(),0,100);
   fireInit = true;
@@ -46,6 +47,6 @@ colorObj fireLine::calcColor(int index,int i) {
 }
 
 
-void fireLine::setLights(int index,boolean wrap=false) { if (fireInit) liteLine::setLights(index,wrap); }
+void fireLine::setLights(int index,boolean wrap) { if (fireInit) liteLine::setLights(index,wrap); }
 
 

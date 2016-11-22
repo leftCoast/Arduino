@@ -13,12 +13,13 @@
 
 #include "fireLine.h"
 
-#define FAST_DELAY    1000// How long is the timer?
+#define FAST_DELAY    10// How long is the timer?
 #define DARK_PERCENT  75
 #define MAX_LIGHTS    120
 #define FIRELINE_LEN  24
 #define MAX_FLAMES    6
 
+/*
 class autoFlame;
 
 autoFlame* flameList[MAX_FLAMES];
@@ -70,27 +71,33 @@ void autoFlame::bumpIndex(void) {
 
 
 boolean autoFlame::busy(void) { return index > lastIndex; }
+*/
 
 
 
 colorObj baseColor(BLACK);
 neoPixel lightBar(MAX_LIGHTS, 8);
+
 timeObj timer(FAST_DELAY);
 int runningDark;
 int r; 
 byte index;
 
-fireLine fireLine(&lightBar,FIRELINE_LEN);
-
+fireLine fireLine1(&lightBar,FIRELINE_LEN);
+fireLine fireLine2(&lightBar,FIRELINE_LEN);
+fireLine fireLine3(&lightBar,FIRELINE_LEN);
+fireLine fireLine4(&lightBar,FIRELINE_LEN);
 
 void setup() {
 
   lightBar.begin();
   setAll(&baseColor);
-  fireLine.begin();
+  fireLine1.begin();
+  /*
   for (byte i;i<MAX_FLAMES;i++) {
     flameList[i] = NULL;
   }
+  */
   runningDark = 100;
   index = 0;
 }
@@ -145,8 +152,8 @@ void loop() {
   if (timer.ding()) {
     lightBar.show();
     timer.stepTime();
-    //drawFlame();
-    randomColors();
+    drawFlame();
+    //randomColors();
   }
 }
 
