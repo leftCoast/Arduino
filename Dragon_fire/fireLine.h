@@ -8,11 +8,13 @@
 class fireLine : public liteLine {
   
   public:
-    fireLine(neoPixel* inLites,int inLength);
+    fireLine(neoPixel* inLites,int inNumLEDs,colorObj* inPatternArray,int inPatternLength,int inNumPatterns);
     ~fireLine(void);
-            void     begin(void);
     virtual colorObj calcColor(int index,int i);
-    virtual void     setLights(int index,boolean wrap=false);
+
+    int       patternLength;
+    colorObj* patternArray;
 };
 
 #endif
+

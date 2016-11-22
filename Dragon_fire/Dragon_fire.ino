@@ -13,100 +13,122 @@
 
 #include "fireLine.h"
 
-#define FAST_DELAY    10// How long is the timer?
 #define DARK_PERCENT  75
-#define MAX_LIGHTS    120
-#define FIRELINE_LEN  24
-#define MAX_FLAMES    6
 
-/*
-class autoFlame;
+#define NUM_LIGHTS    120
+#define LED_PIN       8
+#define PATTERN_LEN   24
+#define NUM_PATTERNS  10
+#define FRAME_DELAY   17     // How long between frames.
+#define WAIT_DELAY    2000   // How long between flames.
 
-autoFlame* flameList[MAX_FLAMES];
 
-void spawn(void) {
+neoPixel lightString(NUM_LIGHTS,LED_PIN);
+colorObj patternArray[PATTERN_LEN];
+fireLine fireLine(&lightString,NUM_LIGHTS,patternArray,PATTERN_LEN,NUM_PATTERNS);
 
-  
+void setupPatternArray(void) {
+
+  colorMultiMap flameMapper;
+  colorObj  aColor;
+
+  aColor = yellow;
+  aColor.blend(&black,70);
+  flameMapper.addColor(0,&aColor);
+
+  aColor = yellow;
+  aColor.blend(&red,50);
+  aColor.blend(&black,50);
+  flameMapper.addColor(2,&aColor);
+
+  aColor = red;
+  aColor.blend(&black,70);
+  flameMapper.addColor(4,&aColor);
+
+  aColor = red;
+  aColor.blend(&black,95);
+  flameMapper.addColor(PATTERN_LEN-6,&aColor);
+  flameMapper.addColor(PATTERN_LEN,&aColor);
+
+  for(byte i=0;i<PATTERN_LEN;i++) {
+    patternArray[i] = flameMapper.Map(i);
+  }
 }
 
+void setupCristmasArray(void) {
 
-class autoFlame {
+  colorMultiMap flameMapper;
+  colorObj  aColor;
 
-  autoFlame(fireLine* inFireLine);
+  aColor = yellow;
+  aColor.blend(&black,70);
+  flameMapper.addColor(0,&aColor);
 
-  public:
-          void    incIndex(int inIndex);
-          void    setSpawnPoint(int inSpawn);  // 0 means stop.
-          void    drawSelf(void);
-          void    bumpIndex(void);
-          boolean busy();
-          
-  fireLine* mFireLine;
-  int       index;
-  int       lastIndex;
-  int       spawnPoint;
-};
+  aColor = yellow;
+  aColor.blend(&magenta,50);
+  aColor.blend(&black,50);
+  flameMapper.addColor(2.5,&aColor);
 
+  aColor = blue;
+  aColor.blend(&black,70);
+  flameMapper.addColor(4.5,&aColor);
 
-autoFlame::autoFlame(fireLine* inFireLine) {
+  aColor = green;
+  aColor.blend(&black,70);
+  flameMapper.addColor(10.5,&aColor);
+
+  aColor = green;
+  aColor.blend(&red,50);
+  aColor.blend(&black,50);
+  flameMapper.addColor(13,&aColor);
+
+  aColor = red;
+  aColor.blend(&black,70);
+  flameMapper.addColor(16,&aColor);
   
-  mFireLine = inFireLine;
-  lastIndex = mFireLine->getNumPixels() + mFireLine->getLength() - 2; 
-  index = lastIndex+1;                                             // puts us off the end.
-  spawnPoint = mFireLine->getLength();                             // nice defualt.
+  aColor = red;
+  aColor.blend(&black,95);
+  flameMapper.addColor(PATTERN_LEN-3,&aColor);
+  flameMapper.addColor(PATTERN_LEN,&aColor);
+
+  for(byte i=0;i<PATTERN_LEN;i++) {
+    patternArray[i] = flameMapper.Map(i);
+  }
 }
 
+timeObj frameTimer(FRAME_DELAY);
+timeObj waitTimer(WAIT_DELAY);
 
-void autoFlame::setSpawnPoint(int inSpawn) { spawnPoint = inSpawn; }
-
-
-void autoFlame::drawSelf(void) { if (mFireLine) mFireLine->setLights(index); }
-
-    
-void autoFlame::bumpIndex(void) {
-  
-    index++; 
-    if (index==spawnPoint) spawn();
-}
-
-
-boolean autoFlame::busy(void) { return index > lastIndex; }
-*/
-
-
-
-colorObj baseColor(BLACK);
-neoPixel lightBar(MAX_LIGHTS, 8);
-
-timeObj timer(FAST_DELAY);
-int runningDark;
-int r; 
-byte index;
-
-fireLine fireLine1(&lightBar,FIRELINE_LEN);
-fireLine fireLine2(&lightBar,FIRELINE_LEN);
-fireLine fireLine3(&lightBar,FIRELINE_LEN);
-fireLine fireLine4(&lightBar,FIRELINE_LEN);
+int   runningDark;
+int   r; 
+int  index;
+int  maxIndex;
+bool  runningFlames;
 
 void setup() {
 
-  lightBar.begin();
-  setAll(&baseColor);
-  fireLine1.begin();
-  /*
-  for (byte i;i<MAX_FLAMES;i++) {
-    flameList[i] = NULL;
-  }
-  */
+  //Serial.begin(9600);
+  maxIndex = NUM_LIGHTS + (PATTERN_LEN*NUM_PATTERNS);
+  lightString.begin();
+  setupPatternArray();
+  //setupCristmasArray();
+  setAll(&black); 
+  lightString.show();
+  
   runningDark = 100;
+  
   index = 0;
+  runningFlames = false;
+  waitTimer.start();
 }
+
+
 
 
 void setAll(colorObj* color) {
 
-  for (int i = 0; i < MAX_LIGHTS; i++) {
-    lightBar.setPixelColor(i, color);
+  for (int i = 0; i < NUM_LIGHTS; i++) {
+    lightString.setPixelColor(i, color);
   }
 }
 
@@ -119,43 +141,45 @@ void randomColors(void) {
    byte b;
    colorObj  rColor;
     
-  for (int i = 0;i<MAX_LIGHTS;i++) {
+  for (int i = 0;i<NUM_LIGHTS;i++) {
     r = random(0,256);
     g = random(0,256);
     b = random(0,256);
     rColor.setColor(r,g,b);
     rColor.blend(&black,runningDark);     //Knock down power draw.
-    lightBar.setPixelColor(i, &rColor);
+    lightString.setPixelColor(i, &rColor);
   }
   if (runningDark>DARK_PERCENT) runningDark--;
 }
 
 
-void drawFlame(void) {
-
-  setAll(&baseColor);
-  fireLine1.setLights(index);
-  fireLine2.setLights(index-(FIRELINE_LEN*2));
-  fireLine3.setLights(index-(FIRELINE_LEN*4));
-  fireLine4.setLights(index-(FIRELINE_LEN*8));
-  //fireLine5.setLights(index-(FIRELINE_LEN*16));
-  index++;
-  if (index>=MAX_LIGHTS+(FIRELINE_LEN*9)) index = 0;
-  
-}
-
-
 void loop() {
 
-  //idle();
   r = random();     // Randomize the randoms.
-  if (timer.ding()) {
-    lightBar.show();
-    timer.stepTime();
-    drawFlame();
-    //randomColors();
+  
+  if (runningFlames) {
+    if (frameTimer.ding()) {
+      lightString.show();
+      frameTimer.start();
+      setAll(&black);
+      fireLine.setLights(index++);
+      if (index>maxIndex) {
+        waitTimer.start();
+        runningFlames = false;
+      }
+    }
+  } else {
+    if (waitTimer.ding()) {
+      index = 0;
+      setAll(&black);
+      fireLine.setLights(index++);
+      runningFlames = true;
+      // don't start frame timer, just leave it running for fast startup.
+    }
+    
   }
 }
+
 
 
 

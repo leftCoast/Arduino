@@ -27,7 +27,7 @@ class liteLine {
       
    private:
    	neoPixel* lites;   								
-      int       length;
+      int       lineLength;
 };
 
    

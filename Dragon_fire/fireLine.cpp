@@ -1,52 +1,35 @@
 #include "fireLine.h"
 #include <colorObj.h>
 
-colorObj    fireHead;
-colorMapper flameMapper;
-mapper      indexToColor;
-boolean     fireInit = false;   // To force a "begin()" to be called.
+mapper dimmer(0,120,0,100);
 
+fireLine::fireLine(neoPixel* inLites,int inNumLEDs,colorObj* inPatternArray,int inPatternLength,int inNumPatterns) 
+: liteLine(inLites,inPatternLength*inNumPatterns) {
 
-fireLine::fireLine(neoPixel* inLites,int inLength) : liteLine(inLites,inLength) {  }
+  patternArray = inPatternArray;
+  patternLength = inPatternLength;
+}
 
 
 fireLine::~fireLine(void) { }
 
 
-// Sets up globals so only one need be called for all.
-void fireLine::begin(void) {
-
-  fireHead.setColor(&yellow);
-  fireHead.blend(&black,70);
-  colorObj temp(RED);
-  temp.blend(&black,70);
-  flameMapper.setColors(&temp,&black);
-  
-  indexToColor.setValues(1,getLength(),0,100);
-  fireInit = true;
-}
-
-
 colorObj fireLine::calcColor(int index,int i) {
 
-    colorObj fireTail;
-    float tailPercent;
     colorObj aColor;
-    
+    i = i % patternLength;
     if (i==0) {
       int r = random(1,100);
-      if (r>95)
+      if (r>90)
         aColor.setColor(&white);
       else
-        aColor = fireHead;
+        aColor = patternArray[0];
     } else {
-      tailPercent = indexToColor.Map(i);
-      aColor = flameMapper.Map(tailPercent);
+      aColor = patternArray[i];
     }
+    //aColor.blend(&black,dimmer.Map(index));
     return aColor;
 }
 
-
-void fireLine::setLights(int index,boolean wrap) { if (fireInit) liteLine::setLights(index,wrap); }
 
 

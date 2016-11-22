@@ -5,7 +5,7 @@
 liteLine::liteLine(neoPixel* inLites,int inLength) {
  
  	lites = inLites;
- 	length = inLength;
+ 	lineLength = inLength;
 }
   
 
@@ -14,11 +14,11 @@ liteLine::~liteLine(void) { }
      
  
 // Forgot how long it was?     
-int liteLine::getLength(void) { return length; }
+int liteLine::getLength(void) { return lineLength; }
 
 
 // Well, maybe they want to change it?
-void liteLine::setLength(int inLength) { length = inLength; }	
+void liteLine::setLength(int inLength) { lineLength = inLength; }	
 
 
 // How many pixels are out there?
@@ -57,7 +57,7 @@ void liteLine::setLights(int index,boolean wrap) {
    
    if (lites) {
    	if (wrap) {
-      	for(int i=0;i<length;i++) {
+      	for(int i=0;i<lineLength;i++) {
          	color = calcColor(index,i);
          	liteIndex = index-i;
          	if (liteIndex<0) {
@@ -66,7 +66,7 @@ void liteLine::setLights(int index,boolean wrap) {
          	lites->setPixelColor(liteIndex, &color);
       	}
    	} else {
-      	for(int i=0;i<length;i++) {
+      	for(int i=0;i<lineLength;i++) {
          	color = calcColor(index,i);
          	lites->setPixelColor(index-i, &color);
       	}
