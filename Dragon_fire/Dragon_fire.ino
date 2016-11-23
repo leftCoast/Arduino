@@ -61,7 +61,7 @@ void setupCristmasArray(void) {
   colorObj  aColor;
 
   aColor = yellow;
-  aColor.blend(&black,70);
+  //aColor.blend(&black,70);
   flameMapper.addColor(0,&aColor);
 
   aColor = yellow;
@@ -110,8 +110,8 @@ void setup() {
   //Serial.begin(9600);
   maxIndex = NUM_LIGHTS + (PATTERN_LEN*NUM_PATTERNS);
   lightString.begin();
-  setupPatternArray();
-  //setupCristmasArray();
+  //setupPatternArray();
+  setupCristmasArray();
   setAll(&black); 
   lightString.show();
   
