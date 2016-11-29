@@ -12,7 +12,7 @@ public :
   bool linkIn(mapItem* itemPtr);
   double Map(double inVal);
   double doMap(double inVal);
-  void outputItem(void);
+  //void outputItem(void);
 
   double x;
   double y;
@@ -32,7 +32,7 @@ public:
   void addPoint(double x, double y);
   void clearMap(void);
   double Map(double inVal);
-  void outputList(void);
+  //void outputList(void);
 
 private :
 

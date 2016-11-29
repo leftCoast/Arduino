@@ -14,8 +14,9 @@ class neoPixel : public Adafruit_NeoPixel {
   neoPixel(uint16_t n, uint8_t p=6, uint8_t t=NEO_GRB + NEO_KHZ800);
   ~neoPixel();
   
-  void setPixelColor(uint16_t n,colorObj* inColor);
+  void     setPixelColor(uint16_t n,colorObj* inColor);
   colorObj getPixelColor(uint16_t n);
+  void	  setAll(colorObj* color);		// 'Cause its soo handy.
 };
 
 #endif

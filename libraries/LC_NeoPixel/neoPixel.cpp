@@ -25,3 +25,10 @@ colorObj neoPixel::getPixelColor(uint16_t n) {
    return result;
 }
 
+
+void neoPixel::setAll(colorObj* color) {
+
+  for (int i = 0; i < numPixels(); i++) {
+  	 setPixelColor(i, color);
+  }
+}
