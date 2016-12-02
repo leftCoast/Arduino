@@ -1,5 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 
+#include <blinker.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -18,9 +19,15 @@
 
 #define NUM_LIGHTS    8//120
 #define LED_PIN       8
+<<<<<<< HEAD
 #define PATTERN_LEN   3//24
 #define NUM_PATTERNS  5//10
 #define FRAME_DELAY   250//17     // How long between frames.
+=======
+#define PATTERN_LEN   24
+#define NUM_PATTERNS  10
+#define FRAME_DELAY   0//17     // How long between frames.
+>>>>>>> FETCH_HEAD
 #define WAIT_DELAY    2000   // How long between flames.
 
 
@@ -107,17 +114,28 @@ int   r;
 int  index;
 int  maxIndex;
 bool  runningFlames;
+blinker heartbeat;
 
 void setup() {
 
   //Serial.begin(9600);
   heartbeat.setBlink(true);
+<<<<<<< HEAD
   maxIndex = fireLine.getMaxIndex();
   lightString.begin();
   setupPatternArray();
   //setupCristmasArray();
   setAll(&black); 
+=======
+  
+  lightString.begin();
+  lightString.setAll(&black); 
+>>>>>>> FETCH_HEAD
   lightString.show();
+  
+  setupPatternArray();
+  //setupCristmasArray();
+  maxIndex = NUM_LIGHTS + (PATTERN_LEN*NUM_PATTERNS);
   
   runningDark = 100;
   
@@ -125,17 +143,6 @@ void setup() {
   runningFlames = false;
   waitTimer.start();
 }
-
-
-
-
-void setAll(colorObj* color) {
-
-  for (int i = 0; i < NUM_LIGHTS; i++) {
-    lightString.setPixelColor(i, color);
-  }
-}
-
 
 
 void randomColors(void) {
@@ -166,7 +173,7 @@ void loop() {
     if (frameTimer.ding()) {
       lightString.show();
       frameTimer.start();
-      setAll(&black);
+      lightString.setAll(&black);
       fireLine.setLights(index++);
       if (index>maxIndex+1) {     // We already loaded in the last one so we need another to fire it off.
         waitTimer.start();
@@ -176,12 +183,11 @@ void loop() {
   } else {
     if (waitTimer.ding()) {
       index = 0;
-      setAll(&black);
+      lightString.setAll(&black);
       fireLine.setLights(index++);
       runningFlames = true;
       // don't start frame timer, just leave it running for fast startup.
     }
-    
   }
 }
 

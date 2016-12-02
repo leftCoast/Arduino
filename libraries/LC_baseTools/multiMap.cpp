@@ -156,7 +156,7 @@ void multiMap::addPoint(double x, double y) {
 
 void multiMap::clearMap(void) {
 
-  Serial.println("I'm being cleared!!");
+  //Serial.println("I'm being cleared!!");
   if (itemList!=NULL) {
     while(itemList->greaterItem!=NULL)
       delete(itemList->greaterItem);
@@ -176,6 +176,7 @@ double multiMap::Map(double inVal) {
   return 0;                      // I guess zero is the best we can do here.
 }
 
+/*
 void multiMap::outputList(void) {
 
   mapItem* trace;
@@ -191,4 +192,4 @@ void multiMap::outputList(void) {
     Serial.println("Empty");
   }
 }
-
+*/

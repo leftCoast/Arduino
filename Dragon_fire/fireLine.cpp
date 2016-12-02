@@ -1,8 +1,6 @@
 #include "fireLine.h"
 #include <colorObj.h>
 
-mapper dimmer(0,120,0,100);
-
 fireLine::fireLine(neoPixel* inLites,int inNumLEDs,colorObj* inPatternArray,int inPatternLength,int inNumPatterns) 
 : liteLine(inLites,inPatternLength*inNumPatterns) {
 
@@ -28,7 +26,6 @@ colorObj fireLine::calcColor(int index,int i) {
     } else {
       aColor = patternArray[i];
     }
-    //aColor.blend(&black,dimmer.Map(index));
     return aColor;
 }
 
