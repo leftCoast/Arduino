@@ -1,6 +1,7 @@
+#define master
+
 #include <Adafruit_NeoPixel.h>
 
-#include <blinker.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -15,19 +16,11 @@
 
 #include "fireLine.h"
 
-#define DARK_PERCENT  75
-
-#define NUM_LIGHTS    8//120
+#define NUM_LIGHTS    120
 #define LED_PIN       8
-<<<<<<< HEAD
-#define PATTERN_LEN   3//24
-#define NUM_PATTERNS  5//10
-#define FRAME_DELAY   250//17     // How long between frames.
-=======
 #define PATTERN_LEN   24
 #define NUM_PATTERNS  10
-#define FRAME_DELAY   0//17     // How long between frames.
->>>>>>> FETCH_HEAD
+#define FRAME_DELAY   17     // How long between frames.
 #define WAIT_DELAY    2000   // How long between flames.
 
 
@@ -36,6 +29,34 @@ colorObj patternArray[PATTERN_LEN];
 fireLine fireLine(&lightString,NUM_LIGHTS,patternArray,PATTERN_LEN,NUM_PATTERNS);
 
 blinker heartbeat;
+
+timeObj frameTimer(FRAME_DELAY);
+
+#ifdef master
+
+#define LIGHT_1 3
+#define LIGHT_2 4
+#define LIGHT_3 5
+#define LIGHT_4 6
+#define LIGHT_5 12
+
+#define DELAY_0 10
+#define DELAY_1 FRAME_DELAY
+#define DELAY_2 FRAME_DELAY * 3
+
+timeObj waitTimer(WAIT_DELAY);
+
+#else
+
+#define MASTER_PIN  6
+
+#endif
+
+int  r; 
+int  index;
+int  maxIndex;
+bool runningFlames;
+
 
 void setupPatternArray(void) {
 
@@ -63,112 +84,108 @@ void setupPatternArray(void) {
   for(byte i=0;i<PATTERN_LEN;i++) {
     patternArray[i] = flameMapper.Map(i);
   }
-}
 
-void setupCristmasArray(void) {
-
-  colorMultiMap flameMapper;
-  colorObj  aColor;
-
-  aColor = yellow;
-  //aColor.blend(&black,70);
-  flameMapper.addColor(0,&aColor);
-
-  aColor = yellow;
-  aColor.blend(&magenta,50);
-  aColor.blend(&black,50);
-  flameMapper.addColor(2.5,&aColor);
-
-  aColor = blue;
-  aColor.blend(&black,70);
-  flameMapper.addColor(4.5,&aColor);
-
-  aColor = green;
-  aColor.blend(&black,70);
-  flameMapper.addColor(10.5,&aColor);
-
-  aColor = green;
-  aColor.blend(&red,50);
-  aColor.blend(&black,50);
-  flameMapper.addColor(13,&aColor);
-
-  aColor = red;
-  aColor.blend(&black,70);
-  flameMapper.addColor(16,&aColor);
+  // For testing
+  //patternArray[0] = red;
+  //patternArray[1] = green;
+  //patternArray[2] = blue;
   
-  aColor = red;
-  aColor.blend(&black,95);
-  flameMapper.addColor(PATTERN_LEN-3,&aColor);
-  flameMapper.addColor(PATTERN_LEN,&aColor);
-
-  for(byte i=0;i<PATTERN_LEN;i++) {
-    patternArray[i] = flameMapper.Map(i);
-  }
 }
 
-timeObj frameTimer(FRAME_DELAY);
-timeObj waitTimer(WAIT_DELAY);
-
-int   runningDark;
-int   r; 
-int  index;
-int  maxIndex;
-bool  runningFlames;
-blinker heartbeat;
 
 void setup() {
 
   //Serial.begin(9600);
   heartbeat.setBlink(true);
-<<<<<<< HEAD
   maxIndex = fireLine.getMaxIndex();
   lightString.begin();
   setupPatternArray();
-  //setupCristmasArray();
-  setAll(&black); 
-=======
-  
-  lightString.begin();
   lightString.setAll(&black); 
->>>>>>> FETCH_HEAD
   lightString.show();
-  
-  setupPatternArray();
-  //setupCristmasArray();
-  maxIndex = NUM_LIGHTS + (PATTERN_LEN*NUM_PATTERNS);
-  
-  runningDark = 100;
-  
-  index = 0;
-  runningFlames = false;
-  waitTimer.start();
-}
 
+  #ifdef master
 
-void randomColors(void) {
-
-   byte r;
-   byte g;
-   byte b;
-   colorObj  rColor;
+    pinMode(LIGHT_1, OUTPUT);
+    digitalWrite(LIGHT_1, LOW);
     
-  for (int i = 0;i<NUM_LIGHTS;i++) {
-    r = random(0,256);
-    g = random(0,256);
-    b = random(0,256);
-    rColor.setColor(r,g,b);
-    rColor.blend(&black,runningDark);     //Knock down power draw.
-    lightString.setPixelColor(i, &rColor);
-  }
-  if (runningDark>DARK_PERCENT) runningDark--;
+    pinMode(LIGHT_2, OUTPUT);
+    digitalWrite(LIGHT_2, LOW);
+    
+    pinMode(LIGHT_3, OUTPUT);
+    digitalWrite(LIGHT_3, LOW);
+    
+    pinMode(LIGHT_4, OUTPUT);
+    digitalWrite(LIGHT_4, LOW);
+    
+    pinMode(LIGHT_5, OUTPUT);
+    digitalWrite(LIGHT_5, LOW);
+
+    waitTimer.start();
+  #else
+
+    pinMode(MASTER_PIN, INPUT);
+    delay(100);                  // Wait to make sure the master has the pins shut down.
+  #endif
+  
+  runningFlames = false;
 }
+
+
+void startLights(void) {
+
+  index = 0;
+  lightString.setAll(&black);
+  fireLine.setLights(index++);
+  runningFlames = true;
+  frameTimer.start();
+}
+
+
+#ifdef master
+
+void startAllLights(void) {
+
+  digitalWrite(LIGHT_1, HIGH);  // Get everyone's attention.
+  digitalWrite(LIGHT_2, HIGH);
+  digitalWrite(LIGHT_3, HIGH);
+  digitalWrite(LIGHT_4, HIGH);
+  digitalWrite(LIGHT_5, HIGH);
+  delay(DELAY_0);
+  digitalWrite(LIGHT_2, LOW);   // Bring 'em on staggered.
+  digitalWrite(LIGHT_3, LOW);
+  delay(DELAY_1);
+  digitalWrite(LIGHT_1, LOW);
+  digitalWrite(LIGHT_4, LOW);
+  delay(DELAY_2);
+  startLights();                // Our own..
+  digitalWrite(LIGHT_5, LOW);
+}
+
+#endif
 
 
 void loop() {
 
-  idle();
+  idle();           // Run stuff.
   r = random();     // Randomize the randoms.
+
+#ifdef master
+
+  if (!runningFlames) {
+    if (waitTimer.ding()) {
+       startAllLights();
+    }
+  }
   
+#else
+
+  if (digitalRead(MASTER_PIN)==HIGH) {
+    while(digitalRead(MASTER_PIN)==HIGH); // Wait for a low
+    startLights();
+  }
+  
+#endif
+
   if (runningFlames) {
     if (frameTimer.ding()) {
       lightString.show();
@@ -176,17 +193,11 @@ void loop() {
       lightString.setAll(&black);
       fireLine.setLights(index++);
       if (index>maxIndex+1) {     // We already loaded in the last one so we need another to fire it off.
-        waitTimer.start();
         runningFlames = false;
+ #ifdef master       
+        waitTimer.start();
+ #endif      
       }
-    }
-  } else {
-    if (waitTimer.ding()) {
-      index = 0;
-      lightString.setAll(&black);
-      fireLine.setLights(index++);
-      runningFlames = true;
-      // don't start frame timer, just leave it running for fast startup.
     }
   }
 }
