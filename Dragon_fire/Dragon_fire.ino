@@ -6,6 +6,7 @@
 #include <mapper.h>
 #include <multiMap.h>
 #include <timeObj.h>
+#include <blinker.h>
 
 #include <neoPixel.h>
 #include <chainPixels.h>
@@ -15,11 +16,11 @@
 
 #define DARK_PERCENT  75
 
-#define NUM_LIGHTS    120
+#define NUM_LIGHTS    8//120
 #define LED_PIN       8
-#define PATTERN_LEN   24
-#define NUM_PATTERNS  10
-#define FRAME_DELAY   17     // How long between frames.
+#define PATTERN_LEN   3//24
+#define NUM_PATTERNS  5//10
+#define FRAME_DELAY   250//17     // How long between frames.
 #define WAIT_DELAY    2000   // How long between flames.
 
 
@@ -27,13 +28,15 @@ neoPixel lightString(NUM_LIGHTS,LED_PIN);
 colorObj patternArray[PATTERN_LEN];
 fireLine fireLine(&lightString,NUM_LIGHTS,patternArray,PATTERN_LEN,NUM_PATTERNS);
 
+blinker heartbeat;
+
 void setupPatternArray(void) {
 
   colorMultiMap flameMapper;
   colorObj  aColor;
 
   aColor = yellow;
-  aColor.blend(&black,70);
+  aColor.blend(&black,50);
   flameMapper.addColor(0,&aColor);
 
   aColor = yellow;
@@ -108,10 +111,11 @@ bool  runningFlames;
 void setup() {
 
   //Serial.begin(9600);
-  maxIndex = NUM_LIGHTS + (PATTERN_LEN*NUM_PATTERNS);
+  heartbeat.setBlink(true);
+  maxIndex = fireLine.getMaxIndex();
   lightString.begin();
-  //setupPatternArray();
-  setupCristmasArray();
+  setupPatternArray();
+  //setupCristmasArray();
   setAll(&black); 
   lightString.show();
   
@@ -155,6 +159,7 @@ void randomColors(void) {
 
 void loop() {
 
+  idle();
   r = random();     // Randomize the randoms.
   
   if (runningFlames) {
@@ -163,7 +168,7 @@ void loop() {
       frameTimer.start();
       setAll(&black);
       fireLine.setLights(index++);
-      if (index>maxIndex) {
+      if (index>maxIndex+1) {     // We already loaded in the last one so we need another to fire it off.
         waitTimer.start();
         runningFlames = false;
       }

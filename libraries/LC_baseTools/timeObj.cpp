@@ -1,11 +1,11 @@
 #include "timeObj.h"
 #include <arduino.h>
 
+
 timeObj::timeObj(float inMs) {
 
   startTime = 0;
   endTime = 0;
-  crossing = false;
   setTime(inMs);        // This sets startTime and endTime. Best go here?
 }
 
@@ -22,29 +22,54 @@ void timeObj::setTime(float inMs,bool startNow) {
 
 void timeObj::start(void) {
 
-  startTime = micros();
-  endTime = startTime + waitTime;
-  crossing = endTime < startTime;
+    if (waitTime==0) {
+        config = zero;
+    } else {
+        startTime = micros();
+        endTime = startTime + waitTime;
+        if (endTime < startTime) {
+            config = crossing;
+        } else {
+            config = normal;
+        }
+    }
 }
 
 
 void timeObj::stepTime(void) {
 
-  startTime = startTime + waitTime;
-  endTime = startTime + waitTime;
-  crossing = endTime < startTime;
+    if (config!=zero) {
+        startTime = endTime;
+        endTime = startTime + waitTime;
+        if (endTime < startTime) {
+            config = crossing;
+        } else {
+            config = normal;
+        }
+    }
 }
 
 
 bool timeObj::ding(void) {
   
   unsigned long now;
-
-  now = micros();
-  if (crossing)
-    return (now < startTime) && (now >= endTime);
-  else
-    return now >= endTime;
+    
+    now = micros();
+    switch (config) {
+        case zero : return true;
+        case crossing :
+            if (now >= startTime || now < endTime)
+                return false;
+            else
+                return true;
+        break;
+        case normal :
+            if (now >= startTime && now < endTime)
+                return false;
+            else
+                return true;
+        break;
+    }
 }
 
 

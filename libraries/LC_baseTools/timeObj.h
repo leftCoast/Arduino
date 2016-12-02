@@ -7,6 +7,8 @@
 // Not fast & accurate enough for RC Servos.
 // *** Takes care of roll ever issues ***
 
+enum timeType { zero, crossing, normal };
+
 class timeObj {
 
 public:
@@ -22,7 +24,8 @@ protected:
   unsigned long waitTime;
   unsigned long startTime;
   unsigned long endTime;
-  bool       crossing;
+  timeType      config;
+  //bool       crossing;
 };
 
 #endif

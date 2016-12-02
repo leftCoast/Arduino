@@ -6,6 +6,7 @@ mapper dimmer(0,120,0,100);
 fireLine::fireLine(neoPixel* inLites,int inNumLEDs,colorObj* inPatternArray,int inPatternLength,int inNumPatterns) 
 : liteLine(inLites,inPatternLength*inNumPatterns) {
 
+  maxIndex = inNumLEDs + (inPatternLength*inNumPatterns) - 1;
   patternArray = inPatternArray;
   patternLength = inPatternLength;
 }
@@ -32,4 +33,5 @@ colorObj fireLine::calcColor(int index,int i) {
 }
 
 
+int fireLine::getMaxIndex(void) { return maxIndex; }
 
