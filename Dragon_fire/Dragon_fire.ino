@@ -23,7 +23,6 @@
 #define FRAME_DELAY   17     // How long between frames.
 #define WAIT_DELAY    2000   // How long between flames.
 
-
 neoPixel lightString(NUM_LIGHTS,LED_PIN);
 colorObj patternArray[PATTERN_LEN];
 fireLine fireLine(&lightString,NUM_LIGHTS,patternArray,PATTERN_LEN,NUM_PATTERNS);
