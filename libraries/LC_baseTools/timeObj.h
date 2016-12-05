@@ -5,7 +5,7 @@
 // Set the timer and wait 'till it goes "ding". 
 // Great for blinking LEDs, updating readings, etc.
 // Not fast & accurate enough for RC Servos.
-// *** Takes care of roll ever issues ***
+// *** Takes care of roll over issues ***
 
 enum timeType { zero, crossing, normal };
 
@@ -25,7 +25,6 @@ protected:
   unsigned long startTime;
   unsigned long endTime;
   timeType      config;
-  //bool       crossing;
 };
 
 #endif
