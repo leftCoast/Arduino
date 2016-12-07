@@ -37,8 +37,8 @@ int numData      : Number of data values used in each averager. Carefull here, e
 // once you get things running to match your application. Dont't change them here, just add the two values
 // to the end of the constructor when you create yours and your values will be used instead.
 
-#define DEF_SUMTIME  50  //ms - Can be thought of as sensitivity.
-#define DEF_NUMDATA  10  //values per averager. - Can be thought of as capacitance.
+#define DEF_SUMTIME  100  //ms - Can be thought of as sensitivity.
+#define DEF_NUMDATA  5    //values per averager. - Can be thought of as capacitance.
 
 // NOTE Multiply the two values gives the approximate time, in ms, for a set of trigger events to die down to zero.
 
@@ -58,7 +58,7 @@ class shaker : public idler {
   int         shakeSum = 0;
   int         shakePin;
   timeObj*    shakeTimer = NULL;
-  runningAvg* shake = NULL;
+  runningAvg* shakeAve = NULL;
 };
 
 
