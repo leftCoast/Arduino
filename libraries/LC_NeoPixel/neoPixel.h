@@ -11,7 +11,7 @@ class neoPixel : public Adafruit_NeoPixel {
 
   // Constructor: number of LEDs, pin number, LED type.
   // See the ADAfruit_NeoPixel.h for info on these things.
-  neoPixel(uint16_t n, uint8_t p=6, uint8_t t=NEO_GRB + NEO_KHZ800);
+  neoPixel(uint16_t n, uint8_t p, uint8_t t=NEO_GRB + NEO_KHZ800);
   ~neoPixel();
   
   void     setPixelColor(uint16_t n,colorObj* inColor);
