@@ -14,7 +14,7 @@
 #include <liteLine.h>
 #include <neoPixel.h>
 
-#include "shaker.h"
+#include <shaker.h>
 
 #define NUM_LEDS  32
 #define LED_PIN   8
