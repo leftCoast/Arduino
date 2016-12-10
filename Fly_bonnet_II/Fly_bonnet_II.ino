@@ -35,26 +35,51 @@ timeObj checkTimer(CHECK_TIME);
 
 colorMultiMap theColorMapper;
 
+enum modetype {light, extreme};
+modetype mode;
+
 void setup() {
 
   theLights.begin();
   theShaker.begin();
-  theColorMapper.addColor(0,&green);
-  theColorMapper.addColor(SHAKE_MAX1,&green);
-  theColorMapper.addColor(SHAKE_MAX2,&red);
+  theColorMapper.addColor(0, &red);
+  theColorMapper.addColor(SHAKE_MAX1, &red);
+  theColorMapper.addColor(SHAKE_MAX2, &yellow);
+  mode = light;
   checkTimer.start();
-  theLights.setAll(&blue);
 }
 
 
 void loop() {
 
+  float shakeState;
   idle();
 
   if (checkTimer.ding()) {
+    colorObj aColor;
+
     checkTimer.stepTime();
-    colorObj aColor = theColorMapper.Map(theShaker.result());
-    theLights.setAll(&aColor);
-    theLights.show();
+    shakeState = theShaker.result();
+    if (shakeState > SHAKE_MAX2) {
+      mode = extreme;
+    }
+    switch (mode) {
+      case light :
+        aColor = theColorMapper.Map(shakeState);
+        theLights.setAll(&aColor);
+        theLights.show();
+        break;
+      case extreme :
+        if (count >= 0 && count < 3) {
+          colorStep(&white);
+        } else {
+          colorStep(&red);
+        }
+        count++;
+        if (count >= 7) {
+          count = 0;
+        }
+        break;
+    }
   }
 }
