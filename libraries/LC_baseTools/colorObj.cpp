@@ -10,8 +10,6 @@ colorObj cyan(CYAN);
 colorObj magenta(MAGENTA);
 colorObj yellow(YELLOW);
 
-enum hat {
-    off, forward, back, left, right };
 
 // colormapper extremes..
 #define START_COLOR     0

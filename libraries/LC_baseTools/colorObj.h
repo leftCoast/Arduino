@@ -38,7 +38,7 @@ public:
   byte getGreen(void);
   byte getBlue(void);
 
-  colorObj mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new by mixing. (Like old blend)
+  colorObj mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like old blend)
   void     blend(colorObj* mixinColor,byte mixPercent);      // Just blend with myself.
     
 #ifdef PRINT_COLOR    
