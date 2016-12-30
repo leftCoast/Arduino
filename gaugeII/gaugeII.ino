@@ -45,7 +45,8 @@ drawObj mObject;
 
 void setup(void) {
 
-TSPoint inDest;
+//TSPoint inDest;
+TS_Point inDest;
 
   //Serial.begin(9600);
   pinMode(pumpPin,OUTPUT);      // Whatever happens, shut off the pump.
@@ -116,22 +117,22 @@ void readings(void) {
 
 
 void loop(void) {
-  TSPoint inPt;
+  TS_Point inPt;
 
   readings();
   inPt = screen->getPoint();
-  if (screen->pressed(inPt)) {
-    if (mHotSpotOff.inRect(inPt)) {
+  if (screen->touched()) {
+    if (mHotSpotOff.inRect(inPt.x,inPt.y)) {
       digitalWrite(pumpPin,HIGH);
-      screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height);
+      // screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height); // Some day maybe I will be able to write this
       delay(200);
-      screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height);
+      // screen->frameRectInvert(mHotSpotOff.location,mHotSpotOff.width,mHotSpotOff.height); // Some day maybe I will be able to write this.
     } 
-    else if (mHotSpotOn.inRect(inPt)) { 
+    else if (mHotSpotOn.inRect(inPt.x,inPt.y)) { 
       digitalWrite(pumpPin,LOW);
-      screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height);
+      // screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height); // Some day maybe I will be able to write this.
       delay(200);
-      screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height);
+      //screen->frameRectInvert(mHotSpotOn.location,mHotSpotOn.width,mHotSpotOn.height);  // Some day maybe I will be able to write this.
     }    
   }
 }

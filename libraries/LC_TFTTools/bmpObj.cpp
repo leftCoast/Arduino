@@ -10,6 +10,9 @@
 // Needed to draw bitmaps from SD card to screen. For lack of a better idea
 // I just wrapped up all the code in here. Its a bit of a patchwok now.
 // Maybe later I can find a better home for this.
+//
+// 12/29/16 - NOt actually created now. It was written about 3 years ago and for
+// some reason got deleted. Today I found it on Github and brought it back. "Whew!"
 
 
 int8_t savedSPI;            // When we init, we'll set this.
@@ -105,7 +108,7 @@ bmpObj::bmpObj(char* inFileName, TS_Point inDest) {
 }
 
 
-// I hope free() is the right thing to call. It is an object.
+// Do what we can to save memory.
 bmpObj::~bmpObj(void) {
     free(fileName);
 }
@@ -168,14 +171,14 @@ void bmpObj::plotBmp(void) {
     int   y;
     
     if (haveInfo) {                                     // We sucessfully got the info?
-        if (fileSeek(source,imageOffset)) {               // Move to trh bitmap data.
+        if (fileSeek(source,imageOffset)) {               // Move to the bitmap data.
             if (imageHeight>0) {                            // The image is upside down?
                 for (y=dest.y+imageHeight; y>=dest.y; y--) {  // Loop from the bottom of the image to the top.
                     plotLine(y);                                // Draw this line.
                 }
             }
             else {                                          // Image must be stored right side up.
-                long temp = -imageHeight;                     // We need the absolut value. But don't loose the info.
+                long temp = -imageHeight;                     // We need the absolute value. But don't loose the info.
                 for (y=dest.y; y<=dest.y+temp; y++) {         // Loop from the top down.
                     plotLine(y);                                // Draw this line.
                 }       

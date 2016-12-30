@@ -10,6 +10,12 @@
 #include <mapper.h>
 #include <colorObj.h>
 
+
+#ifndef swap
+#define swap(a, b) { int t = a; a = b; b = t; }
+#endif
+
+
 // Rotation
 #define PORTRAIT      0  // USB up
 #define LANDSCAPE     1  // USB left
