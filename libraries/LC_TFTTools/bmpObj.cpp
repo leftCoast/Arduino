@@ -130,7 +130,8 @@ void bmpObj::getInfo(void) {
         if (read16(source) == 0x4D42) {             // If we have something or other..
             temp = read32(source);                    // We grab the file size.
             temp = read32(source);                    // Creator bits
-            imageOffset = read32(source);             // image offset, save this.
+            temp = read32(source);                    // image offset (Why read it into temp first?)
+            imageOffset = temp;                       // image offset!?! Save this! (Actually, this shuts up the compiler.)
             temp = read32(source);                    // read DIB header size?
             imageWidth = read32(source);              // width? Good thing to save for later.
             imageHeight = read32(source);             // Height? Negative means the data is right side up. Go figure..

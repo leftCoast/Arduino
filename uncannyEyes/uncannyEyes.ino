@@ -40,8 +40,8 @@ typedef Adafruit_SSD1351 displayType; // Using OLED display(s)
 
 // INPUT CONFIG (for eye motion -- enable or comment out as needed) --------
 
-//#define JOYSTICK_X_PIN A0 // Analog pin for eye horiz pos (else auto)
-//#define JOYSTICK_Y_PIN A1 // Analog pin for eye vert position (")
+#define JOYSTICK_X_PIN A0 // Analog pin for eye horiz pos (else auto)
+#define JOYSTICK_Y_PIN A1 // Analog pin for eye vert position (")
 //#define JOYSTICK_X_FLIP   // If set, reverse stick X axis
 //#define JOYSTICK_Y_FLIP   // If set, reverse stick Y axis
 #define TRACKING          // If enabled, eyelid tracks pupil

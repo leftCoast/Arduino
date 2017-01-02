@@ -112,7 +112,7 @@ void label::setValue(int val) {
 
 void label::setValue(unsigned long val) {
 
-  snprintf (temp,TEMP_BUFF_SIZE,"%u",val);
+  snprintf (temp,TEMP_BUFF_SIZE,"%lu",val);
   setValue(temp);
   needRefresh = true;
 }
@@ -154,7 +154,7 @@ word label::getTextHeight(void) {
 
 void label::drawSelf(void) {
 
-  word numCharsDisp;  // How many we have room for?
+  int numCharsDisp;  // How many we have room for?
   int charDif;     
 
   if (buff) {
