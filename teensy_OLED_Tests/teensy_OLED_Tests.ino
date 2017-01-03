@@ -18,7 +18,8 @@
 //#include <label.h>
 //#include <screenObj.h>
 
-#define DIMMER_POT  15
+//#define DIMMER_POT  15  // For teensy
+#define DIMMER_POT  A0  // For Uno
 
 #define sclk 13
 #define mosi 11
@@ -27,7 +28,9 @@
 #define rst  8
 
 //Adafruit_SSD1351 theOLED = Adafruit_SSD1351(cs, dc, mosi, sclk, rst);
-Adafruit_SSD1351 theOLED = Adafruit_SSD1351(cs, dc, rst);
+Adafruit_SSD1351 theOLED = Adafruit_SSD1351(cs, dc, rst); // Should be HW pins. 
+//SPISettings settings(24000000, MSBFIRST, SPI_MODE3); // Teensy 3.1 max SPI
+
 colorMultiMap colorMap;
 int colorIndex;
 timeObj screenTimer(50);
@@ -69,4 +72,5 @@ void loop() {
     theOLED.print("What the heck?");
   }
 }
+
 
