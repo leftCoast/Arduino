@@ -47,8 +47,9 @@ public:
   
 
 private :
-  Adafruit_FT6206* ts;
+  Adafruit_FT6206* ts;	// The touchscreen part.
 };
+
 
 extern screenObj* screen;
 
