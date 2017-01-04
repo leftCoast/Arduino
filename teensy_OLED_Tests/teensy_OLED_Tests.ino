@@ -28,12 +28,10 @@
 #define cs   9
 #define rst  8
 
-// Need these for later..
 //#define ADAFRUIT_1947 1   // 2.8" TFT Touch Shield for Arduino w/Capacitive Touch.
 //#define ADAFRUIT_1431 2   // OLED Breakout Board - 16-bit Color 1.5" w/microSD holder.
 
 adafruit_1431_Obj theOLED(cs, dc, mosi, sclk, rst);
-
 
 colorMultiMap colorMap;
 int colorIndex;
