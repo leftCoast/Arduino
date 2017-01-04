@@ -13,13 +13,14 @@
 //#include <servo.h>
 #include <timeObj.h>
 
+#include "adafruit_1431_Obj.h"
 //#include <bmpObj.h>
 //#include <drawObj.h>
 //#include <label.h>
 //#include <screenObj.h>
 
-//#define DIMMER_POT  15  // For teensy
-#define DIMMER_POT  A0  // For Uno
+#define DIMMER_POT  15  // For teensy
+//#define DIMMER_POT  A0  // For Uno
 
 #define sclk 13
 #define mosi 11
@@ -27,9 +28,12 @@
 #define cs   9
 #define rst  8
 
-//Adafruit_SSD1351 theOLED = Adafruit_SSD1351(cs, dc, mosi, sclk, rst);
-Adafruit_SSD1351 theOLED = Adafruit_SSD1351(cs, dc, rst); // Should be HW pins. 
-//SPISettings settings(24000000, MSBFIRST, SPI_MODE3); // Teensy 3.1 max SPI
+// Need these for later..
+//#define ADAFRUIT_1947 1   // 2.8" TFT Touch Shield for Arduino w/Capacitive Touch.
+//#define ADAFRUIT_1431 2   // OLED Breakout Board - 16-bit Color 1.5" w/microSD holder.
+
+adafruit_1431_Obj theOLED(cs, dc, mosi, sclk, rst);
+
 
 colorMultiMap colorMap;
 int colorIndex;
@@ -38,7 +42,7 @@ mapper dimmer(0,1023,0,100);
 
 void setup() {
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
   theOLED.begin();
 
   colorMap.addColor(0,&green);
@@ -64,12 +68,12 @@ void loop() {
     if (colorIndex>=40) colorIndex = 0;
     aColor.blend(&black,dimmer.Map(dimControl));
     //theOLED.fillRect(0, 0, 128, 128, aColor.getColor16());
-    theOLED.fillScreen(aColor.getColor16());
+    theOLED.fillScreen(&aColor);
     aColor.setColor(&black);
     aColor.blend(&white,dimmer.Map(dimControl));
-    theOLED.setTextColor(aColor.getColor16());
+    theOLED.setTextColor(&aColor);
     theOLED.setCursor(20,100);
-    theOLED.print("What the heck?");
+    theOLED.drawText("No, Really?");
   }
 }
 
