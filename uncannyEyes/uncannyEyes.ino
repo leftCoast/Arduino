@@ -27,10 +27,16 @@
 #include <Adafruit_SSD1351.h>  // OLED display library -OR-
 //#include <Adafruit_ST7735.h> // TFT display library (enable one only)
 
+//#include <colorObj.h>
+//colorObj aColor;
+//colorMapper gradiant;
+//mapper  yScaler(0,127,1,100);
+//word color16;
+
 #ifdef _ADAFRUIT_ST7735H_
 typedef Adafruit_ST7735  displayType; // Using TFT display(s)
 #else
-typedef Adafruit_SSD1351 displayType; // Using OLED display(s)
+typedef Adafruit_SSD1351  displayType; // Using OLED display(s)
 #endif
 
 #define DISPLAY_DC      7 // Data/command pin for BOTH displays
@@ -84,6 +90,8 @@ struct {
 // INITIALIZATION -- runs once at startup ----------------------------------
 
 void setup(void) {
+
+  //gradiant.setColors(&blue,&black);
   uint8_t e;
 
   Serial.begin(115200);
@@ -168,6 +176,9 @@ void drawEye( // Renders one eye.  Inputs must be pre-clipped & valid.
   scleraXsave = scleraX; // Save initial X value to reset on each line
   irisY       = scleraY - (SCLERA_HEIGHT - IRIS_HEIGHT) / 2;
   for(screenY=0; screenY<SCREEN_HEIGHT; screenY++, scleraY++, irisY++) {
+    //byte yScaled = yScaler.Map(screenY);
+    //aColor = gradiant.Map(yScaled);  
+    //color16 = aColor.getColor16();
     scleraX = scleraXsave;
     irisX   = scleraXsave - (SCLERA_WIDTH - IRIS_WIDTH) / 2;
     for(screenX=0; screenX<SCREEN_WIDTH; screenX++, scleraX++, irisX++) {
@@ -187,6 +198,7 @@ void drawEye( // Renders one eye.  Inputs must be pre-clipped & valid.
           p = sclera[scleraY][scleraX];                 // Pixel = sclera
         }
       }
+      //p = color16;
       // SPI FIFO technique from Paul Stoffregen's ILI9341_t3 library:
       while(KINETISK_SPI0.SR & 0xC000); // Wait for space in FIFO
       KINETISK_SPI0.PUSHR = p | SPI_PUSHR_CTAS(1) | SPI_PUSHR_CONT;
