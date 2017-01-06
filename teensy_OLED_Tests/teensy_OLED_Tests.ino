@@ -4,7 +4,7 @@
 
 #include <blinker.h>
 #include <colorObj.h>
-//#include <idlers.h>
+#include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
@@ -13,11 +13,11 @@
 //#include <servo.h>
 #include <timeObj.h>
 
-#include "adafruit_1431_Obj.h"
-//#include <bmpObj.h>
-//#include <drawObj.h>
-//#include <label.h>
-//#include <screenObj.h>
+#include <adafruit_1431_Obj.h>
+
+#include <drawObj.h>
+#include <label.h>
+#include <screen.h>
 
 #define COLOR_POT   14   // For teensy 
 #define DIMMER_POT  15  
@@ -32,10 +32,8 @@
 #define cs   9
 #define rst  8
 
-//#define ADAFRUIT_1947 1   // 2.8" TFT Touch Shield for Arduino w/Capacitive Touch.
-//#define ADAFRUIT_1431 2   // OLED Breakout Board - 16-bit Color 1.5" w/microSD holder.
 
-adafruit_1431_Obj theOLED(cs, dc, mosi, sclk, rst);
+//adafruit_1431_Obj theOLED(cs, dc, mosi, sclk, rst);
 
 colorMultiMap colorMap;
 int colorIndex;
@@ -52,12 +50,16 @@ runningAvg dimAve(NUM_AVERAGES);
 runningAvg colorAve(NUM_AVERAGES);
 
 bool seenChange;
+label aLabel("Rock and roll!");
 
 void setup() {
 
-  //Serial.begin(9600);
-  theOLED.begin();
-
+  Serial.begin(9600);
+  if (!initScreen(ADAFRUIT_1431)) {         //if it fails..
+    Serial.println("Screen init faild.");   // Tell the world, then
+    while(true);                            // lock and die.
+  }
+  Serial.println("Screen seems ok..");
   colorMap.addColor(0,&green);
   colorMap.addColor(10,&red);
   colorMap.addColor(30,&blue);
@@ -65,10 +67,15 @@ void setup() {
   
   lastColor = -1;
   lastDim = -1;
-  theOLED.setTextSize(1);
+  screen->setTextSize(1);
   checkDials();
   setupColors();
   screenTimer.start();
+  screen->fillScreen(&red);
+  viewList.addObj(&aLabel);
+  aLabel.setLocation(20,100);
+  aLabel.setColors(blue);
+  aLabel.draw();
 }
 
 
@@ -100,23 +107,30 @@ void setupColors(void) {
   screenColor = aColor.mixColors(&black,potToPercent.Map(lastDim));
   aColor.setColor(&black);
   aColor.blend(&white,potToPercent.Map(lastDim));
-  theOLED.setTextColor(&aColor);
+  screen->setTextColor(&aColor);
 }
 
 
 void loop() {
+
+  idle();
+  /*
   
-  checkDials();
+   checkDials();
   if (screenTimer.ding()) {
     screenTimer.start();
+   
+     
     if (seenChange) {
       setupColors();
-      theOLED.fillScreen(&screenColor);
-      theOLED.setCursor(20,75);
-      theOLED.drawText("Again? Really?");
+      screen->fillScreen(&screenColor);
+      screen->setCursor(20,75);
+      screen->drawText("Again? Really?");
       seenChange = false;
     }
-  }
+    }
+    */
+  
 }
 
 

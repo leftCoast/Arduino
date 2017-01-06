@@ -95,13 +95,13 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
-  screen->fillRect(locX, locY, width, height, BLACK); // Default draw.
-  screen->drawRect(locX, locY, width, height, WHITE);
+  screen->fillRect(locX, locY, width, height, &black); // Default draw.
+  screen->drawRect(locX, locY, width, height, &white);
 }
 
 
 // Manager has detected a fresh click, is it ours?
-boolean   drawObj::acceptClick(TS_Point where) {
+boolean   drawObj::acceptClick(point where) {
     
     if (wantsClicks) {
         if (inRect(where.x,where.y)) {
@@ -171,7 +171,7 @@ void viewMgr::addObj(drawObj* newObj) {
 boolean viewMgr::checkClicks(void) {
     
     drawObj*    trace;
-    TS_Point    where;
+    point       where;
     boolean     done;
     boolean     success;
     
@@ -208,7 +208,7 @@ boolean viewMgr::checkClicks(void) {
 void viewMgr::checkRefresh(void) {
     
     drawObj*    trace;
-    TS_Point    where;
+    point       where;
     boolean     done;
 
     trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.

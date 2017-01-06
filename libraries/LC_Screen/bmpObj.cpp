@@ -11,7 +11,7 @@
 // I just wrapped up all the code in here. Its a bit of a patchwok now.
 // Maybe later I can find a better home for this.
 //
-// 12/29/16 - NOt actually created now. It was written about 3 years ago and for
+// 12/29/16 - Not actually created now. It was written about 3 years ago and for
 // some reason got deleted. Today I found it on Github and brought it back. "Whew!"
 
 
@@ -99,7 +99,7 @@ uint32_t read32(File f) {
 
 
 // Constructor for bmpObj. Takes a filename & point to draw it.
-bmpObj::bmpObj(char* inFileName, TS_Point inDest) {
+bmpObj::bmpObj(char* inFileName, point inDest) {
     
     fileName = (char*)malloc(strlen(inFileName+1)); // Grab just enoug RAM to store the string.
     strcpy(fileName,inFileName);                    // Save the filename.
@@ -115,7 +115,7 @@ bmpObj::~bmpObj(void) {
 
 
 // Move the point used for locating the drawing.
-void bmpObj::setDest(TS_Point inDest) {
+void bmpObj::setDest(point inDest) {
     dest = inDest;
 }
 
@@ -153,15 +153,13 @@ void bmpObj::getInfo(void) {
 void bmpObj::plotLine(int y) {
     
     colorObj  thePixal;
-    uint16_t  color16;
     uint8_t   buf[pixBytes];
     int       x;
     
     for (x=dest.x; x<dest.x+imageWidth; x++) {            // Ok, x does dest to max image width.
-        readBuff(source,buf,pixBytes);                      // Grab a pixel.
+        readBuff(source,buf,pixBytes);                    // Grab a pixel.
         thePixal.setColor(buf[2],buf[1],buf[0]);          // Load colorObj.
-        color16 = thePixal.getColor16();                  // Convert it to 565 color.
-        screen->drawPixel(x,y,color16);                     // Spat it out to the screen.
+        screen->drawPixel(x,y,&thePixal);                 // Spat it out to the screen.
     }
 }
 

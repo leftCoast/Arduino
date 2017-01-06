@@ -11,7 +11,7 @@
 
 
 #include <SD.h>
-#include "screenObj.h"
+#include "screen.h"
 
 // The chip select pin for the SD card on the shield
 #define SD_CS 5
@@ -29,17 +29,17 @@ public:
 class bmpObj {
     
 public:
-    bmpObj(char* inFileName, TS_Point inDest);
+    bmpObj(char* inFileName,point inDest);
     ~bmpObj(void);
     
-    void setDest(TS_Point inDest);
+    void setDest(point inDest);
     void getInfo(void);
     void plotLine(int y);
     void plotBmp(void);
     
     char*   fileName;
     File    source;
-    TS_Point   dest;
+    point   dest;
     boolean haveInfo;
     int    imageOffset;
     int    imageWidth;

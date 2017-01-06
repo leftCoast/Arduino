@@ -3,7 +3,7 @@
 
 #include <lists.h>
 #include <idlers.h>
-#include "screenObj.h"
+#include "screen.h"
 
 
 // ***************************************************************
@@ -49,7 +49,7 @@ public:
           boolean   wantRefresh(void);
           void      draw(void);                    // Call this one. Don't inherit this one.
   virtual void      drawSelf(void);                // Inherit this one and make it yours.
-  virtual boolean   acceptClick(TS_Point where);
+  virtual boolean   acceptClick(point where);
   virtual void      clickOver(void);
   virtual void      doAction(void);      // Override me for action!
   

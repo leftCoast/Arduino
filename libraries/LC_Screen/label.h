@@ -28,6 +28,8 @@ public :
   
   void setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
   void setJustify(word inJustify);
+  void setColors(colorObj tColor);
+  void setColors(word tColor);
   void setColors(colorObj textColor, colorObj backColor);
   void setColors(word textColor, word backColor);
   void setPrecision(int inPrec);
@@ -46,12 +48,13 @@ public :
   void initLabel(void);
   void freeBuff(void);
   
-  word  textSize;
-  word  justify;
-  word  backColor;
-  word  textColor;
-  char*  buff;
-  int    prec;      // For formatting floats.
+  word    textSize;
+  word    justify;
+  word    backColor;
+  word    textColor;
+  boolean transp;
+  char*   buff;
+  int     prec;      // For formatting floats.
 };
 
 
