@@ -11,24 +11,21 @@ Harder to trigger  https://www.adafruit.com/products/1767
 Here's what we do with them. Every time idle() is called, typically each time through the event loop,
 we look to see if we have a trigger on this pin, shakePin. Triggering would be a
 pull to ground. If so, we hold 'till the trigger event is clear and add one to our accumulator,
-shakeSum or tapSum. We continue doing this for the amount of milliseconds that is given by sumTime.
+shakeSum. We continue doing this for the amount of milliseconds that is given by sumTime.
 
-After sumTime expires, we take each sum, shakeSum and tapSum, and add them to their respective running
-average objects, shake and tinkle. The amount of data values each running average object uses is given by
-the inputted value numData.
+After sumTime expires, we take shakeSum and add it to its running average object. The amount
+of data values each running average object uses is given by the inputted value numData.
 
 Why in the world do we do all of this?
 The sensors only give instant binary readouts. This is good for, say.. Turning something on and off
 but that's about it. Also, you need to be watching the input pin when it happens. By counting the amount 
 of triggers over a given time period. (integrating) We can get a more analog value representing how
-much vibration is going on. By using the two different types of sensors we can get an idea of the
-type of vibration as well. We run this through the running averagers to smooth the values through
+much vibration is going on. We run this through the running averagers to smooth the values through
 time and to allow more time for the main program to notice. Smooth curve in time as opposed to random
 glitches.
 
 So, with that being said heres your input parameters.
 int inShakePin   : pin number for easy to trigger sensor.
-int inTinklePin  : pin number for harder to trigger sensor.
 float sumTime    : Amount of time, in milliseconds, to accumulate trigger events. 
 int numData      : Number of data values used in each averager. Carefull here, eats memory with large numbers.
 */
