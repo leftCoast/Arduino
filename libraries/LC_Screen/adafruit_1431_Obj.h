@@ -3,6 +3,12 @@
 #include <Adafruit_SSD1351.h>
 #include <SPI.h>
 
+#define ADAFRUIT_1431_SPI_CLK 	13
+#define ADAFRUIT_1431_SPI_MOSI	11
+#define ADAFRUIT_1431_SPI_CS		 9
+#define ADAFRUIT_1431_SPI_DC	 	 7
+#define ADAFRUIT_1431_SPI_RST		 8
+
 class adafruit_1431_Obj : public displayObj {
 
   public :

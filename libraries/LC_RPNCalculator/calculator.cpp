@@ -93,6 +93,7 @@ void calculator::buttonClick(const char* inButtonID) {
 	//else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
     else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
 	else if (!strcmp(buttonID,"Y^X")) { xyFunction(pow(y,x)); }
+	else if (!strcmp(buttonID,"Y~X")) { xyFunction(pow(y,x)); }	// Arduino
     else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
 	else if (!strcmp(buttonID,"1/X")) { xFunction(1/x); }
 	else if (!strcmp(buttonID,"π")) { xFunction(M_PI); }
@@ -125,21 +126,21 @@ void calculator::buttonClick(const char* inButtonID) {
 			xFunction(tan(x));
 		}
 	}
-	else if (!strcmp(buttonID,"ASIN")) {
+	else if (!strcmp(buttonID,"ASIN")||!strcmp(buttonID,"ASN")) {
 		if (degrees) {
 			xFunction(rad_2_deg(asin(x)));
 		} else {
 			xFunction(asin(x));
 		}
 	}
-	else if (!strcmp(buttonID,"ACOS")) {
+	else if (!strcmp(buttonID,"ACOS")||!strcmp(buttonID,"ACS")) {
 		if (degrees) {
 			xFunction(rad_2_deg(acos(x)));
 		} else {
 			xFunction(acos(x));
 		}
 	}
-	else if (!strcmp(buttonID,"ATAN")) {
+	else if (!strcmp(buttonID,"ATAN")||!strcmp(buttonID,"ATN")) {
 		if (degrees) {
 			xFunction(rad_2_deg(atan(x)));
 		} else {

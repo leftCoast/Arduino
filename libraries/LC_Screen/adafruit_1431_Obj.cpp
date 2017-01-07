@@ -1,12 +1,5 @@
-#include <SPI.h>
-#include <Adafruit_GFX.h> 
-#include <Adafruit_SSD1351.h> 
 #include "adafruit_1431_Obj.h"
 
-
-#define SCREEN_WIDTH  128
-#define SCREEN_HEIGHT 128
-#define NUM_PIXELS    16384 // Yeah, but I don't want to calculate this. In a hurry!
 
 adafruit_1431_Obj::adafruit_1431_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST)
   :displayObj(true,true,false,true,false) {

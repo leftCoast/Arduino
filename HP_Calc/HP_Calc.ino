@@ -2,12 +2,11 @@
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
-#include <timeObj.h>
 
 #include <drawObj.h>
 #include <label.h>
-#include <screenObj.h>
-
+#include <screen.h>
+#include <adafruit_1947_Obj.h>
 
 #include <SPI.h>
 #include <Wire.h>
@@ -19,8 +18,8 @@
 #include <calculator.h>
 #include "calcButton.h"
 
-#define  BACK_COLOR BLACK
-#define  DISP_COLOR RED
+#define  BACK_COLOR (&black)
+#define  DISP_COLOR (&red)
 #define  DISP_Y     10
 #define  TEXT_SIZE  2
 
@@ -78,42 +77,46 @@ calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BT
 //calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 
-/*
-calcButton btnSwapXY = calcButton("x‹›y", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-calcButton btnRollDn = calcButton("Rdn", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-calcButton btnSto = calcButton("Sto", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-calcButton btnRcl = calcButton("Rcl", BTN_COL_4, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-*/
 
-calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnSwapXY = calcButton("x~y", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+//calcButton btnRollDn = calcButton("Rdn", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+calcButton btnSto = calcButton("Sto", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnRcl = calcButton("Rcl", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 
-/*
-calcButton btnASin = calcButton("asn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnACos = calcButton("acs",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-*/
 
-calculator mCalc;
+calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+
+calcButton btnASin = calcButton("asn",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnACos = calcButton("acs",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+
+
+calculator mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
 boolean    buttonPressed;
 
 void setup() {
   //Serial.begin(9600);
-  if (initScreen(INV_PORTRAIT)) {
-    screen->fillScreen(BACK_COLOR);
+  //while(!Serial);
+  
+  if (initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
+    Serial.println("Got screen");
+    screen->fillScreen(&black);
     loadScreen();
-    screen->drawRect(BTN_COL_1 - 3, DISP_Y - 3, ((BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1) + 5, 22, RED);
-  }
+    Serial.println("Show Display");
+    screen->drawRect(BTN_COL_1 - 3, DISP_Y - 3, ((BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1) + 5, 22, DISP_COLOR);
+  } else Serial.println("Screen failed");
   buttonPressed = false;
 }
 
 
 void loadScreen(void) {
 
+  Serial.println("Loading screen");
   setupButtonColors();
   XReg.setTextSize(TEXT_SIZE);
-  XReg.setColors(DISP_COLOR, BACK_COLOR);
+  XReg.setColors(DISP_COLOR->getColor16(), BACK_COLOR->getColor16());
   XReg.setJustify(TEXT_RIGHT);
   XReg.setPrecision(mCalc.getFixVal());
   viewList.addObj(&XReg);
@@ -149,9 +152,13 @@ void loadScreen(void) {
   viewList.addObj(&btnCos);
   viewList.addObj(&btnTan);
   
-  //viewList.addObj(&btnASin);
-  //viewList.addObj(&btnACos);
-  //viewList.addObj(&btnATan);
+  viewList.addObj(&btnSwapXY);
+  viewList.addObj(&btnSto);
+  viewList.addObj(&btnRcl);
+  
+  viewList.addObj(&btnASin);
+  viewList.addObj(&btnACos);
+  viewList.addObj(&btnATan);
 }
 
 

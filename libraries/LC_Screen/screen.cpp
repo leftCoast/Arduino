@@ -1,19 +1,15 @@
 #include "screen.h"
 #include "adafruit_1431_Obj.h"
+#include "adafruit_1947_Obj.h"
 
 displayObj* screen = NULL;
-
-#define sclk 13         //Just to get up and running. I promise!
-#define mosi 11
-#define dc   7
-#define cs   9
-#define rst  8
 
 boolean initScreen(byte hardware, int inRotation) {
 
   switch (hardware) {
     case ADAFRUIT_1431 :
-      screen = (displayObj*) new adafruit_1431_Obj(cs, dc, mosi, sclk, rst);
+    	Serial.println("Allocating a 1431");
+      screen = (displayObj*) new adafruit_1431_Obj(ADAFRUIT_1431_SPI_CS, ADAFRUIT_1431_SPI_DC, ADAFRUIT_1431_SPI_MOSI, ADAFRUIT_1431_SPI_CLK, ADAFRUIT_1431_SPI_RST);
       if (screen) {
         return(screen->dispObjBegin());
       } else {
@@ -21,15 +17,16 @@ boolean initScreen(byte hardware, int inRotation) {
       }
       break;
     case ADAFRUIT_1947 :
-       //screen = (displayObj*) new adafruit_1947_Obj(cs, dc, mosi, sclk, rst);
+    	Serial.println("Allocating a 1947");
+      screen = (displayObj*) new adafruit_1947_Obj(ADAFRUIT_1947_SPI_CS, ADAFRUIT_1947_SPI_DC, ADAFRUIT_1947_SPI_MOSI, ADAFRUIT_1947_SPI_CLK, ADAFRUIT_1947_SPI_RST,ADAFRUIT_1947_SPI_MISO);
       if (screen) {
-        //return(screen->begin());
-        //screen.initR(INITR_144GREENTAB);
-        false;
-      } else {
-        return false;
+        if (screen->dispObjBegin()) {
+        		return true;
+        }
       }
+      return false;
       break;
+    default : return false;
   }
 }
 

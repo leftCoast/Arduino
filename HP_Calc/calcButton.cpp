@@ -27,21 +27,21 @@ colorObj fxClickedTColor(BLACK);
 
 void setupButtonColors(void) {
 
-  numberActiveBColor = numberActiveBColor.blend(&black, 40);
-  numberActiveBColor = numberActiveBColor.blend(&yellow, 25);
-  //numberClickedBColor = numberClickedBColor(&white, 100);
-  numberActiveTColor = numberActiveTColor.blend(&black, 60);
-  //numberClickedTColor = numberClickedTColor.blend(&red, 80);
+  numberActiveBColor.blend(&black, 40);
+  numberActiveBColor.blend(&yellow, 25);
+  //numberClickedBColor(&white, 100);
+  numberActiveTColor.blend(&black, 60);
+  //numberClickedTColor.blend(&red, 80);
 
-  editActiveBColor = editActiveBColor.blend(&white, 40);
-  //editClickedBColor = editClickedBColor(&white, 100);
-  //editActiveTColor = editActiveTColor.blend(&black, 100);
-  //editClickedTColor = editClickedTColor.blend(&red, 80);
+  editActiveBColor.blend(&white, 40);
+  //editClickedBColor(&white, 100);
+  //editActiveTColor.blend(&black, 100);
+  //editClickedTColor.blend(&red, 80);
 
-  fxActiveBColor = fxActiveBColor.blend(&white, 20);
-  //fxActiveTColor = fxActiveTColor.blend();
-  //fxClickedBColor = fxClickedBColor.blend();
-  //fxClickedTColor = fxClickedTColor.blend();
+  fxActiveBColor.blend(&white, 20);
+  //fxActiveTColor.blend();
+  //fxClickedBColor.blend();
+  //fxClickedTColor.blend();
 }
 
 
@@ -115,14 +115,14 @@ void calcButton::drawSelf(void) {
   }
 
   if (clicked) {
-    screen->fillRoundRect(locX, locY, width, height, RADIUS, touchedBaseColor->getColor16());
-    screen->drawRoundRect(locX-1, locY-1, width+2, height+2, RADIUS+1, WHITE);
-    screen->drawRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, WHITE);
-    screen->setTextColor(touchedTextColor->getColor16(), touchedBaseColor->getColor16());
+    screen->fillRoundRect(locX, locY, width, height, RADIUS, touchedBaseColor);
+    screen->drawRoundRect(locX-1, locY-1, width+2, height+2, RADIUS+1, &white);
+    screen->drawRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, &white);
+    screen->setTextColor(touchedTextColor, touchedBaseColor);
   } else {
-    screen->fillRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, BLACK); // Need to access BACK_COLOR from main.
-    screen->fillRoundRect(locX, locY, width, height, RADIUS, activeBaseColor->getColor16());
-    screen->setTextColor(activeTextColor->getColor16(), activeBaseColor->getColor16());
+    screen->fillRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, &black); 
+    screen->fillRoundRect(locX, locY, width, height, RADIUS, activeBaseColor);
+    screen->setTextColor(activeTextColor, activeBaseColor);
   }
   screen->setTextSize(TEXT_SIZE);
   screen->setTextWrap(false);
@@ -130,7 +130,7 @@ void calcButton::drawSelf(void) {
   word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(fStr)) - 1;
   if (dispWidth > textWidth) {
     screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
-    screen->print(fStr);
+    screen->drawText(fStr);
   }
 }
 
