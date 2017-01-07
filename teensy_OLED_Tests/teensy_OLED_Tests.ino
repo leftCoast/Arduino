@@ -74,7 +74,7 @@ void setup() {
   screen->fillScreen(&red);
   viewList.addObj(&aLabel);
   aLabel.setLocation(20,100);
-  aLabel.setColors(blue);
+  aLabel.setColors(green);
   aLabel.draw();
 }
 
