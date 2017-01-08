@@ -65,6 +65,7 @@ drawObj::drawObj() {
 
   needRefresh = true;       // Well Duh! We never been drawn yet!
   wantsClicks = false;    // 'Cause this is actually the default.
+  callback = NULL;
 }
 
 
@@ -74,6 +75,7 @@ drawObj::drawObj(word inLocX, word inLocY, word inWidth,word inHeight,boolean in
     needRefresh = true;
     clicked = false;
     wantsClicks = inClicks;
+    callback = NULL;
 }
 
 
@@ -124,9 +126,15 @@ void   drawObj::clickOver(void) {
             
             
 // Override me for action!
-void drawObj::doAction(void) {  }
+void drawObj::doAction(void) {
+	Serial.println("doAction()");
+	if (callback) {
+		*(callback);
+	}
+}
 
 
+void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 
 
 // ***************************************************

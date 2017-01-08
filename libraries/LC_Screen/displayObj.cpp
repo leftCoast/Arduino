@@ -11,6 +11,7 @@
   }
 
 boolean displayObj::dispObjBegin(void) { return false; }
+void displayObj::setRotation(byte inRotation) { }
 void displayObj::setTextColor(colorObj* inColor) { }
 void displayObj::setTextColor(colorObj* tColor,colorObj* bColor) { }
 void displayObj::setTextSize(byte inSize) { }

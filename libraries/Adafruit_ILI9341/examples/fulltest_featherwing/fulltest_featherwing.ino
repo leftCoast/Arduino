@@ -1,10 +1,9 @@
 /***************************************************
-  This is our Bitmap drawing example for the Adafruit ILI9341 Breakout and Shield
-  ----> http://www.adafruit.com/products/1651
+  This is our touchscreen painting example for the Adafruit TFT FeatherWing
+  ----> http://www.adafruit.com/products/3315
 
   Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
+
   Adafruit invests time and resources providing this open source code,
   please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
@@ -13,26 +12,68 @@
   MIT license, all text above must be included in any redistribution
  ****************************************************/
 
+#include <SPI.h>
+#include <Wire.h>      // this is needed even tho we aren't using it
 
 #include <Adafruit_GFX.h>    // Core graphics library
-#include "Adafruit_ILI9341.h" // Hardware-specific library
-#include <SPI.h>
+#include <Adafruit_ILI9341.h> // Hardware-specific library
 #include <SD.h>
+#include <Adafruit_STMPE610.h>
 
-// TFT display and SD card will share the hardware SPI interface.
-// Hardware SPI pins are specific to the Arduino board type and
-// cannot be remapped to alternate pins.  For Arduino Uno,
-// Duemilanove, etc., pin 11 = MOSI, pin 12 = MISO, pin 13 = SCK.
+#ifdef ESP8266
+   #define STMPE_CS 16
+   #define TFT_CS   0
+   #define TFT_DC   15
+   #define SD_CS    2
+#endif
+#ifdef __AVR_ATmega32U4__
+   #define STMPE_CS 6
+   #define TFT_CS   9
+   #define TFT_DC   10
+   #define SD_CS    5
+#endif
+#ifdef ARDUINO_SAMD_FEATHER_M0
+   #define STMPE_CS 6
+   #define TFT_CS   9
+   #define TFT_DC   10
+   #define SD_CS    5
+#endif
+#ifdef TEENSYDUINO
+   #define TFT_DC   10
+   #define TFT_CS   4
+   #define STMPE_CS 3
+   #define SD_CS    8
+#endif
+#ifdef ARDUINO_STM32_FEATHER
+   #define TFT_DC   PB4
+   #define TFT_CS   PA15
+   #define STMPE_CS PC7
+   #define SD_CS    PC5
+#endif
 
-#define TFT_DC 9
-#define TFT_CS 10
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+Adafruit_STMPE610 ts = Adafruit_STMPE610(STMPE_CS);
 
-#define SD_CS 4
+
+// This is calibration data for the raw touch data to the screen coordinates
+#define TS_MINX 3800
+#define TS_MAXX 100
+#define TS_MINY 100
+#define TS_MAXY 3750
+
+#define PENRADIUS 3
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
+  delay(10);
+  Serial.println("FeatherWing TFT");
+  if (!ts.begin()) {
+    Serial.println("Couldn't start touchscreen controller");
+    while (1);
+  }
+  Serial.println("Touchscreen started");
+  
   tft.begin();
   tft.fillScreen(ILI9341_BLUE);
   
@@ -48,6 +89,21 @@ void setup(void) {
 }
 
 void loop() {
+  // Retrieve a point  
+  TS_Point p = ts.getPoint();
+  
+  Serial.print("X = "); Serial.print(p.x);
+  Serial.print("\tY = "); Serial.print(p.y);
+  Serial.print("\tPressure = "); Serial.println(p.z);  
+ 
+ 
+  // Scale from ~0->4000 to tft.width using the calibration #'s
+  p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width());
+  p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+
+  if (((p.y-PENRADIUS) > 0) && ((p.y+PENRADIUS) < tft.height())) {
+    tft.fillCircle(p.x, p.y, PENRADIUS, ILI9341_RED);
+  }
 }
 
 // This function opens a Windows Bitmap (BMP) file and

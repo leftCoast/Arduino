@@ -51,7 +51,7 @@ boolean adafruit_1947_Obj::dispObjBegin(void) {
   return false;
 }
 
-
+void adafruit_1947_Obj::setRotation(byte inRotation)      { theTFT->setRotation(inRotation); }
 void adafruit_1947_Obj::setTextColor(colorObj* inColor)   { theTFT->setTextColor(inColor->getColor16()); }
 void adafruit_1947_Obj::setTextColor(colorObj* tColor,colorObj* bColor) { theTFT->setTextColor(tColor->getColor16(),bColor->getColor16()); }
 void adafruit_1947_Obj::setTextSize(byte inSize)          { theTFT->setTextSize(inSize); }

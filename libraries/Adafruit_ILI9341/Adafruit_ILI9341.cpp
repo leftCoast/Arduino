@@ -14,11 +14,44 @@
  ****************************************************/
 
 #include "Adafruit_ILI9341.h"
-#include <avr/pgmspace.h>
+#ifdef __AVR__
+  #include <avr/pgmspace.h>
+#elif defined(ESP8266) || defined(ESP32)
+  #include <pgmspace.h>
+#endif
+
+#ifndef ARDUINO_STM32_FEATHER
+  #include "pins_arduino.h"
+  #include "wiring_private.h"
+#endif
+
 #include <limits.h>
-#include "pins_arduino.h"
-#include "wiring_private.h"
 #include <SPI.h>
+
+
+// If the SPI library has transaction support, these functions
+// establish settings and protect from interference from other
+// libraries.  Otherwise, they simply do nothing.
+#ifdef SPI_HAS_TRANSACTION
+static inline void spi_begin(void) __attribute__((always_inline));
+static inline void spi_begin(void) {
+#if defined (ARDUINO_ARCH_ARC32)
+  // max speed!
+  SPI.beginTransaction(SPISettings(16000000, MSBFIRST, SPI_MODE0));
+#else
+    // max speed!
+  SPI.beginTransaction(SPISettings(24000000, MSBFIRST, SPI_MODE0));
+#endif
+}
+static inline void spi_end(void) __attribute__((always_inline));
+static inline void spi_end(void) {
+  SPI.endTransaction();
+}
+#else
+#define spi_begin()
+#define spi_end()
+#endif
+
 
 // Constructor when using software SPI.  All output pins are configurable.
 Adafruit_ILI9341::Adafruit_ILI9341(int8_t cs, int8_t dc, int8_t mosi,
@@ -49,20 +82,30 @@ void Adafruit_ILI9341::spiwrite(uint8_t c) {
 
   if (hwSPI) {
 #if defined (__AVR__)
-      uint8_t backupSPCR = SPCR;
+  #ifndef SPI_HAS_TRANSACTION
+    uint8_t backupSPCR = SPCR;
     SPCR = mySPCR;
+  #endif
     SPDR = c;
     while(!(SPSR & _BV(SPIF)));
+  #ifndef SPI_HAS_TRANSACTION
     SPCR = backupSPCR;
-#elif defined(TEENSYDUINO)
-    SPI.transfer(c);
-#elif defined (__arm__)
-    SPI.setClockDivider(11); // 8-ish MHz (full! speed!)
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setDataMode(SPI_MODE0);
+  #endif
+#else
     SPI.transfer(c);
 #endif
   } else {
+#if defined(ESP8266) || defined(ESP32) || defined (ARDUINO_ARCH_ARC32)
+    for(uint8_t bit = 0x80; bit; bit >>= 1) {
+      if(c & bit) {
+	digitalWrite(_mosi, HIGH); 
+      } else {
+	digitalWrite(_mosi, LOW); 
+      }
+      digitalWrite(_sclk, HIGH);
+      digitalWrite(_sclk, LOW);
+    }
+#else
     // Fast SPI bitbang swiped from LPD8806 library
     for(uint8_t bit = 0x80; bit; bit >>= 1) {
       if(c & bit) {
@@ -77,55 +120,49 @@ void Adafruit_ILI9341::spiwrite(uint8_t c) {
       //digitalWrite(_sclk, LOW);
       *clkport &= ~clkpinmask;
     }
+#endif
   }
 }
 
 
 void Adafruit_ILI9341::writecommand(uint8_t c) {
-  *dcport &=  ~dcpinmask;
-  //digitalWrite(_dc, LOW);
-  //*clkport &= ~clkpinmask; // clkport is a NULL pointer when hwSPI==true
-  //digitalWrite(_sclk, LOW);
+#if defined (USE_FAST_PINIO)
+  *dcport &= ~dcpinmask;
   *csport &= ~cspinmask;
-  //digitalWrite(_cs, LOW);
+#else
+  digitalWrite(_dc, LOW);
+  digitalWrite(_sclk, LOW);
+  digitalWrite(_cs, LOW);
+#endif
 
   spiwrite(c);
 
+#if defined (USE_FAST_PINIO)
   *csport |= cspinmask;
-  //digitalWrite(_cs, HIGH);
+#else
+  digitalWrite(_cs, HIGH);
+#endif
 }
 
 
 void Adafruit_ILI9341::writedata(uint8_t c) {
+#if defined (USE_FAST_PINIO)
   *dcport |=  dcpinmask;
-  //digitalWrite(_dc, HIGH);
-  //*clkport &= ~clkpinmask; // clkport is a NULL pointer when hwSPI==true
-  //digitalWrite(_sclk, LOW);
   *csport &= ~cspinmask;
-  //digitalWrite(_cs, LOW);
-  
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
+
   spiwrite(c);
 
-  //digitalWrite(_cs, HIGH);
+#if defined (USE_FAST_PINIO)
   *csport |= cspinmask;
+#else
+  digitalWrite(_cs, HIGH);
+#endif
 } 
 
-// If the SPI library has transaction support, these functions
-// establish settings and protect from interference from other
-// libraries.  Otherwise, they simply do nothing.
-#ifdef SPI_HAS_TRANSACTION
-static inline void spi_begin(void) __attribute__((always_inline));
-static inline void spi_begin(void) {
-  SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-}
-static inline void spi_end(void) __attribute__((always_inline));
-static inline void spi_end(void) {
-  SPI.endTransaction();
-}
-#else
-#define spi_begin()
-#define spi_end()
-#endif
 
 // Rather than a bazillion writecommand() and writedata() calls, screen
 // initialization commands and arguments are organized in these tables
@@ -169,39 +206,42 @@ void Adafruit_ILI9341::begin(void) {
 
   pinMode(_dc, OUTPUT);
   pinMode(_cs, OUTPUT);
+
+#if defined (USE_FAST_PINIO)
   csport    = portOutputRegister(digitalPinToPort(_cs));
   cspinmask = digitalPinToBitMask(_cs);
   dcport    = portOutputRegister(digitalPinToPort(_dc));
   dcpinmask = digitalPinToBitMask(_dc);
+#endif
 
   if(hwSPI) { // Using hardware SPI
-#if defined (__AVR__)
     SPI.begin();
-    SPI.setClockDivider(SPI_CLOCK_DIV2); // 8 MHz (full! speed!)
+
+#ifndef SPI_HAS_TRANSACTION
     SPI.setBitOrder(MSBFIRST);
     SPI.setDataMode(SPI_MODE0);
+  #if defined (_AVR__)
+    SPI.setClockDivider(SPI_CLOCK_DIV2); // 8 MHz (full! speed!)
     mySPCR = SPCR;
-#elif defined(TEENSYDUINO)
-    SPI.begin();
+  #elif defined(TEENSYDUINO)
     SPI.setClockDivider(SPI_CLOCK_DIV2); // 8 MHz (full! speed!)
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setDataMode(SPI_MODE0);
-#elif defined (__arm__)
-      SPI.begin();
-      SPI.setClockDivider(11); // 8-ish MHz (full! speed!)
-      SPI.setBitOrder(MSBFIRST);
-      SPI.setDataMode(SPI_MODE0);
+  #elif defined (__arm__)
+    SPI.setClockDivider(11); // 8-ish MHz (full! speed!)
+  #endif
 #endif
   } else {
     pinMode(_sclk, OUTPUT);
     pinMode(_mosi, OUTPUT);
     pinMode(_miso, INPUT);
+
+#if defined (USE_FAST_PINIO)
     clkport     = portOutputRegister(digitalPinToPort(_sclk));
     clkpinmask  = digitalPinToBitMask(_sclk);
     mosiport    = portOutputRegister(digitalPinToPort(_mosi));
     mosipinmask = digitalPinToBitMask(_mosi);
     *clkport   &= ~clkpinmask;
     *mosiport  &= ~mosipinmask;
+#endif
   }
 
   // toggle RST low to reset
@@ -271,7 +311,7 @@ void Adafruit_ILI9341::begin(void) {
   writedata(0x10);   //SAP[2:0];BT[3:0] 
  
   writecommand(ILI9341_VMCTR1);    //VCM control 
-  writedata(0x3e); //对比度调节
+  writedata(0x3e); //露脭卤脠露脠碌梅陆脷
   writedata(0x28); 
   
   writecommand(ILI9341_VMCTR2);    //VCM control2 
@@ -363,16 +403,24 @@ void Adafruit_ILI9341::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1,
 
 void Adafruit_ILI9341::pushColor(uint16_t color) {
   if (hwSPI) spi_begin();
-  //digitalWrite(_dc, HIGH);
+
+#if defined(USE_FAST_PINIO)
   *dcport |=  dcpinmask;
-  //digitalWrite(_cs, LOW);
   *csport &= ~cspinmask;
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
 
   spiwrite(color >> 8);
   spiwrite(color);
 
+#if defined(USE_FAST_PINIO)
   *csport |= cspinmask;
-  //digitalWrite(_cs, HIGH);
+#else
+  digitalWrite(_cs, HIGH);
+#endif
+
   if (hwSPI) spi_end();
 }
 
@@ -383,16 +431,23 @@ void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if (hwSPI) spi_begin();
   setAddrWindow(x,y,x+1,y+1);
 
-  //digitalWrite(_dc, HIGH);
+#if defined(USE_FAST_PINIO)
   *dcport |=  dcpinmask;
-  //digitalWrite(_cs, LOW);
   *csport &= ~cspinmask;
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
 
   spiwrite(color >> 8);
   spiwrite(color);
 
+#if defined(USE_FAST_PINIO)
   *csport |= cspinmask;
-  //digitalWrite(_cs, HIGH);
+#else
+  digitalWrite(_cs, HIGH);
+#endif
+
   if (hwSPI) spi_end();
 }
 
@@ -411,17 +466,25 @@ void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
 
   uint8_t hi = color >> 8, lo = color;
 
+#if defined(USE_FAST_PINIO)
   *dcport |=  dcpinmask;
-  //digitalWrite(_dc, HIGH);
   *csport &= ~cspinmask;
-  //digitalWrite(_cs, LOW);
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
 
   while (h--) {
     spiwrite(hi);
     spiwrite(lo);
   }
+
+#if defined(USE_FAST_PINIO)
   *csport |= cspinmask;
-  //digitalWrite(_cs, HIGH);
+#else
+  digitalWrite(_cs, HIGH);
+#endif
+
   if (hwSPI) spi_end();
 }
 
@@ -436,16 +499,22 @@ void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
   setAddrWindow(x, y, x+w-1, y);
 
   uint8_t hi = color >> 8, lo = color;
+#if defined(USE_FAST_PINIO)
   *dcport |=  dcpinmask;
   *csport &= ~cspinmask;
-  //digitalWrite(_dc, HIGH);
-  //digitalWrite(_cs, LOW);
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
   while (w--) {
     spiwrite(hi);
     spiwrite(lo);
   }
+#if defined(USE_FAST_PINIO)
   *csport |= cspinmask;
-  //digitalWrite(_cs, HIGH);
+#else
+  digitalWrite(_cs, HIGH);
+#endif
   if (hwSPI) spi_end();
 }
 
@@ -467,10 +536,13 @@ void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 
   uint8_t hi = color >> 8, lo = color;
 
+#if defined(USE_FAST_PINIO)
   *dcport |=  dcpinmask;
-  //digitalWrite(_dc, HIGH);
   *csport &= ~cspinmask;
-  //digitalWrite(_cs, LOW);
+#else
+  digitalWrite(_dc, HIGH);
+  digitalWrite(_cs, LOW);
+#endif
 
   for(y=h; y>0; y--) {
     for(x=w; x>0; x--) {
@@ -478,8 +550,12 @@ void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
       spiwrite(lo);
     }
   }
-  //digitalWrite(_cs, HIGH);
+#if defined(USE_FAST_PINIO)
   *csport |= cspinmask;
+#else
+  digitalWrite(_cs, HIGH);
+#endif
+
   if (hwSPI) spi_end();
 }
 
@@ -544,20 +620,21 @@ uint8_t Adafruit_ILI9341::spiread(void) {
 
   if (hwSPI) {
 #if defined (__AVR__)
+  #ifndef SPI_HAS_TRANSACTION
     uint8_t backupSPCR = SPCR;
     SPCR = mySPCR;
+  #endif
     SPDR = 0x00;
     while(!(SPSR & _BV(SPIF)));
     r = SPDR;
+
+  #ifndef SPI_HAS_TRANSACTION
     SPCR = backupSPCR;
-#elif defined(TEENSYDUINO)
-    r = SPI.transfer(0x00);
-#elif defined (__arm__)
-    SPI.setClockDivider(11); // 8-ish MHz (full! speed!)
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setDataMode(SPI_MODE0);
+  #endif
+#else
     r = SPI.transfer(0x00);
 #endif
+
   } else {
 
     for (uint8_t i=0; i<8; i++) {

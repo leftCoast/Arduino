@@ -31,6 +31,7 @@ boolean adafruit_1431_Obj::dispObjBegin(void) {
   return false;
 }
 
+boolean adafruit_1431_Obj::dispObjBegin(int inRotation) { return dispObjBegin(); }
 
 void adafruit_1431_Obj::setTextColor(colorObj* inColor)   { theOLED->setTextColor(inColor->getColor16()); }
 void adafruit_1431_Obj::setTextColor(colorObj* tColor,colorObj* bColor) { theOLED->setTextColor(tColor->getColor16(),bColor->getColor16()); }

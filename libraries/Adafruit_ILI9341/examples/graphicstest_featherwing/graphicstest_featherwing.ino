@@ -1,10 +1,9 @@
 /***************************************************
-  This is our GFX example for the Adafruit ILI9341 Breakout and Shield
-  ----> http://www.adafruit.com/products/1651
+  This is our GFX example for the Adafruit ILI9341 TFT FeatherWing
+  ----> http://www.adafruit.com/products/3315
 
   Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
+
   Adafruit invests time and resources providing this open source code,
   please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
@@ -13,24 +12,49 @@
   MIT license, all text above must be included in any redistribution
  ****************************************************/
 
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
 
-#include "SPI.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
+#ifdef ESP8266
+   #define STMPE_CS 16
+   #define TFT_CS   0
+   #define TFT_DC   15
+   #define SD_CS    2
+#endif
+#ifdef __AVR_ATmega32U4__
+   #define STMPE_CS 6
+   #define TFT_CS   9
+   #define TFT_DC   10
+   #define SD_CS    5
+#endif
+#ifdef ARDUINO_SAMD_FEATHER_M0
+   #define STMPE_CS 6
+   #define TFT_CS   9
+   #define TFT_DC   10
+   #define SD_CS    5
+#endif
+#ifdef TEENSYDUINO
+   #define TFT_DC   10
+   #define TFT_CS   4
+   #define STMPE_CS 3
+   #define SD_CS    8
+#endif
+#ifdef ARDUINO_STM32_FEATHER
+   #define TFT_DC   PB4
+   #define TFT_CS   PA15
+   #define STMPE_CS PC7
+   #define SD_CS    PC5
+#endif
 
-// For the Adafruit shield, these are the default.
-#define TFT_DC 9
-#define TFT_CS 10
-
-// Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-// If using the breakout, change pins as desired
-//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("ILI9341 Test!"); 
- 
+  Serial.begin(115200);
+
+  delay(10);
+  Serial.println("FeatherWing TFT Test!");
+
   tft.begin();
 
   // read diagnostics (optional but can help debug problems)

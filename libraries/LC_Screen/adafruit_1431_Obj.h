@@ -16,6 +16,7 @@ class adafruit_1431_Obj : public displayObj {
   ~adafruit_1431_Obj(void);
   
   virtual boolean dispObjBegin(void);
+  virtual boolean dispObjBegin(int inRotation);
   virtual void    setTextColor(colorObj* tColor);
   virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void    setTextSize(byte inSize);

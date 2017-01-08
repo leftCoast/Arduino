@@ -51,12 +51,14 @@ public:
   virtual void      drawSelf(void);                // Inherit this one and make it yours.
   virtual boolean   acceptClick(point where);
   virtual void      clickOver(void);
-  virtual void      doAction(void);      // Override me for action!
+  virtual void      doAction(void);      				// Override me for action!
+  			 void		  setCallback(void(*funct)(void));		// Or use a callback?
   
 protected:
   boolean        needRefresh;
   boolean        wantsClicks;
   boolean        clicked;
+  void			  (*callback)(void);
 };
 
 
