@@ -31,7 +31,7 @@ void setup() {
   
    Serial.begin(9600);
    if (initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
-     Serial.println("Got sreen.");
+     Serial.println("Got screen.");
    } else {
      Serial.println("Scrren failed, halting program.");
      while(true);                  //  kill the program.
@@ -42,7 +42,9 @@ void setup() {
    message.draw();
 
    button.draw();
+   Serial.println("Setting callback");
    button.setCallback(&callback);
+   Serial.println("Callback should be set.");
    viewList.addObj(&button);
 }
 

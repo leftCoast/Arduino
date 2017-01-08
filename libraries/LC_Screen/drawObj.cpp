@@ -124,12 +124,15 @@ void   drawObj::clickOver(void) {
     clicked = false;
 }
             
-            
+
 // Override me for action!
 void drawObj::doAction(void) {
 	Serial.println("doAction()");
 	if (callback) {
+        Serial.print("callback is not NULL : ");
+        Serial.println((unsigned int)callback);
 		*(callback);
+        Serial.println("Did it work?");
 	}
 }
 

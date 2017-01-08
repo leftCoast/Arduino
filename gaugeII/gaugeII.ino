@@ -1,15 +1,28 @@
 #include <SD.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
-#include <TouchScreen.h>
+#include <Adafruit_ILI9341.h> // Hardware-specific library
 
+
+#include <blinker.h>
 #include <colorObj.h>
-#include <screenObj.h>
+#include <idlers.h>
+#include <lists.h>
+#include <mapper.h>
+#include <multiMap.h>
+#include <PulseOut.h>
+#include <runningAvg.h>
+#include <servo.h>
+#include <timeObj.h>
+
+#include <adafruit_1431_Obj.h>
+#include <adafruit_1947_Obj.h>
+#include <bmpObj.h>
+#include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
-#include <bmpObj.h>
-#include <timeObj.h>
+#include <screen.h>
+
 
 #define NUM_SIZE   2
 #define LEFT_EDGE  45
@@ -46,13 +59,15 @@ drawObj mObject;
 void setup(void) {
 
 //TSPoint inDest;
-TS_Point inDest;
+point inDest;
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
   pinMode(pumpPin,OUTPUT);      // Whatever happens, shut off the pump.
   digitalWrite(pumpPin,HIGH);
-  if (initScreen(INV_PORTRAIT)) {
-    screen->fillScreen(WHITE);
+  Serial.println("ini Screen..");
+  if (initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
+    Serial.print("Success!");
+    screen->fillScreen(&black);
     if (initSDCard()) {
       inDest.x = 0;
       inDest.y = 0;
@@ -61,8 +76,16 @@ TS_Point inDest;
       mBitmap.getInfo();
       if (mBitmap.haveInfo){
         mBitmap.plotBmp();
-      }
+      } else {
+       Serial.println("No bitmap!");
+      } 
+    } else {
+      Serial.println("No SD card!");
     }
+  } else {
+    Serial.println("Fail! Halting..");
+     while(true);
+  }
 
     vOutVac.setLocation(LEFT_EDGE,BASELINE1);
     vOutVac.setJustify(TEXT_RIGHT);
@@ -80,7 +103,7 @@ TS_Point inDest;
     //mObject.draw();
 
     mTimer.start();
-  }
+  
 }
 
 
@@ -117,7 +140,7 @@ void readings(void) {
 
 
 void loop(void) {
-  TS_Point inPt;
+  point inPt;
 
   readings();
   inPt = screen->getPoint();
