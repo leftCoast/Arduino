@@ -80,7 +80,6 @@ void label::setJustify(word inJustify) {
 
 void label::setColors(colorObj* tColor, colorObj* bColor) {
 
-  Serial.println(F("Here we are setting colors.."));
   textColor.setColor(tColor);
   backColor.setColor(bColor);
   transp = false;           // we set both.

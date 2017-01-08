@@ -79,21 +79,19 @@ drawObj button;               // drawObj can be used as a crude button. Best to 
 scrBlinker blinker(250);      // An example of inheriting some goodies for an automatic blinker.
 scrBlinker blinker2;
 
-colorObj  backColor;          // We'll build up a nice background color here.
-colorObj  liteOnColor;        // These next two are for setting up the blinker colors.
-colorObj  liteOffColor;
-
 int clickCount = 0;           // Something for the button to change.
 
 // Here's how you hook it all up.
 void setup() {
 
+    colorObj  backColor;          // We'll build up a nice background color.
+    colorObj  liteOnColor;        // These next two are for setting up the blinker colors.
+    colorObj  liteOffColor;
+    
    // Initalize the screen hardware.
    //Serial.begin(9600);
-   if (initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
-     Serial.println(F("Got screen."));
-   } else {
-     Serial.println(F("Screen failed, halting program."));
+   if (!initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
+     //Serial.println(F("Screen failed, halting program."));
      while(true);                  //  kill the program.
    }
 
