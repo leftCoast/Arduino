@@ -33,6 +33,8 @@ public :
   virtual void fillScreenGradient(colorObj* startColor,colorObj* endColor,boolean vertical=true);
   virtual void fillRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor);
   virtual void drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor);
+  virtual void drawCircle(word locX,word locY,word inDiam, colorObj* inColor);
+  virtual void fillCircle(word locX,word locY,word inDiam, colorObj* inColor);
   virtual void drawPixel(word x,word y,colorObj* pColor);
     
   virtual void drawPixelInvert(word x,word y);

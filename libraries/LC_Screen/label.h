@@ -8,6 +8,8 @@
 #define CHAR_HEIGHT 8     // Actual size is 8 * text size.
 #define DEF_PRECISION 2   // Number of digits past decimal point.
 
+#define TEMP_BUFF_SIZE 32 // Temp buff for doing text formatting and things.
+								  // Think about what you'll need here. Its important!
 enum {
   TEXT_RIGHT,
   TEXT_LEFT,
@@ -28,10 +30,8 @@ public :
   
   void setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
   void setJustify(word inJustify);
-  void setColors(colorObj tColor);
-  void setColors(word tColor);
-  void setColors(colorObj textColor, colorObj backColor);
-  void setColors(word textColor, word backColor);
+  void setColors(colorObj* tColor);
+  void setColors(colorObj* tColor, colorObj* bColor);
   void setPrecision(int inPrec);
   void setValue(int val);
   void setValue(unsigned long val);
@@ -48,13 +48,13 @@ public :
   void initLabel(void);
   void freeBuff(void);
   
-  word    textSize;
-  word    justify;
-  word    backColor;
-  word    textColor;
-  boolean transp;
-  char*   buff;
-  int     prec;      // For formatting floats.
+  word        textSize;
+  word    	  justify;
+  colorObj    backColor;
+  colorObj    textColor;
+  boolean     transp;
+  char*       buff;
+  int         prec;      // For formatting floats.
 };
 
 

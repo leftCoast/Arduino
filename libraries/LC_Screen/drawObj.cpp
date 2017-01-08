@@ -102,6 +102,10 @@ void  drawObj::drawSelf(void) {
 }
 
 
+// The ability to control this is handy..
+void drawObj::clickable(boolean inWantsClicks) { wantsClicks = inWantsClicks; }
+
+
 // Manager has detected a fresh click, is it ours?
 boolean   drawObj::acceptClick(point where) {
     
@@ -125,14 +129,11 @@ void   drawObj::clickOver(void) {
 }
             
 
-// Override me for action!
+// Override me for different action.
 void drawObj::doAction(void) {
-	Serial.println("doAction()");
+
 	if (callback) {
-        Serial.print("callback is not NULL : ");
-        Serial.println((unsigned int)callback);
-		*(callback);
-        Serial.println("Did it work?");
+		  callback();
 	}
 }
 

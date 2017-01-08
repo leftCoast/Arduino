@@ -1,7 +1,5 @@
 #include "adafruit_1947_Obj.h"
 
-#define swap(a, b) { int16_t t = a; a = b; b = t; }
-
 adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST,byte inMISO)
   :displayObj(true,true,true,true,false) {
 
@@ -62,6 +60,11 @@ void adafruit_1947_Obj::fillRect(word locX,word locY,word width,word height,colo
 void adafruit_1947_Obj::drawRect(word locX,word locY,word width,word height,colorObj* inColor) { theTFT->drawRect(locX, locY, width, height,inColor->getColor16()); }
 void adafruit_1947_Obj::fillRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ theTFT->fillRoundRect(locX,locY,width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ theTFT->drawRoundRect(locX,locY,width,height,radius,inColor->getColor16()); }
+
+void adafruit_1947_Obj::drawCircle(word locX,word locY,word inDiam, colorObj* inColor) { theTFT->drawCircle(locX,locY,inDiam/2,inColor->getColor16()); }
+void adafruit_1947_Obj::fillCircle(word locX,word locY,word inDiam, colorObj* inColor) { theTFT->fillCircle(locX,locY,inDiam/2,inColor->getColor16()); }
+  
+  
 void adafruit_1947_Obj::drawPixel(word x,word y,colorObj* pColor) { theTFT->drawPixel(x,y,pColor->getColor16()); }
 	 
 point adafruit_1947_Obj::getPoint(void) {

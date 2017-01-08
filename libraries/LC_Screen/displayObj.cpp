@@ -25,6 +25,8 @@ void displayObj::fillRectGradient(word inX,word inY,word inXSize,word inYSize,co
 void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,boolean vertical) { }
 void displayObj::fillRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ }
 void displayObj::drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ }
+void displayObj::drawCircle(word locX,word locY,word inDiam, colorObj* inColor){ }
+void displayObj::fillCircle(word locX,word locY,word inDiam, colorObj* inColor){ }
 void displayObj::drawPixel(word x,word y,colorObj* pColor) { }
 void displayObj::drawPixelInvert(word x,word y) { }
 void displayObj::frameRectInvert(word x,word y,word width,word height) { }

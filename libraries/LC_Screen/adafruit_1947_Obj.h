@@ -19,6 +19,10 @@
 #define INV_PORTRAIT  2  // USB down
 #define INV_LANDSCAPE 3  // USB right
 
+#ifndef swap
+#define swap(a, b) { int16_t t = a; a = b; b = t; }
+#endif
+
 class adafruit_1947_Obj : public displayObj {
 
   public :
@@ -37,6 +41,8 @@ class adafruit_1947_Obj : public displayObj {
   virtual void    drawRect(word locX,word locY,word width,word height,colorObj* inColor);
   virtual void    fillRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor);
   virtual void    drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor);
+  virtual void    drawCircle(word locX,word locY,word inDiam, colorObj* inColor);
+  virtual void    fillCircle(word locX,word locY,word inDiam, colorObj* inColor);
   virtual void    drawPixel(word x,word y,colorObj* pColor);
   
   virtual point     getPoint(void);

@@ -1,6 +1,5 @@
 #include "label.h"
-
-#define TEMP_BUFF_SIZE 80    // Temp buff for doing text formatting and things. 
+ 
 char  temp[TEMP_BUFF_SIZE];
 
 label::label() : 
@@ -79,25 +78,17 @@ void label::setJustify(word inJustify) {
 }
 
 
-void label::setColors(word inTextColor, word inBackColor) {
+void label::setColors(colorObj* tColor, colorObj* bColor) {
 
-  textColor = inTextColor;
-  backColor = inBackColor;
+  Serial.println(F("Here we are setting colors.."));
+  textColor.setColor(tColor);
+  backColor.setColor(bColor);
   transp = false;           // we set both.
   needRefresh = true;
 }
 
 
-void label::setColors(colorObj inTextColor, colorObj inBackColor) {
-
-  setColors(inTextColor.getColor16(),inBackColor.getColor16());
-}
-
-
-void label::setColors(colorObj tColor) { setColors(tColor,white); transp = true; }
-
-
-void label::setColors(word tColor)  { setColors(tColor,white); transp = true; }
+void label::setColors(colorObj* tColor) { setColors(tColor,&white); transp = true; }
   
 
 void label::setPrecision(int inPrec) {
@@ -163,14 +154,12 @@ void label::drawSelf(void) {
 
   int numCharsDisp;  // How many we have room for?
   int charDif;     
-  colorObj  tColor(textColor);
-  colorObj  bColor(backColor);
   
   if (buff) {
     if (transp) {
-      screen->setTextColor(&tColor);
+      screen->setTextColor(&textColor);
     } else {
-      screen->setTextColor(&tColor,&bColor);
+      screen->setTextColor(&textColor,&backColor);
     }
     screen->setTextSize(textSize);
     screen->setTextWrap(false);

@@ -49,6 +49,7 @@ public:
           boolean   wantRefresh(void);
           void      draw(void);                    // Call this one. Don't inherit this one.
   virtual void      drawSelf(void);                // Inherit this one and make it yours.
+  		    void		  clickable(boolean inWantsClicks);
   virtual boolean   acceptClick(point where);
   virtual void      clickOver(void);
   virtual void      doAction(void);      				// Override me for action!
@@ -70,7 +71,7 @@ public:
     
             void    addObj(drawObj* newObj);
             boolean checkClicks(void);
-    void    checkRefresh(void);
+            void    checkRefresh(void);
     virtual void    idle(void);
     
             drawObj*    theList;    // Pointer to top of list;
