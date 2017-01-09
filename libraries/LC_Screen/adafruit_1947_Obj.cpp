@@ -62,7 +62,10 @@ void adafruit_1947_Obj::fillRoundRect(word locX,word locY,word width,word height
 void adafruit_1947_Obj::drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ theTFT->drawRoundRect(locX,locY,width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawCircle(word locX,word locY,word inDiam, colorObj* inColor) { drawRoundRect(locX,locY,inDiam,inDiam,inDiam/2,inColor); }
 void adafruit_1947_Obj::fillCircle(word locX,word locY,word inDiam, colorObj* inColor) { fillRoundRect(locX,locY,inDiam,inDiam,inDiam/2,inColor); }
-  
+void adafruit_1947_Obj::drawVLine(word locX,word locY,word height,colorObj* inColor) { theTFT->drawFastVLine(locX,locY,height,inColor->getColor16()); }
+void adafruit_1947_Obj::drawHLine(word locX,word locY,word width,colorObj* inColor) { theTFT->drawFastHLine(locX,locY,width,inColor->getColor16()); }
+void adafruit_1947_Obj::drawLine(word locX,word locY,word locX2,word locY2,colorObj* inColor) { theTFT->drawLine(locX,locY,locX2,locY2,inColor->getColor16()); }
+ 
   
 void adafruit_1947_Obj::drawPixel(word x,word y,colorObj* pColor) { theTFT->drawPixel(x,y,pColor->getColor16()); }
 	 
