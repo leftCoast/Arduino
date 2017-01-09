@@ -19,7 +19,8 @@ public :
 
   virtual void  setLocation(word x, word y);
   virtual void  setSize(word inWidth,word inHeight);
-  virtual void  setRect(rect inRect);                   // Got a rect? Make this one the same.
+  virtual void  setRect(rect* inRect);                  // Got a rect? Make this one the same.
+  virtual void  setRect(point* inPt1,point* inPt2);	  // Or two points..
           word  maxX(void);                             // Where's our last pixel?
           word  maxY(void);                             // Same as obove but in the Y direction.
           word  minX(void);                             // Where's our first pixel?

@@ -34,7 +34,7 @@ class adafruit_1947_Obj : public displayObj {
   virtual void    setTextColor(colorObj* tColor);
   virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void    setTextSize(byte inSize);
-  virtual void    setCursor(int inX,int inY);
+  virtual void    setCursor(word inX,word inY);
   virtual void    drawText(char* inText);
   virtual void    fillScreen(colorObj* inColor);
   virtual void    fillRect(word locX,word locY,word width,word height,colorObj* inColor);

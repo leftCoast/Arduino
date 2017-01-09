@@ -27,6 +27,9 @@ void displayObj::fillRoundRect(word locX,word locY,word width,word height,word r
 void displayObj::drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor){ }
 void displayObj::drawCircle(word locX,word locY,word inDiam, colorObj* inColor){ }
 void displayObj::fillCircle(word locX,word locY,word inDiam, colorObj* inColor){ }
+void displayObj::drawVLine(word locX,word locY,word locY2,colorObj* inColor) { }
+void displayObj::drawHLine(word locX,word locY,word locX2,colorObj* inColor) { }
+void displayObj::drawLine(word locX,word locY,word locX2,word locY2,colorObj* inColor) { }
 void displayObj::drawPixel(word x,word y,colorObj* pColor) { }
 void displayObj::drawPixelInvert(word x,word y) { }
 void displayObj::frameRectInvert(word x,word y,word width,word height) { }

@@ -35,6 +35,9 @@ public :
   virtual void drawRoundRect(word locX,word locY,word width,word height,word radius,colorObj* inColor);
   virtual void drawCircle(word locX,word locY,word inDiam, colorObj* inColor);
   virtual void fillCircle(word locX,word locY,word inDiam, colorObj* inColor);
+  virtual void drawVLine(word locX,word locY,word height,colorObj* inColor);
+  virtual void drawHLine(word locX,word locY,word width,colorObj* inColor);
+  virtual void drawLine(word locX,word locY,word locX2,word locY2,colorObj* inColor);
   virtual void drawPixel(word x,word y,colorObj* pColor);
     
   virtual void drawPixelInvert(word x,word y);

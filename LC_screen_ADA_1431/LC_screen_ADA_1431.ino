@@ -9,10 +9,11 @@
 #include <multiMap.h>           // Like I said, multi mappers for fancy stuff.
 #include <timeObj.h>            // Timers the can be reset and watched.
 
-#include <adafruit_1947_Obj.h>  // The glue code between the Adafruit product# 1947 and the windowing system.
+#include <adafruit_1431_Obj.h>  // The glue code between the Adafruit product# 1947 and the windowing system.
 #include <displayObj.h>         // The Base display command object.
 #include <drawObj.h>            // The base drawing object. Inheit this for making your own things for the screen. Also the refresh and drawing management is in here.
 #include <label.h>              // A simple label object for the screen.
+#include <lineObj.h>            // A line.
 #include <screen.h>             // The screen ties it all together. This is who connects the hardware drivers to the drawing enviroment.
 
 
@@ -64,18 +65,19 @@ void  scrBlinker::drawSelf(void) {
 
   hookup();           
   if (liteOn) {
-    screen->fillCircle(locX + width/2 , locY + width/2, width, &onColor);
+    screen->fillCircle(locX,locY,height,&onColor);
   } else {
-    screen->fillCircle(locX + width/2, locY + width/2, width, &offColor);
+    screen->fillCircle(locX,locY,height,&offColor);
   }
 }
 
 // *********** Meanwile, back to the main program ***********
 
 
+#define NUM_LINES 1           // More than one gets memory tight. But 10 still works on UNOs.
 
-label message("A Label",2);   // A label is all about just getting text and numbers to the screen. 
-drawObj button;               // drawObj can be used as a crude button. Best to inherit them to make more interesting things.
+label message("A Label",1);   // A label is all about just getting text and numbers to the screen. 
+lineObj line[NUM_LINES];      // lineObj is all  about lines. Lets grab a bunch!
 scrBlinker blinker(250);      // An example of inheriting some goodies for an automatic blinker.
 scrBlinker blinker2;
 
@@ -90,7 +92,7 @@ void setup() {
     
    // Initalize the screen hardware.
    //Serial.begin(9600);
-   if (!initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
+   if (!initScreen(ADAFRUIT_1431,PORTRAIT)) {
      //Serial.println(F("Screen failed, halting program."));
      while(true);                  //  kill the program.
    }
@@ -104,13 +106,12 @@ void setup() {
    message.setColors(&white,&backColor);
    viewList.addObj(&message);
 
-   // Now for the button.
-   button.clickable(true);
-   button.setSize(45,30);
-   button.setLocation(100,100);
-   button.setCallback(callback);
-   viewList.addObj(&button);
-
+   // Some nice lines.
+   for(byte i=0;i<NUM_LINES;i++) {
+     line[i].setEnds(10,40,118,40+(4*i));
+     viewList.addObj(&(line[i]));
+   }
+   
    // Now our little custom blinker.
    liteOnColor.setColor(&yellow);
    liteOnColor.blend(&white,20);
@@ -118,19 +119,13 @@ void setup() {
    liteOffColor.blend(&black,70);
    blinker.setColors(&liteOnColor,&liteOffColor);
    blinker.setSize(10,10);
-   blinker.setLocation(200,16);
+   blinker.setLocation(80,16);
    viewList.addObj(&blinker);
 
    // And another..
    blinker2.setSize(10,10);
-   blinker2.setLocation(215,16);
+   blinker2.setLocation(95,16);
    viewList.addObj(&blinker2);
-}
-
-
-// The callback for the button.
-void callback(void) { 
-  message.setValue(++clickCount);
 }
 
 

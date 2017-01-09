@@ -36,10 +36,20 @@ void  rect::setSize(word inWidth,word inHeight) {
 }
 
 
-void rect::setRect(rect inRect) {
+void rect::setRect(rect* inRect) {
   
-  setLocation(inRect.locX,inRect.locY);
-  setSize(inRect.width,inRect.height);
+  setLocation(inRect->locX,inRect->locY);
+  setSize(inRect->width,inRect->height);
+}
+
+void rect::setRect(point* inPt1,point* inPt2) {
+
+  word x = min(inPt1->x,inPt2->x);
+  word y = max(inPt1->y,inPt2->y);
+  word width = abs((int)inPt1->x-(int)inPt2->x);
+  word height = abs((int)inPt1->y-(int)inPt2->y);
+  setLocation(x,y);
+  setSize(width,height);
 }
 
 
