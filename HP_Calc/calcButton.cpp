@@ -8,7 +8,7 @@
 
 extern calculator mCalc;
 extern boolean    buttonPressed;
-       boolean   gSecondFx = false;
+       boolean    gSecondFx = false;
 
 
 colorObj numberActiveBColor(WHITE);
@@ -46,20 +46,6 @@ void setupButtonColors(void) {
   //fxClickedTColor.blend();
 }
 
-/*
-void change2ndFx(boolean setClear) {
-
-  drawObj*    node;
-  calcButton* trace;
-  
-  node = viewList.theList;
-  while(node) {
-    trace = dynamic_cast<calcButton*>(node);
-    if (trace) trace->setSecond(setClear);
-    node = (drawObj*)node->next;
-  }
-}
-*/
 
 calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width, byte inType)
   : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
@@ -172,14 +158,6 @@ void calcButton::doAction(void) {
   buttonPressed = true;            // Tell the calling program we changed something.
 }
 
-/*
-void calcButton::doAction(void) {
-
-  beep();
-  mCalc.buttonClick(fStr);    // Send our fuction label to the calculator object to parse.
-  buttonPressed = true;       // Tell the calling program we changed something.
-}
-*/
 
 void calcButton::beep(void) {
 
@@ -204,7 +182,49 @@ void secondfxButton::doAction(void) {
   beep();
   secondFx = !secondFx;
   gSecondFx = secondFx;
-  needRefresh = true;
+  //needRefresh = true;   // Right now its not actually changing so lets not redraw it.
 }
 
+
+
+degRadButton::degRadButton(word inLocX, word inLocY,byte width,byte height)
+    : calcButton("-------",inLocX,inLocY,width,DEG_RAD_BTN) {
+      
+    setSize(width,height);
+} 
+                  
+
+void  degRadButton::setColors(colorObj* inTColor,colorObj* inHTColor,colorObj* inBColor) {
+
+    tColor.setColor(inTColor);
+    hColor.setColor(inHTColor);
+    bColor.setColor(inBColor);
+    needRefresh = true;
+  }
+
+
+void  degRadButton::drawSelf(void) {
+
+    screen->setTextSize(1);
+    screen->setTextWrap(false);
+    if (clicked) {
+      screen->setTextColor(&hColor, &bColor);
+    } else {
+      screen->setTextColor(&tColor, &bColor);
+    }
+    screen->setCursor(locX + 2, locY + 1);
+    if ( mCalc.getDegrees()) {
+      screen->drawText("Degrees");
+    } else {
+      screen->drawText("Radians");
+    }
+  }
+
+  
+ void  degRadButton::doAction(void) {
+
+    beep();
+    mCalc.toggleDegrees();
+    needRefresh = true;
+ }
 

@@ -28,6 +28,11 @@
 #define  LINE_X2     207
 #define  LINE_Y      DISP_Y + 21
 
+#define DEG_RAD_X       LINE_X1
+#define DEG_RAD_Y       LINE_Y + 5
+#define DEG_RAD_WIDTH   50
+#define DEG_RAD_HEIGHT  16
+
 #define BTN_WIDTH1  30
 #define BTN_WIDTH2  50
 #define BTN_WIDTH3  80
@@ -54,6 +59,7 @@
 
 label XReg(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0"); // ƒ
 lineObj  aLine(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);
+degRadButton degRad(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT); //DISP_COLOR,BACK_COLOR
 
 calcButton btn1 = calcButton("1", BTN_COL_2, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
 calcButton btn2 = calcButton("2", BTN_COL_3, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
@@ -102,7 +108,7 @@ calculator mCalc;           // The calculator object. Feed it key strokes and it
 boolean    buttonPressed;
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   //while(!Serial);
   
   if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
@@ -130,6 +136,9 @@ void loadScreen(void) {
 
   aLine.setColor(DISP_COLOR);
   viewList.addObj(&aLine);
+  
+  degRad.setColors(DISP_COLOR, &white, BACK_COLOR);
+  viewList.addObj(&degRad);
 
   viewList.addObj(&btn1);
   viewList.addObj(&btn2);
