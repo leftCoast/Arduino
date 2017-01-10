@@ -48,7 +48,7 @@ label::~label() {
 void label::initLabel(void) {
 
   textSize = DEF_TEXT_SIZE;
-  setColors(BLACK,WHITE);
+  setColors(&black,&white);
   setJustify(TEXT_LEFT);
   buff = NULL;
   prec = DEF_PRECISION;
@@ -100,7 +100,7 @@ void label::setPrecision(int inPrec) {
 
 
 void label::setValue(int val) {
-
+  
   snprintf (temp,TEMP_BUFF_SIZE,"%d",val);
   setValue(temp);
   needRefresh = true;
@@ -122,7 +122,8 @@ void label::setValue(double val) {
   needRefresh = true;
 }
 
-void label::setValue(float val) { 
+void label::setValue(float val) {
+  
   setValue((double) val); 
 }
 

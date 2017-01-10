@@ -11,7 +11,7 @@ calculator::calculator(void) {
 	z = 0;
 	t = 0;
 	for (int i=0;i<10;i++) { sto[i] = 0; }
-    fix = 4;
+    fix = 2;
 	degrees = true;
     enter = false;
 	fixPressed = false;

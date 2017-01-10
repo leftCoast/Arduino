@@ -7,6 +7,8 @@
 #define EDIT_BTN    1
 #define FX_BTN      2
 
+#define BEEP_PIN    23
+
 class calcButton : public drawObj {
   
   public :
@@ -16,7 +18,8 @@ class calcButton : public drawObj {
           //void    clearInvert(void);
   virtual void    drawSelf(void);
   virtual void    doAction(void); 
-  
+          void    beep(void);
+          
   protected :
           char* fStr;
           //char* aFStr;

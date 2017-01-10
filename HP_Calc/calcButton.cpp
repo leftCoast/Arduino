@@ -149,6 +149,20 @@ void calcButton::doAction(void) {
 
 void calcButton::doAction(void) {
 
+  beep();
   mCalc.buttonClick(fStr);    // Send our fuction label to the calculator object to parse.
   buttonPressed = true;       // Tell the calling program we changed something.
 }
+
+void calcButton::beep(void) {
+
+  for(int i=0;i<20;i++) {
+    digitalWrite(BEEP_PIN, HIGH);
+    delay(1);
+    digitalWrite(BEEP_PIN, LOW);
+    delay(1);
+  }
+  digitalWrite(BEEP_PIN, HIGH);
+}
+  
+

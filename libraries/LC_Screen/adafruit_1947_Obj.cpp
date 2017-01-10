@@ -53,7 +53,8 @@ void adafruit_1947_Obj::setRotation(byte inRotation)      { theTFT->setRotation(
 void adafruit_1947_Obj::setTextColor(colorObj* inColor)   { theTFT->setTextColor(inColor->getColor16()); }
 void adafruit_1947_Obj::setTextColor(colorObj* tColor,colorObj* bColor) { theTFT->setTextColor(tColor->getColor16(),bColor->getColor16()); }
 void adafruit_1947_Obj::setTextSize(byte inSize)          { theTFT->setTextSize(inSize); }
-void adafruit_1947_Obj::setCursor(word inX,word inY)        { theTFT->setCursor(inX,inY); }
+void adafruit_1947_Obj::setTextWrap(boolean wrap) { theTFT->setTextWrap(wrap); }
+void adafruit_1947_Obj::setCursor(word inX,word inY) { theTFT->setCursor(inX,inY); }
 void adafruit_1947_Obj::drawText(char* inText)            { theTFT->print(inText); }
 void adafruit_1947_Obj::fillScreen(colorObj* inColor)     { theTFT->fillScreen(inColor->getColor16()); }
 void adafruit_1947_Obj::fillRect(word locX,word locY,word width,word height,colorObj* inColor) { theTFT->fillRect(locX, locY, width, height,inColor->getColor16()); }

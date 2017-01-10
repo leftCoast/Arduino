@@ -6,11 +6,22 @@
 
 #include "displayObj.h"
 
+/*
+// This block os for Arduino UNO.
 #define ADAFRUIT_1947_SPI_CLK 	13
 #define ADAFRUIT_1947_SPI_MISO	12
 #define ADAFRUIT_1947_SPI_MOSI	11
 #define ADAFRUIT_1947_SPI_CS		10
 #define ADAFRUIT_1947_SPI_DC	 	 9
+#define ADAFRUIT_1947_SPI_RST		-1
+*/
+
+// This block os for Arduino teensy 3.2
+#define ADAFRUIT_1947_SPI_CLK 	13
+#define ADAFRUIT_1947_SPI_MISO	12
+#define ADAFRUIT_1947_SPI_MOSI	11
+#define ADAFRUIT_1947_SPI_CS	10
+#define ADAFRUIT_1947_SPI_DC	 9
 #define ADAFRUIT_1947_SPI_RST		-1
 
 // Rotation
@@ -34,6 +45,7 @@ class adafruit_1947_Obj : public displayObj {
   virtual void    setTextColor(colorObj* tColor);
   virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void    setTextSize(byte inSize);
+  virtual void    setTextWrap(boolean wrap);
   virtual void    setCursor(word inX,word inY);
   virtual void    drawText(char* inText);
   virtual void    fillScreen(colorObj* inColor);

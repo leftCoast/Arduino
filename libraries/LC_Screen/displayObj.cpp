@@ -16,7 +16,7 @@ void displayObj::setTextColor(colorObj* inColor) { }
 void displayObj::setTextColor(colorObj* tColor,colorObj* bColor) { }
 void displayObj::setTextSize(byte inSize) { }
 void displayObj::setTextWrap(boolean inWrap) { }
-void displayObj::setCursor(int inX,int inY) { }
+void displayObj::setCursor(word inX,word inY) { }
 void displayObj::drawText(char* inText) { }
 void displayObj::fillScreen(colorObj* inColor) { }
 void displayObj::fillRect(word locX,word locY,word width,word height,colorObj* inColor) { }

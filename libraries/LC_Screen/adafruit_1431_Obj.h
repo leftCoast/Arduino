@@ -3,11 +3,24 @@
 #include <Adafruit_SSD1351.h>
 #include <SPI.h>
 
+
+// This set is for Arduino UNO & Teensy 3.2
 #define ADAFRUIT_1431_SPI_CLK 	13
 #define ADAFRUIT_1431_SPI_MOSI	11
-#define ADAFRUIT_1431_SPI_CS		 9
-#define ADAFRUIT_1431_SPI_DC	 	 7
-#define ADAFRUIT_1431_SPI_RST		 8
+#define ADAFRUIT_1431_SPI_CS	9
+#define ADAFRUIT_1431_SPI_DC	7
+#define ADAFRUIT_1431_SPI_RST	8
+
+
+/*
+// This set is for Adafruit Feather MO #2995
+#define ADAFRUIT_1431_SPI_CLK 	24
+#define ADAFRUIT_1431_SPI_MOSI	23
+#define ADAFRUIT_1431_SPI_MISO	22
+#define ADAFRUIT_1431_SPI_CS	?   // Free to choose..
+#define ADAFRUIT_1431_SPI_DC	?   // Free to choose..
+#define ADAFRUIT_1431_SPI_RST	?   // Free to choose..
+*/
 
 // Rotation
 #define PORTRAIT      0  // Wires up

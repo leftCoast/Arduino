@@ -7,6 +7,7 @@
 #include <lists.h>              // Link list building tool kit.
 #include <mapper.h>             // Float mappers & multi mappers. Used by colorObj for gradients & blends.
 #include <multiMap.h>           // Like I said, multi mappers for fancy stuff.
+#include <runningAvg.h>
 #include <timeObj.h>            // Timers the can be reset and watched.
 
 #include <adafruit_1431_Obj.h>  // The glue code between the Adafruit product# 1947 and the windowing system.
@@ -76,12 +77,14 @@ void  scrBlinker::drawSelf(void) {
 
 #define NUM_LINES 1           // More than one gets memory tight. But 10 still works on UNOs.
 
-label message("A Label",1);   // A label is all about just getting text and numbers to the screen. 
+label message("-----",1);   // A label is all about just getting text and numbers to the screen.
+label message2("-----",1);
 lineObj line[NUM_LINES];      // lineObj is all  about lines. Lets grab a bunch!
 scrBlinker blinker(250);      // An example of inheriting some goodies for an automatic blinker.
 scrBlinker blinker2;
 
 int clickCount = 0;           // Something for the button to change.
+runningAvg smoother(10);
 
 // Here's how you hook it all up.
 void setup() {
@@ -89,7 +92,9 @@ void setup() {
     colorObj  backColor;          // We'll build up a nice background color.
     colorObj  liteOnColor;        // These next two are for setting up the blinker colors.
     colorObj  liteOffColor;
-    
+
+
+   
    // Initalize the screen hardware.
    //Serial.begin(9600);
    if (!initScreen(ADAFRUIT_1431,PORTRAIT)) {
@@ -102,13 +107,31 @@ void setup() {
    backColor.blend(&green,50);
    screen->fillScreen(&backColor);
 
+   label tempMessage("Raw:",1);
+   tempMessage.setColors(&white,&backColor);
+   tempMessage.setJustify(TEXT_LEFT);
+   tempMessage.setLocation(10,16);
+   tempMessage.draw();
+   tempMessage.setValue("Ave:");
+   tempMessage.setLocation(10,32);
+   tempMessage.draw();
+   
    // Set up our label.
    message.setColors(&white,&backColor);
+   message.setJustify(TEXT_RIGHT);
+   message.setLocation(35,16);
    viewList.addObj(&message);
 
+   // Set up our second label.
+   message2.setColors(&white,&backColor);
+   message2.setJustify(TEXT_RIGHT);
+   message2.setLocation(35,32);
+   message2.setPrecision(0);
+   viewList.addObj(&message2);
+   
    // Some nice lines.
    for(byte i=0;i<NUM_LINES;i++) {
-     line[i].setEnds(10,40,118,40+(4*i));
+     line[i].setEnds(10,45,118,45+(4*i));
      viewList.addObj(&(line[i]));
    }
    
@@ -126,6 +149,7 @@ void setup() {
    blinker2.setSize(10,10);
    blinker2.setLocation(95,16);
    viewList.addObj(&blinker2);
+   
 }
 
 
@@ -133,6 +157,14 @@ void setup() {
 // Just let the first line be idle();
 // Try NOT to use Delay().
 void loop() {
+
+  int   potVal;
+  float averageVal;
   
   idle();
+  potVal = analogRead(A5);
+  potVal = potVal>>1;
+  averageVal = smoother.addData(potVal);
+  message.setValue(potVal<<1);
+  message2.setValue(averageVal*2);
 }

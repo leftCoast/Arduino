@@ -100,23 +100,25 @@ void setup() {
   //Serial.begin(9600);
   //while(!Serial);
   
-  if (initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
-    Serial.println("Got screen");
+  if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
+    Serial.println(F("Got screen"));
     screen->fillScreen(&black);
     loadScreen();
-    Serial.println("Show Display");
+    Serial.println(F("Show Display"));
     screen->drawRect(BTN_COL_1 - 3, DISP_Y - 3, ((BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1) + 5, 22, DISP_COLOR);
-  } else Serial.println("Screen failed");
+  } else Serial.println(F("Screen failed"));
   buttonPressed = false;
+  pinMode(BEEP_PIN, OUTPUT);
+  digitalWrite(BEEP_PIN, HIGH); //Means off.
 }
 
 
 void loadScreen(void) {
 
-  Serial.println("Loading screen");
+  Serial.println(F("Loading screen"));
   setupButtonColors();
   XReg.setTextSize(TEXT_SIZE);
-  XReg.setColors(DISP_COLOR->getColor16(), BACK_COLOR->getColor16());
+  XReg.setColors(DISP_COLOR, BACK_COLOR);
   XReg.setJustify(TEXT_RIGHT);
   XReg.setPrecision(mCalc.getFixVal());
   viewList.addObj(&XReg);
