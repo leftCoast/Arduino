@@ -9,7 +9,8 @@ class lineObj : public drawObj {
 
 public:
              lineObj(void);
-  
+  			 lineObj(word x1,word y1,word x2,word y2,colorObj* inColor);
+  			 
         void setColor(colorObj* inColor);
         void setSize(byte inSize);                      // line width. Sadly, unsuported.
         void setEnds(word x1,word y1,word x2,word y2);

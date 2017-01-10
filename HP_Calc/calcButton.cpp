@@ -8,6 +8,8 @@
 
 extern calculator mCalc;
 extern boolean    buttonPressed;
+       boolean   gSecondFx = false;
+
 
 colorObj numberActiveBColor(WHITE);
 colorObj numberActiveTColor(BLACK);
@@ -44,6 +46,20 @@ void setupButtonColors(void) {
   //fxClickedTColor.blend();
 }
 
+/*
+void change2ndFx(boolean setClear) {
+
+  drawObj*    node;
+  calcButton* trace;
+  
+  node = viewList.theList;
+  while(node) {
+    trace = dynamic_cast<calcButton*>(node);
+    if (trace) trace->setSecond(setClear);
+    node = (drawObj*)node->next;
+  }
+}
+*/
 
 calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width, byte inType)
   : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
@@ -52,11 +68,11 @@ calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width, byte 
   fStr = (char*) malloc(numChars);
   strcpy(fStr, inFStr);
   bType = inType;
-  //aFStr = NULL;
-  //invert = false;
+  aFStr = NULL;
+  secondFx = false;
 }
 
-/*
+
 calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word inLocY, byte width, byte inType)
   : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
 
@@ -69,21 +85,17 @@ calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word inLocY, by
   strcpy(aFStr, inAFStr);
   
   bType = inType;
-  invert = false;
+  secondFx = false;
 }
 
 
-void calcButton::setInvert(void) {
-  invert = true;
-  needRefresh = true;
-}
+void calcButton::idle(void) {
 
-
-void calcButton::clearInvert(void) {
-  invert = false;
-  needRefresh = true;
+  if (aFStr && gSecondFx!=secondFx) {
+    secondFx = gSecondFx;
+    needRefresh = true;
+  }
 }
-*/
 
 
 void calcButton::drawSelf(void) {
@@ -92,7 +104,8 @@ void calcButton::drawSelf(void) {
   colorObj* touchedBaseColor;
   colorObj* activeTextColor;
   colorObj* touchedTextColor;
-
+  
+  hookup();                   // Need to do a hookup, this is a good time.
   switch (bType) {
     case NUMBER_BTN :
       activeBaseColor = &numberActiveBColor;
@@ -109,7 +122,11 @@ void calcButton::drawSelf(void) {
     case FX_BTN :
       activeBaseColor = &fxActiveBColor;
       touchedBaseColor = &fxClickedBColor;
-      activeTextColor = &fxActiveTColor;
+      if (secondFx && aFStr ) {                 // We sportin' a second fx? Let's show it child!
+        activeTextColor = &editActiveBColor;
+      } else {
+        activeTextColor = &fxActiveTColor;
+      }
       touchedTextColor = &fxClickedTColor;
       break;
   }
@@ -127,32 +144,42 @@ void calcButton::drawSelf(void) {
   screen->setTextSize(TEXT_SIZE);
   screen->setTextWrap(false);
   word dispWidth = width - (2 * RADIUS);
-  word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(fStr)) - 1;
-  if (dispWidth > textWidth) {
-    screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
-    screen->drawText(fStr);
+  if (secondFx && aFStr ) {
+    word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(aFStr)) - 1;
+    if (dispWidth > textWidth) {
+      screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
+      screen->drawText(aFStr);
+    }
+  } else {
+    word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(fStr)) - 1;
+    if (dispWidth > textWidth) {
+      screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
+      screen->drawText(fStr);
+    }
   }
 }
 
 
-/*
 void calcButton::doAction(void) {
 
-  if (invert) {
-    mCalc.buttonClick(aFStr);    // Send our fuction label to the calculator object to parse.
+  beep();
+  if (secondFx && aFStr ) {        // its second function time, if we have a second function do it.
+    mCalc.buttonClick(aFStr);      // Send our fuction label to the calculator object to parse.
   } else {
-    mCalc.buttonClick(fStr);    // Send our fuction label to the calculator object to parse.
+    mCalc.buttonClick(fStr);        // Send our fuction label to the calculator object to parse.
   }
-  buttonPressed = true;       // Tell the calling program we changed something.
+  gSecondFx = false;                // First keystroke clears it.
+  buttonPressed = true;            // Tell the calling program we changed something.
 }
-*/
 
+/*
 void calcButton::doAction(void) {
 
   beep();
   mCalc.buttonClick(fStr);    // Send our fuction label to the calculator object to parse.
   buttonPressed = true;       // Tell the calling program we changed something.
 }
+*/
 
 void calcButton::beep(void) {
 
@@ -165,4 +192,19 @@ void calcButton::beep(void) {
   digitalWrite(BEEP_PIN, HIGH);
 }
   
+
+
+secondfxButton::secondfxButton(char* inFStr,word inLocX, word inLocY,byte width,byte inType)
+  : calcButton(inFStr,inLocX,inLocY,width,inType) { }
+
+void secondfxButton::idle() { secondFx = gSecondFx; }         // This one works different..
+
+void secondfxButton::doAction(void) {
+  
+  beep();
+  secondFx = !secondFx;
+  gSecondFx = secondFx;
+  needRefresh = true;
+}
+
 

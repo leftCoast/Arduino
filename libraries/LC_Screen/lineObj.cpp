@@ -1,5 +1,6 @@
 #include "lineObj.h"
 
+// Default is a black line across the default 16x16 rectangle.
 lineObj::lineObj(void) { 
 
     color.setColor(&black);
@@ -8,6 +9,13 @@ lineObj::lineObj(void) {
 }
 
 
+lineObj::lineObj(word x1,word y1,word x2,word y2,colorObj* inColor) {
+
+	setColor(inColor);
+	setEnds(x1,y1,x2,y2);
+}
+	
+	
 void lineObj::setColor(colorObj* inColor) {
   
   color.setColor(inColor);

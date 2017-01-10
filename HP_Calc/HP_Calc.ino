@@ -5,6 +5,7 @@
 
 #include <drawObj.h>
 #include <label.h>
+#include <lineObj.h>
 #include <screen.h>
 #include <adafruit_1947_Obj.h>
 
@@ -20,34 +21,39 @@
 
 #define  BACK_COLOR (&black)
 #define  DISP_COLOR (&red)
-#define  DISP_Y     10
+#define  DISP_Y     4
 #define  TEXT_SIZE  2
+
+#define  LINE_X1     22
+#define  LINE_X2     207
+#define  LINE_Y      DISP_Y + 21
 
 #define BTN_WIDTH1  30
 #define BTN_WIDTH2  50
 #define BTN_WIDTH3  80
 
-#define BTN_ROWA_1    40
-#define BTN_ROWA_2    70
-#define BTN_ROWA_3    100
-#define BTN_ROWA_4    130
+#define BTN_ROWA_1    60
+#define BTN_ROWA_2    90
+#define BTN_ROWA_3    120
+#define BTN_ROWA_4    150
 
 #define BTN_COLA_1    25
 #define BTN_COLA_2    90
 #define BTN_COLA_3    155
 
-#define BTN_ROW_1    160
-#define BTN_ROW_2    190
-#define BTN_ROW_3    220
-#define BTN_ROW_4    250
-#define BTN_ROW_5    280
+#define BTN_ROW_1    180
+#define BTN_ROW_2    210
+#define BTN_ROW_3    240
+#define BTN_ROW_4    270
+#define BTN_ROW_5    300
 
 #define BTN_COL_1    25
 #define BTN_COL_2    75
 #define BTN_COL_3    125
 #define BTN_COL_4    175
 
-label XReg(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0");
+label XReg(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0"); // ƒ
+lineObj  aLine(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);
 
 calcButton btn1 = calcButton("1", BTN_COL_2, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
 calcButton btn2 = calcButton("2", BTN_COL_3, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
@@ -73,24 +79,23 @@ calcButton btnPt = calcButton(".", BTN_COL_3, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN)
 calcButton btnPi = calcButton("Pi", BTN_COL_4, BTN_ROW_5, BTN_WIDTH1, NUMBER_BTN);
 
 calcButton btnInvrse = calcButton("1/x", BTN_COLA_1, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-calcButton btnRoot = calcButton("Srt", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-//calcButton btnRoot = calcButton("√x", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+calcButton btnRoot = calcButton("Srt","y^x", BTN_COLA_2, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 
 
-calcButton btnSwapXY = calcButton("x~y", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-//calcButton btnRollDn = calcButton("Rdn", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
-calcButton btnSto = calcButton("Sto", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-calcButton btnRcl = calcButton("Rcl", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnSwapXY = calcButton("y~x","Rdn", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+//calcButton btnRollDn = calcButton(" ", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
+calcButton btnSto = calcButton(">p",">r", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
+calcButton btnRcl = calcButton("Sto","Rcl", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 
 
-calcButton btnSin = calcButton("sin",BTN_COLA_1, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnCos = calcButton("cos",BTN_COLA_2, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
-calcButton btnTan = calcButton("tan",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnSin = calcButton("sin","asn",BTN_COLA_1, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnCos = calcButton("cos","acs",BTN_COLA_2, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
+calcButton btnTan = calcButton("tan","atn",BTN_COLA_3, BTN_ROWA_2, BTN_WIDTH2, FX_BTN);
 
-calcButton btnASin = calcButton("asn",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
-calcButton btnACos = calcButton("acs",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
-calcButton btnATan = calcButton("atn",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnASin = calcButton("Ln","e^x",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+calcButton btnACos = calcButton("log","t^x",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
+secondfxButton btnATan = secondfxButton("2f",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, EDIT_BTN);
 
 
 calculator mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
@@ -122,6 +127,9 @@ void loadScreen(void) {
   XReg.setJustify(TEXT_RIGHT);
   XReg.setPrecision(mCalc.getFixVal());
   viewList.addObj(&XReg);
+
+  aLine.setColor(DISP_COLOR);
+  viewList.addObj(&aLine);
 
   viewList.addObj(&btn1);
   viewList.addObj(&btn2);

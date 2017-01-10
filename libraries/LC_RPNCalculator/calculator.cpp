@@ -62,7 +62,7 @@ void calculator::buttonClick(const char* inButtonID) {
 	
 	// Like "ENTER", "FIX" sets a boolean for the next keystroke.
 	// So we set boolean flag and bail out.
-	// (Its cleared at the end of tis function.)
+	// (Its cleared at the end of this function.)
 	else if (!strcmp(buttonID,"FIX")) {
         fixPressed = true;
         return;
@@ -78,8 +78,7 @@ void calculator::buttonClick(const char* inButtonID) {
         return;
     }
 	
-	//else if (!strcmp(buttonID,"CLX")) { handleClx();}
-    else if (!strcmp(buttonID,"CX")) { handleClx();}    // For arduino.
+    else if (!strcmp(buttonID,"CLX")||!strcmp(buttonID,"CX")) { handleClx();}
 	else if (!strcmp(buttonID,"RDN")) { handleRollDown();}
 	else if (!strcmp(buttonID,"+")) { xyFunction(y+x); }
 	else if (!strcmp(buttonID,"-")) { xyFunction(y-x); }
@@ -93,12 +92,11 @@ void calculator::buttonClick(const char* inButtonID) {
 	//else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
     else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
 	else if (!strcmp(buttonID,"Y^X")) { xyFunction(pow(y,x)); }
-	else if (!strcmp(buttonID,"Y~X")) { xyFunction(pow(y,x)); }	// Arduino
     else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
 	else if (!strcmp(buttonID,"1/X")) { xFunction(1/x); }
 	else if (!strcmp(buttonID,"π")) { xFunction(M_PI); }
     else if (!strcmp(buttonID,"PI")) { xFunction(M_PI); }   // arduino
-	else if (!strcmp(buttonID,"X‹›Y")) {
+	else if (!strcmp(buttonID,"Y<>X")||(!strcmp(buttonID,"Y~X"))) {
 		double temp;
 		temp = x;
 		x = y;
@@ -148,12 +146,12 @@ void calculator::buttonClick(const char* inButtonID) {
 		}
 	}
 	else if (!strcmp(buttonID,"LOG")) { xFunction(log10(x)); }
-	else if (!strcmp(buttonID,"10^X")) { xFunction(pow(10,x)); }
+	else if (!strcmp(buttonID,"10^X")||!strcmp(buttonID,"T^X")) { xFunction(pow(10,x)); }
 	else if (!strcmp(buttonID,"LN")) { xFunction(log(x)); }
 	else if (!strcmp(buttonID,"E^X")) { xFunction(exp(x)); }
 	
 	// To rectangular..
-    else if (!strcmp(buttonID,"»R")) {
+    else if (!strcmp(buttonID,"»R")||!strcmp(buttonID,">R")) {
 		double radians;
 		double distance;
 		
@@ -171,7 +169,7 @@ void calculator::buttonClick(const char* inButtonID) {
 	// To polar..
 	// r = √ (x^2 + y^2)
 	//θ = arctan (y/x) where x != 0
-	else if (!strcmp(buttonID,"»P")) {
+	else if (!strcmp(buttonID,"»P")||!strcmp(buttonID,">P")) {
 		
 		double xDistance = x;
 		double yDistance = y;
