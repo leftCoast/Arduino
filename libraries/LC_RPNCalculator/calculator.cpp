@@ -344,7 +344,7 @@ int  calculator::getFixVal(void) {
         if (!point) {
             return 0;
         } else {
-            return (-log10(multiplyer))-1;
+            return (-log10(multiplyer));
         }
     } else
         return fix;

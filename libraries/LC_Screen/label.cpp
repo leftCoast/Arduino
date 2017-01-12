@@ -117,7 +117,7 @@ void label::setValue(unsigned long val) {
 
 void label::setValue(double val) {
 
-  dtostrf(val,0,prec,temp);	
+  dtostrf(val,0,prec,temp);
   setValue(temp);
   needRefresh = true;
 }
