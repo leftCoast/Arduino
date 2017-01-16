@@ -17,6 +17,7 @@
 #include <Adafruit_GFX.h>
 
 #include <calculator.h>
+#include "anime.h"
 #include "calcButton.h"
 
 #define  BACK_COLOR (&black)
@@ -28,10 +29,26 @@
 #define  LINE_X2     207
 #define  LINE_Y      DISP_Y + 21
 
+#define  LINE2_X1     125
+#define  LINE2_X2     207
+#define  LINE2_Y      DISP_Y + 24
+
+#define  LINE3_X1     156
+#define  LINE3_X2     207
+#define  LINE3_Y      DISP_Y + 27
+            
 #define DEG_RAD_X       LINE_X1
-#define DEG_RAD_Y       LINE_Y + 5
+#define DEG_RAD_Y       LINE_Y + 6
 #define DEG_RAD_WIDTH   50
-#define DEG_RAD_HEIGHT  16
+#define DEG_RAD_HEIGHT  15
+
+#define SPRIT_X         DEG_RAD_X + 134
+#define SPRIT_Y         LINE3_Y + 3
+#define SPRIT_WIDTH     51
+#define SPRIT_HEIGHT    8
+#define SPRIT_TIME      25
+
+#define  LINE4_Y        SPRIT_Y + SPRIT_HEIGHT + 2
 
 #define BTN_WIDTH1  30
 #define BTN_WIDTH2  50
@@ -59,7 +76,13 @@
 
 label XReg(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0"); // ƒ
 lineObj  aLine(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);
-degRadButton degRad(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT); //DISP_COLOR,BACK_COLOR
+lineObj  aLine2(LINE2_X1,LINE2_Y,LINE2_X2,LINE2_Y,DISP_COLOR);
+lineObj  aLine3(LINE3_X1,LINE3_Y,LINE3_X2,LINE3_Y,DISP_COLOR);
+lineObj  aLine4(LINE3_X1,LINE4_Y,LINE3_X2,LINE4_Y,DISP_COLOR);
+
+degRadButton degRad(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
+
+anime theSprit(SPRIT_X,SPRIT_Y,SPRIT_WIDTH,SPRIT_HEIGHT,SPRIT_TIME);
 
 calcButton btn1 = calcButton("1", BTN_COL_2, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
 calcButton btn2 = calcButton("2", BTN_COL_3, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
@@ -90,7 +113,6 @@ calcButton btnFix = calcButton("Fix", BTN_COLA_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN
 
 
 calcButton btnSwapXY = calcButton("y~x","Rdn", BTN_COLA_1, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
-//calcButton btnRollDn = calcButton(" ", BTN_COL_3, BTN_ROWA_4, BTN_WIDTH2, FX_BTN);
 calcButton btnSto = calcButton(">p",">r", BTN_COLA_2, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 calcButton btnRcl = calcButton("Sto","Rcl", BTN_COLA_3, BTN_ROWA_3, BTN_WIDTH2, FX_BTN);
 
@@ -136,10 +158,19 @@ void loadScreen(void) {
 
   aLine.setColor(DISP_COLOR);
   viewList.addObj(&aLine);
+  aLine2.setColor(DISP_COLOR);
+  viewList.addObj(&aLine2);
+  aLine3.setColor(DISP_COLOR);
+  viewList.addObj(&aLine3);
+  aLine4.setColor(DISP_COLOR);
+  viewList.addObj(&aLine4);
   
   degRad.setColors(DISP_COLOR, &white, BACK_COLOR);
   viewList.addObj(&degRad);
 
+  theSprit.begin();
+  viewList.addObj(&theSprit);
+  
   viewList.addObj(&btn1);
   viewList.addObj(&btn2);
   viewList.addObj(&btn3);

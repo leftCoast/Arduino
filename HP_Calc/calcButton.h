@@ -1,8 +1,8 @@
 #ifndef calcButton_h
 #define calcButton_h
 
-#include <drawObj.h>
 #include <idlers.h>
+#include <drawObj.h>
 
 #define NUMBER_BTN  0
 #define EDIT_BTN    1
