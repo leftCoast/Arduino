@@ -25,20 +25,20 @@ class colorObj {
 
 public:
   colorObj(byte inRed, byte inGreen, byte inBlue);
-  //colorObj(colorObj* inColor);
+  //colorObj(colorObj* inColor);						// Wanted this one, but the compiler mixes it up with color16.
   colorObj(word color16);
   colorObj(void);
 
   void setColor(byte inRed, byte inGreen, byte inBlue);
   void setColor(word color16);
-  void setColor(colorObj* inColor);
+  void setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
   word getColor16(void);
     
   byte getRed(void);
   byte getGreen(void);
   byte getBlue(void);
 
-  colorObj mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like old blend)
+  colorObj mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like the old blend)
   void     blend(colorObj* mixinColor,byte mixPercent);      // Just blend with myself.
     
 #ifdef PRINT_COLOR    
