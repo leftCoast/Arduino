@@ -7,7 +7,7 @@ drawObj() {
   initLabel();
 }
 
-
+// These next two actually fit our rectangle to the text.
 label::label(char* inText) : 
 drawObj() {
 
@@ -155,7 +155,7 @@ void label::drawSelf(void) {
   int numCharsDisp;  // How many we have room for?
   int charDif;     
   
-  if (buff) {
+	if (buff) {
     if (transp) {
       screen->setTextColor(&textColor);
     } else {
@@ -169,8 +169,7 @@ void label::drawSelf(void) {
     charDif =  numCharsDisp - strlen(buff);
     if (charDif==0) {               //Exact amount..
       screen->drawText(buff);
-    } 
-    else if (charDif>0) {          // Needs padding..
+    } else if (charDif>0) {          // Needs padding..
       switch (justify) {
       case TEXT_LEFT :
         screen->drawText(buff);
@@ -181,18 +180,26 @@ void label::drawSelf(void) {
         screen->drawText(buff);
         break;
       }
-    } 
-    else {                      // Needs truncation..
-      switch (justify) {
-      case TEXT_LEFT :
-        for(int i=0;i<numCharsDisp;i++) screen->drawText((char*)(buff[i]));
-        break;
-      case TEXT_RIGHT :
-        for(int i=0;i<numCharsDisp;i++) screen->drawText((char*)(buff[i-charDif]));  // Subtract 'cause its negitive, dumy!
-        break;
-      }
-    }
-  }
+		} else {                      // Needs truncation..
+    	if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {
+			  switch (justify) {
+				case TEXT_LEFT :						// 1/19/2017 : This bit has never been tested.
+					int i;
+					for(i=0;i<numCharsDisp;i++) {
+						temp[i] = buff[i];
+					}
+					temp[i] = '\0';	
+					screen->drawText(temp);
+					break;
+				case TEXT_RIGHT :						// This bit has been tested, and works.
+					screen->drawText((char*)&(buff[-charDif]));  
+					break;
+				}
+			} else {
+				screen->drawText("Overflow");
+			}
+		}
+	}
 }
 
 

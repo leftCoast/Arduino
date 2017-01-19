@@ -8,8 +8,10 @@
 #define CHAR_HEIGHT 8     // Actual size is 8 * text size.
 #define DEF_PRECISION 2   // Number of digits past decimal point.
 
-#define TEMP_BUFF_SIZE 32 // Temp buff for doing text formatting and things.
-								  // Think about what you'll need here. Its important!
+#define TEMP_BUFF_SIZE 41 // Temp buff for doing text formatting and things.
+						  						// Think about what you'll need here. Its important!
+						  						// float can get to 3.4xx E+38 add '-', '.' & \0 
+						  						// gives 41 chars.
 enum {
   TEXT_RIGHT,
   TEXT_LEFT,
