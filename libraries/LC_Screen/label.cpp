@@ -93,7 +93,7 @@ void label::setColors(colorObj* tColor) { setColors(tColor,&white); transp = tru
 void label::setPrecision(int inPrec) {
 
   if (inPrec>=0) {
-    prec = inPrec;
+    prec = min(MAX_PREC,inPrec);	// No limit and the temp buffer explodes.
     needRefresh = true;
   }
 }
