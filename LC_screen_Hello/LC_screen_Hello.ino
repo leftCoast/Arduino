@@ -3,20 +3,16 @@
 
 #include <Adafruit_ILI9341.h>
 
-//#include <blinker.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
-//#include <PulseOut.h>
-#include <runningAvg.h>
-//#include <servo.h>
-#include <timeObj.h>
 
-//#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
-#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
-//#include <bmpObj.h>
+// Coose your hardware.
+#include <adafruit_1431_Obj.h>    // ADAFRUIT_1431
+//#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
@@ -27,8 +23,8 @@ label hello("Hello world!");
 
 void setup() {
 
-  if (!initScreen(ADAFRUIT_1947)) {
-    while(true); // Kill the process.
+  if (!initScreen(ADAFRUIT_1431,PORTRAIT)) { // Select hardware choice goes here.        
+    while(true); // No screen? Kill the process.
   }
   screen->fillScreen(&green);
   viewList.addObj(&hello);
@@ -36,6 +32,6 @@ void setup() {
 
 
 void loop() {
+  
   idle();
-
 }

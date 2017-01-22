@@ -73,9 +73,10 @@ bool rect::inRect(word x, word y) {
 
 drawObj::drawObj() {
 
-  needRefresh = true;       // Well Duh! We never been drawn yet!
-  wantsClicks = false;    // 'Cause this is actually the default.
-  callback = NULL;
+  needRefresh = true;			// Well Duh! We never been drawn yet!
+  wantsClicks = false;		// 'Cause this is actually the default.
+  parentObj = NULL;				// Well, there ain't one yet..
+  callback = NULL;				// And, no.. We have none of this either.
 }
 
 
@@ -85,6 +86,7 @@ drawObj::drawObj(word inLocX, word inLocY, word inWidth,word inHeight,boolean in
     needRefresh = true;
     clicked = false;
     wantsClicks = inClicks;
+    parentObj = NULL;
     callback = NULL;
 }
 
@@ -94,6 +96,36 @@ drawObj::~drawObj() { }
 
 // When the manager asks if we want a refresh..
 boolean drawObj::wantRefresh(void) { return needRefresh; }
+
+
+// We may be a sub object of another, this gives the x we draw to.
+word drawObj::scrX(void) {
+
+	if (parentObj) {
+		return(parentObj->locX + locX);
+	} else {
+		return locX;
+	}
+}
+
+
+// Just like the guy above except gives the y we draw to.
+word drawObj::scrY(void) {
+
+	if (parentObj) {
+		return(parentObj->locY + locY);
+	} else {
+		return locY;
+	}
+}
+
+
+// 
+rect drawObj::scrRect(void) {
+
+	rect temp(scrX(),scrY(),width,height);
+	return temp;
+}
 
 
 // Call this one to draw..
@@ -107,8 +139,8 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
-  screen->fillRect(locX, locY, width, height, &black); // Default draw.
-  screen->drawRect(locX, locY, width, height, &white);
+  screen->fillRect(scrX(), scrY(), width, height, &black); // Default draw.
+  screen->drawRect(scrX(), scrX(), width, height, &white);
 }
 
 
@@ -119,8 +151,11 @@ void drawObj::clickable(boolean inWantsClicks) { wantsClicks = inWantsClicks; }
 // Manager has detected a fresh click, is it ours?
 boolean   drawObj::acceptClick(point where) {
     
+    rect	gRect;
+    
     if (wantsClicks) {
-        if (inRect(where.x,where.y)) {
+    		gRect = scrRect();
+        if (gRect.inRect(where.x,where.y)) {
             needRefresh = true;
             clicked = true;
             doAction();

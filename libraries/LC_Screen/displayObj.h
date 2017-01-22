@@ -7,11 +7,16 @@
 // The plan is to inherit this for whatever glue code each piece of 
 // hardware needs to run.
 
+// point needs to go here 'cause it spans both the display side and
+// the drawing object side. So, this is the lowest common denominator
+// if you will.
+
   struct point {
     word x;
     word y;
-  };
-  
+  }; 
+
+
 
 class displayObj {    
 

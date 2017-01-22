@@ -8,7 +8,7 @@ boolean initScreen(byte hardware, int inRotation) {
 
   switch (hardware) {
     case ADAFRUIT_1431 :
-      screen = (displayObj*) new adafruit_1431_Obj(ADAFRUIT_1431_SPI_CS, ADAFRUIT_1431_SPI_DC, ADAFRUIT_1431_SPI_MOSI, ADAFRUIT_1431_SPI_CLK, ADAFRUIT_1431_SPI_RST);
+      screen = (displayObj*) new adafruit_1431_Obj(ADAFRUIT_1431_SPI_OLED_CS, ADAFRUIT_1431_SPI_DC, ADAFRUIT_1431_SPI_MOSI, ADAFRUIT_1431_SPI_CLK, ADAFRUIT_1431_SPI_RST);
       if (screen) {
       	if (screen->dispObjBegin()) {
         		screen->setRotation(inRotation);

@@ -5,7 +5,9 @@
 #include <idlers.h>
 #include "screen.h"
 
-
+// point, I know what you're thinking. It should be here. But its in displayObj.h.
+// Its needed by both sides.
+  
 // ***************************************************************
 // Base class for a rectangle. 
 // ***************************************************************
@@ -20,12 +22,12 @@ public :
   virtual void  setLocation(word x, word y);
   virtual void  setSize(word inWidth,word inHeight);
   virtual void  setRect(rect* inRect);                  // Got a rect? Make this one the same.
-  virtual void  setRect(point* inPt1,point* inPt2);	  // Or two points..
+  virtual void  setRect(point* inPt1,point* inPt2);	    // Or two points..
           word  maxX(void);                             // Where's our last pixel?
           word  maxY(void);                             // Same as obove but in the Y direction.
           word  minX(void);                             // Where's our first pixel?
           word  minY(void);                             // Same as obove but in the Y direction.
-  virtual bool  inRect(word x, word y);                  // Is this point in us?
+  virtual bool  inRect(word x, word y);                 // Is this point in us?
 
 //protected:
   word  locX;
@@ -48,21 +50,34 @@ public:
   ~drawObj();
     
           boolean   wantRefresh(void);
-          void      draw(void);                    // Call this one. Don't inherit this one.
-  virtual void      drawSelf(void);                // Inherit this one and make it yours.
+          word			scrX(void);												// ScrX() returns the global screen x location.
+          word			scrY(void);												// ScrY() returns the global screen x location.
+          rect			scrRect();												// Our rect in global coordinates.
+          void      draw(void);                    		// Call this one. Don't inherit this one.
+  virtual void      drawSelf(void);                		// Inherit this one and make it yours.
   		    void		  clickable(boolean inWantsClicks);
   virtual boolean   acceptClick(point where);
   virtual void      clickOver(void);
-  virtual void      doAction(void);      				// Override me for action!
-  			 void		  setCallback(void(*funct)(void));		// Or use a callback?
+  virtual void      doAction(void);      								// Override me for action!
+  			  void		  setCallback(void(*funct)(void));		// Or use a callback?
   
 protected:
-  boolean        needRefresh;
-  boolean        wantsClicks;
-  boolean        clicked;
+  boolean     needRefresh;
+  boolean     wantsClicks;
+  boolean     clicked;
+  drawObj*		parentObj;
   void			  (*callback)(void);
 };
 
+
+// ***************************************************************
+// Here we have the management of the screen. Get the clicks,
+// find drawObjs to act on the clicks and tell the objects when to
+// redraw themselves.
+//
+// "viewList" is the global that does all these things during
+// idle time.
+// ***************************************************************
 
 class viewMgr : public idler {
     
