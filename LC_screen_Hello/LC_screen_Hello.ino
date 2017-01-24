@@ -13,6 +13,7 @@
 #include <adafruit_1431_Obj.h>    // ADAFRUIT_1431
 //#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 
+#include "listView.h"
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
@@ -21,6 +22,11 @@
 
 label hello("Hello world!");
 
+label listItem1("List item #1");
+label listItem2("List item #2");
+
+listView stringList(40,40,100,20,3);
+
 void setup() {
 
   if (!initScreen(ADAFRUIT_1431,PORTRAIT)) { // Select hardware choice goes here.        
@@ -28,6 +34,11 @@ void setup() {
   }
   screen->fillScreen(&green);
   viewList.addObj(&hello);
+  viewList.addObj(&stringList);
+
+  stringList.addObj(&listItem1);
+  stringList.addObj(&listItem2);
+
 }
 
 
