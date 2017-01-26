@@ -52,6 +52,7 @@ void label::initLabel(void) {
   setJustify(TEXT_LEFT);
   buff = NULL;
   prec = DEF_PRECISION;
+  needRefresh = true;
 }
 
 
@@ -154,7 +155,7 @@ void label::drawSelf(void) {
 
   int numCharsDisp;  // How many we have room for?
   int charDif;     
-  
+  Serial.println("drawSelf()");
 	if (buff) {
     if (transp) {
       screen->setTextColor(&textColor);
@@ -164,9 +165,10 @@ void label::drawSelf(void) {
     screen->setTextSize(textSize);
     screen->setTextWrap(false);
     screen->setCursor(locX,locY);
-
+		Serial.print("location x, y ");Serial.print(locX);Serial.print(", ");Serial.println(locY);
     numCharsDisp = width/(CHAR_WIDTH*textSize);
     charDif =  numCharsDisp - strlen(buff);
+    Serial.print("charDif ");Serial.println(charDif);
     if (charDif==0) {               //Exact amount..
       screen->drawText(buff);
     } else if (charDif>0) {          // Needs padding..
@@ -188,7 +190,8 @@ void label::drawSelf(void) {
 					for(i=0;i<numCharsDisp;i++) {
 						temp[i] = buff[i];
 					}
-					temp[i] = '\0';	
+					temp[i] = '\0';
+					Serial.print("drawing : ");Serial.println(temp);
 					screen->drawText(temp);
 					break;
 				case TEXT_RIGHT :						// This bit has been tested, and works.

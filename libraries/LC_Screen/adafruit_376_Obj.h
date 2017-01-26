@@ -1,31 +1,49 @@
-#ifndef adafruit_1947_Obj_h
-#define adafruit_1947_Obj_h
+#ifndef adafruit_376_obj_h
+#define adafruit_376_obj_h
 
-#include <SPI.h>
-#include <Wire.h>      			// this is needed for FT6206
 #include <Adafruit_GFX.h>
-#include <Adafruit_ILI9341.h>
-#include <Adafruit_FT6206.h>
+#include <Adafruit_TFTLCD.h>
+#include <TouchScreen.h>
 
-#include "displayObj.h"
+#include <displayObj.h>
 
-/*
-// This block os for Arduino UNO.
-#define ADAFRUIT_1947_SPI_CLK 	13
-#define ADAFRUIT_1947_SPI_MISO	12
-#define ADAFRUIT_1947_SPI_MOSI	11
-#define ADAFRUIT_1947_SPI_CS		10
-#define ADAFRUIT_1947_SPI_DC	 	 9
-#define ADAFRUIT_1947_SPI_RST		-1
-*/
+// Why does it care?
+#if defined(__SAM3X8E__)
+    #undef __FlashStringHelper::F(string_literal)
+    #define F(string_literal) string_literal
+#endif
 
-// This block os for Arduino teensy 3.2
-#define ADAFRUIT_1947_SPI_CLK 	13
-#define ADAFRUIT_1947_SPI_MISO	12
-#define ADAFRUIT_1947_SPI_MOSI	11
-#define ADAFRUIT_1947_SPI_CS	10
-#define ADAFRUIT_1947_SPI_DC	 9
-#define ADAFRUIT_1947_SPI_RST		-1
+
+#ifndef USE_ADAFRUIT_SHIELD_PINOUT 
+ #error "This sketch is intended for use with the TFT LCD Shield. Make sure that USE_ADAFRUIT_SHIELD_PINOUT is #defined in the Adafruit_TFTLCD.h library file."
+#endif
+
+// These are the pins for the shield!
+#define YP A1  // must be an analog pin, use "An" notation!
+#define XM A2  // must be an analog pin, use "An" notation!
+#define YM 7   // can be a digital pin
+#define XP 6   // can be a digital pin
+
+
+#ifdef __SAM3X8E__
+  #define TS_MINX 125
+  #define TS_MINY 170
+  #define TS_MAXX 880
+  #define TS_MAXY 940
+#else
+  #define TS_MINX  150
+  #define TS_MINY  120
+  #define TS_MAXX  920
+  #define TS_MAXY  940
+#endif
+
+#define LCD_CS A3
+#define LCD_CD A2
+#define LCD_WR A1
+#define LCD_RD A0
+
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
 
 // Rotation
 #define PORTRAIT      0  // USB up
@@ -37,11 +55,11 @@
 #define swap(a, b) { int16_t t = a; a = b; b = t; }
 #endif
 
-class adafruit_1947_Obj : public displayObj {
+class adafruit_376_Obj : public displayObj {
 
   public :
-  adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST,byte inMISO);
-  ~adafruit_1947_Obj(void);
+  adafruit_376_Obj(void);
+  ~adafruit_376_Obj(void);
   
   virtual boolean dispObjBegin(void);
   virtual void    setRotation(byte inRotation);
@@ -67,14 +85,8 @@ class adafruit_1947_Obj : public displayObj {
   virtual boolean   touched(void);
   
   private:
-          Adafruit_FT6206*  cTS;
-          Adafruit_ILI9341* theTFT;
-          byte              cs;
-          byte              dc;
-          byte              mosi;
-          byte					 miso;
-          byte              sclk;
-          byte              rst;
+          TouchScreen*		  cTS;
+          Adafruit_TFTLCD*  theTFT;
 };
 
 #endif

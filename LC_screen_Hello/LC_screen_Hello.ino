@@ -32,7 +32,7 @@ void setup() {
   if (!initScreen(ADAFRUIT_1431,PORTRAIT)) { // Select hardware choice goes here.        
     while(true); // No screen? Kill the process.
   }
-  screen->fillScreen(&green);
+  screen->fillScreen(&blue);
   viewList.addObj(&hello);
   viewList.addObj(&stringList);
 
