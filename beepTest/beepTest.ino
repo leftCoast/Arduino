@@ -14,7 +14,7 @@
 #define BUTTON_PIN 12
 #define ANALOG_PIN A0
 
-#define SOUND_PIN1 23//5
+#define SOUND_PIN1 5///[ '0023//5
 #define SOUND_PIN2 4
 #define SOUND_PIN3 3
 
