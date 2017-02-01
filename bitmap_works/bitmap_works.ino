@@ -46,7 +46,7 @@ void setup(void) {
 
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
-  tft.fillScreen(ILI9341_GREEN);
+  //tft.fillScreen(ILI9341_GREEN);
   
   //yield();
 
@@ -54,10 +54,12 @@ void setup(void) {
   if (!SD.begin(SD_CS)) {
     Serial.println("failed!");
   }
-  tft.fillScreen(ILI9341_RED);
+  //tft.fillScreen(ILI9341_RED);
   Serial.println("OK!");
 
-  bmpDraw("LC_RUST.bmp", 0, 0);
+  bmpDraw("vacPnl.bmp", 0, 0);
+  
+  //bmpDraw("LC_RUST.bmp", 0, 0);
   //bmpDraw("woof.bmp", 0, 0);
 }
 
