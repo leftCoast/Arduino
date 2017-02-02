@@ -117,8 +117,11 @@ void label::setValue(unsigned long val) {
 
 
 void label::setValue(double val) {
-
+   
+  Serial.print("val : ");Serial.println(val);
+  Serial.print("prec : ");Serial.println(prec);
   dtostrf(val,0,prec,temp);
+  Serial.print("Str : ");Serial.println(temp);
   setValue(temp);
   needRefresh = true;
 }

@@ -50,16 +50,16 @@ public:
   ~drawObj();
     
           boolean   wantRefresh(void);
-          word			scrX(void);												// ScrX() returns the global screen x location.
-          word			scrY(void);												// ScrY() returns the global screen x location.
-          rect			scrRect();												// Our rect in global coordinates.
+          word		scrX(void);												// ScrX() returns the global screen x location.
+          word		scrY(void);												// ScrY() returns the global screen x location.
+          rect		scrRect();												// Our rect in global coordinates.
           void      draw(void);                    		// Call this one. Don't inherit this one.
   virtual void      drawSelf(void);                		// Inherit this one and make it yours.
-  		    void		  clickable(boolean inWantsClicks);
+  		    void	clickable(boolean inWantsClicks);
   virtual boolean   acceptClick(point where);
   virtual void      clickOver(void);
   virtual void      doAction(void);      								// Override me for action!
-  			  void		  setCallback(void(*funct)(void));		// Or use a callback?
+          void		setCallback(void(*funct)(void));		// Or use a callback?
   
 protected:
   boolean     needRefresh;

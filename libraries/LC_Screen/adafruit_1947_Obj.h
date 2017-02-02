@@ -14,9 +14,10 @@
 #define ADAFRUIT_1947_SPI_CLK 	13
 #define ADAFRUIT_1947_SPI_MISO	12
 #define ADAFRUIT_1947_SPI_MOSI	11
-#define ADAFRUIT_1947_SPI_CS		10
-#define ADAFRUIT_1947_SPI_DC	 	 9
-#define ADAFRUIT_1947_SPI_RST		-1
+#define ADAFRUIT_1947_SPI_CS	10
+#define ADAFRUIT_1947_SPI_DC	 9
+#define ADAFRUIT_1947_SPI_RST	-1
+#define ADAFRUIT_1947_SPI_SD_CS  4
 */
 
 // This block os for Arduino teensy 3.2
@@ -25,7 +26,8 @@
 #define ADAFRUIT_1947_SPI_MOSI	11
 #define ADAFRUIT_1947_SPI_CS	10
 #define ADAFRUIT_1947_SPI_DC	 9
-#define ADAFRUIT_1947_SPI_RST		-1
+#define ADAFRUIT_1947_SPI_RST	-1
+#define ADAFRUIT_1947_SPI_SD_CS  4
 
 // Rotation
 #define PORTRAIT      0  // USB up
@@ -40,6 +42,7 @@
 class adafruit_1947_Obj : public displayObj {
 
   public :
+  adafruit_1947_Obj(void);        // This is for creating the hardware version.
   adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST,byte inMISO);
   ~adafruit_1947_Obj(void);
   
@@ -69,6 +72,7 @@ class adafruit_1947_Obj : public displayObj {
   private:
           Adafruit_FT6206*  cTS;
           Adafruit_ILI9341* theTFT;
+          boolean           hardware;
           byte              cs;
           byte              dc;
           byte              mosi;

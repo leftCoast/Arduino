@@ -14,7 +14,7 @@
 // 12/29/16 - Not actually created now. It was written about 3 years ago and for
 // some reason got deleted. Today I found it on Github and brought it back. "Whew!"
 
-
+/*
 int8_t savedSPI;            // When we init, we'll set this.
 
 boolean initSDCard(void) {
@@ -45,6 +45,7 @@ SPIControl::~SPIControl(void) {
     SPCR = 0;
 }
 
+
 // Wrapper functions with the SPIControl calls.
 File openSD(char* fileName) {
     
@@ -73,14 +74,15 @@ int readBuff(File inFile,void* buf, uint16_t nbyte) {
     SPIControl ourSPI;
     return(inFile.read(buf,nbyte));
 }
-
+*/
 
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order
 // than what we use here in Arduinoland. These two routines swap 'em back.
 // For 2 byte numbers.
 uint16_t read16(File f) {
+    
     uint16_t result;
-    SPIControl ourSPI;
+    
     ((uint8_t *)&result)[0] = f.read(); // LSB
     ((uint8_t *)&result)[1] = f.read(); // MSB
     return result;
@@ -88,8 +90,9 @@ uint16_t read16(File f) {
 
 // For 4 byte numbers.
 uint32_t read32(File f) {
+    
     uint32_t result;
-    SPIControl ourSPI;
+
     ((uint8_t *)&result)[0] = f.read(); // LSB
     ((uint8_t *)&result)[1] = f.read();
     ((uint8_t *)&result)[2] = f.read();
@@ -125,7 +128,7 @@ void bmpObj::getInfo(void) {
     
     uint32_t temp;
     
-    source = openSD(fileName);                    // Time to see if we can open the file.
+    source = SD.open(fileName);                    // Time to see if we can open the file.
     if (source) {                                 // We get a file handle?
         if (read16(source) == 0x4D42) {             // If we have something or other..
             temp = read32(source);                    // We grab the file size.
@@ -157,7 +160,7 @@ void bmpObj::plotLine(int y) {
     int       x;
     
     for (x=dest.x; x<dest.x+imageWidth; x++) {            // Ok, x does dest to max image width.
-        readBuff(source,buf,pixBytes);                    // Grab a pixel.
+        source.read(buf,pixBytes);                        // Grab a pixel.
         thePixal.setColor(buf[2],buf[1],buf[0]);          // Load colorObj.
         screen->drawPixel(x,y,&thePixal);                 // Spat it out to the screen.
     }
@@ -169,19 +172,37 @@ void bmpObj::plotBmp(void) {
     
     int   y;
     
-    if (haveInfo) {                                     // We sucessfully got the info?
-        if (fileSeek(source,imageOffset)) {               // Move to the bitmap data.
-            if (imageHeight>0) {                            // The image is upside down?
-                for (y=dest.y+imageHeight; y>=dest.y; y--) {  // Loop from the bottom of the image to the top.
+    if (haveInfo) {                                             // We sucessfully got the info?
+        if (source.seek(imageOffset)) {                         // Move to the bitmap data.
+            if (imageHeight>0) {                                // The image is upside down?
+                for (y=dest.y+imageHeight; y>=(int)dest.y; y--) {    // Loop from the bottom of the image to the top.
                     plotLine(y);                                // Draw this line.
                 }
             }
-            else {                                          // Image must be stored right side up.
-                long temp = -imageHeight;                     // We need the absolute value. But don't loose the info.
-                for (y=dest.y; y<=dest.y+temp; y++) {         // Loop from the top down.
+            else {                                              // Image must be stored right side up.
+                long temp = -imageHeight;                       // We need the absolute value. But don't loose the info.
+                for (y=dest.y; y<=dest.y+temp; y++) {           // Loop from the top down.
                     plotLine(y);                                // Draw this line.
                 }       
             }
         }
     }
 }
+
+/*
+void bmpObj::outputInfo(void) {
+    
+    if (haveInfo) {
+        Serial.print("file name : ");Serial.println(fileName);
+        File    source;
+        Serial.print("dest x,y : ");Serial.print(dest.x);Serial.print(", ");Serial.println(dest.y);
+        Serial.print("Image Offset : ");Serial.println(imageOffset);
+        Serial.print("Image Width : ");Serial.println(imageWidth);
+        Serial.print("Image Height : ");Serial.println(imageHeight);
+        Serial.print("Image Depth : ");Serial.println(imageDepth);
+        Serial.print("Pix Bytes : ");Serial.println(pixBytes);
+    } else {
+        Serial.println("We have no .bmp info..");
+    }
+}
+*/

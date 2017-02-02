@@ -1,5 +1,19 @@
 #include "adafruit_1947_Obj.h"
 
+adafruit_1947_Obj::adafruit_1947_Obj(void)
+:displayObj(true,true,true,true,false) {
+    
+    cTS = NULL;
+    theTFT = NULL;
+    cs = ADAFRUIT_1947_SPI_CS;
+    dc = ADAFRUIT_1947_SPI_DC;
+    mosi = ADAFRUIT_1947_SPI_MOSI;
+    sclk = ADAFRUIT_1947_SPI_CLK;
+    rst = ADAFRUIT_1947_SPI_RST;
+    miso = ADAFRUIT_1947_SPI_MISO;
+    hardware = true;
+}
+
 adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST,byte inMISO)
   :displayObj(true,true,true,true,false) {
 
@@ -11,6 +25,7 @@ adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK
   sclk = inSCLK;
   rst = inRST;
   miso = inMISO;
+  hardware = false;
 }
 
 adafruit_1947_Obj::~adafruit_1947_Obj(void) {
@@ -28,7 +43,11 @@ adafruit_1947_Obj::~adafruit_1947_Obj(void) {
 
 boolean adafruit_1947_Obj::dispObjBegin(void) { 
 
-  theTFT = new Adafruit_ILI9341(cs,dc,mosi,sclk,rst,miso);
+  if (hardware){
+    theTFT = new Adafruit_ILI9341(cs, dc);
+  } else {
+    theTFT = new Adafruit_ILI9341(cs,dc,mosi,sclk,rst,miso);
+  }
   if (theTFT!=NULL) {
     cTS = new Adafruit_FT6206();
     if (cTS!=NULL) {
