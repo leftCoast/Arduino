@@ -9,9 +9,6 @@
 #include <screen.h>
 #include <adafruit_1947_Obj.h>
 
-#include <SPI.h>
-#include <Wire.h>
-
 #include <Adafruit_FT6206.h>
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_GFX.h>

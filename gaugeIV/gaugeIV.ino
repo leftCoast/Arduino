@@ -2,12 +2,15 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ILI9341.h> // Hardware-specific library
 
+#include <blinker.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
+#include <PulseOut.h>
 #include <runningAvg.h>
+#include <servo.h>
 #include <timeObj.h>
 
 #include <adafruit_1947_Obj.h>
@@ -28,8 +31,11 @@
 
 #define vacummPin A4
 
+//label vOutVac("-000.0",NUM_SIZE);
 label vOutVac(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
+//label vOutLeak("-000.0",NUM_SIZE);
 label vOutLeak(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
+colorObj  labelColor(GREEN);
 
 mapper data2voltMapper(0, 1024, 0.0049, 5);   // Update for 3.2V chip
 mapper volt2psiMapper(0.2,4.5,-16.7,0);
@@ -40,10 +46,9 @@ timeObj  mTimer(500);
 
 void setup(void) {
   
-  point     destPt;
-  colorObj  labelColor;
+  point destPt;
   
-  /*Serial.begin(9600);while(!Serial);*/
+  //Serial.begin(9600);while(!Serial);
   Serial.println("init Screen..");
   if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
     Serial.println("Success!");
@@ -65,14 +70,13 @@ void setup(void) {
      while(true);
   }
 
-    labelColor.setColor(&green);
     labelColor.blend(&black,30);
     vOutVac.setTextSize(TEXT_SIZE);
     vOutVac.setJustify(TEXT_RIGHT);
     vOutVac.setPrecision(PRECISION);
     vOutVac.setColors(&labelColor);
     viewList.addObj(&vOutVac);
-    //screen->drawRect(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,&red);
+    screen->drawRect(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,&red);
     
     vOutLeak.setTextSize(TEXT_SIZE);
     vOutLeak.setJustify(TEXT_RIGHT);
@@ -120,8 +124,3 @@ void loop(void) {
   idle();
   readings();
 }
-
-
-
-
-

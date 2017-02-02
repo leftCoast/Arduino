@@ -156,7 +156,6 @@ void calcButton::doAction(void) {
   }
   gSecondFx = false;                // First keystroke clears it.
   buttonPressed = true;            // Tell the calling program we changed something.
-  Serial.print("Button's clicked, X Reg is : ");Serial.println(mCalc.getX());
 }
 
 

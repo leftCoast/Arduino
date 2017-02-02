@@ -139,8 +139,6 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
-  Serial.print("drawSelf() x, y, h, w ");Serial.print(scrX());Serial.print(", ");Serial.print(scrY());
-  Serial.print(", ");Serial.print(width);Serial.print(", ");Serial.println(height);
   screen->fillRect(scrX(), scrY(), width, height, &black); // Default draw.
   screen->drawRect(scrX(), scrX(), width, height, &white);
 }
