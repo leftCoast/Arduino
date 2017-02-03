@@ -5,27 +5,27 @@
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
- rect::rect(void) {
+rect::rect(void) {
    
    setLocation(DEF_LOC_X,DEF_LOC_Y);
    setSize(DEF_SIZE_X,DEF_SIZE_Y);
  }
  
  
- rect::rect(word x, word y, word inWidth,word inHeight) {
+rect::rect(int inX, int inY, word inWidth,word inHeight) {
    
-   setLocation(x,y);
+   setLocation(inX,inY);
    setSize(inWidth,inHeight);
  }
 
  
- rect::~rect(void) { }
+rect::~rect(void) { }
  
  
-void  rect::setLocation(word x, word y) {
+void  rect::setLocation(int inX, int inY) {
   
-  locX = x;
-  locY = y;
+  x = inX;
+  y = inY;
 }
 
 
@@ -38,33 +38,33 @@ void  rect::setSize(word inWidth,word inHeight) {
 
 void rect::setRect(rect* inRect) {
   
-  setLocation(inRect->locX,inRect->locY);
+  setLocation(inRect->x,inRect->y);
   setSize(inRect->width,inRect->height);
 }
 
 void rect::setRect(point* inPt1,point* inPt2) {
 
-  word x = min(inPt1->x,inPt2->x);
-  word y = max(inPt1->y,inPt2->y);
+  int locX = min(inPt1->x,inPt2->x);
+  int locY = max(inPt1->y,inPt2->y);
   word width = abs((int)inPt1->x-(int)inPt2->x);
   word height = abs((int)inPt1->y-(int)inPt2->y);
-  setLocation(x,y);
+  setLocation(locX,locY);
   setSize(width,height);
 }
 
 
-word rect::maxX(void) { return(locX + width); }
-word rect::maxY(void)  { return(locY + height); }
-word rect::minX(void) { return(locX); }
-word rect::minY(void)  { return(locY); }
+int rect::maxX(void) { return(x + width); }
+int rect::maxY(void)  { return(y + height); }
+int rect::minX(void) { return(x); }
+int rect::minY(void)  { return(y); }
 
-bool rect::inRect(word x, word y) {
+bool rect::inRect(int inX, int inY) {
 
   return(
-  x >= minX() &&
-  x <= maxX() &&
-  y >= minY() &&
-  y <= maxY()
+  inX >= minX() &&
+  inX <= maxX() &&
+  inY >= minY() &&
+  inY <= maxY()
   );
 }
 
@@ -102,9 +102,9 @@ boolean drawObj::wantRefresh(void) { return needRefresh; }
 word drawObj::scrX(void) {
 
 	if (parentObj) {
-		return(parentObj->locX + locX);
+		return(parentObj->x + x);
 	} else {
-		return locX;
+		return x;
 	}
 }
 
@@ -113,9 +113,9 @@ word drawObj::scrX(void) {
 word drawObj::scrY(void) {
 
 	if (parentObj) {
-		return(parentObj->locY + locY);
+		return(parentObj->y + y);
 	} else {
-		return locY;
+		return y;
 	}
 }
 

@@ -48,7 +48,7 @@ void lineObj::setEnds(point* startPt,point* endPt) {
   setRect(startPt,endPt);
   if (startPt->x == endPt->x) slope = vertical;
   else if (startPt->y == endPt->y) slope = horizontal;
-  else if ((locX == startPt->x && locY == startPt->y)||(locX == endPt->x && locY == endPt->y)) slope = negativeSlope;
+  else if ((x == startPt->x && y == startPt->y)||(x == endPt->x && y == endPt->y)) slope = negativeSlope;
   else slope = positiveSlope;
   needRefresh = true;
 }
@@ -72,10 +72,10 @@ void lineObj::drawSelf() {
   Serial.print("height: ");Serial.println(height);
   */
   switch(slope) {
-    case vertical : screen->drawVLine(locX,locY,height,&color); break;
-    case positiveSlope : screen->drawLine(locX,locY-height,locX+width,locY,&color); break;
-    case negativeSlope : screen->drawLine(locX,locY,locX+width,locY-height,&color); break;
-    case horizontal : screen->drawHLine(locX,locY,width,&color); break;
+    case vertical : screen->drawVLine(x,y,height,&color); break;
+    case positiveSlope : screen->drawLine(x,y-height,x+width,y,&color); break;
+    case negativeSlope : screen->drawLine(x,y,x+width,y-height,&color); break;
+    case horizontal : screen->drawHLine(x,y,width,&color); break;
   }
 }
 

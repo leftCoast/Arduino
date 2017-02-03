@@ -224,7 +224,7 @@ void label::drawSelf(void) {
     }
     screen->setTextSize(textSize);
     screen->setTextWrap(false);
-    screen->setCursor(locX,locY);
+    screen->setCursor(x,y);
     numCharsDisp = width/(CHAR_WIDTH*textSize);
     charDif =  numCharsDisp - strlen(buff);
     //Serial.print("charDif ");Serial.println(charDif);

@@ -16,22 +16,22 @@ class rect {
 
 public :
   rect(void);
-  rect(word x, word y, word inWidth,word inHeight);
+  rect(int inX, int inY, word inWidth,word inHeight);
   ~rect(void);
 
-  			  void  setLocation(word x, word y);
+  			  void  setLocation(int inX, int inY);
   			  void  setSize(word inWidth,word inHeight);
   			  void  setRect(rect* inRect);                  // Got a rect? Make this one the same.
   			  void  setRect(point* inPt1,point* inPt2);	    // Or two points..
-          word  maxX(void);                             // Where's our last pixel?
-          word  maxY(void);                             // Same as obove but in the Y direction.
-          word  minX(void);                             // Where's our first pixel?
-          word  minY(void);                             // Same as obove but in the Y direction.
-  			  bool  inRect(word x, word y);                 // Is this point in us?
+          int  maxX(void);                             // Where's our last pixel?
+          int  maxY(void);                             // Same as obove but in the Y direction.
+          int  minX(void);                             // Where's our first pixel?
+          int  minY(void);                             // Same as obove but in the Y direction.
+  			  bool inRect(int inX, int inY);                 // Is this point in us?
 
 //protected:
-  word  locX;
-  word  locY;
+  int   x;
+  int   y;
   word  width;
   word  height;
 };

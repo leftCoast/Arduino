@@ -11,12 +11,12 @@
 #include <timeObj.h>
 
 #include <adafruit_1947_Obj.h>
-#include <bmpObj.h>
+#include <bmpPipe.h>
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
 #include <screen.h>
-
+#include "bmpLabel.h"
 
 #define TEXT_SIZE   2
 #define LEFT_EDGE  36
@@ -26,51 +26,45 @@
 #define TEXT_WIDTH  91
 #define TEXT_HEIGHT 14
 
-#define vacummPin A4
+#define vacummPin A11
 
-label vOutVac(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
-label vOutLeak(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
+bmpLabel vOutVac(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
+bmpLabel vOutLeak(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
 
 mapper data2voltMapper(0, 1024, 0.0049, 5);   // Update for 3.2V chip
 mapper volt2psiMapper(0.2,4.5,-16.7,0);
 mapper psi2hgMapper(-14.734624,2.2,30,-4.4792455);
 
 float lastRead = 0;
-timeObj  mTimer(500);
 
+timeObj  hgTimer(100);
+timeObj  ldTimer(500);
+ 
 void setup(void) {
-  
-  point     destPt;
+ 
   colorObj  labelColor;
   
-  /*Serial.begin(9600);while(!Serial);*/
+  //Serial.begin(9600);while(!Serial);
   Serial.println("init Screen..");
   if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
     Serial.println("Success!");
     screen->fillScreen(&black);
-    destPt.x = 0;
-    destPt.y = 0;
-    bmpObj mBitmap("vacPnl.bmp",destPt);
-    mBitmap.getInfo();
-    if (mBitmap.haveInfo){
-      Serial.println("Found bitmap, plotting..");
-      //mBitmap.outputInfo();
-      mBitmap.plotBmp();
-      Serial.println("Done plotting..");
-    } else {
-     Serial.println("No bitmap!");
-    } 
+    bmpPipe mBitmap;
+    if (mBitmap.openPipe("vacPnl.bmp")) {
+      mBitmap.drawBitmap(0,0);
+    }
   } else {
     Serial.println("Fail! Halting..");
      while(true);
   }
 
     labelColor.setColor(&green);
-    labelColor.blend(&black,30);
+    labelColor.blend(&black,40);
     vOutVac.setTextSize(TEXT_SIZE);
     vOutVac.setJustify(TEXT_RIGHT);
     vOutVac.setPrecision(PRECISION);
     vOutVac.setColors(&labelColor);
+    vOutVac.openPipe("vacPnl.bmp");
     viewList.addObj(&vOutVac);
     //screen->drawRect(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,&red);
     
@@ -78,10 +72,12 @@ void setup(void) {
     vOutLeak.setJustify(TEXT_RIGHT);
     vOutLeak.setPrecision(PRECISION);
     vOutLeak.setColors(&labelColor);
+    vOutLeak.openPipe("vacPnl.bmp");
     viewList.addObj(&vOutLeak);
     //screen->drawRect(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,&red);
     
-    mTimer.start();
+    hgTimer.start();
+    ldTimer.start();
 }
 
 
@@ -92,15 +88,22 @@ void readings(void) {
   float psi;
   float inHg;
   float leakdown;
-
+  char textBuff[20];
+  
+  sensorValue = analogRead(vacummPin);
   sensorValue = analogRead(vacummPin);
   volts = data2voltMapper.Map(sensorValue);
   psi = volt2psiMapper.Map(volts);
   inHg = psi2hgMapper.Map(psi);
-  vOutVac.setValue(inHg);
-  if (mTimer.ding()) {
-    mTimer.stepTime();
+  if (hgTimer.ding()) {
+    dtostrf(round(inHg*10)/10.0,0,1,textBuff);
+    vOutVac.setValue(textBuff);
+    hgTimer.stepTime();
+  }
+  if (ldTimer.ding()) {
+    ldTimer.stepTime();
     leakdown = (lastRead - inHg) * 120.0;
+    Serial.print("leakdown : ");Serial.println(leakdown,10);
     if (leakdown>999.9) {
       vOutLeak.setValue("+++.+");
     } 
@@ -108,7 +111,8 @@ void readings(void) {
       vOutLeak.setValue("---.-");
     } 
     else {
-      vOutLeak.setValue(leakdown);
+      dtostrf(round(leakdown*10)/10.0,0,1,textBuff);
+      vOutLeak.setValue(textBuff);
     }
     lastRead = inHg;
   }

@@ -12,8 +12,8 @@
 // if you will.
 
   struct point {
-    word x;
-    word y;
+    int x;
+    int y;
   }; 
 
 
