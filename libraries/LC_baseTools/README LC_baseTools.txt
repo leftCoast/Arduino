@@ -12,7 +12,9 @@ Lets start with..
 
 
 
-*** timeObj ***
+***
+timeObj
+***
 
 timeObj is essentially an egg timer. Or, the timer you find on a microwave oven these days. Set a time and listen for the "ding" sound.
 
@@ -30,8 +32,8 @@ There's some other handy calls you can make.
 
 myTimer.start();  // Start the timer NOW. Clear whatever it was doing and start timing.
 
-myTimer.setTime(Ms); // Change the duration and starts NOW.
-myTimer.setTime(Ms, maybeStart); // Change the duration and start if maybeStart is true.
+myTimer.setTime(Ms); // Change the duration and restart NOW.
+myTimer.setTime(Ms, maybeStart); // Change the duration and restart if maybeStart is true.
 
 myTimer.stepTime();  // Sets up the timer for the next "ding" from the last "ding".. Removes latency.
 
@@ -39,13 +41,15 @@ NOTE : Timer deals with the issue of the microsecond clock crossing zero as well
 
 
 
-*** mapper ***
+***
+mapper
+***
 
 Mapper objects are used to map a range of value to another range of values. They are used for things like…
 
-Assume you know your analog input swings from say..  127..4263 and this corresponds to -26.3..47.02 degrees C.
+Assume you know your analog input swings from say..  127..963 and this corresponds to -26.3..47.02 degrees C.
 
-mapper myMapper(127,4263,-26.3,47.02); // This creates your mapper object.
+mapper myMapper(127,963,-26.3,47.02); // This creates your mapper object.
 
 
 int val = analogRead(analogPin);      // read the input pin
@@ -73,7 +77,9 @@ NOTE : Mappers were developed in the desktop computer world, so they call for do
 
 
 
-*** multiMap ***
+***
+multiMap
+***
 
 First see mapper above ^^^s. Grok that it will map one range of value to another given the end points of both sets. Now, keeping this in mind..
 
@@ -116,7 +122,9 @@ NOTE : multiMap objects do no curve fitting or smoothing at all. Just liner inte
 
 
 
-*** lists ***
+***
+lists
+***
 
 Lists contains a set of objects for managing linked lists. These are kind of like arrays that are dynamic in their size. They can grow or shrink as you add or delete bits. They can represent things like stacks & queues. If you've never worked with linked lists, don't worry. You may not need to directly use them. But, the rest of the library uses them so they need to be here as a toolkit.
 
@@ -289,7 +297,7 @@ blinker - NO BLOCKING
 
 Well, since we already met blinker, here you go. This is just a simple class to blink an LED in the background. I use it just to let me know that the main loop() is still running.
 
-blnker mBlinker;
+blinker mBlinker;
 
 void setup(void) {
 
@@ -323,24 +331,5 @@ pulseOut myPWM(inPin,inPeriod); // This creates the object. Pin number and Perio
 
 myPWM.setWidth(inWidth);	    // This sets the on time of the pulse in milliseconds.
 
-When you call your idle(); functino in your main loop(), it'll run in the background for you. You can call myPWM.setWidth(inWidth); any time.
-
-
-
-***
-servo - SOME BLOCKING
-***
-
-A real simple servo class. It does block while the pin is held high but typcially that's not an issue for most. It doesn't monkey around with any of the chips timers and things so it meshes well with most everything else.
-
-servo mServo(inPin);	// Tell it what pin to use for your RC servo.
-
-the onlny other call is..
-
-
-mServo.setServo(val) // Val is a float from -100 to 100
-
-calling idle() in your main loop function lets it run in the background.
-
-That's it for now!
+When you call your idle(); function in your main loop(), it'll run in the background for you. You can call myPWM.setWidth(inWidth); any time.
 

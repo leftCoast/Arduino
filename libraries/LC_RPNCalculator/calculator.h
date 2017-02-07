@@ -18,7 +18,7 @@ public:
 	~calculator(void);
 	
 	void    buttonClick(const char* buttonID);
-    double  getX(void);
+  double  getX(void);
 	double  getY(void);
 	double  getZ(void);
 	double  getT(void);
@@ -26,20 +26,20 @@ public:
 	void	setDegrees(bool inDegrees);
 	bool	toggleDegrees(void);
 	bool	getDegrees(void);
-    double  rad_2_deg(double x);
-    double  deg_2_rad(double x);
+  double  rad_2_deg(double x);
+  double  deg_2_rad(double x);
 	int		getFixVal(void);
 	bool	getFix();
-    bool	getSto();
-    bool	getRcl();
-    bool	getEnter();
+  bool	getSto();
+  bool	getRcl();
+  bool	getEnter();
 	bool	isEditing(void);
 	
 protected:
 	void    startEditing(void);
 	void    handleNumber(int inNum);
-    void    handlePoint(void);
-    void    handleClx(void);
+  void    handlePoint(void);
+  void    handleClx(void);
 	void    handleRollDown(void);
 	void    pushStack(void);
 	void    popStack(void);
@@ -51,16 +51,16 @@ protected:
 	double  z;
 	double  y;
 	double	x;
-    double  sto[NUM_STO_REG];   // 10 storage registers 0..9
+  double  sto[NUM_STO_REG];   // 10 storage registers 0..9
 	int		fix;
-    bool    editing;
-    bool    point;
+  bool    editing;
+  bool    point;
 	bool	degrees;
 	bool	enter;
 	bool	fixPressed;
-    bool    stoPressed;
-    bool    rclPressed;
-    double  multiplyer;
+  bool    stoPressed;
+  bool    rclPressed;
+  double  multiplyer;
 };
 
 #endif

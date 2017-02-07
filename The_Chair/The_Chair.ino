@@ -1,3 +1,14 @@
+// This code was for running "The Chair". We rewired some thrustmaster game controllers
+// and attached them to an office chair bolted to a plywood base. Joystick - with hat switch,
+// Throttle & rudder petals. This code ran it all and outputted an emulated trainer signal
+// that we'd plug into our Spektrum DX5 radio transmitters. Hold down the "trainer" switch
+// typically with a rubber band, and you flew using the chair. Oh and a set of Goggles for FPV.
+// It was great fun! This code is a bit of a mess, it was bashed together as fast as
+// possible. Just to get us up and running. If you're reading this, good luck!
+//
+// Oh, the hat switch was coded as a roll/pitch trim device.
+// And I just bitbanged the signal out using delay(); ouch! But it worked!
+
 
 #include <blinker.h>
 #include <idlers.h>

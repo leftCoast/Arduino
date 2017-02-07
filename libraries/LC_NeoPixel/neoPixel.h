@@ -4,6 +4,9 @@
 #include <Adafruit_NeoPixel.h>
 #include <colorObj.h>
 
+// This is mainly so you can do the neopixle thing using our colorObj stuff.
+// This allows all sorts of color function possibilities. And makes life 
+// generally, a lot easier.
 
 class neoPixel : public Adafruit_NeoPixel {
    

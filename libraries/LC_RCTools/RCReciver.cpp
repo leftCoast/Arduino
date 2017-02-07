@@ -90,7 +90,7 @@ void reciverPin::handeler(void) {
     };  
 }
    
-      
+   // Why is case 0 different? I don't remember.   
 void reciverPin::attachHandler(byte state) {
 
    switch(index) {
