@@ -50,6 +50,7 @@ class soundBoard : public idler, public timeObj {
           boolean       setSoundfile(char* inFilePath);
           boolean       command(action inCommand);
           boolean       isPlaying(void);
+          void          setVolume(byte volume);
           void          setError(soundBoardErr inErr);
           soundBoardErr getLastError(void);
 

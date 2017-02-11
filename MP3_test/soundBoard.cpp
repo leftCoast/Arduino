@@ -123,6 +123,9 @@ boolean soundBoard::command(action inCommand) {
 boolean soundBoard::isPlaying(void) { return musicPlayer->playingMusic; }
 
 
+void soundBoard::setVolume(byte volume) { musicPlayer->setVolume(volume,volume); }
+
+
 void soundBoard::setError(soundBoardErr inErr) { lastErr = inErr; }
 
 
