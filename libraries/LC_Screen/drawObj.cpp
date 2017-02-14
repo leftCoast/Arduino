@@ -69,6 +69,78 @@ bool rect::inRect(int inX, int inY) {
 }
 
 
+point rect::getCorner(rectPt corner) {
+
+	point	tempPt;
+	
+	switch(corner) {
+		case topLeftPt :
+			tempPt.x = x;
+			tempPt.y = y;
+		break;
+		case topRightPt :
+			tempPt.x = x + length;
+			tempPt.y = y;
+		break;
+		case bottomLeftPt :
+			tempPt.x = x;
+			tempPt.y = y + height;
+		break;
+		case bottomRightPt :
+			tempPt.x = x + length;
+			tempPt.y = y + height;
+		break;
+	}
+	return tempPt;
+}
+
+
+// Are we touching this passed in rectangle?
+// If so where? Edge? Corner? Overlap?
+rectTouch rect::touching(rect* inRect) {
+
+		point 		tempPt;
+		
+		tempPt = inRect->getCorner(topLeftPt);
+		if (nRect(tempPt.x,tempPt.y) return overlap;
+		tempPt = inRect->getCorner(topRightPt);
+		if (nRect(tempPt.x,tempPt.y) return overlap;
+		tempPt = inRect->getCorner(bottomLeftPt);
+		if (nRect(tempPt.x,tempPt.y) return overlap;
+		tempPt = inRect->getCorner(bottomRightPt);
+		if (nRect(tempPt.x,tempPt.y) return overlap;
+		
+		if(inRect->maxX()==x-1) {
+			if(inRect->maxY()==minY()-1) return topLeft;
+			if(inRect->minY()==maxY()+1) return bottomLeft;
+			if(inRect->minY()>maxY()+1) return noTouch;
+			if (inRect->maxY()<minY()-1) return noTouch;
+			return leftSide;
+		} else if (inRect->maxY()==y-1) {
+			if(inRect->maxX()==x-1) return topLeft;
+			if(inRect->minX()==x+1) return topRight;
+			if(inRect->maxX()<x-1) return noTouch;
+			if(inRect->minX()>x+1) return noTouch;
+			return topSide;
+		} else if (inRect->minX()==maxX()+1) {
+			if(inRect->maxY()==minY()-1) return topRight;
+			if(inRect->minY()==maxY()+1) return bottomRight;
+			if(inRect->minY()>maxY()+1) return noTouch;
+			if (inRect->maxY()<minY()-1) return noTouch;
+			return rightSide;
+		} else if (inRect->minY()==maxY()+1) {
+			if(inRect->maxX()==x-1) return bottomLeft;
+			if(inRect->minX()==x+1) return bottomRight;
+			if(inRect->maxX()<x-1) return noTouch;
+			if(inRect->minX()>x+1) return noTouch;
+			return bottomSide;
+		}
+		return noTouch;
+	}
+}
+
+
+
 // ***********************************
 
 drawObj::drawObj() {

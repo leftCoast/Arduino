@@ -11,6 +11,11 @@
 // ***************************************************************
 // Base class for a rectangle. 
 // ***************************************************************
+enum rectTouch { noTouch, leftSide, rightSide, topSide, bottomSide, 
+									topLeft, topRight, bottomLeft, bottomRight };
+									
+enum rectPt { topLeftPt, topRightPt, bottomLeftPt, bottomRightPt };
+
 
 class rect {
 
@@ -19,17 +24,19 @@ public :
   rect(int inX, int inY, word inWidth,word inHeight);
   ~rect(void);
 
-virtual	  void  setLocation(int inX, int inY);
-  			  void  setSize(word inWidth,word inHeight);
-  			  void  setRect(rect* inRect);                  // Got a rect? Make this one the same.
-  			  void  setRect(point* inPt1,point* inPt2);	    // Or two points..
-          int  maxX(void);                             // Where's our last pixel?
-          int  maxY(void);                             // Same as obove but in the Y direction.
-          int  minX(void);                             // Where's our first pixel?
-          int  minY(void);                             // Same as obove but in the Y direction.
-  			  bool inRect(int inX, int inY);                 // Is this point in us?
-
-//protected:
+virtual	  void  		setLocation(int inX, int inY);
+  			  void  		setSize(word inWidth,word inHeight);
+  			  void  		setRect(rect* inRect);                  // Got a rect? Make this one the same.
+  			  void  		setRect(point* inPt1,point* inPt2);	    // Or two points..
+          int  			maxX(void);                             // Where's our last pixel?
+          int  			maxY(void);                             // Same as obove but in the Y direction.
+          int  			minX(void);                             // Where's our first pixel?
+          int  			minY(void);                             // Same as obove but in the Y direction.
+  			  bool 			inRect(int inX, int inY);               // Is this point in us?
+  			  point			getCorner(rectPt corner);								// Pass back the corner point.
+					rectTouch	touching(rect* inRect);									// Is that rect touching us?
+					
+protected:
   int   x;
   int   y;
   word  width;
