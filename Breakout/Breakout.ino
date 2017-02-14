@@ -21,6 +21,16 @@
 #include <screen.h>
 #include "movingObj.h"
 
+class ballObj : public movingObj {
+
+  public:
+    movingObj(
+  
+};
+
+
+
+
 #define PADDLE_Y      110
 #define PADDLE_WIDTH  16
 #define PADDLE_HEIGHT 4

@@ -9,8 +9,9 @@
 
 soundBoard theSoundBoard(SOUNDBOARD_SHIELD);
 
+byte vol = 20; 
 void setup() {
-  Serial.begin(9600); while(!Serial);
+  Serial.begin(9600); //while(!Serial);
   Serial.println(F("Small bugs fly fastest!"));
  
   if (!theSoundBoard.begin()) { // initialise the music player
@@ -25,21 +26,21 @@ void setup() {
   }
   Serial.println(F("SD.begin() succeded!"));
 
-  if (!theSoundBoard.setSoundfile("Hawaii50.mp3")) { //"Hawaii50.mp3"
- // if (!theSoundBoard.setSoundfile("RadioAct.mp3")) { //"Hawaii50.mp3"
+  //if (!theSoundBoard.setSoundfile("Hawaii50.mp3")) { //"Hawaii50.mp3"
+  if (!theSoundBoard.setSoundfile("RadioAct.mp3")) { //"Hawaii50.mp3"
     Serial.print(F("setSoundfile() failed with error# "));Serial.println((int)theSoundBoard.getLastError());
     while (1);
   }
   Serial.println(F("setSoundfile() succeded!"));
-
+  
   if (!theSoundBoard.command(play)) {
     Serial.print(F("command(play) failed with error# "));Serial.println((int)theSoundBoard.getLastError());
     while (1);
   }
+  theSoundBoard.setVolume(vol);
   Serial.println(F("command(play) succeded!"));
 }
   
-byte vol = 20;  
 
 void loop() {
 
