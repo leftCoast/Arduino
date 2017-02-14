@@ -19,7 +19,7 @@ public :
   rect(int inX, int inY, word inWidth,word inHeight);
   ~rect(void);
 
-  			  void  setLocation(int inX, int inY);
+virtual	  void  setLocation(int inX, int inY);
   			  void  setSize(word inWidth,word inHeight);
   			  void  setRect(rect* inRect);                  // Got a rect? Make this one the same.
   			  void  setRect(point* inPt1,point* inPt2);	    // Or two points..
@@ -46,13 +46,14 @@ class drawObj : public rect, public dblLinkListObj {
 
 public:
   drawObj();
-  drawObj(word inLocX, word inLocY, word inWidth,word inHeight,boolean inClicks=false);
+  drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
   ~drawObj();
     
           boolean   wantRefresh(void);
-          word		scrX(void);												// ScrX() returns the global screen x location.
-          word		scrY(void);												// ScrY() returns the global screen x location.
+          int		scrX(void);												// ScrX() returns the global screen x location.
+          int		scrY(void);												// ScrY() returns the global screen y location.
           rect		scrRect();												// Our rect in global coordinates.
+	virtual	void		setLocation(int inX,int inY);
           void      draw(void);                    		// Call this one. Don't inherit this one.
   virtual void      drawSelf(void);                		// Inherit this one and make it yours.
   		    void	clickable(boolean inWantsClicks);

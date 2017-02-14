@@ -80,7 +80,7 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(word inLocX, word inLocY, word inWidth,word inHeight,boolean inClicks)
+drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks)
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
@@ -99,10 +99,10 @@ boolean drawObj::wantRefresh(void) { return needRefresh; }
 
 
 // We may be a sub object of another, this gives the x we draw to.
-word drawObj::scrX(void) {
+int drawObj::scrX(void) {
 
 	if (parentObj) {
-		return(parentObj->x + x);
+		return(parentObj->scrX() + x);
 	} else {
 		return x;
 	}
@@ -110,10 +110,10 @@ word drawObj::scrX(void) {
 
 
 // Just like the guy above except gives the y we draw to.
-word drawObj::scrY(void) {
+int drawObj::scrY(void) {
 
 	if (parentObj) {
-		return(parentObj->y + y);
+		return(parentObj->scrY() + y);
 	} else {
 		return y;
 	}
@@ -127,7 +127,13 @@ rect drawObj::scrRect(void) {
 	return temp;
 }
 
+void drawObj::setLocation(int inX,int inY) {
 
+		rect::setLocation(inX,inY);
+		needRefresh = true;
+}
+	
+	
 // Call this one to draw..
 void  drawObj::draw(void) {
 
@@ -139,8 +145,11 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
+  Serial.print("x, y ");Serial.print(x);Serial.print(", ");Serial.println(y);
+  Serial.print("scrX(), scrY() ");Serial.print(scrX());Serial.print(", ");Serial.println(scrY());
+  Serial.print("width, height ");Serial.print(width);Serial.print(", ");Serial.println(height);
   screen->fillRect(scrX(), scrY(), width, height, &black); // Default draw.
-  screen->drawRect(scrX(), scrX(), width, height, &white);
+  screen->drawRect(scrX(), scrY(), width, height, &white);
 }
 
 

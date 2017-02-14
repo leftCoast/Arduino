@@ -8,7 +8,7 @@
 //
 // For now we expect the correct or only SC card reader to be
 // running. We also won't do any scaling of bitmaps. Just grab 
-// rect A and spit it to rect B.
+// rect A on the card and spit it to rect B on the display.
 
 #include <SD.h>
 #include <drawObj.h>

@@ -10,7 +10,7 @@
 
 extern displayObj* screen;
 
-boolean initScreen(byte hardware, int inRotation=0);
+boolean initScreen(byte hardware, byte inRotation=0, byte SD_cs=0);
 
 
 #endif

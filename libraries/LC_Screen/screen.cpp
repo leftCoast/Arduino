@@ -7,7 +7,7 @@
 
 displayObj* screen = NULL;
 
-boolean initScreen(byte hardware, int inRotation) {
+boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
 
   switch (hardware) {
     case ADAFRUIT_1431 :
@@ -15,7 +15,11 @@ boolean initScreen(byte hardware, int inRotation) {
       if (screen) {
       	if (screen->dispObjBegin()) {
         		screen->setRotation(inRotation);
-        		return true;
+        		if (SD_cs) {
+                return SD.begin(SD_cs);
+            } else {
+            		return true;
+            }
       	}
       }
       return false;
@@ -26,8 +30,10 @@ boolean initScreen(byte hardware, int inRotation) {
       if (screen) {
         if (screen->dispObjBegin()) {
             screen->setRotation(inRotation);
-            if (SD.begin(ADAFRUIT_1947_SPI_SD_CS)) {
-                return true;
+            if (SD_cs) {
+                return SD.begin(SD_cs);
+            } else {
+            		return true;
             }
         }
       }

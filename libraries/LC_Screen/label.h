@@ -28,11 +28,10 @@ public :
   label();
   label(char* inText);
   label(char* inText, word inSize);
-  label(word inLocX, word inLocY, int inWidth,int inHeight);
-  label(word inLocX, word inLocY, int inWidth,int inHeight, char* inText);
+  label(int inLocX, int inLocY, int inWidth,int inHeight);
+  label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
   ~label();
   
-  //void dtostrf(double number, unsigned char prec, char *s);		// Theirs broke.
   void setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
   void setJustify(word inJustify);
   void setColors(colorObj* tColor);
