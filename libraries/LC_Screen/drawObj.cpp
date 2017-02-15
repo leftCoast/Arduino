@@ -79,7 +79,7 @@ point rect::getCorner(rectPt corner) {
 			tempPt.y = y;
 		break;
 		case topRightPt :
-			tempPt.x = x + length;
+			tempPt.x = x + width;
 			tempPt.y = y;
 		break;
 		case bottomLeftPt :
@@ -87,7 +87,7 @@ point rect::getCorner(rectPt corner) {
 			tempPt.y = y + height;
 		break;
 		case bottomRightPt :
-			tempPt.x = x + length;
+			tempPt.x = x + width;
 			tempPt.y = y + height;
 		break;
 	}
@@ -97,47 +97,47 @@ point rect::getCorner(rectPt corner) {
 
 // Are we touching this passed in rectangle?
 // If so where? Edge? Corner? Overlap?
-rectTouch rect::touching(rect* inRect) {
+rectTouch rect::touching(rect* checkRect) {
 
 		point 		tempPt;
 		
-		tempPt = inRect->getCorner(topLeftPt);
-		if (nRect(tempPt.x,tempPt.y) return overlap;
-		tempPt = inRect->getCorner(topRightPt);
-		if (nRect(tempPt.x,tempPt.y) return overlap;
-		tempPt = inRect->getCorner(bottomLeftPt);
-		if (nRect(tempPt.x,tempPt.y) return overlap;
-		tempPt = inRect->getCorner(bottomRightPt);
-		if (nRect(tempPt.x,tempPt.y) return overlap;
+		tempPt = checkRect->getCorner(topLeftPt);
+		if (inRect(tempPt.x,tempPt.y)) return overlap;
+		tempPt = checkRect->getCorner(topRightPt);
+		if (inRect(tempPt.x,tempPt.y)) return overlap;
+		tempPt = checkRect->getCorner(bottomLeftPt);
+		if (inRect(tempPt.x,tempPt.y)) return overlap;
+		tempPt = checkRect->getCorner(bottomRightPt);
+		if (inRect(tempPt.x,tempPt.y)) return overlap;
 		
-		if(inRect->maxX()==x-1) {
-			if(inRect->maxY()==minY()-1) return topLeft;
-			if(inRect->minY()==maxY()+1) return bottomLeft;
-			if(inRect->minY()>maxY()+1) return noTouch;
-			if (inRect->maxY()<minY()-1) return noTouch;
+		if(checkRect->maxX()==x-1) {
+			if(checkRect->maxY()==minY()-1) return topLeft;
+			if(checkRect->minY()==maxY()+1) return bottomLeft;
+			if(checkRect->minY()>maxY()+1) return noTouch;
+			if (checkRect->maxY()<minY()-1) return noTouch;
 			return leftSide;
-		} else if (inRect->maxY()==y-1) {
-			if(inRect->maxX()==x-1) return topLeft;
-			if(inRect->minX()==x+1) return topRight;
-			if(inRect->maxX()<x-1) return noTouch;
-			if(inRect->minX()>x+1) return noTouch;
+		} else if (checkRect->maxY()==y-1) {
+			if(checkRect->maxX()==x-1) return topLeft;
+			if(checkRect->minX()==x+1) return topRight;
+			if(checkRect->maxX()<x-1) return noTouch;
+			if(checkRect->minX()>x+1) return noTouch;
 			return topSide;
-		} else if (inRect->minX()==maxX()+1) {
-			if(inRect->maxY()==minY()-1) return topRight;
-			if(inRect->minY()==maxY()+1) return bottomRight;
-			if(inRect->minY()>maxY()+1) return noTouch;
-			if (inRect->maxY()<minY()-1) return noTouch;
+		} else if (checkRect->minX()==maxX()+1) {
+			if(checkRect->maxY()==minY()-1) return topRight;
+			if(checkRect->minY()==maxY()+1) return bottomRight;
+			if(checkRect->minY()>maxY()+1) return noTouch;
+			if (checkRect->maxY()<minY()-1) return noTouch;
 			return rightSide;
-		} else if (inRect->minY()==maxY()+1) {
-			if(inRect->maxX()==x-1) return bottomLeft;
-			if(inRect->minX()==x+1) return bottomRight;
-			if(inRect->maxX()<x-1) return noTouch;
-			if(inRect->minX()>x+1) return noTouch;
+		} else if (checkRect->minY()==maxY()+1) {
+			if(checkRect->maxX()==x-1) return bottomLeft;
+			if(checkRect->minX()==x+1) return bottomRight;
+			if(checkRect->maxX()<x-1) return noTouch;
+			if(checkRect->minX()>x+1) return noTouch;
 			return bottomSide;
 		}
 		return noTouch;
 	}
-}
+
 
 
 

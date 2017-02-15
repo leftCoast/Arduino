@@ -24,11 +24,23 @@
 class ballObj : public movingObj {
 
   public:
-    movingObj(
-  
+    ballObj(int inX, int inY, word inWidth,word inHeight);
+    
+  virtual void drawSelf(void);
+
+    float angle;    // degrees.
+    float velocity; // pixels/frame
 };
 
 
+ballObj::ballObj(int inX, int inY, word inWidth,word inHeight) 
+  : movingObj(inX,inY,inWidth,inHeight) {}
+
+  
+void ballObj::drawSelf(void) {
+  eraseSelf();
+  screen->fillRect(scrX(), scrY(), width, height, &white);
+}
 
 
 #define PADDLE_Y      110
