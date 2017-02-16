@@ -26,3 +26,5 @@ void movingObj::drawSelf(void) {
   screen->fillRect(scrX(), scrY(), width, height, &white);
 }
 
+int movingObj::middleX(void) { return x+width/2; }
+

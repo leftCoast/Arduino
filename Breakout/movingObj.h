@@ -12,6 +12,7 @@ class movingObj : public drawObj {
   virtual void setLocation(int inX, int inY);
   virtual void eraseSelf(void);
   virtual void drawSelf(void);
+          int  middleX(void);
 
           colorObj  backColor;
           int       oldX;

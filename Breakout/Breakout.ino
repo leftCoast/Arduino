@@ -21,49 +21,45 @@
 #include <screen.h>
 #include "movingObj.h"
 
-class ballObj : public movingObj {
-
-  public:
-    ballObj(int inX, int inY, word inWidth,word inHeight);
-    
-  virtual void drawSelf(void);
-
-    float angle;    // degrees.
-    float velocity; // pixels/frame
-};
-
-
-ballObj::ballObj(int inX, int inY, word inWidth,word inHeight) 
-  : movingObj(inX,inY,inWidth,inHeight) {}
-
-  
-void ballObj::drawSelf(void) {
-  eraseSelf();
-  screen->fillRect(scrX(), scrY(), width, height, &white);
-}
+#include "ballObj.h"
 
 
 #define PADDLE_Y      110
 #define PADDLE_WIDTH  16
 #define PADDLE_HEIGHT 4
 
+
+#define FRAME_MS  10
+#define LOST_MS   1000
+
 movingObj  paddle(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
-//label    test(30,50,40,8);
+label      debug(20,120,80,8);
+ballObj    theBall(&paddle,&debug);
+
+label    score(35,50,70,8);
+
 mapper   pMapper(0,1023,0,128-PADDLE_WIDTH);
-timeObj  frameTimer(50);
+timeObj  frameTimer(FRAME_MS);
+timeObj  lostTimer(LOST_MS);
 
 void setup() {
 
-  Serial.begin(9600); while(!Serial);
+  Serial.begin(9600); //while(!Serial);
   if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     while(true); // Kill the process.
   }
   screen->fillScreen(&black);
   paddle.setBackColor(&black);
   viewList.addObj(&paddle);
-  //test.setColors(&black,&green);
-  //viewList.addObj(&test);
-
+ 
+  score.setColors(&yellow,&black);
+  viewList.addObj(&score);
+  
+  debug.setColors(&yellow,&black);
+  viewList.addObj(&debug);
+  
+  viewList.addObj(&theBall);
+  theBall.reset();
   frameTimer.start();
 }
 
@@ -71,20 +67,31 @@ int oldLoc = -1;
 
 void loop() {
 
-  int val;
-  int newLoc;
-  
-  rect  aRect;
-  idle();
-  if (frameTimer.ding()) {
-    frameTimer.stepTime();
-    val = analogRead(15);
-    //test.setValue(val);
-    newLoc = pMapper.Map(val);
-    if (newLoc!=oldLoc) {
-      paddle.setLocation(newLoc,PADDLE_Y);
-      oldLoc = newLoc;
+    int val;
+    int newLoc;
+    
+    rect  aRect;
+    idle();
+    if (theBall.ballLost) {
+      if (lostTimer.ding()) {
+        score.setValue("           ");
+        theBall.reset();
+        frameTimer.start();
+      }
+    } else {
+      if (frameTimer.ding()) {
+        frameTimer.stepTime();
+        val = analogRead(15);
+        newLoc = pMapper.Map(val);
+        if (newLoc!=oldLoc) {
+          paddle.setLocation(newLoc,PADDLE_Y);
+          oldLoc = newLoc;
+        }
+        theBall.ballFrame();
+        if (theBall.ballLost) {
+          score.setValue("BALL LOST!!");
+          lostTimer.start();
+        }
+      }
     }
   }
-
-}

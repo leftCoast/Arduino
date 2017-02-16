@@ -1,0 +1,211 @@
+#include "ballObj.h"
+
+gameCompass ourCompass;
+
+
+gameCompass::gameCompass(void) {
+
+  courses[0].y = -2 ;courses[0].x = 0;
+  courses[1].y = -2 ;courses[1].x = 1;
+  courses[2].y = -3 ;courses[2].x = 2;
+  courses[3].y = -2 ;courses[3].x = 2;
+  courses[4].y = -2 ;courses[4].x = 3;
+
+  courses[9].y = 2 ;courses[9].x = 0;
+  courses[8].y = 2 ;courses[8].x = 1;
+  courses[7].y = 3 ;courses[7].x = 2;
+  courses[6].y = 2 ;courses[6].x = 2;
+  courses[5].y = 2 ;courses[5].x = 3;
+
+  courses[10].y = 2 ;courses[10].x = -1;
+  courses[11].y = 3 ;courses[11].x = -2;
+  courses[12].y = 2 ;courses[12].x = -2;
+  courses[13].y = 2 ;courses[13].x = -3;
+
+  courses[17].y = -2 ;courses[17].x = -1;
+  courses[16].y = -3 ;courses[16].x = -2;
+  courses[15].y = -2 ;courses[15].x = -2;
+  courses[14].y = -2 ;courses[14].x = -3;
+}
+
+
+
+point gameCompass::adjustCourse(int dy,int dx,courseChange change) {
+
+    point aPoint;
+    bool  foundPoint;
+    byte  index;
+    
+    aPoint.y = dy;    // Defualt, no change.
+    aPoint.x = dx;
+    index = 0;
+    foundPoint = false;
+    while(!foundPoint&&index<COMPASS_POINTS) {
+      foundPoint = (courses[index].y == dy && courses[index].x == dx);
+      if (!foundPoint) {
+        index++;
+      }
+    }
+    if (foundPoint) {
+      switch (change) {
+        case clockwise :
+          if (index!=4 && index!=13) {
+            index++;
+            if (index>=COMPASS_POINTS) {
+              index=0;
+            }
+            aPoint.y = courses[index].y;    
+            aPoint.x = courses[index].x;
+          }
+          break;
+        case counterClockwise :
+          if (index!=5 && index!=14) {
+            index--;
+            if (index<0) {
+              index = COMPASS_POINTS-1;
+            }
+            aPoint.y = courses[index].y;    
+            aPoint.x = courses[index].x;
+          }
+          break;
+      }
+    }
+    return aPoint;
+  }
+  
+
+
+  
+// ************  
+
+
+
+ballObj::ballObj(movingObj* inPaddle,label* inDebug) 
+  : movingObj(BALL_X,BALL_Y,BALL_DIA,BALL_DIA) {
+
+    thePaddle = inPaddle;
+    ballLost = true;
+    mDebug = inDebug;
+ }
+
+
+void ballObj::reset(void) {
+
+    deltaY  = abs(BALL_DY);    // Always start heding down.
+    deltaX = BALL_DX;
+    framePerPix = BALL_FPP;
+    
+    yCount = 0;
+    xCount = 0;
+    frameCount = 0; 
+    movingObj::setLocation(BALL_X,BALL_Y);
+    ballLost = false;
+}
+
+
+void ballObj::chageDirection(courseChange change) {
+
+  
+}
+
+
+void ballObj::setLocation(int inX, int inY) {
+
+    boolean clearSkies;
+    point   newCourse;
+    
+    if (!ballLost) {
+      clearSkies = true;
+
+      // Fist we check the walls..
+      if (inX>=128-width) {  // Hit right wall
+        deltaX = -deltaX;
+        clearSkies = false;
+      }
+      if (inX<=width) {  // Hit left wall
+        deltaX = -deltaX;
+        clearSkies = false;
+      }
+       if (inY>=128-height) {  // Hit bittom wall
+        ballLost = true;               // The ball was LOST!!
+        screen->fillRect(x,y,width,height,&backColor);
+        clearSkies = false;
+      }
+      if (inY<=height) {  // Hit top wall
+        deltaY = -deltaY;
+        clearSkies = false;
+      }
+  
+      // Then we check the paddle. 
+      if (y+height<=thePaddle->y && inY+height >= thePaddle->y) {     // We're at the paddle level!
+        if (!(inX>thePaddle->maxX()||inX+width<thePaddle->minX())) {  // Paddle hit!!
+          deltaY = -abs(deltaY);                                      // So as to not get stuck. Force and upward movement.
+          
+           if (middleX()>thePaddle->middleX()) {
+            newCourse = ourCompass.adjustCourse(deltaY,deltaX,clockwise);
+            deltaY = newCourse.y;
+            deltaX = newCourse.x;
+          } else if (middleX()<thePaddle->middleX()) {
+            newCourse = ourCompass.adjustCourse(deltaY,deltaX,counterClockwise);
+            deltaY = newCourse.y;
+            deltaX = newCourse.x;
+          }
+          
+          char tempy[20];
+          char tempx[8];
+          snprintf (tempy,20,"%d",deltaY);
+          snprintf (tempx,20,"%d",deltaX);
+          strcat(tempy,", ");
+          strcat(tempy,tempx);
+          mDebug->setValue(tempy);
+          
+          clearSkies = false;
+        } 
+      }
+      if (clearSkies) {
+        movingObj::setLocation(inX,inY);
+      }
+    }
+  }
+
+
+void ballObj::drawSelf(void) {
+  
+    eraseSelf();
+    screen->fillRoundRect(scrX(), scrY(),width,height,width/3,&red);
+    //screen->drawRoundRect(scrX(),scrY(),width, height,width/3,&white);
+  }
+
+
+void ballObj::ballFrame(void) {
+
+    int newX;
+    int newY;
+    
+    if (!ballLost) {
+      if (frameCount==0) {
+        if (xCount<abs(deltaX)) {
+          newX = x + deltaX;
+          xCount++;
+        } else {
+          newX = x;
+        }
+        if (yCount<abs(deltaY)) {
+          newY = y + deltaY;
+          yCount++;
+        } else {
+          newY = y;
+        }
+        if (xCount==abs(deltaX)&&yCount==abs(deltaY)) {
+          xCount = 0;
+          yCount = 0;
+        }
+        setLocation(newX,newY);
+      }
+      frameCount++;
+      if (frameCount==framePerPix) {
+          frameCount = 0; 
+      }
+    }
+  }
+
