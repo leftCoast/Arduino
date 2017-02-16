@@ -5,11 +5,11 @@
 #include <label.h>
 
 #define BALL_X    61
-#define BALL_Y    50
-#define BALL_DIA  6
-#define BALL_FPP  4   // Frames / pixel
-#define BALL_DY   2
-#define BALL_DX   1
+#define BALL_Y    60
+#define BALL_DIA  4
+#define BALL_FPM  4   // Frames / move
+#define BALL_DY   -2
+#define BALL_DX   0
 
 #define COMPASS_POINTS  18
 
@@ -32,10 +32,9 @@ class ballObj : public movingObj {
     ballObj(movingObj* inPaddle,label* inDebug);
 
           void  reset(void);
-          void  chageDirection(courseChange change);
   virtual void setLocation(int inX, int inY);
   virtual void drawSelf(void);
-          void  ballFrame(void);
+          void ballFrame(void);
     
     int   deltaY;       // Our vector..
     int   deltaX;

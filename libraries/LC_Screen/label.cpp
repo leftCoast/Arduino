@@ -159,7 +159,6 @@ void label::drawSelf(void) {
 
   int numCharsDisp;  // How many we have room for?
   int charDif;     
-  //Serial.println("drawSelf()");
 	if (buff) {
     if (transp) {
       screen->setTextColor(&textColor);
@@ -168,7 +167,6 @@ void label::drawSelf(void) {
     }
     screen->setTextSize(textSize);
     screen->setTextWrap(false);
-    Serial.print("x, y ");Serial.print(x);Serial.print(", ");Serial.println(y);
     screen->setCursor(x,y);
     numCharsDisp = width/(CHAR_WIDTH*textSize);
     charDif =  numCharsDisp - strlen(buff);
