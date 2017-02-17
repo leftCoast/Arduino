@@ -24,30 +24,40 @@
 #include "ballObj.h"
 #include "brickObj.h"
 
-#define PADDLE_Y      115
 #define PADDLE_WIDTH  16
 #define PADDLE_HEIGHT 4
+#define PADDLE_Y      115
 
+
+#define PADDLE_MS 20
 #define FRAME_MS  10
-#define LOST_MS   1000
+#define TEXT_MS   1500
 
+#define MESSAGE_X 25
+#define MESSAGE_Y 70
+#define MESSAGE_W 78
+#define MESSAGE_H 8
 
+#define NUM_BALLS 4
+enum gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
+
+gameStates gameState;
 movingObj  paddle(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
-label      debug(20,120,80,8);
-ballObj    theBall(&paddle,&debug);
-
-label    score(35,70,70,8);
-
-mapper   pMapper(0,1023,0,128-PADDLE_WIDTH);
-timeObj  frameTimer(FRAME_MS);
-timeObj  lostTimer(LOST_MS);
-
-colorObj  backColor;  // Everyone.
-int oldLoc = -1;      // For paddle I think.
+ballObj    theBall(&paddle);
+label      message(MESSAGE_X,MESSAGE_Y,MESSAGE_W,MESSAGE_H);
+mapper     pMapper(0,1023,0,128-PADDLE_WIDTH);
+timeObj    frameTimer(FRAME_MS);
+timeObj    paddleTimer(PADDLE_MS);
+timeObj    textTimer(TEXT_MS);
+runningAvg smoother(4);
+colorObj   backColor;  
+int        oldLoc = -1;
+int        savedPaddleX;
+int        ballCount;
 
 void setup() {
 
-  //Serial.begin(9600); //while(!Serial);
+  //Serial.begin(9600); while(!Serial);
   if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     while(true); // Kill the process.
   }
@@ -56,31 +66,34 @@ void setup() {
   paddle.setBackColor(&backColor);
   viewList.addObj(&paddle);
  
-  score.setColors(&yellow,&backColor);
-  viewList.addObj(&score);
-  
-  debug.setColors(&yellow,&backColor);
-  viewList.addObj(&debug);
+  message.setColors(&yellow,&backColor);
+  message.setJustify(TEXT_CENTER);
+  viewList.addObj(&message);
 
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
-  theBall.reset();
-  frameTimer.start(); 
+
+  setState(preGame); 
 }
+
 
 void fillBricks(void) {
 
   brickObj* aBrick;
-
-  int y = BOTTOM_BRICK;
+  int y;;
+  int offset;
+  
+  y = BOTTOM_BRICK;
+  offset = (128-(NUM_BRICKS*BRICK_W))/2;
   colorObj aColor;
   y = BOTTOM_BRICK;
   aColor.setColor(&blue);
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
-      aBrick = new brickObj((i*BRICK_W)+1,y);
+      aBrick = new brickObj((i*BRICK_W)+offset,y);
       aBrick->setColor(&aColor);
+      aBrick->setBackColor(&backColor);
       viewList.addObj(aBrick);
     }
     y = y-BRICK_H;
@@ -88,51 +101,127 @@ void fillBricks(void) {
   aColor.setColor(&yellow);
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
-      aBrick = new brickObj((i*BRICK_W)+1,y);
+      aBrick = new brickObj((i*BRICK_W)+offset,y);
       aBrick->setColor(&aColor);
+      aBrick->setBackColor(&backColor);
       viewList.addObj(aBrick);
     }
     y = y-BRICK_H;
   }
   aColor.setColor(&red);
-  for(byte j=0;j<1;j++) {
+  for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
-      aBrick = new brickObj((i*BRICK_W)+1,y);
+      aBrick = new brickObj((i*BRICK_W)+offset,y);
       aBrick->setColor(&aColor);
+      aBrick->setBackColor(&backColor);
       viewList.addObj(aBrick);
     }
     y = y-BRICK_H;
   }
 }
-  
 
 
-void loop() {
+void doPaddle(void) {
 
-    int val;
+    float val;
     int newLoc;
     
-    idle();
-    if (frameTimer.ding()) {
-      frameTimer.stepTime();
-      val = analogRead(15);
-      newLoc = pMapper.Map(val);
+    if (paddleTimer.ding()) {
+      paddleTimer.stepTime();
+      val = smoother.addData(analogRead(15));
+      newLoc = round(pMapper.Map(val));
       if (newLoc!=oldLoc) {
         paddle.setLocation(newLoc,PADDLE_Y);
         oldLoc = newLoc;
       }
+    }
+  }
+
+
+void doBall(void) {
+
+    if (frameTimer.ding()) {
+      frameTimer.stepTime();
+      theBall.ballFrame();
       if (theBall.ballLost) {
-        if (lostTimer.ding()) {
-          score.setValue("           ");
-          theBall.reset();
-          frameTimer.start();
-        }
+          ballCount--;
+          if (ballCount) {
+            setState(lostBall);
+          } else {
+            setState(gameOver);
+          }
       } else {
-        theBall.ballFrame();
-        if (theBall.ballLost) {
-          score.setValue("BALL LOST!!");
-          lostTimer.start();
+        if (!bricks()) {
+          setState(gameWin);
         }
       }
     }
   }
+
+
+void setState(gameStates state) {
+
+    switch(state) {
+      case preGame :
+        paddleTimer.start();
+        ballCount = NUM_BALLS;
+        theBall.setLocation(BALL_X,BALL_Y);
+        resetBricks();
+        message.setValue("Move to start");
+        while(!paddleTimer.ding());
+        doPaddle();
+        savedPaddleX = paddle.x;
+        frameTimer.start();
+        break;
+      case inPLay :
+        message.setValue(" ");
+        theBall.reset();
+        frameTimer.start();
+        break;
+      case lostBall :
+        message.setValue("BALL LOST!!");
+        textTimer.start();
+        break;
+      case gameOver :
+        message.setValue("GAME OVER!!");
+        textTimer.start();
+        break;
+      case gameWin :
+        theBall.eraseSelf();
+        message.setValue("WINNER!!");
+        textTimer.start();
+        break;
+    }
+    gameState = state;
+  }
+
+
+void loop(void) {
+
+    idle();
+    doPaddle();
+    switch(gameState) {
+      case preGame :
+          if (paddle.x!=savedPaddleX) {
+            setState(inPLay);
+          }
+        break;
+      case inPLay : doBall(); break;
+      case lostBall :
+        if (textTimer.ding()) {
+          setState(inPLay);
+        }
+        break;
+      case gameOver :
+        if (textTimer.ding()) {
+          setState(preGame);
+        }
+        break;
+      case gameWin :
+        if (textTimer.ding()) {
+          setState(preGame);
+        }
+        break;
+    }
+  }
+

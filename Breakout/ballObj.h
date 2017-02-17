@@ -29,7 +29,7 @@ class gameCompass {
 class ballObj : public movingObj {
 
   public:
-    ballObj(movingObj* inPaddle,label* inDebug);
+    ballObj(movingObj* inPaddle);
 
           void  reset(void);
   virtual void setLocation(int inX, int inY);
@@ -47,7 +47,6 @@ class ballObj : public movingObj {
     boolean ballLost;
 
     movingObj*  thePaddle;
-    label*      mDebug;
 };
 
 #endif

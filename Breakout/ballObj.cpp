@@ -83,12 +83,11 @@ point gameCompass::adjustCourse(int dy, int dx, courseChange change) {
 
 
 
-ballObj::ballObj(movingObj* inPaddle, label* inDebug)
+ballObj::ballObj(movingObj* inPaddle)
   : movingObj(BALL_X, BALL_Y, BALL_DIA, BALL_DIA) {
 
   thePaddle = inPaddle;
   ballLost = true;
-  mDebug = inDebug;
 }
 
 
@@ -113,7 +112,7 @@ void ballObj::setLocation(int inX, int inY) {
   point     newCourse;
   rect      ourNewSelf;
   int       index;
-  rectTouch theTouch;
+  boolean   theTouch;
   
   if (!ballLost) {
     clearSkies = true;
@@ -158,22 +157,22 @@ void ballObj::setLocation(int inX, int inY) {
     // Now we check the bricks!
     ourNewSelf.setRect(this);
     ourNewSelf.setLocation(inX,inY);
-    theTouch = noTouch;
+    theTouch = false;
     index = 0;
     done = false;
     while(!done) {                      // find the first brick we hit.
       if (index>=TOTAL_BRICKS) {
         done = true;
       } else {
-        theTouch = ourNewSelf.touching((rect*)brickList[index]);
-        if (theTouch!=noTouch) {
+        theTouch = ourNewSelf.overlap((rect*)brickList[index]);
+        if (theTouch) {
           brickList[index]->hit();
           done = true;
         }
         index++;
       }
     }
-    if (theTouch!=noTouch) {
+    if (theTouch) {
       deltaY = -deltaY;
       clearSkies = false;
     }

@@ -11,8 +11,7 @@
 // ***************************************************************
 // Base class for a rectangle. 
 // ***************************************************************
-enum rectTouch { noTouch, leftSide, rightSide, topSide, bottomSide, 
-									topLeft, topRight, bottomLeft, bottomRight, overlap };
+
 									
 enum rectPt { topLeftPt, topRightPt, bottomLeftPt, bottomRightPt };
 
@@ -34,7 +33,7 @@ virtual	  void  		setLocation(int inX, int inY);
           int  			minY(void);                             // Same as obove but in the Y direction.
   			  bool 			inRect(int inX, int inY);               // Is this point in us?
   			  point			getCorner(rectPt corner);								// Pass back the corner point.
-					rectTouch	touching(rect* inRect);									// Is that rect touching us?
+					bool			overlap(rect* inRect);									// Is that rect touching us?
 					
 					int   x;
 					int   y;

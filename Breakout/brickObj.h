@@ -3,12 +3,14 @@
 
 #include "movingObj.h"
 
-#define BRICK_W       15
-#define BRICK_H       8
-#define NUM_BRICKS    128/BRICK_W
+#define BRICK_W       14
+#define BRICK_H       6
+#define NUM_BRICKS    126/BRICK_W
 #define BOTTOM_BRICK  48
-#define BRICK_ROWS    5
+#define BRICK_ROWS    6
 #define TOTAL_BRICKS  NUM_BRICKS*BRICK_ROWS
+#define HILIGHT_PRCT  40
+#define SHADOW_PRCT   60
 
 class brickObj : public movingObj {
 
@@ -20,11 +22,15 @@ class brickObj : public movingObj {
             void  reset(void);
     virtual void  drawSelf(void);
     
-    colorObj brickColor;
-    int      homeX;
-    int      homeY;
+    colorObj  brickColor;
+    colorObj  hilight;
+    colorObj  shadow;
+    int       homeX;
+    int       homeY;
 };
 
 extern brickObj* brickList[];
+extern void resetBricks(void);
+extern boolean bricks(void);
 
 #endif

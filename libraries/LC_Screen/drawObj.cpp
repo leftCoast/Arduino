@@ -96,46 +96,14 @@ point rect::getCorner(rectPt corner) {
 
 
 // Are we touching this passed in rectangle?
-// If so where? Edge? Corner? Overlap?
-rectTouch rect::touching(rect* checkRect) {
+bool rect::overlap(rect* checkRect) {
 
-		point 		tempPt;
-		
-		tempPt = checkRect->getCorner(topLeftPt);
-		if (inRect(tempPt.x,tempPt.y)) return overlap;
-		tempPt = checkRect->getCorner(topRightPt);
-		if (inRect(tempPt.x,tempPt.y)) return overlap;
-		tempPt = checkRect->getCorner(bottomLeftPt);
-		if (inRect(tempPt.x,tempPt.y)) return overlap;
-		tempPt = checkRect->getCorner(bottomRightPt);
-		if (inRect(tempPt.x,tempPt.y)) return overlap;
-		
-		if(checkRect->maxX()==x-1) {
-			if(checkRect->maxY()==minY()-1) return topLeft;
-			if(checkRect->minY()==maxY()+1) return bottomLeft;
-			if(checkRect->minY()>maxY()+1) return noTouch;
-			if (checkRect->maxY()<minY()-1) return noTouch;
-			return leftSide;
-		} else if (checkRect->maxY()==y-1) {
-			if(checkRect->maxX()==x-1) return topLeft;
-			if(checkRect->minX()==x+1) return topRight;
-			if(checkRect->maxX()<x-1) return noTouch;
-			if(checkRect->minX()>x+1) return noTouch;
-			return topSide;
-		} else if (checkRect->minX()==maxX()+1) {
-			if(checkRect->maxY()==minY()-1) return topRight;
-			if(checkRect->minY()==maxY()+1) return bottomRight;
-			if(checkRect->minY()>maxY()+1) return noTouch;
-			if (checkRect->maxY()<minY()-1) return noTouch;
-			return rightSide;
-		} else if (checkRect->minY()==maxY()+1) {
-			if(checkRect->maxX()==x-1) return bottomLeft;
-			if(checkRect->minX()==x+1) return bottomRight;
-			if(checkRect->maxX()<x-1) return noTouch;
-			if(checkRect->minX()>x+1) return noTouch;
-			return bottomSide;
-		}
-		return noTouch;
+
+		if(maxX()<checkRect->minX()) return false;
+		if(minX()>checkRect->maxX()) return false;
+		if(maxY()<checkRect->minY()) return false;
+		if(minY()>checkRect->maxY()) return false;
+		return true;
 	}
 
 

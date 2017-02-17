@@ -182,6 +182,13 @@ void label::drawSelf(void) {
         for(int i=1;i<=charDif;i++) screen->drawText(" ");
         screen->drawText(buff);
         break;
+      case TEXT_CENTER :
+      	int leadSp = charDif/2;
+      	int trailSp = charDif-leadSp;
+        for(int i=1;i<=leadSp;i++) screen->drawText(" ");
+        screen->drawText(buff);
+        for(int i=1;i<=trailSp;i++) screen->drawText(" ");
+        break;
       }
 		} else {                      // Needs truncation..
     	if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {
