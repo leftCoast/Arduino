@@ -1,10 +1,10 @@
 
-/*
+
 #include "colorObj.h"
 #include "mapper.h"
 #include "multiMap.h"
 #include "timeObj.h"
-*/
+
 #include "neoPixel.h"
 
 
