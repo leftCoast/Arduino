@@ -31,7 +31,7 @@
 bmpLabel vOutVac(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
 bmpLabel vOutLeak(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
 
-mapper data2voltMapper(0, 1024/2, 0.0049, 5);   // Update for 3.2V chip
+mapper data2voltMapper(0, 1023, 0, 6.6);   // Update for 3.2V chip
 mapper volt2psiMapper(0.2,4.5,-16.7,0);
 mapper psi2hgMapper(-14.734624,2.2,30,-4.4792455);
 
@@ -47,7 +47,7 @@ void setup(void) {
  
   colorObj  labelColor;
   
-  //Serial.begin(9600);while(!Serial);
+  Serial.begin(9600);while(!Serial);
   Serial.println("init Screen..");
   if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
     Serial.println("Success!");
