@@ -126,7 +126,7 @@ void ballObj::setLocation(int inX, int inY) {
       deltaX = -deltaX;
       clearSkies = false;
     }
-    if (inY >= 128 - height) {        // Hit bittom wall
+    if (inY >= 115 - height) {        // Hit bittom wall
       ballLost = true;                // The ball was LOST!!
       screen->fillRect(x,y,width,height,&backColor);
       clearSkies = false;

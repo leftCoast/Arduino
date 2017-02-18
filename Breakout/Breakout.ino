@@ -25,9 +25,8 @@
 #include "brickObj.h"
 
 #define PADDLE_WIDTH  16
-#define PADDLE_HEIGHT 4
-#define PADDLE_Y      115
-
+#define PADDLE_HEIGHT 3
+#define PADDLE_Y      112
 
 #define PADDLE_MS 20
 #define FRAME_MS  10
@@ -38,22 +37,32 @@
 #define MESSAGE_W 78
 #define MESSAGE_H 8
 
+#define BALLS_TXT_X 40
+#define BALLS_TXT_W 72
+#define BALLS_Y     118
+#define BALLS_H     8
+#define BALLS_NUM_X BALLS_TXT_X + BALLS_TXT_W + 2
+#define BALLS_NUM_W 16
+
 #define NUM_BALLS 4
 enum gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
-gameStates gameState;
-movingObj  paddle(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
-ballObj    theBall(&paddle);
-label      message(MESSAGE_X,MESSAGE_Y,MESSAGE_W,MESSAGE_H);
-mapper     pMapper(0,1023,0,128-PADDLE_WIDTH);
-timeObj    frameTimer(FRAME_MS);
-timeObj    paddleTimer(PADDLE_MS);
-timeObj    textTimer(TEXT_MS);
-runningAvg smoother(4);
-colorObj   backColor;  
-int        oldLoc = -1;
-int        savedPaddleX;
-int        ballCount;
+gameStates    gameState;
+movingObj     paddle(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
+ballObj       theBall(&paddle);
+label         message(MESSAGE_X,MESSAGE_Y,MESSAGE_W,MESSAGE_H);
+label         numBallsTxt(BALLS_TXT_X,BALLS_Y,BALLS_TXT_W,BALLS_H);
+label         numBallsNum(BALLS_NUM_X,BALLS_Y,BALLS_NUM_W,BALLS_H);
+colorMultiMap ballNumCMap;
+mapper        pMapper(0,1023,1,127-PADDLE_WIDTH);
+timeObj       frameTimer(FRAME_MS);
+timeObj       paddleTimer(PADDLE_MS);
+timeObj       textTimer(TEXT_MS);
+runningAvg    smoother(4);
+colorObj      backColor;  
+int           oldLoc = -1;
+int           savedPaddleX;
+int           ballCount;
 
 void setup() {
 
@@ -63,6 +72,8 @@ void setup() {
   }
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
+  screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
+  
   paddle.setBackColor(&backColor);
   viewList.addObj(&paddle);
  
@@ -70,6 +81,21 @@ void setup() {
   message.setJustify(TEXT_CENTER);
   viewList.addObj(&message);
 
+  numBallsTxt.setColors(&white,&backColor);
+  numBallsTxt.setJustify(TEXT_RIGHT);
+  numBallsTxt.setValue("Balls:");
+  numBallsTxt.drawSelf();           // In theroy we won't need redraws..
+  //viewList.addObj(&numBallsTxt);  // So we can (not) link it up.
+
+  numBallsNum.setColors(&backColor,&backColor); // Not yet..
+  numBallsNum.setJustify(TEXT_LEFT);
+  numBallsNum.setValue(" ");
+  viewList.addObj(&numBallsNum);
+  
+  ballNumCMap.addColor(NUM_BALLS,&green);
+  ballNumCMap.addColor(2,&yellow);
+  ballNumCMap.addColor(1,&red);
+    
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
@@ -158,6 +184,18 @@ void doBall(void) {
     }
   }
 
+void showBallNum(int balls) {
+
+  colorObj  aColor;
+
+  if (balls) {
+    aColor = ballNumCMap.Map(balls);
+    numBallsNum.setColors(&aColor,&backColor);
+    numBallsNum.setValue(ballCount);
+  } else {
+    numBallsNum.setValue(" ");
+  }
+}
 
 void setState(gameStates state) {
 
@@ -165,6 +203,7 @@ void setState(gameStates state) {
       case preGame :
         paddleTimer.start();
         ballCount = NUM_BALLS;
+        showBallNum(ballCount);
         theBall.setLocation(BALL_X,BALL_Y);
         resetBricks();
         message.setValue("Move to start");
@@ -180,10 +219,12 @@ void setState(gameStates state) {
         break;
       case lostBall :
         message.setValue("BALL LOST!!");
+        showBallNum(ballCount);
         textTimer.start();
         break;
       case gameOver :
         message.setValue("GAME OVER!!");
+        showBallNum(ballCount);
         textTimer.start();
         break;
       case gameWin :
