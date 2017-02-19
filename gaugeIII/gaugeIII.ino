@@ -27,7 +27,7 @@
 #define TEXT_HEIGHT 14
 
 #define vacummPin A12
-
+  
 bmpLabel vOutVac(LEFT_EDGE,BASELINE1,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
 bmpLabel vOutLeak(LEFT_EDGE,BASELINE2,TEXT_WIDTH,TEXT_HEIGHT,"-000.0");
 
@@ -47,9 +47,9 @@ void setup(void) {
  
   colorObj  labelColor;
   
-  Serial.begin(9600);while(!Serial);
+  //Serial.begin(9600);while(!Serial);
   Serial.println("init Screen..");
-  if (initScreen(ADAFRUIT_1947,PORTRAIT)) {
+  if (initScreen(ADAFRUIT_1947,PORTRAIT,ADAFRUIT_1947_SPI_SD_CS)) {
     Serial.println("Success!");
     screen->fillScreen(&black);
     bmpPipe mBitmap;
