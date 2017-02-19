@@ -4,7 +4,7 @@
 #include "mapper.h"
 #include "multiMap.h"
 // uncomment for debug stuff.
-//#define PRINT_COLOR
+#define PRINT_COLOR
 
 // Color definitions
 #define	BLACK           0x0000

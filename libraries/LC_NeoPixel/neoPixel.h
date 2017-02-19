@@ -18,11 +18,11 @@ class neoPixel : public Adafruit_NeoPixel {
   ~neoPixel();
   
   void     setPixelColor(uint16_t n,colorObj* inColor);
-   void		 setPixelColorW(uint16_t n,colorObj* inColor);
+  //void		 setPixelColorW(uint16_t n,colorObj* inColor);
   colorObj getPixelColor(uint16_t n);
-  colorObj getPixelColorW(uint16_t n);
+  //colorObj getPixelColorW(uint16_t n);
   void	  setAll(colorObj* color);		// 'Cause its soo handy.
-  void	  setAllW(colorObj* color);
+  //void	  setAllW(colorObj* color);
 };
 
 #endif
