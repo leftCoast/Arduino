@@ -38,8 +38,8 @@ void setup() {
   fourColorRing.setPixelColor(2,&white);
   fourColorRing.setPixelColor(3,&yellow);
   fourColorRing.setPixelColor(4,&aColor);
-  fourColorRing.setPixelColor(5,&aColor);
-  
+  fourColorRing.setPixelColor(5,&blue);
+  fourColorRing.setPixelColor(6,&aColor);
   fourColorRing.show();
   
   threeColorStick.begin();
@@ -47,22 +47,10 @@ void setup() {
   threeColorStick.setPixelColor(1,&yellow);
   threeColorStick.setPixelColor(2,&aColor);
   threeColorStick.setPixelColor(7,&blue);
+  
   threeColorStick.show();
   delay(250);
   aColor = threeColorStick.getPixelColor(0);
-  
-  for(int i=0;i<640;i++) {
-    shiftPixels(&fourColorRing,true);
-    shiftPixels(&threeColorStick,true);
-    aColor = randomColor();
-    fourColorRing.setPixelColor(0,&aColor);
-    aColor = randomColor();
-    threeColorStick.setPixelColor(0,&aColor);
-    fourColorRing.show();
-    threeColorStick.show();
-    delay(50);
-  }
-
 }
 
 colorObj randomColor(void) {
@@ -74,27 +62,11 @@ colorObj randomColor(void) {
 }
 
 
-void shiftPixels(neoPixel* pixels,bool toEnd) {
-
-  colorObj  aColor;
-  int       last;
-
-  last = pixels->numPixels()-1;
-  if (toEnd) {                              // Feed new colors onto pixel 0, pull 'em through to the end.
-    for(int i=last;i>0;i--) {
-      aColor = pixels->getPixelColor(i-1);
-      pixels->setPixelColor(i,&aColor);
-    }
-  } else {                                  // Feed new colors onto last pixel, push 'em to the start..
-    for(int i=0;i<last;i++) {
-      aColor = pixels->getPixelColor(i+1);
-      pixels->setPixelColor(i,&aColor);
-    }
-  }
-}
-
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
+  fourColorRing.roll(false);
+  fourColorRing.show();
+  delay(100);
 
 }

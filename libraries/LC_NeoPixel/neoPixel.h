@@ -19,7 +19,9 @@ class neoPixel : public Adafruit_NeoPixel {
   
   void     setPixelColor(uint16_t n,colorObj* inColor);
   colorObj getPixelColor(uint16_t n);
-  void	  setAll(colorObj* color);		// 'Cause its soo handy.
+  void	   setAll(colorObj* color);				// 'Cause its soo handy.
+  colorObj shiftPixels(bool toEnd=true);		// Even handier!
+  void		 roll(bool clockwise=true);			// For rolling pixelRings
 };
 
 #endif

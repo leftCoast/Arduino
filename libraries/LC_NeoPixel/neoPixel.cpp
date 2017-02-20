@@ -48,3 +48,44 @@ void neoPixel::setAll(colorObj* color) {
   	 setPixelColor(i, color);
   }
 }
+
+colorObj neoPixel::shiftPixels(bool toEnd) {
+
+  colorObj  aColor;
+  colorObj  lastColor;
+  int       last;
+
+  last = numPixels()-1;
+  if (toEnd) {                              // Feed new colors onto pixel 0, pull 'em through to the end.
+    lastColor = getPixelColor(last);
+    for(int i=last;i>0;i--) {
+      aColor = getPixelColor(i-1);
+      setPixelColor(i,&aColor);
+    }
+  } else {                                  // Feed new colors onto last pixel, push 'em to the start..
+    lastColor = getPixelColor(0);
+    for(int i=0;i<last;i++) {
+      aColor = getPixelColor(i+1);
+      setPixelColor(i,&aColor);
+    }
+  }
+  return lastColor;
+}
+
+
+void neoPixel::roll(bool clockwise) {
+
+		colorObj aColor;
+
+  	aColor = shiftPixels(!clockwise);
+  	if (!clockwise) {
+  		setPixelColor(0,&aColor);
+  	} else {
+  		setPixelColor(numPixels()-1,&aColor);
+  	}
+  }
+  	
+  	
+  	
+  	
+  	
