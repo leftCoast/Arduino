@@ -48,12 +48,3 @@ void neoPixel::setAll(colorObj* color) {
   	 setPixelColor(i, color);
   }
 }
-
-/*
-void neoPixel::setAllW(colorObj* color) {
-
-  for (int i = 0; i < numPixels(); i++) {
-  	 setPixelColorW(i, color);
-  }
-}
-*/
