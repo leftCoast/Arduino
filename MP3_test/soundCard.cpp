@@ -1,11 +1,11 @@
-#include "soundBoard.h"
+#include "soundCard.h"
 
 // DREQ should be an an Interrupt pin. *** UN-USED IN THIS VERSION ***
 #define DREQ 3 
 
 
-soundBoard::soundBoard(byte boardSetup) 
-  : timeObj(SOUNDBOARD_SLEEP_MS) { 
+soundCard::soundCard(byte boardSetup) 
+  : timeObj(soundCard_SLEEP_MS) { 
   
     setupType = boardSetup;
     filePath = NULL;
@@ -13,7 +13,7 @@ soundBoard::soundBoard(byte boardSetup)
   }
 
 
-soundBoard::~soundBoard(void) { 
+soundCard::~soundCard(void) { 
   
     if (musicPlayer) {
       delete musicPlayer;
@@ -26,15 +26,15 @@ soundBoard::~soundBoard(void) {
   }
 
 
-boolean soundBoard::begin(void) { 
+boolean soundCard::begin(void) { 
 
     start();                    // Whatever happens, lets get the timer rolling.
     switch (setupType) {
-      case SOUNDBOARD_SHIELD :
-        musicPlayer = new Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, SOUNDBOARD_SD_CS);
+      case soundCard_SHIELD :
+        musicPlayer = new Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, soundCard_SD_CS);
       break;
-      case SOUNDBOARD_BREAKOUT :
-        musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_RESET, BREAKOUT_CS, BREAKOUT_DCS, DREQ, SOUNDBOARD_SD_CS);
+      case soundCard_BREAKOUT :
+        musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_RESET, BREAKOUT_CS, BREAKOUT_DCS, DREQ, soundCard_SD_CS);
       break;
       default : setError(badSetup); return false;
     }
@@ -52,7 +52,7 @@ boolean soundBoard::begin(void) {
   }
 
 
-boolean soundBoard::setSoundfile(char* inFilePath) {
+boolean soundCard::setSoundfile(char* inFilePath) {
 
   if (filePath) {
     free(filePath);
@@ -81,7 +81,7 @@ boolean soundBoard::setSoundfile(char* inFilePath) {
 }
 
 
-boolean soundBoard::command(action inCommand) {
+boolean soundCard::command(action inCommand) {
 
   boolean success;
 
@@ -120,19 +120,19 @@ boolean soundBoard::command(action inCommand) {
 }
 
           
-boolean soundBoard::isPlaying(void) { return musicPlayer->playingMusic; }
+boolean soundCard::isPlaying(void) { return musicPlayer->playingMusic; }
 
 
-void soundBoard::setVolume(byte volume) { musicPlayer->setVolume(volume,volume); }
+void soundCard::setVolume(byte volume) { musicPlayer->setVolume(volume,volume); }
 
 
-void soundBoard::setError(soundBoardErr inErr) { lastErr = inErr; }
+void soundCard::setError(soundCardErr inErr) { lastErr = inErr; }
 
 
-soundBoardErr soundBoard::getLastError(void) { return lastErr; }
+soundCardErr soundCard::getLastError(void) { return lastErr; }
 
 
-void soundBoard::idle(void) {
+void soundCard::idle(void) {
 
     if (musicPlayer->playingMusic && ding()) {
       noInterrupts();

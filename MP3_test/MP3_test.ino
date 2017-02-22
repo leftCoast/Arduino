@@ -1,43 +1,41 @@
 
-
-
 #include <SPI.h>
 #include <Adafruit_VS1053.h>
 #include <SD.h>
 
-#include "soundBoard.h"
+#include "soundCard.h"
 
-soundBoard theSoundBoard(SOUNDBOARD_SHIELD);
+soundCard theSoundCard(soundCard_SHIELD);
 
 byte vol = 20; 
 void setup() {
   Serial.begin(9600); //while(!Serial);
   Serial.println(F("Small bugs fly fastest!"));
  
-  if (!theSoundBoard.begin()) { // initialise the music player
-     Serial.print(F("theSoundBoard.begin() failed with error# "));Serial.println((int)theSoundBoard.getLastError());
+  if (!theSoundCard.begin()) { // initialise the music player
+     Serial.print(F("theSoundCard.begin() failed with error# "));Serial.println((int)theSoundCard.getLastError());
      while (1);
   }
-  Serial.println(F("theSoundBoard.begin() succeded!"));
+  Serial.println(F("theSoundCard.begin() succeded!"));
  
-  if (!SD.begin(SOUNDBOARD_SD_CS)) {
+  if (!SD.begin(soundCard_SD_CS)) {
     Serial.println(F("SD.begin() failed.."));
     while (1);
   }
   Serial.println(F("SD.begin() succeded!"));
 
-  //if (!theSoundBoard.setSoundfile("Hawaii50.mp3")) { //"Hawaii50.mp3"
-  if (!theSoundBoard.setSoundfile("RadioAct.mp3")) { //"Hawaii50.mp3"
-    Serial.print(F("setSoundfile() failed with error# "));Serial.println((int)theSoundBoard.getLastError());
+  //if (!theSoundCard.setSoundfile("Hawaii50.mp3")) { //"Hawaii50.mp3"
+  if (!theSoundCard.setSoundfile("RadioAct.mp3")) { //"Hawaii50.mp3"
+    Serial.print(F("setSoundfile() failed with error# "));Serial.println((int)theSoundCard.getLastError());
     while (1);
   }
   Serial.println(F("setSoundfile() succeded!"));
   
-  if (!theSoundBoard.command(play)) {
-    Serial.print(F("command(play) failed with error# "));Serial.println((int)theSoundBoard.getLastError());
+  if (!theSoundCard.command(play)) {
+    Serial.print(F("command(play) failed with error# "));Serial.println((int)theSoundCard.getLastError());
     while (1);
   }
-  theSoundBoard.setVolume(vol);
+  theSoundCard.setVolume(vol);
   Serial.println(F("command(play) succeded!"));
 }
   
@@ -51,14 +49,14 @@ void loop() {
     inChar = Serial.read();
     if (inChar=='u') {
       if (vol>0) vol--;
-      theSoundBoard.setVolume(vol);
+      theSoundCard.setVolume(vol);
     } else if (inChar=='d') {
       if (vol<255) vol++;
-      theSoundBoard.setVolume(vol);
+      theSoundCard.setVolume(vol);
     } else if (inChar=='p') {
-      theSoundBoard.command(pause);
+      theSoundCard.command(pause);
     }  else if (inChar=='r') {
-      theSoundBoard.command(restart);
+      theSoundCard.command(restart);
     }
   }
   

@@ -1,5 +1,5 @@
-#ifndef soundBoard_h
-#define soundBoard_h
+#ifndef soundCard_h
+#define soundCard_h
 
 #include <SD.h>
 #include <Adafruit_VS1053.h>
@@ -23,42 +23,42 @@
 #define SHIELD_DCS    6      // VS1053 Data/command select pin (output)      
 
 // The default SD card select pin. (Fixed for the Shield type)
-#define SOUNDBOARD_SD_CS 4  
+#define soundCard_SD_CS 4  
 
 // Possible setups 
-#define SOUNDBOARD_SHIELD   0
-#define SOUNDBOARD_BREAKOUT 1
+#define soundCard_SHIELD   0
+#define soundCard_BREAKOUT 1
 
 // how long 'till we load in more sound data.
-#define SOUNDBOARD_SLEEP_MS 100
+#define soundCard_SLEEP_MS 100
 
 enum action { play, pause, restart };
 
-enum soundBoardErr { 
+enum soundCardErr { 
   noErr, badSetup, initErr, badCommand, 
   noFileErr,mallocErr,nullStrErr, unknownErr
   };
 
 
-class soundBoard : public idler, public timeObj {
+class soundCard : public idler, public timeObj {
 
   public:
-    soundBoard(byte boardSetup);
-    ~soundBoard(void);
+    soundCard(byte boardSetup);
+    ~soundCard(void);
 
           boolean       begin(void);
           boolean       setSoundfile(char* inFilePath);
           boolean       command(action inCommand);
           boolean       isPlaying(void);
           void          setVolume(byte volume);
-          void          setError(soundBoardErr inErr);
-          soundBoardErr getLastError(void);
+          void          setError(soundCardErr inErr);
+          soundCardErr getLastError(void);
 
   protected:
   virtual void idle(void);
 
     Adafruit_VS1053_FilePlayer* musicPlayer;
-    soundBoardErr lastErr;
+    soundCardErr lastErr;
     byte          setupType;
     char*         filePath;
     boolean       playing;
