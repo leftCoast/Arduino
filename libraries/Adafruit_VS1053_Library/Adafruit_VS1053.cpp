@@ -185,7 +185,7 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   // resync
   sciWrite(VS1053_REG_WRAMADDR, 0x1e29);
   sciWrite(VS1053_REG_WRAM, 0);
-
+	//Serial.println(trackname);
   currentTrack = SD.open(trackname);
   if (!currentTrack) {
     return false;

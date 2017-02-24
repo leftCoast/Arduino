@@ -3,7 +3,7 @@
 #include <Adafruit_VS1053.h>
 #include <SD.h>
 
-#include "soundCard.h"
+#include <soundCard.h>
 
 soundCard theSoundCard(soundCard_SHIELD);
 
