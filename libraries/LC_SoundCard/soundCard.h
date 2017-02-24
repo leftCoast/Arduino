@@ -13,9 +13,9 @@
 //#define MOSI 11      // Output data, to VS1053/SD card
 
 // These are the pins used for the breakout example
-#define BREAKOUT_RESET  9      // VS1053 reset pin (output)
-#define BREAKOUT_CS     10     // VS1053 chip select pin (output)
-#define BREAKOUT_DCS    8      // VS1053 Data/command select pin (output)
+#define BREAKOUT_RESET  2      // VS1053 reset pin (output)
+#define BREAKOUT_CS     1     // VS1053 chip select pin (output)
+#define BREAKOUT_DCS    7      // VS1053 Data/command select pin (output)
 
 // These are the pins used for the music maker shield
 #define SHIELD_RESET  -1      // VS1053 reset pin (unused!)

@@ -12,7 +12,7 @@ lilParser mParser;
 char workingDir[20] = "/";
 char cmdCursor[] = ">";
 
-soundCard theSoundCard(soundCard_SHIELD);
+soundCard theSoundCard(soundCard_BREAKOUT);
 byte vol;
 
 void setup(void) {
@@ -297,14 +297,14 @@ bool pauseFile(void) {
 void loop() {
 
   char      inChar;
-  commands  command;
-
+  //commands  command;
+int command;
   idle();
   if (Serial.available()) {
     inChar = Serial.read();
     Serial.print(inChar);
     command = mParser.addChar(inChar);
-    switch ((int)command) {                       // Cheat: Allows -1 passed back as error.
+    switch (command) {                       // Cheat: Allows -1 passed back as error.
       case noCommand : break;
       case cp : copyFile(); break;
       case rm : removeFile(); break;
@@ -318,7 +318,7 @@ void loop() {
       case cmdPlay : playFile(); break;
       case cmdPause : pauseFile(); break;
       
-      case -1 : Serial.println("???"); break;
+      default : Serial.println("???"); break;
     }
     if (command) Serial.print(cmdCursor);
   }

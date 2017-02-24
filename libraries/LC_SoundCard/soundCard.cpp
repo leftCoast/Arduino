@@ -59,7 +59,7 @@ boolean soundCard::setSoundfile(char* inFilePath) {
     filePath = NULL;
   }
   if (inFilePath) {
-    filePath = malloc(strlen(inFilePath)+1);
+    filePath = (char*)malloc(strlen(inFilePath)+1);
     if (filePath) {                               // Good or bad, we've allocated the file path.
       strcpy(filePath,inFilePath);
       File testFile = SD.open(filePath);

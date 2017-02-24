@@ -21,7 +21,7 @@ void lilParser::addCmd(int inCmdNum, char* inCmd) {
   cmdTemplate* command;
 
   if (inCmdNum > 0) {
-    command = new cmdTemplate(inCmdNum, inCmd);
+    command = (cmdTemplate*) new cmdTemplate(inCmdNum, inCmd);
     if (command) {
       addToTop((linkListObj*)command);
     }
@@ -134,7 +134,7 @@ void lilParser::reset(void) {
 cmdTemplate::cmdTemplate(int inCmdNum, char* inCmd) {
 
   cmdNum = inCmdNum;
-  cmd = malloc(sizeof(char) * (strlen(inCmd) + 1));
+  cmd = (char*)malloc(sizeof(char) * (strlen(inCmd) + 1));
   strcpy(cmd, inCmd);
   reset();
 }

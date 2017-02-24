@@ -1,11 +1,10 @@
 
 #include <SPI.h>
 #include <Adafruit_VS1053.h>
-#include <SD.h>
 
 #include <soundCard.h>
 
-soundCard theSoundCard(soundCard_SHIELD);
+soundCard theSoundCard(soundCard_BREAKOUT);
 
 byte vol = 20; 
 void setup() {
