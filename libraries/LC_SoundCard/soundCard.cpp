@@ -9,6 +9,7 @@ soundCard::soundCard(byte boardSetup)
   
     setupType = boardSetup;
     filePath = NULL;
+    volume = 40;						// Hardcoded default from Adafruit.
     setError(noErr);
   }
 
@@ -123,7 +124,14 @@ boolean soundCard::command(action inCommand) {
 boolean soundCard::isPlaying(void) { return musicPlayer->playingMusic; }
 
 
-void soundCard::setVolume(byte volume) { musicPlayer->setVolume(volume,volume); }
+void soundCard::setVolume(byte inVolume) { 
+
+	volume = inVolume;
+	musicPlayer->setVolume(inVolume,inVolume);
+}
+
+
+byte soundCard::getVolume(void) { return volume; }
 
 
 void soundCard::setError(soundCardErr inErr) { lastErr = inErr; }

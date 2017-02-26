@@ -5,10 +5,12 @@
 
 // A Command is: CMD params.. \n
 // Parameters are seperated by whitespace.
-// It will resolve to a positive integer.
+// Command return positive integers.
 // Commands "in process" return 0. IE not end of text.
 // Unparsable commands return -1
 
+// I think I'm going to do a buff = realloc(buff,size); thing here.
+// Need to add numBytes for params.
 #define EOL '\n'            // Set this to match your system.
 #define PARAM_BUFF_SIZE 40  // One buff to fit them all..
 
@@ -22,7 +24,8 @@ class lilParser : public linkList {
     void  addCmd(int inCmdNum, char* inCmd);
     int   addChar(char inChar);
     int   numParams(void);
-    bool  getParam(char* buff);
+    int		getParamSize(void);			// same as strlen.
+    char* getParam(void);
     void  reset(void);
     
     cmdTemplate*  currentCmd;

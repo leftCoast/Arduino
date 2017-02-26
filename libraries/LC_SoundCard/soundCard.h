@@ -51,6 +51,7 @@ class soundCard : public idler, public timeObj {
           boolean       command(action inCommand);
           boolean       isPlaying(void);
           void          setVolume(byte volume);
+          byte					getVolume(void);
           void          setError(soundCardErr inErr);
           soundCardErr getLastError(void);
 
@@ -61,6 +62,7 @@ class soundCard : public idler, public timeObj {
     soundCardErr lastErr;
     byte          setupType;
     char*         filePath;
+    byte					volume;
     boolean       playing;
 };
 

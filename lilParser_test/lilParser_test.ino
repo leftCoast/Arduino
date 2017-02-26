@@ -5,7 +5,7 @@
 #include <lilParser.h>
 #include <soundCard.h>
 
-enum commands { noCommand, cp, rm, ls, pwd, cd, mkdir, rmdir, csf, cmdPlay, cmdPause };
+enum commands { noCommand, cp, rm, ls, pwd, cd, mkdir, rmdir, csf, cmdPlay, cmdPause, cmdReset, vol, svol };
 
 lilParser mParser;
 
@@ -13,7 +13,6 @@ char workingDir[20] = "/";
 char cmdCursor[] = ">";
 
 soundCard theSoundCard(soundCard_BREAKOUT);
-byte vol;
 
 void setup(void) {
 
@@ -35,8 +34,10 @@ void setup(void) {
   mParser.addCmd(csf, "csf");
   mParser.addCmd(cmdPlay, "play");
   mParser.addCmd(cmdPause, "pause");
-  
-  vol = 20;
+   mParser.addCmd(cmdReset, "reset");
+  mParser.addCmd(svol, "svol");
+  mParser.addCmd(vol, "vol");
+
   if (theSoundCard.begin()) {
     Serial.println(F("Sound card ready."));
   } else {
@@ -47,13 +48,21 @@ void setup(void) {
 }
 
 
-void makeFullpath(char* filePath, char* fullPath) {
+char* makeFullpath(char* filePath) {
+
+  char* fullPath;
 
   if (filePath[0] == '/') {
-    strcpy(fullPath, filePath);
+    fullPath = (char*)malloc(strlen(filePath) + 1);
+    if (fullPath) {
+      strcpy(fullPath, filePath);
+    }
   } else {
-    strcpy(fullPath, workingDir);
-    strcpy(fullPath, filePath);
+    fullPath = (char*)malloc(strlen(filePath) + strlen(workingDir) + 1);
+    if (fullPath) {
+      strcpy(fullPath, workingDir);
+      strcat(fullPath, filePath);
+    }
   }
 }
 
@@ -62,29 +71,34 @@ bool copyFile(void) {
 
   File  sourceFile;
   File  destFile;
-  char  charBuff[80];
-  byte  nextByte;
+  char* paramBuff;
+  char* pathBuff;
   bool  success;
 
   success = false;
   if (mParser.numParams() >= 2) {
-    if (mParser.getParam(&(charBuff[0]))) {
-      nextByte = strlen(&(charBuff[0])) + 2;
-      makeFullpath(&(charBuff[0]), &(charBuff[nextByte]));
-      if (SD.exists(&(charBuff[nextByte]))) {
-        sourceFile = SD.open(&(charBuff[nextByte]));
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      pathBuff = makeFullpath(paramBuff);
+      free(paramBuff);
+      if (SD.exists(pathBuff)) {
+        sourceFile = SD.open(pathBuff);
+        free(pathBuff);
         if (sourceFile) {
-          if (mParser.getParam(&(charBuff[0]))) {
-            if (!strcmp("con", &(charBuff[0]))) {
+          paramBuff = mParser.getParam();
+          if (paramBuff) {
+            if (!strcmp("con", paramBuff)) {
+              free(paramBuff);
               while (sourceFile.available()) {
                 Serial.print(sourceFile.read());
               }
               Serial.println();
               success = true;
             } else {
-              nextByte = strlen(&(charBuff[0])) + 2;
-              makeFullpath(&(charBuff[0]), &(charBuff[nextByte]));
-              destFile = SD.open(&(charBuff[nextByte]), FILE_WRITE);
+              pathBuff = makeFullpath(paramBuff);
+              free(paramBuff);
+              destFile = SD.open(pathBuff, FILE_WRITE);
+              free(pathBuff);
               if (destFile) {
                 destFile.seek(0);
                 while (sourceFile.available()) {
@@ -118,37 +132,49 @@ bool copyFile(void) {
 
 bool removeFile(void) {
 
-  char fileName[20];
-  char filePath[40];
-  File theFile;
+
+  File  theFile;
+  char* paramBuff;
+  char* filePath;
   bool  success;
 
   success = false;
   if (mParser.numParams()) {
-    mParser.getParam(fileName);
-    strcpy(filePath, workingDir);
-    strcat(filePath, fileName);
-    if (SD.exists(filePath)) {
-      theFile = SD.open(filePath);
-      if (!theFile.isDirectory()) {
-        theFile.close();
-        success = SD.remove(filePath);
-        if (!success) {
-          Serial.println(F("Unknown file error."));
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      filePath = makeFullpath(paramBuff);
+      free(paramBuff);
+      if (filePath) {
+        if (SD.exists(filePath)) {
+          theFile = SD.open(filePath);
+          if (theFile) {
+            if (!theFile.isDirectory()) {
+              theFile.close();
+              success = SD.remove(filePath);
+              if (!success) {
+                Serial.println(F("Unknown file error."));
+              }
+            } else {
+              Serial.print(filePath); Serial.println(F(" is not a file."));
+            }
+          } else {
+            Serial.println(F("Failed to open file."));
+          }
+        } else {
+          Serial.println(F("No such file name."));
         }
+        free(filePath);
       } else {
-        theFile.close();
-        Serial.print(fileName); Serial.println(F(" is not a file."));
+        Serial.println(F("Failed to allocate RAM"));
       }
     } else {
-      Serial.println(F("No such file name."));
+      Serial.println(F("Failed to allocate RAM"));
     }
   } else {
-    Serial.println(F("Missing file name."));
+    Serial.println(F("Missing parameter."));
   }
   return success;
 }
-
 
 void listDirectory(void) {
 
@@ -157,64 +183,83 @@ void listDirectory(void) {
   bool  done;
 
   wd = SD.open(workingDir);
-  wd.rewindDirectory();
-  done = false;
-  do {
-    entry = wd.openNextFile();
-    if (entry) {
-      Serial.print(entry.name());
-      if (entry.isDirectory()) {
-        Serial.println("/");
+  if (wd) {
+    wd.rewindDirectory();
+    done = false;
+    do {
+      entry = wd.openNextFile();
+      if (entry) {
+        Serial.print(entry.name());
+        if (entry.isDirectory()) {
+          Serial.println("/");
+        } else {
+          Serial.print("\t"); Serial.println(entry.size(), DEC);
+        }
+        entry.close();
       } else {
-        Serial.print("\t"); Serial.println(entry.size(), DEC);
+        done = true;
       }
-      entry.close();
-    } else {
-      done = true;
-    }
-  } while (!done);
-  wd.close();
+    } while (!done);
+    wd.close();
+  } else {
+    Serial.println(F("Fail to open file."));
+  }
 }
 
 
 bool changeDirectory() {
 
   File  testFile;
+  char* paramBuff;
+  char* temp;
+  int   trace;
   bool  success;
-  char  path[20];
-  char  temp[40];
-  int  trace;
 
   success = false;
   if (mParser.numParams()) {
-    mParser.getParam(path);
-    if (!strcmp(path, "..")) {
-      trace = strlen(workingDir) - 2;
-      if (trace > 0) {
-        while (workingDir[trace] != '/' && trace > 0) {
-          trace--;
-        }
-        workingDir[trace + 1] = '\0';
-      } else {
-        Serial.println(F("Already at root."));
-      }
-    } else {
-      strcpy(temp, workingDir);
-      strcat(temp, path);
-      if (SD.exists(temp)) {
-        testFile = SD.open(temp);
-        success = testFile.isDirectory();
-        if (success) {
-          strcpy(workingDir, temp);
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      if (!strcmp(paramBuff, "..")) {
+        trace = strlen(workingDir) - 2;
+        if (trace > 0) {
+          while (workingDir[trace] != '/' && trace > 0) {
+            trace--;
+          }
+          workingDir[trace + 1] = '\0';
         } else {
-          Serial.println(F("Path must be directory names, not filenames."));
+          Serial.println(F("Already at root."));
         }
       } else {
-        Serial.println(F("No such directory."));
+        temp = makeFullpath(paramBuff);
+        if (temp) {
+          if (SD.exists(temp)) {
+            testFile = SD.open(temp);
+            if (testFile) {
+              success = testFile.isDirectory();
+              testFile.close();
+              if (success) {
+                strcpy(workingDir, temp);
+              } else {
+                Serial.println(F("Path must be directory names, not filenames."));
+              }
+            } else {
+              Serial.println(F("Fail to opn file."));
+            }
+          } else {
+            Serial.println(F("No such file or directory."));
+          }
+          free(temp);
+        } else {
+          Serial.println(F("Failed to allocate RAM"));
+        }
       }
+      free(paramBuff);
+    } else {
+      Serial.println(F("Failed to allocate RAM"));
     }
+    return success;
   } else {
-    Serial.println(F("Missing directory name."));
+    Serial.println(F("Missing paraeter."));
   }
   return success;
 }
@@ -231,30 +276,38 @@ bool removeDirectory(void) {
 
 bool chooseMP3File(void) {
 
-  char  charBuff[20];
+  char* paramBuff;
+  char* fullPath;
   byte  nextByte;
   bool  success;
 
   success = false;
+  Serial.print("Num params ");Serial.println(mParser.numParams());
   if (mParser.numParams()) {
-    if (mParser.getParam(&(charBuff[0]))) {
-      nextByte = strlen(&(charBuff[0])) + 2;
-      makeFullpath(&(charBuff[0]), &(charBuff[nextByte]));
-      if (SD.exists(&(charBuff[nextByte]))) {
-        if (theSoundCard.setSoundfile(&(charBuff[nextByte]))) {
-        //if (theSoundCard.setSoundfile("RADIOACT.MP3")) {
-          Serial.print(&(charBuff[nextByte]));
-          Serial.println(" Queued and ready to play.");
-          success = true;
+    paramBuff = mParser.getParam();
+    Serial.print("got param ");Serial.println(paramBuff);
+    if (paramBuff) {
+      fullPath = makeFullpath(paramBuff);
+      free(paramBuff);
+      if (fullPath) {
+        if (SD.exists(fullPath)) {
+        if (theSoundCard.setSoundfile(fullPath)) {
+          Serial.print(fullPath);
+            Serial.println(" Queued and ready to play.");
+            success = true;
+          } else {
+            Serial.print(F("setSoundfile() failed with error# "));
+            Serial.println((int)theSoundCard.getLastError());
+          }
         } else {
-          Serial.print(F("setSoundfile() failed with error# "));
-          Serial.println((int)theSoundCard.getLastError());
+          Serial.println(F("File doesn't exsist"));
         }
+        free(fullPath);
       } else {
-        Serial.println(F("File doesn't exsist"));
+        Serial.println(F("Failed to allocate RAM"));
       }
     } else {
-      Serial.println(F("Faild to retrieve parameter."));
+      Serial.println(F("Failed to allocate RAM"));
     }
   } else {
     Serial.println(F("Missing parameter."));
@@ -294,11 +347,62 @@ bool pauseFile(void) {
 }
 
 
+bool resetFile(void) {
+
+  bool  success;
+
+  success = false;
+  if (theSoundCard.command(restart)) {
+    success = true;
+  } else {
+    Serial.print(F("command(restart) failed with error# "));
+    Serial.println((int)theSoundCard.getLastError());
+  }
+  return success;
+}
+
+
+bool setVol(void) {
+
+  char* paramBuff;
+  int   vol;
+  bool  success;
+
+  success = false;
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      vol = atoi(paramBuff);
+      free(paramBuff);
+      if (vol < 0) {
+        vol = 0;
+      } else if (vol > 256) {
+        vol = 256;
+      }
+      theSoundCard.setVolume(vol);
+      success = true;
+    } else {
+      Serial.println(F("Faild to retrieve parameter."));
+    }
+  } else {
+    Serial.println(F("Missing parameter."));
+  }
+  return success;
+}
+
+
+bool getVol(void) {
+
+  Serial.print("Volume : "); Serial.println(theSoundCard.getVolume());
+  return true;
+}
+
+
 void loop() {
 
-  char      inChar;
-  //commands  command;
-int command;
+  char  inChar;
+  int   command;
+
   idle();
   if (Serial.available()) {
     inChar = Serial.read();
@@ -317,7 +421,10 @@ int command;
       case csf : chooseMP3File(); break;
       case cmdPlay : playFile(); break;
       case cmdPause : pauseFile(); break;
-      
+      case cmdReset : resetFile(); break;
+      case svol : setVol(); break;
+      case vol : getVol(); break;
+
       default : Serial.println("???"); break;
     }
     if (command) Serial.print(cmdCursor);

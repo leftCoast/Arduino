@@ -86,25 +86,51 @@ int lilParser::numParams(void) {
 }
 
 
+// Same as strlen 
+int lilParser::getParamSize(void) {
 
-bool lilParser::getParam(char* buff) {
-
-  int index;
-
-  index = 0;
-  if (currentCmd) {                                                       // Had successful parse.
-    if (paramBuff[paramIndex] != '\0') {                                  // Not at the end of the buffer.
-      while (paramBuff[paramIndex] != '\0' && paramBuff[paramIndex] != EOL) { // Loop through the next param.
-        buff[index++] = paramBuff[paramIndex++];                          // Filling the user buff.
+	int index;
+	int	count;
+	
+	count = 0;																													// Nothin' yet..
+  if (currentCmd) {                                                   // Had successful parse.
+    index = paramIndex;																								// local copy of paramIndex.
+    if (paramBuff[index] != '\0') {                                 	// Not at the end of the buffer.
+      while (paramBuff[index] != '\0' && paramBuff[index] != EOL) { 	// Loop through the next param.
+        count++;                          														// Counting..
+        index++;
       }
-      buff[index] = '\0';                                                 // Cap off the user buff.
-      if (paramBuff[paramIndex] == EOL) {                                 // If EOL kicked us out.
-        paramIndex++;                                                     // Hop over it.
-      }
-      return true;                                                        // We're passing something back.
-    }
+		}
+	}
+	return count;																												// Tell the world.
+}
+
+
+char* lilParser::getParam(void) {
+	
+	char*	buff;
+  int 	index;
+	
+	buff = NULL;
+	if (currentCmd) {																															// Had successful parse.
+		Serial.println("Have a successful parse.");
+		buff = (char*) malloc(getParamSize()+1);																		// Ask for memory.
+		Serial.println("Got a buffer");
+		if (buff) {																																	// If we got memory.
+  		index = 0;																																// Ready to write in the chars..
+    	if (paramBuff[paramIndex] != '\0') {                                  		// Not looking at empty buffer.
+      	while (paramBuff[paramIndex] != '\0' && paramBuff[paramIndex] != EOL) { // Loop through to the next param.
+        	buff[index++] = paramBuff[paramIndex++];                          		// Filling the user buff.
+      	}
+      	buff[index] = '\0';                                                 		// Cap off the new buff.
+      	Serial.print("buff ");Serial.println(buff);
+      	if (paramBuff[paramIndex] == EOL) {                                 		// If EOL kicked us out.
+        	paramIndex++;                                                     		// Hop over it.
+      	}
+    	}
+  	}
   }
-  return false;                                                           // Didn't pass back nuthin'!
+  return buff;                                                           				// Pass back the result.
 }
 
 
