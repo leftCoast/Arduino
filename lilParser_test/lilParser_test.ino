@@ -1,3 +1,4 @@
+
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_VS1053.h>
@@ -5,24 +6,49 @@
 #include <lilParser.h>
 #include <soundCard.h>
 
-enum commands { noCommand, cp, rm, ls, pwd, cd, mkdir, rmdir, csf, cmdPlay, cmdPause, cmdReset, vol, svol };
+// Let's try error numbers to orginase this.
+//
+#define F_NO_ERR    0
 
+#define F_BOOT_ERR  1   //"SD Drive boot failure."
+#define F_CMD_ERR   2   //"???"
+
+#define F_RAM_ERR   3   //"Not enough RAM"
+#define F_MPAR_ERR  4   //"Missing parameter."
+#define F_RPAR_ERR  5   //"Failed to retrieve parameter."
+
+#define F_NSF_ERR   6   //"No such file or directory."
+#define F_FOF_ERR   7   //"Failed to open file."
+#define F_FODF_ERR  8   //"Failed to open dest. file."
+#define F_FOSF_ERR  9   //"Failed to open source file."
+
+#define F_NOF_ERR  10   //"Not a file."
+#define F_NOD_ERR  11   //"Not a directory."
+#define F_ART_ERR  12   //"Already at root."
+#define F_UKN_ERR  13   //"Unknown file error."
+
+#define F_LAZY_ERR 14   //"Not yet implemented."
+//
+//
+
+// Stuff for the command parser.
 lilParser mParser;
+enum      commands { noCommand, cp, rm, ls, pwd, cd, mkdir, rmdir, csf, cmdPlay, cmdPause, cmdReset, vol, svol, st };
 
-char workingDir[20] = "/";
-char cmdCursor[] = ">";
+
+char  workingDir[40] = "/";
+char  cmdCursor[] = ">";
+byte  lastFileError;
 
 soundCard theSoundCard(soundCard_BREAKOUT);
 
-void setup(void) {
+void setup(void) { 
 
-  Serial.begin(9600);
-  while (!Serial);
-  if (!SD.begin(4)) {
-    Serial.println(F("SD Drive failed to boot."));
-    Serial.println(F("Shutting down."));
-    while (true);
-  }
+  Serial.begin(9600); while (!Serial);
+  
+  lastFileError = F_NO_ERR;
+  if (!SD.begin(4)) { lastFileError = F_BOOT_ERR; }
+  
   mParser.addCmd(cp, "cp");
   mParser.addCmd(rm, "rm");
   mParser.addCmd(ls, "ls");
@@ -34,17 +60,69 @@ void setup(void) {
   mParser.addCmd(csf, "csf");
   mParser.addCmd(cmdPlay, "play");
   mParser.addCmd(cmdPause, "pause");
-   mParser.addCmd(cmdReset, "reset");
+  mParser.addCmd(cmdReset, "reset");
   mParser.addCmd(svol, "svol");
   mParser.addCmd(vol, "vol");
-
-  if (theSoundCard.begin()) {
-    Serial.println(F("Sound card ready."));
-  } else {
+  mParser.addCmd(st, "st");
+  
+  if (!theSoundCard.begin()) {
     Serial.print(F("Sound card failed with error# "));
     Serial.println((int)theSoundCard.getLastError());
   }
+  
   Serial.print(cmdCursor);
+}
+
+
+bool isMP3File(char* fileName) {
+
+  int   numChars;
+  char  dotMP3[] = ".MP3";
+  
+  if (fileName) {                 // Sanity.
+    numChars = strlen(fileName);
+    if (numChars>4) {
+      byte index = 0;
+      for(byte i=numChars-4;i<numChars;i++) {
+        if(!(toupper(fileName[i]) == dotMP3[index])) {
+          return false;
+        }
+        index++;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+  
+
+
+// Print & clear the last file error.
+void  lastErrOut(void) {
+
+  switch(lastFileError) {
+    case F_NO_ERR : break;
+
+    case F_BOOT_ERR : Serial.println(F("SD Drive boot failure.")); break;
+    case F_CMD_ERR  : Serial.println(F("???")); break;
+
+    case F_RAM_ERR  : Serial.println(F("Not enough RAM")); break;
+    case F_MPAR_ERR : Serial.println(F("Missing parameter.")); break;
+    case F_RPAR_ERR : Serial.println(F("Failed to retrieve parameter.")); break;
+
+    case F_NSF_ERR  : Serial.println(F("No such file or directory.")); break;
+    case F_FOF_ERR  : Serial.println(F("Failed to open file.")); break;
+    case F_FODF_ERR : Serial.println(F("Failed to open dest. file.")); break;
+    case F_FOSF_ERR : Serial.println(F("Failed to open source file.")); break;
+
+    case F_NOF_ERR  : Serial.println(F("Not a file.")); break;
+    case F_NOD_ERR  : Serial.println(F("Not a directory.")); break;
+    case F_ART_ERR  : Serial.println(F("Already at root.")); break;
+    case F_UKN_ERR  : Serial.println(F("Unknown file error.")); break;
+
+    case F_LAZY_ERR  : Serial.println(F("Not yet implemented.")); break;
+  }
+  lastFileError = F_NO_ERR;
 }
 
 
@@ -107,24 +185,29 @@ bool copyFile(void) {
                 destFile.close();
                 success = true;
               } else {
-                Serial.println(F("Faild to open dest. file."));
+                lastFileError = F_FODF_ERR;
               }
             }
           } else {
-            Serial.println(F("Faild to retrieve parameter."));
+            lastFileError = F_RPAR_ERR;
+            //Serial.println(F("Faild to retrieve parameter."));
           }
         } else {
-          Serial.println(F("Faild to open source file."));
+          lastFileError = F_FOSF_ERR;
+          //Serial.println(F("Faild to open source file."));
         }
         sourceFile.close();
       } else {
-        Serial.println(F("File doesn't exsist"));
+        lastFileError = F_NSF_ERR;
+        //Serial.println(F("File doesn't exsist"));
       }
     } else {
-      Serial.println(F("Faild to retrieve parameter."));
+      lastFileError = F_RPAR_ERR;
+      //Serial.println(F("Faild to retrieve parameter."));
     }
   } else {
-    Serial.println(F("Missing parameter."));
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing parameter."));
   }
   return success;
 }
@@ -152,29 +235,37 @@ bool removeFile(void) {
               theFile.close();
               success = SD.remove(filePath);
               if (!success) {
-                Serial.println(F("Unknown file error."));
+                lastFileError = F_UKN_ERR;
+                //Serial.println(F("Unknown file error."));
               }
             } else {
-              Serial.print(filePath); Serial.println(F(" is not a file."));
+              lastFileError = F_NOF_ERR;
+              //Serial.print(filePath); Serial.println(F(" is not a file."));
             }
           } else {
-            Serial.println(F("Failed to open file."));
+            lastFileError = F_FOF_ERR;
+            //Serial.println(F("Failed to open file."));
           }
         } else {
-          Serial.println(F("No such file name."));
+          lastFileError = F_NSF_ERR;
+          //Serial.println(F("No such file name."));
         }
         free(filePath);
       } else {
-        Serial.println(F("Failed to allocate RAM"));
+        lastFileError = F_RAM_ERR;
+        //Serial.println(F("Failed to allocate RAM"));
       }
     } else {
-      Serial.println(F("Failed to allocate RAM"));
+      lastFileError = F_RAM_ERR;
+      //Serial.println(F("Failed to allocate RAM"));
     }
   } else {
-    Serial.println(F("Missing parameter."));
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing parameter."));
   }
   return success;
 }
+
 
 void listDirectory(void) {
 
@@ -202,7 +293,8 @@ void listDirectory(void) {
     } while (!done);
     wd.close();
   } else {
-    Serial.println(F("Fail to open file."));
+    lastFileError = F_FOF_ERR;  // Sadly, instead of returning a NULL, it just crashes.
+    //Serial.println(F("Fail to open file."));
   }
 }
 
@@ -226,8 +318,9 @@ bool changeDirectory() {
             trace--;
           }
           workingDir[trace + 1] = '\0';
-        } else {
-          Serial.println(F("Already at root."));
+        } else {      
+          lastFileError = F_ART_ERR;
+          //Serial.println(F("Already at root."));
         }
       } else {
         temp = makeFullpath(paramBuff);
@@ -240,37 +333,46 @@ bool changeDirectory() {
               if (success) {
                 strcpy(workingDir, temp);
               } else {
-                Serial.println(F("Path must be directory names, not filenames."));
+                lastFileError = F_NOD_ERR;
+                //Serial.println(F("Path must be directory names, not filenames."));
               }
             } else {
-              Serial.println(F("Fail to opn file."));
+              lastFileError = F_FOF_ERR;
+              //Serial.println(F("Fail to opn file."));
             }
           } else {
-            Serial.println(F("No such file or directory."));
+            lastFileError = F_NSF_ERR;
+            //Serial.println(F("No such file or directory."));
           }
           free(temp);
         } else {
-          Serial.println(F("Failed to allocate RAM"));
+          lastFileError = F_RAM_ERR;
+          //Serial.println(F("Failed to allocate RAM"));
         }
       }
       free(paramBuff);
     } else {
-      Serial.println(F("Failed to allocate RAM"));
+      lastFileError = F_RAM_ERR;
+      //Serial.println(F("Failed to allocate RAM"));
     }
     return success;
   } else {
-    Serial.println(F("Missing paraeter."));
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing paraeter."));
   }
   return success;
 }
 
 
 bool makeDirectory(void) {
-  Serial.println(F("Not yet implemented."));
+  
+  lastFileError = F_LAZY_ERR;
 }
 
+
 bool removeDirectory(void) {
-  Serial.println(F("Not yet implemented."));
+  
+  lastFileError = F_LAZY_ERR;
 }
 
 
@@ -282,35 +384,38 @@ bool chooseMP3File(void) {
   bool  success;
 
   success = false;
-  Serial.print("Num params ");Serial.println(mParser.numParams());
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
-    Serial.print("got param ");Serial.println(paramBuff);
     if (paramBuff) {
       fullPath = makeFullpath(paramBuff);
       free(paramBuff);
       if (fullPath) {
         if (SD.exists(fullPath)) {
-        if (theSoundCard.setSoundfile(fullPath)) {
-          Serial.print(fullPath);
-            Serial.println(" Queued and ready to play.");
+          Serial.print("Checking if mp3 file:");Serial.println(isMP3File(fullPath));
+          if (theSoundCard.setSoundfile(fullPath)) {
+            //Serial.print(fullPath);
+            //Serial.println(" Queued and ready to play.");
             success = true;
           } else {
             Serial.print(F("setSoundfile() failed with error# "));
             Serial.println((int)theSoundCard.getLastError());
           }
         } else {
-          Serial.println(F("File doesn't exsist"));
+          lastFileError = F_NSF_ERR;
+          //Serial.println(F("File doesn't exsist"));
         }
         free(fullPath);
       } else {
-        Serial.println(F("Failed to allocate RAM"));
+        lastFileError = F_RAM_ERR;
+        //Serial.println(F("Failed to allocate RAM"));
       }
     } else {
-      Serial.println(F("Failed to allocate RAM"));
+      lastFileError = F_RAM_ERR;
+      //Serial.println(F("Failed to allocate RAM"));
     }
   } else {
-    Serial.println(F("Missing parameter."));
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing parameter."));
   }
   return success;
 }
@@ -321,8 +426,12 @@ bool playFile(void) {
   bool  success;
 
   success = false;
+
+  if (mParser.numParams()) {
+    chooseMP3File();
+  }
   if (theSoundCard.command(play)) {
-    Serial.println(F("Playing."));
+    //Serial.println(F("Playing."));
     success = true;
   } else {
     Serial.print(F("command(play) failed with error# "));
@@ -382,10 +491,12 @@ bool setVol(void) {
       theSoundCard.setVolume(vol);
       success = true;
     } else {
-      Serial.println(F("Faild to retrieve parameter."));
+      lastFileError = F_RPAR_ERR;
+      //Serial.println(F("Faild to retrieve parameter."));
     }
   } else {
-    Serial.println(F("Missing parameter."));
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing parameter."));
   }
   return success;
 }
@@ -394,7 +505,30 @@ bool setVol(void) {
 bool getVol(void) {
 
   Serial.print("Volume : "); Serial.println(theSoundCard.getVolume());
+  if (mParser.numParams()) {
+    setVol();
+    Serial.print("New volume : "); Serial.println(theSoundCard.getVolume());
+  }
   return true;
+}
+
+
+void setSleepTime(void) {
+
+    char* paramBuff;
+    int   timeMs;
+    bool  success;
+
+  success = false;
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      timeMs = atoi(paramBuff);
+      free(paramBuff);
+      Serial.print("Setting sleep time to:");Serial.println(timeMs);
+      theSoundCard.setTime(timeMs);
+    }
+  }
 }
 
 
@@ -402,13 +536,13 @@ void loop() {
 
   char  inChar;
   int   command;
-
+  
   idle();
   if (Serial.available()) {
     inChar = Serial.read();
     Serial.print(inChar);
     command = mParser.addChar(inChar);
-    switch (command) {                       // Cheat: Allows -1 passed back as error.
+    switch (command) {                       
       case noCommand : break;
       case cp : copyFile(); break;
       case rm : removeFile(); break;
@@ -424,9 +558,11 @@ void loop() {
       case cmdReset : resetFile(); break;
       case svol : setVol(); break;
       case vol : getVol(); break;
-
-      default : Serial.println("???"); break;
+      case st : setSleepTime(); break;
+      
+      default : lastFileError = F_CMD_ERR; break;
     }
+    if (lastFileError) lastErrOut();
     if (command) Serial.print(cmdCursor);
   }
 }

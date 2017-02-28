@@ -7,6 +7,7 @@
 #include <idlers.h>
 #include <timeObj.h>
 
+
 // The usual SPI pins..
 //#define CLK 13       // SPI Clock, shared with SD card
 //#define MISO 12      // Input data, from VS1053/SD card
@@ -30,7 +31,7 @@
 #define soundCard_BREAKOUT 1
 
 // how long 'till we load in more sound data.
-#define soundCard_SLEEP_MS 100
+#define soundCard_SLEEP_MS 40
 
 enum action { play, pause, restart };
 
@@ -53,7 +54,7 @@ class soundCard : public idler, public timeObj {
           void          setVolume(byte volume);
           byte					getVolume(void);
           void          setError(soundCardErr inErr);
-          soundCardErr getLastError(void);
+          soundCardErr 	getLastError(void);
 
   protected:
   virtual void idle(void);

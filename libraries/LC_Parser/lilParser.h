@@ -5,7 +5,7 @@
 
 // A Command is: CMD params.. \n
 // Parameters are seperated by whitespace.
-// Command return positive integers.
+// Succesful parsed commands return positive integers.
 // Commands "in process" return 0. IE not end of text.
 // Unparsable commands return -1
 
@@ -20,11 +20,12 @@ class lilParser : public linkList {
 
   public:
     lilParser(void);
-
+		~lilParser(void);
+		
     void  addCmd(int inCmdNum, char* inCmd);
     int   addChar(char inChar);
     int   numParams(void);
-    int		getParamSize(void);			// same as strlen.
+    int		getParamSize(void);
     char* getParam(void);
     void  reset(void);
     
@@ -39,6 +40,7 @@ class cmdTemplate : public linkListObj {
 
   public:
     cmdTemplate(int inCmdNum, char* inCmd);
+    ~cmdTemplate(void);
 
     void  addChar(char inChar);
     void  endParse(void);
@@ -46,7 +48,6 @@ class cmdTemplate : public linkListObj {
     bool  validCmd(void);
     int   cmdNumber(void);
     void  reset(void);
-    bool  getParam(char* buff);
 
     int   cmdNum;
     char* cmd;
@@ -55,7 +56,7 @@ class cmdTemplate : public linkListObj {
     bool  badChar;
     bool  cmdOK;
     bool  parsingParam;
-    int   paramIndex;
+    byte   paramIndex;
 };
 
 #endif

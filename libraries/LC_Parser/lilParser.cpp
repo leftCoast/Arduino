@@ -10,9 +10,11 @@
 char paramBuff[PARAM_BUFF_SIZE];
 
 // Create a parser.
-lilParser::lilParser(void) : linkList(true) {
-  reset();
-}
+lilParser::lilParser(void) : linkList(true) { reset(); }
+
+
+// We own them so we can auto-dump em.
+lilParser::~lilParser(void) { dumpList(); }
 
 
 // Add a command we can parse for. Only command numbers >0 need apply.
@@ -56,7 +58,7 @@ int lilParser::addChar(char inChar) {
       trace = (cmdTemplate*)trace->next;  // We're still here? Check the next cmd.
     }
     return -1;                            // Saw EOL and no one took the bait? Bad inputted command.
-  } else {                                // Not saw EOL..
+  } else {                                // Not seen EOL..
     trace = (cmdTemplate*)theList;        // Setup to see if any cmds are still parsing..
     while (trace != NULL) {               // Start looping.
       if (trace->parsing()) {             // Are you still parsing?
@@ -113,9 +115,7 @@ char* lilParser::getParam(void) {
 	
 	buff = NULL;
 	if (currentCmd) {																															// Had successful parse.
-		Serial.println("Have a successful parse.");
 		buff = (char*) malloc(getParamSize()+1);																		// Ask for memory.
-		Serial.println("Got a buffer");
 		if (buff) {																																	// If we got memory.
   		index = 0;																																// Ready to write in the chars..
     	if (paramBuff[paramIndex] != '\0') {                                  		// Not looking at empty buffer.
@@ -123,7 +123,6 @@ char* lilParser::getParam(void) {
         	buff[index++] = paramBuff[paramIndex++];                          		// Filling the user buff.
       	}
       	buff[index] = '\0';                                                 		// Cap off the new buff.
-      	Serial.print("buff ");Serial.println(buff);
       	if (paramBuff[paramIndex] == EOL) {                                 		// If EOL kicked us out.
         	paramIndex++;                                                     		// Hop over it.
       	}
@@ -161,9 +160,13 @@ cmdTemplate::cmdTemplate(int inCmdNum, char* inCmd) {
 
   cmdNum = inCmdNum;
   cmd = (char*)malloc(sizeof(char) * (strlen(inCmd) + 1));
-  strcpy(cmd, inCmd);
-  reset();
+  if (cmd) {
+  	strcpy(cmd, inCmd);
+	}
+	reset();
 }
+
+cmdTemplate::~cmdTemplate(void) { if (cmd) free(cmd); }
 
 
 void cmdTemplate::addChar(char inChar) {
@@ -228,11 +231,18 @@ int  cmdTemplate::cmdNumber(void) {
 
 
 void cmdTemplate::reset(void) {
-
-  parsingCmd = true;
-  cmdIndex = 0;
-  badChar = false;
-  cmdOK = false;
-  parsingParam = false;
-  paramIndex = 0;
+	
+	if (cmd) {									// If we got the buffer
+  	parsingCmd = true;
+  	cmdIndex = 0;
+  	badChar = false;
+  	cmdOK = false;
+  	parsingParam = false;
+  	paramIndex = 0;
+  } else {										// How many ways can we say "No, not doing it!"
+  	parsingCmd = false;
+  	badChar = true;
+  	cmdOK = false;
+  	parsingParam = false;
+  }
 }
