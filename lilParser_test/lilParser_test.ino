@@ -1,4 +1,4 @@
-
+ 
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_VS1053.h>
@@ -64,7 +64,7 @@ void setup(void) {
   mParser.addCmd(svol, "svol");
   mParser.addCmd(vol, "vol");
   mParser.addCmd(st, "st");
-  
+  //renameFile();
   if (!theSoundCard.begin()) {
     Serial.print(F("Sound card failed with error# "));
     Serial.println((int)theSoundCard.getLastError());
@@ -72,29 +72,6 @@ void setup(void) {
   
   Serial.print(cmdCursor);
 }
-
-/*
-bool isMP3File(char* fileName) {
-
-  int   numChars;
-  char  dotMP3[] = ".MP3";
-  
-  if (fileName) {                 // Sanity.
-    numChars = strlen(fileName);
-    if (numChars>4) {
-      byte index = 0;
-      for(byte i=numChars-4;i<numChars;i++) {
-        if(!(toupper(fileName[i]) == dotMP3[index])) {
-          return false;
-        }
-        index++;
-      }
-      return true;
-    }
-  }
-  return false;
-}
-*/ 
 
 
 // Print & clear the last file error.
@@ -125,6 +102,42 @@ void  lastErrOut(void) {
   lastFileError = F_NO_ERR;
 }
 
+void SDCleaner(void) {
+
+  File  wd;
+  File  entry;
+  char  fileName[15];
+  char* strPtr;
+  byte  strLen;
+  bool  done;
+   
+  wd = SD.open(workingDir);
+  if (wd) {
+    wd.rewindDirectory();
+    done = false;
+    do {
+      entry = wd.openNextFile();
+      if (entry) {
+        strcpy(fileName,entry.name());
+        entry.close();                                // Enough of you.
+        if(fileName[0]=='_') {                        // Starts with a '_'
+          strPtr = strstr(fileName,".MP3");
+          if (strPtr) {
+            strLen = strlen(fileName);
+            strLen = strLen-4;
+            if(strPtr==&(fileName[strLen])) {         // Ends with a .mp3
+              SD.remove(fileName);                    // One of apple's files, kill it.
+            }
+          } 
+        }
+      } else {
+        done = true;
+      }
+    } while (!done);
+    wd.close();
+  }
+}
+
 
 char* makeFullpath(char* filePath) {
 
@@ -142,6 +155,12 @@ char* makeFullpath(char* filePath) {
       strcat(fullPath, filePath);
     }
   }
+}
+
+bool renameFile(void) {
+
+  //rename("Angel.mp3","Angel2.mp3");
+  //SdFat::rename("Angel.mp3", "Angel2.mp3");
 }
 
 
@@ -380,7 +399,6 @@ bool chooseMP3File(void) {
 
   char* paramBuff;
   char* fullPath;
-  byte  nextByte;
   bool  success;
 
   success = false;
@@ -391,10 +409,7 @@ bool chooseMP3File(void) {
       free(paramBuff);
       if (fullPath) {
         if (SD.exists(fullPath)) {
-          //Serial.print("Checking if mp3 file:");Serial.println(isMP3File(fullPath));
           if (theSoundCard.setSoundfile(fullPath)) {
-            //Serial.print(fullPath);
-            //Serial.println(" Queued and ready to play.");
             success = true;
           } else {
             Serial.print(F("setSoundfile() failed with error# "));
@@ -431,7 +446,6 @@ bool playFile(void) {
     chooseMP3File();
   }
   if (theSoundCard.command(play)) {
-    //Serial.println(F("Playing."));
     success = true;
   } else {
     Serial.print(F("command(play) failed with error# "));
