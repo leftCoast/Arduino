@@ -69,7 +69,7 @@ void setup(void) {
     Serial.print(F("Sound card failed with error# "));
     Serial.println((int)theSoundCard.getLastError());
   }
-  
+  SDCleaner();
   Serial.print(cmdCursor);
 }
 
@@ -103,6 +103,10 @@ void  lastErrOut(void) {
 }
 
 void SDCleaner(void) {
+
+// FSEVEN~1/
+// TRASHE~1/
+// SPOTLI~1/
 
   File  wd;
   File  entry;
@@ -233,7 +237,6 @@ bool copyFile(void) {
 
 
 bool removeFile(void) {
-
 
   File  theFile;
   char* paramBuff;
@@ -389,10 +392,111 @@ bool makeDirectory(void) {
 }
 
 
-bool removeDirectory(void) {
+void clearDirectory(char* fullPath) {
+
+  File  dir;
+  File  entry;
+  char  fileName[15];
+  char* newPath;
+  char* tempWD;
+  bool  done;
   
-  lastFileError = F_LAZY_ERR;
+  tempWD = malloc(strlen(workingDir)+1);
+  strcpy(tempWD,workingDir);
+  Serial.print("Ready to clear:");Serial.println(workingDir);
+  dir = SD.open(workingDir);
+  Serial.println("called open..");
+  if (dir.isDirectory()) {
+    dir.rewindDirectory();
+    done = false;
+    do {
+      entry = dir.openNextFile();
+      Serial.print("got entry: ");
+      if (entry) {
+        strcpy(fileName,entry.name());
+        Serial.println(fileName);
+        if (entry.isDirectory()) {
+          entry.close();
+          dir.close();
+          strcat(fileName,"/");
+          strcat(workingDir,newPath);
+          Serial.print("clearing:");Serial.println(newPath);
+          clearDirectory(newPath);
+          Serial.print("removing:");Serial.println(newPath);
+          SD.rmdir(newPath);
+          free(newPath);
+          dir = SD.open(fullPath);
+          dir.rewindDirectory();
+        } else {
+          newPath = makeFullpath(fileName);
+          Serial.print("deleting:");Serial.println(newPath);
+          SD.remove(newPath);
+          free(newPath);
+        }
+      } else {
+        done = true;
+      }
+    } while(!done);
+    dir.close();
+  } else Serial.println("not a dir?");
+  strcpy(workingDir,tempWD);
+  free(tempWD);
 }
+
+bool removeDirectory(void) {
+
+  File  theFile;
+  char* paramBuff;
+  char* filePath;
+  bool  success;
+  char* tempWD;
+  
+  success = false;
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    if (paramBuff) {
+      filePath = makeFullpath(paramBuff);
+      free(paramBuff);
+      if (filePath) {
+        if (SD.exists(filePath)) {
+          theFile = SD.open(filePath);
+          if (theFile) {
+            if (theFile.isDirectory()) {
+              theFile.close();
+              clearDirectory(filePath);
+              success = SD.rmdir(filePath);
+              if (!success) {
+                lastFileError = F_UKN_ERR;
+                //Serial.println(F("Unknown file error."));
+              }
+            } else {
+              lastFileError = F_NOD_ERR;
+              //Serial.print(filePath); Serial.println(F(" is not a dir."));
+            }
+          } else {
+            lastFileError = F_FOF_ERR;
+            //Serial.println(F("Failed to open file."));
+          }
+        } else {
+          lastFileError = F_NSF_ERR;
+          //Serial.println(F("No such file name."));
+        }
+        free(filePath);
+      } else {
+        lastFileError = F_RAM_ERR;
+        //Serial.println(F("Failed to allocate RAM"));
+      }
+    } else {
+      lastFileError = F_RAM_ERR;
+      //Serial.println(F("Failed to allocate RAM"));
+    }
+  } else {
+    lastFileError = F_MPAR_ERR;
+    //Serial.println(F("Missing parameter."));
+  }
+  return success;
+}
+
 
 
 bool chooseMP3File(void) {
