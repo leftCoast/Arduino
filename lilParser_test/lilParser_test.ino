@@ -73,7 +73,7 @@ void setup(void) {
   Serial.print(cmdCursor);
 }
 
-
+/*
 bool isMP3File(char* fileName) {
 
   int   numChars;
@@ -94,7 +94,7 @@ bool isMP3File(char* fileName) {
   }
   return false;
 }
-  
+*/ 
 
 
 // Print & clear the last file error.
@@ -391,7 +391,7 @@ bool chooseMP3File(void) {
       free(paramBuff);
       if (fullPath) {
         if (SD.exists(fullPath)) {
-          Serial.print("Checking if mp3 file:");Serial.println(isMP3File(fullPath));
+          //Serial.print("Checking if mp3 file:");Serial.println(isMP3File(fullPath));
           if (theSoundCard.setSoundfile(fullPath)) {
             //Serial.print(fullPath);
             //Serial.println(" Queued and ready to play.");

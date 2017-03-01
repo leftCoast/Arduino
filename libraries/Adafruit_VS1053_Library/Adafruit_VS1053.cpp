@@ -178,6 +178,29 @@ boolean Adafruit_VS1053_FilePlayer::stopped(void) {
   return (!playingMusic && !currentTrack);
 }
 
+
+bool Adafruit_VS1053_FilePlayer::isMP3File(const char* fileName) {
+    
+    int   numChars;
+    char  dotMP3[] = ".MP3";
+    
+    if (fileName) {                 // Sanity.
+        numChars = strlen(fileName);
+        if (numChars>4) {
+            byte index = 0;
+            for(byte i=numChars-4;i<numChars;i++) {
+                if(!(toupper(fileName[i]) == dotMP3[index])) {
+                    return false;
+                }
+                index++;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+
 unsigned long Adafruit_VS1053_FilePlayer::mp3_ID3Jumper(File mp3) {
 
   char 					tag[4];
@@ -231,8 +254,11 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
     return false;
   }
   
-  // We know we have a valid file. This sets the start point.
-  currentTrack.seek(mp3_ID3Jumper(currentTrack));
+  // We know we have a valid file. Check if .mp3
+  // If so, check for ID3 tag and jump it if present.
+  if (isMP3File(trackname)) {
+    currentTrack.seek(mp3_ID3Jumper(currentTrack));
+  }
   
   // don't let the IRQ get triggered by accident here
   noInterrupts();
