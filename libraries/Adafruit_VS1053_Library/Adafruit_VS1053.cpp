@@ -178,8 +178,8 @@ boolean Adafruit_VS1053_FilePlayer::stopped(void) {
   return (!playingMusic && !currentTrack);
 }
 
-
-bool Adafruit_VS1053_FilePlayer::isMP3File(const char* fileName) {
+// Just checks to see if the name ends in ".mp3"
+boolean Adafruit_VS1053_FilePlayer::isMP3File(const char* fileName) {
     
     int   numChars;
     char  dotMP3[] = ".MP3";
@@ -247,7 +247,7 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   // resync
   sciWrite(VS1053_REG_WRAMADDR, 0x1e29);
   sciWrite(VS1053_REG_WRAM, 0);
-	Serial.println(trackname);
+  
   currentTrack = SD.open(trackname);
   
   if (!currentTrack) {
