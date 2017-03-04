@@ -42,6 +42,7 @@ class adafruit_1431_Obj : public displayObj {
   virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void    setTextSize(byte inSize);
   virtual void		setTextWrap(boolean wrap);
+  virtual void 		setFont(const GFXfont* font);
   virtual void    setCursor(int inX,int inY);
   virtual void    drawText(char* inText);
   virtual void    fillScreen(colorObj* inColor);
@@ -54,7 +55,7 @@ class adafruit_1431_Obj : public displayObj {
   virtual void    drawVLine(int locX,int locY,word height,colorObj* inColor);
   virtual void    drawHLine(int locX,int locY,word width,colorObj* inColor);
   virtual void    drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
-  virtual void    drawPixel(int x,int y,colorObj* pColor);
+  virtual void    drawPixel(int locX,int locY,colorObj* pColor);
   
   private:
           Adafruit_SSD1351* theOLED;

@@ -26,8 +26,11 @@ boolean bmpPipe::openPipe(char* filename) {
 	
   fileOpen = false;
   haveInfo = false;
+  Serial.print("opening file: ");Serial.println(filename);
   if ((bmpFile = SD.open(filename)) != NULL) {        // Can we open the file?
-    fileOpen = true;                                  // Got that far at least.
+  	Serial.print("Opened file: ");Serial.println(filename);
+    fileOpen = true; 
+    Serial.println("grabbing info..");                                 // Got that far at least.
     haveInfo = readInfo();                            // Then see if we can understand it.
     if (haveInfo && !haveSourceRect) {                // If we can..
       aRect.x = 0;                               			// Default the source to the image.
@@ -125,6 +128,9 @@ void bmpPipe::drawLine(int x,int y) {
     for (trace=x;trace<=endTrace; trace++) {       // Ok, trace does x..x+width.
       bmpFile.read(buf,pixBytes);                 // Grab a pixel.
       thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
+      Serial.print("pixel x,y -> color: ");
+      Serial.print(x);Serial.print(", ");Serial.print(y);Serial.print("-> ");
+      Serial.print(buf[2]);Serial.print(":");Serial.print(buf[1]);Serial.print(":");Serial.println(buf[0]);
       screen->drawPixel(trace,y,&thePixal);       // Spat it out to the screen.
     }
   }
@@ -156,13 +162,14 @@ void bmpPipe::drawBitmap(int x,int y) {
     srcY = sourceRect.y;
     for (trace=y; trace<=endY;trace++) {
       bmpFile.seek(filePtr(x,srcY++));
+      Serial.print("line: ");Serial.print(x);Serial.print(", ");Serial.println(trace);
       drawLine(x,trace);
     }       
   }
 }
 
 
-/*
+
 void bmpPipe::showPipe(void) {
 
   Serial.print("Src rect x,y,w,h : ");Serial.print(sourceRect.x);Serial.print(", ");Serial.print(sourceRect.y);
@@ -177,4 +184,4 @@ void bmpPipe::showPipe(void) {
   Serial.print("Pix Bytes        : ");Serial.println(pixBytes);
   Serial.print("Bytes per Row    : ");Serial.println(bytesPerRow);
 }
-*/
+

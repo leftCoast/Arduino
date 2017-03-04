@@ -16,6 +16,7 @@ void displayObj::setTextColor(colorObj* inColor) { }
 void displayObj::setTextColor(colorObj* tColor,colorObj* bColor) { }
 void displayObj::setTextSize(byte inSize) { }
 void displayObj::setTextWrap(boolean inWrap) { }
+void displayObj::setFont(const GFXfont* font) { }
 void displayObj::setCursor(int inX,int inY) { }
 void displayObj::drawText(char* inText) { }
 void displayObj::fillScreen(colorObj* inColor) { }
@@ -30,7 +31,7 @@ void displayObj::fillCircle(int locX,int locY,word inDiam, colorObj* inColor){ }
 void displayObj::drawVLine(int locX,int locY,word height,colorObj* inColor) { }
 void displayObj::drawHLine(int locX,int locY,word width,colorObj* inColor) { }
 void displayObj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { }
-void displayObj::drawPixel(int x,int y,colorObj* pColor) { }
+void displayObj::drawPixel(int locX,int locY,colorObj* pColor) { }
 void displayObj::drawPixelInvert(int x,int y) { }
 void displayObj::frameRectInvert(int x,int y,word width,word height) { }
 

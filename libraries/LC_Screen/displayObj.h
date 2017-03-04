@@ -1,6 +1,8 @@
 #ifndef displayObj_h
 #define displayObj_h
 
+#include <Arduino.h>
+#include <gfxfont.h>
 #include <colorObj.h>
 
 // This is going to by our base display object. Similar to adafruit's GFX object.
@@ -29,6 +31,7 @@ public :
   virtual void setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void setTextSize(byte inSize);
   virtual void setTextWrap(boolean inWrap);
+  virtual void setFont(const GFXfont* font);
   virtual void setCursor(int inX,int inY);
   virtual void drawText(char* inText);
   virtual void fillScreen(colorObj* inColor);
@@ -43,7 +46,7 @@ public :
   virtual void drawVLine(int locX,int locY,word height,colorObj* inColor);
   virtual void drawHLine(int locX,int locY,word width,colorObj* inColor);
   virtual void drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
-  virtual void drawPixel(int x,int y,colorObj* pColor);
+  virtual void drawPixel(int locX,int locY,colorObj* pColor);
     
   virtual void drawPixelInvert(int x,int y);
   virtual void frameRectInvert(int x,int y,word width,word height);

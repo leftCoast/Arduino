@@ -22,7 +22,7 @@ class lilParser : public linkList {
     lilParser(void);
 		~lilParser(void);
 		
-    void  addCmd(int inCmdNum, char* inCmd);
+    void  addCmd(int inCmdNum, const char* inCmd);
     int   addChar(char inChar);
     int   numParams(void);
     int		getParamSize(void);
@@ -39,7 +39,7 @@ class lilParser : public linkList {
 class cmdTemplate : public linkListObj {
 
   public:
-    cmdTemplate(int inCmdNum, char* inCmd);
+    cmdTemplate(int inCmdNum, const char* inCmd);
     ~cmdTemplate(void);
 
     void  addChar(char inChar);

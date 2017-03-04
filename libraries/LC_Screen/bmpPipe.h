@@ -25,7 +25,7 @@ class bmpPipe {
     		boolean   openPipe(char* fileName);
     		void      setSourceRect(rect inRect);
 virtual	void      drawBitmap(int x,int y);
-      //void      showPipe(void);
+      void      showPipe(void);
     
   protected:
   

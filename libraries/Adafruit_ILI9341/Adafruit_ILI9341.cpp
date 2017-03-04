@@ -425,9 +425,9 @@ void Adafruit_ILI9341::pushColor(uint16_t color) {
 }
 
 void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
-
+	
   if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
-
+	
   if (hwSPI) spi_begin();
   setAddrWindow(x,y,x+1,y+1);
 

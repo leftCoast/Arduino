@@ -18,7 +18,7 @@ lilParser::~lilParser(void) { dumpList(); }
 
 
 // Add a command we can parse for. Only command numbers >0 need apply.
-void lilParser::addCmd(int inCmdNum, char* inCmd) {
+void lilParser::addCmd(int inCmdNum, const char* inCmd) {
 
   cmdTemplate* command;
 
@@ -156,7 +156,7 @@ void lilParser::reset(void) {
 // ****************************************
 
 
-cmdTemplate::cmdTemplate(int inCmdNum, char* inCmd) {
+cmdTemplate::cmdTemplate(int inCmdNum, const char* inCmd) {
 
   cmdNum = inCmdNum;
   cmd = (char*)malloc(sizeof(char) * (strlen(inCmd) + 1));
@@ -173,7 +173,7 @@ void cmdTemplate::addChar(char inChar) {
 
   if (parsingCmd) {                               // Ok, if parsing command.
     if (isspace(inChar)) {                        // And we have a white space. (cmd done)
-      if (cmdIndex == strlen(cmd)) {              // If we've parsed the same amount of chars as length.
+      if (cmdIndex == (int)strlen(cmd)) {         // If we've parsed the same amount of chars as length.
         cmdOK = true;                             // Then its a match!
         parsingCmd = false;                       // No longer parsing the command.
       }
@@ -221,7 +221,7 @@ bool cmdTemplate::parsing(void) {
 // Two cases here. A) we've seen all the command chars and not hit a bad one.
 // Or B) we already went through this and set cmdOK to true.
 bool cmdTemplate::validCmd(void) { 
-  return ((cmdIndex == strlen(cmd) && !badChar) || cmdOK);
+  return ((cmdIndex == (int)strlen(cmd) && !badChar) || cmdOK);
 }
 
 

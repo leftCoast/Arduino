@@ -36,6 +36,7 @@ void adafruit_1431_Obj::setTextColor(colorObj* inColor)   { theOLED->setTextColo
 void adafruit_1431_Obj::setTextColor(colorObj* tColor,colorObj* bColor) { theOLED->setTextColor(tColor->getColor16(),bColor->getColor16()); }
 void adafruit_1431_Obj::setTextSize(byte inSize)          { theOLED->setTextSize(inSize); }
 void adafruit_1431_Obj::setTextWrap(boolean wrap)         { theOLED->setTextWrap(wrap); }
+void adafruit_1431_Obj::setFont(const GFXfont* font) 			{ theOLED->setFont(font); }
 void adafruit_1431_Obj::setCursor(int inX,int inY)        { theOLED->setCursor(inX,inY); }
 void adafruit_1431_Obj::drawText(char* inText)            { theOLED->print(inText); }
 void adafruit_1431_Obj::fillScreen(colorObj* inColor)     { theOLED->fillScreen(inColor->getColor16()); }
@@ -48,8 +49,7 @@ void adafruit_1431_Obj::fillCircle(int locX,int locY,word inDiam, colorObj* inCo
 void adafruit_1431_Obj::drawVLine(int locX,int locY,word height,colorObj* inColor) { theOLED->drawFastVLine(locX,locY,height,inColor->getColor16()); }
 void adafruit_1431_Obj::drawHLine(int locX,int locY,word width,colorObj* inColor) { theOLED->drawFastHLine(locX,locY,width,inColor->getColor16()); }
 void adafruit_1431_Obj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { theOLED->drawLine(locX,locY,locX2,locY2,inColor->getColor16()); }
-
-void adafruit_1431_Obj::drawPixel(int x,int y,colorObj* pColor) { theOLED->drawPixel(x,y,pColor->getColor16()); }
+void adafruit_1431_Obj::drawPixel(int locX,int locY,colorObj* pColor) { Serial.println("calling.."); theOLED->drawPixel(locX,locY,pColor->getColor16()); }
 
 
  

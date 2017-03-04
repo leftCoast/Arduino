@@ -1,10 +1,19 @@
  
 #include <SPI.h>
+//#include<SdFat.h>
 #include <SD.h>
 #include <Adafruit_VS1053.h>
 #include <lists.h>
 #include <lilParser.h>
 #include <soundCard.h>
+
+#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
+#include <bmpPipe.h>
+#include <displayObj.h>
+#include <drawObj.h>
+#include <label.h>
+#include <lineObj.h>
+#include <screen.h>
 
 // Let's try error numbers to orginase this.
 //
@@ -31,14 +40,24 @@
 //
 //
 
+#define BUTTON_PIN  21
+#define PARAM_FILE  "/dbos/CONFIG.SYS"
+#define DISP_BG_FILE  "/dbos/paper.bmp"
+
 // Stuff for the command parser.
 lilParser mParser;
 enum      commands { noCommand, cp, rm, ls, pwd, cd, mkdir, rmdir, csf, cmdPlay, cmdPause, cmdReset, vol, svol, st };
 
 
-char  workingDir[40] = "/";
+char  workingDir[255] = "/";
 char  cmdCursor[] = ">";
 byte  lastFileError;
+
+char        currentSongFile[80] = "";
+int         currentSongVol;
+enum        userStates { nothin, pressinTDamnButton };
+userStates  userState = nothin;
+timeObj     debounceTimer(100);
 
 soundCard theSoundCard(soundCard_BREAKOUT);
 
@@ -70,6 +89,22 @@ void setup(void) {
     Serial.println((int)theSoundCard.getLastError());
   }
   SDCleaner();
+  readParamFile();
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
+    Serial.println("Init screen card fail.");
+    while(true); // Kill the process.
+  }
+  screen->fillScreen(&green);
+  Serial.println("Screen\'s online.");
+  
+  if(SD.exists(DISP_BG_FILE)) {
+     Serial.println("Found .bmp file");
+  } else {
+    Serial.println("No .bmp file");
+  }
+  
   Serial.print(cmdCursor);
 }
 
@@ -142,7 +177,8 @@ void SDCleaner(void) {
   }
 }
 
-
+// Makes a full path out of a file or folder name
+// assuming we want workingDir + filePath.
 char* makeFullpath(char* filePath) {
 
   char* fullPath;
@@ -159,12 +195,14 @@ char* makeFullpath(char* filePath) {
       strcat(fullPath, filePath);
     }
   }
+  return fullPath;
 }
 
 bool renameFile(void) {
 
   //rename("Angel.mp3","Angel2.mp3");
   //SdFat::rename("Angel.mp3", "Angel2.mp3");
+  return false;
 }
 
 
@@ -191,7 +229,7 @@ bool copyFile(void) {
             if (!strcmp("con", paramBuff)) {
               free(paramBuff);
               while (sourceFile.available()) {
-                Serial.print(sourceFile.read());
+                Serial.print((char)sourceFile.read());
               }
               Serial.println();
               success = true;
@@ -389,20 +427,40 @@ bool changeDirectory() {
 bool makeDirectory(void) {
   
   lastFileError = F_LAZY_ERR;
+  return false;
+}
+
+// push a directory into the full path. (make it longer)
+// Pass back old length. This is a tool used for recursing into folders.
+byte pushWD(char* fileName) {
+
+  byte numChars;
+  
+  numChars = strlen(workingDir);
+  if (fileName[0]=='/') {
+    strcat(workingDir,&(fileName[1]));
+  } else {
+    strcat(workingDir,fileName);
+  }
+  if (workingDir[strlen(workingDir)-1]!='/') {
+    strcat(workingDir,"/");
+  }
+  return numChars;
 }
 
 
-void clearDirectory(char* fullPath) {
+// Remember the guy above? This clips the workinng directory back when you're done.
+void popWD(byte numChars) { workingDir[numChars]='\0'; }
+
+
+void clearWDirectory() {
 
   File  dir;
   File  entry;
-  char  fileName[15];
-  char* newPath;
-  char* tempWD;
+  char  fileName[105];
+  byte  numChars;
   bool  done;
   
-  tempWD = malloc(strlen(workingDir)+1);
-  strcpy(tempWD,workingDir);
   Serial.print("Ready to clear:");Serial.println(workingDir);
   dir = SD.open(workingDir);
   Serial.println("called open..");
@@ -418,38 +476,38 @@ void clearDirectory(char* fullPath) {
         if (entry.isDirectory()) {
           entry.close();
           dir.close();
-          strcat(fileName,"/");
-          strcat(workingDir,newPath);
-          Serial.print("clearing:");Serial.println(newPath);
-          clearDirectory(newPath);
-          Serial.print("removing:");Serial.println(newPath);
-          SD.rmdir(newPath);
-          free(newPath);
-          dir = SD.open(fullPath);
+          numChars = pushWD(fileName);
+          clearWDirectory();
+          Serial.print("removing:");Serial.println(workingDir);
+          SD.rmdir(workingDir);
+          popWD(numChars);
+          dir = SD.open(workingDir);
           dir.rewindDirectory();
         } else {
-          newPath = makeFullpath(fileName);
-          Serial.print("deleting:");Serial.println(newPath);
-          SD.remove(newPath);
-          free(newPath);
+          numChars = strlen(workingDir);  // Cheating, usin WD buffer as fullpath.
+          strcat(workingDir,fileName);
+          Serial.print("deleting:");Serial.println(workingDir);
+          SD.remove(workingDir);
+          workingDir[numChars+1]='\0';
         }
       } else {
+        Serial.println("..or not..");
         done = true;
       }
     } while(!done);
     dir.close();
   } else Serial.println("not a dir?");
-  strcpy(workingDir,tempWD);
-  free(tempWD);
 }
 
+
+// Well, yeah it works, kinda'.
 bool removeDirectory(void) {
 
   File  theFile;
   char* paramBuff;
   char* filePath;
   bool  success;
-  char* tempWD;
+  char  tempWD[80];
   
   success = false;
   if (mParser.numParams()) {
@@ -463,7 +521,10 @@ bool removeDirectory(void) {
           if (theFile) {
             if (theFile.isDirectory()) {
               theFile.close();
-              clearDirectory(filePath);
+              strcpy(tempWD,workingDir);
+              strcpy(workingDir,filePath);
+              clearWDirectory();
+              strcpy(workingDir,tempWD);
               success = SD.rmdir(filePath);
               if (!success) {
                 lastFileError = F_UKN_ERR;
@@ -497,6 +558,17 @@ bool removeDirectory(void) {
   return success;
 }
 
+bool chooseMP3File(char* path) {
+
+  if (theSoundCard.setSoundfile(path)) {
+    strcpy(currentSongFile,path);
+    return true;
+  } else {
+    Serial.print(F("setSoundfile() failed with error# "));
+    Serial.println((int)theSoundCard.getLastError());
+  }
+  return false;
+}
 
 
 bool chooseMP3File(void) {
@@ -513,7 +585,7 @@ bool chooseMP3File(void) {
       free(paramBuff);
       if (fullPath) {
         if (SD.exists(fullPath)) {
-          if (theSoundCard.setSoundfile(fullPath)) {
+          if (chooseMP3File(fullPath)) {
             success = true;
           } else {
             Serial.print(F("setSoundfile() failed with error# "));
@@ -588,6 +660,12 @@ bool resetFile(void) {
   return success;
 }
 
+void setVol(int vol) {
+  
+  theSoundCard.setVolume(vol);
+  currentSongVol = vol;
+}
+
 
 bool setVol(void) {
 
@@ -606,7 +684,7 @@ bool setVol(void) {
       } else if (vol > 256) {
         vol = 256;
       }
-      theSoundCard.setVolume(vol);
+      setVol(vol);
       success = true;
     } else {
       lastFileError = F_RPAR_ERR;
@@ -635,9 +713,7 @@ void setSleepTime(void) {
 
     char* paramBuff;
     int   timeMs;
-    bool  success;
 
-  success = false;
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     if (paramBuff) {
@@ -649,6 +725,64 @@ void setSleepTime(void) {
   }
 }
 
+void writeParamFile(void) {
+
+  File paramFile;
+  char fileName[] = PARAM_FILE;
+
+  //Serial.println("Writin' files.");
+  if (SD.exists(fileName)) {
+    SD.remove(fileName);
+  }
+  paramFile = SD.open(fileName,FILE_WRITE);
+  paramFile.println(currentSongFile);
+  paramFile.println(currentSongVol);
+  paramFile.close();
+}
+
+
+void readParamFile(void) {
+
+  File paramFile;
+  char fileName[] = PARAM_FILE;
+  byte i;
+  char songFilePath[15];
+  char volStr[10];
+  bool  done;
+  
+  paramFile = SD.open(fileName);
+  if (paramFile) {
+    i = 0;
+    done = false;
+    do {
+      char aChar = paramFile.read();
+      if (aChar=='\n') {
+        songFilePath[i-1] = '\0';   // Kill the '\r'
+        done = true;
+      } else {
+        songFilePath[i] = aChar;
+        i++;
+      }
+    }
+    while(!done);
+    i = 0;
+    done = false;
+    do {
+      char aChar = paramFile.read();
+      if (aChar=='\n') {
+        volStr[i] = '\0';
+        done = true;
+      } else {
+        volStr[i] = aChar;
+        i++;
+      }
+    }
+    while(!done);
+    paramFile.close();
+    chooseMP3File(songFilePath);
+    setVol(atoi(volStr));
+  }
+}
 
 void loop() {
 
@@ -682,6 +816,25 @@ void loop() {
     }
     if (lastFileError) lastErrOut();
     if (command) Serial.print(cmdCursor);
+  }
+  //Serial.println(digitalRead(BUTTON_PIN));
+  switch (userState) {
+    case nothin : 
+      if (!digitalRead(BUTTON_PIN)) {
+        userState = pressinTDamnButton;
+        debounceTimer.start();
+        writeParamFile();
+      }
+      break;
+    case pressinTDamnButton : 
+      if (debounceTimer.ding()) {
+        if (digitalRead(BUTTON_PIN)) {  // Is the bozo holding the damn button down?
+          userState = nothin;
+        } else {
+          debounceTimer.start();        // Whatever, I'll come back later..
+        }
+      }
+      break;
   }
 }
 

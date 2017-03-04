@@ -312,6 +312,7 @@ void Adafruit_SSD1351::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t c
 
 void Adafruit_SSD1351::drawPixel(int16_t x, int16_t y, uint16_t color)
 {
+	Serial.println("Checking params..");
   // Transform x and y based on current rotation.
   switch (getRotation()) {
   // Case 0: No rotation
@@ -332,7 +333,7 @@ void Adafruit_SSD1351::drawPixel(int16_t x, int16_t y, uint16_t color)
   // Bounds check.
   if ((x >= SSD1351WIDTH) || (y >= SSD1351HEIGHT)) return;
   if ((x < 0) || (y < 0)) return;
-
+	Serial.println("Shh, in draw pixel now..");
   goTo(x, y);
   
   // setup for data

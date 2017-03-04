@@ -314,7 +314,6 @@ boolean viewMgr::checkClicks(void) {
 void viewMgr::checkRefresh(void) {
     
     drawObj*    trace;
-    point       where;
     boolean     done;
 
     trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.
