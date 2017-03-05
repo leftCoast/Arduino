@@ -39,6 +39,20 @@ boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
       }
       return false;
       break;
+    case SSD_13XX_Obj :
+    	screen = (displayObj*) new SSD_13XX_Obj();
+    	if (screen) {
+        if (screen->dispObjBegin()) {
+            screen->setRotation(inRotation);
+            if (SD_cs) {
+                return SD.begin(SD_cs);
+            } else {
+            		return true;
+            }
+        }
+      }
+    	return false;
+    	break;
     /* This one causes nothing but compiling issues. And its too big for a UNO.
     case ADAFRUIT_376 :
       screen = (displayObj*) new adafruit_376_Obj();
