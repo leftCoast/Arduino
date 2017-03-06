@@ -23,7 +23,7 @@ SSD_13XX_Obj::~SSD_13XX_Obj(void) {
   
 boolean SSD_13XX_Obj::dispObjBegin(void) { 
 
-  theOLED = new SSD_13XX(cs,dc,rst,mosi,sclk);xs
+  theOLED = new SSD_13XX(cs,dc);
   if (theOLED!=NULL) {
     theOLED->begin();
     return true;
@@ -34,9 +34,9 @@ boolean SSD_13XX_Obj::dispObjBegin(void) {
 void SSD_13XX_Obj::setRotation(byte inRotation)      { theOLED->setRotation(inRotation); }
 void SSD_13XX_Obj::setTextColor(colorObj* inColor)   { theOLED->setTextColor(inColor->getColor16()); }
 void SSD_13XX_Obj::setTextColor(colorObj* tColor,colorObj* bColor) { theOLED->setTextColor(tColor->getColor16(),bColor->getColor16()); }
-void SSD_13XX_Obj::setTextSize(byte inSize)          { theOLED->setTextSize(inSize); }
+void SSD_13XX_Obj::setTextSize(byte inSize)          { theOLED->setTextScale(inSize); }
 void SSD_13XX_Obj::setTextWrap(boolean wrap)         { theOLED->setTextWrap(wrap); }
-void SSD_13XX_Obj::setFont(const GFXfont* font) 			{ theOLED->setFont(font); }
+void SSD_13XX_Obj::setFont(const tFont *font) 		 { theOLED->setFont(font); }
 void SSD_13XX_Obj::setCursor(int inX,int inY)        { theOLED->setCursor(inX,inY); }
 void SSD_13XX_Obj::drawText(char* inText)            { theOLED->print(inText); }
 void SSD_13XX_Obj::fillScreen(colorObj* inColor)     { theOLED->fillScreen(inColor->getColor16()); }

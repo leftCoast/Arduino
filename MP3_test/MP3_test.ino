@@ -4,7 +4,7 @@
 
 #include <soundCard.h>
 
-soundCard theSoundCard(soundCard_SHIELD);
+soundCard theSoundCard(soundCard_BREAKOUT);
 
 byte vol = 20;
 void setup() {
@@ -23,8 +23,7 @@ void setup() {
   }
   Serial.println(F("SD.begin() succeded!"));
 
-  //if (!theSoundCard.setSoundfile("Hawaii50.mp3")) {
-  if (!theSoundCard.setSoundfile("Hawaii5Y.mp3")) {
+  if (!theSoundCard.setSoundfile("Hawaii50.mp3")) {
   //if (!theSoundCard.setSoundfile("RadioAct.mp3")) {
   //if (!theSoundCard.setSoundfile("SK8ERBOI.mp3")) {
   //if (!theSoundCard.setSoundfile("blueSky.mp3")) {

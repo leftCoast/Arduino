@@ -3,13 +3,15 @@
 
 
 // This set is for Arduino UNO & Teensy 3.2
+// There are only a few ways to do this.
+// So just standardise it this way
 #define SSD_13XX_SPI_CLK 			13
 #define SSD_13XX_SPI_MISO			12
 #define SSD_13XX_SPI_MOSI			11
-#define SSD_13XX_SPI_OLED_CS	10 // -> move to 10
-#define SSD_13XX_SPI_DC				9 // -> move to 9
+#define SSD_13XX_SPI_OLED_CS        10
+#define SSD_13XX_SPI_DC				9
 #define SSD_13XX_SPI_RST			8
-#define SSD_13XX_SPI_SD_CS	  4
+#define SSD_13XX_SPI_SD_CS          4   // <- this one can be different.
 
 // Teensy 3.x can use: 2,6,10,15,20,21,22,23
 // Arduino's 8 bit: any
@@ -32,7 +34,7 @@ class SSD_13XX_Obj : public displayObj {
   virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
   virtual void    setTextSize(byte inSize);
   virtual void		setTextWrap(boolean wrap);
-  virtual void 		setFont(const GFXfont* font);
+  virtual void 		setFont(const tFont *font);
   virtual void    setCursor(int inX,int inY);
   virtual void    drawText(char* inText);
   virtual void    fillScreen(colorObj* inColor);
@@ -48,10 +50,10 @@ class SSD_13XX_Obj : public displayObj {
   virtual void    drawPixel(int locX,int locY,colorObj* pColor);
   
   private:
-          Adafruit_SSD1351* theOLED;
-          byte              cs;
-          byte              dc;
-          byte              mosi;
-          byte              sclk;
-          byte              rst;
+          SSD_13XX* theOLED;
+          byte      cs;
+          byte      dc;
+          byte      mosi;
+          byte      sclk;
+          byte      rst;
 };

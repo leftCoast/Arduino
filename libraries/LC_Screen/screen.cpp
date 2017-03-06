@@ -2,6 +2,7 @@
 #include "screen.h"
 #include "adafruit_1431_Obj.h"
 #include "adafruit_1947_Obj.h"
+#include "SSD_13XX_Obj.h"
 
 #include <SD.h>
 
@@ -39,8 +40,8 @@ boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
       }
       return false;
       break;
-    case SSD_13XX_Obj :
-    	screen = (displayObj*) new SSD_13XX_Obj();
+    case SUMO_TOY_SSD_13XX :
+    	screen = (displayObj*) new SSD_13XX_Obj(SSD_13XX_SPI_OLED_CS,SSD_13XX_SPI_DC,SSD_13XX_SPI_MOSI,SSD_13XX_SPI_CLK,SSD_13XX_SPI_RST);
     	if (screen) {
         if (screen->dispObjBegin()) {
             screen->setRotation(inRotation);
@@ -51,9 +52,9 @@ boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
             }
         }
       }
-    	return false;
-    	break;
-    /* This one causes nothing but compiling issues. And its too big for a UNO.
+      return false;
+      break;
+    /* This one causes nothing but compiling issues. And its too big for a UNO. And obsolite anyway.
     case ADAFRUIT_376 :
       screen = (displayObj*) new adafruit_376_Obj();
       if (screen) {

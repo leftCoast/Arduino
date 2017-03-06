@@ -49,7 +49,7 @@ void adafruit_1431_Obj::fillCircle(int locX,int locY,word inDiam, colorObj* inCo
 void adafruit_1431_Obj::drawVLine(int locX,int locY,word height,colorObj* inColor) { theOLED->drawFastVLine(locX,locY,height,inColor->getColor16()); }
 void adafruit_1431_Obj::drawHLine(int locX,int locY,word width,colorObj* inColor) { theOLED->drawFastHLine(locX,locY,width,inColor->getColor16()); }
 void adafruit_1431_Obj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { theOLED->drawLine(locX,locY,locX2,locY2,inColor->getColor16()); }
-void adafruit_1431_Obj::drawPixel(int locX,int locY,colorObj* pColor) { Serial.println("calling.."); theOLED->drawPixel(locX,locY,pColor->getColor16()); }
+void adafruit_1431_Obj::drawPixel(int locX,int locY,colorObj* pColor) { theOLED->drawPixel(locX,locY,pColor->getColor16()); }
 
 
  

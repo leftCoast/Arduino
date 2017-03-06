@@ -8,11 +8,10 @@
 #define ADAFRUIT_1431_SPI_CLK 		13
 #define ADAFRUIT_1431_SPI_MOSI		11
 #define ADAFRUIT_1431_SPI_MISO		12
-#define ADAFRUIT_1431_SPI_OLED_CS	9
-#define ADAFRUIT_1431_SPI_SD_CS	  4
-#define ADAFRUIT_1431_SPI_DC			7
-#define ADAFRUIT_1431_SPI_RST			8
-
+#define ADAFRUIT_1431_SPI_OLED_CS	10
+#define ADAFRUIT_1431_SPI_DC        9
+#define ADAFRUIT_1431_SPI_RST       8
+#define ADAFRUIT_1431_SPI_SD_CS     4
 
 /*
 // This set is for Adafruit Feather MO #2995

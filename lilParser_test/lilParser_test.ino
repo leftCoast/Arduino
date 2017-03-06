@@ -7,6 +7,7 @@
 #include <lilParser.h>
 #include <soundCard.h>
 
+/*
 #include <adafruit_1431_Obj.h> // ADAFRUIT_1431
 #include <bmpPipe.h>
 #include <displayObj.h>
@@ -14,6 +15,7 @@
 #include <label.h>
 #include <lineObj.h>
 #include <screen.h>
+*/
 
 // Let's try error numbers to orginase this.
 //
@@ -92,6 +94,7 @@ void setup(void) {
   readParamFile();
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
+  /*
   if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     Serial.println("Init screen card fail.");
     while(true); // Kill the process.
@@ -104,7 +107,7 @@ void setup(void) {
   } else {
     Serial.println("No .bmp file");
   }
-  
+  */
   Serial.print(cmdCursor);
 }
 

@@ -116,7 +116,7 @@ byte colorObj::getBlue(void) { return blue; }
 colorObj colorObj::mixColors(colorObj* mixinColor,byte mixPercent) {
     
     if (mixPercent>=100) return *mixinColor;
-    else if (mixPercent<=TRANSPARENT) return *this;
+    else if (mixPercent<=0) return *this;
     else {
         mixMapper.setColors(this,mixinColor);
         return mixMapper.Map(mixPercent);

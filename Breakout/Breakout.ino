@@ -13,6 +13,8 @@
 
 #include <adafruit_1431_Obj.h> // ADAFRUIT_1431
 //#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+#include <SSD_13XX.h>
+
 #include <bmpPipe.h>
 #include <displayObj.h>
 #include <drawObj.h>
@@ -45,6 +47,9 @@
 #define BALLS_NUM_W 16
 
 #define NUM_BALLS 4
+
+#define BUTTON_PIN  21
+
 enum gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
 gameStates    gameState;
@@ -64,12 +69,26 @@ int           oldLoc = -1;
 int           savedPaddleX;
 int           ballCount;
 
+enum        userStates { nothin, pressinTDamnButton };
+userStates  userState = nothin;
+timeObj     debounceTimer(100);
+bool          buttonHit = false;
+
+#include <soundCard.h>
+
+soundCard theSoundCard(soundCard_BREAKOUT);
+
 void setup() {
 
-  //Serial.begin(9600); while(!Serial);
+  Serial.begin(9600); while(!Serial);
+  Serial.println("Try screen.");
+  //if (!initScreen(SUMO_TOY_SSD_13XX)) {
   if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
+    Serial.print("Screen fail.");
     while(true); // Kill the process.
   }
+  Serial.println("Screen worked!");
+  
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
   screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
@@ -99,7 +118,16 @@ void setup() {
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
+  
+  //if (theSoundCard.begin()) {
+    //Serial.println("theSoundCard.begin(); success.");
+    //theSoundCard.setSoundfile("Corvette.mp3");
+    //theSoundCard.command(play);
+ // } else {
+    //Serial.println("theSoundCard.begin(); FAIL.");
+ // }
 
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   setState(preGame); 
 }
 
@@ -197,22 +225,25 @@ void showBallNum(int balls) {
   }
 }
 
+
 void setState(gameStates state) {
 
     switch(state) {
       case preGame :
+        buttonHit = false;
         paddleTimer.start();
         ballCount = NUM_BALLS;
         showBallNum(ballCount);
         theBall.setLocation(BALL_X,BALL_Y);
         resetBricks();
-        message.setValue("Move to start");
+        message.setValue("Press start");
         while(!paddleTimer.ding());
         doPaddle();
         savedPaddleX = paddle.x;
         frameTimer.start();
         break;
       case inPLay :
+        buttonHit = false;
         message.setValue(" ");
         theBall.reset();
         frameTimer.start();
@@ -243,7 +274,7 @@ void loop(void) {
     doPaddle();
     switch(gameState) {
       case preGame :
-          if (paddle.x!=savedPaddleX) {
+          if (buttonHit) {
             setState(inPLay);
           }
         break;
@@ -263,6 +294,24 @@ void loop(void) {
           setState(preGame);
         }
         break;
+    }
+    switch (userState) {
+    case nothin : 
+      if (!digitalRead(BUTTON_PIN)) {
+        userState = pressinTDamnButton;
+        debounceTimer.start();
+        buttonHit = true;
+      }
+      break;
+    case pressinTDamnButton : 
+      if (debounceTimer.ding()) {
+        if (digitalRead(BUTTON_PIN)) {  // Is the bozo holding the damn button down?
+          userState = nothin;
+        } else {
+          debounceTimer.start();        // Whatever, I'll come back later..
+        }
+      }
+      break;
     }
   }
 
