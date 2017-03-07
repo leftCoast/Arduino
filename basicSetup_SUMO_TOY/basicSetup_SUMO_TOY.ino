@@ -30,11 +30,13 @@ uint8_t errorCode = 0;
 SSD_13XX tft = SSD_13XX(__CS1, __DC);
 
 void setup() {
-	Serial.begin(38400);
+  //SPI.begin();
+	//Serial.begin(38400);
+  Serial.begin(9600);
 	long unsigned debug_start = millis();
 	while (!Serial && ((millis() - debug_start) <= 5000));
 	Serial.println("serial ok, testing lib...");
-	tft.begin();
+	tft.begin(false);
   Serial.println("begin called,  what's next? Look at error.");
 	//the following it's mainly for Teensy
 	//it will help you to understand if you have choosed the
@@ -48,6 +50,7 @@ void setup() {
 	}
 	else {
     Serial.println("Ok,no error. Print ready to the screen.");
+    tft.fillScreen(GREEN);
 		tft.print("Ready!");
     Serial.println("Watch for it..");
 	}
