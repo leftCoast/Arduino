@@ -23,7 +23,9 @@ SSD_13XX_Obj::~SSD_13XX_Obj(void) {
   
 boolean SSD_13XX_Obj::dispObjBegin(void) { 
 
-  theOLED = new SSD_13XX(cs,dc);
+  //theOLED = new SSD_13XX(10,9,6,11,13);	// Hardwired for temp board
+  // CD,DC,Rst,MOSI,Clk
+  theOLED = new SSD_13XX(cs,dc,rst,mosi,sclk);
   if (theOLED!=NULL) {
     theOLED->begin();
     return true;
@@ -49,7 +51,7 @@ void SSD_13XX_Obj::fillCircle(int locX,int locY,word inDiam, colorObj* inColor) 
 void SSD_13XX_Obj::drawVLine(int locX,int locY,word height,colorObj* inColor) { theOLED->drawFastVLine(locX,locY,height,inColor->getColor16()); }
 void SSD_13XX_Obj::drawHLine(int locX,int locY,word width,colorObj* inColor) { theOLED->drawFastHLine(locX,locY,width,inColor->getColor16()); }
 void SSD_13XX_Obj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { theOLED->drawLine(locX,locY,locX2,locY2,inColor->getColor16()); }
-void SSD_13XX_Obj::drawPixel(int locX,int locY,colorObj* pColor) { Serial.println("calling.."); theOLED->drawPixel(locX,locY,pColor->getColor16()); }
+void SSD_13XX_Obj::drawPixel(int locX,int locY,colorObj* pColor) { theOLED->drawPixel(locX,locY,pColor->getColor16()); }
 
 
  

@@ -22,23 +22,23 @@ class bmpPipe {
     bmpPipe(rect sourceRect);
     ~bmpPipe(void);
 
-    		boolean   openPipe(char* fileName);
-    		void      setSourceRect(rect inRect);
-virtual	void      drawBitmap(int x,int y);
-      void      showPipe(void);
+    		boolean   		openPipe(char* fileName);
+    		void      		setSourceRect(rect inRect);
+virtual	void      		drawBitmap(int x,int y);
+				File					getFile(void);
+				void      		drawLine(File bmpFile,int x,int y);
+    		unsigned long	filePtr(int x,int y);
+      	//void      	showPipe(void);
     
   protected:
-  
-    uint16_t  read16(File f);
-    uint32_t  read32(File f);
-    boolean   readInfo(void);
-    void      drawLine(int x,int y);
-    long      filePtr(int x,int y);
+    uint16_t  		read16(File f);
+    uint32_t  		read32(File f);
+    boolean   		readInfo(File bmpFile);
     
-    File    bmpFile;
+    
+    char*		filePath;
     rect    sourceRect;     // The subset of the image.
     boolean haveSourceRect;
-    boolean fileOpen;
     boolean haveInfo;
     int     imageOffset;
     int     imageWidth;

@@ -8,10 +8,10 @@
 #define SSD_13XX_SPI_CLK 			13
 #define SSD_13XX_SPI_MISO			12
 #define SSD_13XX_SPI_MOSI			11
-#define SSD_13XX_SPI_OLED_CS        10
+#define SSD_13XX_SPI_OLED_CS  10
 #define SSD_13XX_SPI_DC				9
 #define SSD_13XX_SPI_RST			8
-#define SSD_13XX_SPI_SD_CS          4   // <- this one can be different.
+#define SSD_13XX_SPI_SD_CS    4   // <- this one can be different.
 
 // Teensy 3.x can use: 2,6,10,15,20,21,22,23
 // Arduino's 8 bit: any

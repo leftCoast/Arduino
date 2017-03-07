@@ -36,6 +36,7 @@ boolean soundCard::begin(void) {
       break;
       case soundCard_BREAKOUT :
         musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_RESET, BREAKOUT_CS, BREAKOUT_DCS, DREQ, soundCard_SD_CS);
+        //musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_CS, BREAKOUT_DCS, DREQ, soundCard_SD_CS);
       break;
       default : setError(badSetup); return false;
     }

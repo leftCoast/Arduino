@@ -1,7 +1,8 @@
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
-#include <Fonts/FreeMono9pt7b.h>
-#include <Adafruit_ILI9341.h>
+
+#include <SSD_13XX.h>
+#include <Adafruit_VS1053.h>
+
+#include <SSD_13XX_Obj.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -11,48 +12,65 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
-//#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <bmpPipe.h>
+#include <bmpLabel.h>
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
 #include <lineObj.h>
 #include <screen.h>
 
-#define SD_CS         ADAFRUIT_1431_SPI_SD_CS
+#include <soundCard.h>
+
 #define DISP_BG_FILE  "/dbos/paper.bmp"
-//bmpPipe paper;
-label firstLabel(20,20,100,20,"File name");
+bmpPipe paper;
+bmpLabel label1(20,6,100,10,"File name 1",&paper);
+
+soundCard thePlayer(soundCard_BREAKOUT);
+
 void setup() {
 
   Serial.begin(9600); while(!Serial);
   Serial.println("Serial's online.");
 
-  if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT,0)) {
+  SD.begin(4);
+
+  if (!initScreen(SUMO_TOY_SSD_13XX,INV_PORTRAIT)) {
     Serial.println("Init screen card fail.");
     while(true); // Kill the process.
+  } else {
+    screen->fillScreen(&blue);
+    Serial.println("Screen\'s online.");
   }
-  screen->fillScreen(&blue);
-  Serial.println("Screen\'s online.");
-  screen->drawPixel(20,20,&black);
-  Serial.println("Should be blue with one black pixel");
-  delay(3000);
-  screen->fillScreen(&white);
-  //screen->setFont(&FreeMono9pt7b);
-  screen->setTextColor(&black);
-  firstLabel.draw();
-  /*
+  delay(1000); // Lets see it..
+
+  if (thePlayer.begin()) {
+    Serial.println("Sound card OK?");
+    /*if (thePlayer.setSoundfile("Corvette.mp3")) {
+      Serial.println("Happy with Corvette?");
+      //thePlayer.command(play);
+    } else {
+      Serial.println("Couldn't open Corvette.");
+    }
+    */
+  } else {
+    Serial.println("Sound card fail!");
+  }
+
+
   if (paper.openPipe(DISP_BG_FILE)) {
     Serial.println("Opened pipe.");
-    paper.showPipe();
-    //paper.drawBitmap(0,0);
+    paper.drawBitmap(0,0);
+    point pos = label1.getCorner(topLeftPt);
+    for (int i=0;i<10;i++) {
+      label1.setLocation(pos.x,pos.y+(i*12));
+      label1.drawSelf();
+    }
   } else {
     Serial.println("Failed to open pipe.");
   }
-  delay(3000);
-  screen->fillScreen(&red);
-  */
+
+  
 }
 
 

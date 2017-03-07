@@ -1,7 +1,7 @@
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
+//#include <Adafruit_GFX.h>
+//#include <gfxfont.h>
 
-#include <Adafruit_ILI9341.h>
+//#include <Adafruit_ILI9341.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -11,8 +11,9 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
+//#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
 //#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+#include <SSD_13XX_Obj.h>
 #include <SSD_13XX.h>
 
 #include <bmpPipe.h>
@@ -82,13 +83,14 @@ void setup() {
 
   Serial.begin(9600); while(!Serial);
   Serial.println("Try screen.");
-  //if (!initScreen(SUMO_TOY_SSD_13XX)) {
-  if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
+  if (!initScreen(SUMO_TOY_SSD_13XX,INV_PORTRAIT)) {
+  //if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     Serial.print("Screen fail.");
     while(true); // Kill the process.
   }
   Serial.println("Screen worked!");
-  
+
+  SD.begin(20);
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
   screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
@@ -118,15 +120,15 @@ void setup() {
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
-  
-  //if (theSoundCard.begin()) {
-    //Serial.println("theSoundCard.begin(); success.");
-    //theSoundCard.setSoundfile("Corvette.mp3");
+  /*
+  if (theSoundCard.begin()) {
+    Serial.println("theSoundCard.begin(); success.");
+    //if (theSoundCard.setSoundfile("Corvette.mp3")) { Serial.printf("set corvette");}
     //theSoundCard.command(play);
- // } else {
-    //Serial.println("theSoundCard.begin(); FAIL.");
- // }
-
+  } else {
+    Serial.println("theSoundCard.begin(); FAIL.");
+  }
+  */
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   setState(preGame); 
 }
