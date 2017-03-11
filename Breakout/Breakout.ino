@@ -83,12 +83,7 @@ void setup() {
 
   Serial.begin(9600); while(!Serial);
   Serial.println("Try screen.");
-<<<<<<< Updated upstream
   if (!initScreen(SUMO_TOY_SSD_13XX,INV_PORTRAIT)) {
-=======
-  if (!initScreen(SUMO_TOY_SSD_13XX)) {
->>>>>>> Stashed changes
-  //if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     Serial.print("Screen fail.");
     while(true); // Kill the process.
   }

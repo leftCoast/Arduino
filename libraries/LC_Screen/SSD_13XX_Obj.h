@@ -5,18 +5,13 @@
 // This set is for Arduino UNO & Teensy 3.2
 // There are only a few ways to do this.
 // So just standardise it this way
-#define SSD_13XX_SPI_CLK 			13
-#define SSD_13XX_SPI_MISO			12
-#define SSD_13XX_SPI_MOSI			11
+#define SSD_13XX_SPI_CLK 	  13
+#define SSD_13XX_SPI_MISO	  12
+#define SSD_13XX_SPI_MOSI	  11
 #define SSD_13XX_SPI_OLED_CS  10
-#define SSD_13XX_SPI_DC				9
-<<<<<<< Updated upstream
-#define SSD_13XX_SPI_RST			8
-#define SSD_13XX_SPI_SD_CS    4   // <- this one can be different.
-=======
-#define SSD_13XX_SPI_RST			6//8
-#define SSD_13XX_SPI_SD_CS          20   // <- this one can be different.
->>>>>>> Stashed changes
+#define SSD_13XX_SPI_DC		  9
+#define SSD_13XX_SPI_RST	  6bb
+#define SSD_13XX_SPI_SD_CS    20
 
 // Teensy 3.x can use: 2,6,10,15,20,21,22,23
 // Arduino's 8 bit: any
