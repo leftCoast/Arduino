@@ -75,15 +75,19 @@ userStates  userState = nothin;
 timeObj     debounceTimer(100);
 bool          buttonHit = false;
 
-#include <soundCard.h>
+//#include <soundCard.h>
 
-soundCard theSoundCard(soundCard_BREAKOUT);
+//soundCard theSoundCard(soundCard_BREAKOUT);
 
 void setup() {
 
   Serial.begin(9600); while(!Serial);
   Serial.println("Try screen.");
+<<<<<<< Updated upstream
   if (!initScreen(SUMO_TOY_SSD_13XX,INV_PORTRAIT)) {
+=======
+  if (!initScreen(SUMO_TOY_SSD_13XX)) {
+>>>>>>> Stashed changes
   //if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
     Serial.print("Screen fail.");
     while(true); // Kill the process.
@@ -93,6 +97,7 @@ void setup() {
   SD.begin(20);
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
+  delay(3000);
   screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
   
   paddle.setBackColor(&backColor);

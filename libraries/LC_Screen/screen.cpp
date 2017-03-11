@@ -41,7 +41,7 @@ boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
       return false;
       break;
     case SUMO_TOY_SSD_13XX :
-    	screen = (displayObj*) new SSD_13XX_Obj(SSD_13XX_SPI_OLED_CS,SSD_13XX_SPI_DC,SSD_13XX_SPI_MOSI,SSD_13XX_SPI_CLK,SSD_13XX_SPI_RST);
+    	screen = (displayObj*) new SSD_13XX_Obj(SSD_13XX_SPI_OLED_CS,SSD_13XX_SPI_DC,SSD_13XX_SPI_RST,SSD_13XX_SPI_MOSI,SSD_13XX_SPI_CLK);
     	if (screen) {
         if (screen->dispObjBegin()) {
             screen->setRotation(inRotation);

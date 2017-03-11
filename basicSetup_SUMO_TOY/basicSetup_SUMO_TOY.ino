@@ -30,8 +30,14 @@ If you do not use reset, tie it to +3V3
 
 uint8_t errorCode = 0;
 
+<<<<<<< Updated upstream
 //SSD_13XX tft = SSD_13XX(__CS1, __DC);
 SSD_13XX* tft = new SSD_13XX(10,9,6,11,13); // Shortwire
+=======
+//SSD_13XX tft = SSD_13XX(__CS1, __DC,6,11,13);
+SSD_13XX tft = SSD_13XX(__CS1, __DC,8,11,13);
+
+>>>>>>> Stashed changes
 void setup() {
   //SPI.begin();
 	//Serial.begin(38400);
