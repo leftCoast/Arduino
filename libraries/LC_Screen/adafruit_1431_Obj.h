@@ -1,27 +1,8 @@
 #include "displayObj.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1351.h>
-#include <SPI.h>
+#include <LC_SPI.h>
 
-
-// This set is for Arduino UNO & Teensy 3.2
-#define ADAFRUIT_1431_SPI_CLK 		13
-#define ADAFRUIT_1431_SPI_MOSI		11
-#define ADAFRUIT_1431_SPI_MISO		12
-#define ADAFRUIT_1431_SPI_OLED_CS	10
-#define ADAFRUIT_1431_SPI_DC        9
-#define ADAFRUIT_1431_SPI_RST       8
-#define ADAFRUIT_1431_SPI_SD_CS     4
-
-/*
-// This set is for Adafruit Feather MO #2995
-#define ADAFRUIT_1431_SPI_CLK 	24
-#define ADAFRUIT_1431_SPI_MOSI	23
-#define ADAFRUIT_1431_SPI_MISO	22
-#define ADAFRUIT_1431_SPI_CS	?   // Free to choose..
-#define ADAFRUIT_1431_SPI_DC	?   // Free to choose..
-#define ADAFRUIT_1431_SPI_RST	?   // Free to choose..
-*/
 
 // Rotation
 #define PORTRAIT      0  // Wires up
@@ -32,7 +13,7 @@
 class adafruit_1431_Obj : public displayObj {
 
   public :
-  adafruit_1431_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST);
+  adafruit_1431_Obj(byte inCS,byte inRST=-1);
   ~adafruit_1431_Obj(void);
   
   virtual boolean dispObjBegin(void);
@@ -59,8 +40,5 @@ class adafruit_1431_Obj : public displayObj {
   private:
           Adafruit_SSD1351* theOLED;
           byte              cs;
-          byte              dc;
-          byte              mosi;
-          byte              sclk;
           byte              rst;
 };

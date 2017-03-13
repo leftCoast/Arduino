@@ -1,33 +1,17 @@
 #ifndef adafruit_1947_Obj_h
 #define adafruit_1947_Obj_h
 
-#include <SPI.h>
 #include <Wire.h>      			// this is needed for FT6206
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_FT6206.h>
-
+#include <LC_SPI.h>
 #include "displayObj.h"
 
-/*
-// This block os for Arduino UNO.
-#define ADAFRUIT_1947_SPI_CLK 	13
-#define ADAFRUIT_1947_SPI_MISO	12
-#define ADAFRUIT_1947_SPI_MOSI	11
-#define ADAFRUIT_1947_SPI_CS	10
-#define ADAFRUIT_1947_SPI_DC	 9
-#define ADAFRUIT_1947_SPI_RST	-1
-#define ADAFRUIT_1947_SPI_SD_CS  4
-*/
-
-// This block os for Arduino teensy 3.2
-#define ADAFRUIT_1947_SPI_CLK 	13
-#define ADAFRUIT_1947_SPI_MISO	12
-#define ADAFRUIT_1947_SPI_MOSI	11
-#define ADAFRUIT_1947_SPI_CS	10
-#define ADAFRUIT_1947_SPI_DC	 9
-#define ADAFRUIT_1947_SPI_RST	-1
-#define ADAFRUIT_1947_SPI_SD_CS  4
+// Shield version
+#define ADA_1947_SHIELD_CS		10
+#define ADA_1947_SHIELD_RST	  -1
+#define ADA_1947_SHIELD_SDCS	4
 
 // Rotation
 #define PORTRAIT      0  // USB up
@@ -42,8 +26,8 @@
 class adafruit_1947_Obj : public displayObj {
 
   public :
-  adafruit_1947_Obj(void);        // This is for creating the hardware version.
-  adafruit_1947_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST,byte inMISO);
+  adafruit_1947_Obj(void);        					// Shield version.
+  adafruit_1947_Obj(byte inCS,byte inRst);  // Breakout version.
   ~adafruit_1947_Obj(void);
   
   virtual boolean dispObjBegin(void);
@@ -72,12 +56,7 @@ class adafruit_1947_Obj : public displayObj {
   private:
           Adafruit_FT6206*  cTS;
           Adafruit_ILI9341* theTFT;
-          boolean           hardware;
           byte              cs;
-          byte              dc;
-          byte              mosi;
-          byte					 miso;
-          byte              sclk;
           byte              rst;
 };
 

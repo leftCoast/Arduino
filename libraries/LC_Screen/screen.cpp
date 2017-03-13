@@ -2,54 +2,49 @@
 #include "screen.h"
 #include "adafruit_1431_Obj.h"
 #include "adafruit_1947_Obj.h"
+#include <LC_SPI.h>
 #include "SSD_13XX_Obj.h"
 
 #include <SD.h>
 
 displayObj* screen = NULL;
 
-boolean initScreen(byte hardware, byte inRotation,byte SD_cs) {
+boolean initScreen(byte hardware, byte csPin, byte inRotation) { 
+	return initScreen(hardware,csPin, -1,inRotation);
+}
+	
+	
+boolean initScreen(byte hardware,byte csPin,byte rsPin,byte inRotation) {
 
   switch (hardware) {
     case ADAFRUIT_1431 :
-      screen = (displayObj*) new adafruit_1431_Obj(ADAFRUIT_1431_SPI_OLED_CS, ADAFRUIT_1431_SPI_DC, ADAFRUIT_1431_SPI_MOSI, ADAFRUIT_1431_SPI_CLK, ADAFRUIT_1431_SPI_RST);
+      screen = (displayObj*) new adafruit_1431_Obj(csPin,rsPin);
       if (screen) {
       	if (screen->dispObjBegin()) {
         		screen->setRotation(inRotation);
-        		if (SD_cs) {
-                return SD.begin(SD_cs);
-            } else {
-            		return true;
-            }
+            return true;
       	}
       }
       return false;
       break;
+      
     case ADAFRUIT_1947 :
-      //screen = (displayObj*) new adafruit_1947_Obj(ADAFRUIT_1947_SPI_CS, ADAFRUIT_1947_SPI_DC, ADAFRUIT_1947_SPI_MOSI, ADAFRUIT_1947_SPI_CLK, ADAFRUIT_1947_SPI_RST,ADAFRUIT_1947_SPI_MISO);
-      screen = (displayObj*) new adafruit_1947_Obj();
+      screen = (displayObj*) new adafruit_1947_Obj(csPin,rsPin);
       if (screen) {
         if (screen->dispObjBegin()) {
             screen->setRotation(inRotation);
-            if (SD_cs) {
-                return SD.begin(SD_cs);
-            } else {
-            		return true;
-            }
+            return true;
         }
       }
       return false;
       break;
+      
     case SUMO_TOY_SSD_13XX :
-    	screen = (displayObj*) new SSD_13XX_Obj(SSD_13XX_SPI_OLED_CS,SSD_13XX_SPI_DC,SSD_13XX_SPI_RST,SSD_13XX_SPI_MOSI,SSD_13XX_SPI_CLK);
+    	screen = (displayObj*) new SSD_13XX_Obj(csPin,rsPin);
     	if (screen) {
         if (screen->dispObjBegin()) {
             screen->setRotation(inRotation);
-            if (SD_cs) {
-                return SD.begin(SD_cs);
-            } else {
-            		return true;
-            }
+            return true;
         }
       }
       return false;

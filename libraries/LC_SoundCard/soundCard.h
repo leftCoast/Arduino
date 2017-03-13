@@ -1,30 +1,20 @@
 #ifndef soundCard_h
 #define soundCard_h
 
-#include <SD.h>
+#include <LC_SPI.h>
 #include <Adafruit_VS1053.h>
 
 #include <idlers.h>
 #include <timeObj.h>
 
 
-// The usual SPI pins..
-//#define CLK 13       // SPI Clock, shared with SD card
-//#define MISO 12      // Input data, from VS1053/SD card
-//#define MOSI 11      // Output data, to VS1053/SD card
-
-// These are the pins used for the breakout example
-#define BREAKOUT_RESET  2      // VS1053 reset pin (output)
-#define BREAKOUT_CS     1     // VS1053 chip select pin (output)
-#define BREAKOUT_DCS    9      // VS1053 Data/command select pin (output)
-
 // These are the pins used for the music maker shield
-#define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
-#define SHIELD_CS     7      // VS1053 chip select pin (output)
-#define SHIELD_DCS    6      // VS1053 Data/command select pin (output)      
+#define SHIELD_RESET	-1      // VS1053 reset pin (unused!)
+#define SHIELD_CS			 7      // VS1053 chip select pin (output)
+#define SHIELD_DC			 6      // VS1053 Data/command select pin (output)      
+#define SHIELD_SC_CS	 4			// Onboard SD card.
+#define SHIELD_DREQ		 3 
 
-// The default SD card select pin. (Fixed for the Shield type)
-#define soundCard_SD_CS 4  
 
 // Possible setups 
 #define soundCard_SHIELD   0
@@ -44,7 +34,7 @@ enum soundCardErr {
 class soundCard : public idler, public timeObj {
 
   public:
-    soundCard(byte boardSetup);
+    soundCard(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin=-1);
     ~soundCard(void);
 
           boolean       begin(void);
@@ -60,8 +50,11 @@ class soundCard : public idler, public timeObj {
   virtual void idle(void);
 
     Adafruit_VS1053_FilePlayer* musicPlayer;
-    soundCardErr lastErr;
+    soundCardErr 	lastErr;
     byte          setupType;
+    byte					csPin;
+    byte					drqPin;
+    byte					resetPin;
     char*         filePath;
     byte					volume;
     boolean       playing;

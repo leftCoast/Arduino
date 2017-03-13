@@ -1,20 +1,10 @@
 #include "displayObj.h"
 #include "SSD_13XX.h"
+#include <LC_SPI.h>
 
-
-// This set is for Arduino UNO & Teensy 3.2
-// There are only a few ways to do this.
-// So just standardise it this way
-#define SSD_13XX_SPI_CLK 	  13
-#define SSD_13XX_SPI_MISO	  12
-#define SSD_13XX_SPI_MOSI	  11
-#define SSD_13XX_SPI_OLED_CS  10
-#define SSD_13XX_SPI_DC		  9
-#define SSD_13XX_SPI_RST	  6bb
-#define SSD_13XX_SPI_SD_CS    20
 
 // Teensy 3.x can use: 2,6,10,15,20,21,22,23
-// Arduino's 8 bit: any
+// Arduino's 8 bit: any pins
 
 // Rotation
 #define PORTRAIT      0  // Wires up
@@ -25,7 +15,7 @@
 class SSD_13XX_Obj : public displayObj {
 
   public :
-  SSD_13XX_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST);
+  SSD_13XX_Obj(byte inCS,byte inRST);	// OLED MUST have reset. Won't work otherwise.
   ~SSD_13XX_Obj(void);
   
   virtual boolean dispObjBegin(void);

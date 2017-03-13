@@ -1,13 +1,14 @@
 #include "soundCard.h"
 
-// DREQ should be an an Interrupt pin. *** UN-USED IN THIS VERSION ***
-#define DREQ 3 
+#include "screen.h" // debugging
 
-
-soundCard::soundCard(byte boardSetup) 
+soundCard::soundCard(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin) 
   : timeObj(soundCard_SLEEP_MS) { 
   
     setupType = boardSetup;
+    csPin = inCsPin;
+    drqPin = inDrqPin;
+    resetPin = inResetPin;
     filePath = NULL;
     volume = 40;						// Hardcoded default from Adafruit.
     setError(noErr);
@@ -26,25 +27,36 @@ soundCard::~soundCard(void) {
     }
   }
 
+/*
+  Adafruit_VS1053_FilePlayer (int8_t mosi, int8_t miso, int8_t clk, 
+			      int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
+			      int8_t cardCS);
+  Adafruit_VS1053_FilePlayer (int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
+			      int8_t cardCS);
+  Adafruit_VS1053_FilePlayer (int8_t cs, int8_t dcs, int8_t dreq,
+			      int8_t cardCS);
+	Adafruit_VS1053_FilePlayer (int8_t cs, int8_t dcs, int8_t dreq);
+*/
 
 boolean soundCard::begin(void) { 
 
     start();                    // Whatever happens, lets get the timer rolling.
     switch (setupType) {
       case soundCard_SHIELD :
-        musicPlayer = new Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, soundCard_SD_CS);
+        musicPlayer = new Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DC, SHIELD_DREQ);
       break;
       case soundCard_BREAKOUT :
-        musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_RESET, BREAKOUT_CS, BREAKOUT_DCS, DREQ, soundCard_SD_CS);
-        //musicPlayer = new Adafruit_VS1053_FilePlayer(BREAKOUT_CS, BREAKOUT_DCS, DREQ, soundCard_SD_CS);
+        musicPlayer = new Adafruit_VS1053_FilePlayer(resetPin,csPin,LC_DC,drqPin,0);
       break;
       default : setError(badSetup); return false;
     }
     if (musicPlayer) {
+    	//screen->fillScreen(&green);
       if (musicPlayer->begin()) {
         hookup();
         return true;
       } else {
+      	Serial.println("musicPlayer->begin() Fail!");
         setError(initErr);
       }
     } else {

@@ -1,14 +1,11 @@
 #include "SSD_13XX_Obj.h"
 
 
-SSD_13XX_Obj::SSD_13XX_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST)
+SSD_13XX_Obj::SSD_13XX_Obj(byte inCS,byte inRST)
   :displayObj(true,true,false,true,false) {
 
   theOLED = NULL;
   cs = inCS;
-  dc = inDC;
-  mosi = inMOSI;
-  sclk = inSCLK;
   rst = inRST;
 }
 
@@ -23,9 +20,7 @@ SSD_13XX_Obj::~SSD_13XX_Obj(void) {
   
 boolean SSD_13XX_Obj::dispObjBegin(void) { 
 
-  //theOLED = new SSD_13XX(10,9,6,11,13);	// Hardwired for temp board
-  // CD,DC,Rst,MOSI,Clk
-  theOLED = new SSD_13XX(cs,dc,rst,mosi,sclk);
+  theOLED = new SSD_13XX(cs,LC_DC,rst);	// OLED MUST have reset. Won't work otherwise.
   if (theOLED!=NULL) {
     theOLED->begin();
     return true;

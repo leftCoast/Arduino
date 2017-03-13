@@ -4,8 +4,12 @@
 
 #include <soundCard.h>
 
-soundCard theSoundCard(soundCard_BREAKOUT);
+#define SOUND_CS    20
+#define SOUND_SDCS  21
+#define SOUND_DRQ   1
 
+//soundCard theSoundCard(soundCard_BREAKOUT);
+soundCard theSoundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ);
 byte vol = 20;
 void setup() {
   Serial.begin(9600); while (!Serial);
@@ -17,7 +21,7 @@ void setup() {
   }
   Serial.println(F("theSoundCard.begin() succeded!"));
 
-  if (!SD.begin(soundCard_SD_CS)) {
+  if (!SD.begin(SOUND_SDCS)) {
     Serial.println(F("SD.begin() failed.."));
     while (1);
   }

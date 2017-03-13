@@ -1,14 +1,11 @@
 #include "adafruit_1431_Obj.h"
 
 
-adafruit_1431_Obj::adafruit_1431_Obj(byte inCS,byte inDC,byte inMOSI,byte inSCLK,byte inRST)
+adafruit_1431_Obj::adafruit_1431_Obj(byte inCS,byte inRST)
   :displayObj(true,true,false,true,false) {
 
   theOLED = NULL;
   cs = inCS;
-  dc = inDC;
-  mosi = inMOSI;
-  sclk = inSCLK;
   rst = inRST;
 }
 
@@ -23,7 +20,7 @@ adafruit_1431_Obj::~adafruit_1431_Obj(void) {
   
 boolean adafruit_1431_Obj::dispObjBegin(void) { 
 
-  theOLED = new Adafruit_SSD1351(cs, dc, mosi, sclk, rst);
+  theOLED = new Adafruit_SSD1351(cs, LC_DC, rst);
   if (theOLED!=NULL) {
     theOLED->begin();
     return true;

@@ -30,14 +30,9 @@ If you do not use reset, tie it to +3V3
 
 uint8_t errorCode = 0;
 
-<<<<<<< Updated upstream
 //SSD_13XX tft = SSD_13XX(__CS1, __DC);
 SSD_13XX* tft = new SSD_13XX(10,9,6,11,13); // Shortwire
-=======
-//SSD_13XX tft = SSD_13XX(__CS1, __DC,6,11,13);
-SSD_13XX tft = SSD_13XX(__CS1, __DC,8,11,13);
 
->>>>>>> Stashed changes
 void setup() {
   //SPI.begin();
 	//Serial.begin(38400);
@@ -59,7 +54,7 @@ void setup() {
 	}
 	else {
     Serial.println("Ok,no error. Print ready to the screen.");
-    SD.begin(20);
+    SD.begin(21);
     if(SD.exists(DISP_BG_FILE)) {
      Serial.println("Found .bmp file");
   } else {
