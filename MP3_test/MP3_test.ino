@@ -7,9 +7,10 @@
 #define SOUND_CS    20
 #define SOUND_SDCS  21
 #define SOUND_DRQ   1
+#define SOUND_RST   15
 
 //soundCard theSoundCard(soundCard_BREAKOUT);
-soundCard theSoundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ);
+soundCard theSoundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_RST);
 byte vol = 20;
 void setup() {
   Serial.begin(9600); while (!Serial);
@@ -27,14 +28,14 @@ void setup() {
   }
   Serial.println(F("SD.begin() succeded!"));
 
-  if (!theSoundCard.setSoundfile("Hawaii50.mp3")) {
+  //if (!theSoundCard.setSoundfile("Hawaii50.mp3")) {
   //if (!theSoundCard.setSoundfile("RadioAct.mp3")) {
   //if (!theSoundCard.setSoundfile("SK8ERBOI.mp3")) {
   //if (!theSoundCard.setSoundfile("blueSky.mp3")) {
   //if (!theSoundCard.setSoundfile("phoneLn.mp3")) {
   //if (!theSoundCard.setSoundfile("WNEVRWHR.mp3")) {
   //if (!theSoundCard.setSoundfile("Angel.mp3")) {
-  //if (!theSoundCard.setSoundfile("Corvette.mp3")) {
+  if (!theSoundCard.setSoundfile("Corvette.mp3")) {
     Serial.print(F("setSoundfile() failed with error# ")); Serial.println((int)theSoundCard.getLastError());
     while (1);
   }

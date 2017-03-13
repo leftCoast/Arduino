@@ -27,16 +27,6 @@ soundCard::~soundCard(void) {
     }
   }
 
-/*
-  Adafruit_VS1053_FilePlayer (int8_t mosi, int8_t miso, int8_t clk, 
-			      int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
-			      int8_t cardCS);
-  Adafruit_VS1053_FilePlayer (int8_t rst, int8_t cs, int8_t dcs, int8_t dreq,
-			      int8_t cardCS);
-  Adafruit_VS1053_FilePlayer (int8_t cs, int8_t dcs, int8_t dreq,
-			      int8_t cardCS);
-	Adafruit_VS1053_FilePlayer (int8_t cs, int8_t dcs, int8_t dreq);
-*/
 
 boolean soundCard::begin(void) { 
 
@@ -51,12 +41,10 @@ boolean soundCard::begin(void) {
       default : setError(badSetup); return false;
     }
     if (musicPlayer) {
-    	//screen->fillScreen(&green);
       if (musicPlayer->begin()) {
         hookup();
         return true;
       } else {
-      	Serial.println("musicPlayer->begin() Fail!");
         setError(initErr);
       }
     } else {
