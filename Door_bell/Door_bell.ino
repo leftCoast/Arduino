@@ -38,7 +38,7 @@
 #define POT_BTN     4
 #define POT_ANLG    A13
 
-#define DB_BTN      3
+#define DB_BTN      5
 
 #define DISP_BG_FILE  "/dbos/paper.bmp"
 
@@ -48,7 +48,7 @@ bmpLabel label1(20, 6, 100, 10, "File name 1", &paper);
 soundCard thePlayer(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
 byte vol = 20;
 
-enum majorStates { idling, playingSong, editing };
+enum majorStates { idling, ringingDBell, playingSong, editing };
 majorStates majorState;
 majorStates lastState;
 
@@ -56,8 +56,8 @@ mechButton  doorBellButton(DB_BTN);
 mechButton  panelButton(POT_BTN);
 
 void setup() {
-   
-  Serial.begin(9600); while (!Serial);
+
+  //Serial.begin(9600); while (!Serial);
   Serial.println(F("Serial online."));
 
   Serial.println(F("Starting screen."));
@@ -84,7 +84,7 @@ void setup() {
     if (thePlayer.setSoundfile("Corvette.mp3")) {
       Serial.println(F("Soundfile check OK."));
       Serial.println(F("Checking playback."));
-       if (thePlayer.command(play)) {
+      if (thePlayer.command(play)) {
         thePlayer.setVolume(vol);
         Serial.println(F("Playback check OK."));
       } else {
@@ -98,20 +98,18 @@ void setup() {
     Serial.println(F("Sound card FAIL."));
   }
 
-  doorBellButton.begin();
-  panelButton.begin();
-  
   majorState = playingSong;
   lastState = idling;
 }
 
 
 void loop() {
+
   idle();
-  Serial.print("Doorbell: ");Serial.print(digitalRead(DB_BTN));Serial.print("->");Serial.println(doorBellButton.clicked());
-  //Serial.print("Panel: ");Serial.println(panelButton.clicked());
+
   switch (majorState) {
     case idling       : checkIdle();      break;
+    case ringingDBell : checkSongPlay();  break;
     case playingSong  : checkSongPlay();  break;
     case editing      : runEditor();      break;
   }
@@ -123,30 +121,41 @@ void runEditor(void) {
   majorState = idling;
 }
 
-   
+
 void checkIdle(void) {
 
   if (doorBellButton.clicked()) {
-    Serial.println("Trying to play doorbell");
-    readParamFile();
-    thePlayer.setSoundfile(currentSong);
-    thePlayer.setVolume(currentVol);
-    thePlayer.command(play);
-    lastState = majorState;
-    majorState = playingSong;
-    Serial.println("Should be playing doorbell");
-  } else if (panelButton.clicked()) majorState = editing;
+    ringDooell();
+  } else if (panelButton.clicked())  {
+    majorState = editing;
+  }
+}
+
+
+void ringDooell(void) {
+
+  readParamFile();
+  thePlayer.setSoundfile(currentSong);
+  thePlayer.command(play);
+  thePlayer.setVolume(currentVol);
+  lastState = majorState;
+  majorState = ringingDBell;
 }
 
 
 void checkSongPlay() {
 
   if (panelButton.clicked()) {
-    thePlayer.command(pause);
-    majorState = lastState;
+    thePlayer.command(fullStop);
+    majorState = idling;
+  } else if (doorBellButton.clicked()) {
+    ringDooell();
+  } else if (!thePlayer.isPlaying()) {
+    thePlayer.command(fullStop);
+    majorState = idling;
   }
 }
-    
+
 
 
 

@@ -7,13 +7,6 @@ mechButton::mechButton(byte inPinNum) : timeObj(BOUNCE_MS) {
 }
 
 
-void mechButton::begin(void) {
-
-  pinMode(pinNum, INPUT_PULLUP);
-  beenInitialized = true;
-}
-
-
 bool mechButton::clicked(void) {
 
   if (beenInitialized) {              // Ready to go? Lets look!
@@ -28,6 +21,8 @@ bool mechButton::clicked(void) {
       return true;                    // So ignoring hardware, still true.
     }
   } else {                            // Whoops, not set up yet!
+    pinMode(pinNum, INPUT_PULLUP);    // Do it.
+    beenInitialized = true;           // Note it.
     return false;                     // So false to you!
   }
 }

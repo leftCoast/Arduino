@@ -11,7 +11,6 @@ class mechButton : public timeObj {
   public:
     mechButton(byte inPinNum);
 
-    void  begin(void);
     bool  clicked(void);
 
     bool  beenInitialized;

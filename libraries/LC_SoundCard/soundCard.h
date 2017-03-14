@@ -23,7 +23,7 @@
 // how long 'till we load in more sound data.
 #define soundCard_SLEEP_MS 40
 
-enum action { play, pause, restart };
+enum action { play, pause, fullStop, restart };
 
 enum soundCardErr { 
   noErr, badSetup, initErr, badCommand, 

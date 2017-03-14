@@ -119,6 +119,10 @@ boolean soundCard::command(action inCommand) {
       } 
       success = true;                         // Good enough really, call it good.
       break;
+    case fullStop :
+       musicPlayer->stopPlaying();
+       success = true;
+    break;
     case restart :                                          // User wants a restart.
       if (filePath) {                                       // If we have a file.
       	musicPlayer->stopPlaying();													// Call stop to close data file!
