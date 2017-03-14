@@ -23,6 +23,9 @@
 
 #include <soundCard.h>
 
+#include "mechButton.h"
+#include "DB_Files.h"
+
 #define SOUND_CS    20
 #define SOUND_SDCS  21
 #define SOUND_DRQ   1
@@ -37,59 +40,113 @@
 
 #define DB_BTN      3
 
-
 #define DISP_BG_FILE  "/dbos/paper.bmp"
+
 bmpPipe paper;
 bmpLabel label1(20, 6, 100, 10, "File name 1", &paper);
+
 soundCard thePlayer(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
 byte vol = 20;
+
+enum majorStates { idling, playingSong, editing };
+majorStates majorState;
+majorStates lastState;
+
+mechButton  doorBellButton(DB_BTN);
+mechButton  panelButton(POT_BTN);
+
 void setup() {
-
+   
   Serial.begin(9600); while (!Serial);
-  Serial.println("Serial online.");
+  Serial.println(F("Serial online."));
 
-if (!initScreen(ADAFRUIT_376, OLED_CS, OLED_RST, INV_PORTRAIT)) {
-    Serial.println("Init screen card fail.");
-    //while(true); // Kill the process.
+  Serial.println(F("Starting screen."));
+  if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
+    Serial.println(F("Init screen card FAIL."));
   } else {
-    screen->fillScreen(&blue);
-    Serial.println("Screen\'s online.");
+    screen->fillScreen(&black);
+    Serial.println(F("Screen\'s ONLINE."));
   }
 
-  
-  Serial.println("Starting file system.");
+
+  Serial.println(F("Starting file system."));
   if (!SD.begin(SOUND_SDCS)) {
-    Serial.println("SD.begin() fail.");
+    Serial.println(F("File system FAIL."));
   } else {
-    Serial.println("SD.begin() success.");
+    Serial.println(F("File system ONLINE."));
   }
 
-  
 
-  
-  Serial.println("Testing Sound card.");
+  Serial.println(F("Starting Sound card."));
   if (thePlayer.begin()) {
-    Serial.println("Sound card OK?");
+    Serial.println(F("Sound card ONLINE."));
+    Serial.println(F("Checking soundfile."));
     if (thePlayer.setSoundfile("Corvette.mp3")) {
-      Serial.println("Happy with Corvette?");
-      if (thePlayer.command(play)) {
-        Serial.println("Playing Corvette!");
+      Serial.println(F("Soundfile check OK."));
+      Serial.println(F("Checking playback."));
+       if (thePlayer.command(play)) {
         thePlayer.setVolume(vol);
+        Serial.println(F("Playback check OK."));
       } else {
-        Serial.println("Couldn't play Corvette.");
+        Serial.println(F("Playback check FAIL"));
         Serial.print(F("command(play) failed with error# ")); Serial.println((int)thePlayer.getLastError());
       }
     } else {
-      Serial.println("Couldn't open Corvette.");
+      Serial.println(F("Soundfile check FAIL."));
     }
   } else {
-    Serial.println("Sound card fail!");
+    Serial.println(F("Sound card FAIL."));
   }
 
+  doorBellButton.begin();
+  panelButton.begin();
+  
+  majorState = playingSong;
+  lastState = idling;
 }
 
 
 void loop() {
   idle();
-
+  Serial.print("Doorbell: ");Serial.print(digitalRead(DB_BTN));Serial.print("->");Serial.println(doorBellButton.clicked());
+  //Serial.print("Panel: ");Serial.println(panelButton.clicked());
+  switch (majorState) {
+    case idling       : checkIdle();      break;
+    case playingSong  : checkSongPlay();  break;
+    case editing      : runEditor();      break;
+  }
 }
+
+
+void runEditor(void) {
+
+  majorState = idling;
+}
+
+   
+void checkIdle(void) {
+
+  if (doorBellButton.clicked()) {
+    Serial.println("Trying to play doorbell");
+    readParamFile();
+    thePlayer.setSoundfile(currentSong);
+    thePlayer.setVolume(currentVol);
+    thePlayer.command(play);
+    lastState = majorState;
+    majorState = playingSong;
+    Serial.println("Should be playing doorbell");
+  } else if (panelButton.clicked()) majorState = editing;
+}
+
+
+void checkSongPlay() {
+
+  if (panelButton.clicked()) {
+    thePlayer.command(pause);
+    majorState = lastState;
+  }
+}
+    
+
+
+

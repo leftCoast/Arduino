@@ -11,6 +11,7 @@ soundCard::soundCard(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin)
     resetPin = inResetPin;
     filePath = NULL;
     volume = 40;						// Hardcoded default from Adafruit.
+    newSong = false;
     setError(noErr);
   }
 
@@ -67,6 +68,7 @@ boolean soundCard::setSoundfile(char* inFilePath) {
       File testFile = SD.open(filePath);
       if(testFile) {
         testFile.close();
+        newSong = true;
         return true;
       } else {
         setError(noFileErr);
@@ -90,15 +92,23 @@ boolean soundCard::command(action inCommand) {
   setError(noErr);
   success = false;
   switch(inCommand) {
-    case play :                                             // User hit play.
-      if (musicPlayer->paused()) {                          // And we're paused?
-        musicPlayer->pausePlaying(false);                   // Just un-pause.
-        success = true;                                     // That's a success.
-      } else if (filePath) {                                // If we ain't paused, but have a file.
-        success = musicPlayer->startPlayingFile(filePath);  // See if we can start playing this file.
-        if (!success) setError(unknownErr);                 // Who knows what broke in there?
-      } else {                                              // And if we had no file?
-        setError(noFileErr);                                // Flag it.
+    case play : 																								// User hit play.
+    	if (newSong) {	                                         	// New song loaded?
+    		musicPlayer->stopPlaying();															// Call stop to close data file!
+    		success = musicPlayer->startPlayingFile(filePath);			// Try playing the new song.
+      	if (success) {																					// It worked? Cool!
+      		newSong = false;																			// Note it.
+      	} else {																								// Didn't work?
+      		setError(unknownErr);                 								// Who knows what broke in there?
+      	}
+      } else if (musicPlayer->paused()) {												// No fresh new song. Been paused.
+      	musicPlayer->pausePlaying(false);                 			// Just un-pause.
+      	success = true;                                   			// That's a success.
+      } else if (filePath) {																		// Not paused, but there's a file.
+      	success = musicPlayer->startPlayingFile(filePath);			// Try playing that.
+      	if (!success) setError(unknownErr);                 		// No? Again, who knows what broke in there?
+      } else {                                              		// And if we had no file?
+        setError(noFileErr);                                		// Flag it.
       }
       break;
     case pause :                              // User hits pause.
@@ -111,6 +121,7 @@ boolean soundCard::command(action inCommand) {
       break;
     case restart :                                          // User wants a restart.
       if (filePath) {                                       // If we have a file.
+      	musicPlayer->stopPlaying();													// Call stop to close data file!
         success = musicPlayer->startPlayingFile(filePath);  // See if we can start playing this file.
       } else {                                              // And if we had no file?
         setError(noFileErr);                                // Flag it.

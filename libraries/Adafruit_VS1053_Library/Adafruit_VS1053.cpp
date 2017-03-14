@@ -14,7 +14,6 @@
 
 #include <Adafruit_VS1053.h>
 #include <SD.h>
-#include <screen.h>  // DEBUG
 
 #if defined(ARDUINO_STM32_FEATHER)
    #define digitalPinToInterrupt(x) x
@@ -92,17 +91,16 @@ boolean Adafruit_VS1053_FilePlayer::useInterrupt(uint8_t type) {
   return false;
 }
 
-
 Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
 	       int8_t rst, int8_t cs, int8_t dcs, int8_t dreq, 
 	       int8_t cardcs) 
                : Adafruit_VS1053(rst, cs, dcs, dreq) {
 
   playingMusic = false;
-	Serial.println("#2 const");
+
   // Set the card to be disabled while we get the VS1053 up
-  //pinMode(_cardCS, OUTPUT);
-  //digitalWrite(_cardCS, HIGH);  
+  pinMode(_cardCS, OUTPUT);
+  digitalWrite(_cardCS, HIGH);  
 }
 
 Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
@@ -111,7 +109,7 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
   : Adafruit_VS1053(-1, cs, dcs, dreq) {
 
   playingMusic = false;
-	Serial.println("#3 const");
+
   // Set the card to be disabled while we get the VS1053 up
   pinMode(_cardCS, OUTPUT);
   digitalWrite(_cardCS, HIGH);  
@@ -125,7 +123,7 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
                : Adafruit_VS1053(mosi, miso, clk, rst, cs, dcs, dreq) {
 
   playingMusic = false;
-	Serial.println("#4 const");
+
   // Set the card to be disabled while we get the VS1053 up
   pinMode(_cardCS, OUTPUT);
   digitalWrite(_cardCS, HIGH);  
@@ -134,8 +132,8 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
 boolean Adafruit_VS1053_FilePlayer::begin(void) {
   uint8_t v  = Adafruit_VS1053::begin();   
 
-  dumpRegs();
-  Serial.print("Version = "); Serial.println(v);
+  //dumpRegs();
+  //Serial.print("Version = "); Serial.println(v);
   return (v == 4);
 }
 
@@ -495,8 +493,6 @@ void Adafruit_VS1053::reset() {
     delay(100);
     digitalWrite(_reset, HIGH);
   }
-  Serial.print("cs:");Serial.println(_cs);
-  Serial.print("dsc:");Serial.println(_dcs);
   digitalWrite(_cs, HIGH);
   digitalWrite(_dcs, HIGH);
   delay(100);
@@ -513,34 +509,26 @@ uint8_t Adafruit_VS1053::begin(void) {
     pinMode(_reset, OUTPUT);
     digitalWrite(_reset, LOW);
   }
-	Serial.println("SPI reset stuff called, Make screen cyan");
-	//screen->fillScreen(&cyan);
-	
+
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
   pinMode(_dcs, OUTPUT);
   digitalWrite(_dcs, HIGH);
   pinMode(_dreq, INPUT);
-  
-	Serial.println("SPI reset stuff called, Make screen magenta");
-	//screen->fillScreen(&magenta);
-	
+
   if (! useHardwareSPI) {
     pinMode(_mosi, OUTPUT);
     pinMode(_clk, OUTPUT);
     pinMode(_miso, INPUT);
   } else {
-  	Serial.println("SPI.begin() being called.");
     SPI.begin();
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
     SPI.setClockDivider(SPI_CLOCK_DIV128); 
   }
-	Serial.println("SPI reset stuff called, Make screen RED");
-	//screen->fillScreen(&red);
-	dumpRegs();
-	Serial.println("Calling reset.");
+
   reset();
+
   return (sciRead(VS1053_REG_STATUS) >> 4) & 0x0F;
 }
 

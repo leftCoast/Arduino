@@ -3,11 +3,13 @@
 //#include<SdFat.h>
 #include <SD.h>
 #include <Adafruit_VS1053.h>
+#include <LC_SPI.h>
 #include <lists.h>
 #include <lilParser.h>
 #include <soundCard.h>
 
-/*
+#include <timeObj.h>
+
 #include <adafruit_1431_Obj.h> // ADAFRUIT_1431
 #include <bmpPipe.h>
 #include <displayObj.h>
@@ -15,7 +17,7 @@
 #include <label.h>
 #include <lineObj.h>
 #include <screen.h>
-*/
+
 
 // Let's try error numbers to orginase this.
 //
@@ -41,8 +43,20 @@
 #define F_LAZY_ERR 14   //"Not yet implemented."
 //
 //
+#define SOUND_CS    20
+#define SOUND_SDCS  21
+#define SOUND_DRQ   1
+#define SOUND_RST   15
 
-#define BUTTON_PIN  21
+#define OLED_CS     10
+#define OLED_RST    6
+#define OLED_SDCS   -1    // Not wired
+
+#define POT_BTN     4
+#define POT_ANLG    A13
+
+#define DB_BTN      3
+
 #define PARAM_FILE  "/dbos/CONFIG.SYS"
 #define DISP_BG_FILE  "/dbos/paper.bmp"
 
@@ -61,14 +75,18 @@ enum        userStates { nothin, pressinTDamnButton };
 userStates  userState = nothin;
 timeObj     debounceTimer(100);
 
-soundCard theSoundCard(soundCard_BREAKOUT);
+timeObj     frameTimer(100);
+label       potOut(20, 40, 100,20);
+mapper      potToVol(0,1024,0,60);
+
+soundCard theSoundCard(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
 
 void setup(void) { 
 
   Serial.begin(9600); while (!Serial);
   
   lastFileError = F_NO_ERR;
-  if (!SD.begin(4)) { lastFileError = F_BOOT_ERR; }
+  if (!SD.begin(SOUND_SDCS)) { lastFileError = F_BOOT_ERR; }
   
   mParser.addCmd(cp, "cp");
   mParser.addCmd(rm, "rm");
@@ -92,22 +110,24 @@ void setup(void) {
   }
   SDCleaner();
   readParamFile();
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  /*
-  if (!initScreen(ADAFRUIT_1431,INV_PORTRAIT)) {
+  pinMode(POT_BTN, INPUT_PULLUP);
+  pinMode(DB_BTN, INPUT_PULLUP);
+  
+  if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
     Serial.println("Init screen card fail.");
-    while(true); // Kill the process.
+  } else {
+    screen->fillScreen(&green);
+    Serial.println("Screen\'s online.");
   }
-  screen->fillScreen(&green);
-  Serial.println("Screen\'s online.");
   
   if(SD.exists(DISP_BG_FILE)) {
      Serial.println("Found .bmp file");
   } else {
     Serial.println("No .bmp file");
   }
-  */
+  potOut.setColors(&white,&green);
+  //viewList.addObj(&potOut);
+  frameTimer.start();
   Serial.print(cmdCursor);
 }
 
@@ -820,10 +840,15 @@ void loop() {
     if (lastFileError) lastErrOut();
     if (command) Serial.print(cmdCursor);
   }
-  //Serial.println(digitalRead(BUTTON_PIN));
+  if (frameTimer.ding()) {
+    setVol(potToVol.Map(analogRead(POT_ANLG)));
+    //potOut.setValue(analogRead(POT_ANLG)); 
+    frameTimer.start();
+  }
+  //Serial.println(digitalRead(POT_BTN));
   switch (userState) {
     case nothin : 
-      if (!digitalRead(BUTTON_PIN)) {
+      if (!digitalRead(POT_BTN)) {
         userState = pressinTDamnButton;
         debounceTimer.start();
         writeParamFile();
@@ -831,7 +856,7 @@ void loop() {
       break;
     case pressinTDamnButton : 
       if (debounceTimer.ding()) {
-        if (digitalRead(BUTTON_PIN)) {  // Is the bozo holding the damn button down?
+        if (digitalRead(POT_BTN)) {  // Is the bozo holding the damn button down?
           userState = nothin;
         } else {
           debounceTimer.start();        // Whatever, I'll come back later..

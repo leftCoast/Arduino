@@ -58,6 +58,7 @@ class soundCard : public idler, public timeObj {
     char*         filePath;
     byte					volume;
     boolean       playing;
+    boolean				newSong;
 };
 
 #endif
