@@ -3,7 +3,6 @@
 #include <Adafruit_VS1053.h>
 #include <adafruit_1431_Obj.h>
 #include <LC_SPI.h>
-//#include <SSD_13XX_Obj.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -25,6 +24,7 @@
 
 #include "mechButton.h"
 #include "DB_Files.h"
+#include "fListItem.h"
 
 #define SOUND_CS    20
 #define SOUND_SDCS  21
@@ -50,10 +50,13 @@ byte vol = 20;
 
 enum majorStates { idling, ringingDBell, playingSong, editing };
 majorStates majorState;
-majorStates lastState;
+bool  fileLoaded;
+bool  doneEditing;
 
 mechButton  doorBellButton(DB_BTN);
 mechButton  panelButton(POT_BTN);
+
+extern  drawList  fileList;
 
 void setup() {
 
@@ -76,7 +79,14 @@ void setup() {
     Serial.println(F("File system ONLINE."));
   }
 
+  if (paper.openPipe(DISP_BG_FILE)) {
+    Serial.println(F("Background .bmp file OPENED."));
+  } else {
+    Serial.println(F("Background .bmp file FAIL."));
+  }
 
+  viewList.addObj(&fileList);
+  
   Serial.println(F("Starting Sound card."));
   if (thePlayer.begin()) {
     Serial.println(F("Sound card ONLINE."));
@@ -99,7 +109,6 @@ void setup() {
   }
 
   majorState = playingSong;
-  lastState = idling;
 }
 
 
@@ -116,29 +125,59 @@ void loop() {
 }
 
 
+void startEditor(void) {
+
+  drawFileList();
+  majorState = editing;
+}
+
+
 void runEditor(void) {
 
-  majorState = idling;
+   if (doorBellButton.clicked()) {
+    ringDBell();
+  } else if (panelButton.clicked())  {
+    selectFile();
+  }
+  else if (doneEditing) {
+    endEdit();
+    doneEditing = false;
+  } else {
+    editTime();
+  }
+}
+
+
+void endEdit(void) {
+
+  fileList.dumpList();
+  screen->fillScreen(&black);
+  if (fileLoaded) {
+    thePlayer.command(play);
+    fileLoaded = false;
+    majorState = playingSong;
+  } else {
+    majorState = idling;
+  }
 }
 
 
 void checkIdle(void) {
 
   if (doorBellButton.clicked()) {
-    ringDooell();
+    ringDBell();
   } else if (panelButton.clicked())  {
-    majorState = editing;
+    startEditor();
   }
 }
 
 
-void ringDooell(void) {
+void ringDBell(void) {
 
   readParamFile();
   thePlayer.setSoundfile(currentSong);
   thePlayer.command(play);
   thePlayer.setVolume(currentVol);
-  lastState = majorState;
   majorState = ringingDBell;
 }
 
@@ -149,7 +188,7 @@ void checkSongPlay() {
     thePlayer.command(fullStop);
     majorState = idling;
   } else if (doorBellButton.clicked()) {
-    ringDooell();
+    ringDBell();
   } else if (!thePlayer.isPlaying()) {
     thePlayer.command(fullStop);
     majorState = idling;

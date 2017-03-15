@@ -7,3 +7,7 @@ extern byte  currentVol;
 
 void writeParamFile(void);
 void readParamFile(void);
+
+void drawFileList(void);
+void fillFileList(const char* workingDir);
+void selectFile();

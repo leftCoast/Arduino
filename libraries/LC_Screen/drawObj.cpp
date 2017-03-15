@@ -42,6 +42,7 @@ void rect::setRect(rect* inRect) {
   setSize(inRect->width,inRect->height);
 }
 
+
 void rect::setRect(point* inPt1,point* inPt2) {
 
   int locX = min(inPt1->x,inPt2->x);
@@ -98,7 +99,6 @@ point rect::getCorner(rectPt corner) {
 // Are we touching this passed in rectangle?
 bool rect::overlap(rect* checkRect) {
 
-
 		if(maxX()<checkRect->minX()) return false;
 		if(minX()>checkRect->maxX()) return false;
 		if(maxY()<checkRect->minY()) return false;
@@ -132,6 +132,10 @@ drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inCl
 
 
 drawObj::~drawObj() { }
+
+
+// If we are part of a group, our parent calls this.
+void drawObj::setParent(drawObj* inParent) { parentObj = inParent; }
 
 
 // When the manager asks if we want a refresh..
@@ -249,15 +253,19 @@ viewMgr::viewMgr(void) {
 }
 
 
-viewMgr::~viewMgr(void) {
-    
-    if (theList) {
-        while(theList->next) delete theList->next;
-        while(theList->prev) delete theList->prev;
-        delete theList;
-        theList = NULL;
-    }
-    theTouched = NULL;
+viewMgr::~viewMgr(void) { dumpList(); }
+
+
+// delete all the objects.  
+void  viewMgr::dumpList(void) {
+
+	if (theList) {
+		while(theList->next) delete theList->next;
+  	while(theList->prev) delete theList->prev;
+  	delete theList;
+  	theList = NULL;
+  }
+  theTouched = NULL;
 }
 
 
@@ -329,8 +337,24 @@ void viewMgr::checkRefresh(void) {
         }
     }
 }
-            
-            
+ 
+ 
+// Counts & returns the number of objects in the list.           
+word viewMgr::numObjInList(void) {
+
+	drawObj*	trace;
+	word 			count;
+	
+	trace = (drawObj*)theList;
+	count = 0;
+	while(trace!=NULL) {
+		count++;
+		trace = (drawObj*)trace->next;
+	}
+	return count;
+}
+
+          
 // We have time to do stuff, not a lot!
 void viewMgr::idle(void) {
     
@@ -340,4 +364,51 @@ void viewMgr::idle(void) {
         }
    }
 }
+
+
+
+drawGroup::drawGroup(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks) 
+	: drawObj(inLocX,inLocY,inWidth,inHeight,inClicks) { }
+
+
+drawGroup::~drawGroup() { dumpList(); }
+
+
+// The groups are NOT linked into the idle loop.
+// They get their time from the parent getting called.              					
+void drawGroup::addObj(drawObj* newObj) {
+
+	newObj->setParent((drawObj*)this);	// Who's you're.. Naw.
+  if (theList) {                      // We got a list?
+  	newObj->linkToStart(theList);   	// Put the new guy at the top of the list.
+  }
+  theList = newObj;                   // Either way, point to the top of the list.
+	needRefresh = true;	
+}
+
+
+void  drawGroup::draw(void) { 
+
+	if (theList) {
+		checkRefresh();
+	}
+	needRefresh = false; 
+}
  
+
+
+drawList::drawList(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks) 
+	: drawGroup(inLocX,inLocY,inWidth,inHeight,inClicks) { listHeight = inHeight; }
+
+
+drawList::~drawList() { }
+	
+  					
+void drawList::addObj(drawObj* newObj) {
+
+	word numObjs;
+	
+	numObjs = numObjInList();
+	newObj->setLocation(0,numObjs*listHeight);
+	drawGroup::addObj(newObj);	
+}

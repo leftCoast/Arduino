@@ -54,17 +54,18 @@ public:
   drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
   ~drawObj();
     
-          boolean   wantRefresh(void);
-          int		scrX(void);												// ScrX() returns the global screen x location.
-          int		scrY(void);												// ScrY() returns the global screen y location.
+    			void		setParent(drawObj* inParent);			// If we are part of a group, parent calls this.
+          boolean wantRefresh(void);
+          int			scrX(void);												// ScrX() returns the global screen x location.
+          int			scrY(void);												// ScrY() returns the global screen y location.
           rect		scrRect();												// Our rect in global coordinates.
 	virtual	void		setLocation(int inX,int inY);
-          void      draw(void);                    		// Call this one. Don't inherit this one.
-  virtual void      drawSelf(void);                		// Inherit this one and make it yours.
-  		    void	clickable(boolean inWantsClicks);
-  virtual boolean   acceptClick(point where);
-  virtual void      clickOver(void);
-  virtual void      doAction(void);      								// Override me for action!
+          void    draw(void);                    		// Call this one. Don't inherit this one.
+  virtual void    drawSelf(void);                		// Inherit this one and make it yours.
+  		    void		clickable(boolean inWantsClicks);
+  virtual boolean acceptClick(point where);
+  virtual void    clickOver(void);
+  virtual void    doAction(void);      								// Override me for action!
           void		setCallback(void(*funct)(void));		// Or use a callback?
   
 protected:
@@ -91,9 +92,11 @@ public:
                     viewMgr(void);
                     ~viewMgr(void);
     
-            void    addObj(drawObj* newObj);
+    virtual void    addObj(drawObj* newObj);
+    				void		dumpList(void);
             boolean checkClicks(void);
-            void    checkRefresh(void);
+						void    checkRefresh(void);
+						word		numObjInList(void);
     virtual void    idle(void);
     
             drawObj*    theList;    // Pointer to top of list;
@@ -101,6 +104,38 @@ public:
 };
 
 extern viewMgr viewList;
+
+
+
+// ***************************************************************
+// The idea here is to have a draw object that manages a group of
+// drawObjects. This is the base of all lists & popups. Or at least,
+// that's the plan.
+// ***************************************************************
+
+class drawGroup : public drawObj, public viewMgr {
+
+public:
+										drawGroup(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
+  									~drawGroup();
+
+  	virtual void    addObj(drawObj* newObj);
+  	virtual void		draw(void);
+};			
+		
+		
+		
+class drawList : public drawGroup { 
+public:
+										drawList(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
+  									~drawList();
+  					
+  	virtual void    addObj(drawObj* newObj);
+  	
+  					word		listHeight;
+  	
+};
+
 
 #endif
 
