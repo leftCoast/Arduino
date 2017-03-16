@@ -114,8 +114,8 @@ bool rect::overlap(rect* checkRect) {
 drawObj::drawObj() {
 
   needRefresh = true;			// Well Duh! We never been drawn yet!
+  clicked = false;
   wantsClicks = false;		// 'Cause this is actually the default.
-  parentObj = NULL;				// Well, there ain't one yet..
   callback = NULL;				// And, no.. We have none of this either.
 }
 
@@ -126,7 +126,6 @@ drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inCl
     needRefresh = true;
     clicked = false;
     wantsClicks = inClicks;
-    parentObj = NULL;
     callback = NULL;
 }
 
@@ -134,46 +133,13 @@ drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inCl
 drawObj::~drawObj() { }
 
 
-// If we are part of a group, our parent calls this.
-void drawObj::setParent(drawObj* inParent) { parentObj = inParent; }
-
-
 // When the manager asks if we want a refresh..
 boolean drawObj::wantRefresh(void) { return needRefresh; }
 
 
-// We may be a sub object of another, this gives the x we draw to.
-int drawObj::scrX(void) {
+void drawObj::setLocation(int x,int y) {
 
-	if (parentObj) {
-		return(parentObj->scrX() + x);
-	} else {
-		return x;
-	}
-}
-
-
-// Just like the guy above except gives the y we draw to.
-int drawObj::scrY(void) {
-
-	if (parentObj) {
-		return(parentObj->scrY() + y);
-	} else {
-		return y;
-	}
-}
-
-
-// 
-rect drawObj::scrRect(void) {
-
-	rect temp(scrX(),scrY(),width,height);
-	return temp;
-}
-
-void drawObj::setLocation(int inX,int inY) {
-
-		rect::setLocation(inX,inY);
+		rect::setLocation(x,y);
 		needRefresh = true;
 }
 	
@@ -189,11 +155,8 @@ void  drawObj::draw(void) {
 // override this one and draw yourself.
 void  drawObj::drawSelf(void) {
   
-  Serial.print("x, y ");Serial.print(x);Serial.print(", ");Serial.println(y);
-  Serial.print("scrX(), scrY() ");Serial.print(scrX());Serial.print(", ");Serial.println(scrY());
-  Serial.print("width, height ");Serial.print(width);Serial.print(", ");Serial.println(height);
-  screen->fillRect(scrX(), scrY(), width, height, &black); // Default draw.
-  screen->drawRect(scrX(), scrY(), width, height, &white);
+  screen->fillRect(x, y, width, height, &black); // Default draw.
+  screen->drawRect(x, y, width, height, &white);
 }
 
 
@@ -203,12 +166,9 @@ void drawObj::clickable(boolean inWantsClicks) { wantsClicks = inWantsClicks; }
 
 // Manager has detected a fresh click, is it ours?
 boolean   drawObj::acceptClick(point where) {
-    
-    rect	gRect;
-    
+        
     if (wantsClicks) {
-    		gRect = scrRect();
-        if (gRect.inRect(where.x,where.y)) {
+        if (inRect(where.x,where.y)) {
             needRefresh = true;
             clicked = true;
             doAction();
@@ -217,7 +177,7 @@ boolean   drawObj::acceptClick(point where) {
     }
     return false;
 }
-   
+  
             
 // We accepted a click. Well, now its over, deal with it.
 void   drawObj::clickOver(void) {
@@ -239,10 +199,12 @@ void drawObj::doAction(void) {
 void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 
 
+
 // ***************************************************
 // viewMgr, This is they guy that runs the screenshow.
 // Handles redrawing, clicks, etc.
 // ***************************************************
+
 
 viewMgr viewList;
 
@@ -256,15 +218,20 @@ viewMgr::viewMgr(void) {
 viewMgr::~viewMgr(void) { dumpList(); }
 
 
-// delete all the objects.  
+// Delete all the objects. Watch out! Were these
+// created on the stack or in memory? If on the
+// stack don't do this! ONLY use for dynamic lists!
 void  viewMgr::dumpList(void) {
 
-	if (theList) {
-		while(theList->next) delete theList->next;
-  	while(theList->prev) delete theList->prev;
-  	delete theList;
-  	theList = NULL;
-  }
+	drawObj*	trace;
+	
+	while(theList) {
+		trace = (drawObj*)theList;
+		if(trace) {
+			theList = (drawObj*)trace->next;
+			delete(trace);
+		}
+	}
   theTouched = NULL;
 }
 
@@ -285,38 +252,40 @@ void viewMgr::addObj(drawObj* newObj) {
 boolean viewMgr::checkClicks(void) {
     
     drawObj*    trace;
-    point       where;
+    point       gPoint;
+    point       lPoint;
     boolean     done;
     boolean     success;
     
-    success = false;                                                // Did we change anything? Not yet.
-    if (!theTouched) {                                              // No current touch.
-        if (screen->touched()) {                                    // New touch, go look.
-            where = screen->getPoint();                             // Touch was here..
-            trace = (drawObj*)theList->getFirst();                  // make sure we're at the top.
-            done = false;
-            while(!done) {                                          // While were not done
-                if (trace->acceptClick(where)) {                    // If the object accepts the click
-                    theTouched = trace;                             // Save that badboy's address.
-                    success = true;                                 // We changed something.
-                    done = true;                                    // Loop's done
-                } else if (trace->next) {                           // Else if we have a next object.
-                    trace = (drawObj*)trace->next;                  // Hop to the next.
-                } else  {                                           // in this last case.
-                    done = true;                                    // The loop is through.
+    success = false;                                  // Did we change anything? Not yet.
+    if (!theTouched) {                                // No current touch.
+        if (screen->touched()) {                      // New touch, go look.
+            gPoint = screen->getPoint();              // Touch was here..
+            lPoint = screen->lP(gPoint);							// Possibly we're sublist, localize.						
+            trace = (drawObj*)theList->getFirst();    // make sure we're at the top.
+            done = false;															// Get ready..
+            while(!done) {														// While were not done
+                if (trace->acceptClick(lPoint)) {			// If the object accepts the click
+                    theTouched = trace;								// Save that badboy's address.
+                    success = true;                   // We changed something.
+                    done = true;                      // Loop's done
+                } else if (trace->next) {             // Else if we have a next object.
+                    trace = (drawObj*)trace->next;    // Hop to the next.
+                } else  {                             // in this last case.
+                    done = true;                      // The loop is through.
                 }
             }
         }
-    } else {                                                        // We've been touched and delt with it.
-        if (!screen->touched()) {                                   // Touch has finally passed.
-            theTouched->clickOver();                                // Tell the last touched guy its over.
-            theTouched = NULL;                                      // Clear out our flag/pointer.
-            success = true;                                         // We changed something.
+    } else {																					// We've been touched and delt with it.
+        if (!screen->touched()) {                     // Touch has finally passed.
+            theTouched->clickOver();                  // Tell the last touched guy its over.
+            theTouched = NULL;                        // Clear out our flag/pointer.
+            success = true;                           // We changed something.
         }
     }
-    return success;                                                 // Tell the calling method if we changed something.
+    return success;                                   // Tell the calling method if we changed something.
 }
-    
+
 
 // Checking for redraws, non-empty list already checked.
 void viewMgr::checkRefresh(void) {
@@ -327,7 +296,7 @@ void viewMgr::checkRefresh(void) {
     trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.
     done = false;                           // Well, were not done yet are we?
     while(!done) {                          // And while we're not done..
-        if (trace->wantRefresh()) {         // Does this guy want  refresh?
+        if (trace->wantRefresh()) {         // Does this guy want refresh?
             trace->draw();                  // Call his Draw method.
         }
         if (trace->prev) {                  // Ok, we have another up the list?
@@ -355,7 +324,7 @@ word viewMgr::numObjInList(void) {
 }
 
           
-// We have time to do stuff, not a lot!
+// We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
     
     if (theList) {
@@ -367,18 +336,74 @@ void viewMgr::idle(void) {
 
 
 
-drawGroup::drawGroup(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks) 
-	: drawObj(inLocX,inLocY,inWidth,inHeight,inClicks) { }
+// ***************************************************
+// drawGroup, This is they guy that runs a bunch of sub
+// objects. He is both a drawObj and a viewMgr.
+// Before taking any action with a sub object the drawGroup
+// pushed its location onto the screen. This allows all sub
+// objects to work on local coordinates.
+//
+// Once difference is that this viewMgr sublist is NOT linked
+// to the idler list. Only the master list gets the idle calls.
+// The sub lists get called through the drawGroup methods. 
+// ***************************************************
 
 
+drawGroup::drawGroup(int x, int y, word width,word height,boolean clicks) 
+	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
+
+
+// We call dumpList() because the odds are we were
+// dynamically created.
 drawGroup::~drawGroup() { dumpList(); }
+
+
+boolean drawGroup::wantRefresh(void) {
+
+	if (theList) {
+		screen->pushOffset(x,y);				// So we set in our offset.
+		checkRefresh();
+		screen->popOffset(x,y);					// Clear offset.
+	}
+	return needRefresh;
+}
+
+
+// First we see if a list item wants the click. then, if not
+// and we are accepting clicks, we take it.
+boolean   drawGroup::acceptClick(point where) {
+    
+    boolean	success;
+    
+    success = false;   
+		if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
+				screen->pushOffset(x,y);				// Ok, push our offset for the sublist.
+				success = checkClicks();				// See if they handle it.
+				screen->popOffset(x,y);					// Pop off the offset.
+				if (!success && wantsClicks) {	// No one else wanted it? Do we want clicks?
+					needRefresh = true;						// We'll take it.
+					doAction();										// And do things.
+					success = true;								// Noted..
+				}
+		}
+		return success;
+	}
+
+
+// click over. Possibly a sub obj?
+void drawGroup::clickOver(void) {
+	
+	if (theTouched) {							// If it was a subgroup.
+		theTouched->clickOver();    // Tell the last touched guy its over.
+  	theTouched = NULL;          // Clear out our flag/pointer.
+  }
+}
 
 
 // The groups are NOT linked into the idle loop.
 // They get their time from the parent getting called.              					
 void drawGroup::addObj(drawObj* newObj) {
 
-	newObj->setParent((drawObj*)this);	// Who's you're.. Naw.
   if (theList) {                      // We got a list?
   	newObj->linkToStart(theList);   	// Put the new guy at the top of the list.
   }
@@ -387,27 +412,43 @@ void drawGroup::addObj(drawObj* newObj) {
 }
 
 
+// In draw its all about setting the offsets and letting
+// the sub objects draw.
 void  drawGroup::draw(void) { 
 
-	if (theList) {
-		checkRefresh();
-	}
-	needRefresh = false; 
+	Serial.println("Group Draw is called!");
+	drawSelf();									// Just in case we have something to show.
+	needRefresh = false; 				// No more refresh needed.
 }
  
+ 
+// Do nothing as default. Its all about the sub objects.
+void  drawGroup::drawSelf(void) { }
 
 
-drawList::drawList(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks) 
-	: drawGroup(inLocX,inLocY,inWidth,inHeight,inClicks) { listHeight = inHeight; }
+
+// ***************************************************
+// drawList is the same as a drawGroup except it arranges
+// its sub Objects in list form.
+// ***************************************************
+
+
+drawList::drawList(int x, int y, word width,word height,boolean clicks) 
+	: drawGroup(x,y,width,height,clicks) { listHeight = 1; }
 
 
 drawList::~drawList() { }
 	
-  					
+ 
+// Adding list items we assume they are all the same height.
+// We reset our internal list item height each time one is added.
+// So if they are NOT all uniform, we treat them like they are
+// anyway. Too bad, inherit and fix it if this ain't good enough.					
 void drawList::addObj(drawObj* newObj) {
 
 	word numObjs;
 	
+	listHeight = newObj->height;
 	numObjs = numObjInList();
 	newObj->setLocation(0,numObjs*listHeight);
 	drawGroup::addObj(newObj);	

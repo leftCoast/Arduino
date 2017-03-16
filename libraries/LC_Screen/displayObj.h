@@ -25,7 +25,14 @@ class displayObj {
 public :
   displayObj(bool inGraphic,bool inColor,bool inTouch,bool inSD,bool inReadable);
 
+					void		pushOffset(int x, int y);
+					void 		popOffset(int x, int y);
+					int			gX(int x);
+					int			gY(int y);
+					point		lP(point gP);
+					
   virtual boolean dispObjBegin(void);
+  
   virtual void setRotation(byte inRotation);
   virtual void setTextColor(colorObj* tColor);
   virtual void setTextColor(colorObj* tColor,colorObj* bColor);
@@ -61,11 +68,13 @@ public :
   boolean canRead(void);
   
   protected:
-    boolean  graphic;
-    boolean  color;
-    boolean  hasTouch;
-    boolean  hasSD;
-    boolean  readable;
+  	int				offsetX;
+  	int				offsetY;
+    boolean		graphic;
+    boolean		color;
+    boolean		hasTouch;
+    boolean		hasSD;
+    boolean		readable;
 };
 
 #endif

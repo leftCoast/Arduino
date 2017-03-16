@@ -54,12 +54,8 @@ public:
   drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
   ~drawObj();
     
-    			void		setParent(drawObj* inParent);			// If we are part of a group, parent calls this.
-          boolean wantRefresh(void);
-          int			scrX(void);												// ScrX() returns the global screen x location.
-          int			scrY(void);												// ScrY() returns the global screen y location.
-          rect		scrRect();												// Our rect in global coordinates.
-	virtual	void		setLocation(int inX,int inY);
+  virtual	boolean wantRefresh(void);
+	virtual	void		setLocation(int x,int y);
           void    draw(void);                    		// Call this one. Don't inherit this one.
   virtual void    drawSelf(void);                		// Inherit this one and make it yours.
   		    void		clickable(boolean inWantsClicks);
@@ -72,7 +68,6 @@ protected:
   boolean     needRefresh;
   boolean     wantsClicks;
   boolean     clicked;
-  drawObj*		parentObj;
   void			  (*callback)(void);
 };
 
@@ -116,18 +111,22 @@ extern viewMgr viewList;
 class drawGroup : public drawObj, public viewMgr {
 
 public:
-										drawGroup(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
+										drawGroup(int x, int y, word width,word height,boolean clicks=false);
   									~drawGroup();
 
+		virtual	boolean wantRefresh(void);
+		virtual	boolean	acceptClick(point where);
+		virtual	void		clickOver(void);
   	virtual void    addObj(drawObj* newObj);
   	virtual void		draw(void);
+  	virtual void		drawSelf(void);
 };			
 		
 		
 		
 class drawList : public drawGroup { 
 public:
-										drawList(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
+										drawList(int x, int y, word width,word height,boolean clicks=false);
   									~drawList();
   					
   	virtual void    addObj(drawObj* newObj);

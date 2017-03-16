@@ -144,7 +144,7 @@ void bmpPipe::drawLine(File bmpFile,int x,int y) {
     int       endTrace;
 
     endTrace = x+sourceRect.width;
-    for (trace=x;trace<=endTrace; trace++) {       // Ok, trace does x..x+width.
+    for (trace=x;trace<endTrace; trace++) {       // Ok, trace does x..x+width.
       bmpFile.read(buf,pixBytes);                 // Grab a pixel.
       thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
       screen->drawPixel(trace,y,&thePixal);       // Spat it out to the screen.
@@ -179,7 +179,7 @@ void bmpPipe::drawBitmap(int x,int y) {
     if (bmpFile) {
     	endY = y+sourceRect.height;
     	srcY = sourceRect.y;
-    	for (trace=y; trace<=endY;trace++) {
+    	for (trace=y; trace<endY;trace++) {
       	bmpFile.seek(filePtr(x,srcY++));
       	drawLine(bmpFile,x,trace);
     	}

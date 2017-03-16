@@ -39,15 +39,15 @@ class adafruit_1947_Obj : public displayObj {
   virtual void    setCursor(int inX,int inY);
   virtual void    drawText(char* inText);
   virtual void    fillScreen(colorObj* inColor);
-  virtual void    fillRect(int locX,int locY,word width,word height,colorObj* inColor);
-  virtual void    drawRect(int locX,int locY,word width,word height,colorObj* inColor);
-  virtual void    fillRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor);
-  virtual void    drawRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor);
-  virtual void    drawCircle(int locX,int locY,word inDiam, colorObj* inColor);
-  virtual void    fillCircle(int locX,int locY,word inDiam, colorObj* inColor);
-  virtual void    drawVLine(int locX,int locY,word height,colorObj* inColor);
-  virtual void    drawHLine(int locX,int locY,word width,colorObj* inColor);
-  virtual void    drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
+  virtual void    fillRect(int x,int y,word width,word height,colorObj* inColor);
+  virtual void    drawRect(int x,int y,word width,word height,colorObj* inColor);
+  virtual void    fillRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
+  virtual void    drawRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
+  virtual void    drawCircle(int x,int y,word diam, colorObj* inColor);
+  virtual void    fillCircle(int x,int y,word diam, colorObj* inColor);
+  virtual void    drawVLine(int x,int y,word height,colorObj* inColor);
+  virtual void    drawHLine(int x,int y,word width,colorObj* inColor);
+  virtual void    drawLine(int x,int y,int x2,int y2,colorObj* inColor);
   virtual void    drawPixel(int x,int y,colorObj* pColor);
   
   virtual point     getPoint(void);

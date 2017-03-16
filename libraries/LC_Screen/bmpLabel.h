@@ -9,9 +9,13 @@ class bmpLabel : public label {
 public:
   bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop);
   
+  			void 	setFastDraw(bool fast);
+  			void	smoothDraw(void);
+  			void	fasterDraw(void);
 virtual void  drawSelf(void);
 
 				bmpPipe*	backdrop;
+				bool			fastDraw;
 };
 
 #endif

@@ -1,11 +1,10 @@
 #include "DB_Files.h"
-#include "fListItem.h"
+#include "fList.h"
 
-extern  bmpPipe     paper;
         char        currentSong[25];
         byte        currentVol = 20;
-        drawList    fileList(10, 20, 108, 100);
-
+extern  fList       fileList;
+        
 void writeParamFile(void) {
 
   File paramFile;
@@ -63,14 +62,6 @@ void readParamFile(void) {
 }
 
 
-void drawFileList(void) {
-
-  paper.drawBitmap(0,0);
-  //addHeader();
-  fillFileList("/");
-}
-
-
 void fillFileList(const char* workingDir) {
 
   File        wd;
@@ -88,7 +79,7 @@ void fillFileList(const char* workingDir) {
         if (entry.isDirectory()) {
 
         } else {
-          newItem = new fListItem(entry.name(), &paper);
+          newItem = new fListItem(entry.name());
           fileList.addObj(newItem);
         }
         entry.close();
@@ -102,6 +93,5 @@ void fillFileList(const char* workingDir) {
   }
 }
 
-void selectFile() { fileList.theTouched->doAction(); }
 
 

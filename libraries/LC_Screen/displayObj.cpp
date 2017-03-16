@@ -8,7 +8,39 @@
     hasTouch = inTouch;
     hasSD = inSD;
     readable = inReadable;
+    offsetX = 0;
+  	offsetY = 0;
   }
+  
+  
+void displayObj::pushOffset(int x, int y) {
+
+	offsetX = offsetX + x;
+	offsetY = offsetY + y;
+}
+
+
+void displayObj::popOffset(int x, int y) {
+
+	offsetX = offsetX - x;
+	offsetY = offsetY - y;
+}
+
+  
+int displayObj::gX(int x) { return x + offsetX; }
+
+int displayObj::gY(int y) { return y + offsetY; }
+	
+	
+point	displayObj::lP(point gP) {
+
+	point aPt;
+	
+	aPt.x = gP.x -  offsetX;
+	aPt.y = gP.y -  offsetY;
+	return aPt;
+}
+
 
 boolean displayObj::dispObjBegin(void) { return false; }
 void displayObj::setRotation(byte inRotation) { }

@@ -24,7 +24,7 @@
 
 #include "mechButton.h"
 #include "DB_Files.h"
-#include "fListItem.h"
+#include "fList.h"
 
 #define SOUND_CS    20
 #define SOUND_SDCS  21
@@ -48,8 +48,10 @@ bmpLabel label1(20, 6, 100, 10, "File name 1", &paper);
 soundCard thePlayer(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
 byte vol = 20;
 
-enum majorStates { idling, ringingDBell, playingSong, editing };
+enum majorStates { idling, ringingDBell, playingSong, editing, buttonClear };
 majorStates majorState;
+majorStates savedState;
+
 bool  fileLoaded;
 bool  doneEditing;
 
@@ -86,7 +88,7 @@ void setup() {
   }
 
   viewList.addObj(&fileList);
-  
+
   Serial.println(F("Starting Sound card."));
   if (thePlayer.begin()) {
     Serial.println(F("Sound card ONLINE."));
@@ -121,29 +123,40 @@ void loop() {
     case ringingDBell : checkSongPlay();  break;
     case playingSong  : checkSongPlay();  break;
     case editing      : runEditor();      break;
+    case buttonClear  : checkButtons();   break;
   }
 }
 
 
-void startEditor(void) {
+void waitForButtons(majorStates nextState) {
 
-  drawFileList();
-  majorState = editing;
+  savedState = nextState;
+  majorState = buttonClear;
+}
+
+
+void checkButtons(void) {
+
+  if (!doorBellButton.clicked() && !panelButton.clicked()) {
+    majorState = savedState;
+  }
 }
 
 
 void runEditor(void) {
 
-   if (doorBellButton.clicked()) {
+  if (doorBellButton.clicked()) {
+    endEdit();
     ringDBell();
   } else if (panelButton.clicked())  {
-    selectFile();
+    buttonClick();
+    waitForButtons(editing);
   }
   else if (doneEditing) {
     endEdit();
     doneEditing = false;
   } else {
-    editTime();
+    potVal(analogRead(POT_ANLG));
   }
 }
 
@@ -168,6 +181,7 @@ void checkIdle(void) {
     ringDBell();
   } else if (panelButton.clicked())  {
     startEditor();
+    waitForButtons(editing);
   }
 }
 
@@ -178,7 +192,7 @@ void ringDBell(void) {
   thePlayer.setSoundfile(currentSong);
   thePlayer.command(play);
   thePlayer.setVolume(currentVol);
-  majorState = ringingDBell;
+  waitForButtons(ringingDBell);
 }
 
 
@@ -186,7 +200,7 @@ void checkSongPlay() {
 
   if (panelButton.clicked()) {
     thePlayer.command(fullStop);
-    majorState = idling;
+    waitForButtons(idling);
   } else if (doorBellButton.clicked()) {
     ringDBell();
   } else if (!thePlayer.isPlaying()) {
