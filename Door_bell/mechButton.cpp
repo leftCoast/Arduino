@@ -23,7 +23,7 @@ bool mechButton::clicked(void) {
   } else {                            // Whoops, not set up yet!
     pinMode(pinNum, INPUT_PULLUP);    // Do it.
     beenInitialized = true;           // Note it.
-    return false;                     // So false to you!
+    return false;                     // So, false to you!
   }
 }
 

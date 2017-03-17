@@ -137,6 +137,11 @@ drawObj::~drawObj() { }
 boolean drawObj::wantRefresh(void) { return needRefresh; }
 
 
+// Sometimes other know better than us that we need a refresh.
+// This allows them to make that happen.
+void drawObj::setNeedRefresh(void) { needRefresh = true; }
+
+
 void drawObj::setLocation(int x,int y) {
 
 		rect::setLocation(x,y);
@@ -411,16 +416,6 @@ void drawGroup::addObj(drawObj* newObj) {
 	needRefresh = true;	
 }
 
-
-// In draw its all about setting the offsets and letting
-// the sub objects draw.
-void  drawGroup::draw(void) { 
-
-	Serial.println("Group Draw is called!");
-	drawSelf();									// Just in case we have something to show.
-	needRefresh = false; 				// No more refresh needed.
-}
- 
  
 // Do nothing as default. Its all about the sub objects.
 void  drawGroup::drawSelf(void) { }

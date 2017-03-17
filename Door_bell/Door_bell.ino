@@ -2,6 +2,7 @@
 #include <SSD_13XX.h>
 #include <Adafruit_VS1053.h>
 #include <adafruit_1431_Obj.h>
+//#include <Fonts/FreeSerif9pt7b.h>
 #include <LC_SPI.h>
 
 #include <colorObj.h>
@@ -57,6 +58,8 @@ bool  doneEditing;
 
 mechButton  doorBellButton(DB_BTN);
 mechButton  panelButton(POT_BTN);
+
+runningAvg  potSmoother(5);
 
 extern  drawList  fileList;
 
@@ -156,7 +159,7 @@ void runEditor(void) {
     endEdit();
     doneEditing = false;
   } else {
-    potVal(analogRead(POT_ANLG));
+    potVal(potSmoother.addData(analogRead(POT_ANLG)));
   }
 }
 

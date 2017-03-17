@@ -7,7 +7,7 @@
 
 // point, I know what you're thinking. It should be here. But its in displayObj.h.
 // Its needed by both sides.
-  
+
 // ***************************************************************
 // Base class for a rectangle. 
 // ***************************************************************
@@ -55,6 +55,7 @@ public:
   ~drawObj();
     
   virtual	boolean wantRefresh(void);
+  				void		setNeedRefresh(void);
 	virtual	void		setLocation(int x,int y);
           void    draw(void);                    		// Call this one. Don't inherit this one.
   virtual void    drawSelf(void);                		// Inherit this one and make it yours.
@@ -110,7 +111,7 @@ extern viewMgr viewList;
 
 class drawGroup : public drawObj, public viewMgr {
 
-public:
+	public:
 										drawGroup(int x, int y, word width,word height,boolean clicks=false);
   									~drawGroup();
 
@@ -118,14 +119,14 @@ public:
 		virtual	boolean	acceptClick(point where);
 		virtual	void		clickOver(void);
   	virtual void    addObj(drawObj* newObj);
-  	virtual void		draw(void);
   	virtual void		drawSelf(void);
 };			
 		
 		
 		
-class drawList : public drawGroup { 
-public:
+class drawList : public drawGroup {
+ 
+	public:
 										drawList(int x, int y, word width,word height,boolean clicks=false);
   									~drawList();
   					
