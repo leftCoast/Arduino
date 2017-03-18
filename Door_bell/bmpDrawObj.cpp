@@ -5,6 +5,9 @@ bmpDrawObj::bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop)
   : drawObj(x,y,width,height) { backdrop = inBackdrop; }
 
 
+bmpDrawObj::~bmpDrawObj(void) { }
+
+
 // All the drawing does is to erase the rectangle
 // by pasting over the bitmap. This gets it ready 
 // for the inherited to draw to.

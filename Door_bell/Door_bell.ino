@@ -44,22 +44,27 @@
 #define DISP_BG_FILE  "/dbos/paper.bmp"
 
 bmpPipe paper;
-bmpLabel label1(20, 6, 100, 10, "File name 1", &paper);
 
 soundCard thePlayer(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
-byte vol = 20;
 
-enum majorStates { idling, ringingDBell, playingSong, editing, buttonClear };
+
+enum majorStates { idling, ringingDBell, playingSong, editing, buttonClear, adjustVol };
 majorStates majorState;
 majorStates savedState;
 
-bool  fileLoaded;
-bool  doneEditing;
+bool  fileLoaded = false;
+bool  doneEditing = false;
+bool  settingVol = false;
 
 mechButton  doorBellButton(DB_BTN);
 mechButton  panelButton(POT_BTN);
 
 runningAvg  potSmoother(5);
+mapper      potToVol(0,1024,0,60);
+byte vol = 20;
+
+label adjustLbl(25,20,100,8,"Adjust volume.");
+label adjustLbl2(25,50,100,8,"Click to save.");
 
 extern  drawList  fileList;
 
@@ -112,7 +117,7 @@ void setup() {
   } else {
     Serial.println(F("Sound card FAIL."));
   }
-
+  
   majorState = playingSong;
 }
 
@@ -123,10 +128,33 @@ void loop() {
 
   switch (majorState) {
     case idling       : checkIdle();      break;
-    case ringingDBell : checkSongPlay();  break;
+    case ringingDBell : checkDBell();     break;
     case playingSong  : checkSongPlay();  break;
     case editing      : runEditor();      break;
     case buttonClear  : checkButtons();   break;
+    case adjustVol    : checkSetVol();    break;
+  }
+}
+
+
+void runVolume(void) {
+  
+  int potNum = analogRead(POT_ANLG);
+  vol = potToVol.Map(potNum);
+  thePlayer.setVolume(vol);
+}
+
+
+void checkSetVol() {
+
+  runVolume();
+  if (panelButton.clicked()) {
+    currentVol = vol;
+    writeParamFile();
+    thePlayer.command(pause);
+    screen->fillScreen(&black);
+    thePlayer.command(play);
+    waitForButtons(ringingDBell);
   }
 }
 
@@ -167,13 +195,23 @@ void runEditor(void) {
 void endEdit(void) {
 
   fileList.dumpList();
-  screen->fillScreen(&black);
   if (fileLoaded) {
     thePlayer.command(play);
     fileLoaded = false;
     majorState = playingSong;
   } else {
     majorState = idling;
+  }
+  if (settingVol) {             // Oh ohh.. special case..
+    drawBackground();
+    adjustLbl.setColors(&pencil);
+    adjustLbl2.setColors(&pencil);
+    adjustLbl.draw();
+    adjustLbl2.draw();
+    settingVol = false;
+    majorState = adjustVol;
+  } else {
+    screen->fillScreen(&black);
   }
 }
 
@@ -199,8 +237,24 @@ void ringDBell(void) {
 }
 
 
-void checkSongPlay() {
+// much like checkSongPlay() but no volume control.
+void checkDBell(void) {
 
+  if (panelButton.clicked()) {
+    thePlayer.command(fullStop);
+    waitForButtons(idling);
+  } else if (doorBellButton.clicked()) {
+    ringDBell();
+  } else if (!thePlayer.isPlaying()) {
+    thePlayer.command(fullStop);
+    majorState = idling;
+  }
+}
+
+
+void checkSongPlay(void) {
+
+  runVolume();
   if (panelButton.clicked()) {
     thePlayer.command(fullStop);
     waitForButtons(idling);

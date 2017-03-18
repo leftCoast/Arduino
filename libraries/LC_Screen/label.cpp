@@ -57,7 +57,6 @@ void label::initLabel(void) {
 
 
 void label::freeBuff(void) {
-
   if (buff!=NULL) {
     free(buff);
     buff = NULL;

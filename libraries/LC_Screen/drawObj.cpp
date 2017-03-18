@@ -114,6 +114,7 @@ bool rect::overlap(rect* checkRect) {
 drawObj::drawObj() {
 
   needRefresh = true;			// Well Duh! We never been drawn yet!
+  focus = false;					// But we're hopefull.
   clicked = false;
   wantsClicks = false;		// 'Cause this is actually the default.
   callback = NULL;				// And, no.. We have none of this either.
@@ -124,20 +125,27 @@ drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inCl
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
+    focus = false;
     clicked = false;
     wantsClicks = inClicks;
     callback = NULL;
 }
 
 
-drawObj::~drawObj() { }
+// Wake up! Time to die.
+drawObj::~drawObj() {
+
+		if (currentFocus == this) {	// We were great..
+			currentFocus = NULL;			// But, its all over now.
+		}
+	}
 
 
 // When the manager asks if we want a refresh..
 boolean drawObj::wantRefresh(void) { return needRefresh; }
 
 
-// Sometimes other know better than us that we need a refresh.
+// Sometimes others know better than us that we need a refresh.
 // This allows them to make that happen.
 void drawObj::setNeedRefresh(void) { needRefresh = true; }
 
@@ -165,6 +173,14 @@ void  drawObj::drawSelf(void) {
 }
 
 
+// We are either getting or loosing focus.
+void  drawObj::setFocus(boolean setLoose) {
+
+	focus = setLoose;
+	needRefresh = true;
+}
+	
+				
 // The ability to control this is handy..
 void drawObj::clickable(boolean inWantsClicks) { wantsClicks = inWantsClicks; }
 
@@ -211,8 +227,25 @@ void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 // ***************************************************
 
 
-viewMgr viewList;
+viewMgr 	viewList;
+drawObj*	currentFocus = NULL;	// Totally global because? There's only ONE user.
 
+void	setFocusPtr(drawObj* newFocus) {
+
+		if (newFocus!=currentFocus) {					// People are lazy. Now they don't need to check.
+			if (newFocus) {											// If we're actually passed in something.
+				if (currentFocus) {								// Check for NULL..
+					currentFocus->setFocus(false);	// Warn them that their star is falling.
+				}
+				currentFocus = newFocus;					// The up and coming..
+				currentFocus->setFocus(true);			// Tell 'em their star is rising!!
+			} else {														// We got a NULL.
+				currentFocus = NULL;							// Just stamp it in.
+			}
+		}
+	}
+	
+	
 viewMgr::viewMgr(void) {
     
     theList = NULL;
@@ -231,11 +264,9 @@ void  viewMgr::dumpList(void) {
 	drawObj*	trace;
 	
 	while(theList) {
-		trace = (drawObj*)theList;
-		if(trace) {
-			theList = (drawObj*)trace->next;
-			delete(trace);
-		}
+		trace = (drawObj*)theList->next;
+		delete(theList);
+		theList = trace;
 	}
   theTouched = NULL;
 }
@@ -262,6 +293,7 @@ boolean viewMgr::checkClicks(void) {
     boolean     done;
     boolean     success;
     
+    if (!screen->hasTouchScreen()) return false;			// Sanity! Does it even have the hardware?
     success = false;                                  // Did we change anything? Not yet.
     if (!theTouched) {                                // No current touch.
         if (screen->touched()) {                      // New touch, go look.
@@ -321,14 +353,31 @@ word viewMgr::numObjInList(void) {
 	
 	trace = (drawObj*)theList;
 	count = 0;
-	while(trace!=NULL) {
+	while(trace) {
 		count++;
 		trace = (drawObj*)trace->next;
 	}
 	return count;
 }
 
-          
+
+// Its sometimes handy to grab an object by index on the list.
+drawObj* viewMgr::getObj(int index) {
+
+	drawObj*	trace;
+	int				i;
+	
+	i = 0;
+	trace = (drawObj*)theList;
+	while(trace) {
+		if (index==i) return trace;
+		i++;
+		trace = (drawObj*)trace->next;
+	}
+	return NULL;
+}
+
+        
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
     
@@ -345,7 +394,7 @@ void viewMgr::idle(void) {
 // drawGroup, This is they guy that runs a bunch of sub
 // objects. He is both a drawObj and a viewMgr.
 // Before taking any action with a sub object the drawGroup
-// pushed its location onto the screen. This allows all sub
+// pushes its location onto the screen. This allows all sub
 // objects to work on local coordinates.
 //
 // Once difference is that this viewMgr sublist is NOT linked
@@ -363,14 +412,50 @@ drawGroup::drawGroup(int x, int y, word width,word height,boolean clicks)
 drawGroup::~drawGroup() { dumpList(); }
 
 
+
+// Another handy tool. Sometimes you just KNOW everyone you manage
+// Needs a refresh. Typically when scrolled, subObjects don't know
+// they've been moved. Why? Because their offsets move with them.
+// This sets everyone's needRefresh flag.
+void drawGroup::setGroupRefresh(void) {
+		
+		drawObj* trace;
+
+		trace = theList;
+		while(trace) {
+			trace->setNeedRefresh();
+			trace = (drawObj*)trace->next;
+		} 
+	}
+	
+
+// The viewMgr that we live on wants to know if we need a redraw.
+// Before we act on that, lets let the kids redraw first.	
 boolean drawGroup::wantRefresh(void) {
 
 	if (theList) {
 		screen->pushOffset(x,y);				// So we set in our offset.
-		checkRefresh();
+		checkRefresh();									// Now, if they get called to draw? Everything will be fine.
 		screen->popOffset(x,y);					// Clear offset.
 	}
 	return needRefresh;
+}
+
+
+// Someone from the outside is hinting to us that we are
+// due for a redraw. We'd better let the kids know too..
+void drawGroup::setNeedRefresh(void) {
+
+	drawObj::setNeedRefresh();
+	setGroupRefresh();
+}
+
+
+// When we move, the subs can't tell 'less we tell 'em.
+void drawGroup::setLocation(int x,int y) {
+
+		drawObj::setLocation(x,y);
+		setGroupRefresh();
 }
 
 

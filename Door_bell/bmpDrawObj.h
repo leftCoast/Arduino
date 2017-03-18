@@ -8,7 +8,8 @@ class bmpDrawObj : public drawObj {
 
 public:
   bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop);
-
+  ~bmpDrawObj(void);
+  
 virtual void  drawSelf(void);
 
         bmpPipe*  backdrop;

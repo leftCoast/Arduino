@@ -3,6 +3,10 @@
 
 bmpLabel::bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop) 
   : label(inX,inY,width,height,inText) { backdrop = inBackdrop; fastDraw = true; }
+
+
+bmpLabel::~bmpLabel(void) {  }
+
   
 void bmpLabel::setFastDraw(bool fast) { fastDraw = fast; }
 

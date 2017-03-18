@@ -50,15 +50,16 @@ virtual	  void  		setLocation(int inX, int inY);
 class drawObj : public rect, public dblLinkListObj {
 
 public:
-  drawObj();
-  drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
-  ~drawObj();
+  								drawObj();
+  								drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks=false);
+	virtual					~drawObj();
     
   virtual	boolean wantRefresh(void);
-  				void		setNeedRefresh(void);
+  virtual	void		setNeedRefresh(void);
 	virtual	void		setLocation(int x,int y);
           void    draw(void);                    		// Call this one. Don't inherit this one.
   virtual void    drawSelf(void);                		// Inherit this one and make it yours.
+  virtual	void		setFocus(boolean setLoose);				// We are either getting or loosing focus.
   		    void		clickable(boolean inWantsClicks);
   virtual boolean acceptClick(point where);
   virtual void    clickOver(void);
@@ -67,6 +68,7 @@ public:
   
 protected:
   boolean     needRefresh;
+  boolean			focus;
   boolean     wantsClicks;
   boolean     clicked;
   void			  (*callback)(void);
@@ -85,21 +87,24 @@ protected:
 class viewMgr : public idler {
     
 public:
-                    viewMgr(void);
-                    ~viewMgr(void);
+                    	viewMgr(void);
+                    	~viewMgr(void);
     
-    virtual void    addObj(drawObj* newObj);
-    				void		dumpList(void);
-            boolean checkClicks(void);
-						void    checkRefresh(void);
-						word		numObjInList(void);
-    virtual void    idle(void);
+    virtual void    	addObj(drawObj* newObj);
+    				void			dumpList(void);
+            boolean 	checkClicks(void);
+						void    	checkRefresh(void);
+						word			numObjInList(void);
+						drawObj*	getObj(int index);
+    virtual void    	idle(void);
     
             drawObj*    theList;    // Pointer to top of list;
             drawObj*    theTouched; // Pointer to who's been touched.
 };
 
-extern viewMgr viewList;
+extern	viewMgr 	viewList;
+extern	drawObj*	currentFocus;				// Focus goes hand in hand with view management.
+void		setFocusPtr(drawObj* newFocus);
 
 
 
@@ -115,7 +120,10 @@ class drawGroup : public drawObj, public viewMgr {
 										drawGroup(int x, int y, word width,word height,boolean clicks=false);
   									~drawGroup();
 
+		virtual	void		setLocation(int x,int y);
+		virtual	void		setGroupRefresh(void);
 		virtual	boolean wantRefresh(void);
+		virtual	void		setNeedRefresh(void);
 		virtual	boolean	acceptClick(point where);
 		virtual	void		clickOver(void);
   	virtual void    addObj(drawObj* newObj);
