@@ -430,7 +430,8 @@ void drawGroup::setGroupRefresh(void) {
 	
 
 // The viewMgr that we live on wants to know if we need a redraw.
-// Before we act on that, lets let the kids redraw first.	
+// Before we act on that, lets let the kids redraw first.
+// NOTE : THATS MESSED UP. WE SHOULD DRAW FIRST THEN THE KIDS. RETHINK THIS.
 boolean drawGroup::wantRefresh(void) {
 
 	if (theList) {

@@ -76,9 +76,7 @@ void fillFileList(const char* workingDir) {
     do {
       entry = wd.openNextFile();
       if (entry) {
-        if (entry.isDirectory()) {
-
-        } else {
+        if (!entry.isDirectory()) {
           newItem = new fListItem(entry.name());
           fileList.addObj(newItem);
         }

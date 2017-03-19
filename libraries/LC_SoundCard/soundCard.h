@@ -45,9 +45,10 @@ class soundCard : public idler, public timeObj {
           byte					getVolume(void);
           void          setError(soundCardErr inErr);
           soundCardErr 	getLastError(void);
+          void					playClip(char* filePath);				// NOTE: This BLOCKS! only for "clicks".
 
   protected:
-  virtual void idle(void);
+	virtual void idle(void);
 
     Adafruit_VS1053_FilePlayer* musicPlayer;
     soundCardErr 	lastErr;

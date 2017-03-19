@@ -137,7 +137,6 @@ multiMap::~multiMap(void) {
 void multiMap::addPoint(double x, double y) {
 
   mapItem* newItem;
-
   newItem = new mapItem(x,y);          // Whip up a fresh item.
   if (itemList == NULL) {             // Look its the first one!
     itemList = newItem;  

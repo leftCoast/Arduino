@@ -167,4 +167,24 @@ void soundCard::idle(void) {
   }
 
 
+// A BLOCKING run-'till-you're-done function.
+// The idea is that there are very short "beep" 
+// & "click" sounds that would be nice for UI
+// Development and it would be OK to block for
+// a couple ms.
+void soundCard::playClip(char* filePath) {
+
+	File soundFile;
+	
+	if (!musicPlayer->playingMusic) {		// Ok, no one is using the hardware.
+		musicPlayer->startPlayingFile(filePath);
+		while(musicPlayer->playingMusic);
+			if (musicPlayer->readyForData()) {
+				noInterrupts();
+				musicPlayer->feedBuffer();
+				interrupts();
+      }
+    }
+  }
+
 

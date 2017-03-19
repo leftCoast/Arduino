@@ -10,8 +10,10 @@
 // So I added it to mine. Thank you "Sumotoy". If it see's his OLED lib the #ifdef
 // Should stop them from conflicting. else, you can use his.
 // I didn't want this library dependant on his so this is the fix.
+
 #ifndef _COMMON_16BIT_COLORS_H_
 #define _COMMON_16BIT_COLORS_H_
+
 // Color definitions
 static const uint16_t	BLACK		=	0x0000;
 static const uint16_t	WHITE   	=	0xFFFF;
