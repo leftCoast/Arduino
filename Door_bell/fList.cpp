@@ -93,7 +93,7 @@ void fList::doPotVal(int aVal) {
 // We've been handed control. Deal with it!
 void fList::gainControl(void) {
 
-  listMapper.setValues(0, 1023, 0, numObjInList() - 1);
+  listMapper.setValues(1023,0, 0, numObjInList() - 1);
   potTimer.setTime(POT_MS);
 }
 
