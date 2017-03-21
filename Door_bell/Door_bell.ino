@@ -44,6 +44,7 @@
 
 #define DISP_BG_FILE  "/dbos/paper.bmp"
 #define BOOT_FILE  "/dbos/boot.mp3"
+
 bmpPipe paper;
 
 soundCard thePlayer(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
