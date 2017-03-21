@@ -129,7 +129,9 @@ void fList::makeVisable(fListItem* theItem) {
   } else if (itemMax>FL_H) {
     distance = itemMax - FL_H;
     jumps = distance/theItem->height;
-    if ((jumps*theItem->height)<distance) jumps++;
+    if ((jumps*theItem->height)<distance) {   // Round off or whatever caused it to be short?
+      jumps++;                                // Fine, kick in another.
+    }
     scroll(-jumps*theItem->height);
   }
 }
@@ -141,8 +143,8 @@ boolean  fList::visible(fListItem* theItem) {
   return (theItem->y >= 0 && theItem->y <= NUM_FLI * FLI_H - 1);
 }
 
-// Kind of a hack, but.. Go find who has he current song, tell them to redraw.
-// Cause they are going to loose it in a second.
+// Kind of a hack, but.. Go find who has the current song, set their redraw flag.
+// 'Cause they are going to loose it in a second.
 // NOTE: Scary shit pointer casting here. ALL items MUST be fListItem pointers!
 void  fList::currentSongRefresh() {
 
@@ -150,7 +152,7 @@ void  fList::currentSongRefresh() {
   
   trace = theList;
   while(trace) {
-    if (!strcmp(((fListItem*)trace)->mText->buff,currentSong)) { // Out on a limb here!
+    if (!strcmp(((fListItem*)trace)->mText->buff,currentSong)) { // Out on a limb here! Blind Casting up into.. 
       trace->setNeedRefresh();
       return;
     } else {

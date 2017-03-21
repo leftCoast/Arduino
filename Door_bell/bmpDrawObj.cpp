@@ -8,9 +8,8 @@ bmpDrawObj::bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop)
 bmpDrawObj::~bmpDrawObj(void) { }
 
 
-// All the drawing does is to erase the rectangle
-// by pasting over the bitmap. This gets it ready 
-// for the inherited to draw to.
+// All the drawing does is to erase the rectangle by pasting over the
+// bitmap. This gets it ready for the inherited to draw to.
 void bmpDrawObj::drawSelf(void) {
 
   rect   temp;
