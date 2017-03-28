@@ -17,17 +17,17 @@ void anime::begin(void) {
   colorObj  endColor(BLUE);
   colorObj  shine(SHINE_COLOR);
   
-  endX = locX+(width*2);
+  endX = x +(width*2);
   shineCenter = endX-SHINE_WIDTH;
   endColor.blend(&black,80);
   shine.blend(&white,SHINE_PERCENT);               // Add in the shine
-  addColor(locX,&endColor);                        // Start dark..
+  addColor(x,&endColor);                        // Start dark..
   addColor(endX,&endColor);                        // End dark..
   addColor(shineCenter - SHINE_WIDTH,&endColor);   // Start dark..
   addColor(shineCenter,&shine);                    // In the middle? We SHINE!
   endColor.setColor(&white);
   endColor.blend(&black,70);
-  screen->drawRect(locX,locY,width,height,&endColor);
+  screen->drawRect(x,y,width,height,&endColor);
   hookup();
   start();
   needRefresh = true;
@@ -47,7 +47,7 @@ colorObj anime::calcColor(word inX) {
     return temp;
   }
   index = inX+offset;
-  maxX = locX+(width*2);
+  maxX = x+(width*2);
   if(index>maxX) index = index - maxX;
   temp = Map(index);
   return temp;
@@ -62,9 +62,9 @@ void anime::drawSelf(void) {
   word       top;
   word       lineH;
   
-  startX = locX+1;
-  endX = locX+width-2;
-  top = locY+1;
+  startX = x+1;
+  endX = x+width-2;
+  top = y+1;
   lineH = height-2;
   for (int i=startX;i<=endX;i++) {
     tempColor = calcColor(i);

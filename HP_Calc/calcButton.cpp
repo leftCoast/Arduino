@@ -47,8 +47,8 @@ void setupButtonColors(void) {
 }
 
 
-calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width, byte inType)
-  : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
+calcButton::calcButton(char* inFStr, word inLocX, word iny, byte width, byte inType)
+  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, true) {
 
   int numChars = strlen(inFStr) + 1;
   fStr = (char*) malloc(numChars);
@@ -59,8 +59,8 @@ calcButton::calcButton(char* inFStr, word inLocX, word inLocY, byte width, byte 
 }
 
 
-calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word inLocY, byte width, byte inType)
-  : drawObj(inLocX, inLocY, width, BUTTON_HEIGHT, true) {
+calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word iny, byte width, byte inType)
+  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, true) {
 
   int numChars = strlen(inFStr) + 1;
   fStr = (char*) malloc(numChars);
@@ -118,13 +118,13 @@ void calcButton::drawSelf(void) {
   }
 
   if (clicked) {
-    screen->fillRoundRect(locX, locY, width, height, RADIUS, touchedBaseColor);
-    screen->drawRoundRect(locX-1, locY-1, width+2, height+2, RADIUS+1, &white);
-    screen->drawRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, &white);
+    screen->fillRoundRect(x, y, width, height, RADIUS, touchedBaseColor);
+    screen->drawRoundRect(x-1, y-1, width+2, height+2, RADIUS+1, &white);
+    screen->drawRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white);
     screen->setTextColor(touchedTextColor, touchedBaseColor);
   } else {
-    screen->fillRoundRect(locX-2, locY-2, width+4, height+4, RADIUS+2, &black); 
-    screen->fillRoundRect(locX, locY, width, height, RADIUS, activeBaseColor);
+    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &black); 
+    screen->fillRoundRect(x, y, width, height, RADIUS, activeBaseColor);
     screen->setTextColor(activeTextColor, activeBaseColor);
   }
   screen->setTextSize(TEXT_SIZE);
@@ -133,13 +133,13 @@ void calcButton::drawSelf(void) {
   if (secondFx && aFStr ) {
     word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(aFStr)) - 1;
     if (dispWidth > textWidth) {
-      screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
+      screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 1);
       screen->drawText(aFStr);
     }
   } else {
     word textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(fStr)) - 1;
     if (dispWidth > textWidth) {
-      screen->setCursor(locX + RADIUS + ((dispWidth - textWidth) / 2), locY + 1);
+      screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 1);
       screen->drawText(fStr);
     }
   }
@@ -172,8 +172,8 @@ void calcButton::beep(void) {
   
 
 
-secondfxButton::secondfxButton(char* inFStr,word inLocX, word inLocY,byte width,byte inType)
-  : calcButton(inFStr,inLocX,inLocY,width,inType) { }
+secondfxButton::secondfxButton(char* inFStr,word inLocX, word iny,byte width,byte inType)
+  : calcButton(inFStr,inLocX,iny,width,inType) { }
 
 void secondfxButton::idle() { secondFx = gSecondFx; }         // This one works different..
 
@@ -187,8 +187,8 @@ void secondfxButton::doAction(void) {
 
 
 
-degRadButton::degRadButton(word inLocX, word inLocY,byte width,byte height)
-    : calcButton("-------",inLocX,inLocY,width,DEG_RAD_BTN) {
+degRadButton::degRadButton(word inLocX, word iny,byte width,byte height)
+    : calcButton("-------",inLocX,iny,width,DEG_RAD_BTN) {
       
     setSize(width,height);
 } 
@@ -212,7 +212,7 @@ void  degRadButton::drawSelf(void) {
     } else {
       screen->setTextColor(&tColor, &bColor);
     }
-    screen->setCursor(locX + 2, locY + 1);
+    screen->setCursor(x + 2, y + 1);
     
     if ( mCalc.getDegrees()) {
       screen->drawText("Degrees");

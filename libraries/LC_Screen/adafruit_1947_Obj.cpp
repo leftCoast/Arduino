@@ -1,5 +1,6 @@
 #include "adafruit_1947_Obj.h"
 
+
 adafruit_1947_Obj::adafruit_1947_Obj(void)
 :displayObj(true,true,true,true,false) {
     
@@ -9,6 +10,7 @@ adafruit_1947_Obj::adafruit_1947_Obj(void)
     rst = ADA_1947_SHIELD_RST;
 }
 
+
 adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inRst)
   :displayObj(true,true,true,true,false) {
 
@@ -17,6 +19,7 @@ adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inRst)
   cs = inCS;
   rst = inRst;
 }
+
 
 adafruit_1947_Obj::~adafruit_1947_Obj(void) {
 

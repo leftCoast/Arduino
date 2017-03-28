@@ -11,8 +11,6 @@
 // NOTE : ADAFRUIT_376 & ADAFRUIT_1431 Conflict with one another. comment one or the other 
 // out in the .cpp file.
 
-// NOTE : // SUMO_TOY_SSD_13XX OLED **MUST** have reset pin. Won't work otherwise.
-
 extern displayObj* screen;
 
 boolean initScreen(byte hardware, byte csPin, byte inRotation=0);
