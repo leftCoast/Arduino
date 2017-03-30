@@ -147,7 +147,6 @@ void setup() {
 
 void loadScreen(void) {
 
-  Serial.println(F("Loading screen"));
   setupButtonColors();
   XReg.setTextSize(TEXT_SIZE);
   XReg.setColors(DISP_COLOR, BACK_COLOR);
@@ -167,7 +166,6 @@ void loadScreen(void) {
   degRad.setColors(DISP_COLOR, &white, BACK_COLOR);
   viewList.addObj(&degRad);
 
-  Serial.println(F("theSprit.begin()"));
   theSprit.begin();
   viewList.addObj(&theSprit);
   
@@ -209,7 +207,6 @@ void loadScreen(void) {
   viewList.addObj(&btnASin);
   viewList.addObj(&btnACos);
   viewList.addObj(&btnATan);
-   Serial.println(F("Should be everything loaded."));
 }
 
 
