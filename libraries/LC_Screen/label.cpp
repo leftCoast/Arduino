@@ -117,7 +117,6 @@ void label::setValue(unsigned long val) {
 
 void label::setValue(double val) {
    
-	// Need to round to the desired prec. value first.
   dtostrf(val,0,prec,temp);
   setValue(temp);
   needRefresh = true;

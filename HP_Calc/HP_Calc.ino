@@ -127,17 +127,16 @@ calculator mCalc;           // The calculator object. Feed it key strokes and it
 boolean    buttonPressed;
 
 void setup() {
-  Serial.begin(9600);
-  while(!Serial);
-  Serial.println(F("Serial online"));
+  //Serial.begin(9600); while(!Serial);
+  //Serial.println(F("Serial online"));
   if (initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
-    Serial.println(F("Got screen"));
+    //Serial.println(F("Got screen"));
     screen->fillScreen(&black);
     loadScreen();
-    Serial.println(F("Show Display"));
+    //Serial.println(F("Show Display"));
     screen->drawRect(BTN_COL_1 - 3, DISP_Y - 3, ((BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1) + 5, 22, DISP_COLOR);
   } else {
-    Serial.println(F("Screen failed"));
+    //Serial.println(F("Screen failed"));
   }
   buttonPressed = false;
   pinMode(BEEP_PIN, OUTPUT);
@@ -147,7 +146,6 @@ void setup() {
 
 void loadScreen(void) {
 
-  Serial.println(F("Loading screen"));
   setupButtonColors();
   XReg.setTextSize(TEXT_SIZE);
   XReg.setColors(DISP_COLOR, BACK_COLOR);
@@ -167,7 +165,6 @@ void loadScreen(void) {
   degRad.setColors(DISP_COLOR, &white, BACK_COLOR);
   viewList.addObj(&degRad);
 
-  Serial.println(F("theSprit.begin()"));
   theSprit.begin();
   viewList.addObj(&theSprit);
   
@@ -209,8 +206,7 @@ void loadScreen(void) {
   viewList.addObj(&btnASin);
   viewList.addObj(&btnACos);
   viewList.addObj(&btnATan);
-   Serial.println(F("Should be everything loaded."));
-}
+ }
 
 
 void loop() {
