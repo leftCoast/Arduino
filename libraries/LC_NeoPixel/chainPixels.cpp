@@ -98,16 +98,15 @@ void chainPixels::idle(void) {
 
 
 // Groups call this to see what color a pixel is in their set.
-colorObj chainPixels::getPixel(word index) { return pixelDriver->getPixelColor(index); }
+colorObj chainPixels::getPixelColor(word index) { return pixelDriver->getPixelColor(index); }
   
 
 // Groups call this to set a color to a pixel in their set.  
-void chainPixels::setPixel(word index,colorObj* inColor) {
+void chainPixels::setPixelColor(word index,colorObj* inColor) {
   
   pixelDriver->setPixelColor(index,inColor);
   dirtyBit = true;
 }
-  
                
                
 
@@ -140,19 +139,56 @@ void pixelGroup::setChain(chainPixels* inChain) { ourChain = inChain; }
 word pixelGroup::getNumPixels(void) { return numPixels; }
 
 
-colorObj pixelGroup::getPixel(word pixelNum) { return ourChain->getPixel(index+pixelNum); }
+colorObj pixelGroup::getPixelColor(word pixelNum) { return ourChain->getPixelColor(index+pixelNum); }
 
 
-void pixelGroup::setPixel(word pixelNum, colorObj* color) { ourChain->setPixel(index+pixelNum,color); }
+void pixelGroup::setPixelColor(word pixelNum, colorObj* color) { ourChain->setPixelColor(index+pixelNum,color); }
 
 
 void pixelGroup::setPixels(colorObj* color) {
 
    for(int i=0;i<numPixels;i++) {
-      setPixel(i,color);
+      setPixelColor(i,color);
    }
 }
  
  
+colorObj pixelGroup::shiftPixels(bool toEnd) {
+
+	colorObj  aColor;
+  colorObj  lastColor;
+  int       last;
+
+  last = getNumPixels()-1;
+  if (toEnd) {                              // Feed new colors onto pixel 0, pull 'em through to the end.
+    lastColor = getPixelColor(last);
+    for(int i=last;i>0;i--) {
+      aColor = getPixelColor(i-1);
+      setPixelColor(i,&aColor);
+    }
+  } else {                                  // Feed new colors onto last pixel, push 'em to the start..
+    lastColor = getPixelColor(0);
+    for(int i=0;i<last;i++) {
+      aColor = getPixelColor(i+1);
+      setPixelColor(i,&aColor);
+    }
+  }
+  return lastColor;
+}
+
+
+void pixelGroup::roll(bool clockwise)		{
+
+		colorObj aColor;
+
+  	aColor = shiftPixels(!clockwise);
+  	if (!clockwise) {
+  		setPixelColor(0,&aColor);
+  	} else {
+  		setPixelColor(getNumPixels()-1,&aColor);
+  	}
+  }
+  						
+  						 
 void pixelGroup::draw(void) {  } // This will be called repeatedly. Fill with your drawing code.
  

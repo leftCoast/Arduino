@@ -20,8 +20,8 @@ class chainPixels : public queue, public idler {
      virtual  void      pop(void);
               void      addGroup(pixelGroup* inGroup);
      virtual  void      idle(void);
-              colorObj  getPixel(word index);
-              void      setPixel(word index,colorObj* inColor);
+              colorObj  getPixelColor(word index);
+              void      setPixelColor(word index,colorObj* inColor);
              
   protected:
     byte      pin;
@@ -41,10 +41,11 @@ class pixelGroup : public linkListObj {
               void       setChain(chainPixels* inChain);
               word       getNumPixels(void);
               
-              colorObj   getPixel(word pixelNum);                   // What color is THIS pixel now?
-              void       setPixel(word pixelNum, colorObj* color);  // Set THIS pixel this color.
+              colorObj   getPixelColor(word pixelNum);                   // What color is THIS pixel now?
+              void       setPixelColor(word pixelNum, colorObj* color);  // Set THIS pixel this color.
               void       setPixels(colorObj* color);                // Set ALL our pixles this color.
-              
+              colorObj   shiftPixels(bool toEnd=true);							// Even handier!
+  						void		   roll(bool clockwise=true);
       virtual void       draw(void);                                // This will be called repeatedly.
     
     protected:

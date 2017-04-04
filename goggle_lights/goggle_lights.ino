@@ -15,37 +15,45 @@
 #include <liteLine.h>
 #include <neoPixel.h>
 
-#define COLOR_STEP  0.001
-#define MAX_COLOR_INDEX 4
-#define COLOR_STEP_MS   10
+#include "theRings.h"
 
-neoPixel theLight(32,3);
-colorMultiMap theColors;
-float colorIndex;
+chainPixels theRings(3);
+starLight ring1;
+portLight ring2;
 
 
 void setup() {
-  theLight.begin();
-  theLight.setPixelColor(0,&black);
-  theLight.show();
 
-  theColors.addColor(0,&green);
-  theColors.addColor(1,&red);
-  theColors.addColor(3,&blue);
-  theColors.addColor(4,&green);
-
-  colorIndex = 0;
+  setUpPattern();             // First is to set up the pattern we want.
+  theRings.addGroup(&ring1);
+  theRings.addGroup(&ring2);
+  theRings.hookup();
 }
 
 
-void loop() {
+void setUpPattern(void) {
 
-  colorObj  aColor;
-  aColor = theColors.Map(colorIndex);
-  for (int i=0;i<32;i++)
-    theLight.setPixelColor(i,&aColor);
-  theLight.show();
-  colorIndex = colorIndex + COLOR_STEP;
-  if (colorIndex>MAX_COLOR_INDEX) colorIndex = 0;
-  delay(COLOR_STEP_MS);
+  colorObj      aColor;
+
+  aColor.setColor(&white);
+  //aColor.blend(&black,70);
+  theColors.addColor(0,&aColor);
+
+  aColor.setColor(&red);
+  //aColor.blend(&black,50);
+  theColors.addColor(1,&aColor);
+
+  aColor.setColor(&red);
+  aColor.blend(&black,80);
+  theColors.addColor(3,&aColor);
+
+  aColor.setColor(&blue);
+  aColor.blend(&black,80);
+  theColors.addColor(4,&aColor);
+
+  aColor.setColor(&black);
+  theColors.addColor(9,&aColor);
 }
+
+
+void loop() { idle(); }
