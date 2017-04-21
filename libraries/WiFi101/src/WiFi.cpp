@@ -465,6 +465,7 @@ uint8_t WiFiClass::beginAP(const char *ssid, const char* key, uint8_t channel)
 	return startAP(ssid, M2M_WIFI_SEC_WPA_PSK, key, channel);
 }
 
+// AP access point so other wireless things can attach.
 uint8_t WiFiClass::startAP(const char *ssid, uint8_t u8SecType, const void *pvAuthInfo, uint8_t channel)
 {
 	tstrM2MAPConfig strM2MAPConfig;
