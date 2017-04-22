@@ -1,5 +1,4 @@
 #include "WiFiObj.h"
-#include <timeObj.h>
 
 extern "C" {
   #include "bsp/include/nm_bsp.h"
@@ -42,6 +41,69 @@ static void wifiCallback(uint8_t u8MsgType, void* pvMsg) {
 }
 
 
+
+// ************************************************
+// ******************* netwkObj *******************
+// ************************************************
+
+
+// BEFORE creating one, make sure you have a valid
+// data set with MAC address.
+netwkObj::netwkObj(tstrM2mWifiscanResult* inData)
+	: timeObj(LIST_TIME) {
+	
+	SSID = NULL; 
+	setData(inData);
+}
+
+
+netwkObj::~netwkObj(void) { if (SSID) free(SSID); }
+		
+
+// We'll key on the MAC address, seeing its fixed and unique.	
+bool netwkObj::isMe(tstrM2mWifiscanResult* inData) {
+
+	for(byte i=0;i<6;i++) {
+		if (BSSID[i]!=inData->au8BSSID[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+void netwkObj::setData(tstrM2mWifiscanResult* inData) {
+	
+	for(byte i=0;i<6;i++) {
+		BSSID[i]=inData->au8BSSID[i];
+	}
+	if (SSID) {
+		free(SSID);
+	}
+	SSID = (char*)malloc(strlen((char*)(inData->au8SSID))+1);
+	strcpy(SSID,(char*)(inData->au8SSID));
+	RSSI = inData->s8rssi;
+	Auth = inData->u8AuthType;
+	channel = inData->u8ch;
+	visable = true;
+	start();	// Reset the timer.
+}
+
+
+char* netwkObj::getSSID(void)		{ return SSID; }
+byte* netwkObj::getBSSID(void)	{ return (byte*)(&(SSID[0])); }
+int netwkObj::getRSSI(void)			{ return RSSI; }
+byte netwkObj::getAuth(void)		{ return Auth; }
+byte netwkObj::getChannel(void)	{ return channel; }
+bool netwkObj::getVisable(void) { return visable; }
+		
+
+
+// ************************************************
+// ******************* WiFiObj ********************
+// ************************************************
+
+
 WiFiObj::WiFiObj(int cs,int irq, int rst) {
 
 
@@ -53,11 +115,14 @@ WiFiObj::WiFiObj(int cs,int irq, int rst) {
   mode							= WF_RESET_MODE;
   status						= WF_NO_CHIP;
   remoteMACAddrPtr	= NULL;
+  netList = NULL;
+  numInList = 0;
   init = false;
 }
 
 
-WiFiObj::~WiFiObj(void) { }
+WiFiObj::~WiFiObj(void) {  }
+
 
 // We can start with no hookup.
 bool WiFiObj::begin(void) {
@@ -157,6 +222,72 @@ void WiFiObj::doInit(void) {
 }
 
 
+// Pass back this one on the list. Or NULL if not there.
+netwkObj* WiFiObj::getNet(int pos) {
+
+	netwkObj*	trace;
+	
+	trace = netList;
+	while(trace && pos) {
+		trace = (netwkObj*)trace->next;
+		pos--;
+	}
+	return trace;
+}
+
+
+// When adding or deleting list items, just recount it.
+void WiFiObj::countList(void) {
+	
+	netwkObj* trace;
+	
+	numInList = 0;
+	trace = netList;														// Point trace at our list again.
+	while(trace) {
+		trace = (netwkObj*)trace->next;
+		numInList++;
+	}
+}
+		
+		
+// Someone called for a list refresh. So at this time
+// we have a fresh load of network data in scanData.
+// Its time to update the list with it.
+void WiFiObj::updateList(void) {
+	
+	netwkObj*	newOjb;
+	netwkObj*	trace;
+	int	sum;
+	
+	sum = 0;																			// Clear sum
+	for(byte i=0;i<6;i++) {
+		sum = sum + scanData.au8BSSID[i];						// Add all the bytes into sum.
+	}
+	if (sum) {																		// If we got a nonzero number? Then ok.
+		trace = netList;														// Point trace at our list.
+		if (trace==NULL) {													// Special case for empty list.
+			newOjb = new netwkObj(&scanData);					// Make a fresh new one.
+			netList = newOjb;													// Point the list to it. Done!
+		} else {																		// Not so fast mister. If not empty..
+			while(trace) {														// While trace != NULL.
+				if (trace->isMe(&scanData)) {						// Aske each node, "Is this you?"
+					trace->setData(&scanData);						// If it is, refresh the node.
+					trace = NULL;													// And our work is done here.
+				} else if (trace->next==NULL) {					// it wasn't his, and to more nodes.
+					newOjb = new netwkObj(&scanData);			// Crete the new one.
+					newOjb->linkAfter(trace);							// Hook in after trace.
+					trace = NULL;													// And again, we are done.
+				} else {																// it wasn't his, and there is more nodes? 
+					trace = (netwkObj*)trace->next;				// Lets go see!
+				}
+			}
+		}
+		countList();																// We change, it's small, we recount.
+	}
+}
+
+
+
 char* WiFiObj::getSSID(void) {
 	
 	if (status == WF_CONNECTED || status == WF_AP_LISTENING || status == WF_AP_CONNECTED) {
@@ -173,26 +304,29 @@ uint32_t WiFiObj::getLocalIP(void) { return localIP; }
 
 int32_t WiFiObj::getRSSI(void) {
 	
-	timeObj	timeOut(1000);								// Create a timer.
-	int32_t rssi;
+	timeObj	timeOut(1000);												// Create a timer.
 	
-	rssi = -1;
-	if (!init) {
-		m2m_wifi_handle_events(NULL);					// Clear pending events.
-		resolve = 0;													// Send RSSI request.
-		if (m2m_wifi_req_curr_rssi() < 0) {
-			return 0;
+	result = 0;																		// Assume faillure.
+	if (!init) {																	// Sanity.
+		m2m_wifi_handle_events(NULL);								// Clear pending events.
+		result = m2m_wifi_req_curr_rssi();					// Send RSSI request.
+		if (result==M2M_SUCCESS) {									// We got a good call.
+			result = 0;																// Clear result. The handler will fill it.
+			timeOut.start();													// Set a timer and spin for answer..
+			while (result == 0 && !timeOut.ding()) {	// Spin 'till resolve fills or timeout.
+				m2m_wifi_handle_events(NULL);
+			}
 		}
-		timeOut.start();														// Set a timer and spin for answer..
-		while (resolve == 0 && !timeOut.ding()) {
-			m2m_wifi_handle_events(NULL);
-		}
-		rssi = resolve;
-		resolve = 0;	
 	}
-	return rssi;
+	return result;																// There you go.
 }
 	
+	
+void WiFiObj::macAddress(uint8_t* mac) { 
+
+	m2m_wifi_get_mac_address(mac);
+}
+
 	
 void WiFiObj::end() {
 	
@@ -214,199 +348,105 @@ void WiFiObj::end() {
 }
 
 
-void	WiFiObj::macAddress(uint8_t *mac) {
-
-	byte tmpMac[6];
-	byte i;
-	
-	if (init) {
-		m2m_wifi_get_mac_address(mac);		// Why?
-		m2m_wifi_get_mac_address(tmpMac);
-		for(i = 0; i < 6; i++) {					// I guess reverse is the new forward?
-			mac[i] = tmpMac[5-i];
-		}
-	}
-}
-
-
+// This refreshes the network list.
 int8_t WiFiObj::scanNetworks(void) {
 
 	WiFiStatus 	tmp;
 	timeObj			timeout(5000);
+	int8_t			returnVal;
 	
+	returnVal = -1;																													// Assume failure.
 	if (init) {
-		tmp = status;
-		if (m2m_wifi_request_scan(M2M_WIFI_CH_ALL) >= 0) { // Start scan.
-			status = WF_IDLE_STATUS;				// Wait for scan result or timeout:
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
+		tmp = status;																													// We save our status.
+		if (m2m_wifi_request_scan(M2M_WIFI_CH_ALL) >= 0) { 										// Start scan.
+			status = WF_IDLE_STATUS;																						// Wait for scan result.
+			timeout.start();																										// Start the timer.
+			while (status!=WF_SCAN_COMPLETED && !timeout.ding()) {							// Spin 'till done or out of time.
+				m2m_wifi_handle_events(NULL);																			// Let chip do its thing.
 			}
-			status = tmp;
-			return m2m_wifi_get_num_ap_found();
+			if (numNets>0) {																										// Have at least one?
+				timeout.setTime(1000);																						// Reset for quick timeout.			
+				for(int i=0;i<numNets;i++) {																			// loop through all of 'em.
+					m2m_wifi_req_scan_result(i);																		// Fire off query.
+					status = WF_IDLE_STATUS;																				// status ready.
+					timeout.start();																								// Start the timer.
+					while (status!=SCAN_RESULT_COMPLETE && !timeout.ding()) {				// SCAN_RESULT_COMPLETE->delt with.
+						m2m_wifi_handle_events(NULL);																	// Let chip do its thing.
+					}
+				}
+				returnVal = numInList;																										// Success!
+			}
 		} else {
-			Serial.println("m2m_wifi_request_scan() failed.");
+			Serial.println("m2m_wifi_request_scan() failed.");									// Scan failed. 
 		}
+		status = tmp;																													// Restore status.
 	} else {
-		Serial.println("Not initialized.");
+		Serial.println("Not initialized.");																		// We were not ready.
 	}
-	return -1;	// Error flag.
+	return returnVal;																												// Success or failure flag.
 }
 
 
 char* WiFiObj::SSID(uint8_t pos) {
 
-	WiFiStatus tmp;
-	timeObj			timeout(2000);
+	netwkObj*	trace;
 	
-	if (init) {
-		tmp = status;																// Save status.
-		memset(scan_ssid, 0, M2M_MAX_SSID_LEN);			// Clear scan_ssid.
-		if (m2m_wifi_req_scan_result(pos) >= 0) {		// We want a name!
-			status = WF_IDLE_STATUS;									// Wait for name or timeout.
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
-			}
-			status = tmp;															// restore status.
-			resolve = 0;															// Was resolve used? Yes, rssi is in there.
-			return scan_ssid;													// All is good return pointer.
-		} else {
-			Serial.println("m2m_wifi_req_scan_result() failed.");
-		}
-	} else {
-		Serial.println("Not initialized.");
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getSSID();
 	}
-	return NULL;		// Errors! Return NULL
+	return NULL;
 }
-
 
 
 int32_t WiFiObj::RSSI(uint8_t pos) {
 
-	WiFiStatus tmp;
-	int32_t			rssi;
-	timeObj			timeout(2000);
+	netwkObj*	trace;
 	
-	if (init) {
-		tmp = status;																// Save status.
-		memset(scan_ssid, 0, M2M_MAX_SSID_LEN);			// Clear scan_ssid.
-		if (m2m_wifi_req_scan_result(pos) >= 0) {		// We want a name!
-			status = WF_IDLE_STATUS;									// Wait for name or timeout.
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
-			}
-			status = tmp;															// restore status.
-			int32_t rssi = resolve;										// It comes back in resolve!
-			resolve = 0;															// Clear resolve.
-			return rssi;															// All is good, return rssi.
-		} else {
-			Serial.println("m2m_wifi_req_scan_result() failed.");
-		}
-	} else {
-		Serial.println("Not initialized.");
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getRSSI();
 	}
-	return 0;		// Errors! Return 0
+	return 0;
 }
 
 
 uint8_t WiFiObj::encryptionType(uint8_t pos) {
 
-	WiFiStatus tmp;
-	timeObj			timeout(2000);
+	netwkObj*	trace;
 	
-	if (init) {
-		tmp = status;																// Save status.
-		if (m2m_wifi_req_scan_result(pos) >= 0) {		// We want a name!
-			status = WF_IDLE_STATUS;									// Wait for name or timeout.
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
-			}
-			status = tmp;															// restore status.
-			resolve = 0;															// Clear resolve.
-			return scanAuth;													// All is good, return type.
-		} else {
-			Serial.println("m2m_wifi_req_scan_result() failed.");
-		}
-	} else {
-		Serial.println("Not initialized.");
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getAuth();
 	}
-	return 0;		// Errors! Return 0
+	return 0;
 }
 
 
 uint8_t WiFiObj::channel(uint8_t pos) {
 
-	WiFiStatus tmp;
-	timeObj			timeout(2000);
+	netwkObj*	trace;
 	
-	if (init) {
-		tmp = status;																// Save status.
-		if (m2m_wifi_req_scan_result(pos) >= 0) {		// We want a name!
-			status = WF_IDLE_STATUS;									// Wait for name or timeout.
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
-			}
-			status = tmp;															// restore status.
-			resolve = 0;															// Clear resolve.
-			return scanChannel;												// All is good, return type.
-		} else {
-			Serial.println("m2m_wifi_req_scan_result() failed.");
-		}
-	} else {
-		Serial.println("Not initialized.");
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getChannel();
 	}
-	return 0;		// Errors! Return 0
+	return 0;
 }
 
 
-uint8_t* WiFiObj::remoteMacAddress(uint8_t* address) {
+uint8_t* WiFiObj::BSSID(uint8_t pos) {
 
-	timeObj	timeout(1000);
+	netwkObj*	trace;
 	
-	remoteMACAddrPtr = address;								// Point ours at theirs.
-	memset(address, 0, 6);										// Zero it out. (theirs)
-	if (m2m_wifi_get_connection_info()>=0) {	// Call to fill it up.
-		timeout.start();												// Wait for data or timeout.
-		while (remoteMACAddrPtr != 0 && timeout.ding()) {
-			m2m_wifi_handle_events(NULL);
-		}
-		remoteMACAddrPtr = 0;
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getBSSID();
 	}
-	return address;		// I guess, error or not. Return it.
+	return 0;
 }
-
-
-uint8_t* WiFiObj::BSSID(uint8_t pos, uint8_t* bssid) {
-
-	WiFiStatus tmp;
-	timeObj			timeout(2000);
 	
-	if (init) {
-		tmp = status;																// Save status.
-		if (m2m_wifi_req_scan_result(pos) >= 0) {		// We want a name!
-			status = WF_IDLE_STATUS;									// Wait for name or timeout.
-			timeout.start();
-			while (!(status & WF_SCAN_COMPLETED) && !timeout.ding()) {
-				m2m_wifi_handle_events(NULL);
-			}
-			status = tmp;															// restore status.
-			resolve = 0;															// Clear resolve.
-			remoteMACAddrPtr = 0;
-			return bssid;															// All is good, return bssid.
-		} else {
-			Serial.println("m2m_wifi_req_scan_result() failed.");
-		}
-	} else {
-		Serial.println("Not initialized.");
-	}
-	return 0;		// Errors! Return 0
-}
 
-	
 	
 //
 // *********** callback handlers ***********
@@ -426,7 +466,8 @@ void  WiFiObj::handleDefaultConnect(void* pvMsg) {
 
 void  WiFiObj::handleCurrentRSSI(void* pvMsg) {
 	
-	resolve = *((int8_t *)pvMsg);		// Isn't this the same as resolve = *pvMsg; ?
+	result = 0;										// Clear it, just in case..
+	result = *((int8_t *)pvMsg);	// Message is only one byte.
 }
 
 
@@ -469,9 +510,9 @@ void  WiFiObj::handleConnectionInfo(void* pvMsg) {
 
 void  WiFiObj::handleGetSystemTime(void* pvMsg) {
 	
-	if (resolve != 0) {			// Is it carrying an address? It must be.
-		memcpy((tstrSystemTime *)resolve, pvMsg, sizeof(tstrSystemTime));
-		resolve = 0;
+	if (result != 0) {			// Is it carrying an address? It must be.
+		memcpy((tstrSystemTime *)result, pvMsg, sizeof(tstrSystemTime));
+		result = 0;
 	}
 }
 
@@ -505,39 +546,22 @@ void  WiFiObj::handleConnectionChange(void* pvMsg) {
 }
 
 
+// Someone asked how many networks can we see. 
+// This is the result of that action.
 void  WiFiObj::handleScanDone(void* pvMsg) {
-	
-	tstrM2mScanDone* pstrInfo;
-	
-	pstrInfo = (tstrM2mScanDone *)pvMsg;
-	if (pstrInfo->u8NumofCh >= 1) {
-		status = WF_SCAN_COMPLETED;
-	}
+
+	numNets = m2m_wifi_get_num_ap_found();
+	status = WF_SCAN_COMPLETED;
 }
 
 
+// The network list is being refreshed. As the data is called
+// for, we refresh the list and tell whomever its been handled.
 void  WiFiObj::handleScanResult(void* pvMsg) {
-
-	tstrM2mWifiscanResult*	msg;
-	uint16_t								scan_ssid_len;
 	
-	msg = (tstrM2mWifiscanResult *)pvMsg;
-	scan_ssid_len = strlen((const char *)msg->au8SSID);
-	memset(scan_ssid, 0, M2M_MAX_SSID_LEN);
-	if (scan_ssid_len) {
-		memcpy(scan_ssid, (const char *)msg->au8SSID, scan_ssid_len);
-	}
-	if (remoteMACAddrPtr) {												// We pointing to a remote address?
-		for(int i = 0; i < 6; i++) {								// reverse copy the remote MAC
-			remoteMACAddrPtr[i] = msg->au8BSSID[5-i];
-		}
-	} else {
-		//Serial.println("No remote address");
-	}
-	resolve = msg->s8rssi;
-	scanAuth = msg->u8AuthType;
-	scanChannel = msg->u8ch;
-	status = WF_SCAN_COMPLETED;
+	memcpy(&scanData,pvMsg,sizeof(scanData));
+	updateList();
+	status = SCAN_RESULT_COMPLETE;
 }
 
 

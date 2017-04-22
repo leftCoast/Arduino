@@ -7,6 +7,40 @@
 #include "driver/include/m2m_types.h"
 #include <Arduino.h>
 #include <IPAddress.h>
+#include <lists.h>
+#include <timeObj.h>
+
+
+// tstrM2MConnInfo
+// This is the struct layout we receive when we get connet info.
+// uint8 	__PAD24__ [3]							Padding bytes for forcing 4-byte alignment.
+// char 	acSSID [M2M_MAX_SSID_LEN]	AP connection SSID name.
+// uint8 	au8IPAddr [4]							Connection IP address.
+// uint8 	au8MACAddress [6]					MAC address of the peer Wi-Fi station.
+// sint8 	s8RSSI										Connection RSSI signal.
+// uint8 	u8SecType									Security type.
+
+
+// tstrM2mScanDone
+// This is the struct layout we receive to return the number
+// of networks (APs) that have been found. 
+//
+// uint8 	__PAD16__ [2]		Padding bytes for forcing 4-byte alignment.
+// sint8 	s8ScanState			Scan status. M2M_SUCCESS or an error.
+// uint8 	u8NumofCh				Number of found APs.
+
+
+// tstrM2mWifiscanResult
+// This is the struct layout we receive for a scanned network (AP) data set.
+//
+// uint8 	_PAD8_											Padding bytes for forcing 4-byte alignment
+// uint8 	au8BSSID [6]								BSSID of the AP.
+// uint8 	au8SSID [M2M_MAX_SSID_LEN]	AP SSID
+// sint8 	s8rssi											AP signal strength.
+// uint8 	u8AuthType									AP authentication type.
+// uint8 	u8ch												AP RF channel.
+// uint8 	u8index											AP index in the scan result list.
+
 
 typedef enum {
   WF_NO_CHIP = 255,
@@ -21,7 +55,8 @@ typedef enum {
   WF_AP_CONNECTED,
   WF_AP_FAILED,
   WF_PROVISIONING,
-  WF_PROVISIONING_FAILED
+  WF_PROVISIONING_FAILED,
+  SCAN_RESULT_COMPLETE			// Added this cause its two stage. Scan & results.
 } WiFiStatus;
 
 
@@ -42,6 +77,40 @@ enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
 	ENC_TYPE_AUTO = M2M_WIFI_SEC_INVALID
 };
 
+
+// We want a linked list of networks. Also, since some networks 
+// "flicker" we're going to give them a watchdog timer. We'll
+// let them persist for awhile. Each time they are seen, we'll
+// reset the timer. Once the timer expires, they'll be deleted.
+
+#define LIST_TIME	2000	// The're allowed this much time with no signal.
+
+class netwkObj : public dblLinkListObj,
+								 public timeObj {
+
+	public:
+		netwkObj(tstrM2mWifiscanResult* inData);
+		~netwkObj(void);
+		
+		bool		isMe(tstrM2mWifiscanResult* inData);
+		void		setData(tstrM2mWifiscanResult* inData);
+		char*		getSSID(void);		// name.
+		byte*		getBSSID(void);		// MAC address.
+		int			getRSSI(void);		// Signal strength.
+		byte		getAuth(void);		// Encryption.
+		byte		getChannel(void);	// Broadcast channel.
+		bool		getVisable(void);	// Some try to hide.
+		
+	private:
+		char*		SSID;
+		byte		BSSID[6];
+		int			RSSI;
+		byte		Auth;
+		byte		channel;
+		bool		visable;
+};
+
+
 class WiFiObj {
 
   public:
@@ -60,8 +129,7 @@ class WiFiObj {
 		int32_t		RSSI(uint8_t pos);											// Signal from list.
 		uint8_t		encryptionType(uint8_t pos);						// Their encryption type.
 		uint8_t		channel(uint8_t pos);										// Their channel.
-		uint8_t*	BSSID(uint8_t pos, uint8_t* bssid);			// Their.. thing.
-		uint8_t*	remoteMacAddress(uint8_t* address);			// Their Mac address.
+		uint8_t*	BSSID(uint8_t pos);											// Their MAC addr.
 		void			end();
 		
 		void			handleDefaultConnect(void* pvMsg);
@@ -76,15 +144,25 @@ class WiFiObj {
 		
 	protected:
 		void			doInit(void);
+		void			updateList(void);
+		netwkObj* getNet(int pos);
+		void			countList(void);
 		
 		bool				init;
     WiFiStatus  status;
     byte        mode;
+    tstrM2mWifiscanResult	scanData;	// Callbacks will fill this with network info.
+    int					numNets;						// Number for last scan.
+    netwkObj*		netList;						// Pointer to a list of the recent networks.
+    int					numInList;
+    uint32_t		result;							// When we ask for something, here's a spot.
+    
+    
     int         DHCP;
     uint32_t		localIP;
     uint32_t		submask;
     uint32_t		gateway;
-		uint32_t		resolve;
+		
     char 				ssid[M2M_MAX_SSID_LEN];
     char				scan_ssid[M2M_MAX_SSID_LEN];
     byte*				remoteMACAddrPtr;

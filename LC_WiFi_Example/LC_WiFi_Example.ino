@@ -116,7 +116,7 @@ void listNetworks() {
     Serial.print(network.channel(thisNet));
     byte bssid[6];
     Serial.print("\t\tBSSID: ");
-    printBSSID(network.BSSID(thisNet, bssid));
+    printBSSID(network.BSSID(thisNet));
     Serial.print("\tEncryption: ");
     printEncryptionType(network.encryptionType(thisNet));
   }
