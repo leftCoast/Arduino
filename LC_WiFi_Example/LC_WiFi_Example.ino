@@ -89,8 +89,8 @@ void printMacAddress() {
 
 void listNetworks() {
   // scan for nearby networks:
-  Serial.println("** Scan Networks **");
   int numSsid = network.scanNetworks();
+  Serial.println("** Scan Networks **");
   if (numSsid == -1)
   {
     Serial.println("Couldn't get a wifi connection");
@@ -105,7 +105,7 @@ void listNetworks() {
   for (int thisNet = 0; thisNet < numSsid; thisNet++) {
     Serial.print(thisNet);
     Serial.print(") ");
-    Serial.print(network.SSID(thisNet));
+    printinField(network.SSID(thisNet),15);
     Serial.print("\tSignal: ");
     int dbm = network.RSSI(thisNet);
     Serial.print(dbm);
@@ -122,18 +122,16 @@ void listNetworks() {
   }
 }
 
+
 void printBSSID(byte bssid[]) {
-  print2Digits(bssid[5]);
+
+  byte i;
+  
+  for(i=0;i<5;i++) {
+  print2Digits(bssid[i]);
   Serial.print(":");
-  print2Digits(bssid[4]);
-  Serial.print(":");
-  print2Digits(bssid[3]);
-  Serial.print(":");
-  print2Digits(bssid[2]);
-  Serial.print(":");
-  print2Digits(bssid[1]);
-  Serial.print(":");
-  print2Digits(bssid[0]);
+  }
+  print2Digits(bssid[i]);
 }
 
 
@@ -160,10 +158,30 @@ void printEncryptionType(int thisType) {
 
 
 void print2Digits(byte thisByte) {
-  if (thisByte < 0xF) {
+  if (thisByte <= 0xF) {
     Serial.print("0");
   }
   Serial.print(thisByte, HEX);
 }
 
+
+#define FIELD_MAX 32
+char outStr[FIELD_MAX+1];
+
+void printinField(char* inStr,byte field) {
+
+  if (field>FIELD_MAX) {
+    field = FIELD_MAX;
+  }
+  memset(outStr,' ',FIELD_MAX);
+  if (inStr[0]=='\0') {
+    strcpy(outStr,"- Hidden -");
+    outStr[10] = ' ';
+  } else {
+    strcpy(outStr,inStr);
+    outStr[strlen(inStr)] = ' '; 
+  }
+  outStr[field] = '\0';
+  Serial.print(outStr);
+}
 

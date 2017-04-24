@@ -7,8 +7,24 @@
 #include "driver/include/m2m_types.h"
 #include <Arduino.h>
 #include <IPAddress.h>
-#include <lists.h>
 #include <timeObj.h>
+
+
+// tstrEthInitParam
+// This is passed in with m2m_wifi_init() function parameter.
+// uint8				__PAD8__					Padding.
+// uint8*				au8ethRcvBuf			Pointer to Receive Buffer of Ethernet Packet.
+// tpfAppEthCb 	pfAppEthCb				Callback for Ethernet interface.
+// tpfAppWifiCb	pfAppWifiCb				Callback for wifi notifications.
+// uint16				u16ethRcvBufSize	Size of Receive Buffer for Ethernet Packet.
+// uint8				u8EthernetEnable	Enable Ethernet mode flag.
+
+
+// tstrWifiInitParam
+// We pass this into the m2m_wifi_init() function.
+// tpfAppMonCb			pfAppMonCb				Callback for monitoring interface.
+// tpfAppWifiCb			pfAppWifiCb				Callback for Wi-Fi notifications.
+// tstrEthInitParam	strEthInitParam		Structure to hold Ethernet interface parameters.
 
 
 // tstrM2MConnInfo
@@ -21,25 +37,20 @@
 // uint8 	u8SecType									Security type.
 
 
-// tstrM2mScanDone
-// This is the struct layout we receive to return the number
-// of networks (APs) that have been found. 
-//
-// uint8 	__PAD16__ [2]		Padding bytes for forcing 4-byte alignment.
-// sint8 	s8ScanState			Scan status. M2M_SUCCESS or an error.
-// uint8 	u8NumofCh				Number of found APs.
+// tstrM2mWifiStateChanged 
+// When there is a connection state change we get one of these. Not very well documented.
+// uint8 	__PAD16__ [2]		The padding.
+// uint8 	u8CurrState			Current Wi-Fi connection state.
+// uint8 	u8ErrCode				tenuM2mConnChangedErrcode.
 
 
-// tstrM2mWifiscanResult
-// This is the struct layout we receive for a scanned network (AP) data set.
-//
-// uint8 	_PAD8_											Padding bytes for forcing 4-byte alignment
-// uint8 	au8BSSID [6]								BSSID of the AP.
-// uint8 	au8SSID [M2M_MAX_SSID_LEN]	AP SSID
-// sint8 	s8rssi											AP signal strength.
-// uint8 	u8AuthType									AP authentication type.
-// uint8 	u8ch												AP RF channel.
-// uint8 	u8index											AP index in the scan result list.
+// tstrM2MIPConfig
+// We get this with the handleDHCPConfig handeler call.
+// uint32 	u32DhcpLeaseTime		Dhcp Lease Time in sec.
+// uint32 	u32DNS							IP for the DNS server.
+// uint32 	u32Gateway					IP of the Default internet gateway.
+// uint32 	u32StaticIP					The static IP assigned to the device.
+// uint32 	u32SubnetMask				Subnet mask for the local area network.
 
 
 typedef enum {
@@ -56,6 +67,7 @@ typedef enum {
   WF_AP_FAILED,
   WF_PROVISIONING,
   WF_PROVISIONING_FAILED,
+  RSSI_DONE,
   SCAN_RESULT_COMPLETE			// Added this cause its two stage. Scan & results.
 } WiFiStatus;
 
@@ -67,48 +79,7 @@ typedef enum {
 	WF_AP_MODE
 } WiFiModes;
 
-/* Encryption modes */
-enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
-	ENC_TYPE_WEP  = M2M_WIFI_SEC_WEP,
-	ENC_TYPE_TKIP = M2M_WIFI_SEC_WPA_PSK,
-	ENC_TYPE_CCMP = M2M_WIFI_SEC_802_1X,
-	/* ... except these two, 7 and 8 are reserved in 802.11-2007 */
-	ENC_TYPE_NONE = M2M_WIFI_SEC_OPEN,
-	ENC_TYPE_AUTO = M2M_WIFI_SEC_INVALID
-};
 
-
-// We want a linked list of networks. Also, since some networks 
-// "flicker" we're going to give them a watchdog timer. We'll
-// let them persist for awhile. Each time they are seen, we'll
-// reset the timer. Once the timer expires, they'll be deleted.
-
-#define LIST_TIME	2000	// The're allowed this much time with no signal.
-
-class netwkObj : public dblLinkListObj,
-								 public timeObj {
-
-	public:
-		netwkObj(tstrM2mWifiscanResult* inData);
-		~netwkObj(void);
-		
-		bool		isMe(tstrM2mWifiscanResult* inData);
-		void		setData(tstrM2mWifiscanResult* inData);
-		char*		getSSID(void);		// name.
-		byte*		getBSSID(void);		// MAC address.
-		int			getRSSI(void);		// Signal strength.
-		byte		getAuth(void);		// Encryption.
-		byte		getChannel(void);	// Broadcast channel.
-		bool		getVisable(void);	// Some try to hide.
-		
-	private:
-		char*		SSID;
-		byte		BSSID[6];
-		int			RSSI;
-		byte		Auth;
-		byte		channel;
-		bool		visable;
-};
 
 
 class WiFiObj {
@@ -120,16 +91,20 @@ class WiFiObj {
 		bool			begin(void);														// Start, no hookup.
 		bool			connect(char* WifiName,char* WiFiPass);	// Hookup.
     bool			begin(char* WifiName,char* WiFiPass);		// Start & hookup.
-		char*			getSSID(void);
-		uint32_t	getLocalIP(void);
-		int32_t		getRSSI(void);
-		void			macAddress(uint8_t *mac);								// It wants a 6 byte buffer.
-		int8_t		scanNetworks(void);											// How many we see now?
-		char*			SSID(uint8_t pos);											// Name on list.
-		int32_t		RSSI(uint8_t pos);											// Signal from list.
-		uint8_t		encryptionType(uint8_t pos);						// Their encryption type.
-		uint8_t		channel(uint8_t pos);										// Their channel.
-		uint8_t*	BSSID(uint8_t pos);											// Their MAC addr.
+    char*			getSSID(void);													// name.
+    byte*			getMACAddr(void);												// Our MAC address.
+    byte*			getRemoteMACAddr(void);									// Their MAC address.
+		byte*			getBSSID(void);													// Sorta like a MAC address.
+		int				getRSSI(void);													// Signal strength.
+		byte			getAuth(void);													// Encryption type.
+		byte			getChannel(void);												// Broadcast channel.
+    int8_t		scanNetworks(bool onOff);								// Turn scanning on or off.
+		char*			getSSID(int index);											// name.
+		byte*			getBSSID(int index);										// Sorta like a MAC address.
+		int				getRSSI(int index);											// Signal strength.
+		byte			getAuth(int index);											// Encryption type.
+		byte			getChannel(int index);									// Broadcast channel.
+		
 		void			end();
 		
 		void			handleDefaultConnect(void* pvMsg);
@@ -138,9 +113,10 @@ class WiFiObj {
 		void			handleConnectionInfo(void* pvMsg);
 		void			handleGetSystemTime(void* pvMsg);
 		void			handleConnectionChange(void* pvMsg);
-		void			handleScanDone(void* pvMsg);
-		void			handleScanResult(void* pvMsg);
 		void			handleDHCPConfig(void* pvMsg);
+		void			handleReqestWPS(void* pvMsg);
+		void			handleIPConflict(void* pvMsg);
+		void			handleClientInfo(void* pvMsg);
 		
 	protected:
 		void			doInit(void);
@@ -151,23 +127,24 @@ class WiFiObj {
 		bool				init;
     WiFiStatus  status;
     byte        mode;
-    tstrM2mWifiscanResult	scanData;	// Callbacks will fill this with network info.
-    int					numNets;						// Number for last scan.
-    netwkObj*		netList;						// Pointer to a list of the recent networks.
-    int					numInList;
-    uint32_t		result;							// When we ask for something, here's a spot.
+    //uint32_t		result;							// When we ask for something, here's a spot.
     
-    
+    uint32_t		leaseTime;
+		uint32_t		DNS;
     int         DHCP;
     uint32_t		localIP;
     uint32_t		submask;
     uint32_t		gateway;
-		
-    char 				ssid[M2M_MAX_SSID_LEN];
-    char				scan_ssid[M2M_MAX_SSID_LEN];
-    byte*				remoteMACAddrPtr;
-    byte				scanAuth;
-    byte				scanChannel;		
+
+    byte		SSID[M2M_MAX_SSID_LEN];	// Actually SSID is a 32 byte buffer. Most use it like a string.
+    byte		remoteIPAddr[4];				// IP of the AP we hooked to.
+    byte		remoteMACAddr[6];				// Says its the AP MAC addr we hooked to.
+    byte		MACAddr[6];							// Our MAC addr. Again, its what the documentation says.
+		byte		BSSID[6];								// BSSID is used like the wireless MAC Address.
+		int			RSSI;										// RSSI is the signal strength.
+		byte		Auth;										// The type of encryption were using.
+		byte		channel;								// The channel to broadcast/receive on.
 };
+
 
 #endif
