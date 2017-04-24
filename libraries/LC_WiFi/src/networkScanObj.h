@@ -43,45 +43,46 @@ enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
 // let them persist for awhile. Each time they are seen, we'll
 // reset the timer. Once the timer expires, they'll be deleted.
 
-#define LIST_TIME	2000	// The're allowed this much time with no signal.
-
+#define LIST_TIME   5000	// The're allowed this much time with no signal.
+#define SLEEP_TIME  1000  // This much time between scans.
 
 
 class netwkObj;	// Forward dec.
 
-
-enum tasks	{ wait,			// wait for the timer to exire.
-						  scanNum,	// Wait for the scan count to arrive.
-						  loadInfo	// fire off each number, wait for info. and store it.
-						};
+extern enum scanStates;
 
 
-// This is the header node. I manages network list.
+// This is the header node. It manages network list.
 class networkScanObj :	public dblLinkListObj,
 												public timeObj,
 												public idler {
 	
 	public:
-			networkScanObj(tstrM2mWifiscanResult* inData);
+			networkScanObj(void);
 			~networkScanObj(void);
 		
 					void		scanning(bool onOff);		// Turn scanning on or off.
-					
-					char*		getSSID(int index);			// name.
-					byte*		getBSSID(int index);		// Sorta like a MAC address.
-					int			getRSSI(int index);			// Signal strength.
-					byte		getAuth(int index);			// Encryption type.
-					byte		getChannel(int index);	// Broadcast channel.
-		
-					void			handleScanDone(void* pvMsg);
-					void			handleScanResult(void* pvMsg);
-		
-	virtual	void	idle(void);
+  virtual	void	idle(void);
+          bool  startScan(void);
+          bool  startInfo(void);
+					void  handleScanDone(void* pvMsg);
+					void  handleScanResult(void* pvMsg);
+          
+          void      countList(void);
+          void      updateList(void);
+          netwkObj* getNet(byte pos);
+          char*     getSSID(int index);			// name.
+          byte*     getBSSID(int index);		// Sorta like a MAC address.
+          byte      getRSSI(int index);     // Signal strength.
+          byte      getEncrypt(int index);	// Encryption type.
+          byte      getChannel(int index);	// Broadcast channel.
 	
 	private:
-		tasks									task;				// What we're up to now.
+    bool                  areScanning;
+		scanStates						state;				// What we're up to now.
 		tstrM2mWifiscanResult	scanData;		// Holder for last callback info.
-    int										lastCount;	// Also filled by callback.
+    byte									lastCount;	// Also filled by callback.
+    byte                  currentIndex;
 };
 
 
@@ -98,18 +99,18 @@ class netwkObj : public dblLinkListObj,
 		char*		getSSID(void);		// name.
 		byte*		getBSSID(void);		// Sorta like a MAC address.
 		int			getRSSI(void);		// Signal strength.
-		byte		getAuth(void);		// Encryption type.
+		byte		getEncrypt(void);	// Encryption type.
 		byte		getChannel(void);	// Broadcast channel.
 		
 	private:
 		char*		SSID;
 		byte		BSSID[6];
 		int			RSSI;
-		byte		Auth;
+		byte		encrypt;
 		byte		channel;
 };
 
-
+extern networkScanObj* gNetworkScanObj;
 
 
 #endif

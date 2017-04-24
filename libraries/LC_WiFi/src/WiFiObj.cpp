@@ -21,7 +21,6 @@ static void outInfo(void) { Serial.println(infoStr); clrInfo(); }
 // We only get one of each. These are set up when begin() is called.
 // They're used as a links for the callback function.
 WiFiObj* gWiFi 									= NULL;
-networkScanObj* gNetworkScanObj = NULL;
 
 static void wifiCallback(uint8_t u8MsgType, void* pvMsg) {
 

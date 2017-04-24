@@ -1,41 +1,154 @@
 #include "networkScanObj.h"
 
 
-// Pass back this one on the list. Or NULL if not there.
-netwkObj* WiFiObj::getNet(int pos) {
+enum scanStates {
+  
+  scannerOff,
+  waiting,      // Wating for refresh time.
+  waitOnCount,  // Wait for the scan count to arrive.
+  loadInfo,     // Time to fire off info load.
+  waitOnInfo    // Wait for info load to arrive.
+};
 
-	netwkObj*	trace;
-	
-	trace = netList;
-	while(trace && pos) {
-		trace = (netwkObj*)trace->next;
-		pos--;
-	}
-	return trace;
+
+networkScanObj* gNetworkScanObj = NULL;
+
+
+
+networkScanObj::networkScanObj(void) {
+  : timeObj(SLEEP_TIME) {
+    
+    lastCount = 0;
+    scanning(false);
+  }
+  
+  
+networkScanObj::~networkScanObj(void) { }
+  
+  
+// Turn scanning on or off.
+void networkScanObj::scanning(bool onOff) {
+  
+    if (onOff) {              // We turning on?
+      hookup();               // May be first time, call hookup();
+      startScan();            // Don't want to waste time on starup. Kick in the scanner.
+      state = waitOnCount;    // Set the correct state to note we're starting a scan.
+    } else {                  // We're shutting down?
+      state = scannerOff;     // Set state to mask callbacks.
+    }
+    areScanning = onOff;      // Whatever state we're going into. Note it.
+  }
+
+
+// Our little engine for running in thebackground.
+void networkScanObj::idle(void) {
+  
+  if (scanning) {                               // Are we even on?
+    switch (state) {                            // OK, we're on, what state are we in?
+      case waiting :                            // Wating for refresh time.
+        if (ding()) {                           // If it is time for refresh..
+          if (startScan()) {                    // Fire off the scanner to get a count.
+            state = waitOnCount;                // Setup to wait for this count..
+          }
+        }
+        break;
+      case waitOnCount :                          // Ok, waiting for the scan count to arrive.
+        if (scanTimer.ding()) {                   // Has the timer expired?
+          debugOut("scan timer timed out.");      // If in debug mode, display the error.
+          state = wait;                           // In any case we go back to waiting.
+        }
+        break;
+      case loadInfo :                             // Time to fire off info load.
+        if (startInfo()) {
+          state = waitOnInfo();
+        }
+        break;
+      case waitOnInfo :
+        if (scanTimer.ding()) {                   // Has the timer expired?
+          debugOut("info timer timed out.");      // If in debug mode, display the error.
+          state = wait;                           // In any case we go back to waiting.
+        }
+        break;
+      default : debugOut("Got a unknown state in networkScanObj::idle()"); break;
+    }
+  }
 }
 
 
 
-/*
-// Knock out old dead networks.
-void WiFiObj::cleanList(void) {
+// Start functions. Kick off an action and set the scanTimer.
 
-	netwkObj* trace;
-	netwkObj* death;
-	
-	if (netList) {
-		trace = (netwkObj*)netList->getLast();			// Point to end of list.
-		while(trace) {
-			trace->ding();
-			death = trace;
-			if (trace==netList) 
-		}
-	}
+
+// Ask how many networks are out there..
+bool networkScanObj::startScan(void) {
+  
+  int res;
+  
+  res = m2m_wifi_request_scan(M2M_WIFI_CH_ALL);
+  if (res>=0){
+    scanTimeout.start();
+    return true;
+  }
+  debugOut("m2m_wifi_request_scan() failed.");
+  return false;
 }
-*/
+
+
+// We're looking for info on AP x. Start the query.
+bool networkScanObj::startInfo(void) {
+  
+  int res;
+  
+  res = m2m_wifi_req_scan_result(currentIndex);
+  if (res==M2M_SUCCESS) {
+    scanTimer.start();
+    return true;
+  }
+  debugOUt("m2m_wifi_req_scan_result() faild.");
+  return false;
+}
+
+
+
+// Handeler callbacks.
+
+// Someone asked how many networks can we see.
+// Here is the result of that action.
+void  networkScanObj::handleScanDone(void* pvMsg) {
+  
+  if (state==waitOnCount) {                             // If we're actually waiting for this.
+    lastCount = m2m_wifi_get_num_ap_found();            // Grab the count.
+    if (lastCount>0) {                                  // If we saw any..
+      currentIndex = 0;                                 // Reset the index to read them from.
+      status = loadInfo;                                // Fire off the flag to start loading them.
+    } else {                                            // Or if we didn't see any..
+      start();                                          // Reset our waiting timer.
+      state = wiaing;                                   // Basically go back to sleep for a while.
+    }
+  }
+}
+
+
+// The network list is being refreshed. As the data is called
+// for, we refresh the list and tell whomever its been handled.
+void  networkScanObj::handleScanResult(void* pvMsg) {
+	
+    if (state==waitOnInfo) {                      // If we're actually waiting for this.
+      memcpy(&scanData,pvMsg,sizeof(scanData));   // Grab the wad of data.
+      updateList();                               // Use it to update the list.
+      currentIndex++;                             // Bumpcounter to the next item.
+      if (currentIndex<lastCount) {               // We still have more to go?
+        state = loadInfo;                         // Flag we need another read.
+      } else {                                    // No more to go?
+        start();                                  // Reset main timer.
+        state = waiting;                          // Go back to sleep for a while.
+      }
+    }
+  }
+
 
 // When adding or deleting list items, just recount it.
-void WiFiObj::countList(void) {
+void networkScanObj::countList(void) {
 	
 	netwkObj* trace;
 	
@@ -48,10 +161,10 @@ void WiFiObj::countList(void) {
 }
 		
 		
-// Someone called for a list refresh. So at this time
+// Someone called for a list refresh. As a result,
 // we have a fresh load of network data in scanData.
 // Its time to update the list with it.
-void WiFiObj::updateList(void) {
+void networkScanObj::updateList(void) {
 	
 	netwkObj*	newOjb;
 	netwkObj*	trace;
@@ -86,46 +199,28 @@ void WiFiObj::updateList(void) {
 }
 
 
-// This refreshes the network list.
-int8_t networkScanObj::scanNetworks(void) {
+// "Get" funtions.
 
-	WiFiStatus 	tmp;
-	timeObj			timeout(5000);
-	int8_t			returnVal;
+// Pass back this one on the list. Or NULL if not there.
+netwkObj* networkScanObj::getNet(int pos) {
+  
+	netwkObj*	trace;
 	
-	returnVal = -1;																													// Assume failure.
-	if (init) {
-		tmp = status;																													// We save our status.
-		if (m2m_wifi_request_scan(M2M_WIFI_CH_ALL) >= 0) { 										// Start scan.
-			status = WF_IDLE_STATUS;																						// Wait for scan result.
-			timeout.start();																										// Start the timer.
-			while (status!=WF_SCAN_COMPLETED && !timeout.ding()) {							// Spin 'till done or out of time.
-				m2m_wifi_handle_events(NULL);																			// Let chip do its thing.
-			}
-			if (numNets>0) {																										// Have at least one?
-				timeout.setTime(1000);																						// Reset for quick timeout.			
-				for(int i=0;i<numNets;i++) {																			// loop through all of 'em.
-					m2m_wifi_req_scan_result(i);																		// Fire off query.
-					status = WF_IDLE_STATUS;																				// status ready.
-					timeout.start();																								// Start the timer.
-					while (status!=SCAN_RESULT_COMPLETE && !timeout.ding()) {				// SCAN_RESULT_COMPLETE->delt with.
-						m2m_wifi_handle_events(NULL);																	// Let chip do its thing.
-					}
-				}
-				returnVal = numInList;																										// Success!
-			}
-		} else {
-			Serial.println("m2m_wifi_request_scan() failed.");									// Scan failed. 
-		}
-		status = tmp;																													// Restore status.
-	} else {
-		Serial.println("Not initialized.");																		// We were not ready.
+	trace = netList;
+	while(trace && pos) {
+		trace = (netwkObj*)trace->next;
+		pos--;
 	}
-	return returnVal;																												// Success or failure flag.
+	return trace;
 }
 
 
-char* networkScanObj::SSID(uint8_t pos) {
+// No, its not really a string but everyone thinks it is.
+// So, we'll just give 'em a string. Not like it matters,
+// Typically its just for display. But then you could use
+// This as a way of warding off hackers by using all 32
+// bytes and placing Nulls inline.
+char* networkScanObj::getSSID(byte pos) {
 
 	netwkObj*	trace;
 	
@@ -137,7 +232,21 @@ char* networkScanObj::SSID(uint8_t pos) {
 }
 
 
-int32_t networkScanObj::RSSI(uint8_t pos) {
+// BSSID, 6 uneque bytes to finger print an AP. Handy.
+uint8_t* networkScanObj::getBSSID(byte pos) {
+  
+	netwkObj*	trace;
+	
+	trace = getNet(pos);
+	if (trace) {
+		return trace->getBSSID();
+	}
+	return 0;
+}
+
+
+// RSSI, a way of putting a number to signal quality.
+int32_t networkScanObj::getRSSI(byte pos) {
 
 	netwkObj*	trace;
 	
@@ -149,19 +258,22 @@ int32_t networkScanObj::RSSI(uint8_t pos) {
 }
 
 
-uint8_t networkScanObj::encryptionType(uint8_t pos) {
+// What type of encryption is the AP using. WEP? WPA?
+uint8_t networkScanObj::getEncrypt(byte pos) {
 
 	netwkObj*	trace;
 	
 	trace = getNet(pos);
 	if (trace) {
-		return trace->getAuth();
+		return trace->getEncrypt();
 	}
 	return 0;
 }
 
 
-uint8_t networkScanObj::channel(uint8_t pos) {
+// Chanel number, here in the US we get 1-11. Asia gets 1-14?
+// I guess this is the chanel number that the AP is using.
+uint8_t networkScanObj::getChannel(byte pos) {
 
 	netwkObj*	trace;
 	
@@ -172,36 +284,6 @@ uint8_t networkScanObj::channel(uint8_t pos) {
 	return 0;
 }
 
-
-uint8_t* networkScanObj::BSSID(uint8_t pos) {
-
-	netwkObj*	trace;
-	
-	trace = getNet(pos);
-	if (trace) {
-		return trace->getBSSID();
-	}
-	return 0;
-}
-
-
-// Someone asked how many networks can we see. 
-// This is the result of that action.
-void  networkScanObj::handleScanDone(void* pvMsg) {
-
-	lastCount = m2m_wifi_get_num_ap_found();
-	status = WF_SCAN_COMPLETED;
-}
-
-
-// The network list is being refreshed. As the data is called
-// for, we refresh the list and tell whomever its been handled.
-void  networkScanObj::handleScanResult(void* pvMsg) {
-	
-	memcpy(&scanData,pvMsg,sizeof(scanData));
-	updateList();
-	task = loadInfo;
-}
 
 
 
