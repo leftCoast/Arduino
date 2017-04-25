@@ -2,6 +2,8 @@
 
 #include <LC_SPI.h>
 #include <mapper.h>
+#include <idlers.h>
+#include <timeObj.h>
 
 #define CS  6
 #define RST 5
@@ -9,18 +11,18 @@
 
 mapper signalMapper(-120,0,0,100);
 WiFiObj network(CS, IRQ, RST);
+timeObj printTimer(5000);
 
 void setup() {
 
   Serial.begin(9600); while (!Serial);
 
-  Serial.println("Try blank begin()");
-  network.begin();
-  Serial.println("Mac address");
-  printMacAddress();
-  Serial.println("Take down network");
-  network.end();
-  
+  //Serial.println("Try blank begin()");
+  //network.begin();
+  //Serial.println("Mac address");
+  //printMacAddress();
+  //Serial.println("Take down network");
+  //network.end();
   Serial.println("Calling begin with login..!");
   if (network.begin("The Garage","ytrewq12")) {
     Serial.println("SUCCESS!!! A CONNECTION!");
@@ -29,14 +31,16 @@ void setup() {
   } else {
     Serial.println("No connection.. Sad day.");
   }
-  Serial.println("Take down network");
-  //network.end();
-  //Serial.println("Network should be down now.");
-
-
-  // scan for existing networks:
-  Serial.println("Scanning available networks...");
-  listNetworks();
+  /*
+   Serial.println("Take down network, last time..");
+  network.end();
+  Serial.println("Network should be down now.");
+  Serial.println("Try blank begin()");
+  network.begin();
+  */
+  Serial.println("Scanner going on..");
+  network.scanning(true);
+  printTimer.start();
 }
 
 
@@ -60,10 +64,12 @@ void printWiFiStatus() {
 
 void loop() {
   
-  delay(10000);
-  // scan for existing networks:
-  Serial.println("Scanning available networks...");
-  listNetworks();
+  idle();
+  if (printTimer.ding()) {
+    Serial.println("Scanning available networks...");
+    listNetworks();
+    printTimer.start();
+  }
 }
 
 void printMacAddress() {
@@ -71,7 +77,7 @@ void printMacAddress() {
   byte mac[6];
 
   // print your MAC address:
-  network.macAddress(mac);
+  memcpy(mac,network.getMACAddr(),6);
   Serial.print("MAC: ");
   Serial.print(mac[5], HEX);
   Serial.print(":");
@@ -89,13 +95,7 @@ void printMacAddress() {
 
 void listNetworks() {
   // scan for nearby networks:
-  int numSsid = network.scanNetworks();
-  Serial.println("** Scan Networks **");
-  if (numSsid == -1)
-  {
-    Serial.println("Couldn't get a wifi connection");
-    while (true);
-  }
+  int numSsid = network.getNetworkCount();
 
   // print the list of networks seen:
   Serial.print("number of available networks:");
@@ -105,20 +105,20 @@ void listNetworks() {
   for (int thisNet = 0; thisNet < numSsid; thisNet++) {
     Serial.print(thisNet);
     Serial.print(") ");
-    printinField(network.SSID(thisNet),15);
+    printinField(network.getSSID(thisNet),15);
     Serial.print("\tSignal: ");
-    int dbm = network.RSSI(thisNet);
+    int dbm = network.getRSSI(thisNet);
     Serial.print(dbm);
     Serial.print(" dBm\t");
     int percent = signalMapper.Map(dbm);
     Serial.print(percent);Serial.print("%");
     Serial.print("\tChannel: ");
-    Serial.print(network.channel(thisNet));
+    Serial.print(network.getChannel(thisNet));
     byte bssid[6];
     Serial.print("\t\tBSSID: ");
-    printBSSID(network.BSSID(thisNet));
+    printBSSID(network.getBSSID(thisNet));
     Serial.print("\tEncryption: ");
-    printEncryptionType(network.encryptionType(thisNet));
+    printEncryptionType(network.getEncrypt(thisNet));
   }
 }
 

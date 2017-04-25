@@ -9,6 +9,7 @@ extern "C" {
   #include "driver/include/m2m_ssl.h"
 }
 
+
 char errStr[100];
 char infoStr[100];	
 long aLong;
@@ -18,13 +19,14 @@ static void	outLong(void)	 { Serial.println(aLong); }
 static void clrInfo(void) { infoStr[0]='\0'; }
 static void outInfo(void) { Serial.println(infoStr); clrInfo(); }
 
+
 // We only get one of each. These are set up when begin() is called.
 // They're used as a links for the callback function.
 WiFiObj* gWiFi 									= NULL;
 
 static void wifiCallback(uint8_t u8MsgType, void* pvMsg) {
 
-	if (gWiFi) {																	// Sanity. We have something to talk to?
+	if (gWiFi && gNetworkScanObj) {																	// Sanity. We have something to talk to?
 		switch (u8MsgType) {
 			case M2M_WIFI_RESP_DEFAULT_CONNECT		: gWiFi->handleDefaultConnect(pvMsg); break;
 			case M2M_WIFI_RESP_CURRENT_RSSI				: gWiFi->handleCurrentRSSI(pvMsg); break;
@@ -45,11 +47,6 @@ static void wifiCallback(uint8_t u8MsgType, void* pvMsg) {
 }
 
 
-// ************************************************
-// ******************* WiFiObj ********************
-// ************************************************
-
-
 WiFiObj::WiFiObj(int cs,int irq, int rst) {
 
 
@@ -60,22 +57,20 @@ WiFiObj::WiFiObj(int cs,int irq, int rst) {
 
   mode							= WF_RESET_MODE;
   status						= WF_NO_CHIP;
-  remoteMACAddrPtr	= NULL;
-  netList = NULL;
-  numInList = 0;
-  init = false;
+  init							= false;
 }
 
 
-WiFiObj::~WiFiObj(void) {  }
+WiFiObj::~WiFiObj(void) { end(); }
 
 
 // We can start with no hookup.
-bool WiFiObj::begin(void) {
+bool WiFiObj::begin() {
 
-	if (!init) {					// If we ain't initialzed.
-	  gWiFi = this;				// First things first. Setup our global.
-  	doInit();						// Call doInit(). That sets the flag init.
+	if (!init) {															// If we ain't initialzed.
+	  gWiFi = this;														// First things first. Setup our global.
+	  gNetworkScanObj = new netScanner();			// Create the scanner.
+  	doInit();																// Call doInit(). That sets the flag init.
   }
   return init;					// Report!
 }
@@ -104,6 +99,7 @@ bool WiFiObj::connect(char* WifiName,char* WiFiPass) {
   
   success = false;	
   if (init) {
+  	gNetworkScanObj->scanning(false);			// Shut down the scanner.
     if (DHCP) {           // Connect to router? Didn't we just do this?
       localIP = 0;
       submask = 0;
@@ -168,51 +164,7 @@ void WiFiObj::doInit(void) {
 }
 
 
-
-char* WiFiObj::getSSID(void) {
-	
-	if (status == WF_CONNECTED || status == WF_AP_LISTENING || status == WF_AP_CONNECTED) {
-		return SSID;
-	}
-	else {
-		return 0;
-	}
-}
-
-
-uint32_t WiFiObj::getLocalIP(void) { return localIP; }
-
-
-int32_t WiFiObj::getRSSI(void) {
-	
-	timeObj	timeOut(1000);
-	int			savedStat;
-	int			res;
-	
-	savedStat = status;																	// Save status.
-	RSSI = 0;																						// Assume faillure.
-	if (!init) {																				// Sanity.
-		m2m_wifi_handle_events(NULL);											// Clear pending events.
-		status = 0;																				// Clear status. The handler will fill it.
-		res = m2m_wifi_req_curr_rssi();										// Send RSSI request.
-		if (res==M2M_SUCCESS) {														// We sent a good call?
-			timeOut.start();																// Set a timer and..
-			while (status!=RSSI_DONE && !timeOut.ding()) {	// Spin 'till RSSI fills or timeout.
-				m2m_wifi_handle_events(NULL);
-			}
-		}
-		status = savedStat;
-	}
-	return RSSI;																// There you go.
-}
-	
-	
-void WiFiObj::getMACAddr(uint8_t* mac) { 
-
-	m2m_wifi_get_mac_address(mac);
-}
-
-	
+// Release everything. We'll need another call to begin to revive.
 void WiFiObj::end() {
 	
 	if (init) {
@@ -229,11 +181,71 @@ void WiFiObj::end() {
 		mode = WF_RESET_MODE;
 		status = WF_NO_CHIP;
 		init = false;
+		delete(gNetworkScanObj);
+		gNetworkScanObj = NULL;
+		gWiFi = NULL;
 	}
 }
 
 
+void WiFiObj::scanning(bool onOff) {
 
+	gNetworkScanObj->scanning(onOff);
+}
+
+char* WiFiObj::getSSID(void) {
+	
+	if (status == WF_CONNECTED || status == WF_AP_LISTENING || status == WF_AP_CONNECTED) {
+		return (char*)SSID;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+uint32_t WiFiObj::getLocalIP(void) { return localIP; }
+
+
+int WiFiObj::getRSSI(void) {
+	
+	timeObj			timeOut(1000);
+	WiFiStatus	savedStat;
+	int					res;
+	
+	savedStat = status;																	// Save status.
+	RSSI = 0;																						// Assume faillure.
+	if (!init) {																				// Sanity.
+		m2m_wifi_handle_events(NULL);											// Clear pending events.
+		res = m2m_wifi_req_curr_rssi();										// Send RSSI request.
+		if (res==M2M_SUCCESS) {														// We sent a good call?
+			timeOut.start();																// Set a timer and..
+			while (status!=RSSI_DONE && !timeOut.ding()) {	// Spin 'till RSSI fills or timeout.
+				m2m_wifi_handle_events(NULL);
+			}
+		}
+		status = savedStat;
+	}
+	return RSSI;																// There you go.
+}
+	
+	
+byte* WiFiObj::getMACAddr(void) { 
+
+	m2m_wifi_get_mac_address(MACAddr);
+	return MACAddr;
+} 
+
+
+// Pass back the # of items in AP list.
+byte 	WiFiObj::getNetworkCount(void)	{ return gNetworkScanObj->getCount(); }
+char*	WiFiObj::getSSID(int index)			{ return gNetworkScanObj->getSSID(index); }									
+byte* WiFiObj::getBSSID(int index)		{ return gNetworkScanObj->getBSSID(index); }
+int		WiFiObj::getRSSI(int index)			{ return gNetworkScanObj->getRSSI(index); }
+byte	WiFiObj::getEncrypt(int index)	{ return gNetworkScanObj->getEncrypt(index); }
+byte	WiFiObj::getChannel(int index)	{ return gNetworkScanObj->getChannel(index)	; }
+
+		
 //
 // *********** callback handlers ***********
 //
@@ -266,8 +278,8 @@ void  WiFiObj::handleProvisionInfo(void* pvMsg) {
 	Serial.println("Provisioning has been called. It was never completed!");
 	msg = (tstrM2MProvisionInfo *)pvMsg;
 	if (msg->u8Status == M2M_SUCCESS) {
-		memset(ssid, 0, M2M_MAX_SSID_LEN);
-		memcpy(ssid, (char *)msg->au8SSID, strlen((char *)msg->au8SSID));
+		memset(SSID, 0, M2M_MAX_SSID_LEN+1);
+		memcpy(SSID, (char *)msg->au8SSID, strlen((char *)msg->au8SSID));
 		mode = WF_STA_MODE;
 		localIP = 0;
 		submask = 0;
@@ -285,21 +297,20 @@ void  WiFiObj::handleConnectionInfo(void* pvMsg) {
 	tstrM2MConnInfo* msg;
 	
 	msg = (tstrM2MConnInfo*)pvMsg;
-	memcpy(SSID,msg->acSSID,M2M_MAX_SSID_LEN);			// There we gt it.
-	memcpy(connectIPAddr,msg->au8IPAddr,4);					// Uh huh, and that.
-	memcpy(remoteMACAddr,msg->au8MACAddress[i],6);	// That too.
+	memset(SSID,0,M2M_MAX_SSID_LEN+1);							// Going t be used as string. Put '\0's in.
+	memcpy(SSID,msg->acSSID,M2M_MAX_SSID_LEN);			// There we got it.
+	memcpy(remoteIPAddr,msg->au8IPAddr,4);					// Uh huh, and that.
+	memcpy(remoteMACAddr,msg->au8MACAddress,6);			// That too.
 	RSSI = msg->s8RSSI;															// It was just laying there.
 	Auth = msg->u8SecType;													// What? Leave some? no..	
 }
 
 
-void  WiFiObj::handleGetSystemTime(void* pvMsg) {
+void  WiFiObj::handleGetSystemTime(void* pvMsg) { 
 	
-	if (result != 0) {			// Is it carrying an address? It must be.
-		memcpy((tstrSystemTime *)result, pvMsg, sizeof(tstrSystemTime));
-		result = 0;
-	}
+	memcpy(&time, pvMsg, sizeof(tstrSystemTime));
 }
+
 
 // uint8 	__PAD16__ [2]		The padding.
 // uint8 	u8CurrState			Current Wi-Fi connection state
@@ -318,7 +329,7 @@ void  WiFiObj::handleConnectionChange(void* pvMsg) {
 		} else if (mode == WF_AP_MODE) {
 			status = WF_AP_CONNECTED;
 		}
-	} else if (pstrWifiState->u8CurrState == M2M_WIFI_DISCONNECTED) {	// Disconnected?!
+	} else if (msg->u8CurrState == M2M_WIFI_DISCONNECTED) {	// Disconnected?!
 		if (mode == WF_STA_MODE) {
 			status = WF_DISCONNECTED;
 			if (DHCP) {
@@ -361,9 +372,9 @@ void  WiFiObj::handleReqestWPS(void* pvMsg) { Serial.println("There sayin' they 
 
 // Typically from a failed call to m2m_wifi_set_static_ip().
 // Setting yourself to a known address.
-void  WiFiObj::handleIPConflict(void* pvMsg); { Serial.println("There sayin' there's an IP conflict. What do I do?"); }
+void  WiFiObj::handleIPConflict(void* pvMsg) { Serial.println("There sayin' there's an IP conflict. What do I do?"); }
 
 // Documentation says this ain't supported yet.
-void  WiFiObj::handleClientInfo(void* pvMsg); { Serial.println("There sayin' they want client info. What do I do?"); }
+void  WiFiObj::handleClientInfo(void* pvMsg) { Serial.println("There sayin' they want client info. What do I do?"); }
 
 

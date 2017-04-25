@@ -27,15 +27,15 @@
 #define WIFI_FIRMWARE_REQUIRED WIFI_FIRMWARE_LATEST_MODEL_B
 
 #include <Arduino.h>
+#include "driver/include/m2m_types.h"
+#include "WiFiClient.h"
+#include "WiFiSSLClient.h"
+#include "WiFiServer.h"
 
 extern "C" {
 	#include "driver/include/m2m_wifi.h"
 	#include "socket/include/socket.h"
 }
-
-#include "WiFiClient.h"
-#include "WiFiSSLClient.h"
-#include "WiFiServer.h"
 
 typedef enum {
 	WL_NO_SHIELD = 255,

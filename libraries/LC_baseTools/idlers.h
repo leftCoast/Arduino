@@ -8,12 +8,12 @@ public linkListObj {
 
 public: 
   idler(void);
-  ~idler(void);
+  virtual ~idler(void);
 
   void hookup(void);
   virtual void idle(void);
 
-protected:
+//protected:
   boolean hookedIn;
   
 };

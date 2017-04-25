@@ -8,7 +8,7 @@
 #include <Arduino.h>
 #include <IPAddress.h>
 #include <timeObj.h>
-
+#include "netScanner.h"
 
 // tstrEthInitParam
 // This is passed in with m2m_wifi_init() function parameter.
@@ -53,6 +53,28 @@
 // uint32 	u32SubnetMask				Subnet mask for the local area network.
 
 
+// tstrSystemTime
+// For holding a date & time.
+// uint8 	__PAD8__		Padding
+// uint16 u16Year			The rest are kinda' self explanatory.
+// uint8 	u8Day
+// uint8 	u8Hour
+// uint8 	u8Minute
+// uint8 	u8Month 
+// uint8 	u8Second
+
+
+/* Encryption modes */
+enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
+	ENC_TYPE_WEP  = M2M_WIFI_SEC_WEP,
+	ENC_TYPE_TKIP = M2M_WIFI_SEC_WPA_PSK,
+	ENC_TYPE_CCMP = M2M_WIFI_SEC_802_1X,
+	/* ... except these two, 7 and 8 are reserved in 802.11-2007 */
+	ENC_TYPE_NONE = M2M_WIFI_SEC_OPEN,
+	ENC_TYPE_AUTO = M2M_WIFI_SEC_INVALID
+};
+
+
 typedef enum {
   WF_NO_CHIP = 255,
   WF_IDLE_STATUS = 0,
@@ -81,7 +103,6 @@ typedef enum {
 
 
 
-
 class WiFiObj {
 
   public:
@@ -89,23 +110,25 @@ class WiFiObj {
     ~WiFiObj(void);
 
 		bool			begin(void);														// Start, no hookup.
-		bool			connect(char* WifiName,char* WiFiPass);	// Hookup.
     bool			begin(char* WifiName,char* WiFiPass);		// Start & hookup.
+    bool			connect(char* WifiName,char* WiFiPass);	// Hookup.
+    void			scanning(bool onOff);
+    void			end();																	// Tears everything down, frees memory.
     char*			getSSID(void);													// name.
     byte*			getMACAddr(void);												// Our MAC address.
     byte*			getRemoteMACAddr(void);									// Their MAC address.
+    uint32_t	getLocalIP(void);
 		byte*			getBSSID(void);													// Sorta like a MAC address.
 		int				getRSSI(void);													// Signal strength.
-		byte			getAuth(void);													// Encryption type.
+		byte			getEncrypt(void);													// Encryption type.
 		byte			getChannel(void);												// Broadcast channel.
-    int8_t		scanNetworks(bool onOff);								// Turn scanning on or off.
+    void			scanNetworks(bool onOff);								// Turn scanning on or off.
+    byte			getNetworkCount(void);
 		char*			getSSID(int index);											// name.
 		byte*			getBSSID(int index);										// Sorta like a MAC address.
 		int				getRSSI(int index);											// Signal strength.
-		byte			getAuth(int index);											// Encryption type.
+		byte			getEncrypt(int index);											// Encryption type.
 		byte			getChannel(int index);									// Broadcast channel.
-		
-		void			end();
 		
 		void			handleDefaultConnect(void* pvMsg);
 		void			handleCurrentRSSI(void* pvMsg);
@@ -124,26 +147,26 @@ class WiFiObj {
 		netwkObj* getNet(int pos);
 		void			countList(void);
 		
-		bool				init;
-    WiFiStatus  status;
-    byte        mode;
-    //uint32_t		result;							// When we ask for something, here's a spot.
+		bool						init;
+    WiFiStatus  		status;
+    byte        		mode;
+    tstrSystemTime	time;
     
-    uint32_t		leaseTime;
-		uint32_t		DNS;
-    int         DHCP;
-    uint32_t		localIP;
-    uint32_t		submask;
-    uint32_t		gateway;
+    uint32_t				leaseTime;
+		uint32_t				DNS;
+    int         		DHCP;
+    uint32_t				localIP;
+    uint32_t				submask;
+    uint32_t				gateway;
 
-    byte		SSID[M2M_MAX_SSID_LEN];	// Actually SSID is a 32 byte buffer. Most use it like a string.
-    byte		remoteIPAddr[4];				// IP of the AP we hooked to.
-    byte		remoteMACAddr[6];				// Says its the AP MAC addr we hooked to.
-    byte		MACAddr[6];							// Our MAC addr. Again, its what the documentation says.
-		byte		BSSID[6];								// BSSID is used like the wireless MAC Address.
-		int			RSSI;										// RSSI is the signal strength.
-		byte		Auth;										// The type of encryption were using.
-		byte		channel;								// The channel to broadcast/receive on.
+    byte		SSID[M2M_MAX_SSID_LEN+1];	// Actually SSID is a 32 byte buffer. Most use it like a string.
+    byte		remoteIPAddr[4];					// IP of the AP we hooked to.
+    byte		remoteMACAddr[6];					// Says its the AP MAC addr we hooked to.
+    byte		MACAddr[6];								// Our MAC addr. Again, its what the documentation says.
+		byte		BSSID[6];									// BSSID is used like the wireless MAC Address.
+		int			RSSI;											// RSSI is the signal strength.
+		byte		Auth;											// The type of encryption were using.
+		byte		channel;									// The channel to broadcast/receive on.
 };
 
 
