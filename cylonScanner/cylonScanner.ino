@@ -15,20 +15,20 @@
 #include <liteLine.h>
 #include <neoPixel.h>
 
-#define NUM_LEDS  8
-#define LED_PIN   3
+
+//                   ***********  A general pupose scanner class  ***********
 
 
 class cylonScan : public neoPixel,
                   public idler {
 
   public:
-                  cylonScan(int numLEDs,int LEDPin);
+                  cylonScan(int numLEDs,int LEDPin,neoPixelType LEDType=NEO_GRB + NEO_KHZ800);
    virtual        ~cylonScan(void);
 
             void      setColors(colorObj* backColor,colorObj* scanColor);
             void      setFrameTime(float frameMS);
-            void      drawtLEDs(void);
+            void      drawLEDs(void);
    virtual  void      idle(void);
 
             colorObj  backColor;
@@ -41,10 +41,10 @@ class cylonScan : public neoPixel,
 
 
 
-// colors are defaulted to black so setColors must be caklled.
-// This is good because serColors() calls hookup.
-cylonScan::cylonScan(int numLEDs,int LEDPin)
-  : neoPixel(numLEDs,LEDPin), idler() {
+// Colors are defaulted to black so setColors must be called.
+// This is good because serColors() calls hookup().
+cylonScan::cylonScan(int numLEDs,int LEDPin,neoPixelType LEDType)
+  : neoPixel(numLEDs,LEDPin,LEDType), idler() {
 
     backColor.setColor(&black);   // Default to black.
     scanColor.setColor(&black);   // Default to black.
@@ -66,13 +66,13 @@ void cylonScan::setColors(colorObj* inBackColor,colorObj* inScanColor) {
 }
 
 
-void cylonScan::setFrameTime(float frameMS) { frameTimer.setTime(frameMS) ;}
+void cylonScan::setFrameTime(float frameMS) { frameTimer.setTime(frameMS); }
 
 
 void  cylonScan::drawLEDs() {
 
-  setAll(backColor);
-  setPixalColor(frame,scanColor);
+  setAll(&backColor);
+  setPixelColor(frame,&scanColor);
   show();
 }
 
@@ -97,17 +97,32 @@ void cylonScan::idle(void) {
   }
 }
 
-  
-cylonScan scanner(NUM_LEDS,LED_PIN);
+
+//       ***********  Your sketch is here. All that's left of it. The class runs your lights in the background for you.  *********** 
+//                The one rule. Don't feed them meat.. No, really. You can add things to this ketch, but DON'T use delay().
+
+#define NUM_LEDS  8     // Change to match your setup
+#define LED_PIN   3     // This one too.
+
+//cylonScan scanner(NUM_LEDS,LED_PIN,NEO_GRBW+NEO_KHZ800);  // This one for 4 color
+cylonScan scanner(NUM_LEDS,LED_PIN);                        // This one for 3 color.
 
 void setup() {
+
+  colorObj  backColor(WHITE); // Initial colors from stock.
+  colorObj  scanColor(BLUE);
+
+  backColor.blend(&black,95);   // Tone down the white . Blend in 95% black.
+  scanColor.blend(&green,30);   // Bring out thre blue, toss in some green.
+  
   scanner.begin();
-  scanner.setPixelColor(2,&green);
-  scanner.show();
+  scanner.setColors(&backColor,&scanColor);   // set in our colors.
+  //scanner.setColors(&black,&red);           // uncomment this for a different look.
+  scanner.setFrameTime(100);                  // 100 ms between moves.
 }
 
 
 void loop() {
+  idle();
 
-  
 }
