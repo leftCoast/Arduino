@@ -4,7 +4,7 @@
 #include "mapper.h"
 #include "multiMap.h"
 // uncomment for debug stuff.
-#define PRINT_COLOR
+//#define PRINT_COLOR
 
 // I'm not the only one to define the colors. This list was better than mine,
 // So I added it to mine. Thank you "Sumotoy". If it see's his OLED lib the #ifdef

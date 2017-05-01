@@ -57,19 +57,27 @@ WiFiObj::WiFiObj(int cs,int irq, int rst) {
 
   mode							= WF_RESET_MODE;
   status						= WF_NO_CHIP;
+  gNetworkScanObj		= new netScanner();			// Create the scanner.
+  gWiFi 						= this;									// Setup our global.
   init							= false;
 }
 
 
-WiFiObj::~WiFiObj(void) { end(); }
+WiFiObj::~WiFiObj(void) { 
+
+		end();
+		if (gNetworkScanObj) {
+			delete(gNetworkScanObj);
+			gNetworkScanObj = NULL;
+		}
+		gWiFi = NULL;
+	}
 
 
 // We can start with no hookup.
 bool WiFiObj::begin() {
 
 	if (!init) {															// If we ain't initialzed.
-	  gWiFi = this;														// First things first. Setup our global.
-	  gNetworkScanObj = new netScanner();			// Create the scanner.
   	doInit();																// Call doInit(). That sets the flag init.
   }
   return init;					// Report!
@@ -99,7 +107,6 @@ bool WiFiObj::connect(char* WifiName,char* WiFiPass) {
   
   success = false;	
   if (init) {
-  	gNetworkScanObj->scanning(false);			// Shut down the scanner.
     if (DHCP) {           // Connect to router? Didn't we just do this?
       localIP = 0;
       submask = 0;
@@ -181,9 +188,6 @@ void WiFiObj::end() {
 		mode = WF_RESET_MODE;
 		status = WF_NO_CHIP;
 		init = false;
-		delete(gNetworkScanObj);
-		gNetworkScanObj = NULL;
-		gWiFi = NULL;
 	}
 }
 
@@ -238,7 +242,7 @@ byte* WiFiObj::getMACAddr(void) {
 
 
 // Pass back the # of items in AP list.
-byte 	WiFiObj::getNetworkCount(void)	{ return gNetworkScanObj->getCount(); }
+byte 	WiFiObj::getNetworkCount(void)	{ return gNetworkScanObj->getAPCount(); }
 char*	WiFiObj::getSSID(int index)			{ return gNetworkScanObj->getSSID(index); }									
 byte* WiFiObj::getBSSID(int index)		{ return gNetworkScanObj->getBSSID(index); }
 int		WiFiObj::getRSSI(int index)			{ return gNetworkScanObj->getRSSI(index); }

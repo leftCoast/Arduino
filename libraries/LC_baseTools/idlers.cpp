@@ -16,18 +16,14 @@ idler::idler(void) {
   hookedIn = false; 
 }
 
-idler::~idler(void) {
 
-  theIdlers.deleteObj(this);
-}
+idler::~idler(void) { theIdlers.deleteObj(this); }
 
 
 // You can't call this in the contstructor. Love to but can't.
 // So call this the first time you add data or turn your idler on.
 void idler::hookup(void) {
-  //Serial.println("Attempting to hookup an idler");
   if (!hookedIn) {
-    //Serial.print("calling idlers addToTop List: "); Serial.print((unsigned long)&theIdlers); Serial.print("  newObj: "); Serial.println((unsigned long) this);
     theIdlers.addToTop(this); 
     hookedIn = true;
   }
@@ -44,6 +40,9 @@ void idler::idle(void) { }
 // Is delared as a global and runs in th background.
 // *******************************
 
+// Notice the (false) parameter? This means that the idler list
+// Will pop idlers off the list without deleting them. False means
+// it does not own them.
 idlers::idlers(void) : linkList(false) {  }
 
 

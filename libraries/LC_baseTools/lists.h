@@ -12,19 +12,21 @@
 // the list objects.
 // **********************
 
+// This is the base for the things in the list..
 class linkListObj {
   
   public:
     linkListObj(void);
     ~linkListObj(void);
     
-    void linkAfter(linkListObj* present); // Given a pointer to a node, link yourself after it.
-    void linkToEnd(linkListObj* present); // Given a pointer to a node, link yourself after the last in the chain.
+    void 					linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
+    void 					linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
+    linkListObj*	getNext(void);										// Pass back the next pointer.
     
     linkListObj* next;
 };
 
-
+// This is the manager for a list.
 class linkList {
   
   public:
@@ -38,7 +40,10 @@ class linkList {
     virtual boolean      isEmpty(void);
     virtual void         dumpList(void);
     virtual linkListObj* getList(void);
-            
+    				int					 getCount(void);
+    				linkListObj* getByIndex(int index);										
+ 
+ protected :           
     linkListObj* theList;
     boolean      weOwn;
 };

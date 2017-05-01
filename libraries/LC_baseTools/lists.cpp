@@ -39,6 +39,10 @@ void linkListObj::linkToEnd(linkListObj* present) {
   }
 }
 
+// There are times when its nice to just ask.
+linkListObj* linkListObj::getNext(void) { return next; }
+
+
 
 //********************* linkList *************************
 // your basic linked list. Good base for linked list things, you know.
@@ -104,7 +108,7 @@ void linkList::deleteFromTop(void) {
 void linkList::deleteObj(linkListObj* oldObj) {
 
   linkListObj* temp;
-
+	Serial.println("Calling deleteObj()");
   if (oldObj) {                      // They didn't hand us a NULL pointer.
     if(theList==oldObj) {            // Were poiting at it.
       theList = oldObj->next;        // unlink..
@@ -115,12 +119,15 @@ void linkList::deleteObj(linkListObj* oldObj) {
     else {                           // We ain't pointing at it..
       temp = theList;                // We're going to have to go look for it.
       while(temp->next!=oldObj && temp->next!=NULL) {
+      	Serial.println("Looking..");
         temp = temp->next;
       }
+      Serial.println("Loop's done..");
       if (temp->next==oldObj) {      // Found it!
         temp->next = oldObj->next;   // unlink..
         if (weOwn) {                 // Same as always.
-          delete(oldObj);            // We kill the ones we own..
+        	Serial.println("Calling delete(oldObj)");
+          //delete(oldObj);            // We kill the ones we own..
         }
       }
     }
@@ -145,6 +152,35 @@ linkListObj* linkList::getList(void) {
 }
 
 
+int linkList::getCount(void) {
+
+		linkListObj*	trace;
+		long					count;
+	
+		count = 0;
+		trace = theList;
+		while(trace) {
+			count++;
+			trace = trace->next;
+		}
+		return count;
+	}
+	
+	
+// And there are times it would be nice to grab one by index.
+// Like an array. Returns NULL if not found.
+linkListObj* linkList::getByIndex(int index) {
+
+	linkListObj*	trace;
+	
+	trace = theList;
+	while(trace && index) {
+		trace = trace->next;
+		index--;
+	}
+	return trace;
+}
+	
 // ********** stack ****************
 // Your basic stack, we own 'em. Mostly pass throughs with the usual names.
 

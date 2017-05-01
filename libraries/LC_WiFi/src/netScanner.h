@@ -38,7 +38,6 @@
 // from other source files.
 
 class netwkObj;	// Forward dec.
-class netScanner;	
 
 enum scanStates {
   scannerOff,		// Scanning is off. Used as a mask for the handlers.
@@ -48,22 +47,11 @@ enum scanStates {
   waitOnInfo    // Wait for info load to arrive.
 };
 
-
-class scanKicker : public idler {
-
-	public :
-					scanKicker(netScanner* inScannner);
-	virtual ~scanKicker(void);
-		
-	virtual	void			idle(void);
-	
-					netScanner* scanner;
-	};			
-	
 					
 // This is the header node. It manages network list.
-class netScanner :	public dblLinkListObj,
-												public timeObj {
+class netScanner :	public linkList,
+										public idler,
+										public timeObj {
 	
 	public:
 										netScanner(void);
@@ -78,9 +66,8 @@ class netScanner :	public dblLinkListObj,
 					void			trimList(void);
           void      countList(void);
           void      updateList(void);
-          netwkObj* getNet(byte pos);
           
-          byte			getCount(void);					// Return number in list.
+          byte 			getAPCount(void);
           char*     getSSID(byte index);		// name.
           byte*     getBSSID(byte index);		// Sorta like a MAC address.
           int	      getRSSI(byte index);		// Signal strength.
@@ -88,7 +75,6 @@ class netScanner :	public dblLinkListObj,
           byte      getChannel(byte index);	// Broadcast channel.
 	
 	private:
-		scanKicker*						ourKicker;
 		timeObj								scanTimer;
 		scanStates						state;				// What we're up to now.
 		tstrM2mWifiscanResult	scanData;			// Holder for last callback info.
@@ -99,7 +85,7 @@ class netScanner :	public dblLinkListObj,
 
 
 // This is a network node. It contains the individual network data.
-class netwkObj : public dblLinkListObj,
+class netwkObj : public linkListObj,
 								 public timeObj {
 
 	public:
