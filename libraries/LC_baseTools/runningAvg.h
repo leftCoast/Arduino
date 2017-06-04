@@ -9,7 +9,10 @@ class runningAvg {
     
     float addData(float inData);
     float getAve(void);
-    
+    float getMax(void);
+    float getMin(void);
+    float getDelta(void);
+  
   protected:
     int    maxData;     // Total amount allowed.
     int    numValues;   // The amount we have.

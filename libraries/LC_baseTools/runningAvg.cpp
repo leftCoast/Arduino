@@ -40,6 +40,34 @@ float runningAvg::addData(float inData) {
   return result;
 }
 
+
 float runningAvg::getAve(void) { return result; }
 
+
+float runningAvg::getMax(void) {
   
+  float result = theValues[0];
+  
+  for (int i=1;i<maxData;i++) {
+    if (theValues[i]>result) {
+      result = theValues[i];
+    }
+  }
+  return result;
+}
+
+
+float runningAvg::getMin(void) {
+  
+  float result = theValues[0];
+  
+  for (int i=1;i<maxData;i++) {
+    if (theValues[i]<result) {
+      result = theValues[i];
+    }
+  }
+  return result;
+}
+
+
+float runningAvg::getDelta(void) { return getMax()-getMin(); }
