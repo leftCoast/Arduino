@@ -4,7 +4,7 @@
 #include <neoPixel.h>
 #include <timeObj.h>
 
-#define NUM_LEDS          120
+#define NUM_LEDS          150
 #define PIXEL_PIN         2
 //#define DARK_PERCENT      75
 

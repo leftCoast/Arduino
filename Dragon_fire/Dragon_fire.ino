@@ -16,8 +16,8 @@
 
 #include "fireLine.h"
 
-#define NUM_LIGHTS    120
-#define LED_PIN       8
+#define NUM_LIGHTS    150 //120 // These two changed to run on battery box.
+#define LED_PIN       2   //8
 #define PATTERN_LEN   24
 #define NUM_PATTERNS  10
 #define FRAME_DELAY   17     // How long between frames.
@@ -52,7 +52,7 @@ timeObj waitTimer(WAIT_DELAY);
 #endif
 
 int  r; 
-int  index;
+int  pIndex;
 int  maxIndex;
 bool runningFlames;
 
@@ -132,9 +132,9 @@ void setup() {
 
 void startLights(void) {
 
-  index = 0;
+  pIndex = 0;
   lightString.setAll(&black);
-  fireLine.setLights(index++);
+  fireLine.setLights(pIndex++);
   runningFlames = true;
   frameTimer.start();
 }
@@ -190,8 +190,8 @@ void loop() {
       lightString.show();
       frameTimer.start();
       lightString.setAll(&black);
-      fireLine.setLights(index++);
-      if (index>maxIndex+1) {     // We already loaded in the last one so we need another to fire it off.
+      fireLine.setLights(pIndex++);
+      if (pIndex>maxIndex+1) {     // We already loaded in the last one so we need another to fire it off.
         runningFlames = false;
  #ifdef master       
         waitTimer.start();
@@ -200,7 +200,3 @@ void loop() {
     }
   }
 }
-
-
-
-

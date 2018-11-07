@@ -147,7 +147,7 @@ void pixelGroup::setPixelColor(word pixelNum, colorObj* color) { ourChain->setPi
 
 void pixelGroup::setPixels(colorObj* color) {
 
-   for(int i=0;i<numPixels;i++) {
+   for(word i=0;i<numPixels;i++) {
       setPixelColor(i,color);
    }
 }

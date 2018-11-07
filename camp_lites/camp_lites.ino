@@ -4,8 +4,8 @@
 #include <neoPixel.h>
 #include <timeObj.h>
 
-#define NUM_LEDS          120
-#define PIXEL_PIN         4
+#define NUM_LEDS          150
+#define PIXEL_PIN         2
 #define DARK_PERCENT      75
 #define SPARKLE_LOW_LIFE  5
 #define SPARKLE_LIFE      30
@@ -148,7 +148,7 @@ void sparkles::cleanUp(void) {
       if (aSparkle) {                         // Sanity! Check for null.
         if (aSparkle->ding()) {
           deleteObj((linkListObj*)aSparkle);
-          delete aSparkle;                    // Didn't deleteObj take care of this?
+          delete aSparkle;                    // Didn't deleteObj take care of this? *** delete was commented out? why? ***
           done = true;                        // Only kill one. Make 'em sweat.
         }
       } else {
