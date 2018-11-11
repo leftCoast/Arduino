@@ -46,7 +46,6 @@ void setup() {
   lightLine.show();
   delayTimer.start();
   aColor.setColor(&black);
-  aColor.blend(&blue,LOW_BLEND);
   bColor.setColor(&green);
   bColor.blend(&black,HI_BLEND);
   lightMapper.setColors(&aColor,&bColor);

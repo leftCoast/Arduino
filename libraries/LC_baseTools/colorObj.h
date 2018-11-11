@@ -1,4 +1,3 @@
-#ifndef colorObj_h
 #define colorObj_h
 
 #include "mapper.h"
