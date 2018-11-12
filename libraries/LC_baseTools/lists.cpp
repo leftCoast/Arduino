@@ -35,9 +35,10 @@ void linkListObj::linkToEnd(linkListObj* present) {
     while(present->next!=NULL) {      // There's more?!
       present = present->next;        // jump over to the next one!
     }                                 // We should be sitting on the last one now..
-    present->next = this;              // link in!
+    present->next = this;             // link in!
   }
 }
+
 
 // There are times when its nice to just ask.
 linkListObj* linkListObj::getNext(void) { return next; }
@@ -49,28 +50,27 @@ linkListObj* linkListObj::getNext(void) { return next; }
 
 // When we recieve an object to link up. Do we own it? Or are
 // we just tracking other people's laundry?
-linkList::linkList(boolean doWeOwnThem) {
-
-  theList = NULL;
-  weOwn = doWeOwnThem;
-}
+linkList::linkList(void) { theList = NULL; }
 
 
 linkList::~linkList(void) { 
-  dumpList(); 
+  // it seems that there is no way to delete
+  // list items. Why? Because we don't know
+  // what superclass they are. When we call
+  // delete() on them everything crashes.
 }
 
 
 void linkList::addToTop(linkListObj* newObj) {
 
-  /*
-   Serial.print("addToTop list: ");
-  Serial.print((unsigned long)this);
-  Serial.print("  newObj: ");
-  Serial.println((unsigned long) newObj);
-   */
-  newObj->next = theList;  // Empty or not, it does the right thing.
-  theList = newObj;
+	/*
+	Serial.print("addToTop list: ");
+	Serial.print((unsigned long)this);
+	Serial.print("  newObj: ");
+	Serial.println((unsigned long) newObj);
+	*/
+	newObj->next = theList;  // Empty or not, it does the right thing.
+	theList = newObj;
 }
 
 
@@ -91,65 +91,38 @@ void linkList::addToEnd(linkListObj* newObj) {
 }
 
 
-void linkList::deleteFromTop(void) {
+void linkList::unlinkTop(void) {
 
-  linkListObj* temp;
-
-  if (theList) {                    // if we have something there.
-    temp = theList;               // Keep a pointer to it.
+  if (theList) {                  // if we have something there.
     theList = theList->next;      // unlink.
-    if (weOwn) {                  // If we own it?
-      delete(temp);               // delete it.
-    }
   }
 }
 
 
-void linkList::deleteObj(linkListObj* oldObj) {
+void linkList::unlinkObj(linkListObj* oldObj) {
 
   linkListObj* temp;
-	Serial.println("Calling deleteObj()");
+  
   if (oldObj) {                      // They didn't hand us a NULL pointer.
     if(theList==oldObj) {            // Were poiting at it.
       theList = oldObj->next;        // unlink..
-      if (weOwn) {                   // if we own it, 
-        delete(oldObj);              // kill it. Ain't we nice?
-      }
-    } 
-    else {                           // We ain't pointing at it..
+    }  else {                        // We ain't pointing at it..
       temp = theList;                // We're going to have to go look for it.
       while(temp->next!=oldObj && temp->next!=NULL) {
-      	Serial.println("Looking..");
         temp = temp->next;
       }
-      Serial.println("Loop's done..");
       if (temp->next==oldObj) {      // Found it!
         temp->next = oldObj->next;   // unlink..
-        if (weOwn) {                 // Same as always.
-        	Serial.println("Calling delete(oldObj)");
-          //delete(oldObj);            // We kill the ones we own..
-        }
       }
     }
   }     
 }
 
 
-boolean linkList::isEmpty(void) { 
-  return(theList == NULL); 
-}
+bool linkList::isEmpty(void) { return(theList == NULL); }
 
 
-void linkList::dumpList(void) {
-
-  while(!isEmpty())
-    deleteFromTop();
-}
-
-
-linkListObj* linkList::getList(void) { 
-  return (theList); 
-}
+linkListObj* linkList::getList(void) { return (theList); }
 
 
 int linkList::getCount(void) {
@@ -182,60 +155,33 @@ linkListObj* linkList::getByIndex(int index) {
 }
 	
 // ********** stack ****************
-// Your basic stack, we own 'em. Mostly pass throughs with the usual names.
+// Your basic stack. Mostly pass throughs with the usual names.
 
 
-stack::stack(void) : 
-linkList(true) { 
-}
+stack::stack(void) : linkList() { }
 
-stack::~stack(void) {  
-}
+stack::~stack(void) {  }
 
-void stack::push(linkListObj* newObj) { 
-  addToTop(newObj); 
-}
+void stack::push(linkListObj* newObj) { addToTop(newObj); }
 
-void stack::pop(void) { 
-  deleteFromTop(); 
-}
+void stack::pop(void) { unlinkTop(); }
 
-linkListObj* stack::top(void) { 
-  return getList(); 
-}
-
-void stack::dump(void) { 
-  dumpList(); 
-}
-
+linkListObj* stack::top(void) { return getList(); }
 
 
 // ********** queue ****************
 // Your basic queue, we own 'em. Mostly pass throughs with the usual names.
 
 
-queue::queue(void) : 
-linkList(true) { 
-}
+queue::queue(void) : linkList() { }
 
-queue::~queue(void) {  
-}
+queue::~queue(void) { }
 
-void queue::push(linkListObj* newObj) { 
-  addToEnd(newObj); 
-}
+void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
-void queue::pop(void) { 
-  deleteFromTop(); 
-}
+void queue::pop(void) { unlinkTop(); }
 
-linkListObj* queue::top(void) { 
-  return getList(); 
-}
-
-void queue::dump(void) { 
-  dumpList(); 
-}
+linkListObj* queue::top(void) { return getList(); }
 
 
 // ********** double linked list ****************

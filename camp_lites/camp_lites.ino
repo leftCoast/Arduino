@@ -22,8 +22,8 @@
 class sparkle : public linkListObj, public timeObj {
 
   public:
-    sparkle(neoPixel* inLEDs, uint16_t inIndex, colorObj* inColor);
-    ~sparkle(void);
+            sparkle(neoPixel* inLEDs, uint16_t inIndex, colorObj* inColor);
+    virtual ~sparkle(void);
 
     void erase(void); // Put the saved color back.
     void draw(void);  // Save off the base color then do whatever.
@@ -40,13 +40,12 @@ sparkle::sparkle(neoPixel* inLEDs, uint16_t inIndex, colorObj* inColor) {
   LEDs = inLEDs;
   index = inIndex;
   ourColor.setColor(inColor);
-  setTime(random(SPARKLE_LOW_LIFE,SPARKLE_LIFE));                                                                                                                                                                               
+  setTime(random(SPARKLE_LOW_LIFE,SPARKLE_LIFE));
 }
 
 
-sparkle::~sparkle(void) {
-  LEDs = NULL;
-}
+sparkle::~sparkle(void) { LEDs = NULL; }
+
 
 void sparkle::erase(void) {
 
@@ -74,8 +73,8 @@ void sparkle::draw(void) {
 class sparkles : public linkList {
 
   public:
-    sparkles(neoPixel* inLEDs);
-    ~sparkles(void);
+            sparkles(neoPixel* inLEDs);
+    virtual ~sparkles(void);
 
     void  addSparkle(uint16_t index, colorObj* flashColor);
     void  erase(void);
@@ -86,11 +85,9 @@ class sparkles : public linkList {
 };
 
 
-sparkles::sparkles(neoPixel* inLEDs) : linkList(false) {
-  LEDs = inLEDs;
-}
+sparkles::sparkles(neoPixel* inLEDs) : linkList() { LEDs = inLEDs; }
 
-sparkles::~sparkles(void) {  }
+sparkles::~sparkles(void) { }
 
 
 void sparkles::addSparkle(uint16_t index, colorObj* flashColor) {
@@ -147,8 +144,8 @@ void sparkles::cleanUp(void) {
       index++;
       if (aSparkle) {                         // Sanity! Check for null.
         if (aSparkle->ding()) {
-          deleteObj((linkListObj*)aSparkle);
-          delete aSparkle;                    // Didn't deleteObj take care of this? *** delete was commented out? why? ***
+          unlinkObj((linkListObj*)aSparkle);
+          delete aSparkle;                    // We take care of memory we allocated.
           done = true;                        // Only kill one. Make 'em sweat.
         }
       } else {
@@ -176,7 +173,7 @@ colorObj flashColor;
 
 void setup() {
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
 
   flashColor.setColor(&white);
   backColor.setColor(&blue);

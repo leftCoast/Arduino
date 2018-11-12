@@ -1,7 +1,7 @@
 #ifndef lists_h
 #define lists_h
 
-#include <Arduino.h>
+#include <Arduino.h>	// Do we need this here?
 
 
 // **********************
@@ -19,43 +19,39 @@ class linkListObj {
     linkListObj(void);
     ~linkListObj(void);
     
-    void 					linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
-    void 					linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
-    linkListObj*	getNext(void);										// Pass back the next pointer.
+    virtual	void 			linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
+    virtual	void 			linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
+    virtual linkListObj*	getNext(void);						// Pass back the next pointer.
     
     linkListObj* next;
 };
+
 
 // This is the manager for a list.
 class linkList {
   
   public:
-    linkList(boolean doWeOwnThem);
+    linkList(void);
     ~linkList(void);
     
     virtual void         addToTop(linkListObj* newObj);
     virtual void         addToEnd(linkListObj* newObj);
-    virtual void         deleteFromTop(void);             // Push off or kill the first one.
-    virtual void         deleteObj(linkListObj* oldObj);  // Find it and push it off. Maybe kill it?
-    virtual boolean      isEmpty(void);
-    virtual void         dumpList(void);
+    virtual void         unlinkTop(void);					// Push off the first one.
+    virtual void         unlinkObj(linkListObj* oldObj);	// Find it and push it off.
+    virtual bool		 isEmpty(void);
     virtual linkListObj* getList(void);
-    				int					 getCount(void);
-    				linkListObj* getByIndex(int index);										
+    		int			 getCount(void);
+    		linkListObj* getByIndex(int index);										
  
  protected :           
     linkListObj* theList;
-    boolean      weOwn;
 };
 
 
 //*******************************************************
 // stack
-// In the stack we have push, pop, top, dump & empty.
-// We also assume we own the objecs. So, when we pop one,
-// we delete it. This is the most common way I've seen them
-// used. If you want something else, there's enough legos
-// here to make it up.
+// In the stack we have push, pop, top & empty.
+// Actually dump
 //*******************************************************
 
 class stack : public linkList {
@@ -67,18 +63,16 @@ class stack : public linkList {
     virtual void         push(linkListObj* newObj);
     virtual void         pop(void);
     virtual linkListObj* top(void);
-    virtual void         dump(void);
-    virtual boolean      empty(void);
+    virtual bool	     empty(void);
   };
 
 
 //*******************************************************
 // queue
 // Just like in the stack, in the queue we have push, pop, 
-// top, dump & empty. But, when we add an object we don't
+// top & empty. But, when we add an object we don't
 // add it to the top of the list, we add it to the end. 
-// Like the stack, we also assume we own the objecs. So,
-// when we pop one, we delete it.
+// Like the stack.
 //*******************************************************
 
 class queue : public linkList {
@@ -90,16 +84,13 @@ class queue : public linkList {
     virtual void         push(linkListObj* newObj);
     virtual void         pop(void);
     virtual linkListObj* top(void);
-    virtual void         dump(void);
-    //virtual boolean      empty(void);
+    virtual bool	     empty(void);
   };
 
 
 //*******************************************************
 // Double linked list. Handy if you'd like to traverse both
 // ways. Also handy 'cause it can be self managing.
-// Deleting nodes will, first pull them from the list
-// patching the hole, then delete them.
 //*******************************************************
 
 class dblLinkListObj {
@@ -108,9 +99,7 @@ public:
     dblLinkListObj(void);
     ~dblLinkListObj(void);
     
-    
     void            linkAfter(dblLinkListObj* present); // Given a pointer to a node, link yourself after it.
-
     void            linkBefore(dblLinkListObj* present); // Given a pointer to a node, link yourself before it.
     dblLinkListObj* getFirst(void);
     dblLinkListObj* getLast(void);

@@ -17,7 +17,7 @@ idler::idler(void) {
 }
 
 
-idler::~idler(void) { theIdlers.deleteObj(this); }
+idler::~idler(void) { }
 
 
 // You can't call this in the contstructor. Love to but can't.
@@ -40,10 +40,8 @@ void idler::idle(void) { }
 // Is delared as a global and runs in th background.
 // *******************************
 
-// Notice the (false) parameter? This means that the idler list
-// Will pop idlers off the list without deleting them. False means
-// it does not own them.
-idlers::idlers(void) : linkList(false) {  }
+
+idlers::idlers(void) : linkList() {  }
 
 
 idlers::~idlers(void) { }

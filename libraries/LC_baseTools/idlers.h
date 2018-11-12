@@ -14,7 +14,7 @@ public:
   virtual void idle(void);
 
 //protected:
-  boolean hookedIn;
+  bool	hookedIn;
   
 };
 
