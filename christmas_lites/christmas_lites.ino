@@ -3,8 +3,8 @@
 #include <colorObj.h>
 #include <neoPixel.h>
 
-#define NUM_LEDS      120
-#define PIXEL_PIN     45
+#define NUM_LEDS      150
+#define PIXEL_PIN     2
 #define NUM_COLORS    6
 #define DARK_PERCENT  75
 #define FADE_PERCENT  50.999
@@ -113,7 +113,7 @@ class sparkles : public linkList {
 };
 
 
-sparkles::sparkles(neoPixel* inLEDs) : linkList(false) {
+sparkles::sparkles(neoPixel* inLEDs) : linkList() {
   LEDs = inLEDs;
 }
 
@@ -173,7 +173,7 @@ void sparkles::cleanUp(void) {
       index++;
       if (aSparkle) {                         // Sanity! Check for null.
         if (!(aSparkle->alive)) {
-          deleteObj((linkListObj*)aSparkle);
+          unlinkObj((linkListObj*)aSparkle);
           delete aSparkle;
           done = true;                        // Only kill one. Make 'em sweat.
         }

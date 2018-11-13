@@ -28,13 +28,13 @@ void loop() {
 
   int       flameLen;
   int       taperLen;
-  mapper    tapperPercent;
+  mapper    taperPercent;
   colorObj  localFlame;
   
   lites.setAll(&black);
   flameLen = random(25,40);
   taperLen = random(12,flameLen/2);
-  tapperPercent.setValues(flameLen,flameLen-taperLen,90,0);
+  taperPercent.setValues(flameLen,flameLen-taperLen,90,0);
   for(int i=0;i<flameLen;i++) {
     localFlame.setColor(&flame);
     localFlame.blend(&black,tapperPercent.Map(i));
