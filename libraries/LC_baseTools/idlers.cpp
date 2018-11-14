@@ -55,7 +55,7 @@ void idlers::idle(void) {
   trace = (idler*) theList;
   while(trace!=NULL) {
     trace->idle();
-    trace = (idler*)trace->next;
+    trace = (idler*)trace->getNext();
   }
 }
 

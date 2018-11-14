@@ -8,7 +8,7 @@
 // Your basic single linked list. Good for lists and stacks.
 // One issue is that the list objects can not unlink themselves.
 // This is because they have no idea who points at them. 
-// So, unlike the double linked list, the list owner must manage 
+// So, unlike the double linked list, a list owner must manage 
 // the list objects.
 // **********************
 
@@ -17,12 +17,14 @@ class linkListObj {
   
   public:
     linkListObj(void);
-    ~linkListObj(void);
+    virtual	~linkListObj(void);
     
     virtual	void 			linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
     virtual	void 			linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
     virtual linkListObj*	getNext(void);						// Pass back the next pointer.
-    
+    virtual	void			setNext(linkListObj* ptr);			// Point somewhere else.
+  
+  protected :  
     linkListObj* next;
 };
 
@@ -32,12 +34,13 @@ class linkList {
   
   public:
     linkList(void);
-    ~linkList(void);
+    virtual	~linkList(void);
     
     virtual void         addToTop(linkListObj* newObj);
     virtual void         addToEnd(linkListObj* newObj);
     virtual void         unlinkTop(void);					// Push off the first one.
     virtual void         unlinkObj(linkListObj* oldObj);	// Find it and push it off.
+    virtual	void		 dumpList(void);
     virtual bool		 isEmpty(void);
     virtual linkListObj* getList(void);
     		int			 getCount(void);
