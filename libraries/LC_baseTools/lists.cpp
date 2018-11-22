@@ -44,6 +44,9 @@ void linkListObj::linkToEnd(linkListObj* present) {
 linkListObj* linkListObj::getNext(void) { return next; }
 
 
+// Lets point somewhere else..
+void linkListObj::setNext(linkListObj* ptr) { next = ptr; }			
+
 
 //********************* linkList *************************
 // your basic linked list. Good base for linked list things, you know.
@@ -69,7 +72,7 @@ void linkList::addToTop(linkListObj* newObj) {
 	Serial.print("  newObj: ");
 	Serial.println((unsigned long) newObj);
 	*/
-	newObj->next = theList;  // Empty or not, it does the right thing.
+	newObj->setNext(theList);  // Empty or not, it does the right thing.
 	theList = newObj;
 }
 
@@ -94,7 +97,7 @@ void linkList::addToEnd(linkListObj* newObj) {
 void linkList::unlinkTop(void) {
 
   if (theList) {                  // if we have something there.
-    theList = theList->next;      // unlink.
+    theList = theList->getNext();      // unlink.
   }
 }
 
@@ -105,17 +108,29 @@ void linkList::unlinkObj(linkListObj* oldObj) {
   
   if (oldObj) {                      // They didn't hand us a NULL pointer.
     if(theList==oldObj) {            // Were poiting at it.
-      theList = oldObj->next;        // unlink..
+      theList = oldObj->getNext();        // unlink..
     }  else {                        // We ain't pointing at it..
       temp = theList;                // We're going to have to go look for it.
-      while(temp->next!=oldObj && temp->next!=NULL) {
-        temp = temp->next;
+      while(temp->getNext()!=oldObj && temp->getNext()!=NULL) {
+        temp = temp->getNext();
       }
-      if (temp->next==oldObj) {      // Found it!
-        temp->next = oldObj->next;   // unlink..
+      if (temp->getNext()==oldObj) {		// Found it!
+        temp->setNext(oldObj->getNext());	// unlink..
       }
     }
   }     
+}
+
+
+void linkList::dumpList(void) {
+
+	linkListObj*	trace;
+	
+	while(theList) {
+		trace = theList;
+		unlinkTop();
+		delete(trace);
+	}	
 }
 
 
@@ -134,7 +149,7 @@ int linkList::getCount(void) {
 		trace = theList;
 		while(trace) {
 			count++;
-			trace = trace->next;
+			trace = trace->getNext();
 		}
 		return count;
 	}
@@ -148,7 +163,7 @@ linkListObj* linkList::getByIndex(int index) {
 	
 	trace = theList;
 	while(trace && index) {
-		trace = trace->next;
+		trace = trace->getNext();
 		index--;
 	}
 	return trace;
