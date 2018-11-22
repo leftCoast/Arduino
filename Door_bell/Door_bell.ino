@@ -38,7 +38,7 @@
 #define OLED_SDCS   -1    // Not wired
 
 #define POT_BTN     4
-#define POT_ANLG    A13
+#define POT_ANLG    A0    // A13 was used in the original.
 
 #define DB_BTN      5
 
@@ -372,7 +372,3 @@ void checkSongPlay(void) {
     majorState = idling;
   }
 }
-
-
-
-
