@@ -24,7 +24,7 @@ class linkListObj {
     virtual linkListObj*	getNext(void);						// Pass back the next pointer.
     virtual	void			setNext(linkListObj* ptr);			// Point somewhere else.
   
-  protected :  
+  //protected :  
     linkListObj* next;
 };
 

@@ -11,7 +11,7 @@
 
 // I think I'm going to do a buff = realloc(buff,size); thing here.
 // Need to add numBytes for params.
-#define EOL '\n'            // Set this to match your system.
+#define EOL '\r'            // Set this to match your system.
 #define PARAM_BUFF_SIZE 40  // One buff to fit them all..
 
 class cmdTemplate;

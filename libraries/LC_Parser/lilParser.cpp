@@ -10,7 +10,7 @@
 char paramBuff[PARAM_BUFF_SIZE];
 
 // Create a parser.
-lilParser::lilParser(void) : linkList(true) { reset(); }
+lilParser::lilParser(void) : linkList() { reset(); }
 
 
 // We own them so we can auto-dump em.

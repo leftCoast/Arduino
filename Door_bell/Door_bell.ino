@@ -1,8 +1,6 @@
-#include "MemoryFree.h"
-#include <SSD_13XX.h>
+
 #include <Adafruit_VS1053.h>
 #include <adafruit_1431_Obj.h>
-//#include <Fonts/FreeSerif9pt7b.h>
 #include <LC_SPI.h>
 
 #include <colorObj.h>
@@ -91,9 +89,9 @@ void setup() {
   }
 
   fadeMessage.hold();
-  fadeMessage.addColor(0,&white);
-  fadeMessage.addAColor(3000,&white);
-  fadeMessage.addAColor(4000,&black);
+  fadeMessage.addColor(0,&white);         // Time 0 we use white.
+  fadeMessage.addAColor(3000,&white);     // Time 3000ms we use white.
+  fadeMessage.addAColor(4000,&black);     // From time 3000ms to 4000ms we fade to black.
   fadeMessage.setJustify(TEXT_CENTER);
   viewList.addObj(&fadeMessage);
   
