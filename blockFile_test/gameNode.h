@@ -10,10 +10,12 @@ class gameNode : public fileBuff {
     gameNode(blockFile* inFile, unsigned long blockID);
     virtual ~gameNode(void);
 
+    bool            isAnswer(void);
     void            getQuestion(char* buff);
     unsigned long   yesResponse(char* buff);
     unsigned long   noResponse(char* buff);
-    void            addNode(gameNode* newNode, bool yesNo);
+    unsigned long   getYes(void);
+    unsigned long   getNo(void);
     void            setYes(unsigned long ID);
     void            setNo(unsigned long ID);
 

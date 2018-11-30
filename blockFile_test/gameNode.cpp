@@ -49,26 +49,14 @@ unsigned long gameNode::noResponse(char* buff) {
 //  tracer trace("gameNode::noResponse()");
 
   if (!noID) {
-    strcpy(buff, "Well, I'll be wondering. What question should I have asked?");
+    strcpy(buff, "Its not? Well, I'll be wondering. What was it you had in mind?");
   }
   return noID;
 }
 
 
-// Adding node to the datastructure.
-void gameNode::addNode(gameNode* newNode, bool yesNo) {
-//  tracer trace("gameNode::addNode()");
-
-  if (yesNo) {
-    newNode->setYes(yesID);
-    yesID = newNode->getID();
-  } else {
-    newNode->setNo(noID);
-    noID = newNode->getID();
-  }
-  saveToFile();
-  newNode->saveToFile();
-}
+unsigned long gameNode::getYes(void) { return yesID; }
+unsigned long gameNode::getNo(void) { return noID; }
 
 void gameNode::setYes(unsigned long ID)  {
 //  tracer trace("gameNode::setYes()");
@@ -80,6 +68,11 @@ void gameNode::setNo(unsigned long ID)  {
 //  tracer trace("gameNode::setNo()");
   noID = ID;
 }
+
+
+// Leaf nodes are answers. Bot pointers at zero means this is a leaf.
+bool gameNode::isAnswer(void) { return !(yesID||noID); }
+
 
 void gameNode::getQuestion(char* buff) {
 //  tracer trace("gameNode::getQuestion()");

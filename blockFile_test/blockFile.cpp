@@ -270,14 +270,13 @@ bool blockFile::isEmpty(void) {
 
 // Have a look at a daatablock header.
 void blockFile::printDataBlock(blockHeader* aBlock) {
-  /*
+
     Serial.println("---------------------------");
     Serial.println("DATA HEADER");
     Serial.print("Block size : ");Serial.println(sizeof(blockHeader));
     Serial.print("  Block ID : ");Serial.println(aBlock->blockID);
     Serial.print("Buff bytes : ");Serial.println(aBlock->bytes);
     Serial.println("---------------------------");
-  */
 }
 
 // We need to keep better track of our datafile;
@@ -333,7 +332,7 @@ bool  blockFile::peekBlockHeader(blockHeader* aBlock) {
 // mFile is pointing at a data block header. Or at least where we want to put one.
 // Stamp this data block into the file here.
 bool blockFile::writeBlockHeader(unsigned long inBlockID, unsigned long numBytes) {
-//  tracer trace("writeBlockHeader()", &mErr);
+  //tracer trace("writeBlockHeader()", &mErr);
 
   blockHeader   tempBlock;
   unsigned long bytesWritten;
@@ -341,10 +340,8 @@ bool blockFile::writeBlockHeader(unsigned long inBlockID, unsigned long numBytes
   if (mErr == BF_NO_ERR) {                                                // Ok, don't bother if its already broke.
     tempBlock.blockID = inBlockID;                                        // To make the code easier, we write it into a block.
     tempBlock.bytes = numBytes;                                           // This makes it just one big write out.
-    //Serial.println("Writing.."); printDataBlock(&tempBlock);
     bytesWritten = mFile.write((char*)&tempBlock, sizeof(blockHeader));   // Write the bytes.
     if (bytesWritten == sizeof(blockHeader)) {                            // All the bytes get out?
-      mFile.flush();                                                      // Make sure they're out there.
       return true;                                                        // Everything seems fine.
     } else {
       mErr = BF_FWRITE_ERR;                                               // Something broke doring the write.
@@ -525,7 +522,6 @@ bool blockFile::writeFileHeader(void) {
     if (mFile.seek(0)) {                                                      // Set to the start of the file.
       bytesWritten = mFile.write((char*)&mHeader, sizeof(blockFileHeader));   // Write the bytes here.
       if (bytesWritten == sizeof(blockFileHeader)) {                          // All the bytes get out?
-        fClose();                                                             // Make sure they're out there.
         return true;                                                          // Everything seems fine.
       } else {
         mErr = BF_FWRITE_ERR;                                                 // Something broke doring the write.

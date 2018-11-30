@@ -25,7 +25,7 @@ class tracer {
 #define BF_VERSION_ERR    2   // We have the right kind of file. But, wrong verion.
 #define BF_FOPEN_ERR      3   // Tried to open from a file path but failed.
 #define BF_FREAD_ERR      4   // Tried to read a buffer but failed.
-#define BF_FWRITE_ERR     5   // Tried to read a buffer but failed.
+#define BF_FWRITE_ERR     5   // Tried to write a buffer but failed.
 #define BF_ISDIR_ERR      6   // Looking for a file, was handed path to directory.
 #define BF_SEEK_ERR       7   // Trying to reposition the file pointer failed.
 
