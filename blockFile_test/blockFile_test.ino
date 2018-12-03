@@ -156,7 +156,7 @@ void dealWithYes(void) {
     if(currentNode->isAnswer()) {
       Serial.println();Serial.print("Is it ");Serial.print(qBuff);Serial.print("? ");
     } else {
-      Serial.println();Serial.print(qBuff);
+      Serial.println();Serial.print(qBuff);Serial.print(" ");
     }
     gameState = needYNAnswer;
   } else {
@@ -264,7 +264,7 @@ void hookinNewNodes(bool yesNo) {
     lastNode->saveToFile();     // is animal
     qNode->saveToFile();        // Is it smaller than a breadbox?
     objNode->saveToFile();      // A rat.
-    Serial.println();
+    Serial.println();Serial.println();
     Serial.println("There ye go laddie. All your changes and updates have been added to the machine.");
     Serial.print("Would you like to have another go and try it out? ");
     delete(currentNode); currentNode=NULL;
