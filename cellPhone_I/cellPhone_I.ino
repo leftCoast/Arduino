@@ -20,6 +20,58 @@
 #define BUFF_BYTES        255
 #define REPLY_TIMEOUT_MS  1000  // Give it a second.
 
+
+class seen {
+
+  public:
+                seen(char* inPattern);
+  virtual       ~seen(void);
+  
+  virtual bool  addChar(char inChar);
+  virtual bool  result(void);
+  virtual void  reset(void);
+
+  char* pattern;
+  int   index;
+};
+
+
+seen::seen(char* inPattern) {
+
+  pattern = (char*)malloc(strlen(inPattern)+1);
+  if (pattern) {
+    strcpy(pattern,inPattern);
+  }
+  index=0;
+}
+
+
+seen::~seen(void) { if (pattern) free(pattern); }
+
+
+bool seen::addChar(char inChar) {
+
+  if (pattern[index]=='\0') return true;    // We've already seen it, bail.
+  if (inChar==pattern[index]) {
+    index++;
+    if (pattern[index]=='\0') return true;  // We just saw it! Bail.
+  } else {
+    index=0;
+  }
+  return false;                             // We've never seen it.
+}
+
+
+bool seen::result(void) { return pattern[index]=='\0'; }
+
+
+void seen::reset(void) { index=0;}
+
+
+
+seen  seenOK("OK");
+seen  seenError("ERROR");
+
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
@@ -55,7 +107,8 @@ void flushInput(void) {
   }
 }
 
-void cleanOutput(char* buff) {
+
+void cleanInStr(char* buff) {
 
   int   readIndex;
   int   writeIndex;
@@ -75,6 +128,40 @@ void cleanOutput(char* buff) {
 }
 
 
+bool sendCom(char* inCom) {
+
+  char  inChar;
+  bool  done;
+
+  seenOK.reset();
+  seenError.reset();
+  fonaSS.print(inCom);                        // Send it to the hardware..
+  replyTimeout.start();                       // Start our timeout timer.
+  index = 0;
+  done = false;
+  while(!replyTimeout.ding()&&!done) {
+    if (fonaSS.available()) {
+      inChar = fonaSS.read();
+      done = seenOK.addChar(inChar) || seenError.addChar(inChar);
+      charBuff[index++]=inChar;
+    }
+  }
+  charBuff[index]='\0';
+  cleanInStr(charBuff);
+  Serial.println(charBuff);
+  return(seenOK.result());
+}
+
+
+int numSMSMessages(void) {
+
+  if (sendCom("AT+CMGF=1")) {    // Set text mode
+    if (sendCom("AT+CPMS?")) {   // Grab the amount data.
+      
+    }
+  }
+  
+}
 void loop() {
   
   char  inChar;
@@ -89,25 +176,11 @@ void loop() {
       charBuff[index]='\0';
       Serial.print(charBuff);     // Show we got it.
       flushInput();               // Dump leftovers.
-      fonaSS.print(charBuff);     // Send it to the hardware..
-      replyTimeout.start();       // Start our timeout timer.
-      index = 0;
-      bool seenOh = false;
-      while(!replyTimeout.ding()) {
-        if (fonaSS.available()) {
-          inChar = fonaSS.read();
-          if (inChar=='O') {
-            seenOh = true;
-          } else if (seenOh && inChar=='K') {
-            charBuff[index++]=inChar;
-            break;
-          }
-          charBuff[index++]=inChar;
-        }
+      if (sendCom(charBuff)) {
+        Serial.println("Looks good");
+      } else {
+        Serial.println("Oh ohh, error");
       }
-      charBuff[index]='\0';
-      cleanOutput(charBuff);
-      Serial.println(charBuff);
       index = 0; 
     }
   }
