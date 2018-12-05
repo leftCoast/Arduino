@@ -13,6 +13,8 @@
 #include <SoftwareSerial.h>
 #include "Adafruit_FONA.h"
 
+#include "SMSMsgList.h"
+
 #define FONA_RX 9
 #define FONA_TX 8
 #define FONA_RST 4
@@ -28,18 +30,20 @@ char  juliePN[] = {"13607084218"};
 char  tychoPN[] = {"13603593687"};
 char  myPN[] = {"14083400352"};
 
-char*  currentPN = &myPN[0];
-
+char* currentPN = &myPN[0];
+char  currentName[20] = {"ME!"};
 char  inStr[255] = {""};
 
-enum commands { noCommand, hello, getBars, setTycho, setAlex, setDan, setShelby, setJulie, setMe, sendText, reset };
+enum commands { noCommand, hello, getBars, setTycho, setAlex, setDan, setShelby, setJulie, setMe, sendMsg };
 lilParser mParser;
 
+timeObj backgroundTimer(1250);
 
+SMSMsgList  messages;
 
 void setup() {
 
-  pinMode(FONA_RST, OUTPUT);      // Perform reswet on the phone thing.
+  pinMode(FONA_RST, OUTPUT);      // Perform reset on the phone thing.
   digitalWrite(FONA_RST, HIGH);
   delay(100);
   digitalWrite(FONA_RST, LOW);
@@ -50,12 +54,14 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
   
-  Serial.println(F("Booting up FONA"));
+  Serial.println(F("Booting up FONA.."));
   fonaSS.begin(4800);
   if (!fona.begin(fonaSS)) {
     Serial.println(F("Couldn't find FONA"));
     while (1);
   }
+  Serial.println(F("FONA online."));
+  fona.setAudio(FONA_EXTAUDIO);
   while (Serial.available()) {
     char inChar = Serial.read();
   }
@@ -67,15 +73,14 @@ void setupParser(void) {
 
   mParser.addCmd(hello, "hello");
   mParser.addCmd(getBars, "signal");
-  //mParser.addCmd(getBars, "bars");
+  mParser.addCmd(getBars, "bars");
   mParser.addCmd(setTycho, "tycho");
   mParser.addCmd(setAlex, "alex");
   mParser.addCmd(setDan, "dan");
   mParser.addCmd(setShelby, "shelby");
   mParser.addCmd(setJulie, "julie");
-  mParser.addCmd(setMe, "Me");
-  mParser.addCmd(sendText, "S");
-  mParser.addCmd(reset,"reset");
+  mParser.addCmd(setMe, "me");
+  mParser.addCmd(sendMsg, "x");
 }
 
 
@@ -96,18 +101,88 @@ void getSignal(void) {
 
 
 void sendSMS(void) {
-
-  // send an SMS!
-  //char sendto[21], message[141];
   
-  //flushSerial();
-  Serial.print(F("Send to #"));
-  Serial.println(currentPN);
+  Serial.print(F("Me"));
+  Serial.print(F(" - "));
+  Serial.print(inStr);
   if (!fona.sendSMS(currentPN, inStr)) {
-    Serial.println(F("Failed"));
+    Serial.println(F(" - Failed"));
   } else {
-    Serial.println(F("Sent!"));
+    Serial.println();
   }
+}
+
+
+void updateMsgList(void) {
+
+  int   numMsgs;
+  int   msgRead;
+  int   slot;
+  char  phoneNum[13];
+  int   chars;
+  
+  inStr[0]='\0';
+  numMsgs = fona.getNumSMS();
+  if (numMsgs>0) {
+    msgRead = 0;
+    slot = 1;
+    while (msgRead<numMsgs) {
+      if (fona.getSMSSender(slot,phoneNum,13)) {
+        fona.readSMS(slot,inStr,250,&chars);
+        msgRead++;
+        messages.addMsg(&phoneNum[1],inStr);
+        fona.deleteSMS(slot);
+      }
+      slot++;
+    }
+  }
+}
+
+
+void displyMsg(void) {
+
+  SMSMsg* aMessage;
+  
+  aMessage = messages.findFirst(currentPN);
+  if (aMessage) {
+    aMessage->getMsg(inStr);
+    Serial.print(currentName);Serial.print(" - ");
+    Serial.println(inStr);
+    delete(aMessage);
+  }
+}
+
+
+void changeContact(int command) {
+
+  switch(command) {
+    case setTycho : 
+      currentPN = &tychoPN[0]; 
+      strcpy(currentName,"Tycho");
+    break;
+    case setAlex :
+      currentPN = &alexPN[0];
+      strcpy(currentName,"Alliebob");
+    break;
+    case setDan :
+      currentPN = &danPN[0];
+      strcpy(currentName,"Danny D");
+    break;
+    case setShelby :
+      currentPN = &shelbyPN[0];
+      strcpy(currentName,"Shelbers");
+    break;
+    case setJulie :
+      currentPN = &juliePN[0];
+      strcpy(currentName,"Vern");
+    break;
+    case setMe :
+      currentPN = &myPN[0];
+      strcpy(currentName,"ME!");
+    break;
+  }
+  Serial.print("TEXTING : ");
+  Serial.println(currentName);  
 }
 
 
@@ -119,7 +194,6 @@ void loop() {
   
   if (Serial.available()) {
     inChar = Serial.read();
-    //Serial.print(inChar);
     
     if (isspace(inChar)) {
       index = 0;
@@ -138,14 +212,19 @@ void loop() {
       case noCommand : break;
       case hello : Serial.println("Well, hello to you!"); break;
       case getBars :  getSignal(); break;
-      case setTycho : currentPN = &tychoPN[0]; Serial.print("TEXTING : Tycho"); break;
-      case setAlex : currentPN = &alexPN[0]; Serial.print("TEXTING : Alliebob"); break;
-      case setDan : currentPN = &danPN[0]; Serial.print("TEXTING : Danny D"); break;
-      case setShelby : currentPN = &shelbyPN[0]; Serial.print("TEXTING : Shelbers"); break;
-      case setJulie : currentPN = &juliePN[0]; Serial.print("TEXTING : Vern"); break;
-      case setMe : currentPN = &myPN[0]; Serial.print("TEXTING : ME!"); break;
-      case sendText : sendSMS(); break;
+      case setTycho   : 
+      case setAlex    : 
+      case setDan     : 
+      case setShelby  : 
+      case setJulie   : 
+      case setMe      : changeContact(command); break;
+      case sendMsg : sendSMS(); break;
       case -1 : Serial.println("Oh ohh.. parser error!");
     }
+  }
+  if (backgroundTimer.ding()) {
+    backgroundTimer.start();
+    updateMsgList();
+    displyMsg();
   }
 }

@@ -24,7 +24,7 @@ class linkListObj {
     virtual linkListObj*	getNext(void);						// Pass back the next pointer.
     virtual	void			setNext(linkListObj* ptr);			// Point somewhere else.
   
-  //protected :  
+  //protected : 		// Protected seems broken. 
     linkListObj* next;
 };
 
@@ -54,7 +54,6 @@ class linkList {
 //*******************************************************
 // stack
 // In the stack we have push, pop, top & empty.
-// Actually dump
 //*******************************************************
 
 class stack : public linkList {
@@ -74,8 +73,8 @@ class stack : public linkList {
 // queue
 // Just like in the stack, in the queue we have push, pop, 
 // top & empty. But, when we add an object we don't
-// add it to the top of the list, we add it to the end. 
-// Like the stack.
+// add it to the top of the list, Like the stack. We 
+//  add it to the end.
 //*******************************************************
 
 class queue : public linkList {
