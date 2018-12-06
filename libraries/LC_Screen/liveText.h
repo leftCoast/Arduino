@@ -7,7 +7,7 @@
 #include <label.h>
 
 // Live text is text that can change over time in the background. This could be blinking?
-// Or color changes or fade out. YOu pretty much have complete control over the line of text
+// Or color changes or fade out. You pretty much have complete control over the line of text
 // as one line. You don't have a char by char control here. Just color over time on a string.
 // 
 // You have your standard x,y,length, height paramiters. Then you have framerateMs.

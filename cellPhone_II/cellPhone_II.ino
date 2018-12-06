@@ -34,12 +34,12 @@ char* currentPN = &myPN[0];
 char  currentName[20] = {"ME!"};
 char  inStr[255] = {""};
 
-enum commands { noCommand, hello, getBars, setTycho, setAlex, setDan, setShelby, setJulie, setMe, sendMsg };
+enum commands { noCommand, hello, getBars, setTycho, setAlex, setDan, setShelby, setJulie, setMe, sendMsg, getMsgCount };
 lilParser mParser;
 
 timeObj backgroundTimer(1250);
 
-SMSMsgList  messages;
+//SMSMsgList  messages;
 
 void setup() {
 
@@ -62,10 +62,11 @@ void setup() {
   }
   Serial.println(F("FONA online."));
   fona.setAudio(FONA_EXTAUDIO);
+  setupParser();
   while (Serial.available()) {
     char inChar = Serial.read();
   }
-  setupParser();
+  
 }
 
 
@@ -81,6 +82,7 @@ void setupParser(void) {
   mParser.addCmd(setJulie, "julie");
   mParser.addCmd(setMe, "me");
   mParser.addCmd(sendMsg, "x");
+  mParser.addCmd(getMsgCount,"count");
 }
 
 
@@ -108,11 +110,23 @@ void sendSMS(void) {
   if (!fona.sendSMS(currentPN, inStr)) {
     Serial.println(F(" - Failed"));
   } else {
-    Serial.println();
+    Serial.println(" ->");
   }
 }
 
+void getCount(void) {
 
+  int numMsgs = fona.getNumSMS();
+  if (numMsgs>=0) {
+    Serial.print("You have ");
+    Serial.print(numMsgs);
+    Serial.println(" pending");
+  } else {
+    Serial.println("Don't know, it gave back an error.");
+  }
+}
+
+/*
 void updateMsgList(void) {
 
   int   numMsgs;
@@ -149,6 +163,35 @@ void displyMsg(void) {
     Serial.print(currentName);Serial.print(" - ");
     Serial.println(inStr);
     delete(aMessage);
+  }
+}
+*/
+
+void displayMsgs(void) {
+
+  int   numMsgs;
+  int   msgRead;
+  int   slot;
+  char  phoneNum[13];
+  int   chars;
+  
+  inStr[0]='\0';
+  numMsgs = fona.getNumSMS();
+  if (numMsgs>0) {
+    msgRead = 0;
+    slot = 1;
+    while (msgRead<numMsgs) {
+      if (fona.getSMSSender(slot,phoneNum,13)) {
+        msgRead++;
+        if (!strcmp(phoneNum,currentPN)) {
+          fona.readSMS(slot,inStr,250,&chars);
+          Serial.print(currentName);Serial.print(" - ");
+          Serial.println(inStr);
+          fona.deleteSMS(slot);
+        }
+      }
+      slot++;
+    }
   }
 }
 
@@ -204,7 +247,6 @@ void loop() {
         }
       }
       inStr[index]  = '\0';
-      //Serial.print(inStr);
     }
     
     command = mParser.addChar(inChar);
@@ -219,12 +261,12 @@ void loop() {
       case setJulie   : 
       case setMe      : changeContact(command); break;
       case sendMsg : sendSMS(); break;
-      case -1 : Serial.println("Oh ohh.. parser error!");
+      case getMsgCount  : getCount(); break;
+      case -1 : Serial.println("Oh, Sorry. What was that?");
     }
   }
   if (backgroundTimer.ding()) {
     backgroundTimer.start();
-    updateMsgList();
-    displyMsg();
+    displayMsgs();
   }
 }

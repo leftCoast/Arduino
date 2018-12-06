@@ -1,4 +1,4 @@
- #ifndef colorObj_h
+#ifndef colorObj_h
 #define colorObj_h
 
 #include "mapper.h"
@@ -6,37 +6,32 @@
 // uncomment for debug stuff.
 //#define PRINT_COLOR
 
-// I'm not the only one to define the colors. This list was better than mine,
-// So I added it to mine. Thank you "Sumotoy". If it see's his OLED lib the #ifdef
-// Should stop them from conflicting. else, you can use his.
-// I didn't want this library dependant on his so this is the fix.
+//								Red,Grn,blu
+#define	LC_BLACK			  0,  0,  0
+#define	LC_DARK_GREY	154,154,154
+#define	LC_LIGHT_GREY	244,244,244
+#define	LC_WHITE   		255,255,255
 
-#ifndef _COMMON_16BIT_COLORS_H_
-#define _COMMON_16BIT_COLORS_H_
+#define	LC_RED     		255,  0,  0
+#define	LC_PINK   		255,130,208
 
-// Color definitions
-static const uint16_t	BLACK		=	0x0000;
-static const uint16_t	WHITE   	=	0xFFFF;
-static const uint16_t	NAVY   		=	0x000F;
-static const uint16_t	DARKGREEN   =	0x03E0;
-static const uint16_t	DARKCYAN   	=	0x03EF;
-static const uint16_t	MAROON   	=	0x7800;
-static const uint16_t	PURPLE   	=	0x780F;
-static const uint16_t	ORANGE   	=	0xFD20;
-static const uint16_t	PINK   		=	0xF81F;
-static const uint16_t	OLIVE   	=	0x7BE0;
-static const uint16_t	BLUE    	=	0x001F;
-static const uint16_t	RED     	=	0xF800;
-static const uint16_t	GREEN   	=	0x07E0;
-static const uint16_t	CYAN    	=	0x07FF;
-static const uint16_t	MAGENTA 	=	0xF81F;
-static const uint16_t	YELLOW  	=	0xFFE0;
-static const uint16_t	BRIGHT_RED	=	0xF810;
-static const uint16_t	LIGHT_GREY	=	0xC618;//0x8410;
-static const uint16_t	DARK_GREY	=	0x7BEF;//0x4208;
-static const uint16_t	GREENYELLOW	=	0xAFE5;
+#define	LC_GREEN   		  0,255,  0
+#define	LC_DARK_GREEN    0, 30,  0
+#define	LC_OLIVE   		 30, 30,  1
 
-#endif
+#define	LC_BLUE    		  0,  0,255
+#define	LC_LIGHT_BLUE	164,205,255
+#define	LC_NAVY   		  0,  0, 30
+
+#define	LC_PURPLE   	140,  0,255
+#define	LC_LAVENDER    218,151,255
+#define	LC_ORANGE   	255,128,  0
+
+#define	LC_CYAN    		  0,255,255
+#define	LC_MAGENTA 		255,  0,255
+#define	LC_YELLOW  		255,255,  0
+
+
 
 
 class colorObj {

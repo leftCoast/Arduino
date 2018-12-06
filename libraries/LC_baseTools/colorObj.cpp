@@ -1,14 +1,14 @@
 #include "colorObj.h"
 
 // Having the basics handy is very handy!
-colorObj red(RED);
-colorObj blue(BLUE);
-colorObj white(WHITE);
-colorObj black(BLACK);
-colorObj green(GREEN);
-colorObj cyan(CYAN);
-colorObj magenta(MAGENTA);
-colorObj yellow(YELLOW);
+colorObj red(LC_RED);
+colorObj blue(LC_BLUE);
+colorObj white(LC_WHITE);
+colorObj black(LC_BLACK);
+colorObj green(LC_GREEN);
+colorObj cyan(LC_CYAN);
+colorObj magenta(LC_MAGENTA);
+colorObj yellow(LC_YELLOW);
 
 
 // colormapper extremes..
@@ -36,49 +36,106 @@ void colorObj::setColor(byte inRed, byte inGreen, byte inBlue) {
 }
 
 
+// Handed a packed 16 bit color we want to create one of our 24 bit colors.
+// If it falls on one of our known colors, possibly it started out as one of ours?
+// The switch statement will quickly bring it back to our original.
+// Otherwise, we do the best we can with whatever bits we have to play with.
 void colorObj::setColor(word color16) {
 
+
+
   switch(color16) {
-  case BLACK :           //0x0000
+  
+  case 0x0000	:	//BLACK
     red = 0;
     green = 0;
     blue = 0;
     break;
-  case BLUE :            //0x001F
+  case 0x001F :	//BlUE
     red = 0;
     green = 0;
     blue = 255;
     break;
-  case RED :             //0xF800
+  case 0x00F8 :	//RED
     red = 255;
     green = 0;
     blue = 0;
     break;
-  case GREEN :           //0x07E0
+  case 0x07E0 :	//GREEN
     red = 0;
     green = 255;
     blue = 0;
     break;
-  case CYAN :            //0x07FF
+  case 0x07FF :	//CYAN
     red = 0;
     green = 255;
     blue = 255;
     break;
-  case MAGENTA :         //0xF81F
+  case 0xF81F :	//MAGENTA
     red = 255;
     green = 0;
     blue = 255;
     break;
-  case YELLOW :          //0xFFE0 
+  case 0xFFE0 :	//YELOW 
     red = 255;
     green = 255;
     blue = 0;
     break;
-  case WHITE :           //0xFFFF
-    red = 255;
-    green = 255;
-    blue = 255;
-    break;
+	case 0xFFFF :	//WHITE
+		red = 255;
+		green = 255;
+		blue = 255;
+	break;
+	case 0x0003 :	//Navy
+		red = 0;
+		green = 0;
+		blue = 30;
+	break;
+	case 0x00E0 :	//DARK_GREEN
+		red = 0;
+		green = 30;
+		blue = 0;
+	break;
+	case 0x881F :	//PURPLE
+		red = 140;
+		green = 0;
+		blue = 255;
+	break;
+	case 0xFC00 :	//ORANGE
+		red = 255;
+		green = 128;
+		blue = 0;
+	break;
+	case 0xFC1A :	//PINK
+		red = 255;
+		green = 130;
+		blue = 208;
+	break;
+	case 0x18E0 :	//OLIVE
+		red = 30;
+		green = 30;
+		blue = 1;
+	break;
+	case 0xA67F :	//LIGHT_BLUE
+		red = 164;
+		green = 205;
+		blue = 255;
+	break;
+	case 0xDCBF :	//LAVENDER
+		red = 218;
+		green = 151;
+		blue = 255;
+	break;
+	case 0xF7BE :	//LIGHT_GREY
+		red = 244;
+		green = 244;
+		blue = 244;
+	break;
+	case 0x9CD3 :	//DARK_GREY
+		red = 154;
+		green = 154;
+		blue = 154;
+	break;
   default :
     red = highByte(color16);
     green = lowByte(color16>>5);
