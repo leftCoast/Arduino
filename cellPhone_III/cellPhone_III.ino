@@ -34,38 +34,7 @@ void setup() {
     while(true); // Kill the process.
   }
   viewList.addObj(&hello);
-  doColor(LC_BLACK,"BLACK");
-  doColor(LC_WHITE ,"WHITE");
-  doColor(LC_NAVY,"NAVY");
-  doColor(LC_DARK_GREEN,"DARKGREEN");
-  doColor(LC_PURPLE,"PURPLE");
-  doColor(LC_ORANGE,"ORANGE");
-  doColor(LC_PINK,"PINK");
-  doColor(LC_OLIVE,"OLIVE");
-  doColor(LC_BLUE,"BLUE");
-  doColor(LC_LIGHT_BLUE,"LIGHT_BLUE");
-  doColor(LC_LAVENDER,"LAVENDER");
-  doColor(LC_RED,"RED");
-  doColor(LC_GREEN,"GREEN");
-  doColor(LC_CYAN ,"CYAN");
-  doColor(LC_MAGENTA,"MAGENTA");
-  doColor(LC_YELLOW,"YELLOW");
-  doColor(LC_LIGHT_GREY,"LIGHT_GREY");
-  doColor(LC_DARK_GREY,"DARK_GREY");
-
 }
-
-void doColor(byte r,byte g,byte b,char* color) {
-
-  colorObj aColor;
-  
-  aColor.setColor(r,g,b);
-  screen->fillScreen(&aColor);
-  word value = aColor.getColor16();
-  Serial.print(value,HEX);Serial.print(" : ");Serial.println(color);
-  while (!Serial.available());
-  char inChar = Serial.read();
-} 
 
   
 void loop() {
