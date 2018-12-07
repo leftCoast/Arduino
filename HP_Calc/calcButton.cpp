@@ -11,20 +11,20 @@ extern boolean    buttonPressed;
        boolean    gSecondFx = false;
 
 
-colorObj numberActiveBColor(WHITE);
-colorObj numberActiveTColor(BLACK);
-colorObj numberClickedBColor(BLACK);
-colorObj numberClickedTColor(WHITE);
+colorObj numberActiveBColor(LC_WHITE);
+colorObj numberActiveTColor(LC_BLACK);
+colorObj numberClickedBColor(LC_BLACK);
+colorObj numberClickedTColor(LC_WHITE);
 
-colorObj editActiveBColor(BLUE);
-colorObj editActiveTColor(WHITE);
-colorObj editClickedBColor(WHITE);
-colorObj editClickedTColor(BLACK);
+colorObj editActiveBColor(LC_BLUE);
+colorObj editActiveTColor(LC_WHITE);
+colorObj editClickedBColor(LC_WHITE);
+colorObj editClickedTColor(LC_BLACK);
 
-colorObj fxActiveBColor(BLACK);
-colorObj fxActiveTColor(WHITE);
-colorObj fxClickedBColor(WHITE);
-colorObj fxClickedTColor(BLACK);
+colorObj fxActiveBColor(LC_BLACK);
+colorObj fxActiveTColor(LC_WHITE);
+colorObj fxClickedBColor(LC_WHITE);
+colorObj fxClickedTColor(LC_BLACK);
 
 
 void setupButtonColors(void) {
@@ -228,4 +228,3 @@ void  degRadButton::drawSelf(void) {
     mCalc.toggleDegrees();
     needRefresh = true;
  }
-

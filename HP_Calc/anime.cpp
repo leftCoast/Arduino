@@ -1,8 +1,8 @@
 #include "anime.h"
 
-#define SHINE_COLOR   BLUE    // What color we gonna shine with?
-#define SHINE_WIDTH   24       // +/- SHINE_WIDTH is the blend distance.
-#define SHINE_PERCENT 70       // How much white do we want?
+#define SHINE_COLOR   LC_BLUE   // What color we gonna shine with?
+#define SHINE_WIDTH   24        // +/- SHINE_WIDTH is the blend distance.
+#define SHINE_PERCENT 70        // How much white do we want?
 
 
 anime::anime(word inX,word inY,word inWidth,word inHeight,float inTime) :
@@ -14,7 +14,7 @@ void anime::begin(void) {
 
   word      endX;
   word      shineCenter;
-  colorObj  endColor(BLUE);
+  colorObj  endColor(LC_BLUE);
   colorObj  shine(SHINE_COLOR);
   
   endX = x +(width*2);
@@ -82,5 +82,3 @@ void anime::idle(void) {
     start();            // Doesn't matter if we slip some.
   }
 }
-
-
