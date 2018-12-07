@@ -1,23 +1,17 @@
 #ifndef labelButton_h
 #define labelButton_h
 
-#include <idlers.h>
-#include <drawObj.h>
+#include <label.h>
 
  
-class labelButton : public drawObj, public idler {
+class labelButton : public label {
   
   public :
-          labelButton(char* inFStr,word inLocX, word inLocY,byte width,byte height);
+          labelButton(char* inLabel,word locX, word locY,byte width,byte height);
   virtual ~labelButton(void);          
                   
-  virtual void    idle(void);
   virtual void    drawSelf(void);
-  virtual void    doAction(void); 
-  virtual void    beep(void);
-          
-  protected :
-          char*   fStr;
+  virtual void    doAction(void);
 };
 
 #endif

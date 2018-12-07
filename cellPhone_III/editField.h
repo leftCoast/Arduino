@@ -4,7 +4,7 @@
 #include "label.h"
 #include "idlers.h"
 #include "timeObj.h"
-#include "ltlOS.h"
+#include "litlOS.h"
 
 class editField : public label,
                   public idler,

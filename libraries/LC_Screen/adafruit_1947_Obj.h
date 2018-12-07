@@ -26,29 +26,29 @@
 class adafruit_1947_Obj : public displayObj {
 
   public :
-  adafruit_1947_Obj(void);        					// Shield version.
-  adafruit_1947_Obj(byte inCS,byte inRst);  // Breakout version.
-  ~adafruit_1947_Obj(void);
+  				adafruit_1947_Obj(void);						// Shield version.
+  				adafruit_1947_Obj(byte inCS,byte inRst);  // Breakout version.
+  virtual	~adafruit_1947_Obj(void);
   
-  virtual boolean dispObjBegin(void);
-  virtual void    setRotation(byte inRotation);
-  virtual void    setTextColor(colorObj* tColor);
-  virtual void    setTextColor(colorObj* tColor,colorObj* bColor);
-  virtual void    setTextSize(byte inSize);
-  virtual void    setTextWrap(boolean wrap);
-  virtual void    setCursor(int inX,int inY);
-  virtual void    drawText(char* inText);
-  virtual void    fillScreen(colorObj* inColor);
-  virtual void    fillRect(int x,int y,word width,word height,colorObj* inColor);
-  virtual void    drawRect(int x,int y,word width,word height,colorObj* inColor);
-  virtual void    fillRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
-  virtual void    drawRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
-  virtual void    drawCircle(int x,int y,word diam, colorObj* inColor);
-  virtual void    fillCircle(int x,int y,word diam, colorObj* inColor);
-  virtual void    drawVLine(int x,int y,word height,colorObj* inColor);
-  virtual void    drawHLine(int x,int y,word width,colorObj* inColor);
-  virtual void    drawLine(int x,int y,int x2,int y2,colorObj* inColor);
-  virtual void    drawPixel(int x,int y,colorObj* pColor);
+  virtual	bool	dispObjBegin(void);
+  virtual	void	setRotation(byte inRotation);
+  virtual	void	setTextColor(colorObj* tColor);
+  virtual	void	setTextColor(colorObj* tColor,colorObj* bColor);
+  virtual	void	setTextSize(byte inSize);
+  virtual	void	setTextWrap(boolean wrap);
+  virtual	void	setCursor(int inX,int inY);
+  virtual	void	drawText(char* inText);
+  virtual	void	fillScreen(colorObj* inColor);
+  virtual	void	fillRect(int x,int y,word width,word height,colorObj* inColor);
+  virtual	void	drawRect(int x,int y,word width,word height,colorObj* inColor);
+  virtual	void	fillRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
+  virtual	void	drawRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
+  virtual	void	drawCircle(int x,int y,word diam, colorObj* inColor);
+  virtual	void	fillCircle(int x,int y,word diam, colorObj* inColor);
+  virtual	void	drawVLine(int x,int y,word height,colorObj* inColor);
+  virtual	void	drawHLine(int x,int y,word width,colorObj* inColor);
+  virtual	void	drawLine(int x,int y,int x2,int y2,colorObj* inColor);
+  virtual	void	drawPixel(int x,int y,colorObj* pColor);
   
   virtual point     getPoint(void);
   virtual boolean   touched(void);

@@ -3,8 +3,9 @@
 
 
 // This fits our rectangle to the text.
+// **** TEXT SIZE NEEDS TO BE LOKED INTO *****
 editField::editField(char* inText) 
-  : label(inText,DEF_TEDIT_TSIZE) {
+  : label(inText,2) {   
 
   initEditField();
   width = width+2;
@@ -25,14 +26,7 @@ editField::~editField(void) { }
 
 void editField::initEditField() {
 
-  colorObj tColor;
-  colorObj bColor;
 
-  tColor.setColor(DEF_TEDIT_TCOLOR);
-  bColor.setColor(DEF_TEDIT_BCOLOR);
-  setColors(&tColor,&bColor);
-  setJustify(TEXT_LEFT);
-  setTextSize(DEF_TEDIT_TSIZE);
 }
 
 
@@ -45,8 +39,17 @@ void editField::idle(void) { }
 void editField::drawSelf(void) {
 
   int hDif;
+
+  colorObj tColor;
+  colorObj bColor;
+
+  tColor= ourOS.getColor(SYS_TEDIT_TCOLOR);
+  bColor= ourOS.getColor(SYS_TEDIT_BCOLOR);
+  setColors(&tColor);
+  setJustify(TEXT_LEFT);
+  setTextSize(2); // **** TEXT SIZE NEEDS TO BE L)OKED INTO *****
   
-  screen->fillRect(x, y, width, height, &backColor);
+  screen->fillRect(x, y, width, height, &bColor);
   hDif = height-getTextHeight();
   if (hDif>=2) {
     hDif = hDif/2;

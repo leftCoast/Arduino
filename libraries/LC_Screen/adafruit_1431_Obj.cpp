@@ -18,7 +18,7 @@ adafruit_1431_Obj::~adafruit_1431_Obj(void) {
   }
 
   
-boolean adafruit_1431_Obj::dispObjBegin(void) { 
+bool adafruit_1431_Obj::dispObjBegin(void) { 
 
   theOLED = new Adafruit_SSD1351(cs, LC_DC, rst);
   if (theOLED!=NULL) {

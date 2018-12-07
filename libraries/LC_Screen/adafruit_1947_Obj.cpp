@@ -34,7 +34,7 @@ adafruit_1947_Obj::~adafruit_1947_Obj(void) {
 }
 
 
-boolean adafruit_1947_Obj::dispObjBegin(void) { 
+bool adafruit_1947_Obj::dispObjBegin(void) { 
 
   theTFT = new Adafruit_ILI9341(cs,LC_DC,rst);
   if (theTFT!=NULL) {

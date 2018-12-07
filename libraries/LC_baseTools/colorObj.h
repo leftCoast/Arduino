@@ -8,6 +8,7 @@
 
 //								Red,Grn,blu
 #define	LC_BLACK			  0,  0,  0
+#define	LC_CHARCOAL		 50, 50, 50		// NEED TO BE ADDED TO SWITCH STATEMENT!!
 #define	LC_DARK_GREY	154,154,154
 #define	LC_LIGHT_GREY	244,244,244
 #define	LC_WHITE   		255,255,255
