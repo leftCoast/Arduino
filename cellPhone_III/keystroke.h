@@ -6,8 +6,10 @@
 
 
 // Something being edited needs to know what action to take when a keystroke
-// comes in. This should cover it nicely.
-enum  keyCommands { input, shift, backspace, arrowFWD, arrowBack, enter };
+// comes in. This should cover it nicely. Actually, input, backspace, arrowFWD & arrowBack
+// are the only things an edit field needs to deal with. The rest are used internally by
+// the keaboard.
+enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack, enter };
 
 
 // The keyboard is resposible for assembling one of these and sending

@@ -57,12 +57,14 @@ keyboardKey::~keyboardKey(void) { }
 // ********************************************************************************
 
 
-inputKey::inputKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
+inputKey::inputKey(char* inLabel,char* inNum,char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
   : keyboardKey(inKeyboard),
   label(locX,locY,width-1,height-1,inLabel) {
     
     clickable(true);
     mChar = buff[0];
+    mNum = inNum[0];
+    mSymbol = inSym[0];
   }
   
 
@@ -141,6 +143,9 @@ controlKey::controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte
 
   clickable(true);
   mCom = inCom;
+  if(inCom==enter){
+    buff[0] = (char)175;
+  }
 }
 
 
@@ -173,21 +178,37 @@ void controlKey::drawSelf(void) {
   y = y-3;
 }
 
-// input, shift, backspace, arrowFWD, arrowBack, enter
+
+void controlKey::handleShift() {
+  
+  switch(mKeyboard->mState) {
+    case chars    : mKeyboard->handleKey(shifted); break;
+    case shifted  : mKeyboard->handleKey(chars); break;
+    case number   : mKeyboard->handleKey(shifted); break;
+  }
+}
+
+
+void controlKey::handleNumber() {
+  
+  switch(mKeyboard->mState) {
+    case chars   :
+    case shifted : mKeyboard->handleKey(numbers); break;
+    case number  : mKeyboard->handleKey(chars); break;
+  }
+}
+
+      
+// enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack, enter };
 void controlKey::doAction(void) {
 
-  if (mCom==backspace) {
-    mKeyboard->handleKey(backspace);
-  } else if (mCom==arrowBack) {
-    mKeyboard->handleKey(arrowBack);
-  } else if (mCom==shift) {
-    if (mKeyboard->mState==chars) {
-      mKeyboard->handleKey(shifted);
-    } else if (mKeyboard->mState==shifted) {
-      mKeyboard->handleKey(chars);
-    }
-  } else if (mCom==arrowFWD) {
-    mKeyboard->handleKey(arrowFWD);
+  switch (mCom) {
+    case backspace  :  
+    case arrowFWD   :
+    case arrowBack  : 
+    case enter      : mKeyboard->handleKey(mCom); break;
+    case shift      : handleShift(); break;
+    case number     : handleNumber(); break;  
   }
 }
 
@@ -206,44 +227,45 @@ keyboard::keyboard(editField* inEditField) {
   mEditField = inEditField;
   mState = chars;
           
-  qKey = new inputKey("q",COL_1,ROW_1,KEY_WD,KEY_HT,this);
-  wKey = new inputKey("w",COL_2,ROW_1,KEY_WD,KEY_HT,this);
-  eKey = new inputKey("e",COL_3,ROW_1,KEY_WD,KEY_HT,this);
-  rKey = new inputKey("r",COL_4,ROW_1,KEY_WD,KEY_HT,this);
-  tKey = new inputKey("t",COL_5,ROW_1,KEY_WD,KEY_HT,this);
-  yKey = new inputKey("y",COL_6,ROW_1,KEY_WD,KEY_HT,this);
-  uKey = new inputKey("u",COL_7,ROW_1,KEY_WD,KEY_HT,this);
-  iKey = new inputKey("i",COL_8,ROW_1,KEY_WD,KEY_HT,this);
-  oKey = new inputKey("o",COL_9,ROW_1,KEY_WD,KEY_HT,this);
-  pKey = new inputKey("p",COL_10,ROW_1,KEY_WD,KEY_HT,this);
+  qKey = new inputKey("q","1","",COL_1,ROW_1,KEY_WD,KEY_HT,this);
+  wKey = new inputKey("w","2","",COL_2,ROW_1,KEY_WD,KEY_HT,this);
+  eKey = new inputKey("e","3","",COL_3,ROW_1,KEY_WD,KEY_HT,this);
+  rKey = new inputKey("r","4","",COL_4,ROW_1,KEY_WD,KEY_HT,this);
+  tKey = new inputKey("t","5","",COL_5,ROW_1,KEY_WD,KEY_HT,this);
+  yKey = new inputKey("y","6","",COL_6,ROW_1,KEY_WD,KEY_HT,this);
+  uKey = new inputKey("u","7","",COL_7,ROW_1,KEY_WD,KEY_HT,this);
+  iKey = new inputKey("i","8","",COL_8,ROW_1,KEY_WD,KEY_HT,this);
+  oKey = new inputKey("o","9","",COL_9,ROW_1,KEY_WD,KEY_HT,this);
+  pKey = new inputKey("p","0","",COL_10,ROW_1,KEY_WD,KEY_HT,this);
   
-  aKey = new inputKey("a",COL_21,ROW_2,KEY_WD,KEY_HT,this);
-  sKey = new inputKey("s",COL_22,ROW_2,KEY_WD,KEY_HT,this);
-  dKey = new inputKey("d",COL_23,ROW_2,KEY_WD,KEY_HT,this);
-  fKey = new inputKey("f",COL_24,ROW_2,KEY_WD,KEY_HT,this);
-  gKey = new inputKey("g",COL_25,ROW_2,KEY_WD,KEY_HT,this);
-  hKey = new inputKey("h",COL_26,ROW_2,KEY_WD,KEY_HT,this);
-  jKey = new inputKey("j",COL_27,ROW_2,KEY_WD,KEY_HT,this);
-  kKey = new inputKey("k",COL_28,ROW_2,KEY_WD,KEY_HT,this);
-  lKey = new inputKey("l",COL_29,ROW_2,KEY_WD,KEY_HT,this);
+  aKey = new inputKey("a","-","",COL_21,ROW_2,KEY_WD,KEY_HT,this);
+  sKey = new inputKey("s","/","",COL_22,ROW_2,KEY_WD,KEY_HT,this);
+  dKey = new inputKey("d",":","",COL_23,ROW_2,KEY_WD,KEY_HT,this);
+  fKey = new inputKey("f",";","",COL_24,ROW_2,KEY_WD,KEY_HT,this);
+  gKey = new inputKey("g","(","",COL_25,ROW_2,KEY_WD,KEY_HT,this);
+  hKey = new inputKey("h",")","",COL_26,ROW_2,KEY_WD,KEY_HT,this);
+  jKey = new inputKey("j","$","",COL_27,ROW_2,KEY_WD,KEY_HT,this);
+  kKey = new inputKey("k","@","",COL_28,ROW_2,KEY_WD,KEY_HT,this);
+  lKey = new inputKey("l","\"","",COL_29,ROW_2,KEY_WD,KEY_HT,this);
   
-  zKey = new inputKey("z",COL_22,ROW_3,KEY_WD,KEY_HT,this);
-  xKey = new inputKey("x",COL_23,ROW_3,KEY_WD,KEY_HT,this);
-  cKey = new inputKey("c",COL_24,ROW_3,KEY_WD,KEY_HT,this);
-  vKey = new inputKey("v",COL_25,ROW_3,KEY_WD,KEY_HT,this);
-  bKey = new inputKey("b",COL_26,ROW_3,KEY_WD,KEY_HT,this);
-  nKey = new inputKey("n",COL_27,ROW_3,KEY_WD,KEY_HT,this);
-  mKey = new inputKey("m",COL_28,ROW_3,KEY_WD,KEY_HT,this);
+  zKey = new inputKey("z",".","",COL_22,ROW_3,KEY_WD,KEY_HT,this);
+  xKey = new inputKey("x",",","",COL_23,ROW_3,KEY_WD,KEY_HT,this);
+  cKey = new inputKey("c","?","",COL_24,ROW_3,KEY_WD,KEY_HT,this);
+  vKey = new inputKey("v","!","",COL_25,ROW_3,KEY_WD,KEY_HT,this);
+  bKey = new inputKey("b","&","",COL_26,ROW_3,KEY_WD,KEY_HT,this);
+  nKey = new inputKey("n","%","",COL_27,ROW_3,KEY_WD,KEY_HT,this);
+  mKey = new inputKey("m","#","",COL_28,ROW_3,KEY_WD,KEY_HT,this);
   
-  spcKey  = new inputKey(" ",COL_24+1,ROW_4,(KEY_WD*3),KEY_HT,this);
+  spcKey  = new inputKey(" "," "," ",COL_24+1,ROW_4,(KEY_WD*3),KEY_HT,this);
 
-  //input, shift, backspace, arrowFWD, arrowBack, enter 
+  //input, shift, symbol, backspace, arrowFWD, arrowBack, enter 
   
   shiftKey = new controlKey("^",shift,COL_1,ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
   backSpKey = new controlKey("<",backspace,COL_29+(2*ROW_SP),ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
   leftArrow  = new controlKey("<",arrowBack,COL_23,ROW_4,KEY_WD,KEY_HT,this);
   rightArrow  = new controlKey(">",arrowFWD,COL_27,ROW_4,KEY_WD,KEY_HT,this);
-  //enterKey  = new controlKey(">>",enter,arrowFWD,COL_27,ROW_4,KEY_WD,KEY_HT,this);
+  symbolKey   = new controlKey("#",number,COL_1,ROW_4,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
+  enterKey  = new controlKey(">",enter,COL_29+(2*ROW_SP),ROW_4,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
           
   viewList.addObj(qKey);
   viewList.addObj(wKey);
@@ -280,6 +302,8 @@ keyboard::keyboard(editField* inEditField) {
   viewList.addObj(backSpKey);
   viewList.addObj(leftArrow);
   viewList.addObj(rightArrow);
+  viewList.addObj(symbolKey);
+  viewList.addObj(enterKey);
 }
 
 
@@ -320,6 +344,8 @@ keyboard::~keyboard(void) {
   if (backSpKey) delete backSpKey;
   if (leftArrow) delete leftArrow;
   if (rightArrow) delete rightArrow;
+  if (symbolKey) delete symbolKey;
+  if (enterKey) delete enterKey;
 }
 
 

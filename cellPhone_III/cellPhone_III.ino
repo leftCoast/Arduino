@@ -30,14 +30,14 @@ keyboard* ourKeyboard;
 void setup() {
   colorObj aColor;
 
-  Serial.begin(115200);
-  while(!Serial);
+  //Serial.begin(115200);
+  //while(!Serial);
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
-  hello = new editField(1,180,300,16,"Message",1);
+  hello = new editField(1,180,300,16,"",1);
   viewList.addObj(hello);
   ourKeyboard = new keyboard(hello);
 }

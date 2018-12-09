@@ -21,7 +21,7 @@
 // redraw themselves accordingly. also output their data accordingly.
 enum  keyStates { chars, shifted, numbers, symbols };
 
-
+// enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack, enter };
 class keyboard;
 
 
@@ -44,7 +44,7 @@ class keyboardKey : public idler {
 class inputKey : public keyboardKey, public label {
 
   public:
-          inputKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
+          inputKey(char* inLabel,char* inNum,char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
   virtual ~inputKey(void);
 
   virtual void    idle();     // Use this to keep updated.
@@ -61,6 +61,8 @@ class controlKey : public keyboardKey, public label {
   virtual ~controlKey(void);
 
   virtual void    drawSelf(void);
+  virtual void    handleShift(void); 
+  virtual void    handleNumber(void);
   virtual void    doAction(void);
 };
 
@@ -114,6 +116,8 @@ class keyboard {
           controlKey* backSpKey;
           controlKey* leftArrow;
           controlKey* rightArrow;
+          controlKey* symbolKey;
+          controlKey* enterKey;
 }; 
 
 
