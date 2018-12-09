@@ -204,8 +204,8 @@ linkListObj* queue::top(void) { return getList(); }
 
 dblLinkListObj::dblLinkListObj(void) {
     
-    prev = NULL;
-    next = NULL;
+    dllPrev = NULL;
+    dllNext = NULL;
 }
 
 
@@ -216,9 +216,9 @@ dblLinkListObj::~dblLinkListObj(void) { unhook(); }
 void dblLinkListObj::linkAfter(dblLinkListObj* present) {
     
     if (present) {
-        next = present->next;
-        prev = present;
-        present->next = this;
+        dllNext = present->dllNext;
+        dllPrev = present;
+        present->dllNext = this;
     }
 }
 
@@ -227,9 +227,9 @@ void dblLinkListObj::linkAfter(dblLinkListObj* present) {
 void dblLinkListObj::linkBefore(dblLinkListObj* present) {
     
     if (present) {
-        prev = present->prev;
-        next = present;
-        present->prev = this;
+        dllPrev = present->dllPrev;
+        dllNext = present;
+        present->dllPrev = this;
     }
 }
 
@@ -237,8 +237,8 @@ void dblLinkListObj::linkBefore(dblLinkListObj* present) {
 dblLinkListObj* dblLinkListObj::getFirst(void) {
     
     dblLinkListObj* trace = this;
-    while(trace->prev) {
-        trace = trace->prev;
+    while(trace->dllPrev) {
+        trace = trace->dllPrev;
     }
     return trace;
 }
@@ -247,8 +247,8 @@ dblLinkListObj* dblLinkListObj::getFirst(void) {
 dblLinkListObj* dblLinkListObj::getLast(void) {
     
     dblLinkListObj* trace = this;
-    while(trace->next) {
-        trace = trace->next;
+    while(trace->dllNext) {
+        trace = trace->dllNext;
     }
     return trace;
 }
@@ -265,10 +265,10 @@ void dblLinkListObj::linkToStart(dblLinkListObj* present) { if (present) linkBef
 // Unlink us and, if in list, patch the hole.
 void dblLinkListObj::unhook(void) {
     
-    if (prev) prev->next = next;
-    if (next) next->prev = prev;
-    next = NULL;
-    prev = NULL;
+    if (dllPrev) dllPrev->dllNext = dllNext;
+    if (dllNext) dllNext->dllPrev = dllPrev;
+    dllNext = NULL;
+    dllPrev = NULL;
 }
 
 

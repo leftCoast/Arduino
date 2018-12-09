@@ -109,8 +109,8 @@ public:
     void            linkToStart(dblLinkListObj* present); // Given a pointer to a node, link yourself before the first in the chain.
     void            unhook(void);
     
-    dblLinkListObj* prev;
-    dblLinkListObj* next;
+    dblLinkListObj* dllPrev;
+    dblLinkListObj* dllNext;
 };
 
 #endif

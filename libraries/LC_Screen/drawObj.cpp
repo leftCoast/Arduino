@@ -264,7 +264,7 @@ void  viewMgr::dumpList(void) {
 	drawObj*	trace;
 	
 	while(theList) {
-		trace = (drawObj*)theList->next;
+		trace = (drawObj*)theList->dllNext;
 		delete(theList);
 		theList = trace;
 	}
@@ -306,8 +306,8 @@ boolean viewMgr::checkClicks(void) {
                     theTouched = trace;								// Save that badboy's address.
                     success = true;                   // We changed something.
                     done = true;                      // Loop's done
-                } else if (trace->next) {             // Else if we have a next object.
-                    trace = (drawObj*)trace->next;    // Hop to the next.
+                } else if (trace->dllNext) {          // Else if we have a next object.
+                    trace = (drawObj*)trace->dllNext; // Hop to the next.
                 } else  {                             // in this last case.
                     done = true;                      // The loop is through.
                 }
@@ -336,10 +336,10 @@ void viewMgr::checkRefresh(void) {
         if (trace->wantRefresh()) {         // Does this guy want refresh?
             trace->draw();                  // Call his Draw method.
         }
-        if (trace->prev) {                  // Ok, we have another up the list?
-            trace = (drawObj*)trace->prev;  // if so lets go there.
-        } else {                            // No one else?
-            done = true;                    // Then I guess we are done.
+        if (trace->dllPrev) {                  	// Ok, we have another up the list?
+            trace = (drawObj*)trace->dllPrev;	// if so lets go there.
+        } else {                            		// No one else?
+            done = true;                    		// Then I guess we are done.
         }
     }
 }
@@ -355,7 +355,7 @@ word viewMgr::numObjInList(void) {
 	count = 0;
 	while(trace) {
 		count++;
-		trace = (drawObj*)trace->next;
+		trace = (drawObj*)trace->dllNext;
 	}
 	return count;
 }
@@ -372,7 +372,7 @@ drawObj* viewMgr::getObj(int index) {
 	while(trace) {
 		if (index==i) return trace;
 		i++;
-		trace = (drawObj*)trace->next;
+		trace = (drawObj*)trace->dllNext;
 	}
 	return NULL;
 }
@@ -424,7 +424,7 @@ void drawGroup::setGroupRefresh(void) {
 		trace = theList;
 		while(trace) {
 			trace->setNeedRefresh();
-			trace = (drawObj*)trace->next;
+			trace = (drawObj*)trace->dllNext;
 		} 
 	}
 	

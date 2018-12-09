@@ -11,13 +11,14 @@
 #define SYS_TEDIT_TCOLOR_C      LC_BLACK
 #define SYS_TEDIT_HCOLOR_C      LC_LIGHT_BLUE
 
-#define SYS_PANEL_COLOR_C       LC_LIGHT_GREY
-#define SYS_LABEL_BTN_COLOR_C   LC_WHITE
+#define SYS_PANEL_COLOR_C       LC_GREY
+#define SYS_INPUT_BTN_COLOR_C   LC_LIGHT_GREY
 #define SYS_CONTROL_BTN_COLOR_C LC_DARK_GREY
 #define SYS_CONTROL_LBL_COLOR_C LC_BLACK
 #define SYS_SHADOW_COLOR_C      LC_CHARCOAL
 
 litlOS ourOS;
+
 
 litlOS::litlOS(void) {
 
@@ -26,11 +27,12 @@ litlOS::litlOS(void) {
   systemPalette[SYS_TEDIT_HCOLOR].setColor(SYS_TEDIT_HCOLOR_C);
   
   systemPalette[SYS_PANEL_COLOR].setColor(SYS_PANEL_COLOR_C);
-  systemPalette[SYS_LABEL_BTN_COLOR].setColor(SYS_LABEL_BTN_COLOR_C);
+  systemPalette[SYS_INPUT_BTN_COLOR].setColor(SYS_INPUT_BTN_COLOR_C);
   systemPalette[SYS_CONTROL_BTN_COLOR].setColor(SYS_CONTROL_BTN_COLOR_C);
   systemPalette[SYS_CONTROL_LBL_COLOR].setColor(SYS_CONTROL_LBL_COLOR_C);
   systemPalette[SYS_SHADOW_COLOR].setColor(SYS_SHADOW_COLOR_C);
 }
+
 
 // Currently nothing to do.. But maybe later?
 litlOS::~litlOS(void) {  }

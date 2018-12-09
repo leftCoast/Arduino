@@ -8,7 +8,7 @@
 #define SYS_TEDIT_HCOLOR      2
 
 #define SYS_PANEL_COLOR       3
-#define SYS_LABEL_BTN_COLOR   4
+#define SYS_INPUT_BTN_COLOR   4
 #define SYS_CONTROL_BTN_COLOR 5
 #define SYS_CONTROL_LBL_COLOR 6
 #define SYS_SHADOW_COLOR      7
