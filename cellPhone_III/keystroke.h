@@ -7,7 +7,7 @@
 
 // Something being edited needs to know what action to take when a keystroke
 // comes in. This should cover it nicely.
-enum  keyCommands { input, backspace, arrowFWD, arrowBack, enter };
+enum  keyCommands { input, shift, backspace, arrowFWD, arrowBack, enter };
 
 
 // The keyboard is resposible for assembling one of these and sending

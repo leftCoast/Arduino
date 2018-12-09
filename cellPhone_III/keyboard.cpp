@@ -41,13 +41,12 @@ keyboardKey::keyboardKey(keyboard* inKeyboard) {
 
   mKeyboard = inKeyboard;
   mState = mKeyboard->getState();
+  mCom = input;
   hookup();
 }
 
 
 keyboardKey::~keyboardKey(void) { }
-
-void keyboardKey::idle() { }
 
 
 
@@ -60,8 +59,11 @@ void keyboardKey::idle() { }
 
 inputKey::inputKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
   : keyboardKey(inKeyboard),
-  label(locX,locY,width-1,height-1,inLabel)
-  { clickable(true); }
+  label(locX,locY,width-1,height-1,inLabel) {
+    
+    clickable(true);
+    mChar = buff[0];
+  }
   
 
   
@@ -93,9 +95,37 @@ void inputKey::drawSelf(void) {
 }
 
   
-void inputKey::doAction(void)  { mKeyboard->handleKey(buff[0]); }
+void inputKey::doAction(void)  {
+  
+  mKeyboard->handleKey(buff[0]);      // Toss out our input.
+  if (mKeyboard->mState==shifted) {   // If we're in a shift state..
+      mKeyboard->handleKey(chars);    // Clear it.
+  }
+}
 
 
+// chars, shifted, numbers, symbols
+void inputKey::idle() {
+
+  if (mKeyboard->mState!=mState) {
+    switch(mKeyboard->mState) {
+      case chars :
+        buff[0] = tolower(mChar);
+      break;
+      case shifted :
+        buff[0] = toupper(mChar);
+      break;
+      case numbers :
+        buff[0] = mNum;
+      break;
+      case symbols :
+        buff[0] = mSymbol;
+      break;
+    }
+    mState = mKeyboard->mState;
+    needRefresh = true;
+  }
+}
 
 
 // ********************************************************************************
@@ -105,11 +135,15 @@ void inputKey::doAction(void)  { mKeyboard->handleKey(buff[0]); }
 // ********************************************************************************
 
 
-controlKey::controlKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
+controlKey::controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
   : keyboardKey(inKeyboard),
-  label(locX,locY,width-1,height-1,inLabel)
-  { clickable(true); }
-   
+  label(locX,locY,width-1,height-1,inLabel) {
+
+  clickable(true);
+  mCom = inCom;
+}
+
+
 controlKey::~controlKey(void) { }
 
 
@@ -117,7 +151,7 @@ void controlKey::drawSelf(void) {
     
   colorObj baseColor = ourOS.getColor(SYS_CONTROL_BTN_COLOR);
   colorObj textColor = ourOS.getColor(SYS_CONTROL_LBL_COLOR);
-  if (buff[0]=='<') {
+  if (mCom==backspace) {
     textColor.setColor(LC_RED);
   }
   colorObj shadowColor = ourOS.getColor(SYS_SHADOW_COLOR);
@@ -139,13 +173,21 @@ void controlKey::drawSelf(void) {
   y = y-3;
 }
 
-
+// input, shift, backspace, arrowFWD, arrowBack, enter
 void controlKey::doAction(void) {
 
-  if (buff[0]=='<') {
+  if (mCom==backspace) {
     mKeyboard->handleKey(backspace);
-  } else if (buff[0]=='^') {
-    mKeyboard->handleKey(shifted);
+  } else if (mCom==arrowBack) {
+    mKeyboard->handleKey(arrowBack);
+  } else if (mCom==shift) {
+    if (mKeyboard->mState==chars) {
+      mKeyboard->handleKey(shifted);
+    } else if (mKeyboard->mState==shifted) {
+      mKeyboard->handleKey(chars);
+    }
+  } else if (mCom==arrowFWD) {
+    mKeyboard->handleKey(arrowFWD);
   }
 }
 
@@ -193,11 +235,16 @@ keyboard::keyboard(editField* inEditField) {
   nKey = new inputKey("n",COL_27,ROW_3,KEY_WD,KEY_HT,this);
   mKey = new inputKey("m",COL_28,ROW_3,KEY_WD,KEY_HT,this);
   
-  spcKey  = new inputKey(" ",COL_24,ROW_4,(KEY_WD*3)+ROW_SP,KEY_HT,this);
+  spcKey  = new inputKey(" ",COL_24+1,ROW_4,(KEY_WD*3),KEY_HT,this);
+
+  //input, shift, backspace, arrowFWD, arrowBack, enter 
   
-  shiftKey = new controlKey("^",COL_1,ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
-  backSpKey = new controlKey("<",COL_29+(2*ROW_SP),ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
-  
+  shiftKey = new controlKey("^",shift,COL_1,ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
+  backSpKey = new controlKey("<",backspace,COL_29+(2*ROW_SP),ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
+  leftArrow  = new controlKey("<",arrowBack,COL_23,ROW_4,KEY_WD,KEY_HT,this);
+  rightArrow  = new controlKey(">",arrowFWD,COL_27,ROW_4,KEY_WD,KEY_HT,this);
+  //enterKey  = new controlKey(">>",enter,arrowFWD,COL_27,ROW_4,KEY_WD,KEY_HT,this);
+          
   viewList.addObj(qKey);
   viewList.addObj(wKey);
   viewList.addObj(eKey);
@@ -231,6 +278,8 @@ keyboard::keyboard(editField* inEditField) {
   
   viewList.addObj(shiftKey);
   viewList.addObj(backSpKey);
+  viewList.addObj(leftArrow);
+  viewList.addObj(rightArrow);
 }
 
 
@@ -269,6 +318,8 @@ keyboard::~keyboard(void) {
   
   if (shiftKey) delete shiftKey;
   if (backSpKey) delete backSpKey;
+  if (leftArrow) delete leftArrow;
+  if (rightArrow) delete rightArrow;
 }
 
 
@@ -279,6 +330,9 @@ void keyboard::handleKey(char inChar) {
   aKeystroke.editCommand = input;
   aKeystroke.theChar = inChar;
   mEditField->handleKeystroke(&aKeystroke);
+  if(mState==shifted) {
+    mState = chars;
+  }
 }
 
 

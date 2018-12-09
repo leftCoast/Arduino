@@ -14,17 +14,16 @@ class editField : public label,
                   public timeObj {
 
   public:
-                editField(char* defText);
-                editField(int inLocX, int inLocY, int inWidth,int inHeight,char* defText);
-                editField(int inLocX, int inLocY, int inWidth,int inHeight);
+                editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize);
   virtual       ~editField(void);
 
-  virtual void    initEditField(void);
   virtual void    insertChar(char theChar);
   virtual void    deleteChar(void);
   virtual void    handleKeystroke(keystroke* inKeystroke);
   virtual void    getCursorPos(int* cursX,int* cursY,int* cursH);
   virtual void    idle(void);
+          int     centerInField();      // Coordinate shifting hack.
+          void    resetField(int hDef); //
   virtual void    drawSelf(void);
 
           int     cursorPos;

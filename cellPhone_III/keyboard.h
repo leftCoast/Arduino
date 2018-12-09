@@ -13,7 +13,7 @@
 #define COL_1   1
 #define COL_SP  1
 
-#define ROW_1   213
+#define ROW_1   200
 #define ROW_SP  4
 
 // Keys need to know the state of the keyboard. When they get time
@@ -31,10 +31,12 @@ class keyboardKey : public idler {
           keyboardKey(keyboard* inKeyboard);
   virtual ~keyboardKey(void);
 
-  virtual void      idle();     // Use this to keep updated.
-
-          keyboard* mKeyboard;  // Master!
-          keyStates mState;     // Current state I'm showing.
+          keyboard*   mKeyboard;  // Master!
+          keyStates   mState;     // Current state I'm showing.
+          char        mChar;
+          char        mNum;
+          char        mSymbol;
+          keyCommands mCom;
 };
 
 
@@ -45,6 +47,7 @@ class inputKey : public keyboardKey, public label {
           inputKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
   virtual ~inputKey(void);
 
+  virtual void    idle();     // Use this to keep updated.
   virtual void    drawSelf(void);
   virtual void    doAction(void);
 };
@@ -54,7 +57,7 @@ class inputKey : public keyboardKey, public label {
 class controlKey : public keyboardKey, public label {
 
   public:
-          controlKey(char* inLabel,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
+          controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
   virtual ~controlKey(void);
 
   virtual void    drawSelf(void);
@@ -109,6 +112,8 @@ class keyboard {
           
           controlKey* shiftKey;
           controlKey* backSpKey;
+          controlKey* leftArrow;
+          controlKey* rightArrow;
 }; 
 
 

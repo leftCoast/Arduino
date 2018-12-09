@@ -24,7 +24,7 @@
 #define TFT_CS  10
 #define TFT_RST -1  // I think I remember this is not used.
 
-editField hello(1,180,300,16,"Well?");
+editField* hello;
 keyboard* ourKeyboard;
 
 void setup() {
@@ -37,8 +37,9 @@ void setup() {
   }
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
-  viewList.addObj(&hello);
-  ourKeyboard = new keyboard(&hello);
+  hello = new editField(1,180,300,16,"Message",1);
+  viewList.addObj(hello);
+  ourKeyboard = new keyboard(hello);
 }
 
   
