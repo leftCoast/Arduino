@@ -29,21 +29,23 @@ class label : public drawObj {
   				label(char* inText, word inSize);
   				label(int inLocX, int inLocY, int inWidth,int inHeight);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
+  				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize);
 	virtual	~label(void);
   
-  				void setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
-  				void setJustify(word inJustify);
-  				void setColors(colorObj* tColor);
-  				void setColors(colorObj* tColor, colorObj* bColor);
-  				void setPrecision(int inPrec);
-  				void setValue(int val);
-  				void setValue(unsigned long val);
-  				void setValue(float val);
-  				void setValue(double val);
-  				void setValue(char* str);
-
-  				word getTextWidth(void);    // How wide in pixels is our text?
-  				word getTextHeight(void);   // How tall in pixels are the charactors?
+  				void 	setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
+  				void 	setJustify(word inJustify);
+  				void 	setColors(colorObj* tColor);
+  				void 	setColors(colorObj* tColor, colorObj* bColor);
+  				void 	setPrecision(int inPrec);
+  				void 	setValue(int val);
+  				void 	setValue(unsigned long val);
+  				void 	setValue(float val);
+  				void 	setValue(double val);
+  	virtual	void 	setValue(char* str);
+				int	getNumChars(void);		// We want to know how long the string is..
+				void	getText(char* inBuff);	// We asked above how much you have. Hand it over.
+  				word 	getTextWidth(void);		// How wide in pixels is our text?
+  				word 	getTextHeight(void);		// How tall in pixels are the charactors?
   
 	virtual	void drawSelf(void);
 

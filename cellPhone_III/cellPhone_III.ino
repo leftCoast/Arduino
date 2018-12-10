@@ -21,6 +21,7 @@
 #include "litlOS.h"
 #include "editField.h"
 #include "keyboard.h"
+#include "SMSmanager.h"
 
 #define TFT_CS  10
 #define TFT_RST -1  // I think I remember this is not used.
@@ -32,21 +33,28 @@
 #define TB_W    220
 #define TB_H    148
 
+#define TF_INSET  3
+#define TF_X      TB_X+TF_INSET
+#define TF_Y      TB_Y+4
+#define TF_W      TB_W-(2*TF_INSET)
+#define TF_H      TB_H-6
+
 #define EB_X    TB_X
 #define EB_Y    TB_Y+TB_H+8
 #define EB_W    TB_W
 #define EB_H    16
 
-#define INSET   3
-#define ET_X    EB_X+INSET
-#define ET_Y    EB_Y+4
-#define ET_W    EB_W-(2*INSET)
-#define ET_H    10
+#define ET_INSET  3
+#define ET_X      EB_X+ET_INSET
+#define ET_Y      EB_Y+4
+#define ET_W      EB_W-(2*ET_INSET)
+#define ET_H      10
 
 colorRect*  theTextBase;
+label*      theTextField;
 colorRect*  theEditBase;
 editField*  theEditField;
-keyboard*   ourKeyboard;
+SMSmanager* ourKeyboard;
 
 void setup() {
   colorObj aColor;
@@ -59,12 +67,14 @@ void setup() {
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
   theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,1);
+  theTextField = new label(TF_X,TF_Y,TF_W,TF_H,"",1);
   theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,1);
   theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   viewList.addObj(theTextBase);
+  viewList.addObj(theTextField);
   viewList.addObj(theEditBase);
   viewList.addObj(theEditField);
-  ourKeyboard = new keyboard(theEditField);
+  ourKeyboard = new SMSmanager(theEditField,theTextField);
 }
 
   

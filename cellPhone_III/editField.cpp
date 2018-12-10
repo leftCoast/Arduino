@@ -3,17 +3,27 @@
 
 
 editField::editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize) 
- : label(inLocX,inLocY,inWidth,inHeight,inText) { 
+ : label(inLocX,inLocY,inWidth,inHeight,inText,inTextSize) { 
 
-  setTextSize(inTextSize);
   cursorPos = strlen(buff);
   setTime(500);
   hookup();
   cursorOnOff = false;
+  setColors(&black,&white);   // Good default.
 }
 
 
 editField::~editField(void) { }
+
+
+// When an outside force sets any value, it passes through here.
+// We need to deal with the cursor. Be careful not to call our setValue()
+// in here by accadent. It'll probably mess up your poor cursor.
+void editField::setValue(char* str) {
+
+  label::setValue(str);
+  cursorPos = strlen(buff);
+}
 
 
 void editField::insertChar(char theChar) {
@@ -114,22 +124,4 @@ void editField::idle(void) {
     cursorOnOff = !cursorOnOff;
     stepTime();
   }
-}
-
-
-void editField::drawSelf(void) {
-
-  int hDif;
-
-  colorObj tColor;
-  colorObj bColor;
-
-  tColor= ourOS.getColor(SYS_TEDIT_TCOLOR);
-  bColor= ourOS.getColor(SYS_TEDIT_BCOLOR);
-  setColors(&tColor);
-  setJustify(TEXT_LEFT);
-  
-  screen->fillRect(x, y, width, height, &bColor);
-  //screen->drawRect(x, y, width, height, &red);
-  label::drawSelf();
 }

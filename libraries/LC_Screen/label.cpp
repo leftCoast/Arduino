@@ -40,6 +40,15 @@ drawObj(inLocX,inLocY,inWidth,inHeight) {
 }
 
 
+label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize)
+	: drawObj(inLocX,inLocY,inWidth,inHeight) {
+
+	initLabel();
+	setValue(inText);
+	setTextSize(textSize);
+}
+
+
 label::~label() { 
   freeBuff(); 
 }
@@ -140,7 +149,14 @@ void label::setValue(char* str) {
   needRefresh = true;
 }
 
+// We want to know how long the string is..
+int label::getNumChars(void) { return strlen(buff); }
 
+
+// We asked above how much you have. Hand it over.		
+void label::getText(char* inBuff) { strcpy(inBuff,buff); }
+				
+				
 word label::getTextWidth(void) {
 
   return(CHAR_WIDTH*textSize*strlen(buff));

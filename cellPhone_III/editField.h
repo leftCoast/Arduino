@@ -17,12 +17,12 @@ class editField : public label,
                 editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize);
   virtual       ~editField(void);
 
+  virtual void    setValue(char* str);
   virtual void    insertChar(char theChar);
   virtual void    deleteChar(void);
   virtual void    handleKeystroke(keystroke* inKeystroke);
   virtual void    getCursorPos(int* cursX,int* cursY,int* cursH);
   virtual void    idle(void);
-  virtual void    drawSelf(void);
 
           int     cursorPos;
           bool    cursorOnOff;
