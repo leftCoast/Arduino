@@ -37,7 +37,7 @@ colorObj liteLine::getColor(int index) {
 	if (lites)
 		return lites->getPixelColor(index);
 	else 
-		return BLACK;
+		return black;
 }
  
  
