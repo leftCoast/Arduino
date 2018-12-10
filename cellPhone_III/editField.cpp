@@ -92,7 +92,7 @@ void editField::handleKeystroke(keystroke* inKeystroke) {
 void editField::getCursorPos(int* cursX,int* cursY,int* cursH) {
 
   *cursH = getTextHeight();
-  *cursX = x+(CHAR_WIDTH*textSize*cursorPos)-1;
+  *cursX = max(x,x+(CHAR_WIDTH*textSize*cursorPos)-1);
   *cursY = y;
 }
 
@@ -105,38 +105,15 @@ void editField::idle(void) {
   int cursH;
 
   if(ding()) {                              // Uggh! Get to work!
-    int hDef = centerInField();
     getCursorPos(&cursX,&cursY,&cursH);
-    
     if(cursorOnOff) {
       screen->drawVLine(cursX,cursY,cursH,&white);
     } else {
       screen->drawVLine(cursX,cursY,cursH,&black);
     }
-    resetField(hDef);
     cursorOnOff = !cursorOnOff;
     stepTime();
   }
-}
-
-
-int editField::centerInField(void) {
-
-  int   hDif;
-  
-  hDif = height-getTextHeight();
-  if (hDif>=2) {
-    hDif = hDif/2;
-    x = x + hDif;
-    y = y + hDif;
-  }
-  return hDif;
-}
-
-void editField::resetField(int hDif) {
-
-   x = x - hDif;
-   y = y - hDif;
 }
 
 
@@ -153,20 +130,6 @@ void editField::drawSelf(void) {
   setJustify(TEXT_LEFT);
   
   screen->fillRect(x, y, width, height, &bColor);
-  hDif = centerInField();
+  //screen->drawRect(x, y, width, height, &red);
   label::drawSelf();
-  resetField(hDif);
-  /*
-  hDif = height-getTextHeight();
-  if (hDif>=2) {
-    hDif = hDif/2;
-    x = x + hDif;
-    y = y + hDif;
-    label::drawSelf();
-    x = x - hDif;
-    y = y - hDif;
-  } else {
-    label::drawSelf();
-  }
-   */
 }

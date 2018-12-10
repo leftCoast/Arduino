@@ -44,10 +44,10 @@ public:
   colorObj(word color16);
   colorObj(void);
 
-  void setColor(byte inRed, byte inGreen, byte inBlue);
-  void setColor(word color16);
-  void setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
-  word getColor16(void);
+  virtual	void	setColor(byte inRed, byte inGreen, byte inBlue);
+  virtual	void	setColor(word color16);
+  virtual	void	setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
+  word				getColor16(void);
     
   byte getRed(void);
   byte getGreen(void);

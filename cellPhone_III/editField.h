@@ -22,8 +22,6 @@ class editField : public label,
   virtual void    handleKeystroke(keystroke* inKeystroke);
   virtual void    getCursorPos(int* cursX,int* cursY,int* cursH);
   virtual void    idle(void);
-          int     centerInField();      // Coordinate shifting hack.
-          void    resetField(int hDef); //
   virtual void    drawSelf(void);
 
           int     cursorPos;
