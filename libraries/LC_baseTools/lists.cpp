@@ -45,7 +45,20 @@ linkListObj* linkListObj::getNext(void) { return next; }
 
 
 // Lets point somewhere else..
-void linkListObj::setNext(linkListObj* ptr) { next = ptr; }			
+void linkListObj::setNext(linkListObj* ptr) { next = ptr; }	
+
+
+// Call delete on everyone hooked to us.
+void linkListObj::deleteTail(void) {
+
+	linkListObj*	temp;
+	
+	while (next) {
+		temp = next;
+		next = temp->next;
+		delete(temp);
+	}
+}				
 
 
 //********************* linkList *************************
@@ -161,12 +174,15 @@ linkListObj* linkList::getByIndex(int index) {
 
 	linkListObj*	trace;
 	
-	trace = theList;
-	while(trace && index) {
-		trace = trace->getNext();
-		index--;
+	if (index>=0) {							// Sanity, may be a Bozo calling.
+		trace = theList;
+		while(trace && index) {
+			trace = trace->getNext();
+			index--;
+		}
+		return trace;
 	}
-	return trace;
+	return NULL;
 }
 	
 // ********** stack ****************

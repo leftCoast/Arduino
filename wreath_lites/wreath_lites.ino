@@ -15,12 +15,18 @@ neoPixel lites(NUM_LEDS, PIXEL_PIN);
 
 void setup() {
 
-  colorObj  aColor;
-  //Serial.begin(9600);
   lites.begin();
   lites.setAll(&black);
   lites.show();
+  
+  //testSetup();
+  normalSetup();
+}
 
+void normalSetup(void) {
+
+  colorObj  aColor;
+  
   for(int i=0;i<PATTERN_LEN;i++) {
     if(i<8) aColor.setColor(LC_WHITE);
     else if (i==8 && i<12) aColor.setColor(LC_RED);
@@ -38,10 +44,33 @@ void setup() {
   lites.show();
 }
 
+void testSetup(void) {
+
+  colorObj  aColor;
+  
+  aColor.setColor(LC_RED);
+  for(int i=0;i<37;i++) {
+    lites.setPixelColor(i,&aColor);
+  }
+  aColor.setColor(LC_WHITE);
+  for(int i=37;i<75;i++) {
+    lites.setPixelColor(i,&aColor);
+  }
+  aColor.setColor(LC_RED);
+  for(int i=75;i<112;i++) {
+    lites.setPixelColor(i,&aColor);
+  }
+  aColor.setColor(LC_WHITE);
+  for(int i=112;i<150;i++) {
+    lites.setPixelColor(i,&aColor);
+  }
+  lites.show();
+}
+
 
 void loop() {
   
   lites.roll();
   lites.show();
-  delay(75);
+  delay(50);
 }

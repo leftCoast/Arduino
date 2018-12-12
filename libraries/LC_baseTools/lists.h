@@ -16,13 +16,14 @@
 class linkListObj {
   
   public:
-    linkListObj(void);
+    			linkListObj(void);
     virtual	~linkListObj(void);
     
-    virtual	void 			linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
-    virtual	void 			linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
-    virtual linkListObj*	getNext(void);						// Pass back the next pointer.
-    virtual	void			setNext(linkListObj* ptr);			// Point somewhere else.
+    virtual	void 				linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
+    virtual	void 				linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
+    virtual linkListObj*	getNext(void);							// Pass back the next pointer.
+    virtual	void				setNext(linkListObj* ptr);			// Point somewhere else.
+    virtual void				deleteTail(void);						// Call delete on everyone hooked to us.
   
   //protected : 		// Protected seems broken. 
     linkListObj* next;
@@ -33,18 +34,19 @@ class linkListObj {
 class linkList {
   
   public:
-    linkList(void);
+    			linkList(void);
     virtual	~linkList(void);
     
-    virtual void         addToTop(linkListObj* newObj);
-    virtual void         addToEnd(linkListObj* newObj);
-    virtual void         unlinkTop(void);					// Push off the first one.
-    virtual void         unlinkObj(linkListObj* oldObj);	// Find it and push it off.
-    virtual	void		 dumpList(void);
-    virtual bool		 isEmpty(void);
-    virtual linkListObj* getList(void);
-    		int			 getCount(void);
-    		linkListObj* getByIndex(int index);										
+    virtual void         	addToTop(linkListObj* newObj);
+    virtual void         	addToEnd(linkListObj* newObj);
+    virtual void         	unlinkTop(void);						// Push off the first one.
+    virtual void         	unlinkObj(linkListObj* oldObj);	// Find it and push it off.
+    virtual	void		 		dumpList(void);
+    virtual bool				isEmpty(void);
+    virtual linkListObj*	getList(void);
+    
+    		int			 		getCount(void);
+    		linkListObj* 		getByIndex(int index);										
  
  protected :           
     linkListObj* theList;
@@ -59,8 +61,8 @@ class linkList {
 class stack : public linkList {
 
   public:
-    stack(void);
-    ~stack(void);
+    			stack(void);
+    virtual	~stack(void);
     
     virtual void         push(linkListObj* newObj);
     virtual void         pop(void);
@@ -80,13 +82,13 @@ class stack : public linkList {
 class queue : public linkList {
 
   public:
-    queue(void);
-    ~queue(void);
+    			queue(void);
+    virtual	~queue(void);
     
-    virtual void         push(linkListObj* newObj);
-    virtual void         pop(void);
-    virtual linkListObj* top(void);
-    virtual bool	     empty(void);
+    virtual void         	push(linkListObj* newObj);
+    virtual void         	pop(void);
+    virtual linkListObj* 	top(void);
+    virtual bool				empty(void);
   };
 
 
@@ -98,19 +100,19 @@ class queue : public linkList {
 class dblLinkListObj {
     
 public:
-    dblLinkListObj(void);
-    ~dblLinkListObj(void);
+    			dblLinkListObj(void);
+	virtual	~dblLinkListObj(void);
     
-    void            linkAfter(dblLinkListObj* present); // Given a pointer to a node, link yourself after it.
-    void            linkBefore(dblLinkListObj* present); // Given a pointer to a node, link yourself before it.
-    dblLinkListObj* getFirst(void);
-    dblLinkListObj* getLast(void);
-    void            linkToEnd(dblLinkListObj* present); // Given a pointer to a node, link yourself after the last in the chain.
-    void            linkToStart(dblLinkListObj* present); // Given a pointer to a node, link yourself before the first in the chain.
-    void            unhook(void);
-    
-    dblLinkListObj* dllPrev;
-    dblLinkListObj* dllNext;
+    			void					linkAfter(dblLinkListObj* present); 	// Given a pointer to a node, link yourself after it.
+    			void					linkBefore(dblLinkListObj* present); 	// Given a pointer to a node, link yourself before it.
+    			dblLinkListObj*	getFirst(void);
+    			dblLinkListObj*	getLast(void);
+    			void					linkToEnd(dblLinkListObj* present);		// Given a pointer to a node, link yourself after the last in the chain.
+    			void					linkToStart(dblLinkListObj* present);	// Given a pointer to a node, link yourself before the first in the chain.
+    			void					unhook(void);
+    			
+    			dblLinkListObj*	dllPrev;
+    			dblLinkListObj*	dllNext;
 };
 
 #endif
