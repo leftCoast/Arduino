@@ -11,6 +11,7 @@ class colorRect : public drawObj,
             colorRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
     virtual ~colorRect(void);
 
+    virtual void  setInset(int inset);
     virtual void  drawSelf(void);
     virtual void  setColor(byte r,byte g,byte b);
     virtual  void  setColor(word color16);

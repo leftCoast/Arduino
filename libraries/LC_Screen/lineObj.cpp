@@ -15,6 +15,9 @@ lineObj::lineObj(word x1,word y1,word x2,word y2,colorObj* inColor) {
 	setEnds(x1,y1,x2,y2);
 }
 	
+
+lineObj::~lineObj(void) {  }
+
 	
 void lineObj::setColor(colorObj* inColor) {
   

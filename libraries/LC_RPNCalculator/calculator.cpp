@@ -49,9 +49,9 @@ void calculator::buttonClick(const char* inButtonID) {
 	else if (!strcmp(buttonID,".")) { handlePoint(); }
 	
 	// This is also talked about at the end of this function.
-    // Enter is really odd in that it must effect the next keypress.
-    // This is why, once called we immedialy exit. Every other keypress
-    // will exit out the bottom and clear this flag.
+	// Enter is really odd in that it must effect the next keypress.
+	// This is why, once called we immedialy exit. Every other keypress
+	// will exit out the bottom and clear this flag.
 	else if (!strcmp(buttonID,"ENTER")) {
         pushStack();
 		point = false;
@@ -187,12 +187,12 @@ void calculator::buttonClick(const char* inButtonID) {
 		editing = false;
 	}
 	
-    // Enter is wierd!
-    // From the HP11C calculator manual, it diables the stack for the -next- keypress.
-    // So, we're going to set it when the enter key is pressed, then exit immediatly.
-    // On every other keypress, we exit through this route.
-    // So it'll be checked cleared automatically.
-    //
+	// Enter is wierd!
+	// From the HP11C calculator manual, it diables the stack for the -next- keypress.
+	// So, we're going to set it when the enter key is pressed, then exit immediatly.
+	// On every other keypress, we exit through this route.
+	// So it'll be checked cleared automatically.
+	//
 	// Fix is kinda' the same..
 	//
 	// Well actually, so is Sto. And Rcl

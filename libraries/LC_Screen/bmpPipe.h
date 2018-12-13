@@ -17,35 +17,34 @@
 
 class bmpPipe {
 
-  public:
-    bmpPipe(void);
-    bmpPipe(rect sourceRect);
-    ~bmpPipe(void);
+	public:
+				bmpPipe(void);
+				bmpPipe(rect sourceRect);
+	virtual	~bmpPipe(void);
 
-    		boolean   		openPipe(char* fileName);
-    		void      		setSourceRect(rect inRect);
-virtual	void      		drawBitmap(int x,int y);
-				File					getFile(void);
-				void      		drawLine(File bmpFile,int x,int y);
-    		unsigned long	filePtr(int x,int y);
-      	//void      	showPipe(void);
+				bool   			openPipe(char* fileName);
+				void      		setSourceRect(rect inRect);
+	virtual	void      		drawBitmap(int x,int y);
+				File				getFile(void);
+				void				drawLine(File bmpFile,int x,int y);
+				unsigned long	filePtr(int x,int y);
+      		//void      	showPipe(void);
     
-  protected:
-    uint16_t  		read16(File f);
-    uint32_t  		read32(File f);
-    boolean   		readInfo(File bmpFile);
+	protected:
+    			uint16_t  		read16(File f);
+    			uint32_t  		read32(File f);
+    			bool				readInfo(File bmpFile);
     
-    
-    char*		filePath;
-    rect    sourceRect;     // The subset of the image.
-    boolean haveSourceRect;
-    boolean haveInfo;
-    int     imageOffset;
-    int     imageWidth;
-    int     imageHeight;
-    int     imageDepth;
-    int     pixBytes;
-    int     bytesPerRow;
+    			char*				filePath;
+    			rect    			sourceRect;     	// The subset of the image.
+    			bool 				haveSourceRect;
+    			bool 				haveInfo;
+    			int     			imageOffset;
+    			int     			imageWidth;
+    			int     			imageHeight;
+    			int				imageDepth;
+    			int				pixBytes;
+    			int				bytesPerRow;
 };
 
 #endif

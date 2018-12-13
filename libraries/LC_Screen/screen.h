@@ -12,7 +12,7 @@
 
 extern displayObj* screen;
 
-boolean initScreen(byte hardware, byte csPin, byte inRotation=0);
-boolean initScreen(byte hardware, byte csPin, byte rsPin, byte inRotation);
+bool initScreen(byte hardware, byte csPin, byte inRotation=0);
+bool initScreen(byte hardware, byte csPin, byte rsPin, byte inRotation);
 #endif
 

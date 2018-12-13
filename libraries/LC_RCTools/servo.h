@@ -2,8 +2,9 @@
 #include "mapper.h"
 
 class servo : public PulseOut {
-  public:
-     servo (int inpin);
+	public:
+				servo (int inpin);
+	virtual	~servo(void);
      
-     void setServo (float val); 
+				void	setServo(float val); 
 };

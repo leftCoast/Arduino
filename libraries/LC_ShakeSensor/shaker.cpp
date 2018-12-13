@@ -16,6 +16,7 @@ shaker::~shaker(void) {
     if (shakeAve) delete(shakeAve);
 }
  
+ 
 // Setup the ports etc. 
 void shaker::begin(void) {
   

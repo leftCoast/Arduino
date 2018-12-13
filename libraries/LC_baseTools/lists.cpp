@@ -69,12 +69,7 @@ void linkListObj::deleteTail(void) {
 linkList::linkList(void) { theList = NULL; }
 
 
-linkList::~linkList(void) { 
-  // it seems that there is no way to delete
-  // list items. Why? Because we don't know
-  // what superclass they are. When we call
-  // delete() on them everything crashes.
-}
+linkList::~linkList(void) { dumpList(); }
 
 
 void linkList::addToTop(linkListObj* newObj) {

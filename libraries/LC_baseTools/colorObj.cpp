@@ -21,11 +21,17 @@ colorMapper mixMapper;
 
 colorObj::colorObj(byte inRed, byte inGreen, byte inBlue) { setColor(inRed,inGreen,inBlue); }
 
+
 //colorObj::colorObj(colorObj* inColor) { setColor(inColor); }
+
 
 colorObj::colorObj(word inColor16) { setColor(inColor16); }
 
+
 colorObj::colorObj(void) { setColor(0,0,0); }
+
+
+colorObj::~colorObj(void) {  }
 
 
 void colorObj::setColor(byte inRed, byte inGreen, byte inBlue) {
@@ -179,11 +185,21 @@ byte colorObj::getBlue(void) { return blue; }
 //Creates a new color by mixing yourself with some new color.
 colorObj colorObj::mixColors(colorObj* mixinColor,byte mixPercent) {
     
+	 Serial.println("Mixing myself :");
+    printRGB();
+    Serial.print("With ");Serial.print(mixPercent);Serial.println("% of mix-in color :");
+    mixinColor->printRGB();
+    Serial.println();
+    
     if (mixPercent>=100) return *mixinColor;
     else if (mixPercent<=0) return *this;
     else {
         mixMapper.setColors(this,mixinColor);
-        return mixMapper.Map(mixPercent);
+        Serial.println("our mapper shows :");
+        mixMapper.printColors();
+        Serial.println();
+        colorObj temp = mixMapper.Map(mixPercent);
+        return temp;
     }
 }
 
@@ -211,6 +227,7 @@ void colorObj::blend(colorObj* mixinColor,byte mixPercent) {
   Serial.print(green);
   Serial.print(", ");
   Serial.println(blue);
+  Serial.flush();
 }
 #endif
 
@@ -243,6 +260,7 @@ colorMapper::colorMapper(word startC16,word endC16) {
   greenMapper = new mapper(START_COLOR,END_COLOR,startColor.getGreen(),endColor.getGreen());
   blueMapper = new mapper(START_COLOR,END_COLOR,startColor.getBlue(),endColor.getBlue());
 }
+
 
 colorMapper::~colorMapper(void) {
    

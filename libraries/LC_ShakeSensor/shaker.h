@@ -41,21 +41,21 @@ int numData      : Number of data values used in each averager. Carefull here, e
 
 class shaker : public idler {
   
-  public :
+	public :
   
-  shaker(int inShakePin,float sumTime=DEF_SUMTIME,int numData=DEF_NUMDATA);
-  ~shaker(void);
+				shaker(int inShakePin,float sumTime=DEF_SUMTIME,int numData=DEF_NUMDATA);
+	virtual	~shaker(void);
   
-  void    begin(void);
-  virtual void idle(void);
-  float   result(void);
+				void	begin(void);
+	virtual	void	idle(void);
+				float	result(void);
 
   
   protected:
-  int         shakeSum = 0;
-  int         shakePin;
-  timeObj*    shakeTimer = NULL;
-  runningAvg* shakeAve = NULL;
+				int			shakeSum;
+				int			shakePin;
+				timeObj*		shakeTimer;
+				runningAvg*	shakeAve;
 };
 
 

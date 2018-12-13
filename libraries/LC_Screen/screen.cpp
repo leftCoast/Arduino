@@ -8,12 +8,12 @@
 
 displayObj* screen = NULL;
 
-boolean initScreen(byte hardware, byte csPin, byte inRotation) { 
+bool initScreen(byte hardware, byte csPin, byte inRotation) { 
 	return initScreen(hardware,csPin, -1,inRotation);
 }
 	
 	
-boolean initScreen(byte hardware,byte csPin,byte rsPin,byte inRotation) {
+bool initScreen(byte hardware,byte csPin,byte rsPin,byte inRotation) {
 
 	switch (hardware) {
 		case ADAFRUIT_1431 :

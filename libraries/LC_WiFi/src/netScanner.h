@@ -55,32 +55,32 @@ class netScanner :	public linkList,
 	
 	public:
 										netScanner(void);
-	virtual 					~netScanner(void);
+	virtual	~netScanner(void);
 		
-					void			scanning(bool onOff);		// Turn scanning on or off.
-					void			idle(void);
-          bool  		startScan(void);
-          bool  		startInfo(void);
-					void  		handleScanDone(void* pvMsg);
-					void  		handleScanResult(void* pvMsg);
-					void			trimList(void);
-          void      countList(void);
-          void      updateList(void);
+				void	scanning(bool onOff);		// Turn scanning on or off.
+				void	idle(void);
+				bool	startScan(void);
+				bool	startInfo(void);
+				void	handleScanDone(void* pvMsg);
+				void	handleScanResult(void* pvMsg);
+				void	trimList(void);
+				void	countList(void);
+				void	updateList(void);
           
-          byte 			getAPCount(void);
-          char*     getSSID(byte index);		// name.
-          byte*     getBSSID(byte index);		// Sorta like a MAC address.
-          int	      getRSSI(byte index);		// Signal strength.
-          byte      getEncrypt(byte index);	// Encryption type.
-          byte      getChannel(byte index);	// Broadcast channel.
+    	      byte	getAPCount(void);
+    	      char*	getSSID(byte index);		// name.
+     	     byte*	getBSSID(byte index);		// Sorta like a MAC address.
+     	     int		getRSSI(byte index);		// Signal strength.
+     	     byte	getEncrypt(byte index);	// Encryption type.
+     	     byte	getChannel(byte index);	// Broadcast channel.
 	
 	private:
-		timeObj								scanTimer;
-		scanStates						state;				// What we're up to now.
-		tstrM2mWifiscanResult	scanData;			// Holder for last callback info.
-    byte									lastCount;		// Filled by callback. Count of scanned APs.
-    byte                  currentIndex;	// Which AP are we getting  data for now?
-    byte									numInList;
+				timeObj						scanTimer;
+				scanStates					state;				// What we're up to now.
+				tstrM2mWifiscanResult	scanData;			// Holder for last callback info.
+				byte							lastCount;		// Filled by callback. Count of scanned APs.
+				byte               	   currentIndex;	// Which AP are we getting  data for now?
+				byte							numInList;
 };
 
 
@@ -96,14 +96,14 @@ class netwkObj : public linkListObj,
 		void		setData(tstrM2mWifiscanResult* inData);
 		char*		getSSID(void);		// name.
 		byte*		getBSSID(void);		// Sorta like a MAC address.
-		int			getRSSI(void);		// Signal strength.
+		int		getRSSI(void);		// Signal strength.
 		byte		getEncrypt(void);	// Encryption type.
 		byte		getChannel(void);	// Broadcast channel.
 		
 	private:
 		char*		SSID;
 		byte		BSSID[6];
-		int			RSSI;
+		int		RSSI;
 		byte		encrypt;
 		byte		channel;
 };

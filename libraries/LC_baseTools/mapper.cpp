@@ -9,6 +9,9 @@ mapper::mapper(double x1,double x2,double y1,double y2) {
 }
 
 
+mapper::~mapper(void) {  }
+
+
 void mapper::setValues(double x1,double x2,double y1,double y2) {
   maxX = max(x1,x2);
   minX = min(x1,x2);

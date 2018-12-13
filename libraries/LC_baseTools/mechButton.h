@@ -18,15 +18,16 @@
 class mechButton {
   
   public:
-    mechButton(byte inPinNum);
-
-    bool  clicked(void);
+				mechButton(byte inPinNum);
+	virtual	~mechButton(void);
+	
+    			bool	clicked(void);
 
 	protected:
-    bool  beenInitialized;
-    byte  pinNum;
-    byte  checkNum;
-    byte  setAs;
+    			bool  beenInitialized;
+    			byte  pinNum;
+    			byte  checkNum;
+    			byte  setAs;
 };
 
 #endif

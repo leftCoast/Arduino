@@ -22,9 +22,10 @@
 // How long does the animation go on for? No parameter for that. Ah! This is the cool bit.
 // The colorMultiMap sets this.
 //
-// addAColor() takes a time & color. Time is an integer representing milisoncds and color is a coloObj.
-// You want your first color to start at time 0. Then you add them whatever color you want at wheatever time.
-// It will sort them out in time order and blend over time from color to color.
+// addAColor() takes a time & color. Time is an integer representing milisoncds
+// and color is a coloObj. You want your first color to start at time 0. Then you
+// add them whatever color you want at wheatever time. It will sort them out in
+// time order and blend over time from color to color.
 // 
 // For example : Show a string for 4 seconds then fade to black over 1 second.
 // 
@@ -34,10 +35,12 @@
 //
 // That will do it.
 //
-// hold() and release() are for triggering starts and stops of animation. release() can reset the animation
+// hold() and release() are for triggering starts and stops of animation.
+// release() can reset the animation
 // to the 0 frame for you if you'd like.
 //
-// NOTE : Best to use this over solid colors. Trying to animate on a .bmp bakckground is a flashy mess. Too slow.
+// NOTE : Best to use this over solid colors. Trying to animate on a .bmp
+// bakckground is a flashy mess. Too slow.
 
 
 class liveText : public label,
@@ -46,23 +49,23 @@ class liveText : public label,
                  public timeObj {
 
   public:
-                liveText(int x,int y, word width, word height,int framerateMs,bool loop=false);
-                ~liveText(void);
+				liveText(int x,int y, word width, word height,int framerateMs,bool loop=false);
+	virtual	~liveText(void);
                 
  
-          void    addAColor(int timeMs,colorObj* color);
-          void    hold(void);
-          void    release(bool reset=true);
+				void		addAColor(int timeMs,colorObj* color);
+				void		hold(void);
+				void		release(bool reset=true);
 
-  virtual boolean wantRefresh(void);        
-  virtual void    idle(void);
-  virtual void    drawSelf(void);
-          void    setCalcColor(void);
+	virtual	boolean	wantRefresh(void);        
+	virtual	void		idle(void);
+	virtual	void		drawSelf(void);
+				void		setCalcColor(void);
   
-          bool  loop;
-          int   maxTime;
-          int   frame;
-          bool  holding;
+				bool		loop;
+				int		maxTime;
+				int		frame;
+				bool		holding;
 };
 
 #endif

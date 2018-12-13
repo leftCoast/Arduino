@@ -6,17 +6,17 @@
 
 class bmpLabel : public label {
 
-public:
-  bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop);
-  ~bmpLabel(void);
+	public:
+  				bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop);
+	virtual	~bmpLabel(void);
   
-  			void 	setFastDraw(bool fast);
-  			void	smoothDraw(void);
-  			void	fasterDraw(void);
-virtual void  drawSelf(void);
+  				void		setFastDraw(bool fast);
+  				void		smoothDraw(void);
+  				void		fasterDraw(void);
+	virtual	void		drawSelf(void);
 
 				bmpPipe*	backdrop;
-				bool			fastDraw;
+				bool		fastDraw;
 };
 
 #endif

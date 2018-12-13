@@ -20,6 +20,7 @@
 #include  "colorRect.h"
 #include "litlOS.h"
 #include "editField.h"
+#include "textView.h"
 #include "keyboard.h"
 #include "SMSmanager.h"
 
@@ -35,9 +36,9 @@
 
 #define TF_INSET  3
 #define TF_X      TB_X+TF_INSET
-#define TF_Y      TB_Y+4
+#define TF_Y      TB_Y+TF_INSET
 #define TF_W      TB_W-(2*TF_INSET)
-#define TF_H      TB_H-6
+#define TF_H      TB_H-(2*TF_INSET)
 
 #define EB_X    TB_X
 #define EB_Y    TB_Y+TB_H+8
@@ -46,12 +47,12 @@
 
 #define ET_INSET  3
 #define ET_X      EB_X+ET_INSET
-#define ET_Y      EB_Y+4
+#define ET_Y      EB_Y+5
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
 colorRect*  theTextBase;
-label*      theTextField;
+textView*   theTextField;
 colorRect*  theEditBase;
 editField*  theEditField;
 SMSmanager* ourKeyboard;
@@ -59,16 +60,18 @@ SMSmanager* ourKeyboard;
 void setup() {
   colorObj aColor;
 
-  //Serial.begin(115200);
-  //while(!Serial);
+  Serial.begin(9600);
+  delay(10);
+  while(!Serial);
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
-  theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,1);
-  theTextField = new label(TF_X,TF_Y,TF_W,TF_H,"",1);
-  theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,1);
+  theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,2);
+  theTextBase->setColor(LC_DARK_GREEN);
+  theTextField = new textView(TF_X,TF_Y,TF_W,TF_H);
+  theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   viewList.addObj(theTextBase);
   viewList.addObj(theTextField);
@@ -78,7 +81,4 @@ void setup() {
 }
 
   
-void loop() {
-  idle();
-
-}
+void loop() { idle(); }

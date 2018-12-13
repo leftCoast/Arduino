@@ -3,30 +3,27 @@
 
 #include "lists.h"
 
-class idler : 
-public linkListObj {
+class idler : public linkListObj {
 
-public: 
-  idler(void);
-  virtual ~idler(void);
+	public: 
+  				idler(void);
+  	virtual	~idler(void);
 
-  void hookup(void);
-  virtual void idle(void);
+  				void	hookup(void);
+	virtual	void	idle(void);
 
 //protected:
-  bool	hookedIn;
-  
+				bool	hookedIn;
 };
 
 
-class idlers : 
-public linkList {
+class idlers : public linkList {
 
-public:
-  idlers(void);
-  ~idlers(void);
+	public:
+  				idlers(void);
+	virtual	~idlers(void);
 
-  void idle(void);
+  				void	idle(void);
 };
 
 extern idlers theIdlers;

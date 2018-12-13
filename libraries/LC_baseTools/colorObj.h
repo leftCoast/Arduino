@@ -4,7 +4,7 @@
 #include "mapper.h"
 #include "multiMap.h"
 // uncomment for debug stuff.
-//#define PRINT_COLOR
+#define PRINT_COLOR
 
 //								Red,Grn,blu
 #define	LC_BLACK			  0,  0,  0
@@ -39,11 +39,12 @@
 class colorObj {
 
 public:
-  colorObj(byte inRed, byte inGreen, byte inBlue);
-  //colorObj(colorObj* inColor);						// Wanted this one, but the compiler mixes it up with color16.
-  colorObj(word color16);
-  colorObj(void);
-
+  				colorObj(byte inRed, byte inGreen, byte inBlue);
+  				//colorObj(colorObj* inColor);						// Wanted this one, but the compiler mixes it up with color16.
+  				colorObj(word color16);
+  				colorObj(void);
+  virtual	~colorObj(void);
+  
   virtual	void	setColor(byte inRed, byte inGreen, byte inBlue);
   virtual	void	setColor(word color16);
   virtual	void	setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
@@ -80,24 +81,23 @@ extern colorObj yellow;
 
 class colorMapper {
 
-public:
-  colorMapper(void);
-  colorMapper(colorObj* inStart, colorObj* inEnd);
-  colorMapper(word startC16,word endC16);
-  ~colorMapper(void);
+	public:
+				colorMapper(void);
+  				colorMapper(colorObj* inStart, colorObj* inEnd);
+  				colorMapper(word startC16,word endC16);
+	virtual	~colorMapper(void);
   
-  void setColors(colorObj* inStart, colorObj* inEnd);
-
-  colorObj Map(float percent);
+  				void		setColors(colorObj* inStart, colorObj* inEnd);
+  				colorObj Map(float percent);
 
 #ifdef PRINT_COLOR
-  void     printColors(void);
+  				void     printColors(void);
 #endif
   
-private :
-  mapper* redMapper;
-  mapper* greenMapper;
-  mapper* blueMapper;
+	private :
+  				mapper*	redMapper;
+  				mapper*	greenMapper;
+  				mapper*	blueMapper;
 };
 
 
@@ -106,18 +106,18 @@ private :
 
 class colorMultiMap {
     
-    public :
-    colorMultiMap(void);
-    ~colorMultiMap(void);
+	public:
+				colorMultiMap(void);
+	virtual	~colorMultiMap(void);
     
-    void      addColor(double inX, colorObj* color);  // At some numeric value we resolve to this color.
-    void      clearMap(void);
-    colorObj  Map(double inVal);
+    			void	addColor(double inX, colorObj* color);  // At some numeric value we resolve to this color.
+    			void	clearMap(void);
+    			colorObj	Map(double inVal);
     
-    protected :
-    multiMap  redMap;
-    multiMap  greenMap;
-    multiMap  blueMap;
+    protected:
+    			multiMap  redMap;
+    			multiMap  greenMap;
+    			multiMap  blueMap;
 };
 
 

@@ -2,24 +2,36 @@
 
 colorRect::colorRect(int inLocX, int inLocY, word inWidth,word inHeight,int inset)
   : drawObj(inLocX,inLocY,inWidth,inHeight),
-  colorObj(LC_WHITE) { mInset = inset; }
+  colorObj(LC_WHITE) { setInset(inset); }
   
 colorRect::~colorRect(void) { }
 
+
+void colorRect::setInset(int inset) {
+
+    mInset = inset;
+    needRefresh = true;
+}
+
+
 void colorRect::drawSelf(void) {
 
-  colorObj  insetColor;
+  colorObj  insetTLColor;
+  colorObj  insetBRColor;
+  int       j;
   
   screen->fillRect(x, y, width, height, (colorObj*)this);
   if (mInset) {
-    insetColor.setColor(this);
-    insetColor.blend(&black,50);
-    screen->drawVLine(x,y,height-1,&insetColor);
-    screen->drawHLine(x,y,width-1,&insetColor);
-    insetColor.setColor(this);
-    insetColor.blend(&white,50);
-    screen->drawVLine(x+width,y+1,height-1,&insetColor);
-    screen->drawHLine(x+1,y+height,width-1,&insetColor);
+    insetTLColor = mixColors(&black,50);
+    insetBRColor = mixColors(&white,50);
+    j = 1;
+    for (int i=0;i<mInset;i++) {
+      screen->drawVLine(x+i,y+i,height-j,&insetTLColor);
+      screen->drawHLine(x+i,y+i,width-j,&insetTLColor);
+      screen->drawVLine(x+width-i,y+j,height-j,&insetBRColor);
+      screen->drawHLine(x+j,y+height-i,width-j,&insetBRColor);
+      j++;
+    }
   }
 }
 

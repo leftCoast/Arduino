@@ -11,20 +11,21 @@ enum timeType { zero, crossing, normal };
 
 class timeObj {
 
-public:
-  timeObj(float inMs=10);
-
-  void setTime(float inMs,bool startNow=true);    // Change the time duration for next start..
-  virtual void start(void);                       // Start the timer "now".
-  virtual void stepTime(void);                    // Restart the timer from last end time.
-  bool ding(void);                                // Timer has expired.
-  unsigned long getTime(void);                    // How long does this go for?
+	public:
+  				timeObj(float inMs=10);
+	virtual	~timeObj(void);
+	
+  				void 				setTime(float inMs,bool startNow=true);	// Change the time duration for next start..
+  	virtual	void 				start(void);                       			// Start the timer "now".
+  	virtual	void 				stepTime(void);                    			// Restart the timer from last end time.
+  				bool				ding(void);											// Timer has expired.
+  				unsigned long	getTime(void);										// How long does this go for?
     
 protected:
-  unsigned long waitTime;
-  unsigned long startTime;
-  unsigned long endTime;
-  timeType      config;
+  				unsigned long	waitTime;
+  				unsigned long	startTime;
+  				unsigned long	endTime;
+  				timeType			config;
 };
 
 #endif

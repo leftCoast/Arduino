@@ -16,26 +16,27 @@
 
 
 // This is all about numbers. There is actually no link to the actual text.
-class lineMarker : public dblLinkListObj {
+class lineMarker : public linkListObj {
 
   public:
           lineMarker(int index,int numChars, bool hardBreak);
   virtual ~lineMarker(void);
 
-          bool  hardBreak(void);                   // Did we end with a hard or soft break?
-          int   nextIndex(void);                   // Index of the first charactor after us.
-          void  limits(int* index,int* numChars);  // Our text block. Or at least the beginning and length.
+          bool  hardBreak(void);                    // Did we end with a hard or soft break?
+          int   nextIndex(void);                    // Index of the first charactor after us.
+          void  limits(int* index,int* numChars);   // Our text block. Or at least the beginning and length.
+          bool  hasIndex(int index);                // Do we contain the text at this index? 
           
           int   mIndex;           // The point in the text where we start.
           int   mNumChars;        // The amount of charactors in our line.
-          bool  mHardBreak;       // If we ended because of a hard or soft break.
+          bool  mHardBreak;       // Were started with a hard break?
 };
 
 
 // This guy has the text and does the math to maintain the line breaks. No links to
 // The displaying of the text beyond knowing hom many chars make up a line. And the 
 // rule of text flow and formatting.
-class lineManager {
+class lineManager : public linkList {
 
   public:
           lineManager(void);
@@ -47,15 +48,15 @@ class lineManager {
           void        insertText(int index,char* text);               // Stick a NULL terminated substring in at this index.
           void        deleteText(int startIndex,int endIndex);        // Remove some text from middle, beginning? End?
           void        indexAll(void);                                 // Index all the text.
-          //void        indexSet(lineMarker* startLine,int numLines);   // Index a subset of lines.
           void        indexSet(int startLine,int numLines);           // Index a subset of lines.
+          char*       formatLine(int lineNum);                        // And the why of alll this nonsense. Format us a line, this one.
           bool        newMarker(int* index,bool* hardBreak);          // Starting at index, make a new marker. Return true for more text available.
+          int         getLineNum(int index);                          // Given an index into the text buffer, find the line number of it. Return -1 if not found.
           void        trimList(int index);                            // Find the line that includes this index. Delete it and its tail.
-          void        dumpList(void);
           
           char*       mTextBuff;                                      // Our string of text to manage.
           int         mWidthChars;
-          lineMarker* mList;
+          char*       mOutBuff;
 };
 
 
@@ -64,24 +65,26 @@ class lineManager {
 class textView :  public drawObj {
 
   public:
-          textEdit(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks=false);
-  virtual ~textEdit(void);
-  
+          textView(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks=false);
+  virtual ~textView(void);
+
+          void        calculate(void);                            // Something changed, repaginate.
           void        setTextSize(int size);                      // Set the size of the text we are dealing with.
+          void        setTextColor(colorObj* tColor);             // Well, what about a color?
+          void        setFirstLine(int lineNum);                  // Set the first line at the top of our rectangle.
   virtual void        setText(char* text);                        // Replace our text buff with a copy of this.
   virtual void        appendText(char* text);                     // Add this to the end of our text.
   virtual void        insertText(int index,char* text);           // Stick a NULL terminated substring in at this index.
   virtual void        deleteText(int startIndex,int numChars);    // Remove some text from middle, beginning? End?
   
-          int         getLineWidth(void);                         // Calculates the number of chars in a line.
-          int         getNumLines(void);                          // How many lines do we show?  
   virtual void        drawSelf(void);                             // Its draw time!
 
           lineManager mManager;       // The guy that manages the line breaks etc.
-          int         mTHeight;       // Height in pixals for our font.
-          int         mTWidth;        // Width, in pixels of our font. (monospaced)
-          int         mLineSpace;     // Pixels between lines.
-          int         mNumChars;      // Number of chars in a line. (Temp storage only!)
+          int         mTextSize;
+          int         mTHeight;
+          int         mNumLines;
+          int         mFirstLine;
+          colorObj    mTextColor;
 };
 
 #endif

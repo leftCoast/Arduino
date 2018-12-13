@@ -18,7 +18,6 @@ runningAvg::~runningAvg(void) {
 }
 
 
-
 float runningAvg::addData(float inData) {
   
   float sum;
