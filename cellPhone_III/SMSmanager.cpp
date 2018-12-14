@@ -10,13 +10,16 @@ void SMSmanager::handleKey(keyCommands inEditCom) {
 
   char* buff;
   int   numChars;
+  int   index;
   
   if (inEditCom == enter) {
     numChars = mEditField->getNumChars();
     buff = (char*)malloc(numChars+2);
     if (buff) {
-      mEditField->getText(&buff[1]);
-      buff[0]='\n';
+      mEditField->getText(buff);
+      index = strlen(buff);
+      buff[index]='\n';
+      buff[index+1]='\0';
       Serial.print("Sending : ");Serial.println(buff);
       mTextField->appendText(buff);
       buff[0] = '\0';

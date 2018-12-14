@@ -185,21 +185,11 @@ byte colorObj::getBlue(void) { return blue; }
 //Creates a new color by mixing yourself with some new color.
 colorObj colorObj::mixColors(colorObj* mixinColor,byte mixPercent) {
     
-	 Serial.println("Mixing myself :");
-    printRGB();
-    Serial.print("With ");Serial.print(mixPercent);Serial.println("% of mix-in color :");
-    mixinColor->printRGB();
-    Serial.println();
-    
     if (mixPercent>=100) return *mixinColor;
     else if (mixPercent<=0) return *this;
     else {
         mixMapper.setColors(this,mixinColor);
-        Serial.println("our mapper shows :");
-        mixMapper.printColors();
-        Serial.println();
-        colorObj temp = mixMapper.Map(mixPercent);
-        return temp;
+        return mixMapper.Map(mixPercent);
     }
 }
 

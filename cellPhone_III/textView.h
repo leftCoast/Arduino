@@ -14,22 +14,33 @@
 #include "lists.h"
 #include "drawObj.h"
 
+// lineMarker, oh boy!
+// We need to break the text into lines. When flowing text on a screen, there are rules.
+// Hard breaks, soft breaks, leading spaces. Bla bla bla. We read in a long buffer. At some
+// point we'll mark off an area we will call a line. And, all the charactors of the buffer must
+// be accounted for. Why? Because the calling object will ask if we cover index x or not. You
+// can't have any "holes". Also, We need to be able to format ourselves into a sutable output
+// string. That's the whole deal really. Output of formatted text.
 
-// This is all about numbers. There is actually no link to the actual text.
+
 class lineMarker : public linkListObj {
 
   public:
-          lineMarker(int index,int numChars, bool hardBreak);
+          lineMarker(int index,int* numChars,bool* hardBreak,bool* endOfText,int widthChars,char* buff);
   virtual ~lineMarker(void);
 
-          bool  hardBreak(void);                    // Did we end with a hard or soft break?
-          int   nextIndex(void);                    // Index of the first charactor after us.
-          void  limits(int* index,int* numChars);   // Our text block. Or at least the beginning and length.
-          bool  hasIndex(int index);                // Do we contain the text at this index? 
-          
-          int   mIndex;           // The point in the text where we start.
+          bool  hasIndex(int index);                            // Do we "own" the text at this index? 
+          void  formatLine(char* text,char* line,int maxChars); // Give back the line in printable form. Buff MUST be maxChars + 1 or more.
+          int   nextIndex(void);
+          bool  getBreak(void);
+          bool  getEnd(void);
+                         
+          int   mIndex;           // The point in the text where we start. (Global)
           int   mNumChars;        // The amount of charactors in our line.
-          bool  mHardBreak;       // Were started with a hard break?
+          bool  mHardBreak;       // We ended with a hard break?
+          bool  mEOT;             // We're the end?
+          bool  mBlankLine;       // Whatever, its just a blank line.
+          int   mStartIndex;      // When formatting, we start here. (Global)
 };
 
 
@@ -48,7 +59,7 @@ class lineManager : public linkList {
           void        insertText(int index,char* text);               // Stick a NULL terminated substring in at this index.
           void        deleteText(int startIndex,int endIndex);        // Remove some text from middle, beginning? End?
           void        indexAll(void);                                 // Index all the text.
-          void        indexSet(int startLine,int numLines);           // Index a subset of lines.
+          void        indexSet(int endLineNum);                       // Index a subset of lines.
           char*       formatLine(int lineNum);                        // And the why of alll this nonsense. Format us a line, this one.
           bool        newMarker(int* index,bool* hardBreak);          // Starting at index, make a new marker. Return true for more text available.
           int         getLineNum(int index);                          // Given an index into the text buffer, find the line number of it. Return -1 if not found.

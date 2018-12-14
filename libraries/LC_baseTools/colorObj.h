@@ -4,7 +4,7 @@
 #include "mapper.h"
 #include "multiMap.h"
 // uncomment for debug stuff.
-#define PRINT_COLOR
+//#define PRINT_COLOR
 
 //								Red,Grn,blu
 #define	LC_BLACK			  0,  0,  0
@@ -45,20 +45,20 @@ public:
   				colorObj(void);
   virtual	~colorObj(void);
   
-  virtual	void	setColor(byte inRed, byte inGreen, byte inBlue);
-  virtual	void	setColor(word color16);
-  virtual	void	setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
-  word				getColor16(void);
+  virtual	void		setColor(byte inRed, byte inGreen, byte inBlue);
+  virtual	void		setColor(word color16);
+  virtual	void		setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?
+  				word		getColor16(void);
     
-  byte getRed(void);
-  byte getGreen(void);
-  byte getBlue(void);
+  				byte		getRed(void);
+  				byte		getGreen(void);
+  				byte		getBlue(void);
 
-  colorObj mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like the old blend)
-  void     blend(colorObj* mixinColor,byte mixPercent);      // Just blend with myself. Percent 0% -> 100% of new color.
+  				colorObj	mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like the old blend)
+  				void		blend(colorObj* mixinColor,byte mixPercent);      // Just blend with myself. Percent 0% -> 100% of new color.
     
 #ifdef PRINT_COLOR    
-  void printRGB(void);
+  				void		printRGB(void);
 #endif
 
 private :

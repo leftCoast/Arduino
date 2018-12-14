@@ -9,17 +9,125 @@
 
 // ********************************************************************************
 // ********************************************************************************
-// lineMarker hold markrs for line breaks in a text block.
+// lineMarker hold markers for line breaks in a text block.
 // ********************************************************************************
 // ********************************************************************************
 
+// Ok, we do it all in the contructor, or at least a bunch.
+lineMarker::lineMarker(int index,int* numChars,bool* hardBreak,bool* endOfText,int widthChars,char* buff) {
 
-lineMarker::lineMarker(int index,int numChars, bool hardBreak) {
+  int nextChar;
+  int lastBlank;
 
+  Serial.println("Making a line marker");
   mIndex = index;
-  mNumChars = numChars;
-  mHardBreak = hardBreak;
+  mNumChars = 0;
+  mHardBreak = true;
+  mEOT = false;
+  mBlankLine = false;
+  mStartIndex = index;
 
+  if (buff==NULL||buff[index]=='\0') {  // Sanity! We have a buffer and we're not sitting at the end, right?
+    mBlankLine = true;                  // Its a blank line for our purposes.
+    mNumChars = 0;                      // We have zip for char count.
+    mEOT = true;                        // This is the end.
+    *numChars = 0;                      // Tell them we have zip!
+    *endOfText = mEOT;                  // Tell them its the end of the text!
+    *hardBreak = true;                  // Tell them.. Oh whatever!
+    mHardBreak = *hardBreak;            // Save this for later. Used for list patching.
+    return;                             // Blow this Taco stand!
+  }
+  mHardBreak = *hardBreak;            // They tell us if it was a hard break or not.
+  if (!mHardBreak) {                  // Deal with the soft break case first.
+    while(buff[index]==' ') {        // Soft breaks, eat all the leading blanks.
+      index++;                        // bump our index.
+      mNumChars++;                    // bump how many we span.
+    }
+    if (buff[index]=='\0') {          // Special case of a blank line.
+      mBlankLine  = true;             // Note the special case.
+      mNumChars = index-mIndex;       // We ate up this many.
+      *numChars = mNumChars;          // Set up to pass this back.
+      *endOfText = true;              // Tell them its the end of the text!
+      mEOT = true;
+      *hardBreak = true;              // Well, EOF is kinda' like a brick wall.
+      mHardBreak = *hardBreak;        // Save this for later. Used for list patching.
+      return;                         // Blow outta' here. 
+    } else if (buff[index]==EOL) {    // Special case of EOL only.
+      mBlankLine = true;              // Note the special case.
+      mNumChars = index-mIndex;       // We ate up this many.
+      *numChars = mNumChars;          // Set up to pass this back.
+      *endOfText = false;             // Tell them its the end of the text!
+      mEOT = false;
+      *hardBreak = true;              // Well, EOL is kinda' like a brick wall.
+      mHardBreak = *hardBreak;        // Save this for later. Used for list patching.
+      return;                         // Blow outta' here. 
+    }
+  }
+  mStartIndex = index;                // Now, either way our printiable text starts here.
+  lastBlank = -1;                     // We may need this.
+  while(buff[index]!=EOL &&
+        buff[index]!='\0'&&
+        mNumChars<widthChars) {
+    if (buff[index]==' ') {          // Keep track of the last blank we saw.
+      lastBlank = index;
+    }
+    index++;
+    mNumChars++;       
+  }
+  if (buff[index]=='\0') {            // Ran out of text.
+    Serial.println("Ran out of text");
+    mNumChars = index-mIndex;       // We ate up this many.
+    *numChars = mNumChars;          // Set up to pass this back.
+    *endOfText = true;              // Tell them its the end of the text
+    mEOT = true;
+    *hardBreak = true;              // Well, EOF is kinda' like a brick wall.
+    mHardBreak = *hardBreak;        // Save this for later. Used for list patching.
+    return;                         // Blow outta' here. 
+  } else if (buff[index]==EOL) {    // Hit an EOL.
+    index++;                        // Ok, pop it past the EOL.
+    mNumChars = index-mIndex;       // We ate up this many.
+    *numChars = mNumChars;          // Set up to pass this back.
+    *endOfText = false;             // Tell them its the end of the text!
+    mEOT = false;
+    *hardBreak = true;              // Well, EOL is kinda' like a brick wall.
+    mHardBreak = *hardBreak;        // Save this for later. Used for list patching.
+    return;                         // Blow outta' here. 
+  } else if (buff[index]==' ') {   // Its a blank so break here.
+    mNumChars = index-mIndex;       // We ate up this many.
+    *numChars = mNumChars;          // Set up to pass this back.
+    *endOfText = false;             // Tell them its the end of the text!
+    mEOT = false;
+    *hardBreak = false;             // Well, blank is the ultimate soft break.
+    mHardBreak = *hardBreak;        // Save this for later. Used for list patching.
+    return;                         // Done, lets go.
+  } else {                          // Looking at a printable charactor.
+    nextChar = index+1;             // We need to look ahead to decide.
+    if (buff[nextChar]==' '||      // If the look-ahead is some sort of a break.
+        buff[nextChar]==EOL ||         
+        buff[nextChar]=='\0') {
+      mNumChars = index-mIndex;     // We ate up this many.
+      *numChars = mNumChars;        // Set up to pass this back.
+      *endOfText = false;           // Tell them its the end of the text!
+      mEOT = false;
+      *hardBreak = false;           // Well, EOL is kinda' like a brick wall.
+      return;                       // Done, lets go.
+    } else if (lastBlank>-1) {      // Either we go back to the last blank or chop it there.
+      mNumChars = lastBlank-mIndex; // We ate up this many.
+      *numChars = mNumChars;        // Set up to pass this back.
+      *endOfText = false;           // Tell them its the end of the text!
+      mEOT = false;
+      *hardBreak = false;           // 
+      mHardBreak = *hardBreak;      // Save this for later. Used for list patching.
+      return;                       // Done, lets go.
+    } else {                        // in this last case..
+      mNumChars = index-mIndex;     // Nothing but a big text block. Just chop it here.
+      *numChars = mNumChars;        // Set up to pass this back.
+      *endOfText = false;           // Tell them its the end of the text!
+      mEOT = false;
+      *hardBreak = false;           //
+      mHardBreak = *hardBreak;      // Save this for later. Used for list patching.
+    }
+  }
   Serial.println("Creating line marker");
   Serial.print("mIndex : ");Serial.println(mIndex);
   Serial.print("mNumChars : ");Serial.println(mNumChars);
@@ -30,24 +138,38 @@ lineMarker::lineMarker(int index,int numChars, bool hardBreak) {
 lineMarker::~lineMarker(void) {  }
 
 
-// Did we end with a hard or soft break?
-bool lineMarker::hardBreak(void) { return mHardBreak; }
+bool lineMarker::hasIndex(int index) { return index>=mIndex && index<mIndex+mNumChars; }
 
 
-// Index of the first charactor after us.
-int lineMarker::nextIndex(void) { return mIndex+mNumChars; }
+void  lineMarker::formatLine(char* text,char* line,int maxChars) {
 
-
-// Our text block. Or at least the beginning and length.
-void  lineMarker::limits(int* index,int* numChars) {
-
-  *index = mIndex;
-  *numChars = mNumChars;
-  Serial.print("Our limits, index : ");Serial.print(mIndex);Serial.print("  nNumChars : ");Serial.println(mNumChars);
+  int i;
+  int index;
+  int endIndex;
+  
+  if(mBlankLine) {
+    strcpy(line,"");
+  } else {
+    index = 0;
+    endIndex = mIndex + mNumChars;
+    for(i=mStartIndex;i<endIndex;i++) {
+      if (index<maxChars) {
+        line[index] = text[i];
+        index++;
+      }
+    }
+    line[index] = '\0';
+  }
 }
 
 
-bool lineMarker::hasIndex(int index) { return index>=mIndex && index<mIndex+mNumChars; }
+int lineMarker::nextIndex(void) { return mIndex+mNumChars; }
+
+
+bool lineMarker::getBreak(void) { return mHardBreak; }
+
+
+bool lineMarker::getEnd(void) { return mEOT; }
 
 
 
@@ -99,7 +221,7 @@ void lineManager::setText(char* text) {
 }
 
 
-// Add this cstring to the end of our text. CK
+// Add this cstring to the end of our text.
 void lineManager::appendText(char* text) {                         
 
   char* buff;
@@ -130,7 +252,7 @@ void lineManager::appendText(char* text) {
 }
 
 
-// Stick a NULL terminated substring IN FRONT of this index. CK
+// Stick a NULL terminated substring IN FRONT of this index.
 void lineManager::insertText(int index,char* text) {
               
   char*           buff;
@@ -165,7 +287,7 @@ void lineManager::insertText(int index,char* text) {
 }
 
 
-// Remove some text from middle, beginning? End? CK
+// Remove some text from middle, beginning? End?
 void lineManager::deleteText(int startIndex,int numChars) {
 
   int   textLen;
@@ -202,7 +324,7 @@ void lineManager::deleteText(int startIndex,int numChars) {
 }
 
 
-// Index all the text. CK
+// Index all the text.
 void lineManager::indexAll(void) {
 
   int   index;
@@ -223,56 +345,50 @@ void lineManager::indexAll(void) {
 }
 
 
-// Index a subset of lines. CK
-void lineManager::indexSet(int startLineNum,int numLines) {
+// Index a subset of lines.
+void lineManager::indexSet(int endLineNum) {
 
-  int         numChars;
-  int         endLineNum;
-  int         i;
-  int         n;
-  int         index;
-  bool        hardBreak;
-  bool        endOfText;
-  lineMarker* temp;
+   int          numLines;
+   int          lineNum;
+   lineMarker*  aLine;
+   bool         endOfText;
+   int          index;
+   bool         hardBreak;
 
-  Serial.println("Index set");
-  if (mTextBuff) {                                          // We do have text right? CK
-    numChars = strlen(mTextBuff);                           // We have "this many". CK
-    Serial.print("numChars : ");Serial.println(numChars);
-    if (numChars>0) {                                       // More than just a null charactor? CK
-      endLineNum = getCount()-1;                            // Index of the last line we have on the list. CK
-      Serial.print("endLineNum : ");Serial.println(endLineNum);
-      Serial.flush();
-      if (endLineNum<startLineNum) {                        // If we have stuff to do BEFORE startLineNum. CK
-        numLines = numLines + (startLineNum-endLineNum-1);  // We'll have to do more than we thought. CK
-        temp = (lineMarker*)getByIndex(endLineNum);         // Grab the last valid line marker. CK
-        if(temp) {                                          // Whatever, might as well check. CK
-          index = temp->nextIndex();                        // Set next index. CK
-          hardBreak = temp->hardBreak();                    // Same for hardbreak. CK
-          temp->limits(&i,&n);                              // Need to calculate if we are past the end of the text. CK
-          endOfText = (i+n)>=numChars;                      // Its true if i+n our end char is at or past numChars. CK
-        } else {
-          return;                                           // Something is very wrong. Lets just give up and not do anything.
-        }
-      } else {                                              // Ok, we have more than enough lines. CK
-        temp = (lineMarker*)getByIndex(startLineNum-1);     // Grab the line before our start point.
-        if(temp) {                                          // Whatever, might as well check. CK
-          index = temp->nextIndex();                        // Set next index. CK
-          hardBreak = temp->hardBreak();                    // Same for hardbreak. CK
-          endOfText = false;                                // We had lines after this. CK
-          trimList(startLineNum);                           // We have everyting we want. CLip off the list. CK
-        } else {                                            // Didn't get what we were promised to get? CK
-          return;                                           // Something is very wrong. Lets just give up and not do anything. CK
-        }
+   if (mTextBuff) {
+      numLines = getCount();
+      if (!numLines) {
+        index = 0;
+        hardBreak = true;
+        endOfText = false;
+      } else {
+        lineNum = numLines = 1;
+        aLine = (lineMarker*)getByIndex(lineNum);
+        index = aLine->nextIndex();
+        hardBreak = aLine->getBreak();
+        endOfText = aLine->getEnd();
       }
-      while(!endOfText && numLines>0) {                     // FINALLY We have the info we need. Rebuild the section they called for. 
+      Serial.print("numLines : ");Serial.println(numLines);
+      Serial.print("lineNum : ");Serial.println(lineNum);
+      Serial.print("index : ");Serial.println(index);
+      Serial.print("hardBreak : ");Serial.println(hardBreak);
+      Serial.print("endOfText : ");Serial.println(endOfText);
+      Serial.println("Looping : ");
+      while(lineNum<endLineNum&&!endOfText) {
         endOfText = newMarker(&index,&hardBreak);
-        numLines--;
+        lineNum++;
+        Serial.print("lineNum : ");Serial.println(lineNum);
+         Serial.print("index : ");Serial.println(index);
+        Serial.print("hardBreak : ");Serial.println(hardBreak);
+        Serial.print("endOfText : ");Serial.println(endOfText);
+        Serial.println("-------------");
       }
-    }
-  }
-  Serial.println("Exiting indexSet()");
-  Serial.flush();
+      Serial.println("Loop complete : ");
+      Serial.print("lineNum : ");Serial.println(lineNum);
+      Serial.print("index : ");Serial.println(index);
+      Serial.print("hardBreak : ");Serial.println(hardBreak);
+      Serial.print("endOfText : ");Serial.println(endOfText);
+   }
 }
 
 
@@ -280,104 +396,41 @@ char* lineManager::formatLine(int lineNum) {
 
   lineMarker* aLine;
   int         endLineNum;
-  int         startIndex;
-  int         numChars;
-  int         i;
   
-  endLineNum = getCount()-1;                      // Index of the last line we have on the list. CK
-  if (endLineNum<lineNum) {                       // Not indexed? Really?! 
-    indexAll();                                   // Don't bother bing clever, do the lot!
-    endLineNum = getCount()-1;                    // Recheck it.
-    if (endLineNum<lineNum) {                     // There's no line!
-      mOutBuff[0] = '\0';                         // No text for you!
-      return mOutBuff;                            // Take your empty string!
+  endLineNum = getCount()-1;                          // Index of the last line we have on the list.
+  if (endLineNum<lineNum) {                           // Not indexed? Really?! 
+    indexAll();                                       // Don't bother bing clever, do the lot!
+    endLineNum = getCount()-1;                        // Recheck it.
+    if (endLineNum<lineNum) {                         // There's no line!
+      mOutBuff[0] = '\0';                             // No text for you!
+      return mOutBuff;                                // Take your empty string!
     }
   }
-  aLine = (lineMarker*)getByIndex(lineNum);                   // We can get a line.
-  startIndex = aLine->mIndex;                     // It starts here..
-  numChars = aLine->mNumChars;                    // It burns this much text..
-  if (!aLine->mHardBreak) {                       // It started with a soft break?
-    while(mTextBuff[startIndex]==' '&&numChars) { // Skip leading blanks.
-      startIndex++;
-      numChars--;
-    }
-  }
-  i = 0;                                          // i is the index for the output buffer.
-  while((mTextBuff[startIndex]!='\0'||mTextBuff[startIndex]!='\n')&&numChars) { // Long line! We don't see the end, or a return and we ain't run out..
-    mOutBuff[i]=mTextBuff[startIndex];            // Stamp in this charactor.
-    startIndex++;                                 // bump.
-    numChars--;                                   // bump
-    i++;                                          // bump.
-  }
-  mOutBuff[i] = '\0';
+  aLine = (lineMarker*)getByIndex(lineNum);           // We can get a line.
+  aLine->formatLine(mTextBuff,mOutBuff,mWidthChars);
   return mOutBuff;
 }
 
 
-// Starting at index, make a new marker. Return true for more text available. CK
+// Starting at index, make a new marker. Add it to our list
+// and return true for more text available.
 bool lineManager::newMarker(int* index,bool* hardBreak) {        
 
-  int         i;
-  lineMarker* newLine;
-  int         lastSpace;
-  bool        seenPrint;
+  lineMarker* aMarker;
+  int         numChars;
+  int         locIndex;
+  bool        endOfText;
 
-  Serial.println("New marker");
-  i = *index;                                                             // Starting at index..
-  lastSpace = -1;                                                         // Last place we've seen a space.
-  if(!hardBreak) {                                                        // If its a soft break coming in.
-    seenPrint = false;                                                    // Ok, not seen a printable charactor yet.
-    while(!seenPrint) {                                                   // And until we do see one..
-      if (mTextBuff[i]==EOL || mTextBuff[i]=='\0') {                      // Are we pointing at a terminator?
-        *hardBreak = true;                                                // That means its a hard break you know.
-        newLine = new lineMarker(*index,i-*index+1,*hardBreak);           // If so, create a new line marker.
-        addToEnd(newLine);                                                // Save it in our list.
-        *index = i+1;                                                     // Set index to the next char in line.
-        return(mTextBuff[i]!='\0');                                       // i is still pointing to our last char. NULL char means no more.
-      } else {
-        if (isspace(mTextBuff[i])) {                                      // Are we pointing at a white space?
-          i++;                                                            // On soft starts we eat up the leading spaces.
-        } else {
-          seenPrint = true;
-        }
-      }
-    }
-    i = *index;                                                         // We need to deduct the leading whitespace when leading from a soft start.
-  }
-  while(1) {                                                            // Lets just do this forever..
-    if (mTextBuff[i]==EOL || mTextBuff[i]=='\0') {                      // Are we pointing at a terminator?
-      *hardBreak = true;                                                // That means its a hard break you know.
-      newLine = new lineMarker(*index,i-*index+1,*hardBreak);           // If so, create a new line marker.
-      addToEnd(newLine);                                                // Save it in our list.
-      *index = i+1;                                                     // Set index to the next char in line.
-      return(mTextBuff[i]!='\0');                                       // i is still pointing to our last char. NULL char means no more.
-    } else if (i==mWidthChars-1) {                                      // We didn't see an EOL or NULL char, but we are out of room. (mWidthChars was set by calling fx)
-      if (isspace(mTextBuff[i])) {                                      // Are we looking at whitespace?
-        *hardBreak = false;                                             // That means its a soft break.
-        newLine = new lineMarker(*index,i-*index+1,*hardBreak);         // Make the line..
-        addToEnd(newLine);                                              // Add to the list.
-        *index = i+1;                                                   // Point index to the next charactor in line.                                      
-        return(true);                                                   // There's more to come, lets go.
-      } else if (lastSpace>=0) {                                        // Not at white space, did run out of room. But we did see one..
-        *hardBreak = false;                                             // That means its a soft break.
-        newLine = new lineMarker(*index,i-lastSpace+1,*hardBreak);      // Make the line..
-        addToEnd(newLine);                                              // Add to the list.
-        *index = lastSpace+1;                                           // Point index to the next charactor in line.                                      
-        return(true);                                                   // There's more to come, lets go.
-      } else {                                                          // Ok, were out of room, it was just one big block of text, chop it here!
-        *hardBreak = true;                                              // Lets call this a hard break.
-        newLine = new lineMarker(*index,i-*index+1,*hardBreak);         // Make the line..
-        addToEnd(newLine);                                              // Add to the list.
-        *index = i+1;                                                   // Point index to the next charactor in line.                                      
-        return(true);                                                   // There's more to come, lets go.
-      }
-    } else {                                                            // Just cruising along..
-      if (isspace(mTextBuff[i])) {                                      // Are we pointing at a white space?                                 
-        lastSpace = i;                                                  // Keep track of the last space we saw.
-      }
-      i++;                                                              // Next!
+  endOfText = true;
+  if (mTextBuff) {                    // FIRST we have text.
+    if (mTextBuff[*index]!='\0') {    // And we're not at the end of the line.
+      locIndex = *index;
+      aMarker = new lineMarker(locIndex,&numChars,hardBreak,&endOfText,mWidthChars,mTextBuff);
+      addToEnd(aMarker);
+      *index = locIndex+numChars;
     }
   }
+  return endOfText;
 }
 
 
@@ -401,7 +454,7 @@ int lineManager::getLineNum(int index) {
 }
 
 
-// Find the line that index is in, delete it and its tail. CK
+// Find the line that index is in, delete it and its tail.
 void  lineManager::trimList(int index) {
 
   int         lineNum;
@@ -488,7 +541,7 @@ void textView::setFirstLine(int lineNum) {
 // Replace our text buff with a copy of this.
 void textView::setText(char* text) {
   
-  mManager.setText(text); 
+  mManager.setText(text);
   needRefresh = true;
 }
 
@@ -523,13 +576,14 @@ void textView::drawSelf(void) {
   int   locY;
 
   locY = y;
-  mManager.indexSet(mFirstLine,mNumLines);
+  mManager.indexSet(mFirstLine+mNumLines);
   screen->setTextColor(&mTextColor);
   screen->setTextSize(mTextSize);
   screen->setTextWrap(false);
   for (int i=0;i<mNumLines;i++) {  
     textPtr =  mManager.formatLine(i+mFirstLine);
     screen->setCursor(x,locY+(i*mTHeight));
+    //screen->drawText("Well?:");
     screen->drawText(textPtr);
   }
 }

@@ -11,13 +11,14 @@
 #include <timeObj.h>
 
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+#include <colorRect.h>
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
 #include <lineObj.h>
 #include <screen.h>
 
-#include  "colorRect.h"
+
 #include "litlOS.h"
 #include "editField.h"
 #include "textView.h"
@@ -69,8 +70,9 @@ void setup() {
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
   theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,2);
-  theTextBase->setColor(LC_DARK_GREEN);
+  theTextBase->setColor(LC_CYAN);
   theTextField = new textView(TF_X,TF_Y,TF_W,TF_H);
+  theTextField->setText("Well here's a big ass bunch of text. Lets see if it will actually wrap or not? I'm so bloody tired of writing this code that's just a bit beyond what I can inderstand.");
   theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   viewList.addObj(theTextBase);
