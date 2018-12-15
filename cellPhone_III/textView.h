@@ -26,21 +26,20 @@
 class lineMarker : public linkListObj {
 
   public:
-          lineMarker(int index,int* numChars,bool* hardBreak,bool* endOfText,int widthChars,char* buff);
+          lineMarker(int index,bool hardBreak,int widthChars,char* buff);
   virtual ~lineMarker(void);
-
+  
+          void  parseText(int index, bool startHardBreak, int widthChars, char* buff);
           bool  hasIndex(int index);                            // Do we "own" the text at this index? 
           void  formatLine(char* text,char* line,int maxChars); // Give back the line in printable form. Buff MUST be maxChars + 1 or more.
-          int   nextIndex(void);
-          bool  getBreak(void);
-          bool  getEnd(void);
-                         
-          int   mIndex;           // The point in the text where we start. (Global)
-          int   mNumChars;        // The amount of charactors in our line.
-          bool  mHardBreak;       // We ended with a hard break?
-          bool  mEOT;             // We're the end?
-          bool  mBlankLine;       // Whatever, its just a blank line.
-          int   mStartIndex;      // When formatting, we start here. (Global)
+          void  rawText(char* text);                            // Prints raw line of text to Serial.
+          bool  getBreak(void);                                 // Did we end with a hard break?
+          int   getEndIndex(void);                              // Where we left off.
+
+          int   mStartIndex;
+          int   mPrintIndex;
+          int   mEndIndex;
+          bool  mEndHBreak;
 };
 
 
@@ -60,6 +59,7 @@ class lineManager : public linkList {
           void        deleteText(int startIndex,int endIndex);        // Remove some text from middle, beginning? End?
           void        indexAll(void);                                 // Index all the text.
           void        indexSet(int endLineNum);                       // Index a subset of lines.
+          bool        upToDate(void);                                 // Before wasting yet more time. Lets just see if we can sort this any more than it is.
           char*       formatLine(int lineNum);                        // And the why of alll this nonsense. Format us a line, this one.
           bool        newMarker(int* index,bool* hardBreak);          // Starting at index, make a new marker. Return true for more text available.
           int         getLineNum(int index);                          // Given an index into the text buffer, find the line number of it. Return -1 if not found.
@@ -82,20 +82,24 @@ class textView :  public drawObj {
           void        calculate(void);                            // Something changed, repaginate.
           void        setTextSize(int size);                      // Set the size of the text we are dealing with.
           void        setTextColor(colorObj* tColor);             // Well, what about a color?
+          void        setTextColors(colorObj* tColor,colorObj* bColor);
           void        setFirstLine(int lineNum);                  // Set the first line at the top of our rectangle.
   virtual void        setText(char* text);                        // Replace our text buff with a copy of this.
   virtual void        appendText(char* text);                     // Add this to the end of our text.
   virtual void        insertText(int index,char* text);           // Stick a NULL terminated substring in at this index.
   virtual void        deleteText(int startIndex,int numChars);    // Remove some text from middle, beginning? End?
-  
+          char*       seeText(void);
   virtual void        drawSelf(void);                             // Its draw time!
 
           lineManager mManager;       // The guy that manages the line breaks etc.
           int         mTextSize;
           int         mTHeight;
+          int         mLineSpace;
           int         mNumLines;
           int         mFirstLine;
           colorObj    mTextColor;
+          colorObj    mBackColor;
+          bool        mTransp;
 };
 
 #endif

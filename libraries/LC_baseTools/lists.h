@@ -39,11 +39,12 @@ class linkList {
     
     virtual void         	addToTop(linkListObj* newObj);
     virtual void         	addToEnd(linkListObj* newObj);
-    virtual void         	unlinkTop(void);						// Push off the first one.
+    virtual void				unlinkTop(void);						// Push off the first one.
     virtual void         	unlinkObj(linkListObj* oldObj);	// Find it and push it off.
-    virtual	void		 		dumpList(void);
+    virtual	void		 		dumpList(void);						// Call delete on everyone.
     virtual bool				isEmpty(void);
-    virtual linkListObj*	getList(void);
+    virtual linkListObj*	getFirst(void);
+    virtual linkListObj*	getLast(void);
     
     		int			 		getCount(void);
     		linkListObj* 		getByIndex(int index);										

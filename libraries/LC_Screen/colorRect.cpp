@@ -4,6 +4,7 @@ colorRect::colorRect(int inLocX, int inLocY, word inWidth,word inHeight,int inse
   : drawObj(inLocX,inLocY,inWidth,inHeight),
   colorObj(LC_WHITE) { setInset(inset); }
   
+  
 colorRect::~colorRect(void) { }
 
 

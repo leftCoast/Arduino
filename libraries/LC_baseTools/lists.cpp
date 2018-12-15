@@ -102,42 +102,46 @@ void linkList::addToEnd(linkListObj* newObj) {
 }
 
 
+// This one trusts you to keep track of the old top we are unlinking.
 void linkList::unlinkTop(void) {
-
-  if (theList) {                  // if we have something there.
-    theList = theList->getNext();      // unlink.
-  }
+	
+	if (theList) {								// if we have something there.
+		theList = theList->getNext();    // unlink.
+	}
 }
 
 
+// This does NOT delete the object, just unlinks it for you.
+// Better not loose it!
 void linkList::unlinkObj(linkListObj* oldObj) {
 
   linkListObj* temp;
   
-  if (oldObj) {                      // They didn't hand us a NULL pointer.
-    if(theList==oldObj) {            // Were poiting at it.
-      theList = oldObj->getNext();        // unlink..
-    }  else {                        // We ain't pointing at it..
-      temp = theList;                // We're going to have to go look for it.
+  if (oldObj) {											// They didn't hand us a NULL pointer.
+    if(theList==oldObj) {								// Were poiting at it.
+      theList = oldObj->getNext();					// unlink..
+    }  else {												// We ain't pointing at it..
+      temp = theList;									// We're going to have to go look for it.
       while(temp->getNext()!=oldObj && temp->getNext()!=NULL) {
         temp = temp->getNext();
       }
-      if (temp->getNext()==oldObj) {		// Found it!
-        temp->setNext(oldObj->getNext());	// unlink..
+      if (temp->getNext()==oldObj) {				// Found it!
+        temp->setNext(oldObj->getNext());			// unlink..
       }
     }
   }     
 }
 
 
+// Calls delete on all the object of the list.
 void linkList::dumpList(void) {
 
-	linkListObj*	trace;
+	linkListObj*	trace;	// Temp pointer.
 	
-	while(theList) {
-		trace = theList;
-		unlinkTop();
-		delete(trace);
+	while(theList) {			// While we still have something in the list.
+		trace = theList;		// Point at the top of the list.
+		unlinkTop();			// Unlink the top.
+		delete(trace);			// Delete the old top.
 	}	
 }
 
@@ -145,9 +149,23 @@ void linkList::dumpList(void) {
 bool linkList::isEmpty(void) { return(theList == NULL); }
 
 
-linkListObj* linkList::getList(void) { return (theList); }
+linkListObj* linkList::getFirst(void) { return (theList); }
 
 
+linkListObj*  linkList::getLast(void) {
+
+	linkListObj*	trace;
+
+	trace = theList;
+	if(trace) {
+		while(trace->getNext()) {
+			trace = trace->getNext();
+		}
+	}
+	return trace;
+}
+	
+	
 int linkList::getCount(void) {
 
 		linkListObj*	trace;
@@ -192,7 +210,7 @@ void stack::push(linkListObj* newObj) { addToTop(newObj); }
 
 void stack::pop(void) { unlinkTop(); }
 
-linkListObj* stack::top(void) { return getList(); }
+linkListObj* stack::top(void) { return getFirst(); }
 
 
 // ********** queue ****************
@@ -207,7 +225,7 @@ void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
 void queue::pop(void) { unlinkTop(); }
 
-linkListObj* queue::top(void) { return getList(); }
+linkListObj* queue::top(void) { return getFirst(); }
 
 
 // ********** double linked list ****************

@@ -121,7 +121,7 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,boolean inClicks)
+drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks)
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
@@ -142,7 +142,7 @@ drawObj::~drawObj() {
 
 
 // When the manager asks if we want a refresh..
-boolean drawObj::wantRefresh(void) { return needRefresh; }
+bool drawObj::wantRefresh(void) { return needRefresh; }
 
 
 // Sometimes others know better than us that we need a refresh.
@@ -174,7 +174,7 @@ void  drawObj::drawSelf(void) {
 
 
 // We are either getting or loosing focus.
-void  drawObj::setFocus(boolean setLoose) {
+void  drawObj::setFocus(bool setLoose) {
 
 	focus = setLoose;
 	needRefresh = true;
@@ -182,11 +182,11 @@ void  drawObj::setFocus(boolean setLoose) {
 	
 				
 // The ability to control this is handy..
-void drawObj::clickable(boolean inWantsClicks) { wantsClicks = inWantsClicks; }
+void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
 
 
 // Manager has detected a fresh click, is it ours?
-boolean   drawObj::acceptClick(point where) {
+bool   drawObj::acceptClick(point where) {
         
     if (wantsClicks) {
         if (inRect(where.x,where.y)) {
@@ -285,13 +285,13 @@ void viewMgr::addObj(drawObj* newObj) {
 
 
 // Checking clicks, non-empty list already checked.
-boolean viewMgr::checkClicks(void) {
+bool viewMgr::checkClicks(void) {
     
     drawObj*    trace;
     point       gPoint;
     point       lPoint;
-    boolean     done;
-    boolean     success;
+    bool     done;
+    bool     success;
     
     if (!screen->hasTouchScreen()) return false;			// Sanity! Does it even have the hardware?
     success = false;                                  // Did we change anything? Not yet.
@@ -328,7 +328,7 @@ boolean viewMgr::checkClicks(void) {
 void viewMgr::checkRefresh(void) {
     
     drawObj*    trace;
-    boolean     done;
+    bool     done;
 
     trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.
     done = false;                           // Well, were not done yet are we?
@@ -403,7 +403,7 @@ void viewMgr::idle(void) {
 // ***************************************************
 
 
-drawGroup::drawGroup(int x, int y, word width,word height,boolean clicks) 
+drawGroup::drawGroup(int x, int y, word width,word height,bool clicks) 
 	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
 
 
@@ -432,7 +432,7 @@ void drawGroup::setGroupRefresh(void) {
 // The viewMgr that we live on wants to know if we need a redraw.
 // Before we act on that, lets let the kids redraw first.
 // NOTE : THATS MESSED UP. WE SHOULD DRAW FIRST THEN THE KIDS. RETHINK THIS.
-boolean drawGroup::wantRefresh(void) {
+bool drawGroup::wantRefresh(void) {
 
 	if (theList) {
 		screen->pushOffset(x,y);				// So we set in our offset.
@@ -462,9 +462,9 @@ void drawGroup::setLocation(int x,int y) {
 
 // First we see if a list item wants the click. then, if not
 // and we are accepting clicks, we take it.
-boolean   drawGroup::acceptClick(point where) {
+bool   drawGroup::acceptClick(point where) {
     
-    boolean	success;
+    bool	success;
     
     success = false;   
 		if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
@@ -514,7 +514,7 @@ void  drawGroup::drawSelf(void) { }
 // ***************************************************
 
 
-drawList::drawList(int x, int y, word width,word height,boolean clicks) 
+drawList::drawList(int x, int y, word width,word height,bool clicks) 
 	: drawGroup(x,y,width,height,clicks) { listHeight = 1; }
 
 
