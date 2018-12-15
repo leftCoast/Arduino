@@ -59,6 +59,8 @@ colorRect*  theEditBase;
 editField*  theEditField;
 SMSmanager* ourKeyboard;
 
+char  billy[] = {"“Billy”"};
+
 void setup() {
   colorObj aColor;
 
@@ -72,9 +74,13 @@ void setup() {
   screen->fillScreen(&aColor);
   theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,2);
   theTextView = new textView(TF_X,TF_Y,TF_W,TF_H);
-  
-  theTextView->setText("The North American B-25 Mitchell, a twin-engine bomber that became standard equipment for the Allied air forces in World War II, was perhaps the most versatile aircraft of the war. It became the most heavily armed airplane in the world, was used for high- and low-level bombing, strafing, photoreconnaissance, submarine patrol, and even as a fighter and was distinguished as the aircraft that completed the historic raid over Tokyo in 1942.\nIt required 8,500 original drawings and 195,000 engineering man-hours to produce the first one, but nearly 10,000 were produced from late 1939, when the contract was awarded to North American Aviation, through 1945.\nNamed for famed airpower pioneer Brigadier General William “Billy” Mitchell, it was a twin-tail, mid-wing land monoplane powered by two 1,700-horsepower Wright Cyclone engines.\nNormal bomb capacity was 5,000 pounds (2268 kilograms). Some versions carried 75 mm cannon, machine guns and added firepower of 13 .50-caliber guns in the conventional bombardier's compartment. One version carried eight .50-caliber guns in the nose in an arrangement that provided 14 forward-firing guns.");
+
+  //for (int i=0;i<strlen(billy);i++) {
+   // Serial.print(billy[i]);Serial.print(":");Serial.print((int)billy[i]);Serial.println();
+  //}
+  //theTextView->setText("The North American B-25 Mitchell, a twin-engine bomber that became standard equipment for the Allied air forces in World War II, was perhaps the most versatile aircraft of the war. It became the most heavily armed airplane in the world, was used for high- and low-level bombing, strafing, photoreconnaissance, submarine patrol, and even as a fighter and was distinguished as the aircraft that completed the historic raid over Tokyo in 1942.\nIt required 8,500 original drawings and 195,000 engineering man-hours to produce the first one, but nearly 10,000 were produced from late 1939, when the contract was awarded to North American Aviation, through 1945.\nNamed for famed airpower pioneer Brigadier General William “Billy” Mitchell, it was a twin-tail, mid-wing land monoplane powered by two 1,700-horsepower Wright Cyclone engines.\nNormal bomb capacity was 5,000 pounds (2268 kilograms). Some versions carried 75 mm cannon, machine guns and added firepower of 13 .50-caliber guns in the conventional bombardier's compartment. One version carried eight .50-caliber guns in the nose in an arrangement that provided 14 forward-firing guns.");
   //theTextView->setText("Sometimes\nI see things I don't like to see.\nLike bums on the street, or people trying to get the government to bail them out.");
+  
   theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   viewList.addObj(theTextBase);

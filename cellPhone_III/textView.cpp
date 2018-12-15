@@ -25,17 +25,12 @@ char  mapChar(char aChar) {
 // ********************************************************************************
 
 // Ok, we do it all in the contructor, or at least a bunch.
-lineMarker::lineMarker(int index, bool hardBreak, int widthChars, char* buff) {
+lineMarker::lineMarker(int index, bool hardBreak, int widthChars, char* buff) { parseText(index,hardBreak,widthChars,buff); }
 
-  parseText(index,hardBreak,widthChars,buff); 
-}
-          /*
-          int   mStartINdex; //
-          int   mPrintIndex;
-          int   mEndIndex;
-          bool  mEndBreak;
-          */
-          
+
+lineMarker::~lineMarker(void) {  }
+
+
 void lineMarker::parseText(int index, bool startHardBreak, int widthChars, char* buff) {
 
   int lastBlank;
@@ -83,20 +78,7 @@ void lineMarker::parseText(int index, bool startHardBreak, int widthChars, char*
   mEndIndex = index;                            // In the end, this is where we stop.
 }
 
-
-lineMarker::~lineMarker(void) {  }
-
-
-bool lineMarker::hasIndex(int index) { return (mStartIndex<=index) && (mEndIndex>=index); }
-
-/*
-          int   mStartIndex; //
-          int   mPrintIndex;
-          int   mEndIndex;
-          bool  mEndBreak;
-          */
-
-          
+  
 void  lineMarker::formatLine(char* inText, char* outLine, int maxChars) {
 
   int inIndex;
@@ -119,19 +101,14 @@ void  lineMarker::formatLine(char* inText, char* outLine, int maxChars) {
 
 // This is WAY handy as a debug tool!
 void lineMarker::rawText(char* text) {
-
-  char  aChar;
   
   for(int i=mPrintIndex;i<=mEndIndex;i++) {
-    aChar = text[i];
-    switch(aChar) {
-      case '\0' : Serial.print('~'); break;
-      case EOL : Serial.print("/n"); break;
-      case ' ' :  Serial.print("*"); break;
-      default : Serial.print(aChar); break;
-    }
+    Serial.print(mapChar(text[i]));
   }
 }
+
+
+bool lineMarker::hasIndex(int index) { return (mStartIndex<=index) && (mEndIndex>=index); }
 
 
 bool lineMarker::getBreak(void) { return mEndHBreak; }
@@ -204,7 +181,7 @@ void lineManager::appendText(char* text) {
       totalChars = numOurChars + numNewChars;   // Figure total buffer length.
       buff = (char*)malloc(totalChars + 1);     // Allocate the buffer.
       if (buff) {                               // If we got one.
-        trimList(numOurChars);                  // Trim outdated line.
+        trimList(numOurChars-1);                // Trim outdated line.
         if (mTextBuff) {
           strcpy(buff, mTextBuff);                // Copy over our text.
           strcpy(&buff[numOurChars], text);       // Then their text. (on top of the last '\0')
@@ -332,15 +309,21 @@ void lineManager::indexSet(int endLineNum) {
         hardBreak = true;
         endOfText = false;
       } else {                                        // We have some lines, I guess.
-        lineNum = numLines - 1;                       // Finding index to the ast one.
+        lineNum = numLines - 1;                       // Finding index to the last one.
         aLine = (lineMarker*)getByIndex(lineNum);     // Getting a pointer to the last one.
-        index = aLine->getEndIndex()+1;               // Getting the starting point fron this line.
+        index = aLine->getEndIndex()+1;               // Getting the starting point from this line.
         hardBreak = aLine->getBreak();                // Was it ended on a hard or soft break.
         endOfText = mTextBuff[index]=='\0';           // Was it the end of the text?
       }
-      while (lineNum < endLineNum && !endOfText) {    // Until we see enough, or we're at the end of the text.
-        endOfText = newMarker(&index, &hardBreak);    // Punch out line markers.
-        lineNum++;                                    // Keep track of how many.
+      if(endLineNum==-1) {                            // Flag for all lines.
+        while (!endOfText) {                          // Until we see the end of the text.
+          endOfText = newMarker(&index, &hardBreak);  // Punch out line markers.
+        }
+      } else {
+        while (lineNum < endLineNum && !endOfText) {    // Until we see enough, or we're at the end of the text.
+          endOfText = newMarker(&index, &hardBreak);    // Punch out line markers.
+          lineNum++;                                    // Keep track of how many.
+        }
       }
     }
   }
@@ -413,9 +396,9 @@ bool lineManager::newMarker(int* index, bool* hardBreak) {
 }
 
 
-// Given an index into the text buffer, find the line number
-// of it. return -1 if not found.
-int lineManager::getLineNum(int index) {
+// Want to know if this lineMarker exists.
+// Return it's index if found. -1 if not.
+int lineManager::getExistingLineNum(int index) {
 
   lineMarker* temp;
   int         lineNum;
@@ -433,22 +416,47 @@ int lineManager::getLineNum(int index) {
 }
 
 
+// Want the line this guy is in, Index as neccisary.
+int lineManager::getLineNum(int index) {
+
+  int lineNum;
+  
+  lineNum = getExistingLineNum(index);    // First try with what we have.
+  if (lineNum==-1) {                      // No?
+    indexSet(-1);                         // Fine. Index the lot of them.
+    lineNum = getExistingLineNum(index);  // Grab the line number, or error, now.
+  }
+  return lineNum;                         // Off it goes!
+}
+
+
+ 
 // Find the line that index is in, delete it and its tail.
 void  lineManager::trimList(int index) {
 
   int         lineNum;
   lineMarker* theLine;
-  Serial.print("trim list at : ");Serial.println(index);
-  lineNum = getLineNum(index);                    // See if we can find the line number.
-  if (lineNum > 0) {                              // If we found a number and its not the top.
-    lineNum--;                                  // Ok, we want the previos one.
-    theLine = (lineMarker*)getByIndex(lineNum); // Grab the line before the one that changed.
-    theLine->deleteTail();                      // Delete its tail.
-  } else if (lineNum == 0) {                      // Its the head of the list.
-    dumpList();                                   // Dump it all!
-  }
+
+  if(index>0) {                                   // Zero woud be everything. Less thatn zero? Lazy coding.
+    lineNum = getExistingLineNum(index);         // See if we already have this line number.
+    if (lineNum > 0) {                            // If we found a number and its not the top.
+      lineNum--;                                  // Ok, we want the previos one.
+      theLine = (lineMarker*)getByIndex(lineNum); // Grab the line before the one that changed.
+      theLine->deleteTail();                      // Delete its tail.
+    }
+  } else {                                        // Its the head of the list. Or negitive? Whatever!
+    dumpList();                                   // When in doubt, dump it all!
+  }  
 }
 
+
+// Need to be sure the entire list has been indexed.
+// This returns how many lines we have.
+int lineManager::getNumLines(void) {
+
+  indexSet(-1);       // -1, make sure they are all indexed.
+  return getCount();  // rerurn the count.
+}
 
 
 // ********************************************************************************
@@ -463,7 +471,7 @@ textView::textView(int inLocX, int inLocY, word inWidth, word inHeight, bool inC
 
   setTextSize(DEF_TEXT_SIZE);
   setTextColor(&black);
-  setFirstLine(0);
+  mFirstLine = 0;
 }
 
 
@@ -521,14 +529,35 @@ void textView::setTextColors(colorObj* tColor, colorObj* bColor) {
 }
 
 
-// Set the first line at the top of our rectangle.
-void textView::setFirstLine(int lineNum) {
+void textView::setScroll(scrollCom choice,int inNum) {
 
-  mFirstLine = lineNum;
-  needRefresh = true;
+  int numLines;
+  int newEditLine;
+
+  numLines = mManager.getNumLines();
+  if (numLines<=mNumLines) {           // Don't have enough anyway.
+    newEditLine = 0;
+  } else {
+    switch (choice) {
+      case topOfText      : newEditLine = 0;                                      break;
+      case endOfText      : newEditLine = numLines-mNumLines;                     break;
+      case lineAtBottom   : newEditLine = inNum-mNumLines;                        break;
+      case lineAtTop      : newEditLine = inNum;                                  break;
+      case indexAtBottom  : newEditLine = mManager.getLineNum(inNum) - mNumLines; break;
+      case indexAtTop     : newEditLine = mManager.getLineNum(inNum);             break;
+      case upOne          : newEditLine--;                                        break;
+      case downOne        : newEditLine++;                                        break;
+    }
+    if (newEditLine>=numLines) newEditLine = numLines-1;
+    if (newEditLine<0) newEditLine = 0;
+  }
+  if (newEditLine!=mFirstLine) {
+    mFirstLine = newEditLine;
+    needRefresh = true;
+  }
 }
 
-
+  
 // Replace our text buff with a copy of this.
 void textView::setText(char* text) {
 
@@ -541,6 +570,7 @@ void textView::setText(char* text) {
 void textView::appendText(char* text) {
 
   mManager.appendText(text);
+  setScroll(endOfText);
   needRefresh = true;
 }
 
@@ -573,9 +603,7 @@ void textView::drawSelf(void) {
   for (int i = 0; i < mNumLines; i++) {
     textPtr =  mManager.formatLine(i + mFirstLine);
     locY = y + (i * (mTHeight+mLineSpace));
-    if (!mTransp) {
-      screen->fillRect(x,locY,width,mLineSpace,&mBackColor);
-    }
+    screen->fillRect(x,locY,width,mTHeight+mLineSpace,&mBackColor);
     screen->setCursor(x,locY);
     screen->drawText(textPtr);
   }

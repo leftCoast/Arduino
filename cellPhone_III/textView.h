@@ -14,6 +14,9 @@
 #include "lists.h"
 #include "drawObj.h"
 
+// calling the scroll function. You'll need these. Mostly it'll be automatic though.
+enum scrollCom  { topOfText, endOfText, lineAtBottom, lineAtTop, indexAtBottom, indexAtTop, upOne, downOne };
+
 // lineMarker, oh boy!
 // We need to break the text into lines. When flowing text on a screen, there are rules.
 // Hard breaks, soft breaks, leading spaces. Bla bla bla. We read in a long buffer. At some
@@ -30,8 +33,8 @@ class lineMarker : public linkListObj {
   virtual ~lineMarker(void);
   
           void  parseText(int index, bool startHardBreak, int widthChars, char* buff);
-          bool  hasIndex(int index);                            // Do we "own" the text at this index? 
           void  formatLine(char* text,char* line,int maxChars); // Give back the line in printable form. Buff MUST be maxChars + 1 or more.
+          bool  hasIndex(int index);                            // Do we "own" the text at this index? 
           void  rawText(char* text);                            // Prints raw line of text to Serial.
           bool  getBreak(void);                                 // Did we end with a hard break?
           int   getEndIndex(void);                              // Where we left off.
@@ -62,7 +65,9 @@ class lineManager : public linkList {
           bool        upToDate(void);                                 // Before wasting yet more time. Lets just see if we can sort this any more than it is.
           char*       formatLine(int lineNum);                        // And the why of alll this nonsense. Format us a line, this one.
           bool        newMarker(int* index,bool* hardBreak);          // Starting at index, make a new marker. Return true for more text available.
-          int         getLineNum(int index);                          // Given an index into the text buffer, find the line number of it. Return -1 if not found.
+          int         getExistingLineNum(int index);                  // Want to know if this lineMarker exists. Return it's index if found. -1 if not.
+          int         getLineNum(int index);                          // Want the line this guy is in, Index as neccisary.
+          int         getNumLines(void);                              // Count ALL the lines. Index as neccisary.
           void        trimList(int index);                            // Find the line that includes this index. Delete it and its tail.
           
           char*       mTextBuff;                                      // Our string of text to manage.
@@ -83,7 +88,7 @@ class textView :  public drawObj {
           void        setTextSize(int size);                      // Set the size of the text we are dealing with.
           void        setTextColor(colorObj* tColor);             // Well, what about a color?
           void        setTextColors(colorObj* tColor,colorObj* bColor);
-          void        setFirstLine(int lineNum);                  // Set the first line at the top of our rectangle.
+          void        setScroll(scrollCom choice,int inNum=0);    // Better look at the scrolling command list.
   virtual void        setText(char* text);                        // Replace our text buff with a copy of this.
   virtual void        appendText(char* text);                     // Add this to the end of our text.
   virtual void        insertText(int index,char* text);           // Stick a NULL terminated substring in at this index.
