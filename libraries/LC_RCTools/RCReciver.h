@@ -9,22 +9,22 @@
 
 class reciverPin {
    
-   public: 
-     reciverPin(int inPin);
-     ~reciverPin(void);
+	public: 
+				reciverPin(int inPin);
+	virtual	~reciverPin(void);
    
-      unsigned long pinResult(void);   // What's the last value read?
-    //void          dataDump(void);  // uncomment this and its method to dump to serial.
-      void          handeler(void);
+				unsigned long	pinResult(void);   // What's the last value read?
+				//void			dataDump(void);  // uncomment this and its method to dump to serial.
+				void				handeler(void);
       
    protected:
-      void          attachHandler(byte state);
-      byte          pin;
-      byte          index;
-      byte          currentState;
-      unsigned long startMicros;
-      unsigned long endMicros;                      
-      unsigned long result;
+				void          attachHandler(byte state);
+				byte          pin;
+				byte          index;
+				byte          currentState;
+				unsigned long startMicros;
+				unsigned long endMicros;                      
+				unsigned long result;
 };
 
 extern reciverPin* pinList[MAX_PINS];

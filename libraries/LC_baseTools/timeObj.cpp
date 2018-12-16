@@ -10,6 +10,9 @@ timeObj::timeObj(float inMs) {
 }
 
 
+timeObj::~timeObj(void) { }
+
+
 void timeObj::setTime(float inMs,bool startNow) {
 
   if (inMs>0)

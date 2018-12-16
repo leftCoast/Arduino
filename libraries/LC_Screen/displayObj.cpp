@@ -1,17 +1,20 @@
  #include "displayObj.h"
 
   
-  displayObj::displayObj(boolean inGraphic,boolean inColor,boolean inTouch,boolean inSD,boolean inReadable) {
+displayObj::displayObj(bool inGraphic,bool inColor,bool inTouch,bool inSD,bool inReadable) {
 
-    graphic = inGraphic;
-    color = inColor;
-    hasTouch = inTouch;
-    hasSD = inSD;
-    readable = inReadable;
-    offsetX = 0;
-  	offsetY = 0;
+	graphic = inGraphic;
+	color = inColor;
+	hasTouch = inTouch;
+	hasSD = inSD;
+	readable = inReadable;
+	offsetX = 0;
+	offsetY = 0;
   }
   
+
+displayObj::~displayObj(void) { }
+
   
 void displayObj::pushOffset(int x, int y) {
 
@@ -29,6 +32,7 @@ void displayObj::popOffset(int x, int y) {
   
 int displayObj::gX(int x) { return x + offsetX; }
 
+
 int displayObj::gY(int y) { return y + offsetY; }
 	
 	
@@ -42,20 +46,20 @@ point	displayObj::lP(point gP) {
 }
 
 
-boolean displayObj::dispObjBegin(void) { return false; }
+bool displayObj::dispObjBegin(void) { return false; }
 void displayObj::setRotation(byte inRotation) { }
 void displayObj::setTextColor(colorObj* inColor) { }
 void displayObj::setTextColor(colorObj* tColor,colorObj* bColor) { }
 void displayObj::setTextSize(byte inSize) { }
-void displayObj::setTextWrap(boolean inWrap) { }
+void displayObj::setTextWrap(bool inWrap) { }
 void displayObj::setFont(const GFXfont* font) { }
 void displayObj::setCursor(int inX,int inY) { }
 void displayObj::drawText(char* inText) { }
 void displayObj::fillScreen(colorObj* inColor) { }
 void displayObj::fillRect(int locX,int locY,word width,word height,colorObj* inColor) { }
 void displayObj::drawRect(int locX,int locY,word width,word  height,colorObj* inColor) { }
-void displayObj::fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,boolean vertical) { }
-void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,boolean vertical) { }
+void displayObj::fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,bool vertical) { }
+void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical) { }
 void displayObj::fillRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor){ }
 void displayObj::drawRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor){ }
 void displayObj::drawCircle(int locX,int locY,word inDiam, colorObj* inColor){ }
@@ -76,7 +80,7 @@ point   displayObj::getPoint(void) {
   return defPnt;
 }
 
-boolean displayObj::touched(void) {return false; }
+bool displayObj::touched(void) {return false; }
   
 bool displayObj::isGraphic(void) { return graphic; }
 bool displayObj::isColor(void) { return color; }

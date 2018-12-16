@@ -20,6 +20,15 @@ bmpPipe::bmpPipe(rect sourceRect) {
 }
 
 
+bmpPipe::~bmpPipe(void) { 
+  
+	if (filePath) {		// If we have a path, loose it.
+  		free(filePath);	// Free memory.
+  		filePath=NULL;		// And flag it!
+	}
+}
+ 
+ 
 boolean bmpPipe::openPipe(char* filename) {
 
 	rect aRect;
@@ -28,37 +37,28 @@ boolean bmpPipe::openPipe(char* filename) {
   haveInfo = false;												// Ok, assume failure..									
   if (filePath) {													// If we have a path, loose it.
   	free(filePath);												// Free memory.
-  	filePath=NULL;												// And flag it!
+  	filePath=NULL;													// And flag it!
   }
-  bmpFile = SD.open(filename);						// See if it works.
-  if (bmpFile) {    											// We got a file?
-    if (readInfo(bmpFile)) {							// Then see if we can understand it	
+  bmpFile = SD.open(filename);								// See if it works.
+  if (bmpFile) {    												// We got a file?
+    if (readInfo(bmpFile)) {									// Then see if we can understand it	
     	filePath = (char*) malloc(strlen(filename)+1);	// Grab storage for name;
     	if (filePath) {											// Got some?
-    		strcpy(filePath,filename);				// Save it off.
-    		haveInfo = true;									// success!
+    		strcpy(filePath,filename);							// Save it off.
+    		haveInfo = true;										// success!
     	}
-    	if (haveInfo && !haveSourceRect) {  // If we can..
-      	aRect.x = 0;                      // Default the source to the image.
+    	if (haveInfo && !haveSourceRect) {  				// If we can..
+      	aRect.x = 0;                      				// Default the source to the image.
       	aRect.y = 0;
       	aRect.width = imageWidth;
       	aRect.height = imageHeight;
       	setSourceRect(aRect);
     	}
     }
-    bmpFile.close();											// Done, thanks!
+    bmpFile.close();												// Done, thanks!
   }
-  return haveInfo;                     		// Tell the caller if it worked.
+  return haveInfo;                     					// Tell the caller if it worked.
 }
-
-
-bmpPipe::~bmpPipe(void) { 
-  
-	if (filePath) {												// If we have a path, loose it.
-  	free(filePath);											// Free memory.
-  	filePath=NULL;											// And flag it!
-  }
- }
 
 
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order
@@ -73,6 +73,7 @@ uint16_t bmpPipe::read16(File f) {
     ((uint8_t *)&result)[1] = f.read(); // MSB
     return result;
   }
+
 
 // For 4 byte numbers.
 uint32_t bmpPipe::read32(File f) {
@@ -110,23 +111,23 @@ boolean bmpPipe::readInfo(File bmpFile) {
     boolean   success = false;
     uint32_t  temp;
   
-    if (bmpFile) {                                     // We get a file handle?
-      if (read16(bmpFile) == 0x4D42) {                  // If we have something or other..
-        temp = read32(bmpFile);                         // We grab the file size.
-        temp = read32(bmpFile);                         // Creator bits
-        temp = read32(bmpFile);                         // image offset (Why read it into temp first?)
-        imageOffset = temp;                             // image offset!?! Save this! (Actually, this shuts up the compiler.)
-        temp = read32(bmpFile);                         // read DIB header size?
-        imageWidth = read32(bmpFile);                   // width? Good thing to save for later.
-        imageHeight = read32(bmpFile);                  // Height? Negative means the data is right side up. Go figure..
-        if (read16(bmpFile) == 1) {                     // if the next word is 1? What's this mean? Needs to be though.
-          imageDepth = read16(bmpFile);                 // color depth.
-          if (imageDepth == 24 || imageDepth == 32) {   // We can do 24 or 32 bits..
-            pixBytes = imageDepth / 8;                  // Bytes / pixel
-            if (!read32(bmpFile)) {                     // And no compression!
-              bytesPerRow = imageWidth * pixBytes;      // Data takes up this much, but..
-              while(bytesPerRow % 4) bytesPerRow++;     // We need to pad it to a multiple of 4.
-              success = true;                           // Made it this far? We can do this!
+    if (bmpFile) {												// We get a file handle?
+      if (read16(bmpFile) == 0x4D42) {						// If we have something or other..
+        temp = read32(bmpFile);								// We grab the file size.
+        temp = read32(bmpFile);								// Creator bits
+        temp = read32(bmpFile);								// image offset (Why read it into temp first?)
+        imageOffset = temp;									// image offset!?! Save this! (Actually, this shuts up the compiler.)
+        temp = read32(bmpFile);								// read DIB header size?
+        imageWidth = read32(bmpFile);						// width? Good thing to save for later.
+        imageHeight = read32(bmpFile);						// Height? Negative means the data is right side up. Go figure..
+        if (read16(bmpFile) == 1) {							// if the next word is 1? What's this mean? Needs to be though.
+          imageDepth = read16(bmpFile);					// color depth.
+          if (imageDepth == 24 || imageDepth == 32) {	// We can do 24 or 32 bits..
+            pixBytes = imageDepth / 8;						// Bytes / pixel
+            if (!read32(bmpFile)) {							// And no compression!
+              bytesPerRow = imageWidth * pixBytes;		// Data takes up this much, but..
+              while(bytesPerRow % 4) bytesPerRow++;	// We need to pad it to a multiple of 4.
+              success = true;									// Made it this far? We can do this!
             }
           }
         }
@@ -148,23 +149,23 @@ void bmpPipe::drawLine(File bmpFile,int x,int y) {
       bmpFile.read(buf,pixBytes);                 // Grab a pixel.
       thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
       screen->drawPixel(trace,y,&thePixal);       // Spat it out to the screen.
-    }
-  }
+	}
+}
 
 
 unsigned long bmpPipe::filePtr(int x,int y) {
 
-    long  index;
+	long  index;
   
-    index = imageOffset;                                // Starting here..
-    if (imageHeight>0) {                                // The image is upside down?
-       index = index + ((imageHeight-y-1)*bytesPerRow);   // reverse..
-    } else {
-      index = index + (y*bytesPerRow);                  // not reverse.
-    }
-    index = index + (sourceRect.x * pixBytes);          // Add offset for x.
-    return index;                                       // Tell the world.
-  }
+	index = imageOffset;												// Starting here..
+	if (imageHeight>0) {												// The image is upside down?
+		index = index + ((imageHeight-y-1)*bytesPerRow);	// reverse..
+	} else {
+		index = index + (y*bytesPerRow);							// not reverse.
+	}
+	index = index + (sourceRect.x * pixBytes);				// Add offset for x.
+	return index;														// Tell the world.
+}
 
   
 void bmpPipe::drawBitmap(int x,int y) {

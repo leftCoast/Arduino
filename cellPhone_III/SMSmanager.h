@@ -3,17 +3,17 @@
 
 #include "keyboard.h"
 #include "keystroke.h"
-
+#include "textView.h"
 
 class SMSmanager : public keyboard {
 
   public:
-          SMSmanager(editField* inEditField,label* inTextField);
+          SMSmanager(editField* inEditField,textView* inTextField);
           ~SMSmanager(void);
 
   virtual void  handleKey(keyCommands inEditCom);
 
-          label*  mTextField;
+          textView*  mTextField;
 };
 
 #endif

@@ -15,6 +15,9 @@ timeObj(inPeriodMs) {
 }
 
 
+blinker::~blinker(void) { delete(onTimer); }
+
+
 void blinker::setInverse(boolean inInverse) { inverse = inInverse; }
 
 

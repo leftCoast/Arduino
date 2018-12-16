@@ -9,18 +9,19 @@
 // to draw on that bitmap as a background.
 // 
 // The way to use this is to call bmpDrawObj::drawSelf(); in the beginning of 
-// Your drawSelf(); method. This will stamp out an alignd rectangle of the background
-// bitmap on your spot for you to draw on. It also works if your a part of a group. (of groups)
+// Your drawSelf(); method. This will stamp out an alignd rectangle of the
+// background bitmap on your spot for you to draw on. It also works if your
+// a part of a group. (of groups)
 
 class bmpDrawObj : public drawObj {
 
 public:
-  bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop);
-  ~bmpDrawObj(void);
+				bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop);
+	virtual	~bmpDrawObj(void);
   
-virtual void  drawSelf(void);
+	virtual	void		drawSelf(void);
 
-        bmpPipe*  backdrop;
+				bmpPipe*	backdrop;
 };
 
 #endif

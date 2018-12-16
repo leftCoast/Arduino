@@ -41,7 +41,6 @@ class rect {
 					word  height;
 };
 
-
 // ***************************************************************
 // Base class for an object that can be drawn on the screen.
 // Possibly clicked on.

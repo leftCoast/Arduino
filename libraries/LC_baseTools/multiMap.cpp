@@ -13,6 +13,7 @@ mapItem::mapItem(double inX, double inY) {
   greaterItem = NULL;
 }
 
+
 mapItem::~mapItem(void) {     // Time to die. If your in a list, remove yourself.
 
   if (lessItem!=NULL) // Have a "less" item.
@@ -169,10 +170,10 @@ void multiMap::clearMap(void) {
 
 double multiMap::Map(double inVal) {
 
-  if (itemList!=NULL)              // If we have mappers..
-    return itemList->Map(inVal);   // Map that item!
-  else                             // What the heck? We have no mappers at all?
-  return 0;                      // I guess zero is the best we can do here.
+  if (itemList!=NULL)              	// If we have mappers..
+    return itemList->Map(inVal);   	// Map that item!
+  else                             	// What the heck? We have no mappers at all?
+  return 0;                      	// I guess zero is the best we can do here.
 }
 
 /*

@@ -8,6 +8,9 @@ mechButton::mechButton(byte inPinNum) {
 }
 
 
+mechButton::~mechButton(void) {  }
+
+
 bool mechButton::clicked(void) {
 
   if (beenInitialized) {                  // Ready to go? Lets look!

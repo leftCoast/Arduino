@@ -33,33 +33,34 @@ enum soundCardErr {
 
 class soundCard : public idler, public timeObj {
 
-  public:
-    soundCard(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin=-1);
-    ~soundCard(void);
+	public:
+				soundCard(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin=-1);
+	virtual	~soundCard(void);
 
-          boolean       begin(void);
-          boolean       setSoundfile(char* inFilePath);
-          boolean       command(action inCommand);
-          boolean       isPlaying(void);
-          void          setVolume(byte volume);
-          byte					getVolume(void);
-          void          setError(soundCardErr inErr);
-          soundCardErr 	getLastError(void);
-          void					playClip(char* filePath);				// NOTE: This BLOCKS! only for "clicks".
+				bool				begin(void);
+				bool				setSoundfile(char* inFilePath);
+				bool				command(action inCommand);
+				bool				isPlaying(void);
+				void				setVolume(byte volume);
+				byte				getVolume(void);
+				void				setError(soundCardErr inErr);
+				soundCardErr	getLastError(void);
+				void				playClip(char* filePath);		// NOTE: This BLOCKS! ONLY for "clicks".
 
   protected:
-	virtual void idle(void);
+  
+	virtual	void				idle(void);
 
-    Adafruit_VS1053_FilePlayer* musicPlayer;
-    soundCardErr 	lastErr;
-    byte          setupType;
-    byte					csPin;
-    byte					drqPin;
-    byte					resetPin;
-    char*         filePath;
-    byte					volume;
-    boolean       playing;
-    boolean				newSong;
+				Adafruit_VS1053_FilePlayer* musicPlayer;
+				soundCardErr	lastErr;
+				byte				setupType;
+				byte				csPin;
+				byte				drqPin;
+				byte				resetPin;
+				char*				filePath;
+				byte				volume;
+				bool				playing;
+				bool				newSong;
 };
 
 #endif

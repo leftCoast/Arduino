@@ -1,11 +1,11 @@
  #include "neoPixel.h"
 
 
- neoPixel::neoPixel(uint16_t n, uint8_t p, uint8_t t)
+neoPixel::neoPixel(uint16_t n, uint8_t p, uint8_t t)
    :  Adafruit_NeoPixel(n,p,t) {  }
    
    
- neoPixel::~neoPixel() {  }
+neoPixel::~neoPixel() {  }
 
 
 void neoPixel::setPixelColor(uint16_t n,colorObj* inColor) { 
@@ -48,6 +48,7 @@ void neoPixel::setAll(colorObj* color) {
   	 setPixelColor(i, color);
   }
 }
+
 
 colorObj neoPixel::shiftPixels(bool toEnd) {
 

@@ -1,16 +1,18 @@
 #include "PulseOut.h"
 
 
-PulseOut::PulseOut(byte inPin , float inPeriod,boolean inverse) 
-: 
-timeObj(inPeriod),
-idler() {
+PulseOut::PulseOut(byte inPin , float inPeriod,bool inverse) 
+	: timeObj(inPeriod),
+	idler() {
 
   pin = inPin;
   pullDown = inverse;
   width = 0;
   init = false;
 }
+
+
+PulseOut::~PulseOut(void) { }
 
 
 // Width is the width of the pulse.

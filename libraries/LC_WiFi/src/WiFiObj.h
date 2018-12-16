@@ -105,68 +105,68 @@ typedef enum {
 
 class WiFiObj {
 
-  public:
-    WiFiObj(int cs,int irq, int rst);
-    ~WiFiObj(void);
+	public:
+				WiFiObj(int cs,int irq, int rst);
+	virtual	~WiFiObj(void);
 
-		bool			begin(void);														// Start, no hookup.
-    bool			begin(char* WifiName,char* WiFiPass);		// Start & hookup.
-    bool			connect(char* WifiName,char* WiFiPass);	// Hookup.
-    void			scanning(bool onOff);
-    void			end();																	// Tears everything down, frees memory.
-    char*			getSSID(void);													// name.
-    byte*			getMACAddr(void);												// Our MAC address.
-    byte*			getRemoteMACAddr(void);									// Their MAC address.
-    uint32_t	getLocalIP(void);
-		byte*			getBSSID(void);													// Sorta like a MAC address.
-		int				getRSSI(void);													// Signal strength.
-		byte			getEncrypt(void);													// Encryption type.
-		byte			getChannel(void);												// Broadcast channel.
-    void			scanNetworks(bool onOff);								// Turn scanning on or off.
-    byte			getNetworkCount(void);
-		char*			getSSID(int index);											// name.
-		byte*			getBSSID(int index);										// Sorta like a MAC address.
-		int				getRSSI(int index);											// Signal strength.
-		byte			getEncrypt(int index);											// Encryption type.
-		byte			getChannel(int index);									// Broadcast channel.
+				bool			begin(void);														// Start, no hookup.
+				bool			begin(char* WifiName,char* WiFiPass);		// Start & hookup.
+				bool			connect(char* WifiName,char* WiFiPass);	// Hookup.
+				void			scanning(bool onOff);
+				void			end();																	// Tears everything down, frees memory.
+				char*			getSSID(void);													// name.
+				byte*			getMACAddr(void);												// Our MAC address.
+				byte*			getRemoteMACAddr(void);									// Their MAC address.
+				uint32_t	getLocalIP(void);
+				byte*			getBSSID(void);													// Sorta like a MAC address.
+				int				getRSSI(void);													// Signal strength.
+				byte			getEncrypt(void);													// Encryption type.
+				byte			getChannel(void);												// Broadcast channel.
+				void			scanNetworks(bool onOff);								// Turn scanning on or off.
+				byte			getNetworkCount(void);
+				char*			getSSID(int index);											// name.
+				byte*			getBSSID(int index);										// Sorta like a MAC address.
+				int				getRSSI(int index);											// Signal strength.
+				byte			getEncrypt(int index);											// Encryption type.
+				byte			getChannel(int index);									// Broadcast channel.
 		
-		void			handleDefaultConnect(void* pvMsg);
-		void			handleCurrentRSSI(void* pvMsg);
-		void			handleProvisionInfo(void* pvMsg);
-		void			handleConnectionInfo(void* pvMsg);
-		void			handleGetSystemTime(void* pvMsg);
-		void			handleConnectionChange(void* pvMsg);
-		void			handleDHCPConfig(void* pvMsg);
-		void			handleReqestWPS(void* pvMsg);
-		void			handleIPConflict(void* pvMsg);
-		void			handleClientInfo(void* pvMsg);
+				void			handleDefaultConnect(void* pvMsg);
+				void			handleCurrentRSSI(void* pvMsg);
+				void			handleProvisionInfo(void* pvMsg);
+				void			handleConnectionInfo(void* pvMsg);
+				void			handleGetSystemTime(void* pvMsg);
+				void			handleConnectionChange(void* pvMsg);
+				void			handleDHCPConfig(void* pvMsg);
+				void			handleReqestWPS(void* pvMsg);
+				void			handleIPConflict(void* pvMsg);
+				void			handleClientInfo(void* pvMsg);
 		
 	protected:
-		void			doInit(void);
-		void			updateList(void);
-		netwkObj* getNet(int pos);
-		void			countList(void);
+				void				doInit(void);
+				void				updateList(void);
+				netwkObj*		getNet(int pos);
+				void				countList(void);
 		
-		bool						init;
-    WiFiStatus  		status;
-    byte        		mode;
-    tstrSystemTime	time;
+				bool				init;
+				WiFiStatus		status;
+				byte				mode;
+				tstrSystemTime	time;
     
-    uint32_t				leaseTime;
-		uint32_t				DNS;
-    int         		DHCP;
-    uint32_t				localIP;
-    uint32_t				submask;
-    uint32_t				gateway;
+				uint32_t			leaseTime;
+				uint32_t			DNS;
+				int         	DHCP;
+				uint32_t			localIP;
+				uint32_t			submask;
+				uint32_t			gateway;
 
-    byte		SSID[M2M_MAX_SSID_LEN+1];	// Actually SSID is a 32 byte buffer. Most use it like a string.
-    byte		remoteIPAddr[4];					// IP of the AP we hooked to.
-    byte		remoteMACAddr[6];					// Says its the AP MAC addr we hooked to.
-    byte		MACAddr[6];								// Our MAC addr. Again, its what the documentation says.
-		byte		BSSID[6];									// BSSID is used like the wireless MAC Address.
-		int			RSSI;											// RSSI is the signal strength.
-		byte		Auth;											// The type of encryption were using.
-		byte		channel;									// The channel to broadcast/receive on.
+				byte		SSID[M2M_MAX_SSID_LEN+1];	// Actually SSID is a 32 byte buffer. Most use it like a string.
+				byte		remoteIPAddr[4];					// IP of the AP we hooked to.
+				byte		remoteMACAddr[6];					// Says its the AP MAC addr we hooked to.
+				byte		MACAddr[6];								// Our MAC addr. Again, its what the documentation says.
+				byte		BSSID[6];									// BSSID is used like the wireless MAC Address.
+				int			RSSI;											// RSSI is the signal strength.
+				byte		Auth;											// The type of encryption were using.
+				byte		channel;									// The channel to broadcast/receive on.
 };
 
 

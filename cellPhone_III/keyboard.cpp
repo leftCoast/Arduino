@@ -185,6 +185,7 @@ void controlKey::handleShift() {
     case chars    : mKeyboard->handleKey(shifted); break;
     case shifted  : mKeyboard->handleKey(chars); break;
     case number   : mKeyboard->handleKey(shifted); break;
+    default       : break;  // Shut up, compiler.
   }
 }
 
@@ -192,9 +193,10 @@ void controlKey::handleShift() {
 void controlKey::handleNumber() {
   
   switch(mKeyboard->mState) {
-    case chars   :
-    case shifted : mKeyboard->handleKey(numbers); break;
-    case number  : mKeyboard->handleKey(chars); break;
+    case chars    :
+    case shifted  : mKeyboard->handleKey(numbers); break;
+    case number   : mKeyboard->handleKey(chars); break;
+    default       : break;  // Shut up, compiler.
   }
 }
 
@@ -208,7 +210,8 @@ void controlKey::doAction(void) {
     case arrowBack  : 
     case enter      : mKeyboard->handleKey(mCom); break;
     case shift      : handleShift(); break;
-    case number     : handleNumber(); break;  
+    case number     : handleNumber(); break;
+    default         : break;  // Shut up, compiler. 
   }
 }
 

@@ -1,6 +1,6 @@
 #include "SMSmanager.h"
 
-SMSmanager::SMSmanager(editField* inEditField,label* inTextField) 
+SMSmanager::SMSmanager(editField* inEditField,textView* inTextField) 
   : keyboard(inEditField) { mTextField = inTextField; }             // Do we need to delete this later?
 
 
@@ -9,22 +9,20 @@ SMSmanager::~SMSmanager(void) {  }
 void SMSmanager::handleKey(keyCommands inEditCom) {
 
   char* buff;
-  int   numEditChars;
-  int   numListChars;
-  int   totalChars;
+  int   numChars;
+  int   index;
   
   if (inEditCom == enter) {
-    numEditChars = mEditField->getNumChars();
-    numListChars = mTextField->getNumChars();
-    totalChars = numEditChars + numListChars;
-    buff = (char*)malloc(totalChars+2);                // We want to add a '\n' to it.
+    numChars = mEditField->getNumChars();
+    buff = (char*)malloc(numChars+2);
     if (buff) {
-      mTextField->getText(buff);
-      mEditField->getText(&buff[numListChars]);
-      buff[totalChars]='\n';
-      buff[totalChars+1]='\0';
-      mEditField->setValue("");
-      mTextField->setValue(buff);
+      mEditField->getText(buff);
+      index = strlen(buff);
+      buff[index]='\n';
+      buff[index+1]='\0';
+      mTextField->appendText(buff);
+      buff[0] = '\0';
+      mEditField->setValue(buff);
       free(buff);
     }
   } else {
