@@ -21,6 +21,7 @@ void SMSmanager::handleKey(keyCommands inEditCom) {
       buff[index]='\n';
       buff[index+1]='\0';
       mTextField->appendText(buff);
+      Serial.print(buff);
       buff[0] = '\0';
       mEditField->setValue(buff);
       free(buff);

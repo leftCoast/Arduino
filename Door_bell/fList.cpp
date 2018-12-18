@@ -111,7 +111,7 @@ void fList::scroll(int ydist) {
     y = trace->y;
     y = y + ydist;
     trace->setLocation(x, y);
-    trace = (fListItem*)trace->drawObj::next;
+    trace = (fListItem*)trace->dllNext;
   }
 }
 
@@ -156,7 +156,7 @@ void  fList::currentSongRefresh() {
       trace->setNeedRefresh();
       return;
     } else {
-      trace = (drawObj*)trace->next;
+      trace = (drawObj*)trace->dllNext;
     }
   }
 }
@@ -407,7 +407,3 @@ void DBSelector::drawSelf(void) {
     screen->drawLine(x, y + height - 1, x + width - 1, y, &aColor);
   }
 }
-
-
-
-

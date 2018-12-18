@@ -77,7 +77,7 @@ extern  drawList  fileList;
 
 void setup() {
   
-  //Serial.begin(9600); while (!Serial);
+  Serial.begin(9600); while (!Serial);
   Serial.println(F("Serial online."));
 
   Serial.println(F("Starting screen."));
