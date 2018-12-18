@@ -2,9 +2,9 @@
 
 movingObj::movingObj(int inX, int inY, word inWidth,word inHeight) 
   :drawObj(inX,inY,inWidth,inHeight) {
-    backColor.setColor((word)BLACK);
-    oldX = scrX();
-    oldY = scrY(); 
+    backColor.setColor(LC_BLACK);
+    oldX = x;
+    oldY = y; 
   }
 
 void movingObj::setBackColor(colorObj* inBackColor) { backColor.setColor(inBackColor); }
@@ -12,8 +12,8 @@ void movingObj::setBackColor(colorObj* inBackColor) { backColor.setColor(inBackC
 
 void movingObj::setLocation(int inX, int inY) {
 
-  oldX = scrX();
-  oldY = scrY();
+  oldX = x;
+  oldY = y; 
   drawObj::setLocation(inX,inY);
 }
 
@@ -23,8 +23,7 @@ void movingObj::eraseSelf(void) { screen->fillRect(oldX,oldY,width,height,&backC
 
 void movingObj::drawSelf(void) {
   eraseSelf();
-  screen->fillRect(scrX(), scrY(), width, height, &white);
+  screen->fillRect(x,y, width, height, &white);
 }
 
 int movingObj::middleX(void) { return x+width/2; }
-

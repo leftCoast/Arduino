@@ -2,7 +2,6 @@
 #define ballObj_h
 
 #include "movingObj.h"
-#include <label.h>
 
 #define BALL_X    61
 #define BALL_Y    60

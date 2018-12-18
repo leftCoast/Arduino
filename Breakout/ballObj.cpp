@@ -48,7 +48,6 @@ point gameCompass::adjustCourse(int dy, int dx, courseChange change) {
     }
   }
   if (foundPoint) {
-    //Serial.print("found at ");Serial.println(index);
     switch (change) {
       case clockwise :
         if (index != 4 && index != 13) {
@@ -71,7 +70,6 @@ point gameCompass::adjustCourse(int dy, int dx, courseChange change) {
         }
         break;
     }
-    //Serial.print("Changed to ");Serial.println(index);
   }
   return aPoint;
 }
@@ -186,7 +184,7 @@ void ballObj::setLocation(int inX, int inY) {
 void ballObj::drawSelf(void) {
 
   eraseSelf();
-  screen->fillRoundRect(scrX(), scrY(), width, height, width / 3, &red);
+  screen->fillRoundRect(x,y, width, height, width / 3, &red);
 }
 
 
@@ -221,4 +219,3 @@ void ballObj::ballFrame(void) {
     }
   }
 }
-

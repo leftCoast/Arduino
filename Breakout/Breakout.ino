@@ -1,7 +1,5 @@
-//#include <Adafruit_GFX.h>
-//#include <gfxfont.h>
-
-//#include <Adafruit_ILI9341.h>
+#include <Adafruit_GFX.h>
+#include <gfxfont.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -11,16 +9,11 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-//#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
-//#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
-#include <SSD_13XX_Obj.h>
-#include <SSD_13XX.h>
+#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
 
-#include <bmpPipe.h>
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
-#include <lineObj.h>
 #include <screen.h>
 #include "movingObj.h"
 
@@ -49,7 +42,12 @@
 
 #define NUM_BALLS 4
 
-#define BUTTON_PIN  21
+#define OLED_CS     10
+#define OLED_RST    6
+#define OLED_SDCS   -1    // Not wired
+
+#define BUTTON_PIN  4
+#define POT_ANLG    A0 
 
 enum gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
@@ -60,7 +58,7 @@ label         message(MESSAGE_X,MESSAGE_Y,MESSAGE_W,MESSAGE_H);
 label         numBallsTxt(BALLS_TXT_X,BALLS_Y,BALLS_TXT_W,BALLS_H);
 label         numBallsNum(BALLS_NUM_X,BALLS_Y,BALLS_NUM_W,BALLS_H);
 colorMultiMap ballNumCMap;
-mapper        pMapper(0,1023,1,127-PADDLE_WIDTH);
+mapper        pMapper(1023,0,1,127-PADDLE_WIDTH);
 timeObj       frameTimer(FRAME_MS);
 timeObj       paddleTimer(PADDLE_MS);
 timeObj       textTimer(TEXT_MS);
@@ -73,26 +71,16 @@ int           ballCount;
 enum        userStates { nothin, pressinTDamnButton };
 userStates  userState = nothin;
 timeObj     debounceTimer(100);
-bool          buttonHit = false;
-
-//#include <soundCard.h>
-
-//soundCard theSoundCard(soundCard_BREAKOUT);
+bool        buttonHit = false;
 
 void setup() {
 
-  Serial.begin(9600); while(!Serial);
-  Serial.println("Try screen.");
-  if (!initScreen(SUMO_TOY_SSD_13XX,INV_PORTRAIT)) {
-    Serial.print("Screen fail.");
+  if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
     while(true); // Kill the process.
   }
-  Serial.println("Screen worked!");
 
-  SD.begin(20);
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
-  delay(3000);
   screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
   
   paddle.setBackColor(&backColor);
@@ -120,15 +108,6 @@ void setup() {
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
-  /*
-  if (theSoundCard.begin()) {
-    Serial.println("theSoundCard.begin(); success.");
-    //if (theSoundCard.setSoundfile("Corvette.mp3")) { Serial.printf("set corvette");}
-    //theSoundCard.command(play);
-  } else {
-    Serial.println("theSoundCard.begin(); FAIL.");
-  }
-  */
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   setState(preGame); 
 }
@@ -137,10 +116,10 @@ void setup() {
 void fillBricks(void) {
 
   brickObj* aBrick;
-  int y;;
-  int offset;
+  int       y;
+  int       offset;
   
-  y = BOTTOM_BRICK;
+  //y = BOTTOM_BRICK;
   offset = (128-(NUM_BRICKS*BRICK_W))/2;
   colorObj aColor;
   y = BOTTOM_BRICK;
@@ -184,7 +163,7 @@ void doPaddle(void) {
     
     if (paddleTimer.ding()) {
       paddleTimer.stepTime();
-      val = smoother.addData(analogRead(15));
+      val = smoother.addData(analogRead(POT_ANLG));
       newLoc = round(pMapper.Map(val));
       if (newLoc!=oldLoc) {
         paddle.setLocation(newLoc,PADDLE_Y);
@@ -213,6 +192,7 @@ void doBall(void) {
       }
     }
   }
+
 
 void showBallNum(int balls) {
 
@@ -316,4 +296,3 @@ void loop(void) {
       break;
     }
   }
-
