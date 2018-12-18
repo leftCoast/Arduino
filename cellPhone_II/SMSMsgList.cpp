@@ -59,7 +59,7 @@ SMSMsg* SMSMsgList::findFirst(char* PNum,bool unLink) {
   SMSMsg* trace;
   char    buff[PNUM_LEN];
   
-  trace = (SMSMsg*) getList();
+  trace = (SMSMsg*) getFirst();
   while(true) {
     if(trace) {
       trace->getPNum(buff);

@@ -51,20 +51,20 @@ void setup() {
   digitalWrite(FONA_RST, HIGH);
   delay(100);
   
+  Serial1.begin(9600);
   Serial.begin(115200);
-  while (!Serial);
   
   Serial.println(F("Booting up FONA.."));
   fonaSS.begin(4800);
   if (!fona.begin(fonaSS)) {
-    Serial.println(F("Couldn't find FONA"));
+    Serial1.println(F("Couldn't find FONA")); 
     while (1);
   }
-  Serial.println(F("FONA online."));
+  Serial1.println(F("FONA online."));
   fona.setAudio(FONA_EXTAUDIO);
   setupParser();
-  while (Serial.available()) {
-    char inChar = Serial.read();
+  while (Serial1.available()) {
+    char inChar = Serial1.read();
   }
   
 }
@@ -91,26 +91,26 @@ void getSignal(void) {
   uint8_t n = fona.getRSSI();
   int8_t  r;
 
-  Serial.print(F("RSSI = ")); Serial.print(n); Serial.print(": ");
+  Serial1.print(F("RSSI = ")); Serial1.print(n); Serial1.print(": ");
   if (n == 0) r = -115;
   if (n == 1) r = -111;
   if (n == 31) r = -52;
   if ((n >= 2) && (n <= 30)) {
     r = map(n, 2, 30, -110, -54);
   }
-  Serial.print(r); Serial.println(F(" dBm"));
+  Serial1.print(r); Serial1.println(F(" dBm"));
 }
 
 
 void sendSMS(void) {
   
-  Serial.print(F("Me"));
-  Serial.print(F(" - "));
-  Serial.print(inStr);
+  Serial1.print(F("Me"));
+  Serial1.print(F(" - "));
+  Serial1.print(inStr);
   if (!fona.sendSMS(currentPN, inStr)) {
-    Serial.println(F(" - Failed"));
+    Serial1.println(F(" - Failed"));
   } else {
-    Serial.println(" ->");
+    Serial1.println(" ->");
   }
 }
 
@@ -118,11 +118,11 @@ void getCount(void) {
 
   int numMsgs = fona.getNumSMS();
   if (numMsgs>=0) {
-    Serial.print("You have ");
-    Serial.print(numMsgs);
-    Serial.println(" pending");
+    Serial1.print("You have ");
+    Serial1.print(numMsgs);
+    Serial1.println(" pending");
   } else {
-    Serial.println("Don't know, it gave back an error.");
+    Serial1.println("Don't know, it gave back an error.");
   }
 }
 
@@ -160,8 +160,8 @@ void displyMsg(void) {
   aMessage = messages.findFirst(currentPN);
   if (aMessage) {
     aMessage->getMsg(inStr);
-    Serial.print(currentName);Serial.print(" - ");
-    Serial.println(inStr);
+    Serial1.print(currentName);Serial1.print(" - ");
+    Serial1.println(inStr);
     delete(aMessage);
   }
 }
@@ -185,8 +185,8 @@ void displayMsgs(void) {
         msgRead++;
         if (!strcmp(phoneNum,currentPN)) {
           fona.readSMS(slot,inStr,250,&chars);
-          Serial.print(currentName);Serial.print(" - ");
-          Serial.println(inStr);
+          Serial1.print(currentName);Serial1.print(" - ");
+          Serial1.println(inStr);
           fona.deleteSMS(slot);
         }
       }
@@ -224,8 +224,8 @@ void changeContact(int command) {
       strcpy(currentName,"ME!");
     break;
   }
-  Serial.print("TEXTING : ");
-  Serial.println(currentName);  
+  Serial1.print("TEXTING : ");
+  Serial1.println(currentName);  
 }
 
 
@@ -235,15 +235,17 @@ void loop() {
   int   command;
   int   index;
   
-  if (Serial.available()) {
-    inChar = Serial.read();
+  if (Serial1.available()) {
+    inChar = Serial1.read();
+    
+    Serial.print(inChar);
     
     if (isspace(inChar)) {
       index = 0;
       while(inChar!=EOL) {
         inStr[index++]=inChar;
-        if (Serial.available()) {
-          inChar = Serial.read();
+        if (Serial1.available()) {
+          inChar = Serial1.read();
         }
       }
       inStr[index]  = '\0';
@@ -252,7 +254,7 @@ void loop() {
     command = mParser.addChar(inChar);
     switch (command) {                    
       case noCommand : break;
-      case hello : Serial.println("Well, hello to you!"); break;
+      case hello : Serial1.println("Well, hello to you!"); break;
       case getBars :  getSignal(); break;
       case setTycho   : 
       case setAlex    : 
@@ -262,7 +264,7 @@ void loop() {
       case setMe      : changeContact(command); break;
       case sendMsg : sendSMS(); break;
       case getMsgCount  : getCount(); break;
-      case -1 : Serial.println("Oh, Sorry. What was that?");
+      case -1 : Serial1.println("Oh, Sorry. What was that?");
     }
   }
   if (backgroundTimer.ding()) {

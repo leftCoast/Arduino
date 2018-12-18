@@ -20,8 +20,8 @@ void SMSmanager::handleKey(keyCommands inEditCom) {
       index = strlen(buff);
       buff[index]='\n';
       buff[index+1]='\0';
-      mTextField->appendText(buff);
-      Serial.print(buff);
+      mTextField->appendText(buff);   // Echo to screen
+      Serial1.print(buff);             // Run it out the serial.
       buff[0] = '\0';
       mEditField->setValue(buff);
       free(buff);

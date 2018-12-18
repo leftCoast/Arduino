@@ -60,13 +60,14 @@ editField*  theEditField;
 SMSmanager* ourKeyboard;
 
 char  billy[] = {"“Billy”"};
+char  inStr[255] = {""}; 
+int inIdex = 0;
 
 void setup() {
   colorObj aColor;
 
-  Serial.begin(9600);
+  Serial1.begin(9600);
   for(int i=0;i<100;i++)delay(10);
-  //while(!Serial);
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
@@ -85,15 +86,14 @@ void setup() {
   ourKeyboard = new SMSmanager(theEditField,theTextView);
 }
 
-int inIdex = 0;
-char  inStr[255] = {""}; 
+
 void loop() {
   
   char  inChar;
   
   idle();
-  if (Serial.available()) {
-    inChar = Serial.read();
+  if (Serial1.available()) {
+    inChar = Serial1.read();
     inStr[inIdex++]=inChar;
      if (inChar=='\n') {
         inStr[inIdex]  = '\0';

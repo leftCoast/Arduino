@@ -84,7 +84,7 @@ void  lineMarker::formatLine(char* inText, char* outLine, int maxChars) {
   int inIndex;
   int outIndex;
   
-  rawText(inText);Serial.println();
+  //rawText(inText);Serial.println();
   inIndex = mPrintIndex;
   outIndex = 0;
   while(inIndex<=mEndIndex&&maxChars) {
@@ -277,7 +277,7 @@ void lineManager::indexAll(void) {
   bool  endOfText;
 
   dumpList();
-  Serial.print("Dumped list, Count : ");Serial.println(getCount());
+  //Serial.print("Dumped list, Count : ");Serial.println(getCount());
   if (mTextBuff) {
     if (strlen(mTextBuff) > 0) {
       index = 0;
@@ -369,7 +369,7 @@ char* lineManager::formatLine(int lineNum) {
     }
   }
   aLine = (lineMarker*)getByIndex(lineNum);           // We can get a line.
-  Serial.print("Line #, Count : ");Serial.print(lineNum);Serial.print(", ");Serial.print(getCount());Serial.print("|");
+  //Serial.print("Line #, Count : ");Serial.print(lineNum);Serial.print(", ");Serial.print(getCount());Serial.print("|");
   aLine->formatLine(mTextBuff, mOutBuff, mWidthChars);
   return mOutBuff;
 }
@@ -490,6 +490,7 @@ void textView::calculate(void) {
   mNumLines = (height+mLineSpace)/(mTHeight+mLineSpace); // I did the math on scratch paper, we'll see..
   needRefresh = true;                                   // We're going to need to redraw this.
 
+  /*
   Serial.print("Rect width  : ");Serial.println(width);
   Serial.print("Rect height : ");Serial.println(height);
   Serial.print("mTextSize   : ");Serial.println(mTextSize);
@@ -498,7 +499,7 @@ void textView::calculate(void) {
   Serial.print("mLineSpace   : ");Serial.println(mLineSpace);
   Serial.print("numChars    : ");Serial.println(width/tWidth);
   Serial.print("mNumLines   : ");Serial.println(mNumLines);
-
+  */
 }
 
 
