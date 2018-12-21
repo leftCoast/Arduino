@@ -25,6 +25,8 @@
 #include "textView.h"
 #include "keyboard.h"
 #include "SMSmanager.h"
+#include "icons.h"
+#include "quickCom.h"
 
 #define TFT_CS  10
 #define TFT_RST -1  // I think I remember this is not used.
@@ -53,52 +55,102 @@
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
-colorRect*  theTextBase;
-textView*   theTextView;
-colorRect*  theEditBase;
-editField*  theEditField;
-SMSmanager* ourKeyboard;
+colorRect*    theTextBase;
+textView*     theTextView;
+colorRect*    theEditBase;
+editField*    theEditField;
+SMSmanager*   ourKeyboard;
+battPercent*  battIcon;
+qCMaster      ourComObj;
 
-char  billy[] = {"“Billy”"};
-char  inStr[255] = {""}; 
-int inIdex = 0;
+char    billy[] = {"“Billy”"};
+byte    inBuff[256]; 
+int     inIdex = 0;
+timeObj batTimer(20000);
+bool    waitBatt;
+
+
 
 void setup() {
   colorObj aColor;
 
-  Serial1.begin(9600);
-  for(int i=0;i<100;i++)delay(10);
+  ourComObj.begin(9600);
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
+  //Serial.begin(9600);
+  //Serial.println("hello from X teensy!");
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
   theTextBase = new colorRect(TB_X,TB_Y,TB_W,TB_H,2);
   theTextView = new textView(TF_X,TF_Y,TF_W,TF_H);
-
   theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
+
+  battIcon = new battPercent(200,3);
+  
   viewList.addObj(theTextBase);
   viewList.addObj(theTextView);
-  theTextView->setTextColors(&black,&white);
   viewList.addObj(theEditBase);
   viewList.addObj(theEditField);
-  ourKeyboard = new SMSmanager(theEditField,theTextView);
+  viewList.addObj(battIcon);
+
+  theTextView->setTextColors(&black,&white);
+  battIcon->setPercent(50);
+  
+  ourKeyboard = new SMSmanager(theEditField,theTextView,&ourComObj);
+ 
+  waitBatt = false;
+  batTimer.start();
+  theTextView->appendText("");
+  battIcon->setPercent(100);
+}
+
+void  checkErr(char* weDid) {
+  
+  byte error = ourComObj.readErr();
+
+  theTextView->appendText("Tried to ");
+  theTextView->appendText(weDid);
+  theTextView->appendText(" and ");
+  if (error) {
+    theTextView->appendText("it Failed");
+  } else {
+    theTextView->appendText("it Seems ok.");
+  }
+  theTextView->appendText("\n");
 }
 
 
 void loop() {
-  
-  char  inChar;
+
+  byte  bytes;
+  byte  battCom = 1;
   
   idle();
-  if (Serial1.available()) {
-    inChar = Serial1.read();
-    inStr[inIdex++]=inChar;
-     if (inChar=='\n') {
-        inStr[inIdex]  = '\0';
-        theTextView->appendText(inStr);
-        inIdex = 0;
-      }
+  if (batTimer.ding()) {
+    checkErr("ding");
+    if (ourComObj.sendBuff(&battCom,1,true)) {
+      checkErr("Send a buffer");
+      waitBatt = true;
+      batTimer.start();
     }
   }
+  if (waitBatt) {
+      bytes = ourComObj.haveBuff();
+      
+    if (bytes>0) {
+      ourComObj.readBuff(inBuff);
+      checkErr("read reply buffer.");
+      //Serial.print("setting battery percet to : ");Serial.println((byte)inBuff[0]);
+      //Serial.println((byte)inBuff[0]);
+      char  temp[20];
+      snprintf (temp,20,"%d",(int)inBuff[0]);
+      theTextView->appendText("setting battery % = ");theTextView->appendText(temp);theTextView->appendText("\n");
+      battIcon->setPercent((byte)inBuff[0]);
+      waitBatt = false;
+    } else {
+      //theTextView->appendText((char*)inBuff);
+    }
+  }
+}

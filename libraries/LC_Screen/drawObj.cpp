@@ -14,9 +14,8 @@ rect::rect(void) {
  
 rect::rect(int inX, int inY, word inWidth,word inHeight) {
    
-   setLocation(inX,inY);
-   setSize(inWidth,inHeight);
- }
+   setAll(inX,inY,inWidth,inHeight);
+}
 
  
 rect::~rect(void) { }
@@ -51,6 +50,13 @@ void rect::setRect(point* inPt1,point* inPt2) {
   word height = abs((int)inPt1->y-(int)inPt2->y);
   setLocation(locX,locY);
   setSize(width,height);
+}
+
+
+void rect::setAll(int inX, int inY, word inWidth,word inHeight) {
+
+	setLocation(inX,inY);
+   setSize(inWidth,inHeight);
 }
 
 
@@ -233,14 +239,14 @@ drawObj*	currentFocus = NULL;	// Totally global because? There's only ONE user.
 void	setFocusPtr(drawObj* newFocus) {
 
 		if (newFocus!=currentFocus) {					// People are lazy. Now they don't need to check.
-			if (newFocus) {											// If we're actually passed in something.
-				if (currentFocus) {								// Check for NULL..
+			if (newFocus) {								// If we're actually passed in something.
+				if (currentFocus) {						// Check for NULL..
 					currentFocus->setFocus(false);	// Warn them that their star is falling.
 				}
-				currentFocus = newFocus;					// The up and coming..
+				currentFocus = newFocus;				// The up and coming..
 				currentFocus->setFocus(true);			// Tell 'em their star is rising!!
-			} else {														// We got a NULL.
-				currentFocus = NULL;							// Just stamp it in.
+			} else {											// We got a NULL.
+				currentFocus = NULL;						// Just stamp it in.
 			}
 		}
 	}
@@ -484,9 +490,9 @@ bool   drawGroup::acceptClick(point where) {
 // click over. Possibly a sub obj?
 void drawGroup::clickOver(void) {
 	
-	if (theTouched) {							// If it was a subgroup.
-		theTouched->clickOver();    // Tell the last touched guy its over.
-  	theTouched = NULL;          // Clear out our flag/pointer.
+	if (theTouched) {					// If it was a subgroup.
+		theTouched->clickOver();	// Tell the last touched guy its over.
+  	theTouched = NULL;				// Clear out our flag/pointer.
   }
 }
 

@@ -4,9 +4,13 @@
 #include "label.h"
 #include "idlers.h"
 #include "timeObj.h"
-#include "litlOS.h"
+//#include "litlOS.h"
 
 #include "keystroke.h"
+
+// It works for now. But it needs work. Things like writing beyond
+// its window isn't dealt with. Etc. Sop not ready for prime time
+// but for getting stuff into a prototype? Sure. Just be careful.
 
 
 class editField : public label,

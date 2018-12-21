@@ -8,7 +8,8 @@
 #include <PulseOut.h>
 #include <runningAvg.h>
 #include <timeObj.h>
-#include <lilParser.h>
+//#include <lilParser.h>
+#include "quickCom.h"
 
 #include <SoftwareSerial.h>
 #include "Adafruit_FONA.h"
@@ -19,6 +20,7 @@
 #define FONA_TX 8
 #define FONA_RST 4
 #define FONA_RI  7
+//#define S_PORT  Serial1
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
@@ -32,14 +34,15 @@ char  myPN[] = {"14083400352"};
 
 char* currentPN = &myPN[0];
 char  currentName[20] = {"ME!"};
-char  inStr[255] = {""};
+byte  inBuff[255];
 
-enum commands { noCommand, hello, getBars, setTycho, setAlex, setDan, setShelby, setJulie, setMe, sendMsg, getMsgCount };
-lilParser mParser;
 
-timeObj backgroundTimer(1250);
+enum commands { noCommand, rawBattVal, hello, getBars, getBatPct, setTycho,
+                setAlex, setDan, setShelby, setJulie, setMe, sendMsg,
+                getMsgCount };
+                
+qCSlave   ourComObj;
 
-//SMSMsgList  messages;
 
 void setup() {
 
@@ -50,122 +53,95 @@ void setup() {
   delay(10);
   digitalWrite(FONA_RST, HIGH);
   delay(100);
+
+  //Serial.begin(9600);
+  //while(!Serial);
+  Serial.print("Hello!");
+  ourComObj.begin(9600);
+  //Serial.begin(115200);
   
-  Serial1.begin(9600);
-  Serial.begin(115200);
-  
-  Serial.println(F("Booting up FONA.."));
+  //S_PORT.println(F("Booting up FONA.."));
   fonaSS.begin(4800);
   if (!fona.begin(fonaSS)) {
-    Serial1.println(F("Couldn't find FONA")); 
+    //S_PORT.println(F("Couldn't find FONA")); 
     while (1);
   }
-  Serial1.println(F("FONA online."));
-  fona.setAudio(FONA_EXTAUDIO);
-  setupParser();
-  while (Serial1.available()) {
-    char inChar = Serial1.read();
-  }
-  
-}
-
-
-void setupParser(void) {
-
-  mParser.addCmd(hello, "hello");
-  mParser.addCmd(getBars, "signal");
-  mParser.addCmd(getBars, "bars");
-  mParser.addCmd(setTycho, "tycho");
-  mParser.addCmd(setAlex, "alex");
-  mParser.addCmd(setDan, "dan");
-  mParser.addCmd(setShelby, "shelby");
-  mParser.addCmd(setJulie, "julie");
-  mParser.addCmd(setMe, "me");
-  mParser.addCmd(sendMsg, "x");
-  mParser.addCmd(getMsgCount,"count");
+  //S_PORT.println(F("FONA online."));
+  fona.setAudio(FONA_EXTAUDIO); 
 }
 
 
 void getSignal(void) {
-
+/*
   uint8_t n = fona.getRSSI();
   int8_t  r;
 
-  Serial1.print(F("RSSI = ")); Serial1.print(n); Serial1.print(": ");
+  S_PORT.print(F("RSSI = ")); S_PORT.print(n); S_PORT.print(": ");
   if (n == 0) r = -115;
   if (n == 1) r = -111;
   if (n == 31) r = -52;
   if ((n >= 2) && (n <= 30)) {
     r = map(n, 2, 30, -110, -54);
   }
-  Serial1.print(r); Serial1.println(F(" dBm"));
+  S_PORT.print(r); S_PORT.println(F(" dBm"));
+  */
 }
 
 
 void sendSMS(void) {
-  
-  Serial1.print(F("Me"));
-  Serial1.print(F(" - "));
-  Serial1.print(inStr);
+  /*
+  S_PORT.print(F("Me"));
+  S_PORT.print(F(" - "));
+  S_PORT.print(inStr);
   if (!fona.sendSMS(currentPN, inStr)) {
-    Serial1.println(F(" - Failed"));
+    S_PORT.println(F(" - Failed"));
   } else {
-    Serial1.println(" ->");
+    S_PORT.println(" ->");
   }
+  */
 }
+
 
 void getCount(void) {
-
+/*
   int numMsgs = fona.getNumSMS();
   if (numMsgs>=0) {
-    Serial1.print("You have ");
-    Serial1.print(numMsgs);
-    Serial1.println(" pending");
+    S_PORT.print("You have ");
+    S_PORT.print(numMsgs);
+    S_PORT.println(" pending");
   } else {
-    Serial1.println("Don't know, it gave back an error.");
-  }
+    S_PORT.println("Don't know, it gave back an error.");
+  }*/
 }
 
+
+void getBatteryPercent(void) {
+
+  uint16_t batPct;
 /*
-void updateMsgList(void) {
-
-  int   numMsgs;
-  int   msgRead;
-  int   slot;
-  char  phoneNum[13];
-  int   chars;
-  
-  inStr[0]='\0';
-  numMsgs = fona.getNumSMS();
-  if (numMsgs>0) {
-    msgRead = 0;
-    slot = 1;
-    while (msgRead<numMsgs) {
-      if (fona.getSMSSender(slot,phoneNum,13)) {
-        fona.readSMS(slot,inStr,250,&chars);
-        msgRead++;
-        messages.addMsg(&phoneNum[1],inStr);
-        fona.deleteSMS(slot);
-      }
-      slot++;
-    }
+  if (fona.getBattPercent(&batPct)) {
+    S_PORT.print(F("Battery = "));
+    S_PORT.print(batPct);
+    S_PORT.println(F("%"));
+  } else {
+    S_PORT.println("Don't know, the dumb thing gave back an error.");
   }
+  */
 }
 
 
-void displyMsg(void) {
+byte getRawBatteryPercent(void) {
 
-  SMSMsg* aMessage;
+  uint16_t   batPct;
+  byte  outVal;
   
-  aMessage = messages.findFirst(currentPN);
-  if (aMessage) {
-    aMessage->getMsg(inStr);
-    Serial1.print(currentName);Serial1.print(" - ");
-    Serial1.println(inStr);
-    delete(aMessage);
+  if (fona.getBattPercent(&batPct)) {
+    outVal = batPct;
+    return outVal;
   }
+  return 0;
 }
-*/
+
 
 void displayMsgs(void) {
 
@@ -174,7 +150,8 @@ void displayMsgs(void) {
   int   slot;
   char  phoneNum[13];
   int   chars;
-  
+
+  /*
   inStr[0]='\0';
   numMsgs = fona.getNumSMS();
   if (numMsgs>0) {
@@ -185,14 +162,15 @@ void displayMsgs(void) {
         msgRead++;
         if (!strcmp(phoneNum,currentPN)) {
           fona.readSMS(slot,inStr,250,&chars);
-          Serial1.print(currentName);Serial1.print(" - ");
-          Serial1.println(inStr);
+          S_PORT.print(currentName);S_PORT.print(" - ");
+          S_PORT.println(inStr);
           fona.deleteSMS(slot);
         }
       }
       slot++;
     }
   }
+  */
 }
 
 
@@ -224,51 +202,49 @@ void changeContact(int command) {
       strcpy(currentName,"ME!");
     break;
   }
-  Serial1.print("TEXTING : ");
-  Serial1.println(currentName);  
+  //S_PORT.print("TEXTING : ");
+  //S_PORT.println(currentName);  
 }
 
 
 void loop() {
 
-  char  inChar;
-  int   command;
-  int   index;
+  byte  numBytes;
   
-  if (Serial1.available()) {
-    inChar = Serial1.read();
-    
-    Serial.print(inChar);
-    
-    if (isspace(inChar)) {
-      index = 0;
-      while(inChar!=EOL) {
-        inStr[index++]=inChar;
-        if (Serial1.available()) {
-          inChar = Serial1.read();
-        }
+  idle();
+  numBytes = ourComObj.haveBuff();
+  //checkErr("haveBuff");
+  if (numBytes) {
+    //Serial.print("Have a message! ");
+    if (ourComObj.readBuff(inBuff)) {
+      //Serial.print("com # = ");Serial.println((byte)inBuff[0]);
+      switch (inBuff[0]) {                    
+        case noCommand    : break;
+        case hello        : 
+          //Serial.println("saying hello!");
+          strcpy(inBuff,"Well, hello to you!");
+          ourComObj.replyBuff(inBuff,strlen(inBuff)+1);
+        break;
+        case getBars      :  getSignal(); break;
+        case getBatPct    : getBatteryPercent(); break;
+        case rawBattVal   : 
+          //Serial.println("Returning battery percent");
+          inBuff[0] = getRawBatteryPercent();
+          ourComObj.replyBuff(inBuff,1);
+         break;
+        case setTycho     : 
+        case setAlex      : 
+        case setDan       : 
+        case setShelby    : 
+        case setJulie     : 
+        //case setMe        : changeContact(command); break;
+        case sendMsg      : sendSMS(); break;
+        case getMsgCount  : getCount(); break;
+        default           : 
+          strcpy(inBuff,"Oh, Sorry. What was that?");
+          ourComObj.replyBuff(inBuff,strlen(inBuff)+1);
+        break;
       }
-      inStr[index]  = '\0';
     }
-    
-    command = mParser.addChar(inChar);
-    switch (command) {                    
-      case noCommand : break;
-      case hello : Serial1.println("Well, hello to you!"); break;
-      case getBars :  getSignal(); break;
-      case setTycho   : 
-      case setAlex    : 
-      case setDan     : 
-      case setShelby  : 
-      case setJulie   : 
-      case setMe      : changeContact(command); break;
-      case sendMsg : sendSMS(); break;
-      case getMsgCount  : getCount(); break;
-      case -1 : Serial1.println("Oh, Sorry. What was that?");
-    }
-  }
-  if (backgroundTimer.ding()) {
-    backgroundTimer.start();
-    displayMsgs();
   }
 }

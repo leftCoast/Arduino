@@ -1,7 +1,11 @@
 #include "SMSmanager.h"
 
-SMSmanager::SMSmanager(editField* inEditField,textView* inTextField) 
-  : keyboard(inEditField) { mTextField = inTextField; }             // Do we need to delete this later?
+SMSmanager::SMSmanager(editField* inEditField,textView* inTextField,qCMaster* inComObj) 
+  : keyboard(inEditField) {
+    
+  mTextField = inTextField;
+  mComObj = inComObj;
+}         
 
 
 SMSmanager::~SMSmanager(void) {  }
