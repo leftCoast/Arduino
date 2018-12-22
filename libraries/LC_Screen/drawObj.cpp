@@ -441,9 +441,9 @@ void drawGroup::setGroupRefresh(void) {
 bool drawGroup::wantRefresh(void) {
 
 	if (theList) {
-		screen->pushOffset(x,y);				// So we set in our offset.
-		checkRefresh();									// Now, if they get called to draw? Everything will be fine.
-		screen->popOffset(x,y);					// Clear offset.
+		screen->pushOffset(x,y);	// So we set in our offset.
+		checkRefresh();				// Now, if they get called to draw? Everything will be fine.
+		screen->popOffset(x,y);		// Clear offset.
 	}
 	return needRefresh;
 }

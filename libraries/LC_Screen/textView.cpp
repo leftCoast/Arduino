@@ -7,6 +7,9 @@
 #define EOL '\n'
 #endif
 
+#define TOOL_BUFF_SIZE	80	// Needed for formating numbers
+char tool[TOOL_BUFF_SIZE];
+
 char  mapChar(char aChar) {
 
   switch(aChar) {
@@ -575,7 +578,12 @@ void textView::appendText(char* text) {
   needRefresh = true;
 }
 
-
+void textView::appendText(int inVal) {
+	
+	snprintf (tool,TOOL_BUFF_SIZE,"%d",inVal);
+  	appendText(tool);
+}
+	
 // Stick a NULL terminated substring in at this index.
 void textView::insertText(int index, char* text)  {
 

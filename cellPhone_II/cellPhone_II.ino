@@ -36,10 +36,6 @@ char* currentPN = &myPN[0];
 char  currentName[20] = {"ME!"};
 byte  inBuff[255];
 
-
-enum commands { noCommand, rawBattVal, hello, getBars, getBatPct, setTycho,
-                setAlex, setDan, setShelby, setJulie, setMe, sendMsg,
-                getMsgCount };
                 
 qCSlave   ourComObj;
 

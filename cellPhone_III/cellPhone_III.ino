@@ -78,7 +78,6 @@ void setup() {
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
-  //Serial.begin(9600);
   //Serial.println("hello from X teensy!");
   aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
@@ -103,7 +102,7 @@ void setup() {
   waitBatt = false;
   batTimer.start();
   theTextView->appendText("");
-  battIcon->setPercent(100);
+  battIcon->setPercent(0);
 }
 
 void  checkErr(char* weDid) {
@@ -129,24 +128,15 @@ void loop() {
   
   idle();
   if (batTimer.ding()) {
-    checkErr("ding");
     if (ourComObj.sendBuff(&battCom,1,true)) {
-      checkErr("Send a buffer");
       waitBatt = true;
       batTimer.start();
     }
   }
   if (waitBatt) {
-      bytes = ourComObj.haveBuff();
-      
+    bytes = ourComObj.haveBuff();
     if (bytes>0) {
       ourComObj.readBuff(inBuff);
-      checkErr("read reply buffer.");
-      //Serial.print("setting battery percet to : ");Serial.println((byte)inBuff[0]);
-      //Serial.println((byte)inBuff[0]);
-      char  temp[20];
-      snprintf (temp,20,"%d",(int)inBuff[0]);
-      theTextView->appendText("setting battery % = ");theTextView->appendText(temp);theTextView->appendText("\n");
       battIcon->setPercent((byte)inBuff[0]);
       waitBatt = false;
     } else {

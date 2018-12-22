@@ -7,6 +7,7 @@
 
 qCMaster::qCMaster(void) {
 
+	mBuff = NULL;
 	mNumBytesMoved = 0;
 	mWantReply = false;
 	mError = NO_ERR;
@@ -94,11 +95,23 @@ void qCMaster::readBuff(byte* buff) {
 		for(i=0;i<mBuff[0];i++) {
 			buff[i] = mBuff[i+1];
 		}
+		resizeBuff(0);
 		mState = standby;
 	} else {
 		mError = STATE_ERR;						// We didn't say there was a buffer for you.
 	}
 }
+
+
+// Or just toss it all away.. What a waste of effort that was!
+void qCMaster::dumpBuff(void) {
+
+	if(mState==holding) {
+		resizeBuff(0);
+		mState = standby;
+	}
+}
+
 
 
 // The servant's entrance. All the work is being done behind the scenes.
@@ -189,7 +202,7 @@ void qCMaster::doReceiving(void) {
 }
 
 
-// We're using a dynamically sized buffer. malloc() & free(). This
+// We're using a dynamically sized buffer. mBuff() & free(). This
 // just auto-manages all of this.
 bool qCMaster::resizeBuff(byte numBytes) {
 

@@ -39,6 +39,7 @@ class qCMaster : public idler, public timeObj {
 				bool				sendBuff(byte* buff,byte buffLen,bool wantReply);	// Send out a command buffer.
 				byte				haveBuff(void);												// We have a got back complete buffer, how big?
 				void				readBuff(byte* buff);										// Copy the data we got back into here.
+				void				dumpBuff(void);												// For some reason we can't use it.
 	
 	virtual	void				idle(void);														// The servants run things in the background.
 				void				doSending(void);

@@ -69,8 +69,8 @@ class displayObj {
   				bool canRead(void);
   
   protected:
-  				int				offsetX;
-  				int				offsetY;
+  				int		offsetX;
+  				int		offsetY;
 				bool		graphic;
 				bool		color;
 				bool		hasTouch;
