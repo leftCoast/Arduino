@@ -18,15 +18,22 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 qCSlave   ourComObj;
 
 bool  FONAOnline;
-
+char* currentPN;
 
 void setup() {
 
-    Serial.begin(9600);
-    pinMode(FONA_RST, OUTPUT);        // Used for resetting the FONA.
-    ourComObj.begin(9600);            // For talking to the GUI.
-    resetFONA();                      // Hit reaset, see if it'll come online.
-    fona.setAudio(FONA_EXTAUDIO);     // Um.. Why is this here?
+    FONAOnline = false;
+    currentPN = NULL;
+
+    pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
+    pinMode(13, OUTPUT);
+    ourComObj.begin(9600);                // For talking to the GUI.
+    if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
+      //digitalWrite(13, HIGH);
+    }
+    pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
+    resetFONA();                          // Hit reaset, see if it'll come online.
+    fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
 }
 
 
@@ -37,13 +44,14 @@ void loop() {
   idle();
   numBytes = ourComObj.haveBuff();
   if (numBytes>0) {
-    Serial.print("got byte count : ");Serial.println(numBytes);
     inBuff = malloc(numBytes);
     if (inBuff) {
       if (ourComObj.readBuff(inBuff)) {
         switch(inBuff[0]) {
-          case getStatus  : doStatus(); break;
-          default         : break;
+          case getStatus    : doStatus();               break;
+          case setCurrentPN : doCurrentPH(&inBuff[1]);  break;  // Its a c string.
+          case sendSNS      : doSendSNS(&inBuff[1]);    break;  // Its a c string.
+          default           : break;
         } 
       }
       free(inBuff);
@@ -86,8 +94,35 @@ void doStatus(void) {
   fona.getTime(newStat.networkTime,23);
 
   ourComObj.replyBuff((byte*)&newStat,sizeof(cellStatus));
-  Serial.print("cellStatus : ");Serial.println(sizeof(cellStatus));
 }
 
 
+void doCurrentPH(char* inBuff) {
+
+    byte    numBytes;
+    uint8_t result;
+
+    result = 0;                       // We'll pass a 0 for failure.
+    if (currentPN) {                  // First, dump what we had.
+      free(currentPN);                // Whoosh! There it goes.
+    }
+    numBytes = strlen(inBuff);        // Defined as a c string.
+    currentPN = malloc(numBytes+1);   // Now, make room for the new number c string.  
+    if (currentPN) {                  // We get the room?
+        strcpy(currentPN,inBuff);     // Copy it over.
+        result = 1;                   // We'll pass a 1 for success.
+    }
+    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
+}
+
+
+void doSendSNS(char* inBuff) {
+
+  uint8_t result;
   
+  result = 0;
+  if (fona.sendSMS(currentPN, inBuff)) {
+    result = 1;
+  }
+  ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
+}

@@ -1,5 +1,6 @@
 #include "quickCom.h"
 
+
 // ***************************************************************************
 // ********************************* qCMaster *********************************
 // ***************************************************************************
@@ -23,12 +24,8 @@ void qCMaster::begin(int baud) {
 
 	if (mState==offline) {			// A quick sanity check.
 		MASTER_PORT.begin(baud);	// Give the port a kick to start.
-		if (MASTER_PORT) {			// If it worked..
-			hookup();					// Puts us in the idler queue. 
-			mState = standby;			// Then we are open for business!
-		} else {
-			mError = PORT_ERR;		// We don't have a serial port to play with!
-		}
+		hookup();						// Puts us in the idler queue. 
+		mState = standby;				// Then we are open for business!
 	} else {
 		mError = STATE_ERR;			// Getting your calls mixed up there?
 	}
@@ -241,12 +238,8 @@ void qCSlave::begin(int baud) {
 
 	if (mState==offline) {		// A quick sanity check. 
 		SLAVE_PORT.begin(baud);	// Give the port a kick to start.
-		if (SLAVE_PORT) {			// If it worked..
-			hookup();				// Puts us in the idler queue.
-			mState = listening;	// Then we are open for business!
-		} else {
-			mError = PORT_ERR;	// We don't have a serial port to play with!
-		}
+		hookup();					// Puts us in the idler queue.
+		mState = listening;		// Then we are open for business!
 	} else {
 		mError = STATE_ERR;		// Getting your calls mixed up there?
 	}
@@ -339,30 +332,35 @@ void qCSlave::idle(void) {
 	}
 }
 
-	
+
+// The Feather seems to preload a Zero into the incoming stream when it fires up.
+// This is an error and it only happens when the USB cable is not connected.
+// So, we ignore leading zeros because they're an erros as a leading byte anyway.
 void qCSlave::doListen(void) {
 	
 	byte	numBytes;
 	byte	dumpByte;
 	
-	if (SLAVE_PORT.available()) {						// Is there someting to read from the port?
-		numBytes = SLAVE_PORT.read();					// First byte SHALL BE the number of bytes for the message.
-		if (resizeBuff(numBytes+1)) {					// Resize the buffer to hold the message.
-			mBuff[0] = numBytes;							// That first byte shwing size.
-			mNumBytesMoved = 0;							// Setup for a reading..
-			start();											// We start the timer from the first byte.
-			mState = recieveing;							//
-			doReceiving();									// Might as well grab what we can now.
-		} else {												// Now what should we do? We can't fit the message!
-			start();	
-			while(SLAVE_PORT.available() 
-					&& mNumBytesMoved<=numBytes
-					&& !ding()) {							// Roll out the message on the floor.
-				dumpByte = SLAVE_PORT.read();			// Would have been nice to tell them, no answer coming.
-				mNumBytesMoved++;
-				delay(1);									// YES I KNOW I put a delay into a idle function. ONE milisecond.
+	if (SLAVE_PORT.available()) {							// Is there someting to read from the port?
+		numBytes = SLAVE_PORT.read();						// First byte SHALL BE the number of bytes for the message.
+		if (numBytes>0) {										// First byte can't be a zero.
+			if (resizeBuff(numBytes+1)) {					// Resize the buffer to hold the message.
+				mBuff[0] = numBytes;							// That first byte shwing size.
+				mNumBytesMoved = 0;							// Setup for a reading..
+				start();											// We start the timer from the first byte.
+				mState = recieveing;							//
+				doReceiving();									// Might as well grab what we can now.
+			} else {												// Now what should we do? We can't fit the message!
+				start();	
+				while(SLAVE_PORT.available() 
+						&& mNumBytesMoved<=numBytes
+						&& !ding()) {							// Roll out the message on the floor.
+					dumpByte = SLAVE_PORT.read();			// Would have been nice to tell them, no answer coming.
+					mNumBytesMoved++;
+					delay(1);									// YES I KNOW I put a delay into a idle function. ONE milisecond.
+				}
+				mError = MEMORY_ERR;
 			}
-			mError = MEMORY_ERR;
 		}
 	}
 }

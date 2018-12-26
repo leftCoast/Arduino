@@ -6,16 +6,19 @@
 #include "textView.h"
 #include "quickCom.h"
 
+
 class SMSmanager : public keyboard {
 
   public:
-          SMSmanager(editField* inEditField,textView* inTextField,qCMaster* inComObj);
+          SMSmanager(editField* inEditField,textView* inTextField);
           ~SMSmanager(void);
 
   virtual void  handleKey(keyCommands inEditCom);
-
+          bool  resizeOutBuff(byte numBytes);
+  
           textView* mTextField;
-          qCMaster* mComObj;
+          char*     mOutBuff;   // The out going message.
+          byte      mNumBytes;  // How many bites is it now?
 };
 
 #endif

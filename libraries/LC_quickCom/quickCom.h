@@ -4,6 +4,13 @@
 #include	<idlers.h>
 #include <timeObj.h>
 
+
+#define NO_ERR			0
+#define STATE_ERR		1
+#define TIMEOUT_ERR	2
+#define MEMORY_ERR	3
+
+
 //	The idea..
 // Master side :
 // The master initiates communication. Sends a command and optionally waits for a reply.
@@ -12,11 +19,6 @@
 // Slaves listen for a commands, take action on those commands and usually generate
 // replies to those commands.
 
-#define NO_ERR			0
-#define PORT_ERR		1
-#define STATE_ERR		2
-#define TIMEOUT_ERR	3
-#define MEMORY_ERR	4
 
 #define MASTER_PORT	Serial1	// For now this ia all I could come up with.
 #define SLAVE_PORT	Serial1	// Change these to reflect your hardware setup.

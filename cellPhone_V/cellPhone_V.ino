@@ -64,7 +64,7 @@ textView*     theTextView;        // The text window.
 colorRect*    theEditBase;        // White rect behind the text edit field.
 editField*    theEditField;       // The text edit field.
 SMSmanager*   ourKeyboard;        // Just like it sounds, our texting keyboard.
-//battPercent*  battIcon;           // Icon thing showing charge state of the battery.
+battPercent*  battIcon;           // Icon thing showing charge state of the battery.
 
 qCMaster      ourComObj;          // Object used to comunicate with the FONA controller.
 
@@ -79,18 +79,19 @@ comStates comState;
 enum  danceCards { noOne, statusBoy };
 danceCards  currCard;
 
+
 void setup() {
   
   setupScreen();                        // Fire up the screen. If it fails it'll lock the process.
-  delay(5000);                          // Give the FONA controller time to settle down.                         
   comState = offline;                   // Not online yet.
   ourComObj.begin(9600);                // Fire up comunications.
   if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
     comState = standby;                 // Communications standing by!
-    theTextView->appendText("FONA Coms, online.\n");
+    //out("FONA Coms, online.\n");
   }
   currCard = noOne;                     // Free to dance with any and all.
 }
+
 
 void loop() {
   
@@ -98,14 +99,15 @@ void loop() {
 
   if (statusTimer.ding()&&comState==standby) {
     if (currCard == noOne) {
-      theTextView->appendText("Giving card to status boy.\n");
+      //out("Giving card to status boy.\n");
       currCard = statusBoy;
       statusTimer.start();
     }
   }
   switch (currCard) {
-    case noOne     : break;
-    case statusBoy : doStatus(); break;
+    case noOne      :                           break;
+    case statusBoy  : doStatus();               break;
+    //case SMSTalker  : ourKeyboard->sendSMS();   break;
   }
 }
 
@@ -131,18 +133,18 @@ void setupScreen(void) {
   theTextView   = new textView(TF_X,TF_Y,TF_W,TF_H);
   theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
-  //battIcon      = new battPercent(BATT_X,BATT_Y);
+  battIcon      = new battPercent(BATT_X,BATT_Y);
   
   
   viewList.addObj(theTextBase);
   viewList.addObj(theTextView);
   viewList.addObj(theEditBase);
   viewList.addObj(theEditField);
-  //if (battIcon) viewList.addObj(battIcon);
+  viewList.addObj(battIcon);
 
-  ourKeyboard   = new SMSmanager(theEditField,theTextView,&ourComObj);
+  ourKeyboard   = new SMSmanager(theEditField,theTextView);
   theTextView->setTextColors(&black,&white);
-  //battIcon->setPercent(0);
+  battIcon->setPercent(0);
 }
 
 
@@ -170,12 +172,11 @@ void doStatus(void) {
         comState = offline;                         // Its broken!
         currCard = noOne;                           // toss out now usless dance card.
       } else {
-        numBytes = ourComObj.haveBuff();              // If its there, it'll give back its size.
+        numBytes = ourComObj.haveBuff();            // If its there, it'll give back its size.
         if (numBytes>0) {                           // We got byte count?
           if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
             ourComObj.readBuff((byte*)&statusReg);  // Stuff the data into the struct.
             updateInfo();                           // Deal with having new data.
-            comState = offline; break;  // Bail ut so I can see the text.
           } else {                                  // Wrong number of bytes?
             ourComObj.dumpBuff();                   // Who knows what it is, get rid of it.
           }
@@ -187,10 +188,15 @@ void doStatus(void) {
     default : break;
   }
 }
-//battIcon->setPercent((byte)statusReg.batteryPercent);
+
      
 void updateInfo(void) {
-  out("Setting battery voltage : ");out(statusReg.batteryVolts);out("mV\n");
+
+  battIcon->setPercent((byte)statusReg.batteryPercent);
+
+  
+  /*
+  /out("Setting battery voltage : ");out(statusReg.batteryVolts);out("mV\n");
   out("Setting battery percent : ");out(statusReg.batteryPercent);out("%\n");
   out("RSSI                    : ");out(statusReg.RSSI);out("\n");
   out("Net Stat : ");
@@ -208,19 +214,56 @@ void updateInfo(void) {
   out("callStat                : ");out(statusReg.callStat);out("\n");
   out("numSMSs                 : ");out(statusReg.numSMSs);out("\n");
   out("networkTime             : ");out(statusReg.networkTime);out("\n");
- 
-/*
-    uint16_t    FONAOnline;
-  uint16_t    batteryVolts;
-  uint16_t    batteryPercent;
-  uint16_t    RSSI;
-  uint16_t    networkStat;
-  uint16_t    volume;
-  uint16_t    callStat;
-  uint16_t    numSMSs;
-  char      networkTime[24];
-*/
+  */
 
-  
 }
-    
+
+bool  sendComNBuff(byte aCom,byte* aBuff,byte numBytes,bool reply) {
+
+  byte* outBuff;
+
+  outBuff = (byte*)malloc(numBytes+1);              // Clear out some space.
+  if (outBuff) {                                    // If we got the space.
+    outBuff[0] = aCom;                              // Char 0 is the command.
+    for(byte i=0;i<numBytes;i++) {                  // Loop to fill in the buffer part.
+      outBuff[i+1] = aBuff[i];
+    }
+    ourComObj.readErr();                            // Clear out old errors.
+    ourComObj.sendBuff(outBuff,numBytes+1,reply);   // Attempt a send.
+    free(outBuff);                                  // Recycle the buffer.
+    return ourComObj.readErr()==NO_ERR;              // No error means we were able to send it out.
+  }
+  return false;                                     // If we got here something went wrong.
+}
+
+
+void  doSendSMS(void) {
+
+/*
+  byte  ourCom;
+  byte  numBytes;
+
+  ourCom = sendSNS;
+  switch(comState) {
+    case offline    : currCard = noOne; break;
+    case standby    :
+      out("Me - ");                         // Reformat the output. Starting with, Me -
+      out(mOutBuff);                        // And the output sting.
+      if (sendComNBuff(sendSNS,ourKeyboard->mOutBuff,ourKeyboard->mNumBytes,true)) { // Send ok?
+        comState = comSent;                         // We set it.
+      } else {
+        comState = offline;                         // Its busted!
+        currCard = noOne;                           // Toss the card.
+      }
+    break;
+    case comSent    :                               // The command has been sent,
+  }
+  mComObj.sendBuff(&ourCom,1,true);           // Attempt a send.
+  if (!fona.sendSMS("14083400352", mOutBuff)) {
+    out(" - Failed\n"));
+  } else {
+    out(" ->\n");
+  }
+  currCard = noOne;
+  */
+}

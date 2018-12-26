@@ -2,7 +2,7 @@
 #define cellCommon_h
 
 
-enum cellCommands { getStatus, somethingElse  };
+enum cellCommands { getStatus, setCurrentPN, sendSNS, somethingElse  };
 
 enum networkStatus { NS_notRegistered, NS_registeredHome, NS_registeredSearching, NS_denied, NS_unknown, NS_registeredRoaming };
 
@@ -19,6 +19,6 @@ struct cellStatus {
 	uint16_t		numSMSs;
 	char			networkTime[24];
 };
-
+ 
 
 #endif

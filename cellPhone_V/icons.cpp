@@ -1,11 +1,13 @@
 #include "icons.h"
 #include "litlOS.h"
 
+#define NO_VALUE  -1
+
 barGraphBar::barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir,bool inTouch)
   : drawObj(inX,inY,inwidth,inHeight,inTouch) {
 
-  mDir = inDir;
-  mBarVal = 0;
+  mDir = inDir;         // Set Direction.
+  mBarVal = NO_VALUE;   // Flag that we have no value.
   needRefresh = false;  // Why?! Because we are not ready to be drawn yet.
 }
 
@@ -48,6 +50,7 @@ void barGraphBar::setValue(float inVal) {
   }
 }
 
+
 rect barGraphBar::calculateRect(void) {
 
   rect  aRect;
@@ -70,10 +73,12 @@ void barGraphBar::eraseRect(void) {  screen->fillRect(x,y,width,height,&mBackCol
 void barGraphBar::drawSelf(void) {
 
   rect aRect;
-
-  aRect = calculateRect();
-  eraseRect();
-  screen->fillRect(aRect.x,aRect.y,aRect.width,aRect.height,&mBarColor);
+  
+  if (mBarVal!=NO_VALUE) {
+    aRect = calculateRect();
+    eraseRect();
+    screen->fillRect(aRect.x,aRect.y,aRect.width,aRect.height,&mBarColor);
+  }
 }
 
          
