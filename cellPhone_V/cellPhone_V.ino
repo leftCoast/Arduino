@@ -3,6 +3,7 @@
 #include <gfxfont.h>
 #include <Adafruit_ILI9341.h>
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+#include <SD.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -31,6 +32,7 @@
 
 #define TFT_CS  10
 #define TFT_RST -1  // I think I remember this is not used.
+#define SD_CS   4
 
 #define TB_X    10
 #define TB_Y    20
@@ -87,7 +89,15 @@ void setup() {
   ourComObj.begin(9600);                // Fire up comunications.
   if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
     comState = standby;                 // Communications standing by!
-    //out("FONA Coms, online.\n");
+    out("FONA Coms, online.\n");
+  } else {
+    out("FONA Coms, FAIL.\n");
+  }
+  if (SD.begin(SD_CS)) {
+    out("File system ONLINE.\n");
+    
+  } else {
+    out("File system FAIL.\n");
   }
   currCard = noOne;                     // Free to dance with any and all.
 }

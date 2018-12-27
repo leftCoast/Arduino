@@ -25,11 +25,10 @@ void SMSmanager::handleKey(keyCommands inEditCom) {
     if (resizeOutBuff(numChars)) {          // If we got the room..
       mEditField->getText(mOutBuff);        // Grab the message from the edit field.
       mEditField->setValue("");             // Clear the editField.
-      out("*** Hand off the string to be sent here. ***\n");
+      out("*** Hand off message to send here. ***\n");
     }
 
   } else {
-    out("key\n");
     keyboard::handleKey(inEditCom);         // Or, do the default suff.
   }
 }
