@@ -1,6 +1,4 @@
 #include "keyboard.h"
-#include  "litlOS.h"
-
 
 #define COL_2 COL_1 + KEY_WD + COL_SP
 #define COL_3 COL_2 + KEY_WD + COL_SP
@@ -74,9 +72,9 @@ inputKey::~inputKey(void) { }
 
 void inputKey::drawSelf(void) {
 
-  colorObj baseColor = ourOS.getColor(SYS_INPUT_BTN_COLOR);
-  colorObj textColor = ourOS.getColor(SYS_CONTROL_LBL_COLOR);
-  colorObj shadowColor = ourOS.getColor(SYS_SHADOW_COLOR);
+  colorObj baseColor(LC_LIGHT_GREY);
+  colorObj textColor(LC_BLACK);
+  colorObj shadowColor(LC_CHARCOAL);
                                                   
   screen->drawRect(x+1, y+1, width-1, height-1, &shadowColor);
   if (clicked) {
@@ -154,12 +152,12 @@ controlKey::~controlKey(void) { }
 
 void controlKey::drawSelf(void) {
     
-  colorObj baseColor = ourOS.getColor(SYS_CONTROL_BTN_COLOR);
-  colorObj textColor = ourOS.getColor(SYS_CONTROL_LBL_COLOR);
+  colorObj baseColor(LC_DARK_GREY);
+  colorObj textColor(LC_BLACK);
   if (mCom==backspace) {
     textColor.setColor(LC_RED);
   }
-  colorObj shadowColor = ourOS.getColor(SYS_SHADOW_COLOR);
+  colorObj shadowColor(LC_CHARCOAL);
                                                   
   screen->drawRect(x+1, y+1, width-1, height-1, &shadowColor);
   if (clicked) {

@@ -583,6 +583,19 @@ void textView::appendText(int inVal) {
 	snprintf (tool,TOOL_BUFF_SIZE,"%d",inVal);
   	appendText(tool);
 }
+
+
+void textView::appendText(char inChar) {
+	
+	char buff[2];
+	
+	if (inChar!='\0') {
+		buff[0] = inChar;
+		buff[1] = '\0';
+		appendText(buff);
+	}
+}
+
 	
 // Stick a NULL terminated substring in at this index.
 void textView::insertText(int index, char* text)  {

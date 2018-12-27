@@ -3,17 +3,6 @@
 
 #include <SD.h>
 
-class tracer {
-
-  public:
-
-  tracer(char* traceText,int* inErrPtr=NULL);
-  ~tracer();
-
-  char* mText;
-  int*  errPtr;
-};
-
 
 #define BLOCKFILE_TAG             "BLOCKFILE"
 #define BLOCKFILE_TAG_SIZE        12
@@ -33,7 +22,7 @@ class tracer {
 struct blockFileHeader {
   char          nameTag[BLOCKFILE_TAG_SIZE];  // Text of the file tag.
   unsigned long versionNum;                   // Version number. Later code may want to update this.
-  unsigned long initialID;                    // The first user block of data. Can be used as key for the file.
+  unsigned long rootID;								 // The first user block of data. Can be used as key for the file.
   unsigned long nextID;                       // When creating data blocks, this is the next block ID to be handed out.
 };
 
@@ -50,7 +39,7 @@ class blockFile {
           blockFile(char* inFilePath);
   virtual ~blockFile(void);
 
-  unsigned long   readInitialBlockID(void);                     // HINT : You store the information you need to decode your file in here.
+  unsigned long   readRootBlockID(void);                        // HINT : You store the information you need to decode your file in here.
   unsigned long   getNewBlockID(void);                          // The first blockID issued to you, will be saved as your initial block.
   unsigned long   addBlock(char* buffPtr,unsigned long bytes);  // That can come from  getNewBlockID() or addBlock().
   bool            deleteBlock(unsigned long blockID);

@@ -60,7 +60,7 @@ rect barGraphBar::calculateRect(void) {
   switch(mDir) {
     case upBar  : aRect.setAll(x,y+(height-mapPixles),width,mapPixles);  break;
     case dwnBar : aRect.setAll(x,y,width,mapPixles);                     break;
-    case rBar   : aRect.setAll(x,y,mapPixles,width);                     break;
+    case rBar   : aRect.setAll(x,y,mapPixles,height);                    break;
     case lBar   : aRect.setAll(x+(width-mapPixles),y,mapPixles,height);  break;
   }
   return aRect;
@@ -92,13 +92,12 @@ void barGraphBar::drawSelf(void) {
 battPercent::battPercent(int inLocX,int inLocY)
   : drawGroup(inLocX,inLocY,BATT_WIDTH,BATT_HEIGHT) {
 
-  colorObj  backColor;
+  colorObj  backColor(SYS_PANEL_COLOR);
   
   mBar = new barGraphBar(1,BATT_PIN_HEIGHT+1,width-2,height-(BATT_PIN_HEIGHT+2));
   if (mBar) {
     addObj(mBar);
     mBar->setLimits(0,100);
-    backColor = ourOS.getColor(SYS_PANEL_COLOR);
     mBar->setColors(&backColor,&backColor);       // Forces an empty bar if nothing's been set.
   }
   mColorMapper.addColor(100,&green);
@@ -117,12 +116,11 @@ battPercent::~battPercent(void) { if (mBar) delete(mBar); }
 void battPercent::setPercent(int inPercent) {
 
   colorObj  barColor;
-  colorObj  backColor;
+  colorObj  backColor(SYS_PANEL_COLOR);
   
   if (mBar) {
     mBar->setValue(inPercent);
     barColor = mColorMapper.Map(inPercent);
-    backColor = ourOS.getColor(SYS_PANEL_COLOR);
     mBar->setColors(&barColor,&backColor);
   } 
   needRefresh = true; 
@@ -133,4 +131,74 @@ void battPercent::drawSelf(void) {
   
   screen->drawRect(x,y+BATT_PIN_HEIGHT,BATT_WIDTH,BATT_HEIGHT-BATT_PIN_HEIGHT,&black);          // The can.
   screen->drawRect(x+((BATT_WIDTH-BATT_PIN_WIDTH)/2),y,BATT_PIN_WIDTH,BATT_PIN_HEIGHT,&black);  // The + pin.
+}
+
+
+#define RSSI_HEIGHT     14
+#define RSSI_NUM_BARS   4
+#define RSSI_BAR_WID    3
+#define RSSI_BAR_SPACE  1
+
+
+RSSIicon::RSSIicon(int inLocX,int inLocY)
+  : drawGroup(inLocX,inLocY,BATT_WIDTH,BATT_HEIGHT) {
+
+  colorObj  backColor(LC_WHITE);
+  int       startPt;
+  int       limitPt;
+  int       barHeight;
+  
+  mapper barHMapper(0,RSSI_NUM_BARS-1,2,RSSI_HEIGHT);
+  mapper barLimitMapper(0,RSSI_NUM_BARS-1,1,31);
+  startPt = 0; 
+  for (int i=0;i<RSSI_NUM_BARS;i++) {
+    barHeight = round(barHMapper.Map(i));
+    mBars[i] = new barGraphBar(i*(RSSI_BAR_WID+RSSI_BAR_SPACE),height-barHeight,RSSI_BAR_WID,barHeight,rBar);
+    if (mBars[i]) {
+      limitPt = round(barLimitMapper.Map(i));
+      mBars[i]->setLimits(startPt,limitPt,i==0);
+      startPt = limitPt;
+      mBars[i]->setColors(&backColor,&backColor);       // Forces an empty bar if nothing's been set.
+      addObj(mBars[i]);
+    }
+  }
+  mColorMapper.addColor(31,&green);
+  mColorMapper.addColor(13,&green);
+  mColorMapper.addColor(12,&yellow);
+  mColorMapper.addColor(10,&yellow);
+  mColorMapper.addColor(8,&red);
+  mColorMapper.addColor(0,&red);
+  needRefresh = true;
+}
+
+
+RSSIicon::~RSSIicon(void) {
+
+  for (int i=0;i<RSSI_NUM_BARS;i++) {
+    if (mBars[i]) delete(mBars[i]);
+  }
+}
+
+
+void RSSIicon::setRSSI(int inRSSI) {
+
+  colorObj  barColor;
+  colorObj  backColor(LC_WHITE);
+
+  barColor = mColorMapper.Map(inRSSI);
+
+  for (int i=0;i<RSSI_NUM_BARS;i++) {
+    if (mBars[i]) {
+      mBars[i]->setValue(inRSSI);
+      mBars[i]->setColors(&barColor,&backColor);
+    } 
+  }
+  needRefresh = true; 
+}
+
+
+void RSSIicon::drawSelf(void) {
+  
+  //screen->drawRect(x,y+BATT_PIN_HEIGHT,BATT_WIDTH,BATT_HEIGHT-BATT_PIN_HEIGHT,&black);          // The can.
+  //screen->drawRect(x+((BATT_WIDTH-BATT_PIN_WIDTH)/2),y,BATT_PIN_WIDTH,BATT_PIN_HEIGHT,&black);  // The + pin.
 }

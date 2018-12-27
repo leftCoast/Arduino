@@ -42,4 +42,22 @@ class battPercent : public drawGroup {
 };
 
 
+#define RSSI_HEIGHT     14
+#define RSSI_NUM_BARS   6
+#define RSSI_BAR_WID    3
+#define RSSI_BAR_SPACE  1
+
+class RSSIicon : public drawGroup {
+
+  public:
+          RSSIicon(int inLocX,int inLocY);
+  virtual ~RSSIicon(void);
+
+          void  setRSSI(int inRSSI);
+  virtual void  drawSelf(void);
+
+          barGraphBar*    mBars[RSSI_NUM_BARS];
+          colorMultiMap   mColorMapper;
+};
+
 #endif

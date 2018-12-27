@@ -1,27 +1,5 @@
 #include "blockFile.h"
 
-tracer::tracer(char* traceText, int* inErrPtr) {
-
-    errPtr = inErrPtr;
-    mText = (char*)malloc(strlen(traceText)+1);
-    strcpy(mText,traceText);
-    Serial.print("Entering ");Serial.print(mText);
-    if (errPtr) {
-      Serial.print(" With Error: "); Serial.print(*errPtr);
-    }
-    Serial.println();
-}
-
-tracer::~tracer(void) {
-
-    Serial.print("Exiting ");Serial.print(mText);
-    if (errPtr) {
-      Serial.print(" With Error: "); Serial.print(*errPtr);
-    }
-    Serial.println();
-    free(mText);
-}
-
 
 blockFile::blockFile(char* inFilePath) {
   //tracer trace("blockFile()");
@@ -56,10 +34,10 @@ blockFile::~blockFile(void) {
 // Hand back the ID of your first block of data. When designing your
 // project, use this block to store the info you need to decode the rest.
 // return of 0 means that this is an empty file.
-unsigned long blockFile::readInitialBlockID(void) {
+unsigned long blockFile::readRootBlockID(void) {
 //  tracer trace("readInitialBlockID()", &mErr);
 
-  return mHeader.initialID;
+  return mHeader.rootID;
 }
 
 
@@ -71,8 +49,8 @@ unsigned long  blockFile::getNewBlockID(void) {
   unsigned long ID;
 
   ID = mHeader.nextID;        // Save off the ID to use.
-  if (!mHeader.initialID) {   // If this is the first buffer handed out..
-    mHeader.initialID = ID;   // Save its ID. This'll be the one used to decode this mess.
+  if (!mHeader.rootID) {   // If this is the first buffer handed out..
+    mHeader.rootID = ID;   // Save its ID. This'll be the one used to decode this mess.
   }
   mHeader.nextID++;           // Increment it.
   if (fOpen()) {
@@ -102,7 +80,7 @@ bool blockFile::deleteBlock(unsigned long blockID) {
   blockHeader   tempBlock;
 
   if (fOpen()) {
-    if (blockID != mHeader.initialID) {                 // You do NOT want to delete your initial block.
+    if (blockID != mHeader.rootID) {                    // You do NOT want to delete your initial block.
       if (findID(blockID)) {                            // Find this block in datafile.
         if (peekBlockHeader(&tempBlock)) {              // Get a copy of the header.
           if (writeBlockHeader(0, tempBlock.bytes)) {   // Change the header to to be a free block.
@@ -508,7 +486,7 @@ void blockFile::initFileHeader(void) {
 
   strcpy((char*)mHeader.nameTag, BLOCKFILE_TAG);         // Init the header.
   mHeader.versionNum = CURRENT_BLOCKFILE_VERSION; // Set the version number.
-  mHeader.initialID = 0;                          // Zero means not set yet.
+  mHeader.rootID = 0;                             // Zero means not set yet.
   mHeader.nextID = INITIAL_BLOCKFILE_ID;          // Set the next ID value.
 }
 
@@ -553,7 +531,7 @@ bool blockFile::getFileHeader(void) {
             if (tempHeader.versionNum == CURRENT_BLOCKFILE_VERSION) { // Is the version number ok?
               strcpy(mHeader.nameTag, tempHeader.nameTag);           // Everything seems ok, copy the data.
               mHeader.versionNum = tempHeader.versionNum;
-              mHeader.initialID = tempHeader.initialID;
+              mHeader.rootID = tempHeader.rootID;
               mHeader.nextID = tempHeader.nextID;
               success = true;                                         // And we're a success.
             } else {

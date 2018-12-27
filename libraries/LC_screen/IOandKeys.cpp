@@ -1,31 +1,31 @@
-#include "SMSmanager.h"
+#include "IOandKeys.h"
 
 #define out  mTextField->appendText
 
-SMSmanager::SMSmanager(editField* inEditField,textView* inTextField) 
+IOandKeys::IOandKeys(editField* inEditField,textView* inTextField) 
   : keyboard(inEditField) {
     
   mTextField = inTextField;
+  mHaveBuff = false;
   mOutBuff = NULL;
   mNumBytes = 0;
 }         
 
 
-SMSmanager::~SMSmanager(void) {  }
+IOandKeys::~IOandKeys(void) {  }
 
 
-void SMSmanager::handleKey(keyCommands inEditCom) {
+void IOandKeys::handleKey(keyCommands inEditCom) {
 
   int   numChars;
   
   if (inEditCom == enter) {                 // Got the return key.
     numChars = mEditField->getNumChars();   // How big is this new message?
     numChars++;
-    out("resizing buffer\n");
     if (resizeOutBuff(numChars)) {          // If we got the room..
       mEditField->getText(mOutBuff);        // Grab the message from the edit field.
       mEditField->setValue("");             // Clear the editField.
-      out("*** Hand off message to send here. ***\n");
+      mHaveBuff = true;
     }
 
   } else {
@@ -34,7 +34,29 @@ void SMSmanager::handleKey(keyCommands inEditCom) {
 }
 
 
-bool  SMSmanager::resizeOutBuff(byte numBytes) {
+int IOandKeys::haveBuff(void) {
+
+	if (mHaveBuff) {
+		return mNumBytes;
+	}
+	return 0;
+}
+
+
+bool IOandKeys::getBuff(char* buff,int maxBytes) {
+	
+	for (int i=0;i<mNumBytes;i++) {
+		if (i<maxBytes) {
+			buff[i] = mOutBuff[i];
+		}
+	}
+	resizeOutBuff(0);
+	mHaveBuff = false;
+}
+
+
+
+bool IOandKeys::resizeOutBuff(byte numBytes) {
 
   mNumBytes = 0;
   if (mOutBuff) {

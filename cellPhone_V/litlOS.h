@@ -2,34 +2,15 @@
 #define ltlOS_h
 
 #include <colorObj.h>
+#define SYS_TEDIT_BCOLOR        LC_WHITE
+#define SYS_TEDIT_TCOLOR        LC_BLACK
+#define SYS_TEDIT_HCOLOR        LC_LIGHT_BLUE
 
-#define SYS_TEDIT_BCOLOR      0
-#define SYS_TEDIT_TCOLOR      1
-#define SYS_TEDIT_HCOLOR      2
-
-#define SYS_PANEL_COLOR       3
-#define SYS_INPUT_BTN_COLOR   4
-#define SYS_CONTROL_BTN_COLOR 5
-#define SYS_CONTROL_LBL_COLOR 6
-#define SYS_SHADOW_COLOR      7
-
-#define NUM_SYS_COLORS        8   // Well, look up there and count 'em.
-
-
-
-
-class litlOS {
-
-  public:
-  
-          litlOS(void);
-  virtual ~litlOS(void);
-
-          colorObj  getColor(byte colorIndex);
-          colorObj  systemPalette[NUM_SYS_COLORS];
-};
-
-extern  litlOS ourOS;   // As it says, this is our OS. For better or worse..
+#define SYS_PANEL_COLOR         LC_GREY
+#define SYS_INPUT_BTN_COLOR     LC_LIGHT_GREY
+#define SYS_CONTROL_BTN_COLOR   LC_DARK_GREY
+#define SYS_CONTROL_LBL_COLOR   LC_BLACK
+#define SYS_SHADOW_COLOR        LC_CHARCOAL
 
 
 #endif

@@ -92,6 +92,7 @@ class textView :  public drawObj {
   virtual void        setText(char* text);                        // Replace our text buff with a copy of this.
   virtual void        appendText(char* text);                     // Add this to the end of our text.
   virtual void			 appendText(int inVal);								//I know, its an integer. Make it text.
+  virtual void			 appendText(char inChar);
   virtual void        insertText(int index,char* text);           // Stick a NULL terminated substring in at this index.
   virtual void        deleteText(int startIndex,int numChars);    // Remove some text from middle, beginning? End?
           char*       seeText(void);

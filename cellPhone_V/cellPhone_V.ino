@@ -26,7 +26,7 @@
 #include "editField.h"
 #include "textView.h"
 #include "keyboard.h"
-#include "SMSmanager.h"
+#include "IOandKeys.h"
 #include "icons.h"
 
 
@@ -56,8 +56,11 @@
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
-#define BATT_X    200
+#define BATT_X    195
 #define BATT_Y    3
+
+#define SIG_X     BATT_X + 15
+#define SIG_Y     BATT_Y
 
 #define out  theTextView->appendText
 
@@ -65,12 +68,13 @@ colorRect*    theTextBase;        // White rect behind the text indow.
 textView*     theTextView;        // The text window.
 colorRect*    theEditBase;        // White rect behind the text edit field.
 editField*    theEditField;       // The text edit field.
-SMSmanager*   ourKeyboard;        // Just like it sounds, our texting keyboard.
+IOandKeys*    ourKeyboard;        // Just like it sounds, our texting keyboard.
 battPercent*  battIcon;           // Icon thing showing charge state of the battery.
+RSSIicon*     sigIcon;            // Icon showing signal strength.
 
 qCMaster      ourComObj;          // Object used to comunicate with the FONA controller.
 
-timeObj       statusTimer(10000);  // We'll check status every 2 1/2 seconds.
+timeObj       statusTimer(2500);  // We'll check status every 2 1/2 seconds. Well, 10 seconds for now.
 
 cellStatus    statusReg;
 
@@ -130,13 +134,12 @@ void loop() {
 
 void setupScreen(void) {
 
-  colorObj aColor;
+  colorObj aColor(SYS_PANEL_COLOR);
   
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true); // Kill the process.
   }
   
-  aColor = ourOS.getColor(SYS_PANEL_COLOR);
   screen->fillScreen(&aColor);
   
   theTextBase   = new colorRect(TB_X,TB_Y,TB_W,TB_H,2);
@@ -144,17 +147,19 @@ void setupScreen(void) {
   theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H,2);
   theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   battIcon      = new battPercent(BATT_X,BATT_Y);
-  
+  sigIcon       = new RSSIicon(SIG_X,SIG_Y);
   
   viewList.addObj(theTextBase);
   viewList.addObj(theTextView);
   viewList.addObj(theEditBase);
   viewList.addObj(theEditField);
   viewList.addObj(battIcon);
-
-  ourKeyboard   = new SMSmanager(theEditField,theTextView);
+  viewList.addObj(sigIcon);
+  
+  ourKeyboard   = new IOandKeys(theEditField,theTextView);
   theTextView->setTextColors(&black,&white);
   battIcon->setPercent(0);
+  sigIcon->setRSSI(31);
 }
 
 
@@ -203,7 +208,7 @@ void doStatus(void) {
 void updateInfo(void) {
 
   battIcon->setPercent((byte)statusReg.batteryPercent);
-
+  sigIcon->setRSSI(statusReg.RSSI);
   
   /*
   /out("Setting battery voltage : ");out(statusReg.batteryVolts);out("mV\n");
