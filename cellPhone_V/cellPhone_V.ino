@@ -56,11 +56,11 @@
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
-#define BATT_X    195
+#define BATT_X    199
 #define BATT_Y    3
 
 #define SIG_X     BATT_X + 15
-#define SIG_Y     BATT_Y
+#define SIG_Y     BATT_Y + 1
 
 #define out  theTextView->appendText
 
@@ -71,6 +71,7 @@ editField*    theEditField;       // The text edit field.
 IOandKeys*    ourKeyboard;        // Just like it sounds, our texting keyboard.
 battPercent*  battIcon;           // Icon thing showing charge state of the battery.
 RSSIicon*     sigIcon;            // Icon showing signal strength.
+closeBtn*     closeButton;        // Close the panel.
 
 qCMaster      ourComObj;          // Object used to comunicate with the FONA controller.
 
@@ -148,6 +149,9 @@ void setupScreen(void) {
   theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
   battIcon      = new battPercent(BATT_X,BATT_Y);
   sigIcon       = new RSSIicon(SIG_X,SIG_Y);
+  closeButton   = new closeBtn;
+
+  closeButton->setCallback(closeClicked);
   
   viewList.addObj(theTextBase);
   viewList.addObj(theTextView);
@@ -155,11 +159,17 @@ void setupScreen(void) {
   viewList.addObj(theEditField);
   viewList.addObj(battIcon);
   viewList.addObj(sigIcon);
+  viewList.addObj(closeButton);
   
   ourKeyboard   = new IOandKeys(theEditField,theTextView);
   theTextView->setTextColors(&black,&white);
   battIcon->setPercent(0);
   sigIcon->setRSSI(31);
+}
+
+void closeClicked(void) {
+
+  out("CLICKED!\n");
 }
 
 

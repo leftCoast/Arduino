@@ -368,6 +368,7 @@ word viewMgr::numObjInList(void) {
 
 
 // Its sometimes handy to grab an object by index on the list.
+// WHY ARE WE NOT using inherited calls here? Cause we don't have any.
 drawObj* viewMgr::getObj(int index) {
 
 	drawObj*	trace;
@@ -508,7 +509,23 @@ void drawGroup::addObj(drawObj* newObj) {
 	needRefresh = true;	
 }
 
- 
+
+void	drawGroup::draw(void) {
+
+	drawObj*	trace;
+	
+	drawSelf();												// FIRST we draw.
+	trace = (drawObj*)theList->getLast();   		// make sure we're at the bottom.
+	screen->pushOffset(x,y);							// Ok, push our offset for the sublist.
+	while(trace) {                          		// And while we're not done..
+		trace->draw();										// Call his Draw method.
+		trace = (drawObj*)trace->dllPrev;			// if so lets go there.
+	}
+	screen->popOffset(x,y);					// Pop off the offset.
+	needRefresh = false;
+}
+
+
 // Do nothing as default. Its all about the sub objects.
 void  drawGroup::drawSelf(void) { }
 

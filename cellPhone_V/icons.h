@@ -3,6 +3,13 @@
 
 #include "drawObj.h"
 
+
+
+// *********************************************
+// ************** barGraphBar ******************
+// *********************************************
+
+
 enum barGraphDir { upBar, dwnBar, rBar, lBar };
 
 class barGraphBar : public drawObj {
@@ -28,6 +35,13 @@ class barGraphBar : public drawObj {
 };
 
 
+
+
+// *********************************************
+// ************** battPercent ******************
+// *********************************************
+
+
 class battPercent : public drawGroup {
 
   public:
@@ -42,10 +56,13 @@ class battPercent : public drawGroup {
 };
 
 
-#define RSSI_HEIGHT     14
-#define RSSI_NUM_BARS   6
-#define RSSI_BAR_WID    3
-#define RSSI_BAR_SPACE  1
+
+// *********************************************
+// **************** RSSIicon *******************
+// *********************************************
+
+
+#define RSSI_NUM_BARS   4
 
 class RSSIicon : public drawGroup {
 
@@ -59,5 +76,21 @@ class RSSIicon : public drawGroup {
           barGraphBar*    mBars[RSSI_NUM_BARS];
           colorMultiMap   mColorMapper;
 };
+
+
+
+// *********************************************
+// ************* closeBtn *****************
+// *********************************************
+
+class closeBtn : public drawObj {
+
+  public:
+            closeBtn(void);
+    virtual ~closeBtn(void);
+
+    virtual void drawSelf(void);
+};
+
 
 #endif

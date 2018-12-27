@@ -57,7 +57,7 @@ class drawObj : public rect, public dblLinkListObj {
    virtual	bool	wantRefresh(void);
    virtual	void	setNeedRefresh(void);
 	virtual	void	setLocation(int x,int y);
-          	void  draw(void);                    		// Call this one. Don't inherit this one.
+   virtual	void  draw(void);                    		// Call this one. Don't inherit this one.
    virtual 	void  drawSelf(void);                		// Inherit this one and make it yours.
 	virtual	void	setFocus(bool setLoose);				// We are either getting or loosing focus.
   		    	void	clickable(bool inWantsClicks);
@@ -127,6 +127,7 @@ class drawGroup : public drawObj, public viewMgr {
 	virtual	bool	acceptClick(point where);
 	virtual	void	clickOver(void);
   	virtual	void  addObj(drawObj* newObj);
+  	virtual	void  draw(void);
   	virtual	void	drawSelf(void);
 };			
 		

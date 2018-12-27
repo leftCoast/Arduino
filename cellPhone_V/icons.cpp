@@ -1,6 +1,13 @@
 #include "icons.h"
 #include "litlOS.h"
 
+
+
+// *********************************************
+// ************** barGraphBar ******************
+// *********************************************
+
+
 #define NO_VALUE  -1
 
 barGraphBar::barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir,bool inTouch)
@@ -81,7 +88,12 @@ void barGraphBar::drawSelf(void) {
   }
 }
 
+
          
+// *********************************************
+// ************** battPercent ******************
+// *********************************************
+
 
 #define BATT_HEIGHT 14
 #define BATT_WIDTH  8
@@ -134,26 +146,31 @@ void battPercent::drawSelf(void) {
 }
 
 
-#define RSSI_HEIGHT     14
-#define RSSI_NUM_BARS   4
+
+// *********************************************
+// **************** RSSIicon *******************
+// *********************************************
+
+
+#define RSSI_HEIGHT     15
 #define RSSI_BAR_WID    3
 #define RSSI_BAR_SPACE  1
 
 
 RSSIicon::RSSIicon(int inLocX,int inLocY)
-  : drawGroup(inLocX,inLocY,BATT_WIDTH,BATT_HEIGHT) {
+  : drawGroup(inLocX,inLocY,RSSI_NUM_BARS*(RSSI_BAR_WID+RSSI_BAR_SPACE)+2,RSSI_HEIGHT) {
 
-  colorObj  backColor(LC_WHITE);
+  colorObj  backColor(LC_BLACK);
   int       startPt;
   int       limitPt;
   int       barHeight;
   
-  mapper barHMapper(0,RSSI_NUM_BARS-1,2,RSSI_HEIGHT);
+  mapper barHMapper(0,RSSI_NUM_BARS-1,2,RSSI_HEIGHT-2);
   mapper barLimitMapper(0,RSSI_NUM_BARS-1,1,31);
   startPt = 0; 
   for (int i=0;i<RSSI_NUM_BARS;i++) {
     barHeight = round(barHMapper.Map(i));
-    mBars[i] = new barGraphBar(i*(RSSI_BAR_WID+RSSI_BAR_SPACE),height-barHeight,RSSI_BAR_WID,barHeight,rBar);
+    mBars[i] = new barGraphBar(i*(RSSI_BAR_WID+RSSI_BAR_SPACE)+1,(height-barHeight)-1,RSSI_BAR_WID,barHeight,rBar);
     if (mBars[i]) {
       limitPt = round(barLimitMapper.Map(i));
       mBars[i]->setLimits(startPt,limitPt,i==0);
@@ -183,7 +200,7 @@ RSSIicon::~RSSIicon(void) {
 void RSSIicon::setRSSI(int inRSSI) {
 
   colorObj  barColor;
-  colorObj  backColor(LC_WHITE);
+  colorObj  backColor(LC_CHARCOAL);
 
   barColor = mColorMapper.Map(inRSSI);
 
@@ -198,7 +215,43 @@ void RSSIicon::setRSSI(int inRSSI) {
 
 
 void RSSIicon::drawSelf(void) {
+
+  colorObj  aColor(LC_GREY);
+  screen->drawRect(x,y,width,height,&aColor);
+  screen->fillRect(x-1,y-1,width-1,height-1,&black);
+  //screen->drawLine(x,y+height-1,x+width-1,y+height-1,&aColor);
+  //screen->drawLine(x+width-1,y+height-1,x+width-1,y,&aColor);    <- two point vertical seems to not work.   
+}
+
+
+
+// *********************************************
+// ************* closeBtn *****************
+// *********************************************
+
+
+#define CLOSE_X 2
+#define CLOSE_Y 2
+#define CLOSE_W 14
+#define CLOSE_H 14
+
+closeBtn::closeBtn(void)
+  : drawObj(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,true) { }
+
   
-  //screen->drawRect(x,y+BATT_PIN_HEIGHT,BATT_WIDTH,BATT_HEIGHT-BATT_PIN_HEIGHT,&black);          // The can.
-  //screen->drawRect(x+((BATT_WIDTH-BATT_PIN_WIDTH)/2),y,BATT_PIN_WIDTH,BATT_PIN_HEIGHT,&black);  // The + pin.
+closeBtn::~closeBtn(void) {  }
+
+void closeBtn::drawSelf(void) {
+  colorObj  darkRed(LC_RED);
+  darkRed.blend(&black,50);
+
+  if (clicked) {
+    screen->fillRoundRect(x,y,width,height,3,&white);
+    screen->drawRoundRect(x,y,width,height,3,&red);
+    screen->drawCircle(x+3,y+2,9,&white);
+  } else {
+    screen->fillRoundRect(x,y,width,height,3,&red);
+    screen->drawRoundRect(x,y,width,height,3,&darkRed);
+    screen->drawCircle(x+3,y+2,9,&darkRed);
+  }
 }
