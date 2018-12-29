@@ -108,7 +108,7 @@ void litlOS::begin(void) {
   if (mFile->isEmpty()) {
     initOSFile();
   }
-  nextApp = homeApp;
+  nextApp = calcApp;//homeApp;
   hookup();
 }
 
@@ -149,7 +149,6 @@ void litlOS::doLoop(void) {
   if (mPanel) {
     mPanel->panelLoop();
   }
-  
  }
 
 
