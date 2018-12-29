@@ -73,9 +73,13 @@
 #define BTN_COL_3    125
 #define BTN_COL_4    175
 
+extern      bool            gSecondFx;
+            calculator      mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
+            bool            buttonPressed;
 
+          
 rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
-  : panel(inFile,rootID,false) {
+  : panel(calcApp,inFile,rootID,false) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
           
@@ -169,13 +173,13 @@ rpnCalc::~rpnCalc(void) {
   if(btnPt) delete btnPt;
   if(btnPi) delete btnPi;
   
-  if(btnInvrse) delete btnInvrse
-  if(btnRoot) delete btnRoot
-  if(btnFix) delete btnFix
+  if(btnInvrse) delete btnInvrse;
+  if(btnRoot) delete btnRoot;
+  if(btnFix) delete btnFix;
   
   
-  if(btnSwapXY) delete btnSwapXY
-  if(btnSto) delete btnSto
+  if(btnSwapXY) delete btnSwapXY;
+  if(btnSto) delete btnSto;
   if(btnRcl) delete btnRcl;
   
   
@@ -197,6 +201,7 @@ void  rpnCalc::panelSetup(void) {
   buttonPressed = false;
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
+  setGroupRefresh();
 }
 
 
@@ -207,69 +212,69 @@ void rpnCalc::loadScreen(void) {
   XReg->setColors(DISP_COLOR, BACK_COLOR);
   XReg->setJustify(TEXT_RIGHT);
   XReg->setPrecision(mCalc.getFixVal());
-  viewList.addObj(XReg);
+  addObj(XReg);
 
   aLine->setColor(DISP_COLOR);
-  viewList.addObj(aLine);
+  addObj(aLine);
   aLine2->setColor(DISP_COLOR);
-  viewList.addObj(aLine2);
+  addObj(aLine2);
   aLine3->setColor(DISP_COLOR);
-  viewList.addObj(aLine3);
+  addObj(aLine3);
   aLine4->setColor(DISP_COLOR);
-  viewList.addObj(aLine4);
+  addObj(aLine4);
   
   degRad->setColors(DISP_COLOR, &white, BACK_COLOR);
-  viewList.addObj(degRad);
+  addObj(degRad);
 
-  theSprit.begin();
-  viewList.addObj(theSprit);
+  theSprit->begin();
+  addObj(theSprit);
   
-  viewList.addObj(btn1);
-  viewList.addObj(btn2);
-  viewList.addObj(btn3);
-  viewList.addObj(btn4);
-  viewList.addObj(btn5);
-  viewList.addObj(btn6);
-  viewList.addObj(btn7);
-  viewList.addObj(btn8);
-  viewList.addObj(btn9);
-  viewList.addObj(btn0);
+  addObj(btn1);
+  addObj(btn2);
+  addObj(btn3);
+  addObj(btn4);
+  addObj(btn5);
+  addObj(btn6);
+  addObj(btn7);
+  addObj(btn8);
+  addObj(btn9);
+  addObj(btn0);
 
-  viewList.addObj(btnPlus);
-  viewList.addObj(btnMinus);
-  viewList.addObj(btnTimes);
-  viewList.addObj(btnDivide);
+  addObj(btnPlus);
+  addObj(btnMinus);
+  addObj(btnTimes);
+  addObj(btnDivide);
 
-  viewList.addObj(btnEnter);
+  addObj(btnEnter);
 
-  viewList.addObj(btnChSgn);
-  viewList.addObj(btnClrX);
-  viewList.addObj(btnPt);
-  viewList.addObj(btnPi);
+  addObj(btnChSgn);
+  addObj(btnClrX);
+  addObj(btnPt);
+  addObj(btnPi);
 
-  viewList.addObj(btnInvrse);
-  viewList.addObj(btnRoot);
-  viewList.addObj(btnFix);
+  addObj(btnInvrse);
+  addObj(btnRoot);
+  addObj(btnFix);
 
-  viewList.addObj(btnSin);
-  viewList.addObj(btnCos);
-  viewList.addObj(btnTan);
+  addObj(btnSin);
+  addObj(btnCos);
+  addObj(btnTan);
   
-  viewList.addObj(btnSwapXY);
-  viewList.addObj(btnSto);
-  viewList.addObj(btnRcl);
+  addObj(btnSwapXY);
+  addObj(btnSto);
+  addObj(btnRcl);
   
-  viewList.addObj(btnASin);
-  viewList.addObj(btnACos);
-  viewList.addObj(btnATan);
+  addObj(btnASin);
+  addObj(btnACos);
+  addObj(btnATan);
  }
 
  
 void  rpnCalc::panelLoop(void) {
 
   if (buttonPressed) {
-    XReg.setPrecision(mCalc.getFixVal());
-    XReg.setValue(mCalc.getX());
+    XReg->setPrecision(mCalc.getFixVal());
+    XReg->setValue(mCalc.getX());
     buttonPressed = false;
   }
 }

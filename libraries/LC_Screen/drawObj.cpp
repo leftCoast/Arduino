@@ -438,7 +438,7 @@ void drawGroup::setGroupRefresh(void) {
 
 // The viewMgr that we live on wants to know if we need a redraw.
 // Before we act on that, lets let the kids redraw first.
-// NOTE : THATS MESSED UP. WE SHOULD DRAW FIRST THEN THE KIDS. RETHINK THIS.
+// NOTE: I THINK THIS IS MESSED UP. THINK ABOUT IT!
 bool drawGroup::wantRefresh(void) {
 
 	if (theList) {
@@ -473,7 +473,8 @@ bool   drawGroup::acceptClick(point where) {
     
     bool	success;
     
-    success = false;   
+    success = false;
+    Serial.println("->Click<-");
 		if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
 				screen->pushOffset(x,y);				// Ok, push our offset for the sublist.
 				success = checkClicks();				// See if they handle it.
@@ -513,15 +514,17 @@ void drawGroup::addObj(drawObj* newObj) {
 void	drawGroup::draw(void) {
 
 	drawObj*	trace;
-	
-	drawSelf();												// FIRST we draw.
-	trace = (drawObj*)theList->getLast();   		// make sure we're at the bottom.
-	screen->pushOffset(x,y);							// Ok, push our offset for the sublist.
-	while(trace) {                          		// And while we're not done..
-		trace->draw();										// Call his Draw method.
-		trace = (drawObj*)trace->dllPrev;			// if so lets go there.
+
+	drawSelf();
+	if(theList) {											// FIRST we draw.
+		trace = (drawObj*)theList->getLast();   		// make sure we're at the bottom.
+		screen->pushOffset(x,y);							// Ok, push our offset for the sublist.
+		while(trace) {                          		// And while we're not done..
+			trace->draw();										// Call his Draw method.
+			trace = (drawObj*)trace->dllPrev;			// if so lets go there.
+		}
+		screen->popOffset(x,y);					// Pop off the offset.
 	}
-	screen->popOffset(x,y);					// Pop off the offset.
 	needRefresh = false;
 }
 

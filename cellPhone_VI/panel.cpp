@@ -1,9 +1,11 @@
 #include "panel.h"
 #include "litlOS.h"
 
-panel::panel(blockFile* inFile,unsigned long blockID,bool menu)
+panel::panel(int panelID,blockFile* inFile,unsigned long blockID,bool menu)
   : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,true),
   fileBuff(inFile,blockID) { 
+
+  mPanelID = panelID; // Save what "kind" of panel we are.
   
   if (menu) {         // One or two panels user & menu or just user.                               
     mMenuPanel = new drawGroup(0,0,PANEL_WIDTH,SYS_MENU_PIX,true);
@@ -14,6 +16,7 @@ panel::panel(blockFile* inFile,unsigned long blockID,bool menu)
   }
   if (mMenuPanel) drawGroup::addObj(mMenuPanel);
   if (mUserPanel) drawGroup::addObj(mUserPanel);
+  
 }
 
 
@@ -52,8 +55,12 @@ void panel::addObj(drawObj* newObj) {
 void panel::drawSelf(void) { }
 
 
-// setup() & loop() panel style.
-void panel::panelSetup(void) {  }
+// Whom ever is managing panels can assign IDs to us for
+// their nefarious plans. Here's where we hand it back.
+int panel::getPanelID(void) { return mPanelID; }
 
+
+// setup() & loop() panel style.
+void panel::panelSetup(void) { }
 
 void panel::panelLoop(void) {  }

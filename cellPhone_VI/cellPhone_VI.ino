@@ -13,6 +13,7 @@
 #include <timeObj.h>
 #include <quickCom.h>
 #include <displayObj.h>
+#include <bmpPipe.h>
 #include <screen.h>
 
 #include "litlOS.h"

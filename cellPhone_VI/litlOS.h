@@ -2,6 +2,7 @@
 #define ltlOS_h
 
 #include <colorObj.h>
+#include <iconButton.h>
 #include "panel.h"
 
 // If we'd like to have an overall look. Or at least a default look.
@@ -20,15 +21,42 @@
 #define SYS_FILE_PATH           "/SYSTEM/SYSTEM.PRF"
 
 
+enum apps { noPanel, homeApp, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
+
+
+
+class appIcon : public iconButton {
+  
+  public:
+          appIcon(int xLoc,int yLoc,apps message,char* path);
+  virtual ~appIcon(void);
+  
+  virtual void  doAction(void);
+
+          apps  mMessage;
+};
+
+
+
 class homePanel : public panel {
 
   public:
           homePanel(blockFile* inFile,unsigned long rootID);
   virtual ~homePanel(void);
   
+  virtual void  panelSetup(void);
+  virtual void  panelLoop(void);
   virtual void  drawSelf(void);
+
+          appIcon*    calcIcon;
+          appIcon*    textIcon;
+          appIcon*    contactIcon;
+          appIcon*    qGameIcon;
+          appIcon*    breakoutIcon;
+          appIcon*    phoneIcon;
   
 };
+
 
 
 class litlOS :  public idler {
@@ -37,14 +65,14 @@ class litlOS :  public idler {
           litlOS(void);
   virtual ~litlOS(void);
 
-          void  begin(void);                    // The global world is online, do hookups.
-          void  initOSFile(void);               // If there is no OS file, stat one from defaults.
-          void  launchPanel(panel* newPanel);   // Launch a newly created panel.
-          void  doLoop(void);                   // Tell the current panel its loop time.
-  virtual void  idle(void);                     // If we need to do something in the background, here we are.
+          void  begin(void);          // The global world is online, do hookups.
+          void  initOSFile(void);     // If there is no OS file, stat one from defaults.
+          void  launchPanel(void);    // Dispose of this and launch a newly created panel.
+          void  doLoop(void);         // Tell the current panel its loop time.
+  virtual void  idle(void);           // If we need to do something in the background, here we are.
 
           blockFile*  mFile;
-          homePanel*  mSysPanel;
+          panel*      mPanel;
 };
 
 

@@ -174,7 +174,7 @@ void bmpPipe::drawBitmap(int x,int y) {
   int 	trace;
   int 	endY;
   int 	srcY;
-  
+
   if (haveInfo) {
   	bmpFile = SD.open(filePath);                                                                                    
     if (bmpFile) {

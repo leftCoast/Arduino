@@ -8,8 +8,8 @@
 #define RADIUS        3
 
 extern calculator mCalc;
-extern boolean    buttonPressed;
-       boolean    gSecondFx = false;
+extern bool       buttonPressed;
+       bool       gSecondFx = false;
 
 
 colorObj numberActiveBColor(LC_WHITE);
