@@ -79,7 +79,7 @@ extern      bool            gSecondFx;
 
           
 rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
-  : panel(calcApp,inFile,rootID,false) {
+  : panel(calcApp,inFile,rootID) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
           
@@ -193,7 +193,7 @@ rpnCalc::~rpnCalc(void) {
 }
 
 
-void  rpnCalc::panelSetup(void) {
+void  rpnCalc::setup(void) {
   
   screen->fillScreen(&black);
   loadScreen();
@@ -270,7 +270,7 @@ void rpnCalc::loadScreen(void) {
  }
 
  
-void  rpnCalc::panelLoop(void) {
+void  rpnCalc::loop(void) {
 
   if (buttonPressed) {
     XReg->setPrecision(mCalc.getFixVal());

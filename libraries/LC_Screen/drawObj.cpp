@@ -268,13 +268,16 @@ viewMgr::~viewMgr(void) { dumpList(); }
 void  viewMgr::dumpList(void) {
 
 	drawObj*	trace;
-	
+	Serial.println("Entering dump list.");
+	Serial.print("theList :");Serial.println((unsigned long)theList,HEX);
 	while(theList) {
 		trace = (drawObj*)theList->dllNext;
+		Serial.print("Trace :");Serial.println((unsigned long)trace,HEX);
 		delete(theList);
 		theList = trace;
 	}
-  theTouched = NULL;
+	Serial.println("List should be dumped.");
+	theTouched = NULL;
 }
 
 
@@ -416,7 +419,12 @@ drawGroup::drawGroup(int x, int y, word width,word height,bool clicks)
 
 // We call dumpList() because the odds are we were
 // dynamically created.
-drawGroup::~drawGroup() { dumpList(); }
+drawGroup::~drawGroup() { 
+	
+	Serial.println("deleting drawGroup, dumping list.");
+	dumpList();
+	Serial.println("List dumped.");
+}
 
 
 

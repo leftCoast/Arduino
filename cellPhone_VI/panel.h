@@ -23,20 +23,14 @@ class panel : public drawGroup,
               public fileBuff {
 
   public:
-          panel(int panelID,blockFile* inFile,unsigned long rootID,bool menu);
+          panel(int panelID,blockFile* inFile,unsigned long fBlockID);
   virtual ~panel(void);
 
-  virtual void  addObj(drawObj* newObj,bool menu);
-  virtual void  addObj(drawObj* newObj);
-  virtual void  drawSelf(void);
            int  getPanelID();
-  
-  virtual void  panelSetup(void);
-  virtual void  panelLoop(void);
+  virtual void  setup(void);
+  virtual void  loop(void);
 
-          int         mPanelID;   // What panal are you?
-          drawGroup*  mMenuPanel;
-          drawGroup*  mUserPanel; 
+          int   mPanelID;   // What panal are you?
 };
 
 

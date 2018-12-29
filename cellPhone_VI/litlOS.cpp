@@ -18,7 +18,7 @@ appIcon::appIcon(int xLoc,int yLoc,apps message,char* path)
   : iconButton(xLoc,yLoc,path) { mMessage = message; }
 
   
-appIcon::~appIcon(void) {  }
+appIcon::~appIcon(void) { Serial.println("killing icon"); }
 
 
 void appIcon::doAction(void) { nextApp = mMessage; }
@@ -35,7 +35,7 @@ void appIcon::doAction(void) { nextApp = mMessage; }
 
 
 homePanel::homePanel(blockFile* inFile,unsigned long rootID)
-  : panel(homeApp,inFile,rootID,false) {
+  : panel(homeApp,inFile,rootID) {
 
   int iconX;
   
@@ -56,16 +56,24 @@ homePanel::homePanel(blockFile* inFile,unsigned long rootID)
 
 homePanel::~homePanel(void) {
 
+  Serial.print("theList :");Serial.println((unsigned long)theList,HEX);
+  Serial.print("list has :");Serial.print(numObjInList());Serial.print(" objects.");
+  Serial.println("Deleting icons");
+  /*
   if (calcIcon) delete calcIcon;
   if (textIcon) delete textIcon;
   if (contactIcon) delete contactIcon;
   if (qGameIcon) delete qGameIcon;
   if (breakoutIcon) delete breakoutIcon;
   if (phoneIcon) delete phoneIcon;
+  */
+  dumpList();
+  Serial.println("Icons deleted.");
+  Serial.print("list has :");Serial.print(numObjInList());Serial.print(" objects.");
 }
 
 
-void homePanel::panelSetup(void) { 
+void homePanel::setup(void) { 
 
   if (calcIcon)     { addObj(calcIcon);     calcIcon->begin(); }
   if (textIcon)     { addObj(textIcon);     textIcon->begin(); }
@@ -76,7 +84,7 @@ void homePanel::panelSetup(void) {
   setGroupRefresh();
 }
 
-void homePanel::panelLoop(void) {  }
+void homePanel::loop(void) {  }
 
 
 void homePanel::drawSelf(void) { 
@@ -108,7 +116,7 @@ void litlOS::begin(void) {
   if (mFile->isEmpty()) {
     initOSFile();
   }
-  nextApp = calcApp;//homeApp;
+  nextApp = homeApp;
   hookup();
 }
 
@@ -122,6 +130,7 @@ void litlOS::launchPanel(void) {
     Serial.println("Deleting panel");
     Serial.flush();
     delete mPanel;
+    mPanel = NULL;  // Just in case..
     Serial.println("Panel deleted..");
     Serial.flush();
   }
@@ -136,7 +145,7 @@ void litlOS::launchPanel(void) {
     case breakoutApp  : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
   }
   if (mPanel) {
-    mPanel->panelSetup();
+    mPanel->setup();
     mPanel->hookup();
     viewList.addObj(mPanel);
   }
@@ -144,20 +153,18 @@ void litlOS::launchPanel(void) {
 
 
 // Tell the current panel its loop time.
-void litlOS::doLoop(void) {
+void litlOS::loop(void) {
 
-  if (mPanel) {
-    mPanel->panelLoop();
-  }
- }
-
-
-// Things we do..
-void litlOS::idle(void) { 
-  
   if(!mPanel && nextApp!=noPanel) {             // If have no panel and we want one.
     launchPanel();                              // Launch a new panel.
   } else if(nextApp!=mPanel->getPanelID()) {    // Else, if we just want a change of panels.
     launchPanel();                              // Launch a new panel.
   }
-}
+  if (mPanel) {
+    mPanel->loop();
+  }
+ }
+
+
+// Things we do..
+void litlOS::idle(void) {  }

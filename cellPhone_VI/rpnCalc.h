@@ -17,8 +17,8 @@ class rpnCalc : public panel {
   virtual ~rpnCalc(void);
 
           void  loadScreen(void);
-  virtual void  panelSetup(void);
-  virtual void  panelLoop(void);
+  virtual void  setup(void);
+  virtual void  loop(void);
 
           label*          XReg;
           lineObj*        aLine;

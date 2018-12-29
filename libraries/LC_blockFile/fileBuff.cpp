@@ -9,7 +9,7 @@ fileBuff::fileBuff(blockFile* inFile,unsigned long blockID) {
 }
 
 
-fileBuff::~fileBuff(void) { }
+fileBuff::~fileBuff(void) { Serial.println("deleting fileBuff");}
   //tracer trace("fileBuff::~fileBuff()");
   
 
