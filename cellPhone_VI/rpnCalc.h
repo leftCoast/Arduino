@@ -17,8 +17,8 @@ class rpnCalc : public panel {
   virtual ~rpnCalc(void);
 
           void  loadScreen(void);
-  virtual void  setup(void);
-  virtual void  loop(void);
+  virtual void  psetup(void);
+  virtual void  ploop(void);
 
           label*          XReg;
           lineObj*        aLine;
@@ -58,6 +58,8 @@ class rpnCalc : public panel {
           calcButton*     btnASin;
           calcButton*     btnACos;
           secondfxButton* btnATan;
+
+          closeButton*     goAway;
 };
 
 

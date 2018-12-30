@@ -95,11 +95,10 @@ public:
             bool 		checkClicks(void);
 				void    	checkRefresh(void);
 				word		numObjInList(void);
-				drawObj*	getObj(int index);
     virtual void    	idle(void);
     
-            drawObj*	theList;    // Pointer to top of list;
-            drawObj*	theTouched; // Pointer to who's been touched.
+            drawObj	listHeader;				// Header of the list;
+            drawObj*	theTouched;				// Pointer to who's been touched.
 };
 
 extern	viewMgr 	viewList;
@@ -128,7 +127,6 @@ class drawGroup : public drawObj, public viewMgr {
 	virtual	void	clickOver(void);
   	virtual	void  addObj(drawObj* newObj);
   	virtual	void  draw(void);
-  	virtual	void	drawSelf(void);
 };			
 		
 		

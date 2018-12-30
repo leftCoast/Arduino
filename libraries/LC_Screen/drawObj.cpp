@@ -252,150 +252,82 @@ void	setFocusPtr(drawObj* newFocus) {
 	}
 	
 	
-viewMgr::viewMgr(void) {
-    
-    theList = NULL;
-    theTouched = NULL;
-}
+viewMgr::viewMgr(void) { theTouched = NULL; }
 
 
-viewMgr::~viewMgr(void) { dumpList(); }
+viewMgr::~viewMgr(void) { listHeader.dumpList(); }
 
-
-// Delete all the objects. Watch out! Were these
-// created on the stack or in memory? If on the
-// stack don't do this! ONLY use for dynamic lists!
-void  viewMgr::dumpList(void) {
-
-	drawObj*	trace;
-	Serial.println("Entering dump list.");
-	Serial.print("theList :");Serial.println((unsigned long)theList,HEX);
-	while(theList) {
-		trace = (drawObj*)theList->dllNext;
-		Serial.print("Trace :");Serial.println((unsigned long)trace,HEX);
-		delete(theList);
-		theList = trace;
-	}
-	Serial.println("List should be dumped.");
-	theTouched = NULL;
-}
 
 
 // New objects go on top.
 void viewMgr::addObj(drawObj* newObj) {
     
-    if (theList) {                      // We got a list?
-        newObj->linkToStart(theList);   // Put the new guy at the top of the list.
-    } else {
-        hookup();                       // On our first addition, hook up idling.
-    }
-    theList = newObj;                   // Either way, point to the top of the list.
+    newObj->linkAfter(&listHeader);	// Put the new guy at the top of the list.
+    hookup();								// hookup on the first addition. Ignored otherwise.
 }
 
 
-// Checking clicks, non-empty list already checked.
+// Checking clicks.
 bool viewMgr::checkClicks(void) {
     
-    drawObj*    trace;
-    point       gPoint;
-    point       lPoint;
-    bool     done;
-    bool     success;
+	drawObj*	trace;
+	point		gPoint;
+	point		lPoint;
+	bool		success;
     
-    if (!screen->hasTouchScreen()) return false;			// Sanity! Does it even have the hardware?
-    success = false;                                  // Did we change anything? Not yet.
-    if (!theTouched) {                                // No current touch.
-        if (screen->touched()) {                      // New touch, go look.
-            gPoint = screen->getPoint();              // Touch was here..
-            lPoint = screen->lP(gPoint);							// Possibly we're sublist, localize.						
-            trace = (drawObj*)theList->getFirst();    // make sure we're at the top.
-            done = false;															// Get ready..
-            while(!done) {														// While were not done
-                if (trace->acceptClick(lPoint)) {			// If the object accepts the click
-                    theTouched = trace;								// Save that badboy's address.
-                    success = true;                   // We changed something.
-                    done = true;                      // Loop's done
-                } else if (trace->dllNext) {          // Else if we have a next object.
-                    trace = (drawObj*)trace->dllNext; // Hop to the next.
-                } else  {                             // in this last case.
-                    done = true;                      // The loop is through.
-                }
-            }
-        }
-    } else {																					// We've been touched and delt with it.
-        if (!screen->touched()) {                     // Touch has finally passed.
-            theTouched->clickOver();                  // Tell the last touched guy its over.
-            theTouched = NULL;                        // Clear out our flag/pointer.
-            success = true;                           // We changed something.
-        }
-    }
-    return success;                                   // Tell the calling method if we changed something.
+	if (!screen->hasTouchScreen()) return false;		// Sanity! Does it even have the hardware?
+	success = false;											// Did we change anything? Not yet.
+	if (!theTouched) {										// No current touch.
+		if (screen->touched()) {							// New touch, go look.
+			gPoint = screen->getPoint();              // Touch was here..
+			lPoint = screen->lP(gPoint);					// Possibly we're sublist, localize.						
+			trace = (drawObj*)listHeader.getFirst();	// make sure we're at the top.
+			while(trace) {										// While we have something to work with.
+				if (trace->acceptClick(lPoint)) {		// If the object accepts the click
+					theTouched = trace;						// Save that badboy's address.
+					success = true;							// We changed something.
+					trace = NULL;								// Flag that the loop's done.
+				} else {
+					trace = (drawObj*)trace->dllNext;	// Hop to the next.
+				}
+			}
+		}
+	} else {														// We've been touched and delt with it.
+		if (!screen->touched()) {							// Touch has finally passed.
+			theTouched->clickOver();                  // Tell the last touched guy its over.
+			theTouched = NULL;                        // Clear out our flag/pointer.
+			success = true;                           // We changed something.
+		}
+	}
+	return success;											// Tell the calling method if we changed something.
 }
 
 
-// Checking for redraws, non-empty list already checked.
+// Checking for redraws.
 void viewMgr::checkRefresh(void) {
     
-    drawObj*    trace;
-    bool     done;
-
-    trace = (drawObj*)theList->getLast();   // make sure we're at the bottom.
-    done = false;                           // Well, were not done yet are we?
-    while(!done) {                          // And while we're not done..
-        if (trace->wantRefresh()) {         // Does this guy want refresh?
-            trace->draw();                  // Call his Draw method.
-        }
-        if (trace->dllPrev) {                  	// Ok, we have another up the list?
-            trace = (drawObj*)trace->dllPrev;	// if so lets go there.
-        } else {                            		// No one else?
-            done = true;                    		// Then I guess we are done.
-        }
-    }
+	drawObj*	trace;
+	
+	trace = (drawObj*)listHeader.getLast();		// make sure we're at the bottom.
+	while(trace && trace!=(&listHeader)) {			// While not NULL or pointing at our header.
+		if (trace->wantRefresh()) {					// Does this guy want refresh?
+            trace->draw();								// Call his Draw method.
+		}
+      trace = (drawObj*)trace->dllPrev;			// Bump up the list.
+	}
 }
  
  
 // Counts & returns the number of objects in the list.           
-word viewMgr::numObjInList(void) {
-
-	drawObj*	trace;
-	word 			count;
-	
-	trace = (drawObj*)theList;
-	count = 0;
-	while(trace) {
-		count++;
-		trace = (drawObj*)trace->dllNext;
-	}
-	return count;
-}
-
-
-// Its sometimes handy to grab an object by index on the list.
-// WHY ARE WE NOT using inherited calls here? Cause we don't have any.
-drawObj* viewMgr::getObj(int index) {
-
-	drawObj*	trace;
-	int				i;
-	
-	i = 0;
-	trace = (drawObj*)theList;
-	while(trace) {
-		if (index==i) return trace;
-		i++;
-		trace = (drawObj*)trace->dllNext;
-	}
-	return NULL;
-}
+word viewMgr::numObjInList(void) { return (word)listHeader.countTail(); }
 
         
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
     
-    if (theList) {
-        if (!checkClicks()){
-            checkRefresh();
-        }
-   }
+	if (!checkClicks()){		// I guess if we have a click we need  to do that.
+		checkRefresh();		// Otherwise check if we need to do some drawing?
+	}
 }
 
 
@@ -406,10 +338,6 @@ void viewMgr::idle(void) {
 // Before taking any action with a sub object the drawGroup
 // pushes its location onto the screen. This allows all sub
 // objects to work on local coordinates.
-//
-// Once difference is that this viewMgr sublist is NOT linked
-// to the idler list. Only the master list gets the idle calls.
-// The sub lists get called through the drawGroup methods. 
 // ***************************************************
 
 
@@ -417,14 +345,8 @@ drawGroup::drawGroup(int x, int y, word width,word height,bool clicks)
 	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
 
 
-// We call dumpList() because the odds are we were
-// dynamically created.
-drawGroup::~drawGroup() { 
-	
-	Serial.println("deleting drawGroup, dumping list.");
-	dumpList();
-	Serial.println("List dumped.");
-}
+// We don't actually allocate anything new. Just work old tools.
+drawGroup::~drawGroup() { }
 
 
 
@@ -436,7 +358,7 @@ void drawGroup::setGroupRefresh(void) {
 		
 		drawObj* trace;
 
-		trace = theList;
+		trace = (drawObj*)listHeader.getFirst();
 		while(trace) {
 			trace->setNeedRefresh();
 			trace = (drawObj*)trace->dllNext;
@@ -449,12 +371,12 @@ void drawGroup::setGroupRefresh(void) {
 // NOTE: I THINK THIS IS MESSED UP. THINK ABOUT IT!
 bool drawGroup::wantRefresh(void) {
 
-	if (theList) {
-		screen->pushOffset(x,y);	// So we set in our offset.
-		checkRefresh();				// Now, if they get called to draw? Everything will be fine.
+	if (!needRefresh) {				// If we DON'T want a refresh.
+		screen->pushOffset(x,y);	// We set in our offset.
+		checkRefresh();				// And let the kiddies have a go.
 		screen->popOffset(x,y);		// Clear offset.
 	}
-	return needRefresh;
+	return needRefresh;				// In any case, return if we need a refresh or not.
 }
 
 
@@ -479,22 +401,21 @@ void drawGroup::setLocation(int x,int y) {
 // and we are accepting clicks, we take it.
 bool   drawGroup::acceptClick(point where) {
     
-    bool	success;
+	bool	success;
     
-    success = false;
-    Serial.println("->Click<-");
-		if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
-				screen->pushOffset(x,y);				// Ok, push our offset for the sublist.
-				success = checkClicks();				// See if they handle it.
-				screen->popOffset(x,y);					// Pop off the offset.
-				if (!success && wantsClicks) {	// No one else wanted it? Do we want clicks?
-					needRefresh = true;						// We'll take it.
-					doAction();										// And do things.
-					success = true;								// Noted..
-				}
+	success = false;
+	if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
+		screen->pushOffset(x,y);				// Ok, push our offset for the sublist.
+		success = checkClicks();				// See if they handle it.
+		screen->popOffset(x,y);					// Pop off the offset.
+		if (!success && wantsClicks) {		// No one else wanted it? Do we want clicks?
+			needRefresh = true;					// We'll take it.
+			doAction();								// And do things.
+			success = true;						// Noted..
 		}
-		return success;
 	}
+	return success;
+}
 
 
 // click over. Possibly a sub obj?
@@ -502,8 +423,8 @@ void drawGroup::clickOver(void) {
 	
 	if (theTouched) {					// If it was a subgroup.
 		theTouched->clickOver();	// Tell the last touched guy its over.
-  	theTouched = NULL;				// Clear out our flag/pointer.
-  }
+		theTouched = NULL;			// Clear out our flag/pointer.
+	}
 }
 
 
@@ -511,10 +432,7 @@ void drawGroup::clickOver(void) {
 // They get their time from the parent getting called.              					
 void drawGroup::addObj(drawObj* newObj) {
 
-  if (theList) {                      // We got a list?
-  	newObj->linkToStart(theList);   	// Put the new guy at the top of the list.
-  }
-  theList = newObj;                   // Either way, point to the top of the list.
+  	newObj->linkAfter(&listHeader);   	// Put the new guy at the top of the list.
 	needRefresh = true;	
 }
 
@@ -523,22 +441,18 @@ void	drawGroup::draw(void) {
 
 	drawObj*	trace;
 
-	drawSelf();
-	if(theList) {											// FIRST we draw.
-		trace = (drawObj*)theList->getLast();   		// make sure we're at the bottom.
-		screen->pushOffset(x,y);							// Ok, push our offset for the sublist.
-		while(trace) {                          		// And while we're not done..
-			trace->draw();										// Call his Draw method.
-			trace = (drawObj*)trace->dllPrev;			// if so lets go there.
-		}
-		screen->popOffset(x,y);					// Pop off the offset.
+	if (needRefresh) {
+		drawSelf();
 	}
-	needRefresh = false;
+	trace = (drawObj*)listHeader.getLast();	// make sure we're at the bottom.
+	screen->pushOffset(x,y);						// Ok, push our offset for the sublist.
+	while(trace && trace!=(&listHeader)) {		// And while we're not done..
+		trace->draw();									// Call his Draw method.
+		trace = (drawObj*)trace->dllPrev;		// if so lets go there.
+	}
+	screen->popOffset(x,y);							// Pop off the offset.
+	needRefresh = false;								// in any case, we no longer need a refresh.
 }
-
-
-// Do nothing as default. Its all about the sub objects.
-void  drawGroup::drawSelf(void) { }
 
 
 

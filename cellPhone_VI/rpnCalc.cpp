@@ -19,6 +19,11 @@
 #include "anime.h"
 #include "calcButton.h"
 
+#define  CLOSE_X    0
+#define  CLOSE_Y    3
+#define  CLOSE_W    18
+#define  CLOSE_H    18
+
 #define  BACK_COLOR (&black)
 #define  DISP_COLOR (&red)
 #define  DISP_Y     4
@@ -79,7 +84,7 @@ extern      bool            gSecondFx;
 
           
 rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
-  : panel(calcApp,inFile,rootID) {
+  : panel(calcApp,inFile,rootID,false) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
           
@@ -132,6 +137,8 @@ rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
   btnASin = new calcButton("Ln","e^x",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
   btnACos = new calcButton("log","t^x",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
   btnATan = new secondfxButton("2f",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, EDIT_BTN);
+
+  goAway = new closeButton(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H);
   
   gSecondFx = false;
 }
@@ -190,18 +197,18 @@ rpnCalc::~rpnCalc(void) {
   if(btnASin) delete btnASin;
   if(btnACos) delete btnACos;
  if(btnATan) delete btnATan;
+
+ if(goAway) delete goAway;
 }
 
 
-void  rpnCalc::setup(void) {
-  
+void  rpnCalc::psetup(void) {
+
   screen->fillScreen(&black);
   loadScreen();
-  screen->drawRect(BTN_COL_1-3,DISP_Y-3,((BTN_COL_4+BTN_WIDTH1)-BTN_COL_1)+5,22,DISP_COLOR);
   buttonPressed = false;
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
-  setGroupRefresh();
 }
 
 
@@ -267,10 +274,15 @@ void rpnCalc::loadScreen(void) {
   addObj(btnASin);
   addObj(btnACos);
   addObj(btnATan);
+
+  addObj(goAway);
+  
+  screen->drawRect(BTN_COL_1-3,DISP_Y-3,((BTN_COL_4+BTN_WIDTH1)-BTN_COL_1)+5,22,DISP_COLOR);
+  //screen->drawRect(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,DISP_COLOR);
  }
 
  
-void  rpnCalc::loop(void) {
+void  rpnCalc::ploop(void) {
 
   if (buttonPressed) {
     XReg->setPrecision(mCalc.getFixVal());

@@ -17,14 +17,15 @@ idler::idler(void) {
 }
 
 
-idler::~idler(void) { }
+// Before we die, we need to tell our master to let us go.
+idler::~idler(void) { theIdlers.unlinkObj(this); }
 
 
 // You can't call this in the contstructor. Love to but can't.
 // So call this the first time you add data or turn your idler on.
 void idler::hookup(void) {
   if (!hookedIn) {
-    theIdlers.addToTop(this); 
+    theIdlers.addToTop(this);
     hookedIn = true;
   }
 }

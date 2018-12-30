@@ -57,4 +57,15 @@ class degRadButton : public calcButton {
           colorObj bColor;
 };
 
+
+class closeButton : public calcButton {
+
+   public :
+                 closeButton(word inLocX, word inLocY,word inWidth, word inHeight);
+
+  virtual void  drawSelf(void);
+  virtual void  doAction(void);
+};
+
+
 #endif

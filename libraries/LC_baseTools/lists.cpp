@@ -246,9 +246,10 @@ void dblLinkListObj::linkAfter(dblLinkListObj* present) {
     
     if (present) {
         dllNext = present->dllNext;
-        dllPrev = present;
+        dllPrev = present; 
         present->dllNext = this;
-    }
+        if (dllNext) dllNext->dllPrev = this;
+    }    
 }
 
 
@@ -259,6 +260,7 @@ void dblLinkListObj::linkBefore(dblLinkListObj* present) {
         dllPrev = present->dllPrev;
         dllNext = present;
         present->dllPrev = this;
+        if (dllPrev) dllPrev->dllNext = this;
     }
 }
 
@@ -275,7 +277,9 @@ dblLinkListObj* dblLinkListObj::getFirst(void) {
 
 dblLinkListObj* dblLinkListObj::getLast(void) {
     
-    dblLinkListObj* trace = this;
+    dblLinkListObj* trace;
+    
+    trace = this;
     while(trace->dllNext) {
         trace = trace->dllNext;
     }
@@ -300,4 +304,50 @@ void dblLinkListObj::unhook(void) {
     dllPrev = NULL;
 }
 
+
+// Delete entire tail. delete calls unhook before deleting the object.
+void dblLinkListObj::dumpTail(void) { while(dllNext) delete dllNext; }
+
+		
+// Delete entire head section. delete calls unhook before deleting the object.					
+void dblLinkListObj::dumpHead(void) { while(dllPrev) delete dllPrev; }
+	
+
+// Dump both head & tail.
+void dblLinkListObj::dumpList(void) {
+
+		dumpHead();
+		dumpTail();
+}						
+
+
+// How many nodes long is our tail?
+int dblLinkListObj::countTail(void) {
+
+	dblLinkListObj*	trace;
+	int					count;
+	
+	trace = dllNext;
+	count = 0;
+	while(trace) {
+		count++;
+		trace = trace->dllNext;
+	}
+	return count;
+}
+
+
+// How many nodes long is our head?
+int dblLinkListObj::countHead(void) {
+
+	dblLinkListObj*	trace;
+	int					count;
+	
+	trace = dllPrev;
+	count = 0;
+	while(trace) {
+		count++;
+		trace = dllPrev;
+	}
+}
 

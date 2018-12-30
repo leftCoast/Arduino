@@ -1,6 +1,6 @@
 #include "calcButton.h"
 #include <calculator.h>
-
+#include "litlOS.h"
 
 #define TEXT_SIZE     2
 #define CHAR_WIDTH    6
@@ -10,7 +10,7 @@
 extern calculator mCalc;
 extern bool       buttonPressed;
        bool       gSecondFx = false;
-
+extern apps       nextApp;
 
 colorObj numberActiveBColor(LC_WHITE);
 colorObj numberActiveTColor(LC_BLACK);
@@ -219,3 +219,24 @@ void  degRadButton::drawSelf(void) {
     mCalc.toggleDegrees();
     needRefresh = true;
  }
+
+
+closeButton::closeButton(word inLocX, word inLocY,word inWidth, word inHeight)
+  : calcButton("X",inLocX,inLocY,inWidth,inHeight) {
+      
+    setSize(inWidth,inHeight);    // Kinda' redundant maybe?
+}
+
+
+void closeButton::drawSelf(void) {
+
+  screen->fillRoundRect(x, y, width, height, RADIUS, &red);
+  screen->setTextColor(&black, &red);
+  word textWidth = (CHAR_WIDTH * TEXT_SIZE) - 1;
+  word dispWidth = width - (2 * RADIUS);
+  screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 1);
+  screen->drawText("X");
+}
+
+  
+void closeButton::doAction(void) { nextApp = homeApp; }

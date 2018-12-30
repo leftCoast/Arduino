@@ -23,14 +23,15 @@ class panel : public drawGroup,
               public fileBuff {
 
   public:
-          panel(int panelID,blockFile* inFile,unsigned long fBlockID);
+          panel(int panelID,blockFile* inFile,unsigned long fBlockID,bool wantClicks);
   virtual ~panel(void);
 
            int  getPanelID();
-  virtual void  setup(void);
-  virtual void  loop(void);
-
-          int   mPanelID;   // What panal are you?
+  virtual void  psetup(void);
+  virtual void  ploop(void);
+  virtual void  drawSelf(void);
+  
+          int   mPanelID;   // What panal am I?
 };
 
 

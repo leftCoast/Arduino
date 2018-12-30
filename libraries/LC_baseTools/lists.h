@@ -110,7 +110,12 @@ public:
     			dblLinkListObj*	getLast(void);
     			void					linkToEnd(dblLinkListObj* present);		// Given a pointer to a node, link yourself after the last in the chain.
     			void					linkToStart(dblLinkListObj* present);	// Given a pointer to a node, link yourself before the first in the chain.
-    			void					unhook(void);
+    			void					unhook(void);									// Unhook myself.
+    			void					dumpTail(void);								// Delete entire tail.
+    			void					dumpHead(void);								// Delete entire head section..
+    			void					dumpList(void);								// Dump both head & tail.
+    			int					countTail(void);								// How many nodes long is our tail?
+    			int					countHead(void);								// How many nodes long is our head?
     			
     			dblLinkListObj*	dllPrev;
     			dblLinkListObj*	dllNext;
