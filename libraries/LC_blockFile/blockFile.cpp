@@ -461,7 +461,7 @@ bool  blockFile::findID(unsigned long blockID) {
 bool  blockFile::findEnd(void) {
 //  tracer trace("findEnd()", &mErr);
 
-  blockHeader   tempBlock;    // A place to read blocks into.
+  blockHeader   tempBlock;								// A place to read blocks into.
 
   if (mErr == BF_NO_ERR && findFirst()) {       // Reset file pointer. Don't bother if its broken.
     while (true) {                              // Start looping.
@@ -477,6 +477,7 @@ bool  blockFile::findEnd(void) {
       }
     }
   }
+  return false;											// I *think* this is best err out. 12/30/2018
 }
 
 

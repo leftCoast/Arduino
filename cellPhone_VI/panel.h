@@ -2,9 +2,8 @@
 #define panel_h
 
 #include <drawObj.h>
-
 #include <fileBuff.h>
-
+#include <timeObj.h>
 
 // The panel object. Base class for swapping in and out of different objects
 // that want to use the screen. The plan is that the OS can swap panels back
@@ -30,8 +29,10 @@ class panel : public drawGroup {
   virtual void  loop(void);
   virtual void  drawSelf(void);
           void  close(void);
+          void  delay(unsigned long);
   
-          int   mPanelID;   // What panal am I?
+          int     mPanelID;   // What panal am I?
+          timeObj mTimer;     // We'll use it for the delay() thing.
 };
 
 

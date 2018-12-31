@@ -1,8 +1,8 @@
 
 #include "litlOS.h" 
 #include <screen.h>
-#include "rpnCalc.h"
-
+#include "src/rpnCalc/rpnCalc.h"
+#include "src/qGame/qGame.h"
 
 apps      nextApp;  // What panel do we want showing now?
 colorObj  aColor;   // A color object anyone can use.
@@ -117,10 +117,10 @@ void litlOS::launchPanel(void) {
     case noPanel      : return;
     case homeApp      : mPanel = (panel*) new homePanel(); break;
     case calcApp      : mPanel = (panel*) new rpnCalc();   break;
+    case qGameApp     : mPanel = (panel*) new qGame();   break;
     case phoneApp     : 
     case textApp      : 
     case contactApp   :
-    case qGameApp     :
     case breakoutApp  : 
     default           : 
       nextApp = homeApp;

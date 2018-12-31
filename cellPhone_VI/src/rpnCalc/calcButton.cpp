@@ -1,5 +1,7 @@
 #include "calcButton.h"
 #include <calculator.h>
+#include "../../litlOS.h"
+#include "rpnCalc.h"
 
 #define TEXT_SIZE     2
 #define CHAR_WIDTH    6
@@ -7,43 +9,48 @@
 #define RADIUS        3
 
 extern calculator mCalc;
-extern boolean    buttonPressed;
-       boolean    gSecondFx = false;
+extern bool       buttonPressed;
+       bool       gSecondFx = false;
+extern apps       nextApp;
 
+colorObj numberActiveBColor;
+colorObj numberActiveTColor;
+colorObj numberClickedBColor;
+colorObj numberClickedTColor;
 
-colorObj numberActiveBColor(LC_WHITE);
-colorObj numberActiveTColor(LC_BLACK);
-colorObj numberClickedBColor(LC_BLACK);
-colorObj numberClickedTColor(LC_WHITE);
-
-colorObj editActiveBColor(LC_BLUE);
-colorObj editActiveTColor(LC_WHITE);
-colorObj editClickedBColor(LC_WHITE);
-colorObj editClickedTColor(LC_BLACK);
+colorObj editActiveBColor;
+colorObj editActiveTColor;
+colorObj editClickedBColor;
+colorObj editClickedTColor;
 
 colorObj fxActiveBColor(LC_BLACK);
-colorObj fxActiveTColor(LC_WHITE);
-colorObj fxClickedBColor(LC_WHITE);
-colorObj fxClickedTColor(LC_BLACK);
+colorObj fxActiveTColor;
+colorObj fxClickedBColor;
+colorObj fxClickedTColor;
 
 
 void setupButtonColors(void) {
 
+  numberActiveBColor.setColor(LC_WHITE);
+  numberActiveTColor.setColor(LC_BLACK);
+  numberClickedBColor.setColor(LC_BLACK);
+  numberClickedTColor.setColor(LC_WHITE);
+  
+  editActiveBColor.setColor(LC_BLUE);
+  editActiveTColor.setColor(LC_WHITE);
+  editClickedBColor.setColor(LC_WHITE);
+  editClickedTColor.setColor(LC_BLACK);
+  
+  fxActiveBColor.setColor(LC_BLACK);
+  fxActiveTColor.setColor(LC_WHITE);
+  fxClickedBColor.setColor(LC_WHITE);
+  fxClickedTColor.setColor(LC_BLACK);
+
   numberActiveBColor.blend(&black, 40);
   numberActiveBColor.blend(&yellow, 25);
-  //numberClickedBColor(&white, 100);
   numberActiveTColor.blend(&black, 60);
-  //numberClickedTColor.blend(&red, 80);
-
   editActiveBColor.blend(&white, 40);
-  //editClickedBColor(&white, 100);
-  //editActiveTColor.blend(&black, 100);
-  //editClickedTColor.blend(&red, 80);
-
   fxActiveBColor.blend(&white, 20);
-  //fxActiveTColor.blend();
-  //fxClickedBColor.blend();
-  //fxClickedTColor.blend();
 }
 
 
@@ -72,6 +79,12 @@ calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word iny, byte 
   
   bType = inType;
   secondFx = false;
+}
+
+calcButton::~calcButton(void) {
+
+  if (fStr) free(fStr);
+  if (aFStr) free(aFStr);
 }
 
 
@@ -173,16 +186,20 @@ void calcButton::beep(void) {
 
 
 secondfxButton::secondfxButton(char* inFStr,word inLocX, word iny,byte width,byte inType)
-  : calcButton(inFStr,inLocX,iny,width,inType) { }
+  : calcButton(inFStr,inLocX,iny,width,inType) {  }
+
+
+secondfxButton::~secondfxButton(void) {  }
+
 
 void secondfxButton::idle() { secondFx = gSecondFx; }         // This one works different..
+
 
 void secondfxButton::doAction(void) {
   
   beep();
   secondFx = !secondFx;
   gSecondFx = secondFx;
-  //needRefresh = true;   // Right now its not actually changing so lets not redraw it.
 }
 
 
@@ -192,7 +209,10 @@ degRadButton::degRadButton(word inLocX, word iny,byte width,byte height)
       
     setSize(width,height);
 } 
-                  
+
+
+degRadButton::~degRadButton(void) {  }
+
 
 void  degRadButton::setColors(colorObj* inTColor,colorObj* inHTColor,colorObj* inBColor) {
 
@@ -228,3 +248,23 @@ void  degRadButton::drawSelf(void) {
     mCalc.toggleDegrees();
     needRefresh = true;
  }
+
+
+closeButton::closeButton(word inLocX, word inLocY,word inWidth, word inHeight,rpnCalc* inCalc)
+  : calcButton("X",inLocX,inLocY,inWidth,inHeight) { mCalc =  inCalc; }
+
+closeButton::~closeButton(void) { }
+
+
+void closeButton::drawSelf(void) {
+
+  screen->fillRoundRect(x, y, width, height, RADIUS, &red);
+  screen->setTextColor(&black, &red);
+  word textWidth = (CHAR_WIDTH * TEXT_SIZE) - 1;
+  word dispWidth = width - (2 * RADIUS);
+  screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 1);
+  screen->drawText("X");
+}
+
+  
+void closeButton::doAction(void) { mCalc->close(); }

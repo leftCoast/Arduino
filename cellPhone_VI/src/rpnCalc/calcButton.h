@@ -3,7 +3,6 @@
 
 #include <idlers.h>
 #include <drawObj.h>
-//#include "rpnCalc.h"
 
 #define NUMBER_BTN  0
 #define EDIT_BTN    1

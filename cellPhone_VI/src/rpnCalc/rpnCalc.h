@@ -1,13 +1,13 @@
 #ifndef rpnCalc_h
 #define rpnCalc_h
 
-#include "panel.h"
 #include <label.h>
 #include <lineObj.h>
 #include "calcButton.h"
-#include "anime.h"
 #include <calculator.h>
-#include "litlOS.h" 
+#include "../../panel.h"
+#include "../../litlOS.h" 
+#include "anime.h"
 
 
 class rpnCalc : public panel {

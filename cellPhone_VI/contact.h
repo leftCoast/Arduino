@@ -12,10 +12,8 @@ class contact {
   virtual ~contact(void);
 
           
-
           char* mPhoneNum;
           char* mNickName;
-          
           char* mMessageList;
 };
 
@@ -33,7 +31,6 @@ class SMSmessage  public linkListObj,
           char* mMessage;
           bool  sent;
           bool  seen;
-          
 };
 
 
