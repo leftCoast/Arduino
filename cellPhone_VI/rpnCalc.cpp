@@ -83,8 +83,8 @@ extern      bool            gSecondFx;
             bool            buttonPressed;
 
           
-rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
-  : panel(calcApp,inFile,rootID,false) {
+rpnCalc::rpnCalc(void)
+  : panel(calcApp,false) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
           
@@ -138,7 +138,7 @@ rpnCalc::rpnCalc(blockFile* inFile,unsigned long rootID)
   btnACos = new calcButton("log","t^x",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
   btnATan = new secondfxButton("2f",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, EDIT_BTN);
 
-  goAway = new closeButton(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H);
+  goAway = new closeButton(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,this);
   
   gSecondFx = false;
 }
@@ -202,7 +202,7 @@ rpnCalc::~rpnCalc(void) {
 }
 
 
-void  rpnCalc::psetup(void) {
+void  rpnCalc::setup(void) {
 
   screen->fillScreen(&black);
   loadScreen();
@@ -278,11 +278,10 @@ void rpnCalc::loadScreen(void) {
   addObj(goAway);
   
   screen->drawRect(BTN_COL_1-3,DISP_Y-3,((BTN_COL_4+BTN_WIDTH1)-BTN_COL_1)+5,22,DISP_COLOR);
-  //screen->drawRect(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,DISP_COLOR);
  }
 
  
-void  rpnCalc::ploop(void) {
+void  rpnCalc::loop(void) {
 
   if (buttonPressed) {
     XReg->setPrecision(mCalc.getFixVal());

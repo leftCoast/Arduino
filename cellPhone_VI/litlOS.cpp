@@ -34,8 +34,8 @@ void appIcon::doAction(void) { nextApp = mMessage; }
 
 
 
-homePanel::homePanel(blockFile* inFile,unsigned long rootID)
-  : panel(homeApp,inFile,rootID,false) {
+homePanel::homePanel(void)
+  : panel(homeApp,false) {
 
   int iconX;
   
@@ -57,7 +57,7 @@ homePanel::homePanel(blockFile* inFile,unsigned long rootID)
 homePanel::~homePanel(void) { }
 
 
-void homePanel::psetup(void) { 
+void homePanel::setup(void) { 
 
   if (calcIcon)     { addObj(calcIcon);     calcIcon->begin(); }
   if (textIcon)     { addObj(textIcon);     textIcon->begin(); }
@@ -67,7 +67,7 @@ void homePanel::psetup(void) {
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 }
 
-void homePanel::ploop(void) {  }
+void homePanel::loop(void) {  }
 
 
 void homePanel::drawSelf(void) { 
@@ -115,25 +115,28 @@ void litlOS::launchPanel(void) {
   }
   switch(nextApp) {
     case noPanel      : return;
-    case homeApp      : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    //case phoneApp     : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    //case textApp      : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    //case contactApp   : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    case calcApp      : mPanel = (panel*) new rpnCalc(mFile,mFile->readRootBlockID());   break;
-    //case qGameApp     : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    //case breakoutApp  : mPanel = (panel*) new homePanel(mFile,mFile->readRootBlockID()); break;
-    default           : nextApp = homeApp; return;
+    case homeApp      : mPanel = (panel*) new homePanel(); break;
+    case calcApp      : mPanel = (panel*) new rpnCalc();   break;
+    case phoneApp     : 
+    case textApp      : 
+    case contactApp   :
+    case qGameApp     :
+    case breakoutApp  : 
+    default           : 
+      nextApp = homeApp;
+      mPanel = (panel*) new homePanel();
+    break;
   }
   if (mPanel) {
     viewList.addObj(mPanel);
-    mPanel->psetup();
+    mPanel->setup();
     mPanel->hookup();  
   }
 }
 
 
 // Tell the current panel its loop time.
-void litlOS::ploop(void) {
+void litlOS::loop(void) {
 
   if(!mPanel && nextApp!=noPanel) {             // If have no panel and we want one.
     launchPanel();                              // Launch a new panel.
@@ -141,7 +144,7 @@ void litlOS::ploop(void) {
     launchPanel();                              // Launch a new panel.
   }
   if (mPanel) {
-    mPanel->ploop();
+    mPanel->loop();
   }
  }
 

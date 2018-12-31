@@ -1,9 +1,11 @@
 #include "panel.h"
 #include "litlOS.h"
 
-panel::panel(int panelID,blockFile* inFile,unsigned long fBlockID,bool wantClicks)
-  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,wantClicks),
-  fileBuff(inFile,fBlockID) { 
+extern apps nextApp;
+
+panel::panel(int panelID,bool wantClicks)
+  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,wantClicks)
+  { 
 
   mPanelID = panelID; // Save what "kind" of panel we are.
 }
@@ -19,10 +21,15 @@ int panel::getPanelID(void) { return mPanelID; }
 
 
 // setup() & loop() panel style.
-void panel::psetup(void) { }
+void panel::setup(void) { }
 
-void panel::ploop(void) {  }
+void panel::loop(void) {  }
 
 
 // To supress default drawing of one's self.
 void panel::drawSelf(void) {  }
+
+
+// Call this when its time to close the panel
+// and go back to the home panel.
+void panel::close(void) { nextApp = homeApp; }

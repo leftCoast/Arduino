@@ -13,12 +13,12 @@
 class rpnCalc : public panel {
 
   public:
-          rpnCalc(blockFile* inFile,unsigned long rootID);
+          rpnCalc(void);
   virtual ~rpnCalc(void);
 
           void  loadScreen(void);
-  virtual void  psetup(void);
-  virtual void  ploop(void);
+  virtual void  setup(void);
+  virtual void  loop(void);
 
           label*          XReg;
           lineObj*        aLine;

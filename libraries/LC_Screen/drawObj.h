@@ -97,7 +97,7 @@ public:
 				word		numObjInList(void);
     virtual void    	idle(void);
     
-            drawObj	listHeader;				// Header of the list;
+            drawObj	listHeader;				// Header of the drawObj list;
             drawObj*	theTouched;				// Pointer to who's been touched.
 };
 

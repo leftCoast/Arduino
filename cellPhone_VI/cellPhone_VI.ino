@@ -40,5 +40,5 @@ void setup() {
 
 void loop() {
   idle();
-  ourOS->ploop();
+  ourOS->loop();
 }

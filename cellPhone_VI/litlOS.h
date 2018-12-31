@@ -41,11 +41,11 @@ class appIcon : public iconButton {
 class homePanel : public panel {
 
   public:
-          homePanel(blockFile* inFile,unsigned long rootID);
+          homePanel(void);
   virtual ~homePanel(void);
   
-  virtual void  psetup(void);
-  virtual void  ploop(void);
+  virtual void  setup(void);
+  virtual void  loop(void);
   virtual void  drawSelf(void);
 
           appIcon*    calcIcon;
@@ -68,7 +68,7 @@ class litlOS :  public idler {
           void  begin(void);          // The global world is online, do hookups.
           void  initOSFile(void);     // If there is no OS file, stat one from defaults.
           void  launchPanel(void);    // Dispose of this and launch a newly created panel.
-          void  ploop(void);         // Tell the current panel its loop time.
+          void  loop(void);         // Tell the current panel its loop time.
   virtual void  idle(void);           // If we need to do something in the background, here we are.
 
           blockFile*  mFile;

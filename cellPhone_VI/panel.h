@@ -19,17 +19,17 @@
 #define PANEL_HEIGHT  320
 
 
-class panel : public drawGroup,
-              public fileBuff {
+class panel : public drawGroup {
 
   public:
-          panel(int panelID,blockFile* inFile,unsigned long fBlockID,bool wantClicks);
+          panel(int panelID,bool wantClicks);
   virtual ~panel(void);
 
            int  getPanelID();
-  virtual void  psetup(void);
-  virtual void  ploop(void);
+  virtual void  setup(void);
+  virtual void  loop(void);
   virtual void  drawSelf(void);
+          void  close(void);
   
           int   mPanelID;   // What panal am I?
 };
