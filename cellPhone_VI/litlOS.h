@@ -6,6 +6,7 @@
 #include "panel.h"
 
 // If we'd like to have an overall look. Or at least a default look.
+#define SCREEN_PIN    25
 
 #define SYS_TEDIT_BCOLOR        LC_WHITE
 #define SYS_TEDIT_TCOLOR        LC_BLACK
@@ -72,8 +73,15 @@ class litlOS :  public idler {
           void  launchPanel(void);    // Dispose of this and launch a newly created panel.
           void  loop(void);           // Tell the current panel its loop time.
           void  doStatus(void);       // Fill in the status datablock.
+          void  hideRedraw(void);
+          void  bringUp(void);
   virtual void  idle(void);           // If we need to do something in the background, here we are.
 
+          bool        mDimScreen;
+          int         mNowTime;
+          int         mEndTime;
+          multiMap    screenMap;
+          timeObj     mScreenTimer;
           timeObj     statusTimer;    // We'll check status every few seconds.
           blockFile*  mFile;
           panel*      mPanel;

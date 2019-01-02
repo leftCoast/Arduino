@@ -34,6 +34,8 @@ extern danceCards  currCard;           // Who has current control of comunicatio
 
 void setup() {
 
+  analogWrite(SCREEN_PIN,0);    // Turn off backlight.
+  
   // First bring the screen online.
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true);
