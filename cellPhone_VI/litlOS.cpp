@@ -1,6 +1,7 @@
 
 #include "litlOS.h" 
 #include <screen.h>
+#include <cellCommon.h>
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
 #include "phone.h"
@@ -8,7 +9,11 @@
 apps      nextApp;  // What panel do we want showing now?
 colorObj  aColor;   // A color object anyone can use.
 
-
+qCMaster    ourComObj;          // Object used to comunicate with the FONA controller.
+litlOS*     ourOS;              // Hopefully this'll be used to manage the panels.
+cellStatus  statusReg;          // Current state of the hardwre.
+comStates   comState;           // State of comunications.
+danceCards  currCard;           // Who has current control of comunications.
 
 // *****************************************************
 // ********************   appIcon  *********************
@@ -102,6 +107,7 @@ void litlOS::begin(void) {
   }
   nextApp = phoneApp;//homeApp;
   hookup();
+  statusTimer.setTime(2500);
 }
 
 
@@ -144,10 +150,56 @@ void litlOS::loop(void) {
   } else if(nextApp!=mPanel->getPanelID()) {    // Else, if we just want a change of panels.
     launchPanel();                              // Launch a new panel.
   }
-  if (mPanel) {
-    mPanel->loop();
+  if (statusTimer.ding()&&comState==standby) {
+    if (currCard == noOne) {
+      currCard = statusBoy;
+      statusTimer.start();
+    }
   }
+  if (currCard == statusBoy) { doStatus(); }
+  if (mPanel) { mPanel->loop(); }
  }
+
+
+void litlOS::doStatus(void) {
+
+  byte  ourCom;
+  byte  numBytes;
+
+  ourCom = getStatus;
+  switch(comState) {
+    case offline    : currCard = noOne; break;
+    case standby    : 
+      ourComObj.readErr();                          // Clear out old errors.
+      ourComObj.sendBuff(&ourCom,1,true);           // Attempt a send.
+      if (ourComObj.readErr()) {                    // Trouble?
+        comState = offline;                         // Its busted!
+        currCard = noOne;                           // Toss the card.
+      } else {
+        comState = comSent;                         // We set it.
+      }
+      break;
+    case comSent    :                               // The command has been sent, check for reply.
+      if (ourComObj.readErr()) {                    // Anything go wrong in there?
+        //out("had error.\n");
+        comState = offline;                         // Its broken!
+        currCard = noOne;                           // toss out now usless dance card.
+      } else {
+        numBytes = ourComObj.haveBuff();            // If its there, it'll give back its size.
+        if (numBytes>0) {                           // We got byte count?
+          if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
+            ourComObj.readBuff((byte*)&statusReg);  // Stuff the data into the struct.
+          } else {                                  // Wrong number of bytes?
+            ourComObj.dumpBuff();                   // Who knows what it is, get rid of it.
+          }
+          comState = standby;                       // Well we're done with it.
+          currCard = noOne;                         // realease the machine.
+        }
+      }
+      break;
+    default : break;
+  }
+}
 
 
 // Things we do..

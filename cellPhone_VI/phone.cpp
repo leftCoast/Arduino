@@ -1,8 +1,12 @@
 
 #include "phone.h"
 #include <label.h>
+#include <quickCom.h>
+#include "icons.h"
 #include "litlOS.h"
+#include <cellCommon.h>
 
+#define STAT_TIME   4000  // ms between checks on status.
 
 #define KEY_W       40
 #define KEY_H       30
@@ -28,7 +32,18 @@
 #define CHAR_WIDTH  TEXT_SIZE * 6
 #define TEXT_HEIGHT TEXT_SIZE * 8
 
+#define BATT_X    199
+#define BATT_Y    4
 
+#define SIG_X     BATT_X + 15
+#define SIG_Y     BATT_Y
+
+#define out       statDisplay->setValue
+
+extern  qCMaster    ourComObj;          // Object used to comunicate with the FONA controller.
+extern  cellStatus  statusReg;          // Current state of the hardwre.
+extern  danceCards  currCard;           // Who has current control of comunications.
+extern  comStates   comState;           // State of comunications.
 
 // *****************************************************
 // ********************  phoneBtn  *********************
@@ -63,13 +78,25 @@ void phoneBtn::drawSelf(void) {
       screen->setTextColor(&black);
     }
   } else if (mKeystroke[0]=='C') {
-    if (clicked) {
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-      screen->setTextColor(&green);
-    } else {
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
-      screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
-      screen->setTextColor(&white);
+    
+    if (!mPhone->mConnected) {
+      if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&green);
+      } else {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
+        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&white);
+      }
+    } else {  // mConnected
+      if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&red);
+      } else {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&red);
+        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&white);
+      }
     }
   } else {
     if (clicked) {
@@ -83,7 +110,11 @@ void phoneBtn::drawSelf(void) {
   screen->setTextSize(TEXT_SIZE);
   screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
   if (mKeystroke[0]=='C') {
-    screen->drawText("Call");
+    if (!mPhone->mConnected) {
+      screen->drawText("Call");
+    } else {
+      screen->drawText("Hangup");
+    }
   } else {
     screen->drawText(mKeystroke); 
   }
@@ -102,8 +133,12 @@ void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 phone::phone(void) 
   : panel(phoneApp,false) {
 
-  mRawPN = NULL;
-  mFormattedPN = NULL;
+  mRawPN          = NULL;
+  mFormattedPN    = NULL;
+  mNeedToCall     = false;
+  mConnected      = false;
+  mNeedToHangup   = false;
+  mNeedClose      = false;
 }
 
 
@@ -116,6 +151,7 @@ phone::~phone(void) {
 
 void phone::setup(void) {
 
+  statTimer.setTime(STAT_TIME);
   pBtndel   = new phoneBtn(KEY_C3,KEY_R0,'D',this);
   
   pBtn7     = new phoneBtn(KEY_C1,KEY_R1,'7',this);
@@ -136,12 +172,49 @@ void phone::setup(void) {
   
   pBtnCall  = new phoneBtn(KEY_C1,KEY_R5,'C',this);
   pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
-  numDisplay  = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP,KEY_H,"",1);
+  
+  numDisplay  = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
   addObj(numDisplay);
+
+  statDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
+  addObj(statDisplay); 
+  
+  mBatPct = new battPercent(BATT_X,BATT_Y);
+  addObj(mBatPct);
+  mBatPct->setPercent(1,&white);
+  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
+  addObj(mRSSI);
+  
 }
 
 
-void phone::loop(void) {  }
+void phone::loop(void) {
+
+  if (statTimer.ding()) {
+    mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
+    mRSSI->setRSSI(statusReg.RSSI);
+    statTimer.start();
+  }
+  if (mNeedToCall) {
+    if (currCard==noOne) {
+      out("grabbing card");
+      currCard = callMachine;
+    }
+    if (currCard==callMachine) {
+      doCall();
+    }
+  }
+  if (mNeedToHangup) {
+    if (currCard==noOne) {
+      currCard = callMachine;
+    }
+    if (currCard==callMachine) {
+      doHangup();
+    }
+  }
+  if (!mConnected && mNeedClose) close();
+}
+
 
 void phone::drawSelf(void) {
 
@@ -171,10 +244,16 @@ void phone::keystroke(char inKey) {
       formatPN();
       numDisplay->setValue(mFormattedPN);
     break;
-    case 'C'   : call();   break;
+    case 'C'   : 
+      if (!mConnected) {
+        startCall();
+      } else {
+        startHangup();
+      }
+    break;
     case 'X'   : 
-      hangup();
-      close();
+      startHangup();
+      mNeedClose = true;
     break;
   }  
 }
@@ -201,7 +280,14 @@ void phone::addChar(char keyStroke) {
 }
 
 
-void phone::deleteChar(void) { mRawPN[strlen(mRawPN)-1] = '\0'; }
+void phone::deleteChar(void) {
+
+  if (mRawPN) {
+    if (mRawPN[0]!='\0') {
+      mRawPN[strlen(mRawPN)-1] = '\0';
+    }
+  }
+}
 
 
 void phone::formatOne() {
@@ -438,13 +524,140 @@ void phone::formatPN(void) {
 }
 
 
-void phone::call(void) {
+void phone::startCall(void) {
 
-  
+  if (!mConnected) {
+    mNeedToCall = true;
+  }
 }
 
 
-void phone::hangup(void) {
+void phone::startHangup(void) {
 
+  if (mConnected) {
+    mNeedToHangup = true;
+  }
+}
+
+
+void phone::doCall(void) {
+
+  byte* ourCom;
+  byte  numBytes;
+  byte  err;
   
+  switch(comState) {
+    case offline    : currCard = noOne; break;
+    case standby    : 
+      numBytes = strlen(mRawPN);                      // number of PN digets..
+      numBytes = numBytes + 2;                        // Add one for command and one for \0.
+      ourCom = (byte*)malloc(numBytes);               // Grab enough for digets, command & \0.
+      if (ourCom) {                                   // Got it?
+        ourCom[0] = makeCall;                         // First byte is makCall command.
+        strcpy((char*)&ourCom[1],mRawPN);             // The rest of he bytes are the PN digets & trailing \0.
+        ourComObj.readErr();                          // Clear out old errors.
+        ourComObj.sendBuff(ourCom,numBytes,true);     // Send it out, get response.
+        if (ourComObj.readErr()) {                    // Trouble?
+          out("Had send error");
+          comState = offline;                         // Its busted!
+          currCard = noOne;                           // Toss the card.
+          mNeedToCall = false;                        // And we no longer need to call..
+        } else {
+          comState = comSent;                         // We set it.
+        }
+        free(ourCom);                                 // In any case, we're done with this.
+      } else {
+        currCard = noOne;                             // Toss the card.
+        mNeedToCall = false;                          // So we can't really call..
+      }
+    break;
+    case comSent    :                                 // The command has been sent, check for reply.
+      if (ourComObj.readErr()) {                      // Anything go wrong in there?
+        comState = offline;                           // Its broken!
+        currCard = noOne;                             // toss out now usless dance card.
+        mNeedToCall = false;                          // Its broken! So we can't really call..
+      } else {
+        numBytes = ourComObj.haveBuff();              // If something's there, it'll give back its size.
+        if (numBytes) {                               // We got a reply.
+          if (numBytes==1) {                          // We got byte count? It better be one.
+            ourComObj.readBuff((byte*)&err);          // Grab the error byte.
+            if (!err) {                               // No error?
+              comState = standby;                     // Well we're done with it.
+              currCard = noOne;                       // realease the machine.
+              out("Conected?");
+              mConnected = true;                      // LOOK!! Flag a succsessful send!
+              pBtnCall->setNeedRefresh();             // You're going to want to redraw yourself..
+              mNeedToCall = false;                    // And we no longer need to call..
+            } else {                                  // Wrong number of bytes?
+              out("Returned an error.");
+              currCard = noOne;                       // toss out now usless dance card.
+              mNeedToCall = false;                    // Its broken! So we can't really call..
+            }
+          } else {
+            out("Wrong size replay.");
+            ourComObj.dumpBuff();                   // Who knows what it is, get rid of it.
+            comState = offline;                     // Its broken!
+            currCard = noOne;                       // toss out now usless dance card.
+            mNeedToCall = false;                    // Its broken! So we can't really call..
+          }
+        }
+      }
+  break;
+  default : break;
+  }
+}
+
+
+void phone::doHangup(void) {
+
+  byte  ourCom;
+  byte  err;
+  byte  numBytes;
+  
+  switch(comState) {
+    case offline    : currCard = noOne; break;
+    case standby    : 
+      ourCom = hangUp;                              // Only byte is hangUp command.
+      ourComObj.readErr();                          // Clear out old errors.
+      ourComObj.sendBuff(&ourCom,1,true);           // Send it out, get response.
+      if (ourComObj.readErr()) {                    // Trouble?
+        comState = offline;                         // Its busted!
+        currCard = noOne;                           // Toss the card.
+        mNeedToHangup = false;                      // And we no longer need to call..
+      } else {
+        comState = comSent;                         // We set it.
+      }
+    break;
+    case comSent    :                                 // The command has been sent, check for reply.
+      if (ourComObj.readErr()) {                      // Anything go wrong in there?
+        comState = offline;                           // Its broken!
+        currCard = noOne;                             // toss out now usless dance card.
+        mNeedToHangup = false;                        // Its broken! So we can't make it go..
+      } else {
+        numBytes = ourComObj.haveBuff();              // If something's there, it'll give back its size.
+        if (numBytes) {
+          if (numBytes==1) {                            // We got byte count? It better be one.
+            ourComObj.readBuff((byte*)&err);            // Grab the error byte.
+            if (!err) {                                 // No error?
+              comState = standby;                       // Well we're done with it.
+              currCard = noOne;                         // realease the machine.
+              mConnected = false;                       // LOOK!! Flag a succsessful send!
+              out("Disconnected");
+              pBtnCall->setNeedRefresh();               // You're going to want to redraw yourself..
+            } else {
+              comState = standby;                       // Looks like we failed, reset and see what the user does.
+              currCard = noOne;                         // realease the machine.
+            }
+            mNeedToHangup = false;                      // Either way, lets end this attempt.
+          } else {                                      // Wrong number of bytes?
+            ourComObj.dumpBuff();                       // Who knows what it is, get rid of it.
+            comState = offline;                         // Its broken!
+            currCard = noOne;                           // Toss out now usless dance card.
+            mNeedToCall = false;                        // Its broken! So we can't really call..
+          }
+        }
+      }
+      break;
+    default : break;
+  }
 }

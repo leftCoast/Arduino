@@ -18,12 +18,10 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 qCSlave   ourComObj;
 
 bool  FONAOnline;
-char* currentPN;
 
 void setup() {
 
     FONAOnline = false;
-    currentPN = NULL;
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
@@ -44,13 +42,14 @@ void loop() {
   idle();
   numBytes = ourComObj.haveBuff();
   if (numBytes>0) {
-    inBuff = malloc(numBytes);
+    inBuff = (byte*)malloc(numBytes);            
     if (inBuff) {
-      if (ourComObj.readBuff(inBuff)) {
+      if (ourComObj.readBuff(inBuff)) {   // Its a c string.
         switch(inBuff[0]) {
           case getStatus    : doStatus();               break;
-          case setCurrentPN : doCurrentPH(&inBuff[1]);  break;  // Its a c string.
-          case sendSNS      : doSendSNS(&inBuff[1]);    break;  // Its a c string.
+          case makeCall     : doCall(&inBuff[1]);       break;  
+          case hangUp       : doHangUp( );              break;
+          case sendSNS      : doSendSNS(&inBuff[1]);    break;  
           default           : break;
         } 
       }
@@ -97,27 +96,34 @@ void doStatus(void) {
 }
 
 
-void doCurrentPH(char* inBuff) {
+void doCall(char* inNum) {
 
-    byte    numBytes;
     uint8_t result;
 
-    result = 0;                       // We'll pass a 0 for failure.
-    if (currentPN) {                  // First, dump what we had.
-      free(currentPN);                // Whoosh! There it goes.
-    }
-    numBytes = strlen(inBuff);        // Defined as a c string.
-    currentPN = malloc(numBytes+1);   // Now, make room for the new number c string.  
-    if (currentPN) {                  // We get the room?
-        strcpy(currentPN,inBuff);     // Copy it over.
-        result = 1;                   // We'll pass a 1 for success.
+    if (fona.callPhone(inNum)) {
+      result = 0;                   // We'll pass a 0 for no error.
+    } else {
+      result = 1;                   // We'll pass a 1 for error.
     }
     ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
 }
 
 
-void doSendSNS(char* inBuff) {
+void doHangUp(void) {
 
+    uint8_t result;
+
+    if (fona.hangUp()) {
+      result = 0;           // We'll pass a 0 for no error.
+    } else {
+      result = 1;           // We'll pass a 1 for error.
+    }
+    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
+}
+
+
+void doSendSNS(char* inBuff) {
+/*
   uint8_t result;
   
   result = 0;
@@ -125,4 +131,5 @@ void doSendSNS(char* inBuff) {
     result = 1;
   }
   ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
+  */
 }

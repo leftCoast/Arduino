@@ -5,6 +5,7 @@
 #include <drawObj.h>
 #include <label.h>
 #include "panel.h"
+#include "icons.h"
 
 class phone;
 
@@ -31,7 +32,12 @@ class phone : public panel {
   virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
+
+          timeObj statTimer;
+          
           void  keystroke(char inKey);
+          void  startCall(void);
+          void  startHangup(void);
           void  addChar(char inKey);
           void  deleteChar(void);
           void  formatPN(void);
@@ -39,12 +45,17 @@ class phone : public panel {
           void  formatStar(void);
           void  formatHash(void);
           void  formatStd(void);
-          void  call(void);
-          void  hangup(void);
+          void  doCall(void);
+          void  doHangup(void);
 
           char* mRawPN;
           char* mFormattedPN;
+          bool  mNeedToCall;    // We need to be running through the calling sequence.
+          bool  mConnected;     // Successful, as far as we can tell, calling sequence.
+          bool  mNeedToHangup;  // We need to be running through the hanging up sequence.
+          bool  mNeedClose;
 
+          
           phoneBtn* pBtndel;
                 
           phoneBtn* pBtn7;
@@ -67,6 +78,10 @@ class phone : public panel {
           phoneBtn* pBtnClose;
 
           label*    numDisplay;
+          label*    statDisplay;
+          
+          battPercent*  mBatPct;
+          RSSIicon*     mRSSI;
 };
 
 #endif

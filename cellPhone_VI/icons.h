@@ -48,7 +48,7 @@ class battPercent : public drawGroup {
           battPercent(int inLocX,int inLocY);
   virtual ~battPercent(void);
 
-          void  setPercent(int inPercent);
+          void  setPercent(int inPercent,colorObj* backColor);
   virtual void  drawSelf(void);
 
           barGraphBar*  mBar;

@@ -21,8 +21,10 @@
 #define SYS_FILE_PATH           "/SYSTEM/SYSTEM.PRF"
 
 
-enum apps { noPanel, homeApp, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
+enum        apps { noPanel, homeApp, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
 
+enum        comStates { offline, standby, comSent };  // Keeping track of counication states.
+enum        danceCards { noOne, statusBoy, callMachine };          // Keeping track of who's using comunications.
 
 
 class appIcon : public iconButton {
@@ -68,13 +70,14 @@ class litlOS :  public idler {
           void  begin(void);          // The global world is online, do hookups.
           void  initOSFile(void);     // If there is no OS file, stat one from defaults.
           void  launchPanel(void);    // Dispose of this and launch a newly created panel.
-          void  loop(void);         // Tell the current panel its loop time.
+          void  loop(void);           // Tell the current panel its loop time.
+          void  doStatus(void);       // Fill in the status datablock.
   virtual void  idle(void);           // If we need to do something in the background, here we are.
 
+          timeObj     statusTimer;    // We'll check status every few seconds.
           blockFile*  mFile;
           panel*      mPanel;
 };
-
 
 
 #endif
