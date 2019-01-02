@@ -30,8 +30,7 @@ void setup() {
       //digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
-    resetFONA();                          // Hit reaset, see if it'll come online.
-    fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+    resetFONA();                          // Hit reset, see if it'll come online.
 }
 
 
@@ -73,8 +72,19 @@ void resetFONA(void) {
   delay(10);
   digitalWrite(FONA_RST, HIGH);
   delay(100);
-  fonaSS.begin(4800);                 // For talking to the FONA.
-  FONAOnline = fona.begin(fonaSS);   // Able to fire up the FONA.
+  fonaSS.begin(4800);                   // For talking to the FONA.
+  FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
+  fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+
+/*
+For those who wonder how to do that, you can add a call fona
+setAudio(FONA_EXTAUDIO) to your initialization code or issue
+direct command 'AT+CHFA=1' towards SIM800 module.
+
+In my case this module is no longer losing SIM card when
+receiving or placing phone calls.
+Thanks for a tip!
+*/
 }
 
 
