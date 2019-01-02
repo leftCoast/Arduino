@@ -139,7 +139,9 @@ void battPercent::setPercent(int inPercent,colorObj* backColor) {
 
 
 void battPercent::drawSelf(void) {
-  
+
+  //Serial.println("Drawing batter picture.");
+  //screen->fillScreen(&red);
   screen->drawRect(x,y+BATT_PIN_HEIGHT,BATT_WIDTH,BATT_HEIGHT-BATT_PIN_HEIGHT,&black);          // The can.
   screen->drawRect(x+((BATT_WIDTH-BATT_PIN_WIDTH)/2),y,BATT_PIN_WIDTH,BATT_PIN_HEIGHT,&black);  // The + pin.
 }

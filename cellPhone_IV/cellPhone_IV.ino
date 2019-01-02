@@ -75,6 +75,7 @@ void resetFONA(void) {
   fonaSS.begin(4800);                   // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
   fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+  fona.setVolume(30);
 
 /*
 For those who wonder how to do that, you can add a call fona

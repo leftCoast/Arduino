@@ -139,6 +139,7 @@ phone::phone(void)
   mConnected      = false;
   mNeedToHangup   = false;
   mNeedClose      = false;
+  mSeenStatus     = false;
 }
 
 
@@ -181,7 +182,7 @@ void phone::setup(void) {
   
   mBatPct = new battPercent(BATT_X,BATT_Y);
   addObj(mBatPct);
-  mBatPct->setPercent(1,&white);
+  mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
   mRSSI   = new RSSIicon(SIG_X,SIG_Y);
   addObj(mRSSI);
   
@@ -190,8 +191,20 @@ void phone::setup(void) {
 
 void phone::loop(void) {
 
+  // Wierd hck to get the battery & RSSI things to draw
+  // correctly. Why would there be a time issue? How could
+  // time be a factor? And as you add more things, you need
+  // more time.
+  if(!mSeenStatus) {  
+    delay(150);                                                 // Calls idle for 150 ms.
+    mBatPct->setPercent((byte)statusReg.batteryPercent,&white); // Stuff in a value.
+    mRSSI->setRSSI(statusReg.RSSI);                             // Ditto.
+    mSeenStatus = true;                                         // Done it, lets not come back here again.
+  }
+  
   if (statTimer.ding()) {
     mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
+    out("Volume: ");out(statusReg.volume);
     mRSSI->setRSSI(statusReg.RSSI);
     statTimer.start();
   }
@@ -554,7 +567,7 @@ void phone::doCall(void) {
       ourCom = (byte*)malloc(numBytes);               // Grab enough for digets, command & \0.
       if (ourCom) {                                   // Got it?
         ourCom[0] = makeCall;                         // First byte is makCall command.
-        strcpy((char*)&ourCom[1],mRawPN);             // The rest of he bytes are the PN digets & trailing \0.
+        strcpy((char*)&ourCom[1],mRawPN);             // The rest of the bytes are the PN digets & trailing \0.
         ourComObj.readErr();                          // Clear out old errors.
         ourComObj.sendBuff(ourCom,numBytes,true);     // Send it out, get response.
         if (ourComObj.readErr()) {                    // Trouble?

@@ -82,6 +82,7 @@ class phone : public panel {
           
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
+          bool          mSeenStatus;
 };
 
 #endif
