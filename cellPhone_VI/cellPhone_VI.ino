@@ -20,17 +20,17 @@
 
 #include "icons.h"
 #include "litlOS.h"
+#include "cellManager.h"
 
 #define TFT_CS  10
 #define TFT_RST -1    // I think I remember this is not used.
 #define SD_CS   4
 
 
+extern cellManager ourCellManager;      // Object used to comunicate with the FONA controller.
+extern litlOS*     ourOS;               // Hopefully this'll be used to manage the panels.
 
-extern qCMaster    ourComObj;          // Object used to comunicate with the FONA controller.
-extern litlOS*     ourOS;              // Hopefully this'll be used to manage the panels.
-extern comStates   comState;           // State of comunications.
-extern danceCards  currCard;           // Who has current control of comunications.
+
 
 void setup() {
 
@@ -42,13 +42,10 @@ void setup() {
   }
 
   // Next is to bring the comuication hardware online.
-  comState = offline;                   // Not online yet.
-  ourComObj.begin(9600);                // Fire up comunications.
-  if (ourComObj.readErr()!=NO_ERR) {    // Did the poor thing fire up?
+  ourCellManager.begin(9600);             // Fire up comunications.
+  if (ourCellManager.readErr()!=NO_ERR) { // Did the poor thing fire up?
     while(true);
   }
-  comState = standby;                   // Communications standing by!
-  currCard = noOne;                     // Free to dance with any and all.
   
   if (!SD.begin(SD_CS)) {               // Bring the diskdrive online.
     while(true);
@@ -56,6 +53,8 @@ void setup() {
    
   ourOS = new litlOS();                
   ourOS->begin();                       // OS manager, online.
+
+  
 }
 
 

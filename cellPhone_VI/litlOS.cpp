@@ -5,7 +5,7 @@
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
 #include "phone.h"
-
+#include "textView.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -15,14 +15,13 @@
 #define STEPTIME  20 //ms
 
 
-apps      nextApp;  // What panel do we want showing now?
-colorObj  aColor;   // A color object anyone can use.
+apps        nextApp;  // What panel do we want showing now?
+litlOS*     ourOS;    // Hopefully this'll be used to manage the panels.
 
-qCMaster    ourComObj;          // Object used to comunicate with the FONA controller.
-litlOS*     ourOS;              // Hopefully this'll be used to manage the panels.
-cellStatus  statusReg;          // Current state of the hardwre.
-comStates   comState;           // State of comunications.
-danceCards  currCard;           // Who has current control of comunications.
+//textView    logView(10,20,220,240);
+
+
+
 
 // *****************************************************
 // ********************   appIcon  *********************
@@ -66,6 +65,8 @@ homePanel::homePanel(void)
   qGameIcon = new appIcon(iconX,HP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
   iconX=iconX+HP_ICON_XSTEP;
   breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
+
+  //addObj(&logView);
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
@@ -119,12 +120,12 @@ void litlOS::begin(void) {
   }
   nextApp = homeApp;
   hookup();
-  statusTimer.setTime(2500);
   mScreenTimer.setTime(STEPTIME);
   screenMap.addPoint(RAMPUP_START,0);
   screenMap.addPoint(RAMPUP_END,255);
   screenMap.addPoint(RAMPDN_START,255);
   screenMap.addPoint(RAMPDN_END,0);
+  //logView.setTextColors(&green,&black);
   bringUp();
 }
 
@@ -170,56 +171,9 @@ void litlOS::loop(void) {
   } else if(nextApp!=mPanel->getPanelID()) {    // Else, if we just want a change of panels.
     launchPanel();                              // Launch a new panel.
   }
-  if (statusTimer.ding()&&comState==standby) {
-    if (currCard == noOne) {
-      currCard = statusBoy;
-      statusTimer.start();
-    }
-  }
-  if (currCard == statusBoy) { doStatus(); }
   if (mPanel) { mPanel->loop(); }
  }
 
-
-void litlOS::doStatus(void) {
-
-  byte  ourCom;
-  byte  numBytes;
-
-  ourCom = getStatus;
-  switch(comState) {
-    case offline    : currCard = noOne; break;
-    case standby    : 
-      ourComObj.readErr();                          // Clear out old errors.
-      ourComObj.sendBuff(&ourCom,1,true);           // Attempt a send.
-      if (ourComObj.readErr()) {                    // Trouble?
-        comState = offline;                         // Its busted!
-        currCard = noOne;                           // Toss the card.
-      } else {
-        comState = comSent;                         // We set it.
-      }
-      break;
-    case comSent    :                               // The command has been sent, check for reply.
-      if (ourComObj.readErr()) {                    // Anything go wrong in there?
-        //out("had error.\n");
-        comState = offline;                         // Its broken!
-        currCard = noOne;                           // toss out now usless dance card.
-      } else {
-        numBytes = ourComObj.haveBuff();            // If its there, it'll give back its size.
-        if (numBytes>0) {                           // We got byte count?
-          if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
-            ourComObj.readBuff((byte*)&statusReg);  // Stuff the data into the struct.
-          } else {                                  // Wrong number of bytes?
-            ourComObj.dumpBuff();                   // Who knows what it is, get rid of it.
-          }
-          comState = standby;                       // Well we're done with it.
-          currCard = noOne;                         // realease the machine.
-        }
-      }
-      break;
-    default : break;
-  }
-}
 
 //RAMPUP_START
 //RAMPUP_END

@@ -4,6 +4,7 @@
 #include <colorObj.h>
 #include <iconButton.h>
 #include "panel.h"
+#include "textview.h"
 
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
@@ -21,11 +22,13 @@
 #define SYS_MENU_PIX            16  // How many pixles rserved for the menu?
 #define SYS_FILE_PATH           "/SYSTEM/SYSTEM.PRF"
 
+//#define out logView.appendText
+//#define outln logView.appendText("\n")
+
+//extern textView    logView;
+
 
 enum        apps { noPanel, homeApp, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
-
-enum        comStates { offline, standby, comSent };  // Keeping track of counication states.
-enum        danceCards { noOne, statusBoy, callMachine };          // Keeping track of who's using comunications.
 
 
 class appIcon : public iconButton {
@@ -82,7 +85,6 @@ class litlOS :  public idler {
           int         mEndTime;
           multiMap    screenMap;
           timeObj     mScreenTimer;
-          timeObj     statusTimer;    // We'll check status every few seconds.
           blockFile*  mFile;
           panel*      mPanel;
 };

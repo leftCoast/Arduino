@@ -32,12 +32,10 @@ class phone : public panel {
   virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
-
+          
           timeObj statTimer;
           
           void  keystroke(char inKey);
-          void  startCall(void);
-          void  startHangup(void);
           void  addChar(char inKey);
           void  deleteChar(void);
           void  formatPN(void);
@@ -45,14 +43,16 @@ class phone : public panel {
           void  formatStar(void);
           void  formatHash(void);
           void  formatStd(void);
-          void  doCall(void);
-          void  doHangup(void);
+          void  startCall(void);
+          void  startHangup(void);
+          void  checkCall(void);
+          void  checkHangup(void);
 
           char* mRawPN;
           char* mFormattedPN;
-          bool  mNeedToCall;    // We need to be running through the calling sequence.
+          int   mCallingID;     // We're in the calling sequence. Here's our command ID.
           bool  mConnected;     // Successful, as far as we can tell, calling sequence.
-          bool  mNeedToHangup;  // We need to be running through the hanging up sequence.
+          bool  mHangupID;      // We're in the hangup sequence. Here's our command ID.
           bool  mNeedClose;
 
           
@@ -78,7 +78,7 @@ class phone : public panel {
           phoneBtn* pBtnClose;
 
           label*    numDisplay;
-          label*    statDisplay;
+          //label*    statDisplay;
           
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
