@@ -6,6 +6,8 @@
 #include <label.h>
 #include "panel.h"
 #include "icons.h"
+#include "PNLabel.h"
+
 
 class phone;
 
@@ -38,18 +40,12 @@ class phone : public panel {
           void  keystroke(char inKey);
           void  addChar(char inKey);
           void  deleteChar(void);
-          void  formatPN(void);
-          void  formatOne(void);
-          void  formatStar(void);
-          void  formatHash(void);
-          void  formatStd(void);
           void  startCall(void);
           void  startHangup(void);
           void  checkCall(void);
           void  checkHangup(void);
 
           char* mRawPN;
-          char* mFormattedPN;
           int   mCallingID;     // We're in the calling sequence. Here's our command ID.
           bool  mConnected;     // Successful, as far as we can tell, calling sequence.
           bool  mHangupID;      // We're in the hangup sequence. Here's our command ID.
@@ -77,8 +73,9 @@ class phone : public panel {
           phoneBtn* pBtnCall;
           phoneBtn* pBtnClose;
 
+          //PNLabel*  numDisplay;
           label*    numDisplay;
-          //label*    statDisplay;
+          label*    stateDisplay;
           
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;

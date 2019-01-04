@@ -1,8 +1,5 @@
 
 #include "phone.h"
-#include <label.h>
-#include <quickCom.h>
-#include "icons.h"
 #include "litlOS.h"
 #include <cellCommon.h>
 #include "cellManager.h"
@@ -39,10 +36,7 @@
 #define SIG_X     BATT_X + 15
 #define SIG_Y     BATT_Y
 
-//#define out       statDisplay->setValue
-
-extern  cellManager       ourCellManager;          // Object used to comunicate with the FONA controller.
-extern  cellStatus        statusReg;
+#define out       stateDisplay->setValue
 
 
 // *****************************************************
@@ -134,7 +128,6 @@ phone::phone(void)
   : panel(phoneApp,false) {
 
   mRawPN          = NULL;
-  mFormattedPN    = NULL;
   mCallingID      = -1;
   mConnected      = false;
   mHangupID       = -1;
@@ -143,11 +136,7 @@ phone::phone(void)
 }
 
 
-phone::~phone(void) { 
-  
-  if (mRawPN) free(mRawPN);
-  if (mFormattedPN) free(mFormattedPN);
-}
+phone::~phone(void) { if (mRawPN) free(mRawPN); }
 
 
 void phone::setup(void) {
@@ -174,11 +163,13 @@ void phone::setup(void) {
   pBtnCall  = new phoneBtn(KEY_C1,KEY_R5,'C',this);
   pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
   
-  numDisplay  = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
+  //numDisplay  = new PNLabel(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,1);
+  numDisplay = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
   addObj(numDisplay);
 
-  //statDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
-  //addObj(statDisplay); 
+  stateDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
+  addObj(stateDisplay);
+  out("Idle");
   
   mBatPct = new battPercent(BATT_X,BATT_Y);
   addObj(mBatPct);
@@ -191,7 +182,7 @@ void phone::setup(void) {
 
 void phone::loop(void) {
 
-  // Wierd hck to get the battery & RSSI things to draw
+  // Weird hack to get the battery & RSSI things to draw
   // correctly. Why would there be a time issue? How could
   // time be a factor? And as you add more things, you need
   // more time.
@@ -232,14 +223,14 @@ void phone::keystroke(char inKey) {
     case '7'   :
     case '8'   :
     case '9'   : 
+    case '*'   :
+    case '#'   :
       addChar(inKey);
-      formatPN();
-      numDisplay->setValue(mFormattedPN);
+      numDisplay->setValue(mRawPN);
     break;
     case 'D'   :
       deleteChar();
-      formatPN();
-      numDisplay->setValue(mFormattedPN);
+      numDisplay->setValue(mRawPN);
     break;
     case 'C'   : 
       if (!mConnected) {
@@ -262,6 +253,7 @@ void phone::addChar(char keyStroke) {
   char* newStr;
   
   if (!mRawPN) {
+    out("Allocating init rawPrawn");
     mRawPN = (char*)malloc(2);
     mRawPN[0] = keyStroke;
     mRawPN[1] = '\0';
@@ -287,243 +279,10 @@ void phone::deleteChar(void) {
 }
 
 
-void phone::formatOne() {
-
-  int numChars;
-
-  numChars = strlen(mRawPN);
-  switch(numChars) {
-    case 0  : mFormattedPN[0] = '\0'; break;
-    case 1  : 
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '\0';
-    break;
-    case 2  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = ')';
-      mFormattedPN[4] = '\0';
-    break;
-    case 3  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = ')';
-      mFormattedPN[5] = '\0';
-    break;
-    case 4  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = ')';
-      mFormattedPN[6] = '\0';
-    break;
-    case 5  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = ')';
-      mFormattedPN[6] = ' ';
-      mFormattedPN[7] = mRawPN[4];
-      mFormattedPN[8] = '\0';
-    break;
-    case 6  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = ')';
-      mFormattedPN[6] = ' ';
-      mFormattedPN[7] = mRawPN[4];
-      mFormattedPN[8] = mRawPN[5];
-      mFormattedPN[9] = '\0';
-    break;
-    case 7  :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = ')';
-      mFormattedPN[6] = ' ';
-      mFormattedPN[7] = mRawPN[4];
-      mFormattedPN[8] = mRawPN[5];
-      mFormattedPN[9] = mRawPN[6];
-      mFormattedPN[10] = '\0';
-    break;
-    default :
-      mFormattedPN[0] = '1';
-      mFormattedPN[1] = '(';
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = ')';
-      mFormattedPN[6] = ' ';
-      mFormattedPN[7] = mRawPN[4];
-      mFormattedPN[8] = mRawPN[5];
-      mFormattedPN[9] = mRawPN[6];
-      mFormattedPN[10] = '-';
-      strcpy(&mFormattedPN[11],&mRawPN[7]);
-    break;
-  }
-}
-
-
-void phone::formatStar() {
-
-  int numChars;
-
-  numChars = strlen(mRawPN);
-  switch(numChars) {
-    case 0  : mFormattedPN[0] = '\0'; break;
-    case 1  : 
-      mFormattedPN[0] = '*';
-      mFormattedPN[1] = '\0';
-    break;
-    case 2  :
-      mFormattedPN[0] = '*';
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = '\0';
-    break;
-    case 3  :
-      mFormattedPN[0] = '*';
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '\0';
-    break;
-    default  :
-      mFormattedPN[0] = '*';
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = ' ';
-      strcpy(&mFormattedPN[4],&mRawPN[3]);
-    break;
-  }
-}
-
-
-void phone::formatHash() {
-
-  int numChars;
-
-  numChars = strlen(mRawPN);
-  switch(numChars) {
-    case 0  : mFormattedPN[0] = '\0'; break;
-    case 1  :
-      mFormattedPN[0] = '#';
-      mFormattedPN[1] = '\0';
-    break;
-    default  :
-      mFormattedPN[0] =  '#';
-      strcpy(&mFormattedPN[1],&mRawPN[1]);
-    break;
-  }
-}
-
-
-void phone::formatStd() {
-
-  int numChars;
-
-  numChars = strlen(mRawPN);
-  switch(numChars) {
-    case 0  : mFormattedPN[0] = '\0'; break;
-    case 1  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = '\0';
-    break;
-    case 2  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = '\0';
-    break;
-    case 3  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '\0';
-    break;
-    case 4  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '-';
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = '\0';
-    break;
-    case 5  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '-';
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = mRawPN[4];
-      mFormattedPN[6] = '\0';
-    break;
-    case 6  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '-';
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = mRawPN[4];
-      mFormattedPN[6] = mRawPN[5];
-      mFormattedPN[7] = '\0';
-    break;
-    case 7  :
-      mFormattedPN[0] = mRawPN[0];
-      mFormattedPN[1] = mRawPN[1];
-      mFormattedPN[2] = mRawPN[2];
-      mFormattedPN[3] = '-';
-      mFormattedPN[4] = mRawPN[3];
-      mFormattedPN[5] = mRawPN[4];
-      mFormattedPN[6] = mRawPN[5];
-      mFormattedPN[7] = mRawPN[6];
-      mFormattedPN[8] = '\0';
-    break;
-    default   :
-      mFormattedPN[0] = '(';
-      mFormattedPN[1] = mRawPN[0];
-      mFormattedPN[2] = mRawPN[1];
-      mFormattedPN[3] = mRawPN[2];
-      mFormattedPN[4] = ')';
-      mFormattedPN[5] = ' ';
-      mFormattedPN[6] = mRawPN[3];
-      mFormattedPN[7] = mRawPN[4];
-      mFormattedPN[8] = mRawPN[5];
-      mFormattedPN[9] = '-';
-      strcpy(&mFormattedPN[10],&mRawPN[6]);
-    break;
-  }
-}
-
-    
-void phone::formatPN(void) {
-
-  if (mFormattedPN) {
-    free(mFormattedPN);
-    mFormattedPN = NULL;
-  }
-  mFormattedPN = (char*)malloc(strlen(mRawPN) + 6);  // b ( ) b - \0;
-  switch(mRawPN[0]) {
-    case '1'  : formatOne();    break;
-    case '*'  : formatStar();   break;
-    case '#'  : formatHash();   break;
-    default   : formatStd();    break;
-  }
-}
-
-
 void phone::startCall(void) {
 
   if (!mConnected) {
+    out("Connecting...");
     mCallingID = ourCellManager.sendCommand(makeCall,mRawPN,true);
   }
 }
@@ -532,6 +291,7 @@ void phone::startCall(void) {
 void phone::startHangup(void) {
 
   if (mConnected) {
+    out("Hanging up...");
     mHangupID = ourCellManager.sendCommand(hangUp,true);
   }
 }
@@ -544,17 +304,21 @@ void phone::checkCall(void) {
   
   if (mCallingID!=-1) {                                       // Working on a call?
     if (ourCellManager.progress(mCallingID)==com_holding) {   // We found it and its holding a reply?
-      
       numBytes = ourCellManager.numReplyBytes(mCallingID);     // This is how big the reply is.
       if (numBytes==1) {                                      // We're looking for a one byte reply.
         ourCellManager.readReply(mCallingID,&reply);          // Grab the byte.
         if (reply==0) {                                       // Is it a zero?
           mConnected = true;                                  // Cool!, we're connected!
+          out("Connected.");
         }
       } else {
         ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
+        out("Connection error.");
       }
       mCallingID = -1;                                        // In any case, we're done with the command.
+    } else if (ourCellManager.progress(mCallingID)==com_missing) {
+      out("Call failed");
+      mCallingID = -1;
     }
   }
 }
@@ -572,6 +336,7 @@ void phone::checkHangup(void) {
         ourCellManager.readReply(mHangupID,&reply);         // Grab the byte.
         if (reply==0) {                                     // Is it a zero?
           mConnected = true;                                // Cool!, we're connected!
+          out("Idle.");
         }
       } else {
         ourCellManager.dumpBuff();                          // Unknown what it is. Toss it.

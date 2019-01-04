@@ -27,11 +27,6 @@
 #define SD_CS   4
 
 
-extern cellManager ourCellManager;      // Object used to comunicate with the FONA controller.
-extern litlOS*     ourOS;               // Hopefully this'll be used to manage the panels.
-
-
-
 void setup() {
 
   analogWrite(SCREEN_PIN,0);    // Turn off backlight.
@@ -51,14 +46,11 @@ void setup() {
     while(true);
   }
    
-  ourOS = new litlOS();                
-  ourOS->begin();                       // OS manager, online.
-
-  
+  ourOS.begin();                       // Boot OS manager. 
 }
 
 
 void loop() {
   idle();
-  ourOS->loop();
+  ourOS.loop();
 }

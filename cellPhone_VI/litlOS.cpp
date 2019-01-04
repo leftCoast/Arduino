@@ -5,7 +5,6 @@
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
 #include "phone.h"
-#include "textView.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -16,11 +15,7 @@
 
 
 apps        nextApp;  // What panel do we want showing now?
-litlOS*     ourOS;    // Hopefully this'll be used to manage the panels.
-
-//textView    logView(10,20,220,240);
-
-
+litlOS      ourOS;    // Used to manage the panels.
 
 
 // *****************************************************

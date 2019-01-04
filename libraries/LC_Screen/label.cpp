@@ -50,7 +50,7 @@ label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int 
 
 
 label::~label() { 
-  freeBuff(); 
+  resizeBuff(0); 
 }
 
 
@@ -65,11 +65,16 @@ void label::initLabel(void) {
 }
 
 
-void label::freeBuff(void) {
-  if (buff!=NULL) {
-    free(buff);
-    buff = NULL;
-  }  
+bool label::resizeBuff(int numBytes) {
+	if (buff!=NULL) {
+		free(buff);
+		buff = NULL;
+	}
+	if (numBytes>0) {
+		buff = (char*)malloc(numBytes);
+		return buff != NULL;
+	}
+	return true;			// Asking for none, got none.
 }
 
 
@@ -140,13 +145,21 @@ void label::setValue(float val) {
 
 void label::setValue(char* str) {
 
-  word numChars;
+	word numChars;
 
-  freeBuff();
-  numChars = strlen(str) + 1;
-  buff = (char*) malloc(numChars);
-  strcpy (buff,str);
-  needRefresh = true;
+	
+	
+	if (!str) {
+		if (resizeBuff(1)) {
+			buff[0] = '\0';
+		}
+	} else {
+		numChars = strlen(str) + 1;
+		if (resizeBuff(numChars)) {
+			strcpy (buff,str);
+		}
+	}
+	needRefresh = true;
 }
 
 // We want to know how long the string is..
