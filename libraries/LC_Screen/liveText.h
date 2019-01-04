@@ -12,7 +12,7 @@
 // 
 // You have your standard x,y,length, height paramiters. Then you have framerateMs.
 
-// framerateMs : sets how long between changes it wait. This is not a perfect clock. 
+// framerateMs : sets how long between changes it waits. This is not a perfect clock. 
 // Things can effect it like the program doing something else somewhere else. But it 
 // does the best it can and really all this is for is just looks & sizzle. So it should
 // be fine.
@@ -29,15 +29,14 @@
 // 
 // For example : Show a string for 4 seconds then fade to black over 1 second.
 // 
-// addAColor(0,@white);
-// addAColor(4000,@white);
-// addAColor(5000,@black);
+// addAColor(0,&white);
+// addAColor(4000,&white);
+// addAColor(5000,&black);
 //
 // That will do it.
 //
 // hold() and release() are for triggering starts and stops of animation.
-// release() can reset the animation
-// to the 0 frame for you if you'd like.
+// release() can reset the animation to 0 frame for you if you'd like.
 //
 // NOTE : Best to use this over solid colors. Trying to animate on a .bmp
 // bakckground is a flashy mess. Too slow.
@@ -52,12 +51,13 @@ class liveText : public label,
 				liveText(int x,int y, word width, word height,int framerateMs,bool loop=false);
 	virtual	~liveText(void);
                 
- 
 				void		addAColor(int timeMs,colorObj* color);
 				void		hold(void);
 				void		release(bool reset=true);
 
-	virtual	boolean	wantRefresh(void);        
+	virtual	void		setValue(char* str);
+	virtual	void		setValue(int value);
+	virtual	bool		wantRefresh(void);        
 	virtual	void		idle(void);
 	virtual	void		drawSelf(void);
 				void		setCalcColor(void);
@@ -66,6 +66,9 @@ class liveText : public label,
 				int		maxTime;
 				int		frame;
 				bool		holding;
+				colorObj	lastColor;
+				bool		erase;
+				char*		nextStr;
 };
 
 #endif

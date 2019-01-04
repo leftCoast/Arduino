@@ -36,8 +36,6 @@
 #define SIG_X     BATT_X + 15
 #define SIG_Y     BATT_Y
 
-#define out       stateDisplay->setValue
-
 
 // *****************************************************
 // ********************  phoneBtn  *********************
@@ -163,20 +161,23 @@ void phone::setup(void) {
   pBtnCall  = new phoneBtn(KEY_C1,KEY_R5,'C',this);
   pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
   
-  //numDisplay  = new PNLabel(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,1);
-  numDisplay = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
+  numDisplay  = new PNLabel(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,1);
+  //numDisplay = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
   addObj(numDisplay);
 
-  stateDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
+  //stateDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
+  stateDisplay  = new liveText(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,100);
+  stateDisplay->addAColor(0,&blue);
+  stateDisplay->addAColor(2500,&blue);
+  stateDisplay->addAColor(3000,&white);
+  stateDisplay->hold();
   addObj(stateDisplay);
-  out("Idle");
   
   mBatPct = new battPercent(BATT_X,BATT_Y);
   addObj(mBatPct);
   mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
   mRSSI   = new RSSIicon(SIG_X,SIG_Y);
   addObj(mRSSI);
-  
 }
 
 
@@ -253,7 +254,6 @@ void phone::addChar(char keyStroke) {
   char* newStr;
   
   if (!mRawPN) {
-    out("Allocating init rawPrawn");
     mRawPN = (char*)malloc(2);
     mRawPN[0] = keyStroke;
     mRawPN[1] = '\0';
@@ -282,7 +282,7 @@ void phone::deleteChar(void) {
 void phone::startCall(void) {
 
   if (!mConnected) {
-    out("Connecting...");
+    out("Calling..");
     mCallingID = ourCellManager.sendCommand(makeCall,mRawPN,true);
   }
 }
@@ -291,7 +291,7 @@ void phone::startCall(void) {
 void phone::startHangup(void) {
 
   if (mConnected) {
-    out("Hanging up...");
+    out("Hanging up..");
     mHangupID = ourCellManager.sendCommand(hangUp,true);
   }
 }
@@ -310,14 +310,15 @@ void phone::checkCall(void) {
         if (reply==0) {                                       // Is it a zero?
           mConnected = true;                                  // Cool!, we're connected!
           out("Connected.");
+          pBtnCall->setNeedRefresh();
         }
       } else {
         ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
-        out("Connection error.");
+        out("Connect error.");
       }
       mCallingID = -1;                                        // In any case, we're done with the command.
     } else if (ourCellManager.progress(mCallingID)==com_missing) {
-      out("Call failed");
+      out("Call failed.");
       mCallingID = -1;
     }
   }
@@ -330,18 +331,42 @@ void phone::checkHangup(void) {
   byte  reply;
   
   if (mHangupID!=-1) {                                      // Working on a call?
-    if (ourCellManager.progress(mHangupID)==com_holding) {  // We found it and its holding a reply?
-      numBytes = ourCellManager.numReplyBytes(mHangupID);    // This is how big the reply is.
-      if (numBytes==1) {                                    // We're looking for a one byte reply.
-        ourCellManager.readReply(mHangupID,&reply);         // Grab the byte.
-        if (reply==0) {                                     // Is it a zero?
-          mConnected = true;                                // Cool!, we're connected!
-          out("Idle.");
+    switch (ourCellManager.progress(mHangupID)){            // See what's going on here..
+      case com_standby  : 
+      case com_working  :  break;                           // Nothing we can do here.
+      case com_holding  :                                   // Holding means there's a reply waiting for us.
+        numBytes = ourCellManager.numReplyBytes(mHangupID); // This is how big the reply is.
+        if (numBytes==1) {                                  // We're looking for a one byte reply.
+          ourCellManager.readReply(mHangupID,&reply);       // Grab the byte.
+          if (reply==0) {                                   // Is it a zero?
+            mConnected = false;                             // Cool!, we're disconnected!
+            out("Disconnectd.");                            // Tell the world!
+            pBtnCall->setNeedRefresh();                     // Kick the button to draw itself.
+          } else {
+            out("Hangup error.");                           // Troubles somewhere.
+          }
+        } else {
+          ourCellManager.dumpBuff();                        // Unknown what it is. Toss it.
+          out("Hangup error.");                             // Something weird going on..
         }
-      } else {
-        ourCellManager.dumpBuff();                          // Unknown what it is. Toss it.
-      }
-      mHangupID = -1;                                       // In any case, we're done with the command.
+      break;
+      case com_complete :                                   // All this means is it gave us back a reply. (Any reply)                           
+      case com_missing  :                                   // Possibly timed out or we already got it.
+        mHangupID = -1;
+      break;
     }
   }
+}
+
+
+void phone::out(int message) {
+  stateDisplay->setValue(message);
+  stateDisplay->release(true);
+}
+
+
+void phone::out(char* message) {
+  
+  stateDisplay->setValue(message);
+  stateDisplay->release(true);
 }

@@ -299,7 +299,6 @@ void cellManager::launchCommand(cellCommand* aCom) {
   
   uint8_t*  ourComBuff;
   byte      numBytes;
-  bool      reply;
   
   if (mState==holding) {                                // Oh ohh.. Someone left something behind in here.
     dumpBuff();                                         // Dump it out.
@@ -345,8 +344,7 @@ void cellManager::checkForRreply(cellCommand* aCom) {
 // a good example on how to use this machine.
 void cellManager::doStatus(void) {
 
-  cellCommand*  statusCom;
-  byte          numBytes;
+  byte  numBytes;
 
   if (mStatusID==-1) {                              // We need to fire one off?
      mStatusID = sendCommand(getStatus,true);       // Well, that was easy.

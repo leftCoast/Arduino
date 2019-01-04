@@ -35,9 +35,9 @@ class label : public drawObj {
   				void 	setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
   				void 	setJustify(word inJustify);
   				void 	setColors(colorObj* tColor);
-  				void 	setColors(colorObj* tColor, colorObj* bColor);
+	virtual	void 	setColors(colorObj* tColor, colorObj* bColor);
   				void 	setPrecision(int inPrec);
-  				void 	setValue(int val);
+  	virtual	void 	setValue(int val);
   				void 	setValue(unsigned long val);
   				void 	setValue(float val);
   				void 	setValue(double val);

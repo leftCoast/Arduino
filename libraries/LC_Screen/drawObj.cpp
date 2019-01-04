@@ -367,8 +367,7 @@ void drawGroup::setGroupRefresh(void) {
 	
 
 // The viewMgr that we live on wants to know if we need a redraw.
-// Before we act on that, lets let the kids redraw first.
-// NOTE: I THINK THIS IS MESSED UP. THINK ABOUT IT!
+// If we don't, the kids might.
 bool drawGroup::wantRefresh(void) {
 
 	if (!needRefresh) {				// If we DON'T want a refresh.

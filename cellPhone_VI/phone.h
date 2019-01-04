@@ -4,6 +4,7 @@
 
 #include <drawObj.h>
 #include <label.h>
+#include <liveText.h>
 #include "panel.h"
 #include "icons.h"
 #include "PNLabel.h"
@@ -44,11 +45,13 @@ class phone : public panel {
           void  startHangup(void);
           void  checkCall(void);
           void  checkHangup(void);
-
+          void  out(char* message);
+          void  out(int message);
+          
           char* mRawPN;
           int   mCallingID;     // We're in the calling sequence. Here's our command ID.
           bool  mConnected;     // Successful, as far as we can tell, calling sequence.
-          bool  mHangupID;      // We're in the hangup sequence. Here's our command ID.
+          int   mHangupID;      // We're in the hangup sequence. Here's our command ID.
           bool  mNeedClose;
 
           
@@ -73,9 +76,10 @@ class phone : public panel {
           phoneBtn* pBtnCall;
           phoneBtn* pBtnClose;
 
-          //PNLabel*  numDisplay;
-          label*    numDisplay;
-          label*    stateDisplay;
+          PNLabel*  numDisplay;
+          //label*    numDisplay;
+          //label*    stateDisplay;
+          liveText* stateDisplay;
           
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
