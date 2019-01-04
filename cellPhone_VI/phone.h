@@ -5,9 +5,10 @@
 #include <drawObj.h>
 #include <label.h>
 #include <liveText.h>
+#include <PNLabel.h>
 #include "panel.h"
 #include "icons.h"
-#include "PNLabel.h"
+
 
 
 class phone;

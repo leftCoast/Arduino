@@ -1,5 +1,5 @@
 #include "panel.h"
-#include "litlOS.h"
+#include "litlOS.h"   // For nextApp
 
 extern apps nextApp;
 

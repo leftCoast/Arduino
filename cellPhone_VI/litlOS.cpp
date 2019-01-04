@@ -120,7 +120,6 @@ void litlOS::begin(void) {
   screenMap.addPoint(RAMPUP_END,255);
   screenMap.addPoint(RAMPDN_START,255);
   screenMap.addPoint(RAMPDN_END,0);
-  //logView.setTextColors(&green,&black);
   bringUp();
 }
 
@@ -168,13 +167,6 @@ void litlOS::loop(void) {
   }
   if (mPanel) { mPanel->loop(); }
  }
-
-
-//RAMPUP_START
-//RAMPUP_END
-//RAMPDN_START
-//RAMPDN_END
-//STEPTIME
 
 
 void litlOS::hideRedraw() {

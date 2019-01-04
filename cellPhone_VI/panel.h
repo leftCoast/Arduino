@@ -2,14 +2,13 @@
 #define panel_h
 
 #include <drawObj.h>
-#include <fileBuff.h>
 #include <timeObj.h>
+
 
 // The panel object. Base class for swapping in and out of different objects
 // that want to use the screen. The plan is that the OS can swap panels back
 // and forth as the user chooses different things he wants to do. Like
-// different apps. Now, what about icons? Have no idea how that's supposed to
-// work.
+// different apps. 
 
 // These two have to go. Need to bring these out from
 // the displayObj.

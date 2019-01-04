@@ -3,6 +3,7 @@
 
 #include <colorObj.h>
 #include <iconButton.h>
+#include <blockFile.h>
 #include "panel.h"
 
 
