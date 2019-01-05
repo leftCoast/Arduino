@@ -10,38 +10,17 @@ liveText::liveText(int x,int y,word width,word height,int framerateMs,bool inLoo
   maxTime     = 0;
   frame       = 0;
   holding     = false;
-  nextStr	  = NULL;
-  erase		  = false;
 }
 
 
-liveText::~liveText(void) { if (nextStr) free(nextStr); }
+liveText::~liveText(void) { }
 
-void liveText::setValue(int value) { label::setValue(value); }
-
-
-void liveText::setValue(char* str) {
-	
-	if (frame<maxTime) {										// We still have frames to go?
-		if (str) {												// Ok, we do have something to print.
-			nextStr = (char*)malloc(strlen(str)+1);	// Ask for some RAM.
-			if (nextStr) {										// If we got it.
-				erase = true;									// Set erase as a flag.
-				strcpy(nextStr,str);							// Save off the new string for later.
-				return;											// And we drop out of the function.
-			}
-		}
-	}
-	label::setValue(str);									// Otherwise? Just do as you always would.
-}
 
 
 // Need some running call to auto hookup.
 bool   liveText::wantRefresh(void) {
   
-  if (!hookedIn) {
-    hookup();
-  }
+  hookup();
   return label::wantRefresh();
 }
 
@@ -69,28 +48,15 @@ void liveText::release(bool reset) {
 }
 
 
-void liveText::drawSelf(void) {
-	
-	if (erase) {						// Ok! If we need to change mid animation.
-		setColors(&lastColor);		// Set to the ending color.
-		label::drawSelf();			// This "should" erase the last text.
-		label::setValue(nextStr);	// Now we mash in the new message. (We saved it.)
-		free(nextStr);					// Free the buffer..
-		nextStr = NULL;				// Flag the buffer..
-		frame = 0;						// Reset to frame 0.
-		setCalcColor();				// Calculate the starting color..
-		erase = false;					// Everything should be ready.
-	}
-	label::drawSelf();
-}
-
-
 void  liveText::setCalcColor(void) {
   
-  colorObj  aColor;
-
-  aColor = Map(frame);       // Calculate the color.
-  setColors(&aColor);        // set it.
+	bool		savedTransp;
+	colorObj	aColor;
+	
+	aColor = Map(frame);		// Calculate the color.
+	savedTransp = transp;	// Save off our transparent setting.
+	setColors(&aColor);		// set the color it.
+	transp = savedTransp;	// Restore the transp setting.
 }
 
 

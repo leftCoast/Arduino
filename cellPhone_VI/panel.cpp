@@ -1,7 +1,7 @@
 #include "panel.h"
 #include "litlOS.h"   // For nextApp
 
-extern apps nextApp;
+//extern apps nextApp;
 
 // And it all starts up again..
 panel::panel(int panelID,bool wantClicks)

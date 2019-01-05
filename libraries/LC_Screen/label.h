@@ -35,13 +35,13 @@ class label : public drawObj {
   				void 	setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
   				void 	setJustify(word inJustify);
   				void 	setColors(colorObj* tColor);
-	virtual	void 	setColors(colorObj* tColor, colorObj* bColor);
+				void 	setColors(colorObj* tColor, colorObj* bColor);
   				void 	setPrecision(int inPrec);
-  	virtual	void 	setValue(int val);
+  				void 	setValue(int val);
   				void 	setValue(unsigned long val);
   				void 	setValue(float val);
   				void 	setValue(double val);
-  	virtual	void 	setValue(char* str);
+  				void 	setValue(char* str);
 				int	getNumChars(void);		// We want to know how long the string is..
 				void	getText(char* inBuff);	// We asked above how much you have. Hand it over.
   				word 	getTextWidth(void);		// How wide in pixels is our text?
@@ -57,7 +57,7 @@ class label : public drawObj {
 	word		justify;
 	colorObj	backColor;
 	colorObj textColor;
-	boolean  transp;
+	bool		transp;
 	char*    buff;
 	int      prec;      // For formatting floats.
 };

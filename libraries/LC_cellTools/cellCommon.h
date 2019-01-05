@@ -2,11 +2,11 @@
 #define cellCommon_h
 
 
-enum cellCommands { getStatus, setCurrentPN, sendSNS, makeCall, hangUp, pickUp, setVolume, somethingElse  };
+enum cellCommands { getStatus, setCurrentPN, sendSNS, makeCall, hangUp, pickUp, setVolume, playTone, somethingElse  };
 
 enum networkStatus { NS_notRegistered, NS_registeredHome, NS_registeredSearching, NS_denied, NS_unknown, NS_registeredRoaming };
 
-enum callStatus	{ CS_ready, CS_noStatus, CS_ringingIn, CS_ringingOut, CS_unknown };
+enum callStatus	{ CS_ready, CS_noStatus, CS_unknown, CS_ringingIn, CS_ringingOut };
 
 struct cellStatus {
 	uint16_t		FONAOnline;
@@ -20,5 +20,11 @@ struct cellStatus {
 	char			networkTime[24];
 };
  
+ 
+struct tone {
+	uint16_t	freq;
+	uint16_t	durationMS;
+};
+
 
 #endif

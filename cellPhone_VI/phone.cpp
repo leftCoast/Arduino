@@ -3,6 +3,7 @@
 #include "litlOS.h"
 #include <cellCommon.h>
 #include "cellManager.h"
+#include "cellListener.h"
 
 #define STAT_TIME   2500  // ms between checks on status.
 
@@ -49,9 +50,6 @@ phoneBtn::phoneBtn(int x,int y,char inKey,phone* inPhone)
   mKeystroke[1] = '\0';
   mPhone = inPhone;
   mPhone->addObj(this);    // If we add to our phone object, we'll be auto deleted when its recycled.
-  if (mKeystroke[0]=='C') {
-    width = width + COL_GAP;
-  }
 }
 
 
@@ -69,27 +67,6 @@ void phoneBtn::drawSelf(void) {
       screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
       screen->setTextColor(&black);
     }
-  } else if (mKeystroke[0]=='C') {
-    
-    if (!mPhone->mConnected) {
-      if (clicked) {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&green);
-      } else {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
-        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&white);
-      }
-    } else {  // mConnected
-      if (clicked) {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&red);
-      } else {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&red);
-        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&white);
-      }
-    }
   } else {
     if (clicked) {
       screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&blue);
@@ -101,22 +78,116 @@ void phoneBtn::drawSelf(void) {
   }
   screen->setTextSize(TEXT_SIZE);
   screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-  if (mKeystroke[0]=='C') {
-    if (!mPhone->mConnected) {
-      screen->drawText("Call");
-    } else {
-      screen->drawText("Hangup");
-    }
-  } else {
-    screen->drawText(mKeystroke); 
-  }
+  screen->drawText(mKeystroke); 
 }
 
 
 void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 
 
+          
+// *****************************************************
+// *******************  callControl  *******************
+// *****************************************************
 
+  
+callControl::callControl(int x,int y,char inKey,phone* inPhone)
+  : phoneBtn(x,y,inKey,inPhone) {
+
+  width = width + COL_GAP;  // All the buttons are smaller, we're "special".
+  mState = isIdle;
+}
+
+
+callControl::~callControl(void) { }
+
+
+void callControl::drawSelf(void) {
+
+  hookup();
+  screen->setTextSize(TEXT_SIZE);
+  switch(mState) {
+    case isIdle       :
+      if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&green);
+      } else {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
+        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&white);
+      }
+      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+      screen->drawText("Call");
+    break;
+    case hasIncoming  :
+      if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&green);
+      } else {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
+        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&white);
+      }
+      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+      screen->drawText("Answer");
+      mPhone->out("Click X to refuse call.");
+    break;
+    case isConnected  :
+      if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&red);
+      } else {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&red);
+        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->setTextColor(&white);
+      }
+      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+      screen->drawText("Hangup");
+    break;   
+  }
+}
+
+
+void callControl::doAction(void) {
+
+  switch(mState) {
+    case isIdle       : mPhone->startCall();    break;
+    case hasIncoming  : mPhone->answerCall(); break;
+    case isConnected  : mPhone->startHangup();  break;
+  }
+}
+
+
+void callControl::idle() {
+
+  switch(mState) {
+    case isIdle       : 
+      if(callIncoming) {
+        mState = hasIncoming;
+        setNeedRefresh();
+      } else if (mPhone->mConnected) {
+        mState = isConnected;
+        setNeedRefresh();
+      }
+    break;
+    case hasIncoming  :
+      if (mPhone->mConnected) {
+        mState = isConnected;
+        setNeedRefresh();
+      }
+    break;
+    case isConnected  :
+      if (!mPhone->mConnected) {
+        mState = isIdle;
+        setNeedRefresh();
+      }
+    break;
+  }
+}
+
+
+
+          
 // *****************************************************
 // *********************  phone   **********************
 // *****************************************************
@@ -158,19 +229,18 @@ void phone::setup(void) {
   pBtnStar  = new phoneBtn(KEY_C2,KEY_R4,'*',this);
   pBtnHash  = new phoneBtn(KEY_C3,KEY_R4,'#',this);
   
-  pBtnCall  = new phoneBtn(KEY_C1,KEY_R5,'C',this);
+  pBtnCall  = new callControl(KEY_C1,KEY_R5,'C',this);
   pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
   
   numDisplay  = new PNLabel(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,1);
-  //numDisplay = new label(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,"",1);
   addObj(numDisplay);
 
-  //stateDisplay  = new label(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,"",1);
   stateDisplay  = new liveText(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,100);
   stateDisplay->addAColor(0,&blue);
   stateDisplay->addAColor(2500,&blue);
   stateDisplay->addAColor(3000,&white);
   stateDisplay->hold();
+  stateDisplay->setColors(&blue,&white);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
   mBatPct = new battPercent(BATT_X,BATT_Y);
@@ -233,13 +303,6 @@ void phone::keystroke(char inKey) {
       deleteChar();
       numDisplay->setValue(mRawPN);
     break;
-    case 'C'   : 
-      if (!mConnected) {
-        startCall();
-      } else {
-        startHangup();
-      }
-    break;
     case 'X'   : 
       startHangup();
       mNeedClose = true;
@@ -279,6 +342,15 @@ void phone::deleteChar(void) {
 }
 
 
+void phone::answerCall(void) {
+
+  if (!mConnected) {
+    out("Answering..");
+    mCallingID = ourCellManager.sendCommand(pickUp,true);
+  }
+}
+
+
 void phone::startCall(void) {
 
   if (!mConnected) {
@@ -310,7 +382,6 @@ void phone::checkCall(void) {
         if (reply==0) {                                       // Is it a zero?
           mConnected = true;                                  // Cool!, we're connected!
           out("Connected.");
-          pBtnCall->setNeedRefresh();
         }
       } else {
         ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
@@ -341,13 +412,12 @@ void phone::checkHangup(void) {
           if (reply==0) {                                   // Is it a zero?
             mConnected = false;                             // Cool!, we're disconnected!
             out("Disconnectd.");                            // Tell the world!
-            pBtnCall->setNeedRefresh();                     // Kick the button to draw itself.
           } else {
             out("Hangup error.");                           // Troubles somewhere.
           }
         } else {
           ourCellManager.dumpBuff();                        // Unknown what it is. Toss it.
-          out("Hangup error.");                             // Something weird going on..
+          out("Reply error.");                              // Something weird going on..
         }
       break;
       case com_complete :                                   // All this means is it gave us back a reply. (Any reply)                           

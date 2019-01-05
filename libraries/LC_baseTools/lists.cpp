@@ -305,6 +305,22 @@ void dblLinkListObj::unhook(void) {
 }
 
 
+// Hand back the "nth" one of our tail. Starting at 0;
+dblLinkListObj* dblLinkListObj::getTailObj(int index) {
+	
+	dblLinkListObj*	trace;
+	int					count;
+	
+	trace = dllNext;
+	count = 0;
+	while(trace&&count<index) {
+		count++;
+		trace = trace->dllNext;
+	}
+	return trace;
+}
+
+
 // Delete entire tail. delete calls unhook before deleting the object.
 void dblLinkListObj::dumpTail(void) { while(dllNext) delete dllNext; }
 

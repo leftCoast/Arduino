@@ -55,11 +55,8 @@ class liveText : public label,
 				void		hold(void);
 				void		release(bool reset=true);
 
-	virtual	void		setValue(char* str);
-	virtual	void		setValue(int value);
 	virtual	bool		wantRefresh(void);        
 	virtual	void		idle(void);
-	virtual	void		drawSelf(void);
 				void		setCalcColor(void);
   
 				bool		loop;
@@ -67,8 +64,6 @@ class liveText : public label,
 				int		frame;
 				bool		holding;
 				colorObj	lastColor;
-				bool		erase;
-				char*		nextStr;
 };
 
 #endif

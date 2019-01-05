@@ -43,6 +43,9 @@ void drawBackground(void) {
 fList::fList(void) : drawList(FL_X, FL_Y, FL_W, FL_H) { }
 
 
+fList::~fList(void) { }
+
+
 // From an unknown state we need to set up our world.
 void  fList::reset(void) {
 
@@ -63,6 +66,9 @@ void  fList::reset(void) {
   setNeedRefresh();
 }
 
+// This guy has no business drawing. 
+void fList::drawSelf(void) { }
+
 
 // This sets the focus on a list item.
 // So that clicking the button will cause it to grab control.
@@ -70,7 +76,7 @@ void  fList::chooseItem(int index) {
 
   drawObj*  item;
 
-  item = getObj(index);
+  item = getObj(index); // ITEMS START AT 0
   if (item) {
     setFocusPtr(item);
     makeVisable((fListItem*)item);
@@ -105,7 +111,7 @@ void fList::scroll(int ydist) {
   int x;
   int y;
 
-  trace = (fListItem*)theList;
+  trace = (fListItem*)listHeader.dllNext;
   while (trace) {
     x = trace->x;
     y = trace->y;
@@ -150,7 +156,7 @@ void  fList::currentSongRefresh() {
 
   drawObj*   trace;
   
-  trace = theList;
+  trace = theList();
   while(trace) {
     if (!strcmp(((fListItem*)trace)->mText->buff,currentSong)) { // Out on a limb here! Blind Casting up into.. 
       trace->setNeedRefresh();
@@ -260,6 +266,9 @@ boolean fListItem::wantRefresh(void) {
     return false;                       // We were offscreen. I knew it!
   }
 }
+
+// We are only record keeping. No drawing!
+void fListItem::drawSelf(void) { delay(1000); }
 
 
 // ******************************

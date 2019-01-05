@@ -18,7 +18,7 @@
 // push/pot because ,it may want to use the inputs somewhere
 // else while the pushPotGUI is dormant.
 //
-// So what is it? Its ment to be mixed in with the drawGroup
+// So what is it? Its meant to be mixed in with the drawGroup
 // class or one of its diriviteves to create a controlling 
 // group class. There is one global controlPtr that the calling
 // program will set by calling becomeContol(). Then through
@@ -37,14 +37,15 @@
 class pushPotGUI {
 
   public:
-  pushPotGUI(void);
-  ~pushPotGUI(void);
+          pushPotGUI(void);
+  virtual ~pushPotGUI(void);
 
   virtual void    reset(void);          // Stuff to do when we're started or restarted.
   virtual void    gainControl(void);    // Being told we now have control.
   virtual void    doPotVal(int aVal);   // Calliing program sends us in raw pot values.
  
 };
+
 
 extern  pushPotGUI*  controlPtr;
 

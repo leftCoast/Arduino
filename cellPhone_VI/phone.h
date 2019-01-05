@@ -10,7 +10,6 @@
 #include "icons.h"
 
 
-
 class phone;
 
 class phoneBtn :  public drawObj {
@@ -24,6 +23,24 @@ class phoneBtn :  public drawObj {
 
           char    mKeystroke[2];
           phone*  mPhone;
+};
+
+
+class callControl : public phoneBtn,
+                    public idler {
+    
+  public:
+
+  enum callConState { isIdle, hasIncoming, isConnected };
+  
+          callControl(int x,int y,char inKey,phone* inPhone);
+  virtual ~callControl(void);
+
+  virtual void  drawSelf(void);
+  virtual void  doAction(void);
+  virtual void  idle();
+
+          callConState  mState;
 };
 
 
@@ -42,6 +59,7 @@ class phone : public panel {
           void  keystroke(char inKey);
           void  addChar(char inKey);
           void  deleteChar(void);
+          void  answerCall(void);
           void  startCall(void);
           void  startHangup(void);
           void  checkCall(void);
@@ -78,8 +96,6 @@ class phone : public panel {
           phoneBtn* pBtnClose;
 
           PNLabel*  numDisplay;
-          //label*    numDisplay;
-          //label*    stateDisplay;
           liveText* stateDisplay;
           
           battPercent*  mBatPct;

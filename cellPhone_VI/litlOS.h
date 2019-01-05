@@ -4,8 +4,10 @@
 #include <colorObj.h>
 #include <iconButton.h>
 #include <blockFile.h>
+#include <timeObj.h>
+#include <textView.h>
 #include "panel.h"
-
+#include "cellListener.h"
 
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
@@ -57,6 +59,8 @@ class homePanel : public panel {
           appIcon*    qGameIcon;
           appIcon*    breakoutIcon;
           appIcon*    phoneIcon;
+          timeObj     statusTimer;
+          textView*   mText;
   
 };
 
@@ -86,6 +90,7 @@ class litlOS :  public idler {
           panel*      mPanel;
 };
 
+extern  apps nextApp;
 extern  litlOS  ourOS;
 
 

@@ -91,10 +91,12 @@ public:
 	virtual	~viewMgr(void);
     
 	virtual	void		addObj(drawObj* newObj);
-    			void		dumpList(void);
+    			void		dumpDrawObjList(void);
             bool 		checkClicks(void);
 				void    	checkRefresh(void);
 				word		numObjInList(void);
+				drawObj*	getObj(word index);
+				drawObj*	theList(void);
     virtual void    	idle(void);
     
             drawObj	listHeader;				// Header of the drawObj list;

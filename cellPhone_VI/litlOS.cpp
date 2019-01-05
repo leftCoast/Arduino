@@ -2,9 +2,12 @@
 #include "litlOS.h" 
 #include <screen.h>
 #include <cellCommon.h>
+#include <cellManager.h>
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
 #include "phone.h"
+#include "cellListener.h"
+
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -41,7 +44,8 @@ void appIcon::doAction(void) { nextApp = mMessage; }
 #define HP_ICON_XSTEP  40
 #define HP_ICON_Y     275
 
-
+#define out     mText->appendText
+#define outln   mText->appendText("\n")
 
 homePanel::homePanel(void)
   : panel(homeApp,false) {
@@ -61,7 +65,10 @@ homePanel::homePanel(void)
   iconX=iconX+HP_ICON_XSTEP;
   breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
 
-  //addObj(&logView);
+  mText = new textView(10,10,220,150);
+  mText->setTextColors(&yellow,&blue);
+  addObj(mText);
+  statusTimer.setTime(1500);
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
@@ -78,7 +85,42 @@ void homePanel::setup(void) {
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 }
 
-void homePanel::loop(void) {  }
+void homePanel::loop(void) { 
+  
+if (statusTimer.ding()) {
+  mText->setText("");
+  outln;
+  out("           cellStatus");outln;outln;
+  out(" Battery V  : ");out(statusReg.batteryVolts);out("mV\n");
+  out(" Battery %  : ");out(statusReg.batteryPercent);out("%\n");
+  out(" RSSI       : ");out(statusReg.RSSI);outln;
+  out(" Net Stat   : ");
+  switch (statusReg.networkStat) {
+    case 0 : out("Not registered"); break;
+    case 1 : out("Reg. (home)"); break;
+    case 2 : out("Reg. (searching)"); break;
+    case 3 : out("Denied"); break;
+    case 4 : out("Unknown"); break;
+    case 5 : out("Reg. (roaming)"); break;
+    default : out("Undefined"); break;
+  }
+  outln;  
+  out(" Volume     : ");out(statusReg.volume);out("\n");
+  out(" CallState  : ");
+  switch (statusReg.callStat) {
+    case 0  : out("Ready"); break;
+    case 1  : out("No Status"); break;
+    case 2  : out("Unknown"); break;
+    case 3  : out("Ringing In"); break;
+    case 4  : out("Ringing Out"); break;
+    default : out("Unknown II"); break;
+  }
+  outln;
+  out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
+  out(" Net Time   : ");out(statusReg.networkTime);out("\n");
+  statusTimer.start();
+  }
+}
 
 
 void homePanel::drawSelf(void) { 
@@ -120,6 +162,7 @@ void litlOS::begin(void) {
   screenMap.addPoint(RAMPUP_END,255);
   screenMap.addPoint(RAMPDN_START,255);
   screenMap.addPoint(RAMPDN_END,0);
+  ourListener.begin(phoneApp);
   bringUp();
 }
 

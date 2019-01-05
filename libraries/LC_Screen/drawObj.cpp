@@ -266,6 +266,9 @@ void viewMgr::addObj(drawObj* newObj) {
     hookup();								// hookup on the first addition. Ignored otherwise.
 }
 
+// Now anyone can tell us to do that.
+void viewMgr::dumpDrawObjList(void) { listHeader.dumpList(); }
+
 
 // Checking clicks.
 bool viewMgr::checkClicks(void) {
@@ -321,7 +324,14 @@ void viewMgr::checkRefresh(void) {
 // Counts & returns the number of objects in the list.           
 word viewMgr::numObjInList(void) { return (word)listHeader.countTail(); }
 
-        
+
+// Finds the "nth" item on the list, index starting at 0. NULL if not found.
+drawObj* viewMgr::getObj(word index) { return (drawObj*)listHeader.getTailObj((int)index); }
+
+
+drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.dllNext; }
+
+
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
     

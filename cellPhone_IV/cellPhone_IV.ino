@@ -17,10 +17,13 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
 qCSlave   ourComObj;
 
-bool  FONAOnline;
+bool    FONAOnline;
+timeObj toneTime;
+bool    playingSong;
 
 void setup() {
 
+    playingSong = false;
     FONAOnline = false;
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
@@ -48,7 +51,8 @@ void loop() {
           case getStatus    : doStatus();               break;
           case makeCall     : doCall(&inBuff[1]);       break;  
           case hangUp       : doHangUp( );              break;
-          case sendSNS      : doSendSNS(&inBuff[1]);    break;  
+          case sendSNS      : doSendSNS(&inBuff[1]);    break;
+          case pickUp       : doPickUp();               break;
           default           : break;
         } 
       }
@@ -75,10 +79,11 @@ void resetFONA(void) {
   fonaSS.begin(4800);                   // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
   fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
-  fona.setVolume(30);
+  fona.setVolume(40);
+  fona.enableNetworkTimeSync(true);     // See if it works..
 
 /*
-For those who wonder how to do that, you can add a call fona
+For those who wonder : You can add a call fona
 setAudio(FONA_EXTAUDIO) to your initialization code or issue
 direct command 'AT+CHFA=1' towards SIM800 module.
 
@@ -104,6 +109,19 @@ void doStatus(void) {
   fona.getTime(newStat.networkTime,23);
 
   ourComObj.replyBuff((byte*)&newStat,sizeof(cellStatus));
+}
+
+
+void doPickUp(void) {
+
+  uint8_t result;
+
+  if (fona.pickUp()) {
+    result = 0;                   // We'll pass a 0 for no error.
+  } else {
+    result = 1;                   // We'll pass a 1 for error.
+  }
+  ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
 }
 
 
