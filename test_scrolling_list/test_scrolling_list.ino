@@ -48,15 +48,14 @@ void fListItem::drawSelf(void) {
   
   int offst = 2;
   getText(buff);
-  Serial.print("Getting draw call fpr item : ");Serial.println(buff);
   if (mList->isVisible(this)) {
-    Serial.print("Drawing item : ");Serial.println(buff);
     if (focus) {
       setColors(&red);
     } else {
       setColors(&black);
     }
     screen->fillRect(x,y,width,height,&green);
+    screen->drawRect(x,y,width,height,&blue);
     x=x+offst;
     y=y+offst;
       label::drawSelf();
@@ -118,9 +117,10 @@ void setup() {
   Serial.print("Size of RGBpack. : ");Serial.println(sizeof(RGBpack));
 
   fListItem*  newItem;
-  ourList = new scrollingList(20,24,126,60,dialScroll);
+  ourList = new scrollingList(20,24,108,60,dialScroll);
   ourList->setNeedRefresh();
   viewList.addObj(ourList);
+  /*
   newItem = new fListItem(ourList,"First");
   ourList->addObj(newItem);
   newItem = new fListItem(ourList,"Second");
@@ -129,7 +129,8 @@ void setup() {
   ourList->addObj(newItem);
   Serial.print("OurList : ");Serial.println((int)ourList);
   Serial.print("viewList : ");Serial.println((int)&viewList);
-  //fillList("/");
+  */
+  fillList("/");
 }
 
 void fillList(const char* workingDir) {
@@ -148,6 +149,7 @@ void fillList(const char* workingDir) {
       if (entry) {
         if (!entry.isDirectory()) {
           if (strstr(entry.name(),".MP3")) {
+            Serial.println("Adding item");
             newItem = new fListItem(ourList,entry.name());
             ourList->addObj(newItem);
           }
@@ -173,7 +175,7 @@ void loop() {
   float pcnt;
 
   idle();
-  rawPrawn = analogRead(POT_ANLG);
+  rawPrawn = potSmoother.addData(analogRead(POT_ANLG));
   pcnt = potToScroll.Map(rawPrawn);
   ourList->setScrollValue(pcnt);
 }

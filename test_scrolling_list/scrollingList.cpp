@@ -47,8 +47,8 @@ void scrollingList::setScrollValue(float percent) {
   int       numItems;
   mapper    itemMapper;
   int       itemIndex;
-   drawObj* newFocus;
-   
+  drawObj* newFocus;
+
   numItems = numObjInList();                    // How many items on the list.
   itemMapper.setValues(0,100,0,numItems-1);     // Setup a mapper to map 0-100 to 0..last item.
   itemIndex = round(itemMapper.Map(percent));   // Map to get item index.

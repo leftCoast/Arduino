@@ -314,7 +314,6 @@ void viewMgr::checkRefresh(void) {
 	trace = (drawObj*)listHeader.getLast();		// make sure we're at the bottom.
 	while(trace && trace!=(&listHeader)) {			// While not NULL or pointing at our header.
 		if (trace->wantRefresh()) {					// Does this guy want refresh?
-				Serial.print((int)this);Serial.print(" calling refresh on ");Serial.println((int)trace,HEX);
             trace->draw();								// Call his Draw method.
 		}
       trace = (drawObj*)trace->dllPrev;			// Bump up the list.
@@ -330,7 +329,7 @@ word viewMgr::numObjInList(void) { return (word)listHeader.countTail(); }
 drawObj* viewMgr::getObj(word index) { return (drawObj*)listHeader.getTailObj((int)index); }
 
 
-drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.dllNext; }
+drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.getTailObj(0); }
 
 
 // We have time to do stuff, NOT A LOT!
@@ -381,10 +380,9 @@ bool drawGroup::checkGroupRefresh(void) {
 	
 	drawObj* trace;
 
-	trace = (drawObj*)listHeader.getFirst();
+	trace = (drawObj*)listHeader.getTailObj(0);
 	while(trace && trace!=(&listHeader)) {
 		if(trace->wantRefresh()) {
-			Serial.println("Returning true!");
 			return true;
 		}
 		trace = (drawObj*)trace->dllNext;
@@ -459,18 +457,20 @@ void	drawGroup::draw(void) {
 
 	drawObj*	trace;
 
-	if (needRefresh) {
-		Serial.println("Drawing myself");
-		drawSelf();
+	if (needRefresh) {								// We may be the background.
+		drawSelf();										// Do our drawing.
+		setGroupRefresh();							// If we're drawing, the entire group needs it.
 	}
 	trace = (drawObj*)listHeader.getLast();	// make sure we're at the bottom.
 	screen->pushOffset(x,y);						// Ok, push our offset for the sublist.
 	while(trace && trace!=(&listHeader)) {		// And while we're not done..
-		trace->draw();									// Call his Draw method.
-		trace = (drawObj*)trace->dllPrev;		// if so lets go there.
+		if(trace->wantRefresh()) {					// If this guy needs it.
+			trace->draw();								// Call his Draw method.
+		}
+		trace = (drawObj*)trace->dllPrev;		// Hop to the next one up the list.
 	}
 	screen->popOffset(x,y);							// Pop off the offset.
-	needRefresh = false;								// in any case, we no longer need a refresh.
+	needRefresh = false;								// In any case, we no longer need a refresh.
 }
 
 
@@ -494,12 +494,8 @@ drawList::~drawList() { }
 // anyway. Too bad, inherit and fix it if this ain't good enough.					
 void drawList::addObj(drawObj* newObj) {
 
-	word numObjs;
-	Serial.print("List x,y : ");Serial.print(x);Serial.print(", ");Serial.println(y);
-	hookup();
 	itemHeight = max(itemHeight,newObj->height);
-	numObjs = numObjInList();
-	newObj->setLocation(0,numObjs*itemHeight);
+	newObj->setLocation(0,numObjInList()*itemHeight);
 	drawGroup::addObj(newObj);	
 }
 
@@ -507,8 +503,9 @@ void drawList::addObj(drawObj* newObj) {
 // Good idea after adding your list items to run a reset on them all.
 void drawList::resetPositions(void) {
 
-	int	i;
-	drawObj*  trace;
+	int		i;
+	drawObj*	trace;
+	
 	i = 0;											// Start our multiplier at zero.
 	trace = theList();
 	while(trace!=NULL) {							// Standard loop through link list.
@@ -532,10 +529,7 @@ int drawList::lastY(void) {
 
 // Any of our items can be passed in and find if its showing or not.
 // Good for deciding to draw or not.
-bool drawList::isVisible(drawObj* theItem) {
-
-	return (theItem->y >= 0 && theItem->y<= lastY());
-}
+bool drawList::isVisible(drawObj* theItem) { return (theItem->y >= 0 && theItem->y<= lastY()); }
 
 
 // If this itm is not sowing, show it. If above the window, bring it down to the first
@@ -552,7 +546,6 @@ void drawList::showItem(drawObj* theItem) {
   } else {
     return;                               // No scrolling neccisary. Lets go home.
   }
-  Serial.println("shifting list");
   trace = theList();                      // EVERYBODY must scroll!
   while(trace!=NULL) {                    // Standard loop through link list.
     trace->y = trace->y-yDif;             // Each is moved by - xDif;
