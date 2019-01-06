@@ -19,6 +19,15 @@ colorMapper mixMapper;
 
 // ****** colorObj ******
 
+colorObj::colorObj(RGBpack* buff) {
+ 
+	red	= buff->r;
+	green	= buff->g;
+	blue	= buff->b;
+}
+
+
+
 colorObj::colorObj(byte inRed, byte inGreen, byte inBlue) { setColor(inRed,inGreen,inBlue); }
 
 
@@ -180,6 +189,18 @@ byte colorObj::getGreen(void) { return green; }
 
 
 byte colorObj::getBlue(void) { return blue; }
+
+
+// Pack up our color info.
+RGBpack  colorObj::packColor(void) {
+
+	RGBpack	temp;
+	
+	temp.r = red;
+	temp.g = green;
+	temp.b = blue;
+	return temp;
+}
 
 
 //Creates a new color by mixing yourself with some new color.

@@ -314,6 +314,7 @@ void viewMgr::checkRefresh(void) {
 	trace = (drawObj*)listHeader.getLast();		// make sure we're at the bottom.
 	while(trace && trace!=(&listHeader)) {			// While not NULL or pointing at our header.
 		if (trace->wantRefresh()) {					// Does this guy want refresh?
+				Serial.print((int)this);Serial.print(" calling refresh on ");Serial.println((int)trace,HEX);
             trace->draw();								// Call his Draw method.
 		}
       trace = (drawObj*)trace->dllPrev;			// Bump up the list.
@@ -375,18 +376,26 @@ void drawGroup::setGroupRefresh(void) {
 		} 
 	}
 	
+	
+bool drawGroup::checkGroupRefresh(void) {
+	
+	drawObj* trace;
+
+	trace = (drawObj*)listHeader.getFirst();
+	while(trace && trace!=(&listHeader)) {
+		if(trace->wantRefresh()) {
+			Serial.println("Returning true!");
+			return true;
+		}
+		trace = (drawObj*)trace->dllNext;
+	}
+	return false;
+}
+
 
 // The viewMgr that we live on wants to know if we need a redraw.
 // If we don't, the kids might.
-bool drawGroup::wantRefresh(void) {
-
-	if (!needRefresh) {				// If we DON'T want a refresh.
-		screen->pushOffset(x,y);	// We set in our offset.
-		checkRefresh();				// And let the kiddies have a go.
-		screen->popOffset(x,y);		// Clear offset.
-	}
-	return needRefresh;				// In any case, return if we need a refresh or not.
-}
+bool drawGroup::wantRefresh(void) { return (needRefresh || checkGroupRefresh()); }
 
 
 // Someone from the outside is hinting to us that we are
@@ -437,8 +446,8 @@ void drawGroup::clickOver(void) {
 }
 
 
-// The groups are NOT linked into the idle loop.
-// They get their time from the parent getting called.              					
+// The groups are NOT linked into the drawing loop.
+// They get their draw calls from the parent getting called.              					
 void drawGroup::addObj(drawObj* newObj) {
 
   	newObj->linkAfter(&listHeader);   	// Put the new guy at the top of the list.
@@ -451,6 +460,7 @@ void	drawGroup::draw(void) {
 	drawObj*	trace;
 
 	if (needRefresh) {
+		Serial.println("Drawing myself");
 		drawSelf();
 	}
 	trace = (drawObj*)listHeader.getLast();	// make sure we're at the bottom.
@@ -472,7 +482,7 @@ void	drawGroup::draw(void) {
 
 
 drawList::drawList(int x, int y, word width,word height,bool clicks) 
-	: drawGroup(x,y,width,height,clicks) { listHeight = 1; }
+	: drawGroup(x,y,width,height,clicks) { itemHeight = 1; }
 
 
 drawList::~drawList() { }
@@ -485,9 +495,69 @@ drawList::~drawList() { }
 void drawList::addObj(drawObj* newObj) {
 
 	word numObjs;
-	
-	listHeight = newObj->height;
+	Serial.print("List x,y : ");Serial.print(x);Serial.print(", ");Serial.println(y);
+	hookup();
+	itemHeight = max(itemHeight,newObj->height);
 	numObjs = numObjInList();
-	newObj->setLocation(0,numObjs*listHeight);
+	newObj->setLocation(0,numObjs*itemHeight);
 	drawGroup::addObj(newObj);	
 }
+
+
+// Good idea after adding your list items to run a reset on them all.
+void drawList::resetPositions(void) {
+
+	int	i;
+	drawObj*  trace;
+	i = 0;											// Start our multiplier at zero.
+	trace = theList();
+	while(trace!=NULL) {							// Standard loop through link list.
+		trace->y = i++ *  itemHeight;			// Each is moved by itemHeight from the last.
+		trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+		trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+	}
+}
+
+
+// Seeing that all the list items are positioned as if they were the same size..
+// We can calculate the last possible y position an item can have to be viewable.
+int drawList::lastY(void) {
+	
+	int       numViewable;
+	
+	numViewable = (height/itemHeight);	// Quick int division to force truncation.
+	return (numViewable-1) * itemHeight;		// To make sure first is at zero. All overages to bottom.
+}
+
+
+// Any of our items can be passed in and find if its showing or not.
+// Good for deciding to draw or not.
+bool drawList::isVisible(drawObj* theItem) {
+
+	return (theItem->y >= 0 && theItem->y<= lastY());
+}
+
+
+// If this itm is not sowing, show it. If above the window, bring it down to the first
+// position. If below the window bring it up to the last position of the window.
+void drawList::showItem(drawObj* theItem) {
+
+  int       yDif;
+  drawObj*  trace;
+  
+  if (theItem->y<0) {							// Need to scroll down.
+    yDif = theItem->y;							// Simple, we just bring it down to zero.
+  } else if (theItem->y>lastY()) {			// Need to scroll up.
+    yDif = theItem->y - lastY();				// This gives us how much to scroll up.
+  } else {
+    return;                               // No scrolling neccisary. Lets go home.
+  }
+  Serial.println("shifting list");
+  trace = theList();                      // EVERYBODY must scroll!
+  while(trace!=NULL) {                    // Standard loop through link list.
+    trace->y = trace->y-yDif;             // Each is moved by - xDif;
+    trace->setNeedRefresh();              // Just in case, everyione is told to redraw.
+    trace = (drawObj* )trace->dllNext;    // Hop to the next in the list.
+  }
+}
+

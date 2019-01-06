@@ -93,7 +93,7 @@ public:
 	virtual	void		addObj(drawObj* newObj);
     			void		dumpDrawObjList(void);
             bool 		checkClicks(void);
-				void    	checkRefresh(void);
+	virtual	void    	checkRefresh(void);
 				word		numObjInList(void);
 				drawObj*	getObj(word index);
 				drawObj*	theList(void);
@@ -121,6 +121,7 @@ class drawGroup : public drawObj, public viewMgr {
 				drawGroup(int x, int y, word width,word height,bool clicks=false);
   	virtual	~drawGroup();
 
+	virtual	bool	checkGroupRefresh(void);
 	virtual	void	setLocation(int x,int y);
 	virtual	void	setGroupRefresh(void);
 	virtual	bool	wantRefresh(void);
@@ -140,8 +141,12 @@ class drawList : public drawGroup {
   	virtual	~drawList();
   					
   	virtual	void	addObj(drawObj* newObj);
-  	
-  				word	listHeight;
+  				void	resetPositions(void);
+  				int	lastY(void);
+  				bool	isVisible(drawObj* theItem);
+				void	showItem(drawObj* theItem);
+				
+  				int	itemHeight;
   	
 };
 

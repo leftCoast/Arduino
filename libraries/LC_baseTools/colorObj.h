@@ -34,11 +34,20 @@
 #define	LC_YELLOW  		255,255,  0
 
 
+// If you want a LOT of colorObj saved, like a bitmap?
+// The RGBpack is 3 bytes per pixel as opposed to 8 for
+// the color object itself. Same color information.
+struct RGBpack {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+};
 
 
 class colorObj {
 
 public:
+  				colorObj(RGBpack* buff); 
   				colorObj(byte inRed, byte inGreen, byte inBlue);
   				//colorObj(colorObj* inColor);						// Wanted this one, but the compiler mixes it up with color16.
   				colorObj(word color16);
@@ -53,7 +62,8 @@ public:
   				byte		getRed(void);
   				byte		getGreen(void);
   				byte		getBlue(void);
-
+				RGBpack	packColor(void);
+				
   				colorObj	mixColors(colorObj* mixinColor,byte mixPercent);  // Create a new color by mixing. (Like the old blend)
   				void		blend(colorObj* mixinColor,byte mixPercent);      // Just blend with myself. Percent 0% -> 100% of new color.
     
