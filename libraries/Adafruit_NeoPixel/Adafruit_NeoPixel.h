@@ -133,8 +133,7 @@ class Adafruit_NeoPixel {
     clear(),
     updateLength(uint16_t n),
     updateType(neoPixelType t);
-  bool
-  	isRGBType(void);
+  
   uint8_t
    *getPixels(void) const,
     getBrightness(void) const;
@@ -151,7 +150,8 @@ class Adafruit_NeoPixel {
     canShow(void) { return (micros() - endTime) >= 50L; }
 
  private:
-
+bool
+  	isRGBType(void);	// Mine. Hiding it for now to remove dependancies on it.
   boolean
 #ifdef NEO_KHZ400  // If 400 KHz NeoPixel support enabled...
     is800KHz,      // ...true if 800 KHz pixels

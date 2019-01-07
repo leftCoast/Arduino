@@ -12,7 +12,6 @@
 #include <timeObj.h>
 
 #include <chainPixels.h>
-#include <liteLine.h>
 #include <neoPixel.h>
 
 #include "theRings.h"
@@ -36,18 +35,16 @@ void setUpPattern(void) {
   colorObj      aColor;
 
   aColor.setColor(&white);
-  //aColor.blend(&black,70);
   theColors.addColor(0,&aColor);
 
   aColor.setColor(&red);
-  //aColor.blend(&black,50);
   theColors.addColor(1,&aColor);
 
   aColor.setColor(&red);
   aColor.blend(&black,80);
   theColors.addColor(3,&aColor);
 
-  aColor.setColor(&blue);
+  aColor.setColor(&green);
   aColor.blend(&black,80);
   theColors.addColor(4,&aColor);
 

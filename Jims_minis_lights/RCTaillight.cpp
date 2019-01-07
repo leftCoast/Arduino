@@ -47,29 +47,29 @@ void RCTaillight::draw(void) {
   float     yawValue;
   float     rollValue;
   float     turnValue;
-  colorObj  result(GREEN);  // Starting with green..
+  colorObj  result(LC_GREEN);  // Starting with green..
   colorObj  darkSide;
 
   if (yaw != oldYaw || throttle != oldThrottle || roll != oldRoll || pitch != oldPitch) {  // We get called a LOT. Make sure there really is a change.
     pitchValue = pitchPercent.Map(pitch);             // Get pitch as 0..100 (How much red to add..)
-    result = result.blend(&red, pitchValue);          // Create the inital color.
+    result = result.mixColors(&red, pitchValue);          // Create the inital color.
 
     throttleValue = throttlePercent.Map(throttle);    // Get throttle as 0..100
-    result = black.blend(&result, throttleValue);     // Take black and blend this much pitch color into it..
+    result = black.mixColors(&result, throttleValue);     // Take black and blend this much pitch color into it..
     setPixels(&result);                               // This is the base color for the bar.
 
     yawValue = yawPercent.Map(yaw);                   // Get yaw as -100..100
     rollValue = rollPercent.Map(roll);                // Get roll as -100..100
     turnValue = (yawValue + rollValue) / 2.0;         // Avarage the two..
-    darkSide = result.blend(&black, abs(turnValue)*2);  // The darker value..
+    darkSide = result.mixColors(&black, abs(turnValue)*2);  // The darker value..
 
     if (turnValue > 0) {                              // The actual side is somewhat arbitrary. The mounting direction is undefined.
       for (word i = 0; i < numPixels / 2; i++) {
-        setPixel(i, &darkSide);
+        setPixelColor(i, &darkSide);
       }
     } else {
       for (word i = numPixels / 2; i < numPixels; i++) {
-        setPixel(i, &darkSide);
+        setPixelColor(i, &darkSide);
       }
     }
     oldYaw = yaw;              // Save 'em so we don't waste time.
@@ -78,5 +78,3 @@ void RCTaillight::draw(void) {
     oldPitch = pitch;
   }
 }
-
-

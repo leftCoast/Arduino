@@ -1,8 +1,16 @@
-     #include <mapper.h>
+#include <mapper.h>
 #include <lists.h>
 #include <colorObj.h>
 #include <neoPixel.h>
 #include <timeObj.h>
+
+
+//
+// Decoration I setup for "Franklin" My 1941 Dodge Carryall WC53.
+// See : https://youtu.be/JWgQ5aM2B5M
+// Or for the blog : https://www.eskimo.com/~jimlee/Home/Carryall_Blog/Carryall_Blog.html
+//
+//
 
 #define NUM_LEDS          150
 #define PIXEL_PIN         2

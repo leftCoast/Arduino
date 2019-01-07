@@ -212,6 +212,8 @@ void stack::pop(void) { unlinkTop(); }
 
 linkListObj* stack::top(void) { return getFirst(); }
 
+bool stack::empty(void) { return isEmpty(); }
+
 
 // ********** queue ****************
 // Your basic queue, we own 'em. Mostly pass throughs with the usual names.
@@ -226,6 +228,8 @@ void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 void queue::pop(void) { unlinkTop(); }
 
 linkListObj* queue::top(void) { return getFirst(); }
+
+bool queue::empty(void) { return isEmpty(); }
 
 
 // ********** double linked list ****************
@@ -365,5 +369,6 @@ int dblLinkListObj::countHead(void) {
 		count++;
 		trace = dllPrev;
 	}
+	return count;
 }
 

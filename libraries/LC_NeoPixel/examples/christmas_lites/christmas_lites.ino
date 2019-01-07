@@ -3,8 +3,8 @@
 #include <colorObj.h>
 #include <neoPixel.h>
 
-#define NUM_LEDS      150
-#define PIXEL_PIN     2
+#define NUM_LEDS      150       // SET HOW MANY LEDS YOU HAVE HERE.
+#define PIXEL_PIN     2         // SET THE OUTPUT PIN YOU WILL USE HERE.
 #define NUM_COLORS    6
 #define DARK_PERCENT  75
 #define FADE_PERCENT  50.999

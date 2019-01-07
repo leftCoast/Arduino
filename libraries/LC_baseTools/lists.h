@@ -65,10 +65,10 @@ class stack : public linkList {
     			stack(void);
     virtual	~stack(void);
     
-    virtual void         push(linkListObj* newObj);
-    virtual void         pop(void);
-    virtual linkListObj* top(void);
-    virtual bool	     empty(void);
+    virtual void				push(linkListObj* newObj);
+    virtual void				pop(void);
+    virtual linkListObj*	top(void);
+    virtual bool				empty(void);
   };
 
 
