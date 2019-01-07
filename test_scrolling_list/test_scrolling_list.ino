@@ -288,7 +288,7 @@ void doRunVolume(void) {
     setControlPtr(ourList);
   }
    if (ourClicker.clicked()) {
-    player->command(pause);
+    player->command(fullStop);
     runVolume = false;
     while(ourClicker.clicked());
     setControlPtr(ourList);
