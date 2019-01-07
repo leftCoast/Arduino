@@ -17,7 +17,7 @@ scrollingList::~scrollingList(void) {  }
 
 
 // Many times the list itself doesn't draw. 
-void scrollingList::drawSelf(void) { screen->fillRect(x,y,width,height,&red); }
+void scrollingList::drawSelf(void) { }
 
 
 

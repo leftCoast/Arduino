@@ -158,13 +158,13 @@ soundCardErr soundCard::getLastError(void) { return lastErr; }
 
 void soundCard::idle(void) {
 
-    if (musicPlayer->playingMusic && ding()) {
-      noInterrupts();
-      musicPlayer->feedBuffer();
-      interrupts();
-      start();
-    }
-  }
+	if (musicPlayer->playingMusic && ding()) {
+		noInterrupts();
+		musicPlayer->feedBuffer();
+		interrupts();
+		start();
+	}
+}
 
 
 // A BLOCKING run-'till-you're-done function.

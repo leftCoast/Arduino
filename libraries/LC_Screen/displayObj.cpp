@@ -17,14 +17,12 @@ displayObj::~displayObj(void) { }
 
   
 void displayObj::pushOffset(int x, int y) {
-	if (x==0) {Serial.print("push : ");Serial.print(x);Serial.print(", ");Serial.println(y);}
 	offsetX = offsetX + x;
 	offsetY = offsetY + y;
 }
 
 
 void displayObj::popOffset(int x, int y) {
-	if (x==0){Serial.print("pop : ");Serial.print(x);Serial.print(", ");Serial.println(y);}
 	offsetX = offsetX - x;
 	offsetY = offsetY - y;
 }

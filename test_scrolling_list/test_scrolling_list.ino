@@ -9,6 +9,7 @@
 #include <multiMap.h>
 #include <runningAvg.h>
 #include <timeObj.h>
+#include <mechButton.h>
 
 #include <bmpPipe.h>
 #include <bmpLabel.h>
@@ -23,6 +24,89 @@
 #include "scrollingList.h"
 #include "pushPotGUI.h"
 
+class playObj : public idler {
+
+  public:
+            playObj(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin=-1);
+
+            bool  begin(void);
+            bool  setSoundfile(char* inFilePath);
+            bool  command(action inCommand);
+            bool  isPlaying(void);
+            void  setVolume(byte volume);
+
+            timeObj timer;
+};
+
+
+playObj::playObj(byte boardSetup,byte inCsPin,byte inDrqPin,byte inResetPin) {
+  timer.setTime(5000);
+}
+bool playObj::begin(void) { return true; }
+bool playObj::setSoundfile(char* inFilePath) { return true; }
+bool playObj::command(action inCommand) { 
+  timer.start();
+  return true;
+}
+bool playObj::isPlaying(void) { return timer.ding(); }
+void playObj::setVolume(byte volume) { }
+
+// ************************************
+// ************* songList *************
+// ************************************
+
+//mapper  potToScroll(0,1024,0,100);
+
+class songList :  public scrollingList,
+                  public pushPotGUI {
+
+  public:
+          songList(int x, int y, word width,word height);
+  virtual ~songList(void);
+
+  virtual void        doPotVal(int aVal);
+  virtual void        reset(void);
+
+          runningAvg* potSmoother;
+          mapper*     potToScroll;
+};
+
+
+songList::songList(int x, int y, word width,word height)
+  : scrollingList(x,y,width,height,dialScroll) {
+
+  potSmoother = new runningAvg(5);
+  potToScroll = new mapper(0,1024,0,100);
+}
+
+
+songList::~songList(void) {
+
+  if (potSmoother) delete potSmoother;
+  if (potToScroll) delete potToScroll;
+}
+
+
+ void  songList::reset(void) { needRefresh = true; }
+
+void songList::doPotVal(int aVal) {
+
+  float pcnt;
+  
+  pcnt = potToScroll->Map(aVal);
+  setScrollValue(pcnt);
+}
+
+
+
+// ************************************
+// ************ fListItem *************
+// ************************************
+
+
+soundCard*  player;
+//playObj*    player;
+bool        runVolume;
 
 class fListItem : public label {
 
@@ -31,6 +115,7 @@ public:
   virtual ~fListItem(void);
 
   virtual void drawSelf(void);
+  virtual void doAction(void);
   
           drawList* mList;
 };
@@ -42,6 +127,7 @@ fListItem::fListItem(drawList* myList,char* name)
 
 fListItem::~fListItem(void) {  }
 
+
 void fListItem::drawSelf(void) {
 
   char  buff[20];
@@ -49,21 +135,40 @@ void fListItem::drawSelf(void) {
   int offst = 2;
   getText(buff);
   if (mList->isVisible(this)) {
+    Serial.print((int)this);Serial.println(" Drawing.");
     if (focus) {
       setColors(&red);
     } else {
       setColors(&black);
     }
     screen->fillRect(x,y,width,height,&green);
-    screen->drawRect(x,y,width,height,&blue);
+    //screen->drawRect(x,y,width,height,&blue);
     x=x+offst;
     y=y+offst;
       label::drawSelf();
     x=x-offst;
     y=y-offst;
   }
-  //delay(3000);
 }
+
+
+void fListItem::doAction(void) {
+
+  char* songFile[20];
+
+  getText((char*)songFile);
+  player->setSoundfile((char*)songFile);
+  player->command(play);
+  setControlPtr(NULL);
+  runVolume = true;
+}
+
+
+
+// ************************************
+// ************** main() **************
+// ************************************
+
 
 
 #define SOUND_CS    20
@@ -81,12 +186,13 @@ void fListItem::drawSelf(void) {
 #define DB_BTN      5
 
 #define DISP_BG_FILE  "/dbos/paper.bmp"
+#define BOOT_FILE  "/dbos/boot.mp3"
 
-runningAvg      potSmoother(5);
-mapper          potToScroll(0,1024,0,100);
 //bmpPipe         paper;
-scrollingList*  ourList;
-
+songList*   ourList;
+mechButton  ourClicker(POT_BTN);
+mapper      potToVol(0,1024,0,60);
+timeObj     volumeDelay(25);
 
 void setup() {
 
@@ -106,6 +212,14 @@ void setup() {
   }
 
   screen->fillScreen(&green);
+
+  player = new soundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_RST);
+  //player = new playObj(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_RST);
+  player->begin();
+  //player->setSoundfile(BOOT_FILE);
+  //player->command(play);
+  //player->setVolume(0);
+  runVolume = false;
   /*
   if (paper.openPipe(DISP_BG_FILE)) {
     Serial.println(F("Background .bmp file OPENED."));
@@ -117,21 +231,14 @@ void setup() {
   Serial.print("Size of RGBpack. : ");Serial.println(sizeof(RGBpack));
 
   fListItem*  newItem;
-  ourList = new scrollingList(20,24,108,60,dialScroll);
+  ourList = new songList(20,4,100,120);
   ourList->setNeedRefresh();
   viewList.addObj(ourList);
-  /*
-  newItem = new fListItem(ourList,"First");
-  ourList->addObj(newItem);
-  newItem = new fListItem(ourList,"Second");
-  ourList->addObj(newItem);
-  newItem = new fListItem(ourList,"Third");
-  ourList->addObj(newItem);
-  Serial.print("OurList : ");Serial.println((int)ourList);
-  Serial.print("viewList : ");Serial.println((int)&viewList);
-  */
+ 
   fillList("/");
+  setControlPtr(ourList);
 }
+
 
 void fillList(const char* workingDir) {
 
@@ -149,7 +256,6 @@ void fillList(const char* workingDir) {
       if (entry) {
         if (!entry.isDirectory()) {
           if (strstr(entry.name(),".MP3")) {
-            Serial.println("Adding item");
             newItem = new fListItem(ourList,entry.name());
             ourList->addObj(newItem);
           }
@@ -167,15 +273,39 @@ void fillList(const char* workingDir) {
 }
 
 
+void doRunVolume(void) {
+  int vol;
+  int potNum;
+  
+  potNum = analogRead(POT_ANLG);
+  vol = potToVol.Map(potNum);
+  if (volumeDelay.ding()) {
+    player->setVolume(vol);
+    volumeDelay.start();
+  }
+  if (!player->isPlaying()) {
+    runVolume = false;
+    setControlPtr(ourList);
+  }
+   if (ourClicker.clicked()) {
+    player->command(pause);
+    runVolume = false;
+    while(ourClicker.clicked());
+    setControlPtr(ourList);
+  }
+}
 
 
 void loop() {
-  
-  int rawPrawn;
-  float pcnt;
-
+    
   idle();
-  rawPrawn = potSmoother.addData(analogRead(POT_ANLG));
-  pcnt = potToScroll.Map(rawPrawn);
-  ourList->setScrollValue(pcnt);
+  if (runVolume) {
+    doRunVolume();
+  } else {
+    if (ourClicker.clicked()) {
+      buttonClick();
+      while(ourClicker.clicked());
+    }
+    potVal(analogRead(POT_ANLG));
+  } 
 }

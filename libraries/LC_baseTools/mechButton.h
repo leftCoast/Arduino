@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define NUM_CHECKS  5
+#define NUM_CHECKS  20
 
 // Hook your mechanical push button between a digital pin
 // and ground. Pass the pin number into one of these.
