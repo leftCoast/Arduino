@@ -481,8 +481,12 @@ void	drawGroup::draw(void) {
 // ***************************************************
 
 
-drawList::drawList(int x, int y, word width,word height,bool clicks) 
-	: drawGroup(x,y,width,height,clicks) { itemHeight = 1; }
+drawList::drawList(int x, int y, word width,word height,bool clicks,bool vertical) 
+	: drawGroup(x,y,width,height,clicks) {
+
+	mVertical = vertical;	// Save it for now, deal with coding it later.
+	itemHeight = 1;
+}
 
 
 drawList::~drawList() { }

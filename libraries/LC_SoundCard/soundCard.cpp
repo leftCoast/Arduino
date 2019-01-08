@@ -159,9 +159,7 @@ soundCardErr soundCard::getLastError(void) { return lastErr; }
 void soundCard::idle(void) {
 
 	if (musicPlayer->playingMusic && ding()) {
-		noInterrupts();
 		musicPlayer->feedBuffer();
-		interrupts();
 		start();
 	}
 }
@@ -178,13 +176,12 @@ void soundCard::playClip(char* filePath) {
 	
 	if (!musicPlayer->playingMusic) {		// Ok, no one is using the hardware.
 		musicPlayer->startPlayingFile(filePath);
-		while(musicPlayer->playingMusic);
+		while(musicPlayer->playingMusic) {
 			if (musicPlayer->readyForData()) {
-				noInterrupts();
 				musicPlayer->feedBuffer();
-				interrupts();
-      }
-    }
-  }
+			}
+		}
+  	}
+}
 
 

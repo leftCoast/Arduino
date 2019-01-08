@@ -137,7 +137,7 @@ class drawGroup : public drawObj, public viewMgr {
 class drawList : public drawGroup {
  
 	public:
-				drawList(int x, int y, word width,word height,bool clicks=false);
+				drawList(int x, int y, word width,word height,bool clicks=false,bool vertical=true);
   	virtual	~drawList();
   					
   	virtual	void	addObj(drawObj* newObj);
@@ -147,6 +147,7 @@ class drawList : public drawGroup {
 				void	showItem(drawObj* theItem);
 				
   				int	itemHeight;
+  				bool	mVertical;
   	
 };
 
