@@ -63,11 +63,9 @@ void scrollingList::setScrollValue(float percent) {
   }
   itemIndex = round(itemMapper.Map(percent));   // Map to get item index.
   if (itemIndex==-1) {                          // Below 0, abovve list.
-    setFocusPtr(NULL);                          // Defocus the list item.
     mLoc = aboveList;                           // setOur location type to above.
     offList();                                  // Let 'em know if they want.
   } else if (itemIndex==numItems) {             // numItems is actually one past the list.
-    setFocusPtr(NULL);                          // Defocus the list item.
     mLoc = belowList;                           // setOur location type to below.
     offList();                                  // They may want to know, being polite and all..
   } else {

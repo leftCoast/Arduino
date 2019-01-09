@@ -1,7 +1,7 @@
 #include "pushPotGUI.h"
 #include <drawObj.h>
 
-// This on is to be called for setting the controller.
+// This one is to be called for setting the controller.
 void  setControlPtr(pushPotGUI* newController) {
 
   controlPtr = newController;      // The up and coming..

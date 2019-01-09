@@ -5,11 +5,14 @@
 
 
 extern soundCard* player;
-extern bool       runVolume;
-extern toggleBtn* ourToggler;
-extern colorObj   screenBColor;
-extern colorObj   textUHColor;
-extern colorObj   textHColor;
+extern bool           runVolume;
+extern bool           randomPlay;
+extern songListItem*  playing;
+extern toggleBtn*     ourToggler;
+extern colorObj       screenBColor;
+extern colorObj       textUHColor;
+extern colorObj       textHColor;
+extern colorObj       textActiveColor;
 
 // ************************************
 // ********** songListItem ************
@@ -30,14 +33,14 @@ void songListItem::drawSelf(void) {
   int offst = 2;
   getText(buff);
   if (mList->isVisible(this)) {
-    Serial.print((int)this);Serial.println(" Drawing.");
-    if (focus) {
+    if (playing == this) {
+      setColors(&textActiveColor);
+    } else if (focus) {
       setColors(&textHColor);
     } else {
       setColors(&textUHColor);
     }
     screen->fillRect(x,y,width,height,&screenBColor);
-    //screen->drawRect(x,y,width,height,&blue);
     x=x+offst;
     y=y+offst;
       label::drawSelf();
@@ -54,8 +57,10 @@ void songListItem::doAction(void) {
   getText((char*)songFile);
   player->setSoundfile((char*)songFile);
   player->command(play);
-  setControlPtr(NULL);
+  playing = this;
+  //setControlPtr(NULL);  // I don't think this should be here..
   runVolume = true;
+  needRefresh = true;
 }
 
 
@@ -86,7 +91,10 @@ songList::~songList(void) {
 void  songList::reset(void) { needRefresh = true; }
 
 
-void songList::offList(void) { setControlPtr(ourToggler); }
+void songList::offList(void) {
+  
+  setControlPtr(ourToggler);
+}
 
 
 void songList::doPotVal(int aVal) {

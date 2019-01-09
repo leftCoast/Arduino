@@ -41,9 +41,33 @@ class toggleBtn : public scrollingList,
           toggleBtn(int x, int y, word width,word height);
   virtual ~toggleBtn(void);
 
+  virtual void  offList(void);
   virtual void  drawSelf(void);
           void  doPotVal(int aVal);       
 };
+
+
+
+// ************************************
+// ************ contPnlItem ***********
+// ************************************
+
+
+enum CPIType { randPlayOn, randPlayOff }; // Can't think of any others now..
+
+class contPnlItem : public drawObj {
+
+public:
+          contPnlItem(drawList* myList,CPIType myType);
+  virtual ~contPnlItem(void);
+
+  virtual void drawSelf(void);
+  virtual void doAction(void);
+  
+          drawList* mDrawList;
+          CPIType  mCPIType;
+};
+
 
 
 // ************************************
@@ -61,6 +85,7 @@ class controlPanel :  public scrollingList,
   virtual void    drawSelf(void);   
   virtual void    doPotVal(int aVal);
   virtual void    reset(void);
+  virtual void    offList(void);
 
           runningAvg* potSmoother;  
           mapper*     potToControl;
