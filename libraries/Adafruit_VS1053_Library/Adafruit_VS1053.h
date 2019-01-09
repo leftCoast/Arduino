@@ -38,7 +38,9 @@
   typedef uint8_t PortMask;
 #elif defined (__arm__)
   #if defined(TEENSYDUINO)
-  typedef volatile uint8_t RwReg;
+#ifndef RwReg								// Yes this is my hack. - jim lee
+ typedef volatile uint8_t RwReg;
+#endif										// Other end of it.
   typedef uint8_t PortMask;
   #else
   typedef volatile uint32_t RwReg;

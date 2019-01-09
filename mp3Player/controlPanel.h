@@ -9,44 +9,6 @@
 #include "scrollingList.h"
 
 
-// ************************************
-// ************* toggleItem ***********
-// ************************************
-
-enum  toggleDir { toggleDn, toggleLft };
-
-class toggleItem : public drawObj {
-
-public:
-          toggleItem(drawList* myList,toggleDir dir);
-  virtual ~toggleItem(void);
-
-  virtual void drawSelf(void);
-  virtual void doAction(void);
-  
-          drawList* mList;
-          toggleDir mDir;
-};
-
-
-// ************************************
-// ************* toggleBtn ************
-// ************************************
-
-
-class toggleBtn : public scrollingList,
-                  public pushPotGUI {
-
-  public:
-          toggleBtn(int x, int y, word width,word height);
-  virtual ~toggleBtn(void);
-
-  virtual void  offList(void);
-  virtual void  drawSelf(void);
-          void  doPotVal(int aVal);       
-};
-
-
 
 // ************************************
 // ************ contPnlItem ***********
@@ -61,11 +23,11 @@ public:
           contPnlItem(drawList* myList,CPIType myType);
   virtual ~contPnlItem(void);
 
-  virtual void drawSelf(void);
-  virtual void doAction(void);
+  virtual void  drawSelf(void);
+  virtual void  doAction(void);
   
           drawList* mDrawList;
-          CPIType  mCPIType;
+          CPIType   mCPIType;
 };
 
 
@@ -87,8 +49,10 @@ class controlPanel :  public scrollingList,
   virtual void    reset(void);
   virtual void    offList(void);
 
-          runningAvg* potSmoother;  
-          mapper*     potToControl;
+          runningAvg*   potSmoother;  
+          mapper*       potToControl;
+          contPnlItem*  mOnItem;
+          contPnlItem*  mOffItem;
 };
 
 #endif

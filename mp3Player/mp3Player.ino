@@ -56,18 +56,17 @@ soundCard*      player;
 songList*       ourList;
 songListItem*   playing;
 controlPanel*   ourController;
-toggleBtn*      ourToggler;
 
 mechButton      ourClicker(POT_BTN);
 mapper          potToVol(0,1024,0,60);
-timeObj         volumeDelay(50);
+timeObj         volumeDelay(10);
 bool            runVolume;
 bool            randomPlay;
 colorObj        screenBColor;
 colorObj        textUHColor;
 colorObj        textHColor;
 colorObj        textActiveColor;
-runningAvg      potSmoother(10);
+runningAvg      potSmoother(25);
 
 
 void setup() {
@@ -110,10 +109,10 @@ void setup() {
   SDCleaner();
   fillList("/");
   
-  Serial.println("Building toggleBtn");
-  Serial.flush();
-  ourToggler = new toggleBtn(107,6,12,12);
-  viewList.addObj(ourToggler);
+  //Serial.println("Building toggleBtn");
+  //Serial.flush();
+  //ourToggler = new toggleBtn(107,6,12,12);
+  //viewList.addObj(ourToggler);
   
   Serial.println("Building controlPanel");
   Serial.flush();

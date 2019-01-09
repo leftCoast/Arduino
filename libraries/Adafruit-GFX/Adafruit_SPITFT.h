@@ -37,7 +37,9 @@
 #elif defined(__OPENCR__) || defined (__OPENCM904__)
   #undef USE_FAST_PINIO
 #elif defined(ARDUINO_FEATHER52) || defined(__arm__)
-  typedef volatile uint32_t RwReg;
+#ifndef RwReg								// Yes this is my hack. - jim lee
+ typedef volatile uint8_t RwReg;
+#endif										// Other end of it.
 #elif defined(ESP32) || defined(ESP8266)
   typedef volatile uint32_t RwReg;
   #undef USE_FAST_PINIO

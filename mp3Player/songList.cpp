@@ -8,7 +8,8 @@ extern soundCard* player;
 extern bool           runVolume;
 extern bool           randomPlay;
 extern songListItem*  playing;
-extern toggleBtn*     ourToggler;
+//extern toggleBtn*     ourToggler;
+extern controlPanel*  ourController;
 extern colorObj       screenBColor;
 extern colorObj       textUHColor;
 extern colorObj       textHColor;
@@ -58,7 +59,7 @@ void songListItem::doAction(void) {
   player->setSoundfile((char*)songFile);
   player->command(play);
   playing = this;
-  //setControlPtr(NULL);  // I don't think this should be here..
+  setControlPtr(NULL);  // I don't think this should be here.. ( It DOES! Remove it and it leaves a seleced item behind. )
   runVolume = true;
   needRefresh = true;
 }
@@ -76,7 +77,7 @@ void songListItem::doAction(void) {
 songList::songList(int x, int y, word width,word height)
   : scrollingList(x,y,width,height,dSOpenTop) {
 
-  potSmoother = new runningAvg(5);
+  potSmoother = new runningAvg(20);
   potToList   = new mapper(0,1024,0,100);
 }
 
@@ -88,12 +89,13 @@ songList::~songList(void) {
 }
 
 
-void  songList::reset(void) { needRefresh = true; }
+void  songList::reset(void) { }
 
 
 void songList::offList(void) {
-  
-  setControlPtr(ourToggler);
+
+  setFocus(NULL);
+  setControlPtr(ourController);
 }
 
 
