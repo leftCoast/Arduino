@@ -28,10 +28,9 @@
 //
 // Looking at it a little lower down. We use the pot value to
 // scroll the global "focus" around in our subObjects. When a 
-// button click comes in, just call the action() metho on whomever
-// has the focus at that moment. 
-
-
+// button click comes in, just call the action() method on
+// whomever has the focus at that moment. 
+//
 // At least, that's the plan..
 
 class pushPotGUI {

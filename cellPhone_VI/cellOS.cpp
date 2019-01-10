@@ -1,8 +1,11 @@
 
-#include "litlOS.h" 
+#include "cellOS.h"
+
 #include <screen.h>
 #include <cellCommon.h>
 #include <cellManager.h>
+#include <colorObj.h>
+
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
 #include "phone.h"
@@ -16,28 +19,10 @@
 
 #define STEPTIME  20 //ms
 
-
-apps        nextApp;  // What panel do we want showing now?
-litlOS      ourOS;    // Used to manage the panels.
-
+cellOS  ourOS;
 
 // *****************************************************
-// ********************   appIcon  *********************
-// *****************************************************
-
-
-appIcon::appIcon(int xLoc,int yLoc,apps message,char* path)
-  : iconButton(xLoc,yLoc,path) { mMessage = message; }
-
-  
-appIcon::~appIcon(void) {  }
-
-
-void appIcon::doAction(void) { nextApp = mMessage; }
-
-
-// *****************************************************
-// *******************   homePanel  ********************
+// *******************   homeScreen  ********************
 // *****************************************************
 
 #define HP_ICON_X       3
@@ -47,8 +32,8 @@ void appIcon::doAction(void) { nextApp = mMessage; }
 #define out     mText->appendText
 #define outln   mText->appendText("\n")
 
-homePanel::homePanel(void)
-  : panel(homeApp,false) {
+homeScreen::homeScreen(void)
+  : homePanel() {
 
   int iconX;
   
@@ -64,18 +49,19 @@ homePanel::homePanel(void)
   qGameIcon = new appIcon(iconX,HP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
   iconX=iconX+HP_ICON_XSTEP;
   breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
-
+  
+  colorObj aColor(LC_NAVY);
   mText = new textView(10,10,220,150);
-  mText->setTextColors(&yellow,&blue);
+  mText->setTextColors(&white,&aColor);
   addObj(mText);
   statusTimer.setTime(1500);
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
-homePanel::~homePanel(void) { }
+homeScreen::~homeScreen(void) { }
 
 
-void homePanel::setup(void) { 
+void homeScreen::setup(void) { 
 
   if (calcIcon)     { addObj(calcIcon);     calcIcon->begin(); }
   if (textIcon)     { addObj(textIcon);     textIcon->begin(); }
@@ -85,7 +71,7 @@ void homePanel::setup(void) {
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 }
 
-void homePanel::loop(void) { 
+void homeScreen::loop(void) { 
   
 if (statusTimer.ding()) {
   mText->setText("");
@@ -123,40 +109,37 @@ if (statusTimer.ding()) {
 }
 
 
-void homePanel::drawSelf(void) { 
-
-  screen->fillScreen(&white);
+void homeScreen::drawSelf(void) { 
+  colorObj aColor(LC_NAVY);
+  screen->fillScreen(&aColor);
+  screen->fillRect(0,270,240,90,&white);
 }
 
 
 
 // *****************************************************
-// *********************   litlOS   ********************
+// *********************   cellOS   ********************
 // *****************************************************
 
  
-litlOS::litlOS(void) {
+cellOS::cellOS(void) {
 
   mFile = NULL;
-  mPanel = NULL;
-  nextApp = noPanel;
   mDimScreen = false;
   mNowTime = 0;
   mEndTime = 0;
 }
 
 
-litlOS::~litlOS(void) {  }
+cellOS::~cellOS(void) { if (mFile) delete mFile; }
 
 
-void litlOS::begin(void) {
+int cellOS::begin(void) {
 
   mFile = new blockFile(SYS_FILE_PATH);
   if (mFile->isEmpty()) {
     initOSFile();
   }
-  nextApp = homeApp;
-  hookup();
   mScreenTimer.setTime(STEPTIME);
   screenMap.addPoint(RAMPUP_START,0);
   screenMap.addPoint(RAMPUP_END,255);
@@ -164,55 +147,35 @@ void litlOS::begin(void) {
   screenMap.addPoint(RAMPDN_END,0);
   ourListener.begin(phoneApp);
   bringUp();
+  return litlOS::begin();
 }
 
 
-void litlOS::initOSFile(void) {  }
+void cellOS::initOSFile(void) {  }
 
+// Used to create our custom panels.
+panel* cellOS::createPanel(int panelID) {
 
-void litlOS::launchPanel(void) {
+  switch (panelID) {
+    case homeApp      : return new homeScreen(); 
+    case phoneApp     : return new phone();
+    case textApp      : return new homeScreen();
+    case contactApp   : return new homeScreen();
+    case calcApp      : return new rpnCalc();
+    case qGameApp     : return new qGame();
+    case breakoutApp  : return new homeScreen();
+    default           : return NULL;
+  }
+}
+
+void cellOS::launchPanel(void) {
 
   hideRedraw();
-  while(screen->touched()); // Hold 'till their finger is off the screen.
-  if (mPanel) {
-    delete mPanel;
-    mPanel = NULL;  // Just in case..
-  }
-  switch(nextApp) {
-    case noPanel      : return;
-    case homeApp      : mPanel = (panel*) new homePanel(); break;
-    case calcApp      : mPanel = (panel*) new rpnCalc();   break;
-    case qGameApp     : mPanel = (panel*) new qGame();   break;
-    case phoneApp     : mPanel = (panel*) new phone();   break;
-    case textApp      : 
-    case contactApp   :
-    case breakoutApp  : 
-    default           : 
-      nextApp = homeApp;
-      mPanel = (panel*) new homePanel();
-    break;
-  }
-  if (mPanel) {
-    viewList.addObj(mPanel);
-    mPanel->setup();
-    mPanel->hookup();  
-  }
+  litlOS::launchPanel();
 }
 
 
-// Tell the current panel its loop time.
-void litlOS::loop(void) {
-
-  if(!mPanel && nextApp!=noPanel) {             // If have no panel and we want one.
-    launchPanel();                              // Launch a new panel.
-  } else if(nextApp!=mPanel->getPanelID()) {    // Else, if we just want a change of panels.
-    launchPanel();                              // Launch a new panel.
-  }
-  if (mPanel) { mPanel->loop(); }
- }
-
-
-void litlOS::hideRedraw() {
+void cellOS::hideRedraw() {
 
   for(int i=RAMPDN_START;i<RAMPDN_END;i=i+STEPTIME) {
     analogWrite(SCREEN_PIN,screenMap.Map(i));
@@ -225,7 +188,7 @@ void litlOS::hideRedraw() {
   mScreenTimer.start();
 }
 
-void litlOS::bringUp() {
+void cellOS::bringUp() {
   
   mDimScreen = true;
   mNowTime = RAMPUP_START;
@@ -235,7 +198,7 @@ void litlOS::bringUp() {
 
 
 // Things we do..
-void litlOS::idle(void) { 
+void cellOS::idle(void) { 
 
   if (mDimScreen) {
     if (mScreenTimer.ding()) {

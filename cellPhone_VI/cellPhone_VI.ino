@@ -1,5 +1,5 @@
 
-#include <Adafruit_GFX.h>
+#include <Adafruit_GFX.h> 
 #include <gfxfont.h>
 #include <Adafruit_ILI9341.h>
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
@@ -15,16 +15,18 @@
 #include <displayObj.h>
 #include <bmpPipe.h>
 #include <screen.h>
+#include <litlOS.h>
 
 #include <cellCommon.h>
 
 #include "icons.h"
-#include "litlOS.h"
+#include "cellOS.h"
 #include "cellManager.h"
 
 #define TFT_CS  10
 #define TFT_RST -1    // I think I remember this is not used.
 #define SD_CS   4
+
 
 
 void setup() {

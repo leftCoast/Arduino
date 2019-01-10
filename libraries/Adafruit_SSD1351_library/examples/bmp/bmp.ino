@@ -1,7 +1,3 @@
-// IMPORTANT: this code temporarily DOES NOT WORK.
-// New BMP-loading examples will be provided soon
-// in the Adafruit_ImageReader library!
-
 /*************************************************** 
   This is a example sketch demonstrating bitmap drawing
   capabilities of the SSD1351 library for the 1.5" 
@@ -35,11 +31,11 @@
 
 
 // If we are using the hardware SPI interface, these are the pins (for future ref)
-#define SCLK_PIN 13
-#define MOSI_PIN 11
-#define CS_PIN   5
-#define RST_PIN  6
-#define DC_PIN   4
+#define sclk 13
+#define mosi 11
+#define cs   5
+#define rst  6
+#define dc   4
 
 // Color definitions
 #define	BLACK           0x0000
@@ -52,7 +48,7 @@
 #define WHITE           0xFFFF
 
 // to draw images from the SD card, we will share the hardware SPI interface
-Adafruit_SSD1351 tft = Adafruit_SSD1351(CS_PIN, DC_PIN, RST_PIN);
+Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, rst);
 
 // For Arduino Uno/Duemilanove, etc
 //  connect the SD card with MOSI going to pin 11, MISO going to pin 12 and SCK going to pin 13 (standard)
@@ -70,8 +66,8 @@ uint8_t bmpDepth, bmpImageoffset;
 void setup(void) {
   Serial.begin(9600);
    
-  pinMode(CS_PIN, OUTPUT);
-  digitalWrite(CS_PIN, HIGH);
+  pinMode(cs, OUTPUT);
+  digitalWrite(cs, HIGH);
      
   // initialize the OLED
   tft.begin();
@@ -171,7 +167,7 @@ void bmpDraw(char *filename, uint8_t x, uint8_t y) {
         if((y+h-1) >= tft.height()) h = tft.height() - y;
 
         for (row=0; row<h; row++) { // For each scanline...
-          // tft.goTo(x, y+row);
+          tft.goTo(x, y+row);
 
           // Seek to start of scan line.  It might seem labor-
           // intensive to be doing this on every line, but this
@@ -201,9 +197,9 @@ void bmpDraw(char *filename, uint8_t x, uint8_t y) {
             g = sdbuffer[buffidx++];
             r = sdbuffer[buffidx++];
 
-            tft.drawPixel(x+col, y+row, tft.color565(r,g,b));
+            tft.drawPixel(x+col, y+row, tft.Color565(r,g,b));
             // optimized!
-            //tft.pushColor(tft.color565(r,g,b));
+            //tft.pushColor(tft.Color565(r,g,b));
           } // end pixel
         } // end scanline
         Serial.print("Loaded in ");

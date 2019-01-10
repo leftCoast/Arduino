@@ -1,6 +1,6 @@
 
 #include "phone.h"
-#include "litlOS.h"
+#include "cellOS.h"
 #include <cellCommon.h>
 #include "cellManager.h"
 #include "cellListener.h"

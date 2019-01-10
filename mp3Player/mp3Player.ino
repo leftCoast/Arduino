@@ -18,11 +18,10 @@
 #include <label.h>
 #include <lineObj.h>
 #include <screen.h>
-
+#include <scrollingList.h>
+#include <pushPotGUI.h>
 #include <soundCard.h>
 
-#include "scrollingList.h"
-#include "pushPotGUI.h"
 #include "songList.h"
 #include "controlPanel.h"
 
@@ -30,6 +29,25 @@
 // ************************************
 // ************** main() **************
 // ************************************
+//
+// Quick apology about the code here. It was originally
+// tossed together, as fast as possible, as a test case
+// for building a scrolling library. Specifically the
+// pushPotGUI version. Uggh!
+// 
+// Seeing that the screen had .mp3 playing hardware
+// attached to it, it morphed into an .mp3 player interface.
+// This made the testing more fun. And, at the same time,
+// Adafruit contaced me to test their .mp3 player code that
+// I'd put a patch in for them..
+//
+// One thing led to another and here we are. As of this
+// writing, (1/9/2019) this stuff works. But it is a complete
+// and utter bailing-wired-together hack!
+//
+// But, just by accadent, I wrote in this cool navy-white-yellow-red
+// interface that Julie likes. Maybe I'll used that for my
+// cell phone?
 
 
 

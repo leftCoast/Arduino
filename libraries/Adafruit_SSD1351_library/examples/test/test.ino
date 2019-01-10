@@ -7,7 +7,8 @@
   ------> http://www.adafruit.com/products/1431
   ------> http://www.adafruit.com/products/1673
  
-  If you're using a 1.27" OLED, change SCREEN_HEIGHT to 96 instead of 128.
+  If you're using a 1.27" OLED, change SSD1351HEIGHT in Adafruit_SSD1351.h
+ 	to 96 instead of 128
 
   These displays use SPI to communicate, 4 or 5 pins are required to  
   interface
@@ -23,16 +24,12 @@
   Be sure to install it!
  ****************************************************/
 
-// Screen dimensions
-#define SCREEN_WIDTH  128
-#define SCREEN_HEIGHT 128 // Change this to 96 for 1.27" OLED.
-
 // You can use any (4 or) 5 pins 
-#define SCLK_PIN 2
-#define MOSI_PIN 3
-#define DC_PIN   4
-#define CS_PIN   5
-#define RST_PIN  6
+#define sclk 2
+#define mosi 3
+#define dc   4
+#define cs   5
+#define rst  6
 
 // Color definitions
 #define	BLACK           0x0000
@@ -49,15 +46,24 @@
 #include <SPI.h>
 
 // Option 1: use any pins but a little slower
-Adafruit_SSD1351 tft = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, CS_PIN, DC_PIN, MOSI_PIN, SCLK_PIN, RST_PIN);  
+//Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, mosi, sclk, rst);  
 
 // Option 2: must use the hardware SPI pins 
 // (for UNO thats sclk = 13 and sid = 11) and pin 10 must be 
 // an output. This is much faster - also required if you want
 // to use the microSD card (see the image drawing example)
-//Adafruit_SSD1351 tft = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, CS_PIN, DC_PIN, RST_PIN);
+Adafruit_SSD1351 tft = Adafruit_SSD1351(cs, dc, rst);
 
 float p = 3.1415926;
+
+void fillpixelbypixel(uint16_t color) {
+  for (uint8_t x=0; x < tft.width(); x++) {
+    for (uint8_t y=0; y < tft.height(); y++) {
+      tft.drawPixel(x, y, color);
+    }
+  }
+  delay(100);
+}
 
 void setup(void) {
   Serial.begin(9600);
@@ -310,16 +316,33 @@ void mediabuttons() {
 
 /**************************************************************************/
 /*! 
-    @brief  Renders a simple test pattern on the screen
+    @brief  Renders a simple test pattern on the LCD
 */
 /**************************************************************************/
 void lcdTestPattern(void)
 {
-  static const uint16_t PROGMEM colors[] =
-    { RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA, BLACK, WHITE };
-
-  for(uint8_t c=0; c<8; c++) {
-    tft.fillRect(0, tft.height() * c / 8, tft.width(), tft.height() / 8,
-      pgm_read_word(&colors[c]));
+  uint32_t i,j;
+  tft.goTo(0, 0);
+  
+  for(i=0;i<128;i++)
+  {
+    for(j=0;j<128;j++)
+    {
+      if(i<16){
+        tft.writeData(RED>>8); tft.writeData(RED);
+      }
+      else if(i<32) {
+        tft.writeData(YELLOW>>8);tft.writeData(YELLOW);
+      }
+      else if(i<48){tft.writeData(GREEN>>8);tft.writeData(GREEN);}
+      else if(i<64){tft.writeData(CYAN>>8);tft.writeData(CYAN);}
+      else if(i<80){tft.writeData(BLUE>>8);tft.writeData(BLUE);}
+      else if(i<96){tft.writeData(MAGENTA>>8);tft.writeData(MAGENTA);}
+      else if(i<112){tft.writeData(BLACK>>8);tft.writeData(BLACK);}
+      else {
+        tft.writeData(WHITE>>8);      
+        tft.writeData(WHITE);
+       }
+    }
   }
 }

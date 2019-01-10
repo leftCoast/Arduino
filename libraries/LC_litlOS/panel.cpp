@@ -1,7 +1,6 @@
 #include "panel.h"
 #include "litlOS.h"   // For nextApp
 
-//extern apps nextApp;
 
 // And it all starts up again..
 panel::panel(int panelID,bool wantClicks)
@@ -25,13 +24,19 @@ void panel::setup(void) { }
 void panel::loop(void) {  }
 
 
-// To supress default drawing of one's self.
+// he default here is to not draw ourselves. You can chnge that.
 void panel::drawSelf(void) {  }
 
 
-// Call this when its time to close the panel
-// and go back to the home panel.
-void panel::close(void) { nextApp = homeApp; }
+// Call this when its time to close the panel. Default is to go back
+// to the home panel. Maybe you want to link to another from time to time?
+void panel::close(void) { nextPanel = HOME_PANEL_ID; }
+
+// Whereas you call close() when you are complete and want to close.. Sometimes
+// you don't have control of that. So? No matter if you call close, or something
+// else calls close on you, this gets called so you can clean up before being
+// deleted.
+void panel::closing(void) {  }
 
 
 // DELAY!! OMG! Here's an idea on how to finally kill this beast.

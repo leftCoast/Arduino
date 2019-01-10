@@ -22,11 +22,12 @@
 #include <textView.h>
 #include <editField.h>
 #include <IOandKeys.h>
+#include <panel.h>
+#include <blockFile.h>
+#include <fileBuff.h>
 
-#include "blockFile.h"
-#include "fileBuff.h"
 #include "gameNode.h"
-#include "../../panel.h"
+
 
 
 

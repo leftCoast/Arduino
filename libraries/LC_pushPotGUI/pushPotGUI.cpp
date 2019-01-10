@@ -25,7 +25,7 @@ bool  potVal(int aVal) {
 
 
 // Send the button click to whomever has current focus.
-// Returns false if theris no one with focus. True if there
+// Returns false if there is no one with focus. True if there
 // was one.  Don't have a clue as to what it will do with it.
 bool  buttonClick(void) {
 
@@ -36,6 +36,7 @@ bool  buttonClick(void) {
   return false;
 }
 
+// The global pointer.
 pushPotGUI*  controlPtr = NULL;
 
 

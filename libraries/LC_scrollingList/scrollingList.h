@@ -1,6 +1,22 @@
 #ifndef scrollingList_h
 #define scrollingList_h
 
+// Base class for our scrollable collection of.. drawObj(s) living
+// on drawList(s). You fill up a drawList with objects and this
+// is the interface used to control scrolling it.
+//
+// Now, there are a few different ways to do this.
+//
+// Fist is the pushPotGUI. The pushPotGUI is a simple rotating
+// potentiometer that you can push to click. A very simple GUI
+// that is only really suited to really simple applications.
+//
+// Second is button iterface. But I've not written that one yet.
+//
+// Third is single touch, touchscreen. And that's what we're
+// working on today!
+
+
 #include <drawObj.h>
 
 enum scrollType { touchScroll, dialScroll, dSOpenTop, dSOpenBtm, dSOpenBoth, buttonScroll };

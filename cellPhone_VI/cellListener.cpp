@@ -29,7 +29,7 @@ void cellListener::idle(void) {
 	if (!callIncoming) {
 		if (statusReg.callStat == CS_ringingIn) {
 			callIncoming = true;
-			nextApp = (apps)answerID;
+			nextPanel = answerID;
 		}
 	}  else {
 		if(statusReg.callStat != CS_ringingIn) {
