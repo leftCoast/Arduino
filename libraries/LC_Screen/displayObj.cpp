@@ -55,7 +55,9 @@ void displayObj::setCursor(int inX,int inY) { }
 void displayObj::drawText(char* inText) { }
 void displayObj::fillScreen(colorObj* inColor) { }
 void displayObj::fillRect(int locX,int locY,word width,word height,colorObj* inColor) { }
+void displayObj::fillRect(rect* inRect,colorObj* inColor) { }
 void displayObj::drawRect(int locX,int locY,word width,word  height,colorObj* inColor) { }
+void displayObj::drawRect(rect* inRect,colorObj* inColor) { }
 void displayObj::fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,bool vertical) { }
 void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical) { }
 void displayObj::fillRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor){ }

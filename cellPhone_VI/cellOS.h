@@ -7,24 +7,40 @@
 #include <blockFile.h>
 #include <timeObj.h>
 #include <textView.h>
+#include <bmpPipe.h>
 #include <litlOS.h>
 #include "panel.h"
 #include "cellListener.h"
+#include "icons.h"
 
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
 
-#define SYS_TEDIT_BCOLOR        LC_WHITE
-#define SYS_TEDIT_TCOLOR        LC_BLACK
-#define SYS_TEDIT_HCOLOR        LC_LIGHT_BLUE
+#define SYS_FILE_PATH "/SYSTEM/SYSTEM.PRF"
+#define IMAGE_FILE_PATH "/SYSTEM/IMAGES/TGIVE.BMP"
 
-#define SYS_PANEL_COLOR         LC_GREY
-#define SYS_INPUT_BTN_COLOR     LC_LIGHT_GREY
-#define SYS_CONTROL_BTN_COLOR   LC_DARK_GREY
-#define SYS_CONTROL_LBL_COLOR   LC_BLACK
-#define SYS_SHADOW_COLOR        LC_CHARCOAL
+#define MENU_BAR_H    20
 
-#define SYS_FILE_PATH           "/SYSTEM/SYSTEM.PRF"
+// Starting points, they are tweaked in setup().
+extern colorObj  backColor;
+extern colorObj  textColor;
+extern colorObj  textSelectColor;
+extern colorObj  textActiveColor;
+extern colorObj  editFieldBColor;
+
+extern colorObj  lightbButtonColor;
+extern colorObj  lightbButtonHighlight;
+extern colorObj  lightbButtonColorHit;
+extern colorObj  darkButtonColor;
+extern colorObj  darkButtonColorHit;
+
+extern colorObj  redButtonColor;
+extern colorObj  redButtonHighlight;
+extern colorObj  greenbuttonColor;
+extern colorObj  greenButtonHighlight;
+
+extern colorObj battLineColor;
+extern colorObj menuBarColor;
 
 enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
 
@@ -36,8 +52,10 @@ class homeScreen : public homePanel {
   
   virtual void  setup(void);
   virtual void  loop(void);
+          void  showStatus(void);
   virtual void  drawSelf(void);
 
+          bmpPipe*    mBackImage;
           appIcon*    calcIcon;
           appIcon*    textIcon;
           appIcon*    contactIcon;
@@ -45,7 +63,9 @@ class homeScreen : public homePanel {
           appIcon*    breakoutIcon;
           appIcon*    phoneIcon;
           timeObj     statusTimer;
-          textView*   mText;
+          //textView*   mText;
+          battPercent*  mBatPct;
+          RSSIicon*     mRSSI;
   
 };
 

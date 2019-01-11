@@ -15,9 +15,10 @@ enum barGraphDir { upBar, dwnBar, rBar, lBar };
 class barGraphBar : public drawObj {
 
   public:
-            barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir=upBar,bool inTouch=false);
+            barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir=upBar,bool inBinary=false,bool inTouch=false);
     virtual ~barGraphBar(void);
 
+    virtual void        setCutoff(float inCutoff,bool leaveAPixle=false);
     virtual void        setLimits(float inStart,float inEnd,bool leaveAPixle=true);
     virtual void        setColors(colorObj* barColor,colorObj* backColor);
     virtual void        setValue(float inVal);
@@ -28,6 +29,9 @@ class barGraphBar : public drawObj {
 
             mapper        mBarMapper;
             barGraphDir   mDir;
+            bool          mBinary;
+            bool          mLeavePixel;
+            float         mCutoff;
             float         mBarVal;
             float         mMappedVal;
             colorObj      mBarColor;

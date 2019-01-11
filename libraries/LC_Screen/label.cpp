@@ -101,7 +101,7 @@ void label::setColors(colorObj* tColor, colorObj* bColor) {
 }
 
 
-void label::setColors(colorObj* tColor) { setColors(tColor,&white); transp = true; }
+void label::setColors(colorObj* tColor) { setColors(tColor,&backColor); transp = true; }
   
 
 void label::setPrecision(int inPrec) {

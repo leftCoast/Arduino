@@ -4,20 +4,11 @@
 #include <Arduino.h>
 #include <gfxfont.h>
 #include <colorObj.h>
+#include <baseGraphics.h>
 
 // This is going to by our base display object. Similar to adafruit's GFX object.
 // The plan is to inherit this for whatever glue code each piece of 
 // hardware needs to run.
-
-// point needs to go here 'cause it spans both the display side and
-// the drawing object side. So, this is the lowest common denominator
-// if you will.
-
-  struct point {
-    int x;
-    int y;
-  }; 
-
 
 
 class displayObj {    
@@ -44,6 +35,8 @@ class displayObj {
 	virtual	void	drawText(char* inText);
 	virtual	void	fillScreen(colorObj* inColor);
 	virtual	void	fillRect(int locX,int locY,word width,word height, colorObj* inColor);
+	virtual	void	fillRect(rect* inRect,colorObj* inColor);
+	virtual	void	drawRect(rect* inRect,colorObj* inColor);
 	virtual	void	drawRect(int locX,int locY,word width,word height, colorObj* inColor);
 	virtual	void	fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,bool vertical=true);
 	virtual	void	fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical=true);

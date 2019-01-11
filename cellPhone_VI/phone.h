@@ -6,6 +6,7 @@
 #include <label.h>
 #include <liveText.h>
 #include <PNLabel.h>
+#include <colorRect.h>
 #include "panel.h"
 #include "icons.h"
 
@@ -95,6 +96,7 @@ class phone : public panel {
           phoneBtn* pBtnCall;
           phoneBtn* pBtnClose;
 
+          colorRect*  theEditBase;     // Background of the PNLabel.
           PNLabel*  numDisplay;
           liveText* stateDisplay;
           

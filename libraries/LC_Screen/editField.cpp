@@ -117,9 +117,9 @@ void editField::idle(void) {
   if(ding()) {                              // Uggh! Get to work!
     getCursorPos(&cursX,&cursY,&cursH);
     if(cursorOnOff) {
-      screen->drawVLine(cursX,cursY,cursH,&white);
+      screen->drawVLine(cursX,cursY,cursH,&textColor);
     } else {
-      screen->drawVLine(cursX,cursY,cursH,&black);
+      screen->drawVLine(cursX,cursY,cursH,&backColor);
     }
     cursorOnOff = !cursorOnOff;
     stepTime();

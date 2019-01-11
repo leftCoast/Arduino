@@ -19,7 +19,29 @@
 
 #define STEPTIME  20 //ms
 
+// Starting points, they are tweaked in setup().
+colorObj  backColor(LC_NAVY);
+colorObj  textColor(LC_WHITE);
+colorObj  textSelectColor(LC_YELLOW);
+colorObj  textActiveColor(LC_RED);
+colorObj  editFieldBColor(LC_NAVY);
+
+colorObj  lightbButtonColor(LC_NAVY);
+colorObj  lightbButtonHighlight(LC_NAVY);
+colorObj  lightbButtonColorHit(LC_NAVY);
+colorObj  darkButtonColor(LC_NAVY);
+colorObj  darkButtonColorHit(LC_NAVY);
+
+colorObj  redButtonColor(LC_RED);
+colorObj  redButtonHighlight(LC_PINK);
+colorObj  greenbuttonColor(LC_DARK_GREEN);
+colorObj  greenButtonHighlight(LC_GREEN);
+
+colorObj  battLineColor(LC_CHARCOAL);
+colorObj  menuBarColor(LC_RED);
+
 cellOS  ourOS;
+
 
 // *****************************************************
 // *******************   homeScreen  ********************
@@ -29,14 +51,30 @@ cellOS  ourOS;
 #define HP_ICON_XSTEP  40
 #define HP_ICON_Y     275
 
-#define out     mText->appendText
-#define outln   mText->appendText("\n")
+#define ICON_BAR_X    0
+#define ICON_BAR_Y    270
+#define ICON_BAR_W    240
+#define ICON_BAR_H    90
+
+#define BATT_X        199
+#define BATT_Y        2
+
+#define SIG_X         BATT_X + 15
+#define SIG_Y         BATT_Y
+
+
+//#define out     mText->appendText
+//#define outln   mText->appendText("\n")
 
 homeScreen::homeScreen(void)
   : homePanel() {
 
-  int iconX;
-  
+  int   iconX;
+  rect  imageRect;
+
+  imageRect.setAll(0,MENU_BAR_H,240,ICON_BAR_Y-MENU_BAR_H);
+  mBackImage = new bmpPipe(imageRect);
+  mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;
   phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/phone.bmp");
   iconX=iconX+HP_ICON_XSTEP;
@@ -50,15 +88,15 @@ homeScreen::homeScreen(void)
   iconX=iconX+HP_ICON_XSTEP;
   breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
   
-  colorObj aColor(LC_NAVY);
-  mText = new textView(10,10,220,150);
-  mText->setTextColors(&white,&aColor);
-  addObj(mText);
+  //colorObj aColor(LC_NAVY);
+  //mText = new textView(10,10,220,150);
+  //mText->setTextColors(&white,&aColor);
+  //addObj(mText);
   statusTimer.setTime(1500);
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
-homeScreen::~homeScreen(void) { }
+homeScreen::~homeScreen(void) { if (mBackImage) delete mBackImage; }
 
 
 void homeScreen::setup(void) { 
@@ -69,11 +107,17 @@ void homeScreen::setup(void) {
   if (qGameIcon)    { addObj(qGameIcon);    qGameIcon->begin(); }
   if (breakoutIcon) { addObj(breakoutIcon); breakoutIcon->begin(); }
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
+
+  mBatPct = new battPercent(BATT_X,BATT_Y);
+  addObj(mBatPct);
+  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
+  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
+  addObj(mRSSI);
 }
 
-void homeScreen::loop(void) { 
-  
-if (statusTimer.ding()) {
+
+void  homeScreen::showStatus(void) {
+  /*
   mText->setText("");
   outln;
   out("           cellStatus");outln;outln;
@@ -104,15 +148,32 @@ if (statusTimer.ding()) {
   outln;
   out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
   out(" Net Time   : ");out(statusReg.networkTime);out("\n");
-  statusTimer.start();
+  */
+}
+
+
+void homeScreen::loop(void) { 
+
+  if (statusTimer.ding()) {
+    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
+    mRSSI->setRSSI(statusReg.RSSI);
+    //showStatus();
+    statusTimer.start();
   }
 }
 
 
 void homeScreen::drawSelf(void) { 
-  colorObj aColor(LC_NAVY);
-  screen->fillScreen(&aColor);
-  screen->fillRect(0,270,240,90,&white);
+  //colorObj aColor(LC_NAVY);
+  //screen->fillScreen(&aColor);
+  
+  //unsigned long startT = millis();
+  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+  mBackImage->drawBitmap(0,MENU_BAR_H);
+  //unsigned long endT = millis();
+  //Serial.println(endT-startT);
+  
+  screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&white);
 }
 
 
@@ -135,6 +196,40 @@ cellOS::~cellOS(void) { if (mFile) delete mFile; }
 
 
 int cellOS::begin(void) {
+
+  // Tweak our colors.
+  editFieldBColor.blend(&yellow,15  );
+  editFieldBColor.blend(&white,2);
+  
+  lightbButtonColor.blend(&white,20);
+  lightbButtonColorHit.blend(&white,90);
+  lightbButtonHighlight = lightbButtonColorHit;
+  darkButtonColor.blend(&white,10);
+  darkButtonColorHit.blend(&white,80);
+
+  //redbuttonColor;
+  redButtonHighlight.blend(&white,50);
+  greenbuttonColor.blend(&green,50);
+  greenButtonHighlight.blend(&white,90);
+
+  //battLineColor = lightbButtonColor;
+  menuBarColor.blend(&black,95);
+  
+  // Fill in the keyboard pallette.
+  kbPallette.inputKeyText.setColor(&textSelectColor);
+  kbPallette.inputKeyBase.setColor(&lightbButtonColor);
+  kbPallette.inputKeyHText.setColor(&white);
+  kbPallette.inputKeyHBase.setColor(&lightbButtonColorHit);
+    
+  kbPallette.contolKeyText.setColor(&white);
+  kbPallette.contolKeyBase.setColor(&darkButtonColor);
+  kbPallette.contolKeyHText.setColor(&textActiveColor);
+  kbPallette.contolKeyHBase.setColor(&darkButtonColorHit);
+    
+  kbPallette.deleteKeyText.setColor(&textActiveColor);
+  kbPallette.deleteKeyBase.setColor(&darkButtonColor);
+  kbPallette.deleteKeyHText.setColor(&white);
+  kbPallette.deleteKeyHBase.setColor(&darkButtonColorHit);
 
   mFile = new blockFile(SYS_FILE_PATH);
   if (mFile->isEmpty()) {
@@ -159,11 +254,11 @@ panel* cellOS::createPanel(int panelID) {
   switch (panelID) {
     case homeApp      : return new homeScreen(); 
     case phoneApp     : return new phone();
-    case textApp      : return new homeScreen();
-    case contactApp   : return new homeScreen();
+    case textApp      : nextPanel = HOME_PANEL_ID; return new homeScreen();
+    case contactApp   : nextPanel = HOME_PANEL_ID; return new homeScreen();
     case calcApp      : return new rpnCalc();
     case qGameApp     : return new qGame();
-    case breakoutApp  : return new homeScreen();
+    case breakoutApp  : nextPanel = HOME_PANEL_ID; return new homeScreen();
     default           : return NULL;
   }
 }

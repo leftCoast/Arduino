@@ -57,10 +57,9 @@ class qGame : public  panel {
           void  shutDown(void);
   virtual void  loop();
 
-          colorRect*  theTextBase;        // White rect behind the text indow.
           textView*   theTextView;        // The text window.
-          colorRect*  theEditBase;        // White rect behind the text edit field.
           editField*  theEditField;       // The text edit field.
+          colorRect*	 theEditBase;			// Background of text edit window.
           IOandKeys*  ourKeyboard;        // Just like it sounds, our texting keyboard.
 
           blockFile*  theFile;

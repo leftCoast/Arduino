@@ -12,7 +12,7 @@
 
 #define ROW_GAP     50
 
-#define KEY_R0      25
+#define KEY_R0      30
 #define KEY_R1      KEY_R0 + ROW_GAP
 #define KEY_R2      KEY_R1 + ROW_GAP
 #define KEY_R3      KEY_R2 + ROW_GAP
@@ -24,6 +24,22 @@
 #define KEY_C1      30
 #define KEY_C2      KEY_C1 + COL_GAP
 #define KEY_C3      KEY_C2 + COL_GAP
+
+#define EB_X    KEY_C1
+#define EB_Y    KEY_R0
+#define EB_W    KEY_W+COL_GAP+20
+#define EB_H    16
+
+#define ET_INSET  3                     
+#define ET_X      EB_X+ET_INSET
+#define ET_Y      EB_Y+4
+#define ET_W      EB_W-(2*ET_INSET)
+#define ET_H      10
+
+#define ST_X      ET_X
+#define ST_Y      ET_Y + 14
+#define ST_W      ET_W
+#define ST_H      ET_H
 
 #define KEY_RAD     4
 
@@ -57,23 +73,25 @@ phoneBtn::~phoneBtn(void) {  }
 
 
 void phoneBtn::drawSelf(void) {
-
+  
   if (mKeystroke[0]=='X') {
     if (clicked) {
+      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
       screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-      screen->setTextColor(&red);
+      screen->setTextColor(&redButtonColor);
     } else {
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&red);
-      screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
+      screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
       screen->setTextColor(&black);
     }
   } else {
     if (clicked) {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&blue);
+      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);
       screen->setTextColor(&white);
     } else {
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-      screen->setTextColor(&white);
+      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);  // Gives a cool highlight.
+      screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
+      screen->setTextColor(&textSelectColor);
     }
   }
   screen->setTextSize(TEXT_SIZE);
@@ -109,11 +127,12 @@ void callControl::drawSelf(void) {
   switch(mState) {
     case isIdle       :
       if (clicked) {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
         screen->setTextColor(&green);
       } else {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
-        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
         screen->setTextColor(&white);
       }
       screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
@@ -124,8 +143,8 @@ void callControl::drawSelf(void) {
         screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
         screen->setTextColor(&green);
       } else {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&green);
-        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
+        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
         screen->setTextColor(&white);
       }
       screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
@@ -134,12 +153,13 @@ void callControl::drawSelf(void) {
     break;
     case isConnected  :
       if (clicked) {
+        screen->fillRoundRect(x,y,width,height,KEY_RAD,&backColor);
         screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&red);
+        screen->setTextColor(&redButtonColor);
       } else {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&red);
-        screen->drawRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&white);
+      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
+      screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
+      screen->setTextColor(&white);
       }
       screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
       screen->drawText("Hangup");
@@ -231,21 +251,26 @@ void phone::setup(void) {
   
   pBtnCall  = new callControl(KEY_C1,KEY_R5,'C',this);
   pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
+
+  theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H);
+  theEditBase->setColor(&editFieldBColor);
+  addObj(theEditBase);
   
-  numDisplay  = new PNLabel(KEY_C1,KEY_R0,KEY_W+COL_GAP+20,8,1);
+  numDisplay  = new PNLabel(ET_X,ET_Y,ET_W,ET_H,1);
+  numDisplay->setColors(&textSelectColor,&editFieldBColor);
   addObj(numDisplay);
 
-  stateDisplay  = new liveText(KEY_C1,KEY_R0 + 10,KEY_W+COL_GAP+20,8,100);
-  stateDisplay->addAColor(0,&blue);
-  stateDisplay->addAColor(2500,&blue);
-  stateDisplay->addAColor(3000,&white);
+  stateDisplay  = new liveText(ST_X,ST_Y,ST_W,ST_H,100);
+  stateDisplay->addAColor(0,&textColor);
+  stateDisplay->addAColor(2500,&textColor);
+  stateDisplay->addAColor(3000,&backColor);
   stateDisplay->hold();
-  stateDisplay->setColors(&blue,&white);  // Sets the transp variable to false;
+  stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
   mBatPct = new battPercent(BATT_X,BATT_Y);
   addObj(mBatPct);
-  mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
+  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
   mRSSI   = new RSSIicon(SIG_X,SIG_Y);
   addObj(mRSSI);
 }
@@ -259,13 +284,13 @@ void phone::loop(void) {
   // more time.
   if(!mSeenStatus) {  
     delay(150);                                                 // Calls idle for 150 ms.
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&white); // Stuff in a value.
+    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor); // Stuff in a value.
     mRSSI->setRSSI(statusReg.RSSI);                             // Ditto.
     mSeenStatus = true;                                         // Done it, lets not come back here again.
   }
   
   if (statTimer.ding()) {
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&white);
+    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
     mRSSI->setRSSI(statusReg.RSSI);
     statTimer.start();
   }
@@ -277,7 +302,8 @@ void phone::loop(void) {
 
 void phone::drawSelf(void) {
 
-  screen->fillScreen(&white);
+  screen->fillScreen(&backColor);
+  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
 }
 
 
@@ -430,6 +456,8 @@ void phone::checkHangup(void) {
 
 
 void phone::out(int message) {
+  
+  stateDisplay->setColors(&textColor,&backColor);
   stateDisplay->setValue(message);
   stateDisplay->release(true);
 }
@@ -437,6 +465,7 @@ void phone::out(int message) {
 
 void phone::out(char* message) {
   
+  stateDisplay->setColors(&textColor,&backColor);
   stateDisplay->setValue(message);
   stateDisplay->release(true);
 }

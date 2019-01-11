@@ -6,7 +6,8 @@
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_FT6206.h>
 #include <LC_SPI.h>
-#include "displayObj.h"
+#include <baseGraphics.h>
+#include <displayObj.h>
 
 // Shield version
 #define ADA_1947_SHIELD_CS		10
@@ -41,6 +42,8 @@ class adafruit_1947_Obj : public displayObj {
   virtual	void	fillScreen(colorObj* inColor);
   virtual	void	fillRect(int x,int y,word width,word height,colorObj* inColor);
   virtual	void	drawRect(int x,int y,word width,word height,colorObj* inColor);
+  virtual	void	fillRect(rect* inRect,colorObj* inColor);
+  virtual	void	drawRect(rect* inRect,colorObj* inColor);
   virtual	void	fillRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
   virtual	void	drawRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor);
   virtual	void	drawCircle(int x,int y,word diam, colorObj* inColor);

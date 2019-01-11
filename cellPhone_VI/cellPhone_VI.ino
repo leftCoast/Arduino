@@ -12,6 +12,7 @@
 #include <multiMap.h>
 #include <timeObj.h>
 #include <quickCom.h>
+#include <baseGraphics.h>
 #include <displayObj.h>
 #include <bmpPipe.h>
 #include <screen.h>

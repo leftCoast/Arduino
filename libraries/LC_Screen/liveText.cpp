@@ -72,7 +72,7 @@ void liveText::idle(void) {
 			if (loop) {									// If we loop, we start over.
 				frame = 0;								// If so, reset the frame thing.
 			} else {										// If we don't loop.
-				setColors(&lastColor);				// Set the last color;
+				setCalcColor();						// Set the last color;
 				hold();									// We hold.
 			}
 		}

@@ -13,7 +13,7 @@
 #define COL_1   1
 #define COL_SP  1
 
-#define ROW_1   200
+#define ROW_1   210
 #define ROW_SP  4
 
 // Keys need to know the state of the keyboard. When they get time
@@ -24,6 +24,25 @@
 enum  keyStates { chars, shifted, numbers, symbols };
 
 class keyboard;
+
+struct keyColors {
+	colorObj		inputKeyText;
+	colorObj		inputKeyBase;
+	colorObj		inputKeyHText;
+	colorObj		inputKeyHBase;
+	
+	colorObj		contolKeyText;
+	colorObj		contolKeyBase;
+	colorObj		contolKeyHText;
+	colorObj		contolKeyHBase;
+	
+	colorObj		deleteKeyText;
+	colorObj		deleteKeyBase;
+	colorObj		deleteKeyHText;
+	colorObj		deleteKeyHBase;
+};
+
+extern keyColors kbPallette;
 
 
 class keyboardKey : public idler {
@@ -70,17 +89,17 @@ class controlKey : public keyboardKey, public label {
 
 class keyboard {
 
-  public:
-          keyboard(editField* inEditField);
-  virtual ~keyboard(void);
+	public:
+				keyboard(editField* inEditField);
+	virtual	~keyboard(void);
 
-  virtual void        handleKey(char inChar);
-  virtual void        handleKey(keyCommands inEditCom);
-  virtual void        handleKey(keyStates inState);
-  virtual keyStates   getState(void);
-
-          editField*  mEditField;
-          keyStates   mState;
+	virtual	void			handleKey(char inChar);
+	virtual	void			handleKey(keyCommands inEditCom);
+	virtual	void			handleKey(keyStates inState);
+	virtual	keyStates	getState(void);
+			
+          editField*		mEditField;
+          keyStates		mState;
           
           inputKey*   qKey;
           inputKey*   wKey;

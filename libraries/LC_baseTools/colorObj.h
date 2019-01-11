@@ -54,6 +54,7 @@ public:
   				colorObj(void);
   virtual	~colorObj(void);
   
+  virtual	void		setColor(RGBpack* buff);
   virtual	void		setColor(byte inRed, byte inGreen, byte inBlue);
   virtual	void		setColor(word color16);
   virtual	void		setColor(colorObj* inColor);						// Why doesn't this one get confused? Who knows?

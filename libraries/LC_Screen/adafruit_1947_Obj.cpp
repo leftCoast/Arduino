@@ -67,6 +67,8 @@ void adafruit_1947_Obj::drawText(char* inText)            							{ theTFT->print
 void adafruit_1947_Obj::fillScreen(colorObj* inColor)     							{ theTFT->fillScreen(inColor->getColor16()); }
 void adafruit_1947_Obj::fillRect(int x,int y,word width,word height,colorObj* inColor) 									{ theTFT->fillRect(gX(x),gY(y),width, height,inColor->getColor16()); }
 void adafruit_1947_Obj::drawRect(int x,int y,word width,word height,colorObj* inColor) 									{ theTFT->drawRect(gX(x),gY(y),width, height,inColor->getColor16()); }
+void adafruit_1947_Obj::fillRect(rect* inRect,colorObj* inColor) 									{ theTFT->fillRect(gX(inRect->x),gY(inRect->y),inRect->width, inRect->height,inColor->getColor16()); }
+void adafruit_1947_Obj::drawRect(rect* inRect,colorObj* inColor) 									{ theTFT->drawRect(gX(inRect->x),gY(inRect->y),inRect->width, inRect->height,inColor->getColor16()); }
 void adafruit_1947_Obj::fillRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor)	{ theTFT->fillRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawRoundRect(int x,int y,word width,word height,word radius,colorObj* inColor)	{ theTFT->drawRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawCircle(int x,int y,word diam, colorObj* inColor) 														{ drawRoundRect(gX(x),gY(y),diam,diam,diam/2,inColor); }

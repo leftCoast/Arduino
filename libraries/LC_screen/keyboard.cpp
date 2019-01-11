@@ -25,7 +25,7 @@
 #define ROW_3 ROW_2 + KEY_HT + ROW_SP
 #define ROW_4 ROW_3 + KEY_HT + ROW_SP
 
-
+keyColors kbPallette;
 
 // ********************************************************************************
 // ********************************************************************************
@@ -71,18 +71,14 @@ inputKey::~inputKey(void) { }
 
 
 void inputKey::drawSelf(void) {
-
-  colorObj baseColor(LC_LIGHT_GREY);
-  colorObj textColor(LC_BLACK);
-  colorObj shadowColor(LC_CHARCOAL);
                                                   
-  screen->drawRect(x+1, y+1, width-1, height-1, &shadowColor);
+  screen->drawRoundRect(x+1, y+1, width-1, height-1,3, &black);
   if (clicked) {
-    screen->fillRect(x, y, width-1, height-1, &black);
-    setColors(&white);
+    screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyHBase);
+    setColors(&kbPallette.inputKeyHText);
   } else {
-    screen->fillRect(x, y, width-1, height-1, &baseColor);
-    setColors(&textColor);
+    screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyBase);
+    setColors(&kbPallette.inputKeyText);
   }
   
   setTextSize(2);
@@ -152,28 +148,34 @@ controlKey::~controlKey(void) { }
 
 void controlKey::drawSelf(void) {
     
-  colorObj baseColor(LC_DARK_GREY);
-  colorObj textColor(LC_BLACK);
-  if (mCom==backspace) {
-    textColor.setColor(LC_RED);
-  }
-  colorObj shadowColor(LC_CHARCOAL);
-                                                  
-  screen->drawRect(x+1, y+1, width-1, height-1, &shadowColor);
-  if (clicked) {
-    screen->fillRect(x, y, width-1, height-1, &white);
-  } else {
-    screen->fillRect(x, y, width-1, height-1, &baseColor);
-  }
-  
-  setTextSize(2);
-  setJustify(TEXT_CENTER);
-  setColors(&textColor);
-  x = x+5;
-  y = y+3;
-  label::drawSelf();
-  x = x-5;
-  y = y-3;
+	colorObj textColor;
+	
+	screen->drawRoundRect(x+1, y+1, width-1, height-1,3, &black);
+	if (mCom==backspace) {
+		if (clicked) {
+			textColor.setColor(&kbPallette.deleteKeyHText);
+			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.deleteKeyHBase);
+		} else {
+			textColor.setColor(&kbPallette.deleteKeyText);
+			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.deleteKeyBase);
+		}
+	} else {
+		if (clicked) {
+			textColor.setColor(&kbPallette.contolKeyHText);
+			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyHBase);
+		} else {
+			textColor.setColor(&kbPallette.contolKeyText);
+			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyBase);
+		}
+	}
+	setTextSize(2);
+	setJustify(TEXT_CENTER);
+	setColors(&textColor);
+	x = x+5;
+	y = y+3;
+	label::drawSelf();
+	x = x-5;
+	y = y-3;
 }
 
 

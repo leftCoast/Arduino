@@ -168,6 +168,14 @@ void colorObj::setColor(word color16) {
 }
 
 
+void colorObj::setColor(RGBpack* buff) {
+
+	red = buff->r;
+	green = buff->g;
+	blue = buff->b;
+}
+
+	
 void colorObj::setColor(colorObj* inColor) {
     
     red =inColor->getRed();
