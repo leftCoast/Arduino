@@ -44,6 +44,7 @@ class displayObj {
 	virtual	void	fillRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
 	virtual	void	drawRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
 	virtual	void	drawCircle(int locX,int locY,int inDiam, colorObj* inColor);
+	virtual	void	drawCircleHelper(int locX,int locY,int inRad,byte corner,colorObj* inColor);
 	virtual	void	fillCircle(int locX,int locY,int inDiam, colorObj* inColor);
 	virtual	void	drawVLine(int locX,int locY,int height,colorObj* inColor);
 	virtual	void	drawHLine(int locX,int locY,int width,colorObj* inColor);

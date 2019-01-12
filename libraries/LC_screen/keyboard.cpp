@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include <drawDelete.h>
+#include <enterArrow.h>
 
 #define COL_2 COL_1 + KEY_WD + COL_SP
 #define COL_3 COL_2 + KEY_WD + COL_SP
@@ -158,6 +159,10 @@ void controlKey::drawSelf(void) {
 	int         inset = 3;				// All the hand tweaking to draw this.
 	rect        delArrowRect(x+inset+2,y+inset-1,width-(2*(inset+2)),height-(2*inset));
   	drawDelete  delArrow(&delArrowRect);
+  	
+  	int         aInset = 5;
+  	rect			entArrowRect(x+aInset,y+aInset-1,width-(2*aInset),height-(2*aInset));
+  	enterArrow	eArrow(&entArrowRect);
   
 	screen->drawRoundRect(x+1, y+1, width-1, height-1,3, &black);
 	if (mCom==backspace) {
@@ -174,10 +179,12 @@ void controlKey::drawSelf(void) {
 		}
 	} else {
 		if (clicked) {
+			eArrow.setColors(&kbPallette.contolKeyHText,&kbPallette.contolKeyHBase);
 			textColor.setColor(&kbPallette.contolKeyHText);
 			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.contolKeyBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyHBase);
 		} else {
+			eArrow.setColors(&green,&kbPallette.contolKeyBase);
 			textColor.setColor(&kbPallette.contolKeyText);
 			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.contolKeyHBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyBase);
@@ -185,6 +192,8 @@ void controlKey::drawSelf(void) {
 	}
 	if (mCom==backspace) {
 		delArrow.stamp();
+	} else if (mCom==enter) {
+		eArrow.stamp();
 	} else {
 		setTextSize(2);
 		setJustify(TEXT_CENTER);

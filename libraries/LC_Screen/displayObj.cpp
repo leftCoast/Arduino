@@ -64,6 +64,7 @@ void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,bool
 void displayObj::fillRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor){ }
 void displayObj::drawRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor){ }
 void displayObj::drawCircle(int locX,int locY,int inDiam, colorObj* inColor){ }
+void displayObj::drawCircleHelper(int locX,int locY,int inRad,byte corner,colorObj* inColor) { }
 void displayObj::fillCircle(int locX,int locY,int inDiam, colorObj* inColor){ }
 void displayObj::drawVLine(int locX,int locY,int height,colorObj* inColor) { }
 void displayObj::drawHLine(int locX,int locY,int width,colorObj* inColor) { }

@@ -74,6 +74,7 @@ void adafruit_1947_Obj::drawRect(rect* inRect,colorObj* inColor) 									{ theT
 void adafruit_1947_Obj::fillRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor)	{ theTFT->fillRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor)	{ theTFT->drawRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
 void adafruit_1947_Obj::drawCircle(int x,int y,int diam, colorObj* inColor) 														{ drawRoundRect(gX(x),gY(y),diam,diam,diam/2,inColor); }
+void adafruit_1947_Obj::drawCircleHelper(int x,int y,int rad,byte corner,colorObj* inColor) { theTFT->drawCircleHelper(gX(x),gY(y),rad,corner,inColor->getColor16()); }
 void adafruit_1947_Obj::fillCircle(int x,int y,int diam, colorObj* inColor) 														{ fillRoundRect(gX(x),gY(y),diam,diam,diam/2,inColor); }
 void adafruit_1947_Obj::drawVLine(int x,int y,int height,colorObj* inColor) 														{ theTFT->drawFastVLine(gX(x),gY(y),height,inColor->getColor16()); }
 void adafruit_1947_Obj::drawHLine(int x,int y,int width,colorObj* inColor) 														{ theTFT->drawFastHLine(gX(x),gY(y),width,inColor->getColor16()); }

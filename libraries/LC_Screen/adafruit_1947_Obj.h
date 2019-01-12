@@ -49,6 +49,7 @@ class adafruit_1947_Obj : public displayObj {
   virtual	void	fillRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor);
   virtual	void	drawRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor);
   virtual	void	drawCircle(int x,int y,int diam, colorObj* inColor);
+  virtual	void	drawCircleHelper(int x,int y,int rad,byte corner,colorObj* inColor);
   virtual	void	fillCircle(int x,int y,int diam, colorObj* inColor);
   virtual	void	drawVLine(int x,int y,int height,colorObj* inColor);
   virtual	void	drawHLine(int x,int y,int width,colorObj* inColor);
