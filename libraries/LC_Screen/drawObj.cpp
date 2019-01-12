@@ -12,8 +12,18 @@ drawObj::drawObj() {
   callback = NULL;				// And, no.. We have none of this either.
 }
 
+drawObj::drawObj(rect* inRect,bool inClicks)
+	: rect(inRect) {
+	
+	needRefresh = true;
+	focus = false;
+	clicked = false;
+	wantsClicks = inClicks;
+	callback = NULL;
+}
 
-drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks)
+
+drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks)
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
@@ -208,11 +218,11 @@ void viewMgr::checkRefresh(void) {
  
  
 // Counts & returns the number of objects in the list.           
-word viewMgr::numObjInList(void) { return (word)listHeader.countTail(); }
+int viewMgr::numObjInList(void) { return (int)listHeader.countTail(); }
 
 
 // Finds the "nth" item on the list, index starting at 0. NULL if not found.
-drawObj* viewMgr::getObj(word index) { return (drawObj*)listHeader.getTailObj((int)index); }
+drawObj* viewMgr::getObj(int index) { return (drawObj*)listHeader.getTailObj((int)index); }
 
 
 drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.getTailObj(0); }
@@ -237,7 +247,7 @@ void viewMgr::idle(void) {
 // ***************************************************
 
 
-drawGroup::drawGroup(int x, int y, word width,word height,bool clicks) 
+drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
 	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
 
 
@@ -367,7 +377,7 @@ void	drawGroup::draw(void) {
 // ***************************************************
 
 
-drawList::drawList(int x, int y, word width,word height,bool clicks,bool vertical) 
+drawList::drawList(int x, int y, int width,int height,bool clicks,bool vertical) 
 	: drawGroup(x,y,width,height,clicks) {
 
 	mVertical = vertical;	// Save it for now, deal with coding it later.

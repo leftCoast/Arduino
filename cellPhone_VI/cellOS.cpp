@@ -166,9 +166,9 @@ void homeScreen::loop(void) {
 void homeScreen::drawSelf(void) { 
   //colorObj aColor(LC_NAVY);
   //screen->fillScreen(&aColor);
-  
-  //unsigned long startT = millis();
+
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+  //unsigned long startT = millis();
   mBackImage->drawBitmap(0,MENU_BAR_H);
   //unsigned long endT = millis();
   //Serial.println(endT-startT);

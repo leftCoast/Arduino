@@ -2,6 +2,7 @@
 #include "phone.h"
 #include "cellOS.h"
 #include <cellCommon.h>
+#include <drawDelete.h>
 #include "cellManager.h"
 #include "cellListener.h"
 
@@ -73,7 +74,16 @@ phoneBtn::~phoneBtn(void) {  }
 
 
 void phoneBtn::drawSelf(void) {
-  
+
+  int         inset = 5;                      // All the hand tweaking to
+  int         arrowX1 = x+inset+3;            // setup the delete key arrow.
+  int         arrowY1 = y+inset-1;            // After all that, Julie insists it
+  int         arrowX2 = width-(2*(inset+3));  // Looks like an empty Batt. icon.
+  int         arrowY2 = height-(2*inset);
+  rect        arrowRect(arrowX1,arrowY1,arrowX2,arrowY2);
+  drawDelete  arrow(&arrowRect);
+
+    
   if (mKeystroke[0]=='X') {
     if (clicked) {
       screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
@@ -88,15 +98,21 @@ void phoneBtn::drawSelf(void) {
     if (clicked) {
       screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);
       screen->setTextColor(&white);
+      arrow.setColors(&redButtonColor,&lightbButtonColorHit);
     } else {
       screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);  // Gives a cool highlight.
       screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
       screen->setTextColor(&textSelectColor);
+      arrow.setColors(&redButtonColor,&lightbButtonColor);
     }
   }
-  screen->setTextSize(TEXT_SIZE);
-  screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-  screen->drawText(mKeystroke); 
+  if (mKeystroke[0]=='D') {
+    arrow.stamp();
+  } else {
+    screen->setTextSize(TEXT_SIZE);
+    screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+    screen->drawText(mKeystroke);
+  }
 }
 
 

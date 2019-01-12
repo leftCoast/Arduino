@@ -156,7 +156,7 @@ void qGame::setupScreen(void) {
 
   ourKeyboard   = new IOandKeys(theEditField,theTextView);
   theTextView->setTextColors(&textColor,&backColor);
-  //screen->drawRect(theTextView,&white);
+
   screen->fillRect(TF_X,EB_Y-16,TF_W,3,&red);
 }
 

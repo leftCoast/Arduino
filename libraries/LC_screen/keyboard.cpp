@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include <drawDelete.h>
 
 #define COL_2 COL_1 + KEY_WD + COL_SP
 #define COL_3 COL_2 + KEY_WD + COL_SP
@@ -72,22 +73,27 @@ inputKey::~inputKey(void) { }
 
 void inputKey::drawSelf(void) {
                                                   
-  screen->drawRoundRect(x+1, y+1, width-1, height-1,3, &black);
-  if (clicked) {
-    screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyHBase);
-    setColors(&kbPallette.inputKeyHText);
-  } else {
-    screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyBase);
-    setColors(&kbPallette.inputKeyText);
-  }
+	if (clicked) {
+		if (mChar=='p' || mChar=='l'||mChar=='m'||mChar==' ') {
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.inputKeyBase);
+		}
+		screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyHBase);
+		setColors(&kbPallette.inputKeyHText);
+	} else {
+		if (mChar=='p' || mChar=='l'||mChar=='m'||mChar==' ') {
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.inputKeyHBase);
+		}
+		screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.inputKeyBase);
+		setColors(&kbPallette.inputKeyText);
+	}
   
-  setTextSize(2);
-  setJustify(TEXT_CENTER);
-  x = x+5;
-  y = y+3;
-  label::drawSelf();
-  x = x-5;
-  y = y-3;
+	setTextSize(2);
+	setJustify(TEXT_CENTER);
+	x = x+5;
+	y = y+3;
+	label::drawSelf();
+	x = x-5;
+	y = y-3;
 }
 
   
@@ -149,33 +155,46 @@ controlKey::~controlKey(void) { }
 void controlKey::drawSelf(void) {
     
 	colorObj textColor;
-	
+	int         inset = 3;				// All the hand tweaking to draw this.
+	rect        delArrowRect(x+inset+2,y+inset-1,width-(2*(inset+2)),height-(2*inset));
+  	drawDelete  delArrow(&delArrowRect);
+  
 	screen->drawRoundRect(x+1, y+1, width-1, height-1,3, &black);
 	if (mCom==backspace) {
 		if (clicked) {
 			textColor.setColor(&kbPallette.deleteKeyHText);
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.deleteKeyBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.deleteKeyHBase);
+			delArrow.setColors(&kbPallette.deleteKeyHText,&kbPallette.deleteKeyHBase);
 		} else {
 			textColor.setColor(&kbPallette.deleteKeyText);
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.deleteKeyHBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.deleteKeyBase);
+			delArrow.setColors(&kbPallette.deleteKeyText,&kbPallette.deleteKeyBase);
 		}
 	} else {
 		if (clicked) {
 			textColor.setColor(&kbPallette.contolKeyHText);
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.contolKeyBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyHBase);
 		} else {
 			textColor.setColor(&kbPallette.contolKeyText);
+			screen->fillRoundRect(x+1, y, width-1, height-1,3, &kbPallette.contolKeyHBase);
 			screen->fillRoundRect(x, y, width-1, height-1,3, &kbPallette.contolKeyBase);
 		}
 	}
-	setTextSize(2);
-	setJustify(TEXT_CENTER);
-	setColors(&textColor);
-	x = x+5;
-	y = y+3;
-	label::drawSelf();
-	x = x-5;
-	y = y-3;
+	if (mCom==backspace) {
+		delArrow.stamp();
+	} else {
+		setTextSize(2);
+		setJustify(TEXT_CENTER);
+		setColors(&textColor);
+		x = x+5;
+		y = y+3;
+		label::drawSelf();
+		x = x-5;
+		y = y-3;
+	}
 }
 
 
@@ -265,8 +284,8 @@ keyboard::keyboard(editField* inEditField) {
   
   shiftKey = new controlKey("^",shift,COL_1,ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
   backSpKey = new controlKey("<",backspace,COL_29+(2*ROW_SP),ROW_3,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
-  leftArrow  = new controlKey("<",arrowBack,COL_23,ROW_4,KEY_WD,KEY_HT,this);
-  rightArrow  = new controlKey(">",arrowFWD,COL_27,ROW_4,KEY_WD,KEY_HT,this);
+  leftArrow  = new controlKey("<",arrowBack,COL_23-(KEY_WD/2),ROW_4,KEY_WD,KEY_HT,this);
+  rightArrow  = new controlKey(">",arrowFWD,COL_27+(KEY_WD/2),ROW_4,KEY_WD,KEY_HT,this);
   symbolKey   = new controlKey("#",number,COL_1,ROW_4,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
   enterKey  = new controlKey(">",enter,COL_29+(2*ROW_SP),ROW_4,KEY_WD+COL_21-COL_1-(2*ROW_SP),KEY_HT,this);
           

@@ -24,7 +24,8 @@ class displayObj {
 				point	lP(point gP);
 					
 	virtual	bool	dispObjBegin(void);
-  
+  	virtual	void	startWrite(void);
+  	virtual	void	endWrite(void);
 	virtual	void	setRotation(byte inRotation);
 	virtual	void	setTextColor(colorObj* tColor);
 	virtual	void	setTextColor(colorObj* tColor,colorObj* bColor);
@@ -34,23 +35,23 @@ class displayObj {
 	virtual	void	setCursor(int inX,int inY);
 	virtual	void	drawText(char* inText);
 	virtual	void	fillScreen(colorObj* inColor);
-	virtual	void	fillRect(int locX,int locY,word width,word height, colorObj* inColor);
+	virtual	void	fillRect(int locX,int locY,int width,int height, colorObj* inColor);
 	virtual	void	fillRect(rect* inRect,colorObj* inColor);
 	virtual	void	drawRect(rect* inRect,colorObj* inColor);
-	virtual	void	drawRect(int locX,int locY,word width,word height, colorObj* inColor);
-	virtual	void	fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,bool vertical=true);
+	virtual	void	drawRect(int locX,int locY,int width,int height, colorObj* inColor);
+	virtual	void	fillRectGradient(int inX,int inY,int inXSize,int inYSize,colorObj* startColor,colorObj* endColor,bool vertical=true);
 	virtual	void	fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical=true);
-	virtual	void	fillRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor);
-	virtual	void	drawRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor);
-	virtual	void	drawCircle(int locX,int locY,word inDiam, colorObj* inColor);
-	virtual	void	fillCircle(int locX,int locY,word inDiam, colorObj* inColor);
-	virtual	void	drawVLine(int locX,int locY,word height,colorObj* inColor);
-	virtual	void	drawHLine(int locX,int locY,word width,colorObj* inColor);
+	virtual	void	fillRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
+	virtual	void	drawRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
+	virtual	void	drawCircle(int locX,int locY,int inDiam, colorObj* inColor);
+	virtual	void	fillCircle(int locX,int locY,int inDiam, colorObj* inColor);
+	virtual	void	drawVLine(int locX,int locY,int height,colorObj* inColor);
+	virtual	void	drawHLine(int locX,int locY,int width,colorObj* inColor);
 	virtual	void	drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
 	virtual	void	drawPixel(int locX,int locY,colorObj* pColor);
     
 	virtual	void	drawPixelInvert(int x,int y);
-	virtual	void	frameRectInvert(int x,int y,word width,word height);
+	virtual	void	frameRectInvert(int x,int y,int width,int height);
 
 	virtual	point	getPoint(void);
 	virtual	bool	touched(void);

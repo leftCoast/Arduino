@@ -154,7 +154,8 @@ void bmpPipe::drawLine(File bmpFile,int x,int y) {
 }
 
 // If we were able to allocate a line buffer for the colors, try it line at a time.
-// OK it works but ITS SLOWER!! ##(*$%$*%&^#!!
+// OK it works but ITS SLOWER!! ##(*$%$*%&^#!! It is faster if using transactions.
+// Not enough to worry about the complication though.
 void bmpPipe::drawLine(File bmpFile,int x,int y,RGBpack* colorBuff) {
 
 	int		trace;
@@ -172,12 +173,14 @@ void bmpPipe::drawLine(File bmpFile,int x,int y,RGBpack* colorBuff) {
       colorBuff[i].b = readBuf[0];
 		i++;
 	}
-	i = 0;															// Reset i.
+	i = 0;
+	screen->startWrite();															// Reset i.
    for (trace=x;trace<endTrace; trace++) {				// Ok, trace does x..x+width.
    	aColor.setColor(&(colorBuff[i]));
    	screen->drawPixel(trace,y,&aColor);					// Spat it out to the screen.
    	i++;
 	}
+	screen->endWrite();
 }
 
 

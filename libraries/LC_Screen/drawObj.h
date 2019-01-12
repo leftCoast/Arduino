@@ -16,7 +16,8 @@ class drawObj : public rect, public dblLinkListObj {
 
 	public:
   				drawObj();
-  				drawObj(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks=false);
+  				drawObj(rect* inRect,bool inClicks=false);
+  				drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks=false);
 	virtual	~drawObj();
     
    virtual	bool	wantRefresh(void);
@@ -59,8 +60,8 @@ public:
     			void		dumpDrawObjList(void);
             bool 		checkClicks(void);
 	virtual	void    	checkRefresh(void);
-				word		numObjInList(void);
-				drawObj*	getObj(word index);
+				int		numObjInList(void);
+				drawObj*	getObj(int index);
 				drawObj*	theList(void);
     virtual void    	idle(void);
     
@@ -83,7 +84,7 @@ void		setFocusPtr(drawObj* newFocus);
 class drawGroup : public drawObj, public viewMgr {
 
 	public:
-				drawGroup(int x, int y, word width,word height,bool clicks=false);
+				drawGroup(int x, int y, int width,int height,bool clicks=false);
   	virtual	~drawGroup();
 
 	virtual	bool	checkGroupRefresh(void);
@@ -102,7 +103,7 @@ class drawGroup : public drawObj, public viewMgr {
 class drawList : public drawGroup {
  
 	public:
-				drawList(int x, int y, word width,word height,bool clicks=false,bool vertical=true);
+				drawList(int x, int y, int width,int height,bool clicks=false,bool vertical=true);
   	virtual	~drawList();
   					
   	virtual	void	addObj(drawObj* newObj);

@@ -13,6 +13,9 @@ rect::rect(void) {
  }
  
  
+rect::rect(rect* inRect) { setRect(inRect); }
+
+
 rect::rect(int inX, int inY, word inWidth,word inHeight) {
    
    setAll(inX,inY,inWidth,inHeight);

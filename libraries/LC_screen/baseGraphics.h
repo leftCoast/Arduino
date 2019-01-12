@@ -29,6 +29,7 @@ class rect {
 
 	public :
   				rect(void);
+  				rect(rect* inRect);
   				rect(int inX, int inY, word inWidth,word inHeight);
 	virtual	~rect(void);
 
