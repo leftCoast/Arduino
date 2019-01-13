@@ -1,7 +1,7 @@
 #include <stampObj.h>
 
 stampObj::stampObj(rect* aRect)
-	: drawObj(aRect) {  }
+	: rect(aRect) {  }
 	
 stampObj::~stampObj(void) { }
 
