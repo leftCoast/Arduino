@@ -2,17 +2,11 @@
 #include <Adafruit_NeoPixel.h>
 
 #include <liteLine.h>
-//#include <blinker.h>
-//#include <idlers.h>
-//#include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
-//#include <PulseOut.h>
-//#include <servo.h>
 #include <timeObj.h>
 #include <colorObj.h>
 #include <neoPixel.h>
-//#include <runningAvg.h>
 
 //#define CALIBRATE // Un-comment to run as a calibration program.
 
@@ -27,7 +21,6 @@
 #define BACK_STEPS  200   // Number of steps for backgrond color wash.
 
 #define INPUT_PIN A0
-//#define INPUT_PIN A4
 
 neoPixel ring(NUM_LEDS, 5);
 
