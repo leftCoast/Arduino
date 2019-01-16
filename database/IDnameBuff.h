@@ -8,6 +8,7 @@
 class IDnameBuff :  public fileBuff {
 
   public:
+          IDnameBuff(blockFile* inFile,unsigned long blockID,char* recName);
           IDnameBuff(blockFile* inFile,unsigned long blockID,char* recName,unsigned long numBytes,uint8_t* recBuff);
           IDnameBuff(blockFile* inFile,unsigned long blockID);
   virtual ~IDnameBuff(void);
@@ -21,9 +22,9 @@ class IDnameBuff :  public fileBuff {
           bool            resizeName(int numBytes);  
           bool            resizeRecBuff(unsigned long numBytes);
           
-          char*         mRecName;
+          char*         mName;
           unsigned long mNumBytes;
-          uint8_t*      mRecBuff;     
+          uint8_t*      mBuff;     
 };
 
 

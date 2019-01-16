@@ -1,7 +1,22 @@
 #include "fileBuff.h"
 
+
+//constructor for root ID
+fileBuff::fileBuff(blockFile* inFile) {
+  //tracer trace("fileBuff::fileBuff() for root.");
+  
+    mFile = inFile;							// Allright, the blockfile.
+    mBuff = NULL;								// Init our buff pointer.
+    mID = mFile->readRootBlockID();		// Read the root ID.
+    if (mID==0) {								// Zero!? Wow, brand new file!
+    	mID = mFile->getNewBlockID();		// It says, first allocated will be root.
+    }  	
+}
+
+
+// constructor for all those "other" guys.
 fileBuff::fileBuff(blockFile* inFile,unsigned long blockID) {
-  //tracer trace("fileBuff::fileBuff()");
+  //tracer trace("fileBuff::fileBuff() normal flavor.");
   
     mFile = inFile;
     mID = blockID;
@@ -9,7 +24,7 @@ fileBuff::fileBuff(blockFile* inFile,unsigned long blockID) {
 }
 
 
-fileBuff::~fileBuff(void) { Serial.println("deleting fileBuff");}
+fileBuff::~fileBuff(void) {  }
   //tracer trace("fileBuff::~fileBuff()");
   
 
@@ -21,18 +36,15 @@ unsigned long fileBuff::getID(void) {
 
 
 // Inherited will overwrite this one.
-unsigned long fileBuff::calculateBuffSize(void) {
-  //tracer trace("fileBuff::calculateBuffSize()");
-  
-  return 0;
-}
+unsigned long fileBuff::calculateBuffSize(void) { return 0; }
+
 
 // Inherited will overwrite this one.
 void fileBuff::writeToBuff(char* buffPtr,unsigned long maxBytes) {  }
 
 
 // Inherited will overwrite this one.
-unsigned long fileBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) {  }
+unsigned long fileBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) { return 0; }
 
 
 bool fileBuff::saveToFile(void) {

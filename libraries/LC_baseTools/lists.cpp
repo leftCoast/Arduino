@@ -65,7 +65,8 @@ void linkListObj::deleteTail(void) {
 // your basic linked list. Good base for linked list things, you know.
 
 // When we recieve an object to link up. Do we own it? Or are
-// we just tracking other people's laundry?
+// we just tracking other people's laundry? Here is what we do.
+// They can pull out the ones they want whenever. We dump the rest.
 linkList::linkList(void) { theList = NULL; }
 
 

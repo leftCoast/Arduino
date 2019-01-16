@@ -380,7 +380,7 @@ bool  blockFile::nextBlock(unsigned long numBytes) {
 bool  blockFile::findFirst(void) {
 //  tracer trace("findFirst()", &mErr);
 
-  if (mErr == BF_NO_ERR) {                        // As long aas we ain't busted already.
+  if (mErr == BF_NO_ERR) {                        // As long as we ain't busted already.
     if (mFile.seek(sizeof(blockFileHeader))) {    // Easy, its the location right after the header.
       return true;                                // If the jump worked, were golden.
     } else {                                      // If the jump didn't work?

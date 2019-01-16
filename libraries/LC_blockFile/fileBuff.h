@@ -13,7 +13,7 @@
 // yourself into?
 //
 // writeToBuff(char* buffPtr,unsigned long maxBytes); - Do the "flatten" thing.
-// Write the information you need to construct yourself into a data buffer.
+// Write the information you need to re-construct yourself into a data buffer.
 //
 // loadFromBuff(char* buffPtr,unsigned long maxBytes); - Given a data buffer,
 // reconstruct yourself into your former glory!
@@ -26,10 +26,10 @@
 
 class fileBuff {
 
-  public:
-  
-          fileBuff(blockFile* inFile,unsigned long blockID);
-  virtual ~fileBuff(void);
+	public:		
+				fileBuff(blockFile* inFile);									// constructor for root ID
+				fileBuff(blockFile* inFile,unsigned long blockID);		// constructor for all those "other guys".
+	virtual	~fileBuff(void);
 
           unsigned long   getID(void);
   virtual unsigned long   calculateBuffSize(void);

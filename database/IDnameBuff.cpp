@@ -1,44 +1,59 @@
 #include "IDnameBuff.h"
 
-IDnameBuff::IDnameBuff(blockFile* inFile,unsigned long blockID,char* recName,unsigned long numBytes,uint8_t* recBuff)
-  : fileBuff(inFile,blockID) {
+// Two ways to be created. Someone says, "lets make a new one called.. " And resurection from stasis.
 
-  mRecName = NULL;
+// This is our "call into exsistance" constructor. Someone said, make a new one, with these things..
+IDnameBuff::IDnameBuff(blockFile* inFile,unsigned long blockID,char* inName) {
+    : fileBuff(inFile,blockID) {
+      
+  mName = NULL;
   mNumBytes = 0;
-  mRecBuff = NULL;
-  setName(recName);
-  setRecBuff(numBytes,recBuff);
+  mBuff = NULL;
+  setName(inName);
 }
 
 
+IDnameBuff::IDnameBuff(blockFile* inFile,unsigned long blockID,char* inName,unsigned long numBytes,uint8_t* inBuff)
+  : fileBuff(inFile,blockID) {
+
+  mName = NULL;
+  mNumBytes = 0;
+  mBuff = NULL;
+  setName(inName);
+  setBuff(numBytes,inBuff);
+}
+
+
+// Umm.. This gives a blank, I'm assuming the next call would be loadFromBuff() from the calling entity.
 IDnameBuff::IDnameBuff(blockFile* inFile,unsigned long blockID)
   : fileBuff(inFile,blockID) {
 
-  mRecName = NULL;
+  mName = NULL;
   mNumBytes = 0;
-  mRecBuff = NULL;
+  mBuff = NULL;
+  
 }
 
 
 IDnameBuff::~IDnameBuff(void) {
 
   resizeName(0);
-  resizeRecBuff(0);
+  resizeBuff(0);
 }
 
 
-unsigned long IDnameBuff::calculateBuffSize(void) { return strlen(mRecName)+1+mNumBytes; }
+unsigned long IDnameBuff::calculateBuffSize(void) { return strlen(mName)+1+mNumBytes; }
 
 
 void IDnameBuff::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 
   int offset;
   
-  if (maxBytes>=calculateBuffSize()) {            // If we have enough room.
-    strcpy(buffPtr,mRecName);                   // stuff in name with trailing \0.
-    offset = strlen(mRecName)+1;                // Offset to the first data byte.
+  if (maxBytes>=calculateBuffSize()) {          // If we have enough room.
+    strcpy(buffPtr,mName);                      // stuff in name with trailing \0.
+    offset = strlen(mName)+1;                   // Offset to the first data byte.
     for(unsigned long  i=0;i<mNumBytes;i++) {   // Here's your databytes.
-      buffPtr[offset+i] = mRecBuff[i];          // Stuff 'em in.
+      buffPtr[offset+i] = mBuff[i];             // Stuff 'em in.
     }
   }
 }
@@ -50,13 +65,13 @@ unsigned long IDnameBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
   
   nameLen = strlen(buffPtr)+1;                          // First thing in buff is a c string. Measure it.
   resizeName(nameLen);                                  // Ask for enough RAM to store it.
-  if (mRecName) {                                       // If we got it..
-    strcpy(mRecName,buffPtr);                           // Save off the name.
+  if (mName) {                                       // If we got it..
+    strcpy(mName,buffPtr);                           // Save off the name.
     mNumBytes = maxBytes - nameLen;                     // What's left over are the data bytes.
     resizeRecBuff(mNumBytes);                           // Ask for RAM to store the info.
-    if (mRecBuff) {                                     // If we got the RAM.
+    if (mBuff) {                                     // If we got the RAM.
       for(unsigned long i=nameLen;i<maxBytes;i++) {     // Grab the rest of the bytes;
-        mRecBuff[i-nameLen] = buffPtr[i];               // Stuff in the bytes.
+        mBuff[i-nameLen] = buffPtr[i];               // Stuff in the bytes.
       }
     }
   }
@@ -67,22 +82,22 @@ unsigned long IDnameBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 void IDnameBuff::setName(char* recName) {
 
   resizeName(strlen(recName)+1);
-  if (mRecName)  {
-    strcpy(mRecName,recName);
+  if (mName)  {
+    strcpy(mName,recName);
   }
 }
 
 
-char* IDnameBuff::getName(void) { return mRecName; }
+char* IDnameBuff::getName(void) { return mName; }
 
 
 void IDnameBuff::setRecBuff(unsigned long numBytes,uint8_t* recBuff) {
 
   resizeRecBuff(numBytes);
-  if (mRecBuff) {
+  if (mBuff) {
     mNumBytes = numBytes;
     for(unsigned long i=0;i<mNumBytes;i++) {
-      mRecBuff[i]=recBuff[i];
+      mBuff[i]=recBuff[i];
     }
   }
 }
@@ -90,13 +105,13 @@ void IDnameBuff::setRecBuff(unsigned long numBytes,uint8_t* recBuff) {
 
 bool IDnameBuff::resizeName(int numBytes) {
 
-  if (mRecName) {
-    free(mRecName);
-    mRecName = NULL;
+  if (mName) {
+    free(mName);
+    mName = NULL;
   }
   if (numBytes) {
-    mRecName = (char*)malloc(numBytes);
-    return(mRecName!=NULL);
+    mName = (char*)malloc(numBytes);
+    return(mName!=NULL);
   }
   return true;
 }
@@ -104,13 +119,13 @@ bool IDnameBuff::resizeName(int numBytes) {
 
 bool IDnameBuff::resizeRecBuff(unsigned long numBytes) {
 
-  if (mRecBuff) {
-    free(mRecBuff);
-    mRecBuff = NULL;
+  if (mBuff) {
+    free(mBuff);
+    mBuff = NULL;
   }
   if (numBytes) {
-    mRecBuff = (uint8_t*)malloc(numBytes);
-    return(mRecBuff!=NULL);
+    mBuff = (uint8_t*)malloc(numBytes);
+    return(mBuff!=NULL);
   }
   return true;
 }
