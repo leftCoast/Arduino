@@ -45,15 +45,17 @@ void setup() {
     while(true);
   }
   
-  if (!SD.begin(SD_CS)) {               // Bring the diskdrive online.
+  if (!SD.begin(SD_CS)) {     // Bring the diskdrive online.
     while(true);
   }
-   
-  ourOS.begin();                       // Boot OS manager. 
+                              // Once the disk is online we can..
+  ourBlackBook.begin();       // Boot the address book.
+                              // Hardware and services are up and running.
+  ourOS.begin();              // Boot OS manager. 
 }
 
 
-void loop() {
-  idle();
-  ourOS.loop();
+void loop() {     // During loop..
+  idle();         // Idlers get their time.
+  ourOS.loop();   // ourOS gets a kick to pass on the the current panel.
 }

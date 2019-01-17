@@ -247,10 +247,14 @@ void viewMgr::idle(void) {
 // ***************************************************
 
 
+drawGroup::drawGroup(rect* inRect,bool clicks) 
+	: drawObj(inRect,clicks) { needRefresh = true; }
+
+
 drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
 	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
-
-
+	
+	
 // We don't actually allocate anything new. Just work old tools.
 drawGroup::~drawGroup() { }
 
@@ -375,6 +379,14 @@ void	drawGroup::draw(void) {
 // drawList is the same as a drawGroup except it arranges
 // its sub Objects in list form.
 // ***************************************************
+
+
+drawList::drawList(rect* inRect,bool clicks,bool vertical) 
+	: drawGroup(inRect,clicks) {
+
+	mVertical = vertical;	// Save it for now, deal with coding it later.
+	itemHeight = 1;
+}
 
 
 drawList::drawList(int x, int y, int width,int height,bool clicks,bool vertical) 

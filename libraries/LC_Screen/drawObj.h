@@ -84,6 +84,7 @@ void		setFocusPtr(drawObj* newFocus);
 class drawGroup : public drawObj, public viewMgr {
 
 	public:
+				drawGroup(rect* inRect,bool clicks=false);
 				drawGroup(int x, int y, int width,int height,bool clicks=false);
   	virtual	~drawGroup();
 
@@ -103,6 +104,7 @@ class drawGroup : public drawObj, public viewMgr {
 class drawList : public drawGroup {
  
 	public:
+				drawList(rect* inRect,bool clicks=false,bool vertical=true);
 				drawList(int x, int y, int width,int height,bool clicks=false,bool vertical=true);
   	virtual	~drawList();
   					
