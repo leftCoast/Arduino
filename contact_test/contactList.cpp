@@ -20,6 +20,7 @@ contact::contact(blockFile* inFile,unsigned long blockID,char* PN)
   mShortBuff    = false;
   mTextBytes    = 0;
   setPN(PN);
+  mChanged      = true;
 }
 
 
@@ -36,6 +37,7 @@ contact::contact(blockFile* inFile,unsigned long blockID,bool shortBuff)
   mShortBuff    = shortBuff;
   mTextBytes    = 0;
   readFromFile();
+  mChanged      = false;
 }
 
 
@@ -54,9 +56,11 @@ void contact::setPN(char* PN) {
 
   int numChars;
 
+
   numChars = strlen(PN) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mPN)) {
     strcpy(mPN,PN);
+    mChanged = true;
   }
 }
 
@@ -68,6 +72,7 @@ void contact::setNickName(char* nickName) {
   numChars = strlen(nickName) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mNickName)) {
     strcpy(mNickName,nickName);
+    mChanged = true;
   }
 }
 
@@ -79,6 +84,7 @@ void contact::setFirstName(char* firstName) {
   numChars = strlen(firstName) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mFirstName)) {
     strcpy(mFirstName,firstName);
+    mChanged = true;
   }
 }
 
@@ -90,6 +96,7 @@ void contact::setLastName(char* lastName) {
   numChars = strlen(lastName) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mLastName)) {
     strcpy(mLastName,lastName);
+    mChanged = true;
   }
 }
 
@@ -101,6 +108,7 @@ void contact::setCompanyName(char* companyName) {
   numChars = strlen(companyName) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mCompanyName)) {
     strcpy(mCompanyName,companyName);
+    mChanged = true;
   }
 }
 
@@ -113,6 +121,7 @@ void contact::setTextList(char* textList) {
   if (resizeBuff(numChars,(uint8_t**)&mTextList)) {
     strcpy(mTextList,textList);
     mShortBuff = false;
+    mChanged = true;
   }
 }
 
@@ -131,7 +140,6 @@ unsigned long contact::calculateBuffSize(void) {
               } else {
                 numBytes =  numBytes + strlen(mTextList) + 1;
               }
-              
   return numBytes;
 }
 
@@ -191,8 +199,9 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
   if (mShortBuff) {                       // If we didn't have it before.
     resizeBuff(0,(uint8_t**)&mTextList);  // Toss it out now.
   }
-  
+  mChanged = false;
 }
+
 
 unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
@@ -216,6 +225,7 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
   if (mShortBuff) {                                 // Asking only for indexing data.
     resizeBuff(0,(uint8_t**)&mTextList);            // Dump the message text.
   }
+  mChanged = false;
   return buffIndex;   
 }
 
@@ -227,26 +237,64 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
           
 contactList::contactList(blockFile* inFile)
-  : linkList(), fileBuff(inFile) {  }
+  : linkList(), fileBuff(inFile) {
+    
+  readFromFile();   // If we have something, lets get it.
+}
 
   
 contactList::~contactList(void) {  }
 
 
-// This is for creating a fresh new contact. Not re-creation.
-contact* contactList::newContact(char* phoneNum) {
+contact* contactList::findByPN(char* phoneNum) {
 
-  contact*      newContact;
-  unsigned long blockID;
+  contact*  trace;
 
-  blockID = mFile->getNewBlockID();
-  newContact = new contact(mFile,blockID,phoneNum);
-  return newContact;
+  trace = (contact*)getFirst();
+  while(trace) {
+    if (!strcmp(trace->mPN,phoneNum)) {
+      return trace;
+    }
+    trace = (contact*)trace->next;
+  }
+  return trace;
 }
 
 
-unsigned long contactList::calculateBuffSize(void) {return sizeof(unsigned long) * getCount(); }
+// This is for creating a fresh new contact. Not re-creation.
+contact* contactList::findOrAddContact(char* phoneNum) {
+
+  contact*      contactPtr;
+  unsigned long blockID;
+
+  contactPtr = findByPN(phoneNum);
+  if (!contactPtr) {
+    blockID = mFile->getNewBlockID();
+    contactPtr = new contact(mFile,blockID,phoneNum);
+    addToTop(contactPtr);
+  }
+  return contactPtr;
+}
+
+
+unsigned long contactList::calculateBuffSize(void) { return sizeof(unsigned long) * getCount(); }
+
   
+bool contactList::saveSubFileBuffs(void) {
+
+  contact*        trace;
+
+  trace = (contact*)getFirst();       // Grab the first contact on our list.
+  while(trace) {                      // While we have contacts..
+    if (trace->mChanged) {            // If they have been edited..
+      trace->saveToFile();            // Save them to disk.
+    }
+    trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
+  }  
+  return true;                        // Easy peasy, return true;
+}
+
+
  
 void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 
@@ -270,7 +318,7 @@ unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
   unsigned long*  longPtr;
   int             numIDs;
   contact*        newContact;
-  
+
   longPtr = (unsigned long*)buffPtr;                  // If we are a pointer to X, we index by X. So they say
   numIDs = maxBytes / sizeof(unsigned long);          // Figure out how many are in there.
   for (int i=0;i<numIDs;i++) {                        // Loop through them all..

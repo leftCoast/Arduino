@@ -1,38 +1,31 @@
 #include "fileBuff.h"
 
 
-//constructor for root ID
+// constructor for root ID
 fileBuff::fileBuff(blockFile* inFile) {
-  //tracer trace("fileBuff::fileBuff() for root.");
   
-    mFile = inFile;							// Allright, the blockfile.
-    mBuff = NULL;								// Init our buff pointer.
-    mID = mFile->readRootBlockID();		// Read the root ID.
-    if (mID==0) {								// Zero!? Wow, brand new file!
-    	mID = mFile->getNewBlockID();		// It says, first allocated will be root.
-    }  	
+	mFile	= inFile;							// Allright, the blockfile.
+	mBuff	= NULL;								// Init our buff pointer.
+	mID	= mFile->readRootBlockID();	// Read the root ID.
+	if (mID==0) {								// Zero!? Wow, brand new file!
+		mID = mFile->getNewBlockID();		// It says, first allocated will be root.
+	}  	
 }
 
 
 // constructor for all those "other" guys.
 fileBuff::fileBuff(blockFile* inFile,unsigned long blockID) {
-  //tracer trace("fileBuff::fileBuff() normal flavor.");
   
-    mFile = inFile;
-    mID = blockID;
-    mBuff = NULL;
+    mFile	= inFile;
+    mID		= blockID;
+    mBuff	= NULL;
 }
 
 
 fileBuff::~fileBuff(void) {  }
-  //tracer trace("fileBuff::~fileBuff()");
   
 
-unsigned long fileBuff::getID(void) { 
-  //tracer trace("fileBuff::getID()");
-    
-  return mID;
-  }
+unsigned long fileBuff::getID(void) { return mID; }
 
 
 // Inherited will overwrite this one.
@@ -47,31 +40,37 @@ void fileBuff::writeToBuff(char* buffPtr,unsigned long maxBytes) {  }
 unsigned long fileBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) { return 0; }
 
 
+// Inherited MAY overwrite this one.
+// IF inherited manages a group of subFileBuffs, this is the
+// call for you to call saveToFile() on each of them.
+bool fileBuff::saveSubFileBuffs(void) { return true; }
+
+
 bool fileBuff::saveToFile(void) {
-  //tracer trace("fileBuff::saveToFile()");
   
   unsigned long numBytes;
   bool          success;
 
-  success = false;
-  if (mFile) {
-    numBytes = calculateBuffSize();
-    if (numBytes) {
-      mBuff = (char*)malloc(numBytes);
-      if (mBuff) {
-        writeToBuff(mBuff,numBytes);
-        success = mFile->writeBlock(mID,mBuff,numBytes);
-        free(mBuff);
-        mBuff = NULL;
-      }
-    }
-  }
-  return success;
+	success = false;
+	if (mFile) {
+		if (saveSubFileBuffs()) {
+			numBytes = calculateBuffSize();
+			if (numBytes) {
+				mBuff = (char*)malloc(numBytes);
+				if (mBuff) {
+					writeToBuff(mBuff,numBytes);
+					success = mFile->writeBlock(mID,mBuff,numBytes);
+					free(mBuff);
+					mBuff = NULL;
+				}
+			}
+		}
+	}
+	return success;
 }
 
 
 bool fileBuff::readFromFile(void) {
-  //tracer trace("fileBuff::readFromFile()");
   
   unsigned long numBytes;
   bool          success;

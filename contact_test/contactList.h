@@ -36,6 +36,7 @@ class contact : public linkListObj,
           char*   mTextList;      // The message list.
           bool    mShortBuff;     // We do or don't have the text list with us.
           int     mTextBytes;     // This is how mony text bytes are stored on the SD card that we DIDN'T KEEP.
+          bool    mChanged;
 };
 
 
@@ -52,8 +53,10 @@ class contactList : public linkList,
           contactList(blockFile* inFile);
   virtual ~contactList(void);
 
-          contact*        newContact(char* phoneNum);
+          contact*        findByPN(char* phoneNum);
+          contact*        findOrAddContact(char* phoneNum);
   virtual unsigned long   calculateBuffSize(void);
+  virtual bool            saveSubFileBuffs(void);
   virtual void            writeToBuff(char* buffPtr,unsigned long maxBytes);
   virtual unsigned long   loadFromBuff(char* buffPtr,unsigned long maxBytes);
 };
