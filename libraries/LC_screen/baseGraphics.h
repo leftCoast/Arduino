@@ -37,7 +37,8 @@ class rect {
   			  	void  setSize(word inWidth,word inHeight);
   			  	void  setRect(rect* inRect);                 					// Got a rect? Make this one the same.
   			  	void  setRect(point* inPt1,point* inPt2);							// Or two points..
-  			  	void	setAll(int inX, int inY, word inWidth,word inHeight);	// Or the usual way..
+  			  	void	setRect(int inX, int inY, int inWidth,int inHeight);	// Or the usual way..
+          	void	insetRect(int inset);											// Inset all sides by this much. Or expand if negative.
           	int  	maxX(void);                            					// Where's our last pixel?
           	int  	maxY(void);                            					// Same as obove but in the Y direction.
           	int  	minX(void);                            					// Where's our first pixel?

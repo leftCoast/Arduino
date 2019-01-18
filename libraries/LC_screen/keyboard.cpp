@@ -31,8 +31,8 @@ keyColors kbPallette;
 
 // ********************************************************************************
 // ********************************************************************************
-// keyboardKeys are the base class of all keys. This is so there is a common interface
-// to the keyboard object.
+// keyboardKeys are the base class of all keys. This is so there is a common
+// interface to the keyboard object.
 // ********************************************************************************
 // ********************************************************************************
 
@@ -382,26 +382,32 @@ keyboard::~keyboard(void) {
 
 void keyboard::handleKey(char inChar) {
 
-  keystroke aKeystroke;
-
-  aKeystroke.editCommand = input;
-  aKeystroke.theChar = inChar;
-  mEditField->handleKeystroke(&aKeystroke);
-  if(mState==shifted) {
-    mState = chars;
-  }
+	keystroke aKeystroke;
+	
+	if (mEditField) {
+		aKeystroke.editCommand = input;
+		aKeystroke.theChar = inChar;
+		mEditField->handleKeystroke(&aKeystroke);
+		if(mState==shifted) {
+			mState = chars;
+		}
+	}
 }
 
 
 void keyboard::handleKey(keyCommands inEditCom) { 
 
-  keystroke aKeystroke;
+	keystroke aKeystroke;
 
-  aKeystroke.editCommand = inEditCom;
-  aKeystroke.theChar = '\0';
-  mEditField->handleKeystroke(&aKeystroke);
+	if (mEditField) {
+		aKeystroke.editCommand = inEditCom;
+		aKeystroke.theChar = '\0';
+		mEditField->handleKeystroke(&aKeystroke);
+	}
 }
 
+
+void keyboard::setEditField(editField* inField) { mEditField = inField; }
 
 void keyboard::handleKey(keyStates inState) { mState = inState; }
 

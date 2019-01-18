@@ -57,17 +57,27 @@ void rect::setRect(point* inPt1,point* inPt2) {
 }
 
 
-void rect::setAll(int inX, int inY, word inWidth,word inHeight) {
+void rect::setRect(int inX, int inY, int inWidth,int inHeight) {
 
 	setLocation(inX,inY);
    setSize(inWidth,inHeight);
 }
 
 
+void rect::insetRect(int inset) {
+
+	x = x - inset;
+	x = y - inset;
+	width = width - (2*inset);
+	height = height - (2*inset);
+}
+          	
+          	
 int rect::maxX(void) { return(x + width); }
 int rect::maxY(void)  { return(y + height); }
 int rect::minX(void) { return(x); }
 int rect::minY(void)  { return(y); }
+
 
 bool rect::inRect(int inX, int inY) {
 

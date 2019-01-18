@@ -16,8 +16,9 @@
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
 
-#define SYS_FILE_PATH "/SYSTEM/SYSTEM.PRF"
-#define IMAGE_FILE_PATH "/SYSTEM/IMAGES/TGIVE.BMP"
+#define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"
+#define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TGIVE.BMP"
+#define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
 #define MENU_BAR_H    20
 
@@ -78,9 +79,9 @@ class cellOS :  public litlOS {
   virtual ~cellOS(void);
 
   virtual int     begin(void);          // The global world is online, do hookups.
-          void    initOSFile(void);     // If there is no OS file, stat one from defaults.
+          void    initOSFile(void);     // If there is no OS file, start one from defaults.
   virtual panel*  createPanel(int panelID);
-  virtual void    launchPanel(void);    // Dispose of this and launch a newly created panel.
+  virtual void    launchPanel(void);    // Dispose of current and launch a newly created panel.
           void    doStatus(void);       // Fill in the status datablock.
           void    hideRedraw(void);
           void    bringUp(void);

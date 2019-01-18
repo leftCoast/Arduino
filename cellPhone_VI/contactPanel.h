@@ -2,21 +2,60 @@
 #define contactPanel_h
 
 #include <drawObj.h>
+#include <label.h>
+#include <editField.h>
 #include <panel.h>
+#include <contactList.h>
+#include <colorRect.h>
+#include <keystroke.h>
+#include <keyboard.h>
 
 #define PNLIST_X    10
 #define PNLIST_Y    20
 #define PNLIST_W    220
-#define PNLIST_H    200 //?
+#define PNLIST_H    192
 
-#define PN_ITEM_X   0
+#define PN_ITEM_X1  0
 #define PN_ITEM_Y   0   // Doesn't really matter, it scrolls.
 #define PN_ITEM_W   PNLIST_W
-#define PN_ITEM_H   40
+#define PN_ITEM_H   48
+
+#define PN_EITEM_SW 60
+#define PN_EITEM_LW 97
+#define PN_EITEM_H  16 
+
+#define PN_EITEM_SX 10
+#define PN_EITEM_SY 10
+#define PN_EITEM_LX 10
+#define PN_EITEM_LY 10 + PN_EITEM_H + 8 // ??
+
+#define PN_EITEM_SG 10
+#define PN_EITEM_LG  3
+
+#define PN_EITEM_SX2 PN_EITEM_SX + PN_EITEM_SW + PN_EITEM_SG
+#define PN_EITEM_SX3 PN_EITEM_SX2 + PN_EITEM_SW + PN_EITEM_SG
+#define PN_EITEM_LX2 PN_EITEM_LX + PN_EITEM_LW + PN_EITEM_LG
+
+#define PN_EITEM_INSET  3
 
 
-extern addrBook ourBlackBook;
+extern contactList* ourBlackBook;
 
+// *****************************************************
+// *******************  addrStarter  *******************
+// *****************************************************
+// This guy is just for starting up the background global
+// contactList object. "ourBlackBook".
+
+
+class addrStarter {
+
+  public:
+          addrStarter(void);
+  virtual ~addrStarter(void);
+
+          void  begin(char* filePath);
+};
 
 // *****************************************************
 // *******************  PNEditField  *******************
@@ -26,13 +65,15 @@ extern addrBook ourBlackBook;
 class PNEditField :  public drawGroup {
 
   public:
-          PNEditField (rect* inRect,char* inText);
-          ~PNEditField(void);
-          
-  virtual drawSelf(void);
+          PNEditField (rect* bRect,rect* tRect,char* inText);
+  virtual ~PNEditField(void);
   
-          editField*  mEditField;    // Our editing field.
-          colorRect*  mEditBase;     // Our editing field's base.     
+  virtual void  setFocus(bool setLoose);
+          int   getNumChars(void);      // Not including the \0. You may need to add one.
+          void  getText(char* inBuff);  // You better have added the (1) for the \0.
+  
+          editField*  mEditField;       // Our editing field.
+          colorRect*  mEditBase;        // Our editing field's base.     
 };
 
 
@@ -45,16 +86,17 @@ class PNEditField :  public drawGroup {
 class PNListItem :  public drawGroup {
 
   public:
-          PNListItem(rect,contact* inContact);
+          PNListItem(contact* inContact);
   virtual ~PNListItem(void);
-
+  
+          void  finishEdit(PNEditField* theField);
+          
           contact*      mContact;         // Who we represent.
           PNEditField*  pNumEditField;    // Phone number editing field.
           PNEditField*  nickEditField;    // Repeat a lot..
           PNEditField*  fNameEditField;   //
           PNEditField*  lNameEditField; 
           PNEditField*  compEditField;
-          IOandKeys*    ourKeyboard;    // Just like it sounds, our texting keyboard.
 };
 
 
@@ -63,13 +105,13 @@ class PNListItem :  public drawGroup {
 // *********************  PNList  **********************
 // *****************************************************
 
-class PNList : public viewList {
+class PNList : public drawList {
 
   public:
-          PNList(rect);
+          PNList(int x,int y,int width,int height);
   virtual ~PNList(void);
 
-          void  showAll(void);
+          void  fillList(void);
 };
 
 
@@ -81,11 +123,17 @@ class PNList : public viewList {
 
 class contactPanel :  public panel {
 
-  virtual  void  setup(void);
+  public:
+          contactPanel(void);
+  virtual ~contactPanel(void);
+           
+  virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
   virtual void  close(void);
   virtual void  closing(void);
+
+          PNList*         mPNList;
 };
 
 

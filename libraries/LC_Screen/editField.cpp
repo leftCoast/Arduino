@@ -1,7 +1,17 @@
 #include "editField.h"
 
 
+editField(rect* inRect,char* inText,word inTextSize)
+	: label(inRect,inText,inTextSize) {
+	
+	cursorPos = strlen(buff);
+	setTime(500);
+	hookup();
+	cursorOnOff = false;
+	setColors(&black,&white);   // Good default.
+}
 
+	
 editField::editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize) 
  : label(inLocX,inLocY,inWidth,inHeight,inText,inTextSize) { 
 

@@ -72,7 +72,7 @@ homeScreen::homeScreen(void)
   int   iconX;
   rect  imageRect;
 
-  imageRect.setAll(0,MENU_BAR_H,240,ICON_BAR_Y-MENU_BAR_H);
+  imageRect.setRect(0,MENU_BAR_H,240,ICON_BAR_Y-MENU_BAR_H);
   mBackImage = new bmpPipe(imageRect);
   mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;

@@ -80,10 +80,10 @@ rect barGraphBar::calculateRect(void) {
 
   mapPixles = round(mMappedVal);
   switch(mDir) {
-    case upBar  : aRect.setAll(x,y+(height-mapPixles),width,mapPixles);  break;
-    case dwnBar : aRect.setAll(x,y,width,mapPixles);                     break;
-    case rBar   : aRect.setAll(x,y,mapPixles,height);                    break;
-    case lBar   : aRect.setAll(x+(width-mapPixles),y,mapPixles,height);  break;
+    case upBar  : aRect.setRect(x,y+(height-mapPixles),width,mapPixles);  break;
+    case dwnBar : aRect.setRect(x,y,width,mapPixles);                     break;
+    case rBar   : aRect.setRect(x,y,mapPixles,height);                    break;
+    case lBar   : aRect.setRect(x+(width-mapPixles),y,mapPixles,height);  break;
   }
   return aRect;
 }

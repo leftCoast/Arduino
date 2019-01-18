@@ -49,6 +49,15 @@ label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int 
 }
 
 
+label(rect inRect,char* inText,int textSize)
+	: drawObj(inRect) {
+
+	initLabel();
+	setValue(inText);
+	setTextSize(textSize);
+}
+
+
 label::~label() { 
   resizeBuff(0); 
 }
@@ -166,7 +175,7 @@ void label::setValue(char* str) {
 int label::getNumChars(void) { return strlen(buff); }
 
 
-// We asked above how much you have. Hand it over.		
+// We asked above how much you have. Hand it over.	(They better add one for the \0!)	
 void label::getText(char* inBuff) { strcpy(inBuff,buff); }
 				
 				

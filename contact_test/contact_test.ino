@@ -17,7 +17,7 @@
 
 #include <screen.h>
 
-#include "contactList.h"
+#include <contactList.h>
 
 #define TFT_CS  10
 #define TFT_RST -1    // I think I remember this is not used.

@@ -13,6 +13,7 @@
 // You can use this. Give it a panel ID and a full path to a
 // 32x32 bit .bmp file. Use these to populate your home panel,
 // and it does the rest.
+
 class appIcon : public iconButton {
   
   public:

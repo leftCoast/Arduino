@@ -5,6 +5,7 @@
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <SD.h>
 
+#include <keyboard.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -17,12 +18,12 @@
 #include <bmpPipe.h>
 #include <screen.h>
 #include <litlOS.h>
-
 #include <cellCommon.h>
 
 #include "icons.h"
 #include "cellOS.h"
 #include "cellManager.h"
+#include "contactPanel.h"
 
 #define TFT_CS  10
 #define TFT_RST -1    // I think I remember this is not used.
@@ -48,10 +49,12 @@ void setup() {
   if (!SD.begin(SD_CS)) {     // Bring the diskdrive online.
     while(true);
   }
-                              // Once the disk is online we can..
-  ourBlackBook.begin();       // Boot the address book.
-                              // Hardware and services are up and running.
-  ourOS.begin();              // Boot OS manager. 
+  
+  addrStarter kicker;               // Once the disk is online we can..
+  kicker.begin(CONTACT_FILE_PATH);  // Boot our little black book.
+                                    // addrStarter should auto-destruct at the end of setup(). As it should.
+                                    // Hardware and services are up and running.
+  ourOS.begin();                    // Boot OS manager. 
 }
 
 

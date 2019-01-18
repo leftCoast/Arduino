@@ -1,5 +1,9 @@
 #include "resizeBuff.h"
 
+// DON'T USE UNINITIALIZED POINTERS!! EVEN JUST SETTING TO NULL WILL BE FINE.
+// Once your pointer is either set to NULL or allocated, then it can be used
+// in here all you want.
+
 bool resizeBuff(int numBytes,uint8_t** buff) {
 
   if(*buff) {

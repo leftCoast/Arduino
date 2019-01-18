@@ -18,6 +18,7 @@ class editField : public label,
                   public timeObj {
 
   public:
+                editField(rect* inRect,char* inText,word inTextSize);
                 editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize);
   virtual       ~editField(void);
 

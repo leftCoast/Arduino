@@ -96,6 +96,7 @@ class keyboard {
 	virtual	void			handleKey(char inChar);
 	virtual	void			handleKey(keyCommands inEditCom);
 	virtual	void			handleKey(keyStates inState);
+	virtual	void			setEditField(editField* inField);
 	virtual	keyStates	getState(void);
 			
           editField*		mEditField;

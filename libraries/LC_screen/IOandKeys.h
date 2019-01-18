@@ -5,7 +5,6 @@
 #include "keystroke.h"
 #include "editField.h"
 #include "textView.h"
-#include "quickCom.h"
 
 
 class IOandKeys : public keyboard {
