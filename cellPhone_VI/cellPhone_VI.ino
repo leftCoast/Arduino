@@ -5,7 +5,7 @@
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <SD.h>
 
-#include <keyboard.h>
+#include <scrKeyboard.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>

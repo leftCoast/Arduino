@@ -25,12 +25,12 @@
 #define PN_EITEM_H  16 
 
 #define PN_EITEM_SX 10
-#define PN_EITEM_SY 10
+#define PN_EITEM_SY  7
 #define PN_EITEM_LX 10
-#define PN_EITEM_LY 10 + PN_EITEM_H + 8 // ??
+#define PN_EITEM_LY PN_EITEM_SY + PN_EITEM_H + 3
 
 #define PN_EITEM_SG 10
-#define PN_EITEM_LG  3
+#define PN_EITEM_LG  6
 
 #define PN_EITEM_SX2 PN_EITEM_SX + PN_EITEM_SW + PN_EITEM_SG
 #define PN_EITEM_SX3 PN_EITEM_SX2 + PN_EITEM_SW + PN_EITEM_SG
@@ -62,16 +62,22 @@ class addrStarter {
 // *****************************************************
 
 
+class PNListItem;
+
+
 class PNEditField :  public drawGroup {
 
   public:
-          PNEditField (rect* bRect,rect* tRect,char* inText);
+          PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
   virtual ~PNEditField(void);
-  
+
+  virtual void  drawSelf(void);
   virtual void  setFocus(bool setLoose);
+  virtual void  doAction(void);
           int   getNumChars(void);      // Not including the \0. You may need to add one.
           void  getText(char* inBuff);  // You better have added the (1) for the \0.
-  
+
+          PNListItem* mOurListItem;
           editField*  mEditField;       // Our editing field.
           colorRect*  mEditBase;        // Our editing field's base.     
 };
@@ -89,6 +95,7 @@ class PNListItem :  public drawGroup {
           PNListItem(contact* inContact);
   virtual ~PNListItem(void);
   
+  virtual void  drawSelf(void);
           void  finishEdit(PNEditField* theField);
           
           contact*      mContact;         // Who we represent.
@@ -110,7 +117,8 @@ class PNList : public drawList {
   public:
           PNList(int x,int y,int width,int height);
   virtual ~PNList(void);
-
+  
+  virtual void  drawSelf(void);
           void  fillList(void);
 };
 

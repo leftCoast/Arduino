@@ -1,7 +1,7 @@
-#include "editField.h"
+#include <editField.h>
 
 
-editField(rect* inRect,char* inText,word inTextSize)
+editField::editField(rect* inRect,char* inText,word inTextSize)
 	: label(inRect,inText,inTextSize) {
 	
 	cursorPos = strlen(buff);
@@ -120,18 +120,32 @@ void editField::getCursorPos(int* cursX,int* cursY,int* cursH) {
 // Need to flash cursor here.       
 void editField::idle(void) {
 
-  int cursX;
-  int cursY;
-  int cursH;
-
-  if(ding()) {                              // Uggh! Get to work!
-    getCursorPos(&cursX,&cursY,&cursH);
-    if(cursorOnOff) {
-      screen->drawVLine(cursX,cursY,cursH,&textColor);
-    } else {
-      screen->drawVLine(cursX,cursY,cursH,&backColor);
-    }
-    cursorOnOff = !cursorOnOff;
-    stepTime();
-  }
+	if (focus) {
+		if(ding()) {                              // Uggh! Get to work!
+			cursorOnOff = !cursorOnOff;
+			needRefresh = true;
+			start();
+		}
+	}
 }
+
+
+void editField::drawSelf(void) {
+
+	int cursX;
+	int cursY;
+	int cursH;
+	
+	label::drawSelf();
+	if (focus) {
+		getCursorPos(&cursX,&cursY,&cursH);
+		if(cursorOnOff) {
+			screen->drawVLine(cursX,cursY,cursH,&textColor);
+		} else {
+			screen->drawVLine(cursX,cursY,cursH,&backColor);
+		}
+	}
+}
+    
+    
+    

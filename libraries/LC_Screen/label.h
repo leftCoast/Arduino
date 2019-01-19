@@ -30,7 +30,7 @@ class label : public drawObj {
   				label(int inLocX, int inLocY, int inWidth,int inHeight);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize);
-  				label(rect inRect,char* inText,int textSize=1);
+  				label(rect* inRect,char* inText,int textSize=1);
 	virtual	~label(void);
   
   				void 	setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.

@@ -10,7 +10,7 @@
 #include "src/qGame/qGame.h"
 #include "phone.h"
 #include "cellListener.h"
-
+#include "contactPanel.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -255,7 +255,7 @@ panel* cellOS::createPanel(int panelID) {
     case homeApp      : return new homeScreen(); 
     case phoneApp     : return new phone();
     case textApp      : nextPanel = HOME_PANEL_ID; return new homeScreen();
-    case contactApp   : nextPanel = HOME_PANEL_ID; return new homeScreen();
+    case contactApp   : return new contactPanel();
     case calcApp      : return new rpnCalc();
     case qGameApp     : return new qGame();
     case breakoutApp  : nextPanel = HOME_PANEL_ID; return new homeScreen();

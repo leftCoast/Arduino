@@ -12,6 +12,7 @@ drawObj::drawObj() {
   callback = NULL;				// And, no.. We have none of this either.
 }
 
+
 drawObj::drawObj(rect* inRect,bool inClicks)
 	: rect(inRect) {
 	

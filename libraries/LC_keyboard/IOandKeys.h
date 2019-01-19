@@ -1,10 +1,10 @@
 #ifndef IOandKeys_h
 #define IOandKeys_h
 
-#include "keyboard.h"
-#include "keystroke.h"
-#include "editField.h"
-#include "textView.h"
+#include <scrKeyboard.h>
+#include <keystroke.h>
+#include <editField.h>
+#include <textView.h>
 
 
 class IOandKeys : public keyboard {

@@ -2,10 +2,10 @@
 
 
 
-colorRect(rect* inRect,colorObj* inColor,int inset)
+colorRect::colorRect(rect* inRect,colorObj* inColor,int inset)
 	: drawObj(inRect),colorObj() {
 	
-	setColor(&inColor);
+	setColor(inColor);
 	setInset(inset);
 }
 	

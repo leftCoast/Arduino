@@ -1,10 +1,10 @@
-#ifndef keyboard_h
-#define keyboard_h
+#ifndef scrKeyboard_h
+#define scrKeyboard_h
 
 #include <label.h>
-#include "keystroke.h"
-#include "editField.h"
-#include "idlers.h"
+#include <keystroke.h>
+#include <editField.h>
+#include <idlers.h>
 
 
 #define KEY_WD  23
@@ -13,7 +13,7 @@
 #define COL_1   1
 #define COL_SP  1
 
-#define ROW_1   210
+#define ROW_1   217
 #define ROW_SP  4
 
 // Keys need to know the state of the keyboard. When they get time

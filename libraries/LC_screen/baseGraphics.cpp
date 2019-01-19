@@ -18,7 +18,7 @@ rect::rect(rect* inRect) { setRect(inRect); }
 
 rect::rect(int inX, int inY, word inWidth,word inHeight) {
    
-   setAll(inX,inY,inWidth,inHeight);
+   setRect(inX,inY,inWidth,inHeight);
 }
 
  
@@ -66,8 +66,8 @@ void rect::setRect(int inX, int inY, int inWidth,int inHeight) {
 
 void rect::insetRect(int inset) {
 
-	x = x - inset;
-	x = y - inset;
+	x = x + inset;
+	y = y + inset;
 	width = width - (2*inset);
 	height = height - (2*inset);
 }

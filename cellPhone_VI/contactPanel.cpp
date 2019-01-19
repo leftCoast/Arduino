@@ -2,7 +2,7 @@
 
 #include <resizeBuff.h>
 #include <keystroke.h>
-#include <keyboard.h>
+#include <scrKeyboard.h>
 
 #include "contactPanel.h"
 
@@ -33,17 +33,36 @@ void addrStarter::begin(char* filePath) {
 // *****************************************************
 
                          
-PNEditField::PNEditField (rect* bRect,rect* tRect,char* inText)
-  : drawGroup(bRect) {
+PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
+  : drawGroup(inRect,true) {
 
-  mEditBase = new colorRect(bRect,&backColor);
-  mEditField = new editField(tRect,inText,1);
+  rect  bRect;
+  rect  tRect;
+
+  mOurListItem = ourListItem;
+  
+  bRect.x = 0;
+  bRect.y = 0;
+  bRect.width = inRect->width;
+  bRect.height = inRect->height;
+
+  tRect = bRect;
+  tRect.insetRect(PN_EITEM_INSET);
+  tRect.x++;
+  
+  mEditBase = new colorRect(&bRect,&backColor);
+  mEditBase->setColor(&backColor);
   addObj(mEditBase);
+  mEditField = new editField(&tRect,inText,1);
+  mEditField->setColors(&textColor,&backColor);
   addObj(mEditField);
 }
 
 
 PNEditField::~PNEditField(void) {  }
+
+
+void PNEditField::drawSelf(void) { screen->drawRect(this,&white); }
 
 
 void PNEditField::setFocus(bool setLoose) {
@@ -62,8 +81,13 @@ void PNEditField::setFocus(bool setLoose) {
         ourKeyboard->setEditField(NULL);
       }
     }
+    mOurListItem->finishEdit(this);
   }
+  mEditField->setFocus(setLoose);
 }
+
+
+void PNEditField::doAction(void) { setFocusPtr(this); }
 
 
 // Not including the \0. You may need to add one.
@@ -83,53 +107,40 @@ void PNEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
 PNListItem::PNListItem(contact* inContact)
   : drawGroup(PN_ITEM_X1,PN_ITEM_Y,PN_ITEM_W,PN_ITEM_H) {
 
-  rect  bRect;
-  rect  tRect;
-  
+  rect  aRect;
+    
   mContact = inContact;
 
-  bRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
-  tRect = bRect;
-  tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
-  pNumEditField = new PNEditField(&bRect,&tRect,mContact->mPN);
+  aRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
+  pNumEditField = new PNEditField(&aRect,mContact->mPN,this);
   addObj(pNumEditField);
 
   
-  bRect.setRect(PN_EITEM_SX,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
-  tRect = bRect;
-  tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
-  nickEditField = new PNEditField(&bRect,&tRect,mContact->mNickName);
+  aRect.setRect(PN_EITEM_SX,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
+  nickEditField = new PNEditField(&aRect,mContact->mNickName,this);
   addObj(nickEditField);
 
   
-  bRect.setRect(PN_EITEM_SX2,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
-  tRect = bRect;
-  tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
-  fNameEditField = new PNEditField(&bRect,&tRect,mContact->mFirstName);
+  aRect.setRect(PN_EITEM_SX2,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
+  fNameEditField = new PNEditField(&aRect,mContact->mFirstName,this);
   addObj(fNameEditField);
 
   
-  bRect.setRect(PN_EITEM_SX3,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
-  tRect = bRect;
-  tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
-  lNameEditField = new PNEditField(&bRect,&tRect,mContact->mLastName);
+  aRect.setRect(PN_EITEM_SX3,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
+  lNameEditField = new PNEditField(&aRect,mContact->mLastName,this);
   addObj(lNameEditField);
 
   
-  bRect.setRect(PN_EITEM_LX2,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
-  tRect = bRect;
-  tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
-  compEditField = new PNEditField(&bRect,&tRect,mContact->mCompanyName);
+  aRect.setRect(PN_EITEM_LX2,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
+  compEditField = new PNEditField(&aRect,mContact->mCompanyName,this);
   addObj(compEditField);
 }
 
 
 PNListItem::~PNListItem(void) {  }
+
+
+void PNListItem::drawSelf(void) { screen->drawRect(this,&green);  }
 
 
 void PNListItem::finishEdit(PNEditField* theField) {
@@ -195,6 +206,7 @@ PNList::PNList(int x,int y,int width,int height)
   
 PNList::~PNList(void) {  }
 
+void PNList::drawSelf(void) {  screen->drawRect(this,&red); }
 
 void PNList::fillList(void) {
 
@@ -222,24 +234,17 @@ void PNList::fillList(void) {
 
 
 contactPanel::contactPanel(void)
-  : panel(contactApp,false) {
-  if (ourKeyboard==NULL) {
-    ourKeyboard = new keyboard(NULL);
-  }
-}
+  : panel(contactApp,false) {  }
 
 
-contactPanel::~contactPanel(void) {
-
-  if (ourKeyboard) {
-    delete ourKeyboard;
-    ourKeyboard = NULL;
-  }
-}
+contactPanel::~contactPanel(void) {  }
 
            
 void contactPanel::setup(void) {
 
+  if (ourKeyboard==NULL) {
+    ourKeyboard = new keyboard(NULL);
+  }
   mPNList = new PNList(PNLIST_X,PNLIST_Y,PNLIST_W,PNLIST_H);  // Whip up the list of contacts.
   mPNList->fillList();                                        // Fill it with goodies.
   addObj(mPNList);                                            // Pass it to the a group.
@@ -249,7 +254,11 @@ void contactPanel::setup(void) {
 void contactPanel::loop(void) {  }
 
 
-void contactPanel::drawSelf(void) { screen->fillScreen(&backColor); }
+void contactPanel::drawSelf(void) { 
+
+  screen->fillScreen(&backColor);
+  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+}
 
 
 void contactPanel::close(void) {  }
@@ -257,5 +266,9 @@ void contactPanel::close(void) {  }
 
 void contactPanel::closing(void) {
 
-  ourBlackBook->saveToFile(); 
+  ourBlackBook->saveToFile();
+  if (ourKeyboard) {
+    delete ourKeyboard;
+    ourKeyboard = NULL;
+  }
 }

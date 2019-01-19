@@ -49,7 +49,7 @@ label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int 
 }
 
 
-label(rect inRect,char* inText,int textSize)
+label::label(rect* inRect,char* inText,int textSize)
 	: drawObj(inRect) {
 
 	initLabel();

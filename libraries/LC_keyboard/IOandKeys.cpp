@@ -1,4 +1,4 @@
-#include "IOandKeys.h"
+#include <IOandKeys.h>
 
 #define out  mTextField->appendText
 
@@ -52,6 +52,7 @@ bool IOandKeys::getBuff(char* buff,int maxBytes) {
 	}
 	resizeOutBuff(0);
 	mHaveBuff = false;
+  return true;
 }
 
 
