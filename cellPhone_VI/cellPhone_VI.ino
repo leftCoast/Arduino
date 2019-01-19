@@ -9,6 +9,7 @@
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
+#include <lineObj.h>
 #include <mapper.h>
 #include <multiMap.h>
 #include <timeObj.h>

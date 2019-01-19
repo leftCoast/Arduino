@@ -3,6 +3,7 @@
 #include <resizeBuff.h>
 #include <keystroke.h>
 #include <scrKeyboard.h>
+#include <lineObj.h>
 
 #include "contactPanel.h"
 
@@ -29,6 +30,84 @@ void addrStarter::begin(char* filePath) {
 
 
 // *****************************************************
+// ******************  contCloseBtn  *******************
+// *****************************************************
+
+        
+contCloseBtn::contCloseBtn(contactPanel* ourPanel)
+  : drawObj(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,true) {
+
+  mPanel = ourPanel;
+}
+
+contCloseBtn::~contCloseBtn(void) {  }
+
+void contCloseBtn::doAction(void) { mPanel->mNeedClose = true; }
+
+void contCloseBtn::drawSelf(void) {
+
+  if (clicked) {
+    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&backColor);
+    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&black);
+    screen->setTextColor(&redButtonColor);
+  } else {
+    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&redButtonHighlight);
+    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&redButtonColor);
+    screen->setTextColor(&black);
+  }
+  screen->setTextSize(CLOSE_TXT_SIZE);
+  screen->setCursor(x+2+(CLOSE_W - CLOSE_CHAR_W)/2, y + 1 + ((height-CLOSE_TXT_H)/2));
+  screen->drawText("X");
+}
+
+
+
+// *****************************************************
+// *******************  contNewBtn  ********************
+// *****************************************************
+
+
+contNewBtn::contNewBtn(PNList* ourList)
+  : drawObj(NEW_X,NEW_Y,NEW_W,NEW_H,true) {
+  mList = ourList;
+}
+
+    
+contNewBtn::~contNewBtn(void) {  }
+
+
+void contNewBtn::drawSelf(void) {
+
+  if (clicked) {
+    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&backColor);
+    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&lightbButtonColor);
+    screen->setTextColor(&green);
+  } else {
+    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&greenButtonHighlight);
+    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&greenbuttonColor);
+    screen->setTextColor(&white);
+  }
+  screen->setTextSize(NEW_TXT_SIZE);
+  screen->setCursor(x+2+(NEW_W - NEW_CHAR_W)/2, y + 1 + ((height-NEW_TXT_H)/2));
+  screen->drawText("+");
+}
+
+
+void contNewBtn::doAction(void) {
+
+  contact*  ourContact;
+
+  ourContact = ourBlackBook->findByPN(NEW_PN);
+  if (!ourContact) {
+    ourContact = ourBlackBook->findOrAddContact(NEW_PN);
+    if (ourContact) {
+      mList->addContact(ourContact,true);
+    }
+  }
+}
+
+  
+// *****************************************************
 // *******************  PNEditField  *******************
 // *****************************************************
 
@@ -48,7 +127,6 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
 
   tRect = bRect;
   tRect.insetRect(PN_EITEM_INSET);
-  tRect.x++;
   
   mEditBase = new colorRect(&bRect,&backColor);
   mEditBase->setColor(&backColor);
@@ -62,7 +140,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
 PNEditField::~PNEditField(void) {  }
 
 
-void PNEditField::drawSelf(void) { screen->drawRect(this,&white); }
+void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
 
 
 void PNEditField::setFocus(bool setLoose) {
@@ -107,10 +185,14 @@ void PNEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
 PNListItem::PNListItem(contact* inContact)
   : drawGroup(PN_ITEM_X1,PN_ITEM_Y,PN_ITEM_W,PN_ITEM_H) {
 
-  rect  aRect;
+  lineObj*  aDivider;
+  rect      aRect;
     
   mContact = inContact;
 
+  aDivider = new lineObj(PN_ITEM_LX,PN_ITEM_LY,PN_ITEM_LX2,PN_ITEM_LY,&redButtonColor);
+  addObj(aDivider);
+  
   aRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
   pNumEditField = new PNEditField(&aRect,mContact->mPN,this);
   addObj(pNumEditField);
@@ -140,8 +222,10 @@ PNListItem::PNListItem(contact* inContact)
 PNListItem::~PNListItem(void) {  }
 
 
-void PNListItem::drawSelf(void) { screen->drawRect(this,&green);  }
+void PNListItem::drawSelf(void) {
 
+  //screen->drawRect(this,&green); 
+}
 
 void PNListItem::finishEdit(PNEditField* theField) {
 
@@ -206,23 +290,34 @@ PNList::PNList(int x,int y,int width,int height)
   
 PNList::~PNList(void) {  }
 
-void PNList::drawSelf(void) {  screen->drawRect(this,&red); }
+void PNList::drawSelf(void) {  /*screen->drawRect(this,&red);*/ }
 
+
+void PNList::addContact(contact* contactPtr,bool showContact) {
+
+  PNListItem*   itemPtr;
+  
+  if (contactPtr) {
+    itemPtr = new PNListItem(contactPtr);
+    if (itemPtr) {
+      addObj(itemPtr);
+      if (showContact) {
+        showItem(itemPtr);
+      }
+    }
+  } 
+}
+
+  
 void PNList::fillList(void) {
 
   int           numAddr;
   contact*      contactPtr;
-  PNListItem*   itemPtr;
   
   numAddr = ourBlackBook->getCount();
   for (int i=0;i<numAddr;i++) {
     contactPtr = (contact*)ourBlackBook->getByIndex(i);
-    if (contactPtr) {
-      itemPtr = new PNListItem(contactPtr);
-      if (itemPtr) {
-        addObj(itemPtr);
-      }
-    }
+    addContact(contactPtr);
   }
 }
 
@@ -234,7 +329,7 @@ void PNList::fillList(void) {
 
 
 contactPanel::contactPanel(void)
-  : panel(contactApp,false) {  }
+  : panel(contactApp,false) { mNeedClose = false; }
 
 
 contactPanel::~contactPanel(void) {  }
@@ -248,10 +343,17 @@ void contactPanel::setup(void) {
   mPNList = new PNList(PNLIST_X,PNLIST_Y,PNLIST_W,PNLIST_H);  // Whip up the list of contacts.
   mPNList->fillList();                                        // Fill it with goodies.
   addObj(mPNList);                                            // Pass it to the a group.
+
+  contCloseBtn* ourCloseButton = new contCloseBtn(this);
+  addObj(ourCloseButton);
+
+  contNewBtn* ourNewButton = new contNewBtn(mPNList);
+  addObj(ourNewButton);
+  
 }
 
 
-void contactPanel::loop(void) {  }
+void contactPanel::loop(void) { if (mNeedClose) close(); }
 
 
 void contactPanel::drawSelf(void) { 
@@ -261,7 +363,7 @@ void contactPanel::drawSelf(void) {
 }
 
 
-void contactPanel::close(void) {  }
+//void contactPanel::close(void) {  }
 
 
 void contactPanel::closing(void) {
