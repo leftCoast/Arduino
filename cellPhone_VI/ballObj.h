@@ -1,0 +1,51 @@
+#ifndef ballObj_h
+#define ballObj_h
+
+#include "movingObj.h"
+
+#define BALL_X    120
+#define BALL_Y    160
+#define BALL_DIA  6
+#define BALL_FPM  2   // Frames / move
+#define BALL_DY   -2
+#define BALL_DX   0
+
+#define COMPASS_POINTS  18
+
+enum courseChange { clockwise, counterClockwise };
+
+class gameCompass {
+
+  public:
+    gameCompass(void);
+
+    point adjustCourse(int dy,int dx,courseChange change);
+  
+    point courses[COMPASS_POINTS];
+};
+
+
+class ballObj : public movingObj {
+
+  public:
+    ballObj(movingObj* inPaddle);
+
+          void  reset(void);
+  virtual void setLocation(int inX, int inY);
+  virtual void drawSelf(void);
+          void ballFrame(void);
+    
+    int   deltaY;       // Our vector..
+    int   deltaX;
+    int   framePerPix;
+    
+    int   yCount;       // How we're doing onlong that vector..
+    int   xCount;
+    int   frameCount;
+
+    boolean ballLost;
+
+    movingObj*  thePaddle;
+};
+
+#endif

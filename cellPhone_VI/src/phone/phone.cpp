@@ -1,10 +1,10 @@
 
 #include "phone.h"
-#include "cellOS.h"
 #include <cellCommon.h>
 #include <drawDelete.h>
 #include "cellManager.h"
-#include "cellListener.h"
+#include	"../../cellOS.h"
+#include "../cellListener/cellListener.h"
 
 #define STAT_TIME   2500  // ms between checks on status.
 

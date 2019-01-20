@@ -8,8 +8,7 @@
 #include <PNLabel.h>
 #include <colorRect.h>
 #include "panel.h"
-#include "icons.h"
-
+#include "../../icons.h"
 
 class phone;
 

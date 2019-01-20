@@ -17,7 +17,6 @@
 #include <IOandKeys.h>
 #include <blockFile.h>
 #include <fileBuff.h>
-//#include <litlOS.h>
 
 #include	"../../cellOS.h"
 #include "gameNode.h"

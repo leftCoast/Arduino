@@ -8,9 +8,10 @@
 
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
-#include "phone.h"
-#include "cellListener.h"
+#include "src/phone/phone.h"
+#include "src/cellListener/cellListener.h"
 #include "contactPanel.h"
+#include "breakout.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -258,7 +259,7 @@ panel* cellOS::createPanel(int panelID) {
     case contactApp   : return new contactPanel();
     case calcApp      : return new rpnCalc();
     case qGameApp     : return new qGame();
-    case breakoutApp  : nextPanel = HOME_PANEL_ID; return new homeScreen();
+    case breakoutApp  : return new breakout();
     default           : return NULL;
   }
 }

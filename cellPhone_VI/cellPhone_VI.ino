@@ -53,7 +53,7 @@ void setup() {
   
   addrStarter kicker;               // Once the disk is online we can..
   kicker.begin(CONTACT_FILE_PATH);  // Boot our little black book.
-                                    // addrStarter should auto-destruct at the end of setup(). As it should.
+                                    // kicker should auto-destruct at the end of setup(). As it should.
                                     // Hardware and services are up and running.
   ourOS.begin();                    // Boot OS manager. 
 }

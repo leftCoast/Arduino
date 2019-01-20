@@ -1,7 +1,7 @@
 
 #include "cellListener.h"	// Well, duh.
 #include <cellManager.h>	// Currently where the status register is living.
-#include "litlOS.h"			// Our job is to open panels. litlOS is the guy for this.
+#include	"../../cellOS.h"	// Our job is to open panels. litlOS is the guy for this.
  
 bool callIncoming;          
 

@@ -10,7 +10,7 @@
 #include <bmpPipe.h>
 #include <litlOS.h>
 #include "panel.h"
-#include "cellListener.h"
+#include "src/cellListener/cellListener.h"
 #include "icons.h"
 
 // If we'd like to have an overall look. Or at least a default look.
