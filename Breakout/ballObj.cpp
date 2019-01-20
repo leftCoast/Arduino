@@ -1,6 +1,10 @@
 #include "ballObj.h"
 #include "brickObj.h"
 
+// HACK ALERT!!
+#define TFT_W         240
+#define TFT_H         320
+
 gameCompass ourCompass;
 
 
@@ -116,7 +120,7 @@ void ballObj::setLocation(int inX, int inY) {
     clearSkies = true;
 
     // Fist we check the walls..
-    if (inX >= 128 - width) { // Hit right wall
+    if (inX >= TFT_W - width) { // Hit right wall
       deltaX = -deltaX;
       clearSkies = false;
     }
@@ -124,7 +128,7 @@ void ballObj::setLocation(int inX, int inY) {
       deltaX = -deltaX;
       clearSkies = false;
     }
-    if (inY >= 115 - height) {        // Hit bittom wall
+    if (inY >= (TFT_H-13) - height) {        // Hit bottom wall
       ballLost = true;                // The ball was LOST!!
       screen->fillRect(x,y,width,height,&backColor);
       clearSkies = false;
