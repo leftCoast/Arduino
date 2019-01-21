@@ -82,7 +82,7 @@ class RSSIicon : public drawGroup {
 };
 
 
-
+/*
 // *********************************************
 // ************* closeBtn *****************
 // *********************************************
@@ -96,6 +96,6 @@ class closeBtn : public drawObj {
     virtual void drawSelf(void);
 };
 
-
+*/
 
 #endif

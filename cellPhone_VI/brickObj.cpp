@@ -38,6 +38,9 @@ brickObj::brickObj(int inX,int inY)
   }
 
 
+brickObj::~brickObj(void) {  }
+
+
 void brickObj::setColor(colorObj* inColor) {
   
     brickColor.setColor(inColor);
@@ -70,4 +73,3 @@ void brickObj::drawSelf(void) {
     screen->drawVLine(x+width-1,y+1,height-2,&shadow);
   } 
 }
-

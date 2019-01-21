@@ -1,3 +1,4 @@
+#include <drawObj.h>
 
 #include "breakout.h"
 #include "movingObj.h"
@@ -6,41 +7,42 @@
 
 #include "cellOS.h"
 
-#define TFT_W         240
-#define TFT_H         320
+// ******************************
 
-#define PADDLE_WIDTH  20
-#define PADDLE_HEIGHT 4
-#define PADDLE_Y      TFT_H-40
+class myCloseBtn :  public closeBtn {
 
-#define PADDLE_MS 20
-#define FRAME_MS  10
-#define TEXT_MS   1500
+  public:
+          myCloseBtn(int x, int y,breakout* myApp);
+  virtual ~myCloseBtn(void);
 
-#define MESSAGE_X 1
-#define MESSAGE_Y 190
-#define MESSAGE_W TFT_W - 2
-#define MESSAGE_H 8
+  virtual void doAction(void);
+  
+          breakout* mApp;
+};
 
-#define BALLS_TXT_X TFT_W - 100 //40
-#define BALLS_TXT_W 72
-#define BALLS_Y     TFT_H - 10 //118
-#define BALLS_H     8
-#define BALLS_NUM_X BALLS_TXT_X + BALLS_TXT_W + 2
-#define BALLS_NUM_W 16
 
-#define NUM_BALLS 4
+myCloseBtn::myCloseBtn(int x, int y,breakout* myApp)
+  : closeBtn(x,y) { mApp = myApp; }
 
+  
+myCloseBtn::~myCloseBtn(void) {  }
+
+
+void myCloseBtn::doAction(void) { mApp->closeCallback(); }
+
+// ******************************
 
 breakout::breakout(void)
   : panel(breakoutApp,true) {
-  
+
   frameTimer    = new timeObj(FRAME_MS);
   paddleTimer   = new timeObj(PADDLE_MS);
   textTimer     = new timeObj(TEXT_MS);
   oldLoc        = -1;
   userState     = nothin;
   buttonHit     = false;
+  needClose     = false;
+  brickIndex    = 0;        // It was originally written to run once.
 }
 
 
@@ -56,7 +58,7 @@ void breakout::setup() {
 
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
-  screen->drawRect(0,0,TFT_W,TFT_H,&white);   // Damn, looks good leave it!
+  screen->drawRect(0,GAME_TOP,TFT_W,GAME_H,&white);   // Damn, looks good leave it!
 
   paddle = new movingObj(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
   paddle->setBackColor(&backColor);
@@ -78,7 +80,11 @@ void breakout::setup() {
   numBallsNum->setJustify(TEXT_LEFT);
   numBallsNum->setValue(" ");
   addObj(numBallsNum);
-  
+
+  myCloseBtn* aCloseBtn = new myCloseBtn(3,0,this);
+  aCloseBtn->begin();
+  addObj(aCloseBtn);
+
   ballNumCMap.addColor(NUM_BALLS,&green);
   ballNumCMap.addColor(2,&yellow);
   ballNumCMap.addColor(1,&red);
@@ -87,8 +93,11 @@ void breakout::setup() {
   theBall->setBackColor(&backColor);
   addObj(theBall);
   fillBricks();
-  setState(preGame); 
+  setState(preGame);
 }
+
+
+void breakout::closeCallback(void) { needClose = true; }
 
 
 void breakout::fillBricks(void) {
@@ -96,7 +105,7 @@ void breakout::fillBricks(void) {
   brickObj* aBrick;
   int       y;
   int       offset;
-  
+
   offset = (TFT_W-(NUM_BRICKS*BRICK_W))/2;
   colorObj aColor;
   y = BOTTOM_BRICK;
@@ -232,10 +241,14 @@ void breakout::setState(gameStates state) {
     }
     gameState = state;
   }
-
+  
 
 void breakout::loop(void) {
 
+    if (needClose) {
+      close();
+      return;
+    }
     doPaddle();
     switch(gameState) {
       case preGame :

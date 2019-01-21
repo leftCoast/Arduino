@@ -2,13 +2,8 @@
 #define ballObj_h
 
 #include "movingObj.h"
+#include "breakout.h"
 
-#define BALL_X    120
-#define BALL_Y    160
-#define BALL_DIA  6
-#define BALL_FPM  2   // Frames / move
-#define BALL_DY   -2
-#define BALL_DX   0
 
 #define COMPASS_POINTS  18
 
@@ -17,7 +12,8 @@ enum courseChange { clockwise, counterClockwise };
 class gameCompass {
 
   public:
-    gameCompass(void);
+          gameCompass(void);
+  virtual ~gameCompass(void);
 
     point adjustCourse(int dy,int dx,courseChange change);
   
@@ -28,7 +24,8 @@ class gameCompass {
 class ballObj : public movingObj {
 
   public:
-    ballObj(movingObj* inPaddle);
+          ballObj(movingObj* inPaddle);
+  virtual ~ballObj(void);
 
           void  reset(void);
   virtual void setLocation(int inX, int inY);

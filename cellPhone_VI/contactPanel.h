@@ -97,13 +97,12 @@ class addrStarter {
 
 
 
-class contCloseBtn :  public drawObj {
+class contCloseBtn :  public closeBtn {
 
    public:
           contCloseBtn(contactPanel* ourPanel);
   virtual ~contCloseBtn(void);
 
-  virtual void  drawSelf(void);
   virtual void  doAction(void);
 
           contactPanel* mPanel;
@@ -116,7 +115,7 @@ class contCloseBtn :  public drawObj {
 // *****************************************************
 
 
-class contNewBtn :  public drawObj {
+class contNewBtn :  public newBtn {
 
    public:
           contNewBtn(PNList* ourList);

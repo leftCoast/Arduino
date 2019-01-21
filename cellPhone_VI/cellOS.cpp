@@ -44,18 +44,39 @@ colorObj  menuBarColor(LC_RED);
 cellOS  ourOS;
 
 
+
+// *****************************************************
+// *****************   std buttons  ********************
+// *****************************************************
+
+
+closeBtn::closeBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_X22,22) { }
+    
+
+closeBtn::~closeBtn(void) {  }
+
+
+newBtn::newBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_NEW22,22) { }
+    
+
+newBtn::~newBtn(void) {  }
+
+
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
 
-#define HP_ICON_X       3
-#define HP_ICON_XSTEP  40
-#define HP_ICON_Y     275
 
 #define ICON_BAR_X    0
-#define ICON_BAR_Y    270
+#define ICON_BAR_Y    280
 #define ICON_BAR_W    240
-#define ICON_BAR_H    90
+#define ICON_BAR_H    80
+
+#define HP_ICON_X       3
+#define HP_ICON_XSTEP   40
+#define HP_ICON_Y       ICON_BAR_Y + 5
 
 #define BATT_X        199
 #define BATT_Y        2
@@ -81,7 +102,7 @@ homeScreen::homeScreen(void)
   iconX=iconX+HP_ICON_XSTEP;
   textIcon = new appIcon(iconX,HP_ICON_Y,textApp,"/system/icons/text.bmp");
   iconX=iconX+HP_ICON_XSTEP;
-  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,"/system/icons/contacts.bmp");
+  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,"/system/icons/addr.bmp");
   iconX=iconX+HP_ICON_XSTEP;
   calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,"/system/icons/calc.bmp");
   iconX=iconX+HP_ICON_XSTEP;
@@ -174,7 +195,7 @@ void homeScreen::drawSelf(void) {
   //unsigned long endT = millis();
   //Serial.println(endT-startT);
   
-  screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&white);
+  screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&black);
 }
 
 

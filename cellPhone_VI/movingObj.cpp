@@ -7,6 +7,10 @@ movingObj::movingObj(int inX, int inY, word inWidth,word inHeight)
     oldY = y; 
   }
 
+
+movingObj::~movingObj(void) {  }
+
+
 void movingObj::setBackColor(colorObj* inBackColor) { backColor.setColor(inBackColor); }
 
 

@@ -21,6 +21,9 @@
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
+#define ICON_PATH_X22       "/system/icons/redX22.bmp"
+#define ICON_PATH_NEW22     "/system/icons/new22.bmp"
+
 #define MENU_BAR_H    20
 
 // Starting points, they are tweaked in setup().
@@ -45,6 +48,24 @@ extern colorObj battLineColor;
 extern colorObj menuBarColor;
 
 enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
+
+
+
+class closeBtn : public iconButton {
+
+  public:
+          closeBtn(int x,int y);
+  virtual ~closeBtn(void);
+};
+
+class newBtn : public iconButton {
+
+  public:
+          newBtn(int x,int y);
+  virtual ~newBtn(void);
+};
+
+
 
 class homeScreen : public homePanel {
 

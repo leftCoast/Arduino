@@ -246,7 +246,7 @@ void RSSIicon::drawSelf(void) { /*screen->fillRect(x,y,width,height,&black);*/ }
 // ************* closeBtn *****************
 // *********************************************
 
-
+/*
 #define CLOSE_X 2
 #define CLOSE_Y 2
 #define CLOSE_W 14
@@ -272,3 +272,4 @@ void closeBtn::drawSelf(void) {
     screen->drawCircle(x+3,y+2,9,&darkRed);
   }
 }
+*/

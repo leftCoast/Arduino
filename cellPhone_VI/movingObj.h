@@ -6,7 +6,8 @@
 class movingObj : public drawObj {
 
   public:
-    movingObj(int inX, int inY, word inWidth,word inHeight);
+          movingObj(int inX, int inY, word inWidth,word inHeight);
+  virtual ~movingObj(void);
 
           void setBackColor(colorObj* inBackColor);
   virtual void setLocation(int inX, int inY);
@@ -20,4 +21,3 @@ class movingObj : public drawObj {
 };
 
 #endif
-

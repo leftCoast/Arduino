@@ -1,9 +1,7 @@
+
 #include "ballObj.h"
 #include "brickObj.h"
-
-// HACK ALERT!!
-#define TFT_W         240
-#define TFT_H         320
+#include "breakout.h"
 
 gameCompass ourCompass;
 
@@ -33,6 +31,8 @@ gameCompass::gameCompass(void) {
   courses[14].y = -2 ; courses[14].x = -3;
 }
 
+
+gameCompass::~gameCompass(void) {  }
 
 
 point gameCompass::adjustCourse(int dy, int dx, courseChange change) {
@@ -93,6 +93,9 @@ ballObj::ballObj(movingObj* inPaddle)
 }
 
 
+ballObj::~ballObj(void) {  }
+
+
 void ballObj::reset(void) {
 
   deltaY  = abs(BALL_DY);    // Always start heding down.
@@ -133,7 +136,7 @@ void ballObj::setLocation(int inX, int inY) {
       screen->fillRect(x,y,width,height,&backColor);
       clearSkies = false;
     }
-    if (inY <= height) { // Hit top wall
+    if (inY <= GAME_TOP+8 - height) { // Hit top wall
       deltaY = -deltaY;
       clearSkies = false;
     }

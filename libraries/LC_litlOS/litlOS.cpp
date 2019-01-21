@@ -9,8 +9,8 @@ int	nextPanel = NO_PANEL_ID;   // What panel do we want showing now?
 // *****************************************************
 
 
-appIcon::appIcon(int xLoc,int yLoc,int message,char* path)
-  : iconButton(xLoc,yLoc,path) { mMessage = message; }
+appIcon::appIcon(int xLoc,int yLoc,int message,char* path,int pix)
+  : iconButton(xLoc,yLoc,path,pix) { mMessage = message; }
 
   
 appIcon::~appIcon(void) {  }

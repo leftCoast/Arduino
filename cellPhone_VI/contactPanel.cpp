@@ -35,31 +35,15 @@ void addrStarter::begin(char* filePath) {
 
         
 contCloseBtn::contCloseBtn(contactPanel* ourPanel)
-  : drawObj(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,true) {
+  : closeBtn(CLOSE_X,CLOSE_Y) {
 
   mPanel = ourPanel;
+  begin();
 }
 
 contCloseBtn::~contCloseBtn(void) {  }
 
 void contCloseBtn::doAction(void) { mPanel->mNeedClose = true; }
-
-void contCloseBtn::drawSelf(void) {
-
-  if (clicked) {
-    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&backColor);
-    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&black);
-    screen->setTextColor(&redButtonColor);
-  } else {
-    screen->fillRoundRect(x+1,y,width,height,CONT_BTN_RAD,&redButtonHighlight);
-    screen->fillRoundRect(x,y,width,height,CONT_BTN_RAD,&redButtonColor);
-    screen->setTextColor(&black);
-  }
-  screen->setTextSize(CLOSE_TXT_SIZE);
-  screen->setCursor(x+2+(CLOSE_W - CLOSE_CHAR_W)/2, y + 1 + ((height-CLOSE_TXT_H)/2));
-  screen->drawText("X");
-}
-
 
 
 // *****************************************************
@@ -68,8 +52,9 @@ void contCloseBtn::drawSelf(void) {
 
 
 contNewBtn::contNewBtn(PNList* ourList)
-  : drawObj(NEW_X,NEW_Y,NEW_W,NEW_H,true) {
+  : newBtn(NEW_X,NEW_Y) {
   mList = ourList;
+  //begin();
 }
 
     
