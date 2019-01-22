@@ -7,8 +7,11 @@
 #include <liveText.h>
 #include <PNLabel.h>
 #include <colorRect.h>
+#include <contactList.h>
 #include "panel.h"
 #include "../../icons.h"
+
+extern	contact* pleaseCall;
 
 class phone;
 

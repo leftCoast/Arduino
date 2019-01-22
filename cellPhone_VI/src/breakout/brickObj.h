@@ -1,26 +1,25 @@
 #ifndef brickObj_h
 #define brickObj_h
 
-
+#include  <bmpPipe.h>
 #include "breakout.h"
 #include "movingObj.h"
 
 extern int  brickIndex;
 
-class brickObj : public movingObj {
+class brickObj : public movingObj,
+                 public bmpPipe {
 
   public:
           brickObj(int inX,int inY);
   virtual ~brickObj(void);
     
           void  setColor(colorObj* inColor);
+          void  setColor(char* path);
           void  hit(void);
           void  reset(void);
   virtual void  drawSelf(void);
     
-          colorObj  brickColor;
-          colorObj  hilight;
-          colorObj  shadow;
           int       homeX;
           int       homeY;
 };

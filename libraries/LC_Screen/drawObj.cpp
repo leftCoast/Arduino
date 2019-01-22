@@ -90,16 +90,15 @@ void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
 
 // Manager has detected a fresh click, is it ours?
 bool   drawObj::acceptClick(point where) {
-        
-    if (wantsClicks) {
-        if (inRect(where.x,where.y)) {
-            needRefresh = true;
-            clicked = true;
-            doAction();
-            return true;
-        }
-    }
-    return false;
+	if (wantsClicks) {
+		if (inRect(where.x,where.y)) {
+			needRefresh = true;
+			clicked = true;
+			doAction();
+			return true;
+		}
+	}
+	return false;
 }
   
             
@@ -249,11 +248,11 @@ void viewMgr::idle(void) {
 
 
 drawGroup::drawGroup(rect* inRect,bool clicks) 
-	: drawObj(inRect,clicks) { needRefresh = true; }
+	: drawObj(inRect,clicks) {  } // drawObj sets wantRefresh, we don't need to. 1/21/2019
 
 
 drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
-	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
+	: drawObj(x,y,width,height,clicks) {  }
 	
 	
 // We don't actually allocate anything new. Just work old tools.
@@ -445,7 +444,7 @@ int drawList::lastY(void) {
 bool drawList::isVisible(drawObj* theItem) { return (theItem->y >= 0 && theItem->y<= lastY()); }
 
 
-// If this itm is not sowing, show it. If above the window, bring it down to the first
+// If this itm is not showing, show it. If above the window, bring it down to the first
 // position. If below the window bring it up to the last position of the window.
 void drawList::showItem(drawObj* theItem) {
 

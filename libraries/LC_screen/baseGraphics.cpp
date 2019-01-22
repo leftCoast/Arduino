@@ -5,6 +5,17 @@
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
+/*
+// HANDY for tracing issues through the drawing code.
+void rect::printRect(char* label) {
+
+	Serial.print(label);
+	Serial.print("x:");Serial.print(x);Serial.print(" ");
+	Serial.print("y:");Serial.print(y);Serial.print(" ");
+	Serial.print("w:");Serial.print(width);Serial.print(" ");
+	Serial.print("h:");Serial.println(height);
+}
+*/
 
 rect::rect(void) {
    

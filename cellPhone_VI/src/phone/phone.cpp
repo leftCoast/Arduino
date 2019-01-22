@@ -55,6 +55,9 @@
 #define SIG_Y     BATT_Y
 
 
+contact*	pleaseCall;	// The cellOS will set this to NULL on bootup.
+
+
 // *****************************************************
 // ********************  phoneBtn  *********************
 // *****************************************************
@@ -196,6 +199,11 @@ void callControl::doAction(void) {
 
 void callControl::idle() {
 
+	if (pleaseCall) {
+		mPhone->numDisplay->setValue(pleaseCall->mPN);
+		pleaseCall = NULL;
+		doAction();
+	}
   switch(mState) {
     case isIdle       : 
       if(callIncoming) {

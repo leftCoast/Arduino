@@ -1,7 +1,7 @@
 #include "movingObj.h"
 
 movingObj::movingObj(int inX, int inY, word inWidth,word inHeight) 
-  :drawObj(inX,inY,inWidth,inHeight) {
+  :drawObj(inX,inY,inWidth,inHeight,true) {
     backColor.setColor(LC_BLACK);
     oldX = x;
     oldY = y; 

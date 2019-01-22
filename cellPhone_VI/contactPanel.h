@@ -58,11 +58,22 @@
 #define NEW_Y         CLOSE_Y
 #define NEW_W         CLOSE_W
 #define NEW_H         CLOSE_H
-#define NEW_TXT_SIZE  2
-#define NEW_CHAR_W    NEW_TXT_SIZE * 6
-#define NEW_TXT_H     NEW_TXT_SIZE * 8
 #define NEW_PN        "5551212"
 
+#define TEXT_X        NEW_X + NEW_W + CONT_BTN_SPC
+#define TEXT_Y        CLOSE_Y
+#define TEXT_W        CLOSE_W
+#define TEXT_H        CLOSE_H
+
+#define CALL_X        TEXT_X + TEXT_W + CONT_BTN_SPC
+#define CALL_Y        CLOSE_Y
+#define CALL_W        CLOSE_W
+#define CALL_H        CLOSE_H
+
+#define TRASH_X       CALL_X + CALL_W + CONT_BTN_SPC
+#define TRASH_Y       CLOSE_Y
+#define TRASH_W       CLOSE_W
+#define TRASH_H       CLOSE_H
 
 
 extern contactList* ourBlackBook;
@@ -121,12 +132,59 @@ class contNewBtn :  public newBtn {
           contNewBtn(PNList* ourList);
   virtual ~contNewBtn(void);
 
-  virtual void    drawSelf(void);
   virtual void    doAction(void);
 
           PNList* mList;
 
 };
+
+
+// *****************************************************
+// ******************  contTextBtn  ********************
+// *****************************************************
+
+
+class contTextBtn : public textBtn {
+
+  public:
+          contTextBtn(void);
+  virtual ~contTextBtn(void);
+
+  virtual void    doAction(void);
+};
+
+
+
+// *****************************************************
+// ******************  contCallBtn  ********************
+// *****************************************************
+
+
+class contCallBtn : public callBtn {
+
+  public:
+          contCallBtn(void);
+  virtual ~contCallBtn(void);
+
+  virtual void    doAction(void);
+};
+
+
+
+// *****************************************************
+// ******************  contTrashBtn  *******************
+// *****************************************************
+
+
+class contTrashBtn : public trashBtn {
+
+  public:
+          contTrashBtn(void);
+  virtual ~contTrashBtn(void);
+
+  virtual void    doAction(void);
+};
+
 
 
 // *****************************************************
@@ -163,13 +221,17 @@ class PNEditField :  public drawGroup {
 class PNListItem :  public drawGroup {
 
   public:
-          PNListItem(contact* inContact);
+          PNListItem(PNList* ourList,contact* inContact);
   virtual ~PNListItem(void);
-  
-  virtual void  drawSelf(void);
-          void  finishEdit(PNEditField* theField);
+
+  virtual void      draw(void);
+  virtual void      drawSelf(void);
+          void      startedEdit(void);
+          void      finishEdit(PNEditField* theField);
+          contact*  getContact(void);
           
           contact*      mContact;         // Who we represent.
+          PNList*       mList;            // Where we live;
           PNEditField*  pNumEditField;    // Phone number editing field.
           PNEditField*  nickEditField;    // Repeat a lot..
           PNEditField*  fNameEditField;   //
@@ -207,14 +269,12 @@ class contactPanel :  public panel {
           contactPanel(void);
   virtual ~contactPanel(void);
            
-  virtual void  setup(void);
-  virtual void  loop(void);
-  virtual void  drawSelf(void);
-  //virtual void  close(void);
-  virtual void  closing(void);
+  virtual void    setup(void);
+  virtual void    loop(void);
+  virtual void    drawSelf(void);
+  virtual void    closing(void);
 
-          PNList*         mPNList;
-          bool            mNeedClose;
+          PNList* mPNList;
 };
 
 

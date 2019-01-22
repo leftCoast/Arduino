@@ -11,7 +11,7 @@
 #include "src/phone/phone.h"
 #include "src/cellListener/cellListener.h"
 #include "contactPanel.h"
-#include "breakout.h"
+#include "src/breakout/breakout.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -51,30 +51,55 @@ cellOS  ourOS;
 
 
 closeBtn::closeBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_X22,22) { }
+  : iconButton(x,y,ICON_PATH_X22,22) { begin(); }
     
-
 closeBtn::~closeBtn(void) {  }
 
 
 newBtn::newBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_NEW22,22) { }
+  : iconButton(x,y,ICON_PATH_NEW22,22) { begin(); }
     
-
 newBtn::~newBtn(void) {  }
+
+
+searchBtn::searchBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_SEARCH22,22) { begin(); }
+    
+searchBtn::~searchBtn(void) {  }
+
+
+textBtn::textBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_TEXT22,22) { begin(); }
+    
+textBtn::~textBtn(void) {  }
+
+
+callBtn::callBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_PHONE22,22) { begin(); }
+    
+callBtn::~callBtn(void) {  }
+
+
+trashBtn::trashBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_TRASH22,22) { begin(); }
+    
+trashBtn::~trashBtn(void) {  }
+
 
 
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
 
+#define SCR_W         240
+#define SCR_H         320
 
 #define ICON_BAR_X    0
 #define ICON_BAR_Y    280
-#define ICON_BAR_W    240
-#define ICON_BAR_H    80
+#define ICON_BAR_W    SCR_W
+#define ICON_BAR_H    SCR_H - ICON_BAR_Y
 
-#define HP_ICON_X       3
+#define HP_ICON_X       3               // Forgot what HP stood for.. 
 #define HP_ICON_XSTEP   40
 #define HP_ICON_Y       ICON_BAR_Y + 5
 
@@ -84,6 +109,15 @@ newBtn::~newBtn(void) {  }
 #define SIG_X         BATT_X + 15
 #define SIG_Y         BATT_Y
 
+#define BMP_X         0
+#define BMP_Y         MENU_BAR_H
+#define BMP_W         SCR_W
+#define BMP_H         ICON_BAR_Y - MENU_BAR_H
+
+#define BMP_AW        181
+#define BMP_AH        256
+#define BMP_AX        (BMP_W - BMP_AW) / 2
+#define BMP_AY        BMP_Y + (BMP_H - BMP_AH) / 2
 
 //#define out     mText->appendText
 //#define outln   mText->appendText("\n")
@@ -94,11 +128,11 @@ homeScreen::homeScreen(void)
   int   iconX;
   rect  imageRect;
 
-  imageRect.setRect(0,MENU_BAR_H,240,ICON_BAR_Y-MENU_BAR_H);
+  imageRect.setRect(0,0,BMP_AW,BMP_AH);
   mBackImage = new bmpPipe(imageRect);
   mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;
-  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/phone.bmp");
+  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/call.bmp");
   iconX=iconX+HP_ICON_XSTEP;
   textIcon = new appIcon(iconX,HP_ICON_Y,textApp,"/system/icons/text.bmp");
   iconX=iconX+HP_ICON_XSTEP;
@@ -191,7 +225,8 @@ void homeScreen::drawSelf(void) {
 
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
   //unsigned long startT = millis();
-  mBackImage->drawBitmap(0,MENU_BAR_H);
+  screen->fillRect(BMP_X,BMP_Y,BMP_W,BMP_H,&white);
+  mBackImage->drawBitmap(BMP_AX,BMP_AY);
   //unsigned long endT = millis();
   //Serial.println(endT-startT);
   
@@ -263,6 +298,9 @@ int cellOS::begin(void) {
   screenMap.addPoint(RAMPDN_START,255);
   screenMap.addPoint(RAMPDN_END,0);
   ourListener.begin(phoneApp);
+
+  pleaseCall = NULL;  // For the phone panel.
+  
   bringUp();
   return litlOS::begin();
 }

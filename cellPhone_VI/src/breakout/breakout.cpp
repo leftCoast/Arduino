@@ -5,7 +5,7 @@
 #include "ballObj.h"
 #include "brickObj.h"
 
-#include "cellOS.h"
+#include  "../../cellOS.h"
 
 // ******************************
 
@@ -28,20 +28,17 @@ myCloseBtn::myCloseBtn(int x, int y,breakout* myApp)
 myCloseBtn::~myCloseBtn(void) {  }
 
 
-void myCloseBtn::doAction(void) { mApp->closeCallback(); }
+void myCloseBtn::doAction(void) { mApp->close(); }
 
 // ******************************
 
 breakout::breakout(void)
-  : panel(breakoutApp,true) {
+  : panel(breakoutApp,false) {
 
   frameTimer    = new timeObj(FRAME_MS);
   paddleTimer   = new timeObj(PADDLE_MS);
   textTimer     = new timeObj(TEXT_MS);
   oldLoc        = -1;
-  userState     = nothin;
-  buttonHit     = false;
-  needClose     = false;
   brickIndex    = 0;        // It was originally written to run once.
 }
 
@@ -97,9 +94,6 @@ void breakout::setup() {
 }
 
 
-void breakout::closeCallback(void) { needClose = true; }
-
-
 void breakout::fillBricks(void) {
 
   brickObj* aBrick;
@@ -107,33 +101,29 @@ void breakout::fillBricks(void) {
   int       offset;
 
   offset = (TFT_W-(NUM_BRICKS*BRICK_W))/2;
-  colorObj aColor;
   y = BOTTOM_BRICK;
-  aColor.setColor(&blue);
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(&aColor);
+      aBrick->setColor(GREEN_BAR);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
     y = y-BRICK_H;
   }
-  aColor.setColor(&yellow);
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(&aColor);
+      aBrick->setColor(PURPLE_BAR);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
     y = y-BRICK_H;
   }
-  aColor.setColor(&red);
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(&aColor);
+      aBrick->setColor(RED_BAR);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
@@ -144,47 +134,47 @@ void breakout::fillBricks(void) {
 
 void breakout::doPaddle(void) {
 
-    int newLoc;
-    point touchPt;
-    
-    if (paddleTimer->ding()) {
-      paddleTimer->stepTime();
-      if(screen->touched()) {
-        touchPt = screen->getPoint();
-        newLoc = touchPt.x;
-        if (newLoc<0) {
-          newLoc = 0; 
-        } else if (newLoc>=TFT_W-PADDLE_WIDTH) {
-          newLoc = TFT_W-PADDLE_WIDTH-1;
-        }
-        if (newLoc!=oldLoc) {
-          paddle->setLocation(newLoc,PADDLE_Y);
-          oldLoc = newLoc;
-        }
+  int newLoc;
+  point touchPt;
+  
+  if (paddleTimer->ding()) {
+    paddleTimer->stepTime();
+    if(screen->touched()) {
+      touchPt = screen->getPoint();
+      newLoc = touchPt.x - PADDLE_HWIDTH;
+      if (newLoc<=0) {
+        newLoc = 1; 
+      } else if (newLoc>=TFT_W-PADDLE_WIDTH) {
+        newLoc = TFT_W-PADDLE_WIDTH-1;
+      }
+      if (newLoc!=oldLoc) {
+        paddle->setLocation(newLoc,PADDLE_Y);
+        oldLoc = newLoc;
       }
     }
   }
+}
 
 
 void breakout::doBall(void) {
 
-    if (frameTimer->ding()) {
-      frameTimer->stepTime();
-      theBall->ballFrame();
-      if (theBall->ballLost) {
-          ballCount--;
-          if (ballCount) {
-            setState(lostBall);
-          } else {
-            setState(gameOver);
-          }
-      } else {
-        if (!bricks()) {
-          setState(gameWin);
+  if (frameTimer->ding()) {
+    frameTimer->stepTime();
+    theBall->ballFrame();
+    if (theBall->ballLost) {
+        ballCount--;
+        if (ballCount) {
+          setState(lostBall);
+        } else {
+          setState(gameOver);
         }
+    } else {
+      if (!bricks()) {
+        setState(gameWin);
       }
     }
   }
+}
 
 
 void breakout::showBallNum(int balls) {
@@ -203,87 +193,71 @@ void breakout::showBallNum(int balls) {
 
 void breakout::setState(gameStates state) {
 
-    switch(state) {
-      case preGame :
-        buttonHit = false;
-        paddleTimer->start();
-        ballCount = NUM_BALLS;
-        showBallNum(ballCount);
-        theBall->setLocation(BALL_X,BALL_Y);
-        resetBricks();
-        message->setValue("Tap to start");
-        while(!paddleTimer->ding());
-        doPaddle();
-        savedPaddleX = paddle->x;
-        frameTimer->start();
-        break;
-      case inPLay :
-        buttonHit = false;
-        message->setValue(" ");
-        theBall->reset();
-        frameTimer->start();
-        break;
-      case lostBall :
-        message->setValue("BALL LOST!!");
-        showBallNum(ballCount);
-        textTimer->start();
-        break;
-      case gameOver :
-        message->setValue("GAME OVER!!");
-        showBallNum(ballCount);
-        textTimer->start();
-        break;
-      case gameWin :
-        theBall->eraseSelf();
-        message->setValue("WINNER!!");
-        textTimer->start();
-        break;
-    }
-    gameState = state;
+  switch(state) {
+    case preGame :
+      while(screen->touched()) delay(10);
+      paddleTimer->start();
+      ballCount = NUM_BALLS;
+      showBallNum(ballCount);
+      theBall->setLocation(BALL_X,BALL_Y);
+      resetBricks();
+      message->setValue("Tap to start");
+      while(!paddleTimer->ding());
+      doPaddle();
+      savedPaddleX = paddle->x;
+      frameTimer->start();
+      break;
+    case inPLay :
+      message->setValue(" ");
+      theBall->reset();
+      frameTimer->start();
+      break;
+    case lostBall :
+      message->setValue("BALL LOST!!");
+      showBallNum(ballCount);
+      textTimer->start();
+      break;
+    case gameOver :
+      message->setValue("GAME OVER!!");
+      showBallNum(ballCount);
+      textTimer->start();
+      break;
+    case gameWin :
+      theBall->eraseSelf();
+      message->setValue("WINNER!!");
+      textTimer->start();
+      break;
   }
+  gameState = state;
+}
   
 
 void breakout::loop(void) {
 
-    if (needClose) {
-      close();
-      return;
-    }
-    doPaddle();
-    switch(gameState) {
-      case preGame :
-          if (buttonHit) {
-            setState(inPLay);
-          }
-        break;
-      case inPLay : doBall(); break;
-      case lostBall :
-        if (textTimer->ding()) {
+  doPaddle();
+  switch(gameState) {
+    case preGame :
+        if (screen->touched()) {
+          delay(500);
           setState(inPLay);
+          doBall();
         }
-        break;
-      case gameOver :
-        if (textTimer->ding()) {
-          setState(preGame);
-        }
-        break;
-      case gameWin :
-        if (textTimer->ding()) {
-          setState(preGame);
-        }
-        break;
-    }
-    switch (userState) {
-    case nothin : 
-      if (screen->touched()) {
-        userState = pressinTDamnButton;
-        buttonHit = true;
+      break;
+    case inPLay : doBall(); break;
+    case lostBall :
+      if (textTimer->ding()) {
+        setState(inPLay);
       }
       break;
-    case pressinTDamnButton : 
-      if (screen->touched()) {
-        userState = nothin;
+    case gameOver :
+      if (textTimer->ding()) {
+        setState(preGame);
       }
       break;
-    }
+    case gameWin :
+      if (textTimer->ding()) {
+        setState(preGame);
+      }
+      break;
   }
+}

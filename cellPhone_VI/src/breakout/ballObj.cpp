@@ -131,7 +131,7 @@ void ballObj::setLocation(int inX, int inY) {
       deltaX = -deltaX;
       clearSkies = false;
     }
-    if (inY >= (TFT_H-24) - height) {        // Hit bottom wall
+    if (inY >= (GAME_H-24) - height) {        // Hit bottom wall
       ballLost = true;                // The ball was LOST!!
       screen->fillRect(x,y,width,height,&backColor);
       clearSkies = false;

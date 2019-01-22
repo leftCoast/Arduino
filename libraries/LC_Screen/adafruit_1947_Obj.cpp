@@ -4,20 +4,24 @@
 adafruit_1947_Obj::adafruit_1947_Obj(void)
 :displayObj(true,true,true,true,false) {
     
-    cTS = NULL;
-    theTFT = NULL;
-    cs = ADA_1947_SHIELD_CS;
-    rst = ADA_1947_SHIELD_RST;
+	cTS			= NULL;
+	theTFT		= NULL;
+	cs				= ADA_1947_SHIELD_CS;
+	rst			= ADA_1947_SHIELD_RST;
+	lastTouch	= false;
+	touchNum		= 0;
 }
 
 
 adafruit_1947_Obj::adafruit_1947_Obj(byte inCS,byte inRst)
   :displayObj(true,true,true,true,false) {
 
-  cTS = NULL;
-  theTFT = NULL;
-  cs = inCS;
-  rst = inRst;
+	cTS			= NULL;
+	theTFT		= NULL;
+	cs				= inCS;
+	rst			= inRst;
+	lastTouch	= false;
+	touchNum		= 0;
 }
 
 
@@ -113,6 +117,5 @@ point adafruit_1947_Obj::getPoint(void) {
 }
 
 
-boolean adafruit_1947_Obj::touched(void) { return cTS->touched(); }
+bool adafruit_1947_Obj::touched(void) { return cTS->touched(); }
 
- 

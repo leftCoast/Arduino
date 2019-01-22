@@ -23,8 +23,13 @@
 
 #define ICON_PATH_X22       "/system/icons/redX22.bmp"
 #define ICON_PATH_NEW22     "/system/icons/new22.bmp"
+#define ICON_PATH_SEARCH22  "/system/icons/search22.bmp"
+#define ICON_PATH_TEXT22    "/system/icons/text22.bmp"
+#define ICON_PATH_PHONE22   "/system/icons/call22.bmp"
+#define ICON_PATH_TRASH22   "/system/icons/trash22.bmp"
 
-#define MENU_BAR_H    20
+
+#define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
 
 // Starting points, they are tweaked in setup().
 extern colorObj  backColor;
@@ -50,6 +55,10 @@ extern colorObj menuBarColor;
 enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
 
 
+// *****************************************************
+// *****************   std buttons  ********************
+// *****************************************************
+
 
 class closeBtn : public iconButton {
 
@@ -58,12 +67,50 @@ class closeBtn : public iconButton {
   virtual ~closeBtn(void);
 };
 
+
 class newBtn : public iconButton {
 
   public:
           newBtn(int x,int y);
   virtual ~newBtn(void);
 };
+
+
+class searchBtn : public iconButton {
+
+  public:
+          searchBtn(int x,int y);
+  virtual ~searchBtn(void);
+};
+
+
+class textBtn : public iconButton {
+
+  public:
+          textBtn(int x,int y);
+  virtual ~textBtn(void);
+};
+
+
+class callBtn : public iconButton {
+
+  public:
+          callBtn(int x,int y);
+  virtual ~callBtn(void);
+};
+
+
+class trashBtn : public iconButton {
+
+  public:
+          trashBtn(int x,int y);
+  virtual ~trashBtn(void);
+};
+
+
+// *****************************************************
+// ******************   homeScreen  ********************
+// *****************************************************
 
 
 

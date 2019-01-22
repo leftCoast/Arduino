@@ -46,6 +46,7 @@ class rect {
   			  	bool 	inRect(int inX, int inY);              					// Is this point in us?
   			  	point	getCorner(rectPt corner);										// Pass back the corner point.
 				bool	overlap(rect* inRect);											// Is that rect touching us?
+				//void	printRect(char* = "");
 					
 					int   x;
 					int   y;

@@ -24,7 +24,7 @@ void panel::setup(void) { }
 void panel::loop(void) {  }
 
 
-// he default here is to not draw ourselves. You can chnge that.
+// The default here is to not draw ourselves. You can chnge that.
 void panel::drawSelf(void) {  }
 
 

@@ -15,6 +15,8 @@
 #define GAME_H        TFT_H-GAME_TOP
 
 #define PADDLE_WIDTH  20
+#define PADDLE_HWIDTH 10
+
 #define PADDLE_HEIGHT 4
 #define PADDLE_Y      GAME_H-40
 
@@ -55,13 +57,16 @@
 #define HILIGHT_PRCT  40
 #define SHADOW_PRCT   60
 
+#define GREEN_BAR     "/system/icons/grnBar.bmp"
+#define PURPLE_BAR    "/system/icons/purpBar.bmp"
+#define RED_BAR       "/system/icons/redBar.bmp"
+
 class ballObj;
 
 class breakout :  public panel {
 
   public:
 
-  enum    userStates { nothin, pressinTDamnButton };
   enum    gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
   
           breakout(void);
@@ -73,7 +78,6 @@ class breakout :  public panel {
           void doBall(void);
           void showBallNum(int balls);
           void setState(gameStates state);
-          void  closeCallback(void);
   virtual void loop(void);
 
           
@@ -88,12 +92,9 @@ class breakout :  public panel {
           timeObj*        textTimer;
           colorObj        backColor;
           gameStates      gameState;
-          userStates      userState; 
           int             oldLoc;
           int             savedPaddleX;
           int             ballCount;
-          bool            buttonHit;
-          bool            needClose;
 };
 
 #endif
