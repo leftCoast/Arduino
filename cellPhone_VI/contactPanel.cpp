@@ -21,10 +21,16 @@ contact*        currContact = NULL;
 addrStarter::addrStarter(void) {  }
 addrStarter::~addrStarter(void) {  }
 
-void addrStarter::begin(char* filePath) {
+void addrStarter::begin(char* filePath,bool resetFile) {
 
+  //Serial.println("Opening contact file.");Serial.flush();
   mFile = new blockFile(filePath);
   if (mFile) {
+    if (resetFile) {
+      mFile->deleteBlockfile();
+      delete mFile;
+      mFile = new blockFile(filePath);
+    }
     ourBlackBook = new contactList(mFile);
   }
 }
@@ -64,6 +70,7 @@ void contNewBtn::doAction(void) {
   if (!ourContact) {
     ourContact = ourBlackBook->findOrAddContact(NEW_PN);
     if (ourContact) {
+      ourBlackBook->saveToFile();
       mList->addContact(ourContact,true);
     }
   }
@@ -111,14 +118,14 @@ void contCallBtn::doAction(void) {
 // *****************************************************
 
 
-contTrashBtn::contTrashBtn(void)
-  : trashBtn(TRASH_X,TRASH_Y) {  }
+contTrashBtn::contTrashBtn(PNList* ourList)
+  : trashBtn(TRASH_X,TRASH_Y) { mList = ourList; }
 
   
 contTrashBtn::~contTrashBtn(void) { }
 
 
-void contTrashBtn::doAction(void) { }
+void contTrashBtn::doAction(void) { mList->deleteContact(); }
 
 
 
@@ -251,7 +258,11 @@ void PNListItem::draw(void) {
 void PNListItem::drawSelf(void) {  }
 
 
-void PNListItem::startedEdit(void) { currContact = mContact; }
+// globals used for texting, calling & deleting.
+void PNListItem::startedEdit(void) {
+
+  currContact   = mContact;
+}
 
 
 void PNListItem::finishEdit(PNEditField* theField) {
@@ -259,7 +270,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
   char* buff;
   int   numChars;
 
-  currContact = NULL; 
+  currContact = NULL;
   buff = NULL;
   if(theField==pNumEditField) {
     numChars = pNumEditField->getNumChars() + 1;
@@ -321,7 +332,7 @@ PNList::PNList(int x,int y,int width,int height)
   
 PNList::~PNList(void) {  }
 
-void PNList::drawSelf(void) {  /*screen->drawRect(this,&red);*/ }
+void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
 
 
 void PNList::addContact(contact* contactPtr,bool showContact) {
@@ -353,6 +364,39 @@ void PNList::fillList(void) {
 }
 
 
+PNListItem* PNList::itemByContact(contact* aContact) {
+
+  PNListItem* trace;
+
+  trace = (PNListItem*)getObj(0);
+  while(trace) {
+    if (trace->mContact==aContact) {
+      return trace;
+    }
+    trace = (PNListItem*)trace->dllNext;
+  }
+  return NULL;
+}
+
+
+void PNList::deleteContact(void) {
+
+  contact*    aContact;                         // Local storage. Less to worry about.
+  PNListItem* anItem;
+  
+  if (currContact) {                            // If we have a contact to delete..
+    aContact = currContact;                     // Save off the contact pointer;
+    anItem = itemByContact(aContact);           // Using that pointer, find the list item that's hosting it.
+    if (anItem) {                               // If we found the list item..
+      setFocusPtr(NULL);                        // Defocus the editing field.
+      currContact = NULL;                       // Just in case, loose the currentContact.
+      ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
+      delete(anItem);                           // Delete the list item.
+      resetPositions();                         // Resort the list of items.
+      //needRefresh = true;                     // We'll need a refresh after this.
+    }
+  }
+}
 
 // *****************************************************
 // ******************  contactPanel  *******************
@@ -387,7 +431,7 @@ void contactPanel::setup(void) {
   contCallBtn* ourCallBtn = new contCallBtn();
   addObj(ourCallBtn);
 
-  contTrashBtn* ourTrashBtn = new contTrashBtn();
+  contTrashBtn* ourTrashBtn = new contTrashBtn(mPNList);
   addObj(ourTrashBtn);
 }
 

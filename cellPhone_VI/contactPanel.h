@@ -11,7 +11,7 @@
 #include <keyboard.h>
 
 #define PNLIST_X      10
-#define PNLIST_Y      20
+#define PNLIST_Y      30
 #define PNLIST_W      220
 
 
@@ -46,13 +46,10 @@
 #define CONT_BTN_RAD    3
 #define CONT_BTN_SPC    20
 
-#define CLOSE_X         PNLIST_X
-#define CLOSE_Y         PNLIST_Y + PNLIST_H + 2
+#define CLOSE_X         0
+#define CLOSE_Y         1
 #define CLOSE_W         22
 #define CLOSE_H         CLOSE_W
-#define CLOSE_TXT_SIZE  2
-#define CLOSE_CHAR_W    CLOSE_TXT_SIZE * 6
-#define CLOSE_TXT_H     CLOSE_TXT_SIZE * 8
 
 #define NEW_X         CLOSE_X + CLOSE_W + CONT_BTN_SPC
 #define NEW_Y         CLOSE_Y
@@ -97,7 +94,7 @@ class addrStarter {
           addrStarter(void);
   virtual ~addrStarter(void);
 
-          void  begin(char* filePath);
+          void  begin(char* filePath,bool resetFile=false);
 };
 
 
@@ -179,10 +176,12 @@ class contCallBtn : public callBtn {
 class contTrashBtn : public trashBtn {
 
   public:
-          contTrashBtn(void);
+          contTrashBtn(PNList* ourList);
   virtual ~contTrashBtn(void);
 
   virtual void    doAction(void);
+  
+          PNList* mList;
 };
 
 
@@ -190,8 +189,6 @@ class contTrashBtn : public trashBtn {
 // *****************************************************
 // *******************  PNEditField  *******************
 // *****************************************************
-
-
 
 
 class PNEditField :  public drawGroup {
@@ -251,9 +248,11 @@ class PNList : public drawList {
           PNList(int x,int y,int width,int height);
   virtual ~PNList(void);
   
-  virtual void  drawSelf(void);
-          void  addContact(contact* contactPtr,bool showContact=false);
-          void  fillList(void);
+  virtual void          drawSelf(void);
+          void          addContact(contact* contactPtr,bool showContact=false);
+          void          fillList(void);
+          PNListItem*   itemByContact(contact* aContact);
+          void          deleteContact(void);
 };
 
 

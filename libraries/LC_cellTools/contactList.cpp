@@ -7,20 +7,21 @@
 // ********************  contact ********************
 // **************************************************
 
+
 // Creation constructor.
 contact::contact(blockFile* inFile,unsigned long blockID,char* PN)
   : linkListObj(), fileBuff(inFile,blockID) {          
 
-  mPN           = NULL;
-  mNickName     = NULL;
-  mFirstName    = NULL;
-  mLastName     = NULL;
-  mCompanyName  = NULL;
-  mTextList     = NULL;
-  mShortBuff    = false;
-  mTextBytes    = 0;
-  setPN(PN);
-  mChanged      = true;
+	mPN				= NULL;
+	mNickName		= NULL;
+	mFirstName		= NULL;
+	mLastName		= NULL;
+	mCompanyName	= NULL;
+	mTextList		= NULL;
+	mShortBuff		= false;
+	mTextBytes		= 0;
+	setPN(PN);
+	mChanged			= true;
 }
 
 
@@ -28,27 +29,27 @@ contact::contact(blockFile* inFile,unsigned long blockID,char* PN)
 contact::contact(blockFile* inFile,unsigned long blockID,bool shortBuff)
   : linkListObj(), fileBuff(inFile,blockID) {
 
-  mPN           = NULL;
-  mNickName     = NULL;
-  mFirstName    = NULL;
-  mLastName     = NULL;
-  mCompanyName  = NULL;
-  mTextList     = NULL;
-  mShortBuff    = shortBuff;
-  mTextBytes    = 0;
-  readFromFile();
-  mChanged      = false;
+	mPN				= NULL;
+	mNickName		= NULL;
+	mFirstName		= NULL;
+	mLastName		= NULL;
+	mCompanyName	= NULL;
+	mTextList		= NULL;
+	mShortBuff		= shortBuff;
+	mTextBytes		= 0;
+	readFromFile();
+	mChanged			= false;
 }
 
 
 contact::~contact(void) {
 
-  if (mPN) free(mPN);
-  if (mNickName) free(mNickName);
-  if (mFirstName) free(mFirstName);
-  if (mLastName) free(mLastName);
-  if (mCompanyName) free(mCompanyName);
-  if (mTextList) free(mTextList);      
+	if (mPN) free(mPN);
+	if (mNickName) free(mNickName);
+	if (mFirstName) free(mFirstName);
+	if (mLastName) free(mLastName);
+	if (mCompanyName) free(mCompanyName);
+	if (mTextList) free(mTextList);      
 }
 
 
@@ -230,7 +231,6 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 }
 
 
-
 // **************************************************
 // *****************  contactList *******************
 // **************************************************
@@ -272,6 +272,7 @@ contact* contactList::findOrAddContact(char* phoneNum) {
     blockID = mFile->getNewBlockID();
     contactPtr = new contact(mFile,blockID,phoneNum);
     addToTop(contactPtr);
+    saveToFile();
   }
   return contactPtr;
 }
@@ -326,4 +327,18 @@ unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
     addToTop(newContact);                             // Add 'em to our list.
   }
   return numIDs * sizeof(unsigned long);              // That's how much we burned up.
+}
+
+
+void contactList::deleteContact(contact* theDoomed) {
+	
+	unsigned long	blockID;	
+		
+	if (theDoomed) {						// Sanity, did they send us someting?
+		blockID = theDoomed->mID;		// Do it simple, save off the ID.
+		mFile->deleteBlock(blockID);	// Using the ID, erase it from our file.
+		unlinkObj(theDoomed);			// Now lets pull the node out of the list.
+		delete(theDoomed);				// Recycle the node.
+		saveToFile();						// Make the file reflect what we have.
+	}
 }

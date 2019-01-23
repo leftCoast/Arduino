@@ -40,5 +40,4 @@ void iconButton::begin(void) {
 void iconButton::drawSelf(void) { if(haveInfo) drawBitmap(x,y); }
 
 
-
 void iconButton::doAction(void) {  }
