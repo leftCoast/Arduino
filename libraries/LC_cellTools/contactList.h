@@ -27,7 +27,8 @@ class contact :	public linkListObj,
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);
 	virtual	unsigned long	loadFromBuff(char* buffPtr,unsigned long maxBytes);
-
+				void				printContact(void);
+				
 				char*		mPN;
 				char*		mNickName;
 				char*		mFirstName;

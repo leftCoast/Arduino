@@ -44,7 +44,6 @@ class fileBuff {
 	virtual	bool				saveSubFileBuffs(void);
 				bool				saveToFile(void);
 				bool				readFromFile(void);
-				//void				removeFromFile(void);
 				
 				unsigned long	mID;
 				blockFile*		mFile;

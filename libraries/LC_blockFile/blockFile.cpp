@@ -79,61 +79,67 @@ bool blockFile::deleteBlock(unsigned long blockID) {
       if (findID(blockID)) {                            // Find this block in datafile.
         if (peekBlockHeader(&tempBlock)) {              // Get a copy of the header.
           if (writeBlockHeader(0, tempBlock.bytes)) {   // Change the header to to be a free block.
+            fClose();											  // CLOSE THE FILE you boob!
             return true;                                // Found it, read it, freed it, success!
           }
         }
       }
     }
+    fClose();
   }
-  fClose();
-  return false;                                       // Broken, I guess.
+  return false;		// Broken, I guess.
 }
 
+
 // Update or create this numbered file block to match this buffer.
+// If the buffer actually contains something.
 bool blockFile::writeBlock(unsigned long blockID, char* buffPtr, unsigned long bytes) {
 
 	blockHeader   tempBlock;
 	unsigned long remainigBytes;
   
-	if (fOpen()) {
-		if (findID(blockID)) {																			// If we have this one already.
-			if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header.
-				if (tempBlock.bytes == bytes) {														// If its the same size..
-					if (writeBlockHeader(tempBlock.blockID, tempBlock.bytes)) {				// Moves file pointer to the data.
-						if (writeBlockData(buffPtr, bytes)) {										// Write out the new data buffer.
-							fClose();
-							return true;																	// We are done, bail out.
+	if(bytes>0) {																							// When it comes right down to it, you just can't write nothing!
+		if (fOpen()) {
+			if (findID(blockID)) {																			// If we have this one already.
+				if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header.
+					if (tempBlock.bytes == bytes) {														// If its the same size..
+						if (writeBlockHeader(tempBlock.blockID, tempBlock.bytes)) {				// Moves file pointer to the data.
+							if (writeBlockData(buffPtr, bytes)) {										// Write out the new data buffer.
+								fClose();
+								return true;																	// We are done, bail out.
+							}
+						}
+					} else {                                                                // The size had changed.
+						writeBlockHeader(0, tempBlock.bytes);											// Mark the buffer as free. Move on..
+					}
+				}
+			}								
+			if (findFit(bytes)) {																			// Start over. If we find an fitting slot..
+				if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header we have.
+					if (writeBlockHeader(blockID, bytes)) {											// Change the header to reflect what were writing.
+						if (writeBlockData(buffPtr, bytes)) {											// Write out the new data buffer.
+							remainigBytes = tempBlock.bytes - (bytes + sizeof(blockHeader));	// Calculate what's left of the free block.
+							if (writeBlockHeader(0, remainigBytes)) {									// Add block header updating the new free size.
+								fClose();																		// Cleanup..
+								return true;                                                	// All done, lets go get coffee.
+							}
 						}
 					}
-				} else {                                                                // The size had changed.
-					writeBlockHeader(0, tempBlock.bytes);											// Mark the buffer as free. Move on..
-				}
-			}
-		}								
-		if (findFit(bytes)) {																			// Start over. If we find an fitting slot..
-			if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header we have.
-				if (writeBlockHeader(blockID, bytes)) {											// Change the header to reflect what were writing.
-					if (writeBlockData(buffPtr, bytes)) {											// Write out the new data buffer.
-						remainigBytes = tempBlock.bytes - (bytes + sizeof(blockHeader));	// Calculate what's left of the free block.
-						if (writeBlockHeader(0, remainigBytes)) {									// Add block header updating the new free size.
-							fClose();																		// Cleanup..
-							return true;                                                	// All done, lets go get coffee.
+				} 
+			} else if (findEnd()) {										// Couldn't find an empty slot, find the end.
+				if (writeBlockHeader(blockID, bytes)) {			// Change the header to reflect what were writing.
+					if (writeBlockData(buffPtr, bytes)) {			// Write out the new data buffer.
+						if (writeBlockHeader(0, 0)) {					// Add new EOF blockHeader.
+							fClose();										// Clean up loose ends.
+							return true;									// Success!.
 						}
 					}
 				}
-			} 
-		} else if (findEnd()) {										// Couldn't find an empty slot, find the end.
-			if (writeBlockHeader(blockID, bytes)) {			// Change the header to reflect what were writing.
-				if (writeBlockData(buffPtr, bytes)) {			// Write out the new data buffer.
-					if (writeBlockHeader(0, 0)) {					// Add new EOF blockHeader.
-						fClose();										// Clean up loose ends.
-						return true;									// Success!.
-					}
-				}
 			}
+			fClose();
 		}
-		fClose();
 	}
+	return false;	// Like I said. Blocks of nothing, are not allowed.
 }
 
 
@@ -146,7 +152,7 @@ unsigned long  blockFile::getBlockSize(unsigned long blockID) {
   if (fOpen()) {
     if (findID(blockID)) {                              // Find this block in datafile.
       if (peekBlockHeader(&tempBlock)) {                // Get a copy of the header.
-        fClose();
+        fClose();													  
         return tempBlock.bytes;                         // And here's the size..
       }
     }
@@ -172,7 +178,7 @@ bool blockFile::getBlock(unsigned long blockID, char* buffPtr, unsigned long byt
           if (mFile.read(buffPtr, bytes)) {                       // Read it out.
             fClose();
             return true;                                          // If we read it, we're good. Lets go.
-          } else {                                                // Something btoke in read().
+          } else {                                                // Something broke in read().
             mErr = BF_FREAD_ERR;                                  // Flag the error.
           }
         } else {                                                  // Something broke in seek().
@@ -218,8 +224,8 @@ bool blockFile::isEmpty(void) {
         return tempBlock.bytes == 0;
       }
     }
+    fClose();
   }
-  fClose();
   return true;
 }
 
@@ -238,6 +244,41 @@ void blockFile::printDataBlock(blockHeader* aBlock) {
 }
 
 
+// Print out all the headers.
+void blockFile::printFile(void) {
+	
+	blockHeader tempBlock;
+	
+	Serial.println("---------------------------");
+	Serial.println("------ Printing file ------");
+	if (fOpen()) {
+		if(findFirst()) {
+			peekBlockHeader(&tempBlock);
+			while(mErr == BF_NO_ERR && tempBlock.bytes!=0) {
+				printDataBlock(&tempBlock);
+				nextBlock(tempBlock.bytes);
+				peekBlockHeader(&tempBlock);
+			}
+			printDataBlock(&tempBlock);
+		}
+		Serial.println("mErr : ");
+		switch(mErr) {
+			case BF_NO_ERR			:	Serial.println("BF_NO_ERR      // Everything's fine now, ain't it?");break;
+			case BF_MEM_ERR		:	Serial.println("BF_MEM_ERR     // malloc() failed.");break;
+			case BF_VERSION_ERR	:	Serial.println("BF_VERSION_ERR // We have the right kind of file. But, wrong version.");break;
+			case BF_FOPEN_ERR		:	Serial.println("BF_FOPEN_ERR   // Tried to open from a file path, but failed.");break;
+			case BF_FREAD_ERR		:	Serial.println("BF_FREAD_ERR   // Tried to read a buffer but failed.");break;
+			case BF_FWRITE_ERR	:	Serial.println("BF_FWRITE_ERR  // Tried to write a buffer but failed.");break;
+			case BF_ISDIR_ERR		:	Serial.println("BF_ISDIR_ERR   // Looking for a file, was handed path to directory.");break;
+			case BF_SEEK_ERR		:	Serial.println("BF_SEEK_ERR    // Trying to reposition the file pointer failed.");break;
+			default					:	Serial.println("?? // Some weird undocumented error.");break;
+		}
+		fClose();
+	}
+}
+	
+	
+	
 // We need to keep better track of our datafile;
 // This will be the standard opening.
 bool blockFile::fOpen(void) {
@@ -368,7 +409,7 @@ bool  blockFile::findFit(unsigned long numBytes) {
   blockHeader   tempBlock;    // A place to read blocks into.
   unsigned long minBuff;      // Enough room to split a free block.
 
-  if (mErr == BF_NO_ERR && findFirst()) {                                     // Reset file pointer. Don't bother if its broken.
+  if (findFirst()) {                                     							// Reset file pointer.
     minBuff = numBytes + sizeof(blockHeader) + 1;                             // We need enuogh to put in new header & some data.
     while (true) {                                                            // Start looping.
       if (peekBlockHeader(&tempBlock)) {                                      // If we get a header.
@@ -397,30 +438,30 @@ bool  blockFile::findFit(unsigned long numBytes) {
 // If its in there.
 bool  blockFile::findID(unsigned long blockID) {
 
-  blockHeader   tempBlock;    // A place to read blocks into.
-  bool          done;         // Used to tell when we can stop lookin'.
-  bool          success;      // Did this work or not?
+	blockHeader	tempBlock;	// A place to read blocks into.
+	bool			done;			// Used to tell when we can stop lookin'.
+	bool			success;		// Did this work or not?
 
-  success = false;                                                    // Can't succeed unless you try.
-  if (mErr == BF_NO_ERR && findFirst()) {                             // Reset file pointer. Don't bother if its broken.
-    done = false;                                                     // Set up for looping.
-    while (!done) {                                                   // Start looping.
-      if (peekBlockHeader(&tempBlock)) {                              // Lets have a look at the header.
-        if (tempBlock.bytes == 0) {                                   // CHECK FIRST! Bytes == 0 is EOF marker.
-          done = true;                                                // And that's it, we're done.
-        } else if (tempBlock.blockID == blockID) {                    // Not EOF, check ID.
-          success = true;                                             // Found it!
-          done = true;                                                // And we're done.
-        }
-      } else {                                                        // Couldn't peek at the block?
-        done = true;                                                  // Jump out on errors.
-      }
-      if (!done) {                                                    // If we're still running..
-        done = !nextBlock(tempBlock.bytes);                           // Try for the next block.
-      }
-    }
-  }
-  return success;
+	success = false;														// Can't succeed unless you try.
+	if (findFirst()) {													// Reset file pointer. Don't bother if its broken.
+		done = false;														// Set up for looping.
+		while (!done) {													// Start looping.
+			if (peekBlockHeader(&tempBlock)) {						// Lets have a look at the header.
+				if (tempBlock.bytes == 0) {							// CHECK FIRST! Bytes == 0 is EOF marker.
+					done = true;											// And that's it, we're done.
+				} else if (tempBlock.blockID == blockID) {		// Not EOF, check ID.
+					success = true;										// Found it!
+					done = true;											// And we're done.
+				}
+			} else {															// Couldn't peek at the block?
+				done = true;												// Jump out on errors.
+			}
+			if (!done) {													// If we're still running..
+				done = !nextBlock(tempBlock.bytes);					// Try for the next block.
+			}
+		}
+	}
+	return success;
 }
 
 
@@ -428,7 +469,8 @@ bool  blockFile::findID(unsigned long blockID) {
 bool  blockFile::findEnd(void) {
 
   blockHeader   tempBlock;								// A place to read blocks into.
-  if (mErr == BF_NO_ERR && findFirst()) {       // Reset file pointer. Don't bother if its broken.
+  
+  if (findFirst()) {       							// Reset file pointer.
     while (true) {                              // Start looping.
       if (peekBlockHeader(&tempBlock)) {        // See if we can have a look at the header.
         if (tempBlock.bytes == 0) {             // Bytes == 0 is EOF marker.
@@ -449,10 +491,10 @@ bool  blockFile::findEnd(void) {
 // Set our local header to initial condition of a new file.
 void blockFile::initFileHeader(void) {
 
-  strcpy((char*)mHeader.nameTag, BLOCKFILE_TAG);         // Init the header.
-  mHeader.versionNum = CURRENT_BLOCKFILE_VERSION; // Set the version number.
-  mHeader.rootID = 0;                             // Zero means not set yet.
-  mHeader.nextID = INITIAL_BLOCKFILE_ID;          // Set the next ID value.
+  strcpy((char*)mHeader.nameTag, BLOCKFILE_TAG);	// Init the header.
+  mHeader.versionNum = CURRENT_BLOCKFILE_VERSION;	// Set the version number.
+  mHeader.rootID = 0;										// Zero means not set yet.
+  mHeader.nextID = INITIAL_BLOCKFILE_ID;				// Set the next ID value.
 }
 
 
@@ -461,7 +503,7 @@ bool blockFile::writeFileHeader(void) {
 
   int bytesWritten;
 
-  if (mErr == BF_NO_ERR) {                                                      // Don't bother if its broken.
+  if (mErr == BF_NO_ERR) {																		// Don't bother if its broken.
     if (mFile.seek(0)) {                                                      // Set to the start of the file.
       bytesWritten = mFile.write((char*)&mHeader, sizeof(blockFileHeader));   // Write the bytes here.
       if (bytesWritten == sizeof(blockFileHeader)) {                          // All the bytes get out?
@@ -549,9 +591,9 @@ void blockFile::initBlockfile(void) {
       } else {
         mErr = BF_ISDIR_ERR;                          // Tried to open a directory.
       }
+      fClose();
     } else {
       mErr = BF_FOPEN_ERR;                            // Can't open the file.
     }
   }
-  fClose();
 }

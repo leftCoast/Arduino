@@ -55,7 +55,7 @@ bool fileBuff::saveToFile(void) {
 	if (mFile) {
 		if (saveSubFileBuffs()) {
 			numBytes = calculateBuffSize();
-			if (numBytes) {
+			if (numBytes>0) {
 				mBuff = (char*)malloc(numBytes);
 				if (mBuff) {
 					writeToBuff(mBuff,numBytes);
@@ -92,15 +92,3 @@ bool fileBuff::readFromFile(void) {
   }
   return success;
 }
-
-/*
-// Ok this one is to be deleted from the file. Well,
-// if its not the root file. Then you're stuck.
-void  fileBuff::removeFromFile(void) {
-
-	if (mFile) {							// If we have a file to delete from..
-		mFile->deleteBlock(mID);		// We do the delete of our data.
-		mFile = NULL;						// Just to ensure we don't mess up the file. Loose the pointer.
-	}
-}
-*/

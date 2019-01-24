@@ -16,7 +16,7 @@
 // The master initiates communication. Sends a command and optionally waits for a reply.
 //
 // Slave side :
-// Slaves listen for a commands, take action on those commands and usually generate
+// Slaves listen for a commands, take action on those commands and usually generates
 // replies to those commands.
 //
 // Now these are just data smallish blocks of byes. They are not thought of as

@@ -231,6 +231,20 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 }
 
 
+void contact::printContact(void) {
+
+	Serial.print("ID#        : ");Serial.println(mID);
+	Serial.print("Nickname   : [");Serial.print(mNickName);Serial.println("]");
+	Serial.print("Phone      : [");Serial.print(mPN);Serial.println("]");
+	Serial.print("First name : [");Serial.print(mFirstName);Serial.println("]");
+	Serial.print("Last name  : [");Serial.print(mLastName);Serial.println("]");
+	Serial.print("Company    : [");Serial.print(mCompanyName);Serial.println("]");
+	Serial.print("Messages   : [");Serial.print(mTextList);Serial.println("]");
+	Serial.print("BYTES      : ");Serial.println(calculateBuffSize());
+	Serial.println("-------------------------------------");Serial.flush();
+}
+
+
 // **************************************************
 // *****************  contactList *******************
 // **************************************************
@@ -272,7 +286,6 @@ contact* contactList::findOrAddContact(char* phoneNum) {
     blockID = mFile->getNewBlockID();
     contactPtr = new contact(mFile,blockID,phoneNum);
     addToTop(contactPtr);
-    saveToFile();
   }
   return contactPtr;
 }
@@ -285,9 +298,13 @@ bool contactList::saveSubFileBuffs(void) {
 
   contact*        trace;
 
+	Serial.println("-------------------------------------");
+	Serial.println("------ Saving contacts to file ------");
+	Serial.println("-------------------------------------");
   trace = (contact*)getFirst();       // Grab the first contact on our list.
   while(trace) {                      // While we have contacts..
-    if (trace->mChanged) {            // If they have been edited..
+    if (trace->mChanged) {            // If they have been edited (or new).
+    	trace->printContact();
       trace->saveToFile();            // Save them to disk.
     }
     trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
@@ -303,10 +320,14 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
   int             index;
   unsigned long*  longPtr;
 
+	Serial.println("-------------------------------------");
+	Serial.println("---- Saving contact list to file ----");
+	Serial.println("-------------------------------------");
   index = 0;                          // Starting at zero, usually a good plan.
   longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
   trace = (contact*)getFirst();       // Grab the first contact on our list.
   while(trace) {                      // While we have contacts..
+  		Serial.print("ID# : ");Serial.println(trace->mID);Serial.flush();
     longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
     index++;                          // Bump up index by one.
     trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
@@ -337,7 +358,7 @@ void contactList::deleteContact(contact* theDoomed) {
 	if (theDoomed) {						// Sanity, did they send us someting?
 		blockID = theDoomed->mID;		// Do it simple, save off the ID.
 		mFile->deleteBlock(blockID);	// Using the ID, erase it from our file.
-		unlinkObj(theDoomed);			// Now lets pull the node out of the list.
+		unlinkObj(theDoomed);			// Now lets pull the node out of the list. (single link list)
 		delete(theDoomed);				// Recycle the node.
 		saveToFile();						// Make the file reflect what we have.
 	}

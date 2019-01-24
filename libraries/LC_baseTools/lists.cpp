@@ -75,12 +75,6 @@ linkList::~linkList(void) { dumpList(); }
 
 void linkList::addToTop(linkListObj* newObj) {
 
-	/*
-	Serial.print("addToTop list: ");
-	Serial.print((unsigned long)this);
-	Serial.print("  newObj: ");
-	Serial.println((unsigned long) newObj);
-	*/
 	newObj->setNext(theList);  // Empty or not, it does the right thing.
 	theList = newObj;
 }
@@ -88,12 +82,6 @@ void linkList::addToTop(linkListObj* newObj) {
 
 void linkList::addToEnd(linkListObj* newObj) {
 
-  /*
-   Serial.print("addToEnd list: ");
-  Serial.print((unsigned long)this); 
-  Serial.print("  newObj: "); 
-  Serial.println((unsigned long) newObj);
-   */
   if (theList==NULL) {          // No list huh?
     theList = newObj;
   } 
@@ -209,7 +197,7 @@ stack::~stack(void) {  }
 
 void stack::push(linkListObj* newObj) { addToTop(newObj); }
 
-void stack::pop(void) { unlinkTop(); }
+void stack::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
 
 linkListObj* stack::top(void) { return getFirst(); }
 
@@ -226,7 +214,7 @@ queue::~queue(void) { }
 
 void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
-void queue::pop(void) { unlinkTop(); }
+void queue::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
 
 linkListObj* queue::top(void) { return getFirst(); }
 

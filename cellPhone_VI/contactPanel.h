@@ -10,68 +10,6 @@
 #include <keystroke.h>
 #include <keyboard.h>
 
-#define PNLIST_X      10
-#define PNLIST_Y      30
-#define PNLIST_W      220
-
-
-#define PN_ITEM_X1    0
-#define PN_ITEM_Y     0   // Doesn't really matter, it scrolls.
-#define PN_ITEM_W     PNLIST_W
-#define PN_ITEM_H     42
-#define PN_ITEM_LX    30
-#define PN_ITEM_LX2   PNLIST_W - PN_ITEM_LX
-#define PN_ITEM_LY    PN_ITEM_H - 2
-
-#define PNLIST_H      PN_ITEM_H * 4
-
-#define PN_EITEM_SW   68
-#define PN_EITEM_LW   104
-#define PN_EITEM_H    15 
-
-#define PN_EITEM_SX   4
-#define PN_EITEM_SY   4
-#define PN_EITEM_LX   4
-#define PN_EITEM_LY   PN_EITEM_SY + PN_EITEM_H + 3
-
-#define PN_EITEM_SG   4
-#define PN_EITEM_LG   4
-
-#define PN_EITEM_SX2  PN_EITEM_SX + PN_EITEM_SW + PN_EITEM_SG
-#define PN_EITEM_SX3  PN_EITEM_SX2 + PN_EITEM_SW + PN_EITEM_SG
-#define PN_EITEM_LX2  PN_EITEM_LX + PN_EITEM_LW + PN_EITEM_LG
-
-#define PN_EITEM_INSET  3
-
-#define CONT_BTN_RAD    3
-#define CONT_BTN_SPC    20
-
-#define CLOSE_X         0
-#define CLOSE_Y         1
-#define CLOSE_W         22
-#define CLOSE_H         CLOSE_W
-
-#define NEW_X         CLOSE_X + CLOSE_W + CONT_BTN_SPC
-#define NEW_Y         CLOSE_Y
-#define NEW_W         CLOSE_W
-#define NEW_H         CLOSE_H
-#define NEW_PN        "5551212"
-
-#define TEXT_X        NEW_X + NEW_W + CONT_BTN_SPC
-#define TEXT_Y        CLOSE_Y
-#define TEXT_W        CLOSE_W
-#define TEXT_H        CLOSE_H
-
-#define CALL_X        TEXT_X + TEXT_W + CONT_BTN_SPC
-#define CALL_Y        CLOSE_Y
-#define CALL_W        CLOSE_W
-#define CALL_H        CLOSE_H
-
-#define TRASH_X       CALL_X + CALL_W + CONT_BTN_SPC
-#define TRASH_Y       CLOSE_Y
-#define TRASH_W       CLOSE_W
-#define TRASH_H       CLOSE_H
-
 
 extern contactList* ourBlackBook;
 

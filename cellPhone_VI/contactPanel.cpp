@@ -8,6 +8,68 @@
 
 #include "contactPanel.h"
 
+#define PNLIST_X        10
+#define PNLIST_Y        30
+#define PNLIST_W        220
+
+
+#define PN_ITEM_X1      0
+#define PN_ITEM_Y       0   // Doesn't really matter, it scrolls.
+#define PN_ITEM_W       PNLIST_W
+#define PN_ITEM_H       42
+#define PN_ITEM_LX      30
+#define PN_ITEM_LX2     PNLIST_W - PN_ITEM_LX
+#define PN_ITEM_LY      PN_ITEM_H - 2
+
+#define PNLIST_H        PN_ITEM_H * 4
+
+#define PN_EITEM_SW     68
+#define PN_EITEM_LW     104
+#define PN_EITEM_H      15 
+
+#define PN_EITEM_SX     4
+#define PN_EITEM_SY     4
+#define PN_EITEM_LX     4
+#define PN_EITEM_LY     PN_EITEM_SY + PN_EITEM_H + 3
+
+#define PN_EITEM_SG     4
+#define PN_EITEM_LG     4
+
+#define PN_EITEM_SX2    PN_EITEM_SX + PN_EITEM_SW + PN_EITEM_SG
+#define PN_EITEM_SX3    PN_EITEM_SX2 + PN_EITEM_SW + PN_EITEM_SG
+#define PN_EITEM_LX2    PN_EITEM_LX + PN_EITEM_LW + PN_EITEM_LG
+
+#define PN_EITEM_INSET  3
+
+#define CONT_BTN_RAD    3
+#define CONT_BTN_SPC    20
+
+#define CLOSE_X         0
+#define CLOSE_Y         1
+#define CLOSE_W         22
+#define CLOSE_H         CLOSE_W
+
+#define NEWBTN_X        CLOSE_X + CLOSE_W + CONT_BTN_SPC
+#define NEWBTN_Y        CLOSE_Y
+#define NEWBTN_W        CLOSE_W
+#define NEWBTN_H        CLOSE_H
+#define NEWBTN_PN       "5551212"
+
+#define TEXT_X          NEWBTN_X + NEWBTN_W + CONT_BTN_SPC
+#define TEXT_Y          CLOSE_Y
+#define TEXT_W          CLOSE_W
+#define TEXT_H          CLOSE_H
+
+#define CALL_X          TEXT_X + TEXT_W + CONT_BTN_SPC
+#define CALL_Y          CLOSE_Y
+#define CALL_W          CLOSE_W
+#define CALL_H          CLOSE_H
+
+#define TRASH_X         CALL_X + CALL_W + CONT_BTN_SPC
+#define TRASH_Y         CLOSE_Y
+#define TRASH_W         CLOSE_W
+#define TRASH_H         CLOSE_H
+
 blockFile*      mFile;
 contactList*    ourBlackBook;
 keyboard*       ourKeyboard = NULL;
@@ -26,11 +88,12 @@ void addrStarter::begin(char* filePath,bool resetFile) {
   //Serial.println("Opening contact file.");Serial.flush();
   mFile = new blockFile(filePath);
   if (mFile) {
-    if (resetFile) {
-      mFile->deleteBlockfile();
-      delete mFile;
-      mFile = new blockFile(filePath);
-    }
+      if (resetFile) {
+        mFile->deleteBlockfile();
+        delete mFile;
+        mFile = new blockFile(filePath);
+      }
+    mFile->printFile();
     ourBlackBook = new contactList(mFile);
   }
 }
@@ -56,7 +119,7 @@ void contCloseBtn::doAction(void) { mPanel->close(); }
 
 
 contNewBtn::contNewBtn(PNList* ourList)
-  : newBtn(NEW_X,NEW_Y) { mList = ourList; }
+  : newBtn(NEWBTN_X,NEWBTN_Y) { mList = ourList; }
 
     
 contNewBtn::~contNewBtn(void) {  }
@@ -66,11 +129,10 @@ void contNewBtn::doAction(void) {
 
   contact*  ourContact;
 
-  ourContact = ourBlackBook->findByPN(NEW_PN);
+  ourContact = ourBlackBook->findByPN(NEWBTN_PN);
   if (!ourContact) {
-    ourContact = ourBlackBook->findOrAddContact(NEW_PN);
+    ourContact = ourBlackBook->findOrAddContact(NEWBTN_PN);
     if (ourContact) {
-      ourBlackBook->saveToFile();
       mList->addContact(ourContact,true);
     }
   }
@@ -261,7 +323,7 @@ void PNListItem::drawSelf(void) {  }
 // globals used for texting, calling & deleting.
 void PNListItem::startedEdit(void) {
 
-  currContact   = mContact;
+  currContact = mContact;
 }
 
 
@@ -383,20 +445,31 @@ void PNList::deleteContact(void) {
 
   contact*    aContact;                         // Local storage. Less to worry about.
   PNListItem* anItem;
-  
+
+  Serial.println("DELETING. Looking at currContact.");
   if (currContact) {                            // If we have a contact to delete..
+    Serial.print("currContact is not NULL :");Serial.println((int)currContact);
     aContact = currContact;                     // Save off the contact pointer;
-    anItem = itemByContact(aContact);           // Using that pointer, find the list item that's hosting it.
+    Serial.println("Saving off currContact.Looking for iys list item..");
+    anItem = itemByContact(aContact);           // Using our pointer, find the list item that's hosting it.
+    Serial.print("And it returned :");Serial.println((int)anItem);
     if (anItem) {                               // If we found the list item..
+      Serial.println("Setting focus to NULL");
       setFocusPtr(NULL);                        // Defocus the editing field.
+      Serial.println("Setting currContact to NULL");
       currContact = NULL;                       // Just in case, loose the currentContact.
+      Serial.println("Telling ourBlackBook to delete contact.");
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
+      Serial.println("Deleting the contact's list item.");
       delete(anItem);                           // Delete the list item.
-      resetPositions();                         // Resort the list of items.
-      //needRefresh = true;                     // We'll need a refresh after this.
+      Serial.println("resorting the remaining list items.");
+      resetPositions();                         // Close holes in the list of items.
+      needRefresh = true;								// Force a redraw.
     }
   }
 }
+
+
 
 // *****************************************************
 // ******************  contactPanel  *******************
@@ -448,9 +521,14 @@ void contactPanel::drawSelf(void) {
 
 void contactPanel::closing(void) {
 
+	Serial.println("Setting focus to NULL");
+  setFocusPtr(NULL);
+  Serial.println("Saving black book file.");
   ourBlackBook->saveToFile();
   if (ourKeyboard) {
+  	Serial.println("Deleting the keyboard. And setting the global to NULL.");
     delete ourKeyboard;
     ourKeyboard = NULL;
   }
+  Serial.println("We're done. See ya' starside!");
 }
