@@ -12,7 +12,7 @@ class iconButton :	public drawObj,
 							public bmpPipe {
 
 	public:
-				iconButton(int xLoc,int yLoc,char* path);
+				iconButton(int xLoc,int yLoc,char* path,int pix=32);
 	virtual	~iconButton(void);
 	
 				void	begin(void);

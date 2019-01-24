@@ -93,6 +93,7 @@ void setup() {
   fadeMessage.addAColor(3000,&white);     // Time 3000ms we use white.
   fadeMessage.addAColor(4000,&black);     // From time 3000ms to 4000ms we fade to black.
   fadeMessage.setJustify(TEXT_CENTER);
+  fadeMessage.transp = true;
   viewList.addObj(&fadeMessage);
   
   Serial.println(F("Starting file system."));
@@ -289,7 +290,7 @@ void runEditor(void) {
 
 void endEdit(void) {
 
-    fileList.dumpList();
+    fileList.dumpDrawObjList();
     if (settingVol) {             // Oh ohh.. special case..
       drawBackground();
       adjustLbl.setColors(&pencil);

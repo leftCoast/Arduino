@@ -65,7 +65,8 @@ void linkListObj::deleteTail(void) {
 // your basic linked list. Good base for linked list things, you know.
 
 // When we recieve an object to link up. Do we own it? Or are
-// we just tracking other people's laundry?
+// we just tracking other people's laundry? Here is what we do.
+// They can pull out the ones they want whenever. We dump the rest.
 linkList::linkList(void) { theList = NULL; }
 
 
@@ -74,12 +75,6 @@ linkList::~linkList(void) { dumpList(); }
 
 void linkList::addToTop(linkListObj* newObj) {
 
-	/*
-	Serial.print("addToTop list: ");
-	Serial.print((unsigned long)this);
-	Serial.print("  newObj: ");
-	Serial.println((unsigned long) newObj);
-	*/
 	newObj->setNext(theList);  // Empty or not, it does the right thing.
 	theList = newObj;
 }
@@ -87,12 +82,6 @@ void linkList::addToTop(linkListObj* newObj) {
 
 void linkList::addToEnd(linkListObj* newObj) {
 
-  /*
-   Serial.print("addToEnd list: ");
-  Serial.print((unsigned long)this); 
-  Serial.print("  newObj: "); 
-  Serial.println((unsigned long) newObj);
-   */
   if (theList==NULL) {          // No list huh?
     theList = newObj;
   } 
@@ -208,9 +197,11 @@ stack::~stack(void) {  }
 
 void stack::push(linkListObj* newObj) { addToTop(newObj); }
 
-void stack::pop(void) { unlinkTop(); }
+void stack::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
 
 linkListObj* stack::top(void) { return getFirst(); }
+
+bool stack::empty(void) { return isEmpty(); }
 
 
 // ********** queue ****************
@@ -223,9 +214,11 @@ queue::~queue(void) { }
 
 void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
-void queue::pop(void) { unlinkTop(); }
+void queue::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
 
 linkListObj* queue::top(void) { return getFirst(); }
+
+bool queue::empty(void) { return isEmpty(); }
 
 
 // ********** double linked list ****************
@@ -305,6 +298,22 @@ void dblLinkListObj::unhook(void) {
 }
 
 
+// Hand back the "nth" one of our tail. Starting at 0;
+dblLinkListObj* dblLinkListObj::getTailObj(int index) {
+	
+	dblLinkListObj*	trace;
+	int					count;
+	
+	trace = dllNext;
+	count = 0;
+	while(trace&&count<index) {
+		count++;
+		trace = trace->dllNext;
+	}
+	return trace;
+}
+
+
 // Delete entire tail. delete calls unhook before deleting the object.
 void dblLinkListObj::dumpTail(void) { while(dllNext) delete dllNext; }
 
@@ -349,5 +358,6 @@ int dblLinkListObj::countHead(void) {
 		count++;
 		trace = dllPrev;
 	}
+	return count;
 }
 

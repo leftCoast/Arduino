@@ -31,11 +31,9 @@ SIGNAL(TIMER0_COMPA_vect) {
 }
 #endif
 
-volatile boolean feedBufferSem = false;
+volatile boolean feedBufferLock = false;
 
 static void feeder(void) {
-  if (feedBufferSem) return;
-
   myself->feedBuffer();
 }
 
@@ -97,10 +95,7 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
                : Adafruit_VS1053(rst, cs, dcs, dreq) {
 
   playingMusic = false;
-
-  // Set the card to be disabled while we get the VS1053 up
-  pinMode(_cardCS, OUTPUT);
-  digitalWrite(_cardCS, HIGH);  
+  _cardCS = cardcs;
 }
 
 Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
@@ -109,10 +104,7 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
   : Adafruit_VS1053(-1, cs, dcs, dreq) {
 
   playingMusic = false;
-
-  // Set the card to be disabled while we get the VS1053 up
-  pinMode(_cardCS, OUTPUT);
-  digitalWrite(_cardCS, HIGH);  
+  _cardCS = cardcs;
 }
 
 
@@ -123,13 +115,14 @@ Adafruit_VS1053_FilePlayer::Adafruit_VS1053_FilePlayer(
                : Adafruit_VS1053(mosi, miso, clk, rst, cs, dcs, dreq) {
 
   playingMusic = false;
-
-  // Set the card to be disabled while we get the VS1053 up
-  pinMode(_cardCS, OUTPUT);
-  digitalWrite(_cardCS, HIGH);  
+  _cardCS = cardcs;
 }
 
 boolean Adafruit_VS1053_FilePlayer::begin(void) {
+  // Set the card to be disabled while we get the VS1053 up
+  pinMode(_cardCS, OUTPUT);
+  digitalWrite(_cardCS, HIGH);  
+
   uint8_t v  = Adafruit_VS1053::begin();   
 
   //dumpRegs();
@@ -143,10 +136,8 @@ boolean Adafruit_VS1053_FilePlayer::playFullFile(const char *trackname) {
 
   while (playingMusic) {
     // twiddle thumbs
-    noInterrupts();
     feedBuffer();
-    interrupts();
-    delay(100);           // give IRQs a chance
+    delay(5);           // give IRQs a chance
   }
   // music file finished!
   return true;
@@ -180,86 +171,66 @@ boolean Adafruit_VS1053_FilePlayer::stopped(void) {
 
 // Just checks to see if the name ends in ".mp3"
 boolean Adafruit_VS1053_FilePlayer::isMP3File(const char* fileName) {
-    
-    int   numChars;
-    char  dotMP3[] = ".MP3";
-    
-    if (fileName) {                 // Sanity.
-        numChars = strlen(fileName);
-        if (numChars>4) {
-            byte index = 0;
-            for(byte i=numChars-4;i<numChars;i++) {
-                if(!(toupper(fileName[i]) == dotMP3[index])) {
-                    return false;
-                }
-                index++;
-            }
-            return true;
-        }
-    }
-    return false;
+	return (strlen(fileName) > 4) && !strcasecmp(fileName + strlen(fileName) - 4, ".mp3");
 }
-
-
-unsigned long Adafruit_VS1053_FilePlayer::mp3_ID3Jumper(File mp3) {
-
-  char 					tag[4];
-  uint32_t 			start;
-	unsigned long current;
 	
-  start = 0;
-  if (mp3) {
-  	current = mp3.position();
-    if (mp3.seek(0)) {
-      if (mp3.read(tag,3)) {
-      	tag[3] = '\0';
-        if (!strcmp(tag, "ID3")) {
-          if (mp3.seek(6)) {
-          	start = 0ul ;
-  					for (byte i = 0 ; i < 4 ; i++) {
-    					start <<= 7 ;
-    					start |= (0x7F & mp3.read()) ;
-  					}
-          } else {
-            //Serial.println("Second seek failed?");
-          }
-        } else {
-          //Serial.println("It wasn't the damn TAG.");
-        }
-      } else {
-        //Serial.println("Read for the tag failed");
-      }
-    } else {
-      //Serial.println("Seek failed? How can seek fail?");
-    }
-    mp3.seek(current);	// Put you things away like you found 'em.
-  } else {
-    //Serial.println("They handed us a NULL file!");
-  }
-  //Serial.print("Jumper returning: "); Serial.println(start);
-  return start;
-}
-
-
+unsigned long Adafruit_VS1053_FilePlayer::mp3_ID3Jumper(File mp3) {
+	
+	  char 					tag[4];
+	  uint32_t 			start;
+		unsigned long current;
+	
+	  start = 0;
+	  if (mp3) {
+	  	current = mp3.position();
+	    if (mp3.seek(0)) {
+	      if (mp3.read(tag,3)) {
+	      	tag[3] = '\0';
+	        if (!strcmp(tag, "ID3")) {
+	          if (mp3.seek(6)) {
+	          	start = 0ul ;
+	  					for (byte i = 0 ; i < 4 ; i++) {
+	    					start <<= 7 ;
+	    					start |= (0x7F & mp3.read()) ;
+	  					}
+	          } else {
+	            //Serial.println("Second seek failed?");
+	          }
+	        } else {
+	          //Serial.println("It wasn't the damn TAG.");
+	        }
+	      } else {
+	        //Serial.println("Read for the tag failed");
+	      }
+	    } else {
+	      //Serial.println("Seek failed? How can seek fail?");
+	    }
+	    mp3.seek(current);	// Put you things away like you found 'em.
+	  } else {
+	    //Serial.println("They handed us a NULL file!");
+	  }
+	  //Serial.print("Jumper returning: "); Serial.println(start);
+	  return start;
+	}
+	
+	
 boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   // reset playback
   sciWrite(VS1053_REG_MODE, VS1053_MODE_SM_LINE1 | VS1053_MODE_SM_SDINEW);
   // resync
   sciWrite(VS1053_REG_WRAMADDR, 0x1e29);
   sciWrite(VS1053_REG_WRAM, 0);
-  
+
   currentTrack = SD.open(trackname);
-  
   if (!currentTrack) {
     return false;
   }
-  
-  // We know we have a valid file. Check if .mp3
-  // If so, check for ID3 tag and jump it if present.
-  if (isMP3File(trackname)) {
-    currentTrack.seek(mp3_ID3Jumper(currentTrack));
-  }
-  
+
+	// We know we have a valid file. Check if .mp3
+	// If so, check for ID3 tag and jump it if present.
+	if (isMP3File(trackname)) {
+		currentTrack.seek(mp3_ID3Jumper(currentTrack));
+	}
   // don't let the IRQ get triggered by accident here
   noInterrupts();
 
@@ -270,7 +241,11 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   playingMusic = true;
 
   // wait till its ready for data
-  while (! readyForData() );
+  while (! readyForData() ) {
+#if defined(ESP8266)
+	yield();
+#endif
+  }
 
   // fill it up!
   while (playingMusic && readyForData()) {
@@ -284,15 +259,28 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
 }
 
 void Adafruit_VS1053_FilePlayer::feedBuffer(void) {
+  noInterrupts();
   // dont run twice in case interrupts collided
-  if (feedBufferSem) return;
+  // This isn't a perfect lock as it may lose one feedBuffer request if
+  // an interrupt occurs before feedBufferLock is reset to false. This
+  // may cause a glitch in the audio but at least it will not corrupt
+  // state.
+  if (feedBufferLock) {
+    interrupts();
+    return;
+  }
+  feedBufferLock = true;
+  interrupts();
 
-  feedBufferSem = true;
+  feedBuffer_noLock();
 
+  feedBufferLock = false;
+}
+
+void Adafruit_VS1053_FilePlayer::feedBuffer_noLock(void) {
   if ((! playingMusic) // paused or stopped
       || (! currentTrack) 
       || (! readyForData())) {
-    feedBufferSem = false;
     return; // paused or stopped
   }
 
@@ -310,8 +298,6 @@ void Adafruit_VS1053_FilePlayer::feedBuffer(void) {
 
     playData(mp3buffer, bytesread);
   }
-  feedBufferSem = false;
-  return;
 }
 
 
@@ -522,9 +508,11 @@ uint8_t Adafruit_VS1053::begin(void) {
     pinMode(_miso, INPUT);
   } else {
     SPI.begin();
+#ifndef SPI_HAS_TRANSACTION
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
     SPI.setClockDivider(SPI_CLOCK_DIV128); 
+#endif
   }
 
   reset();

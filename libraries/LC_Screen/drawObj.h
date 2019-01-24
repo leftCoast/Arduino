@@ -3,44 +3,9 @@
 
 #include <lists.h>
 #include <idlers.h>
-#include "screen.h"
+#include <baseGraphics.h>
+#include <screen.h>
 
-// point, I know what you're thinking. It should be here. But its in displayObj.h.
-// Its needed by both sides.
-
-// ***************************************************************
-// Base class for a rectangle. 
-// ***************************************************************
-
-									
-enum rectPt { topLeftPt, topRightPt, bottomLeftPt, bottomRightPt };
-
-
-class rect {
-
-	public :
-  				rect(void);
-  				rect(int inX, int inY, word inWidth,word inHeight);
-	virtual	~rect(void);
-
-	virtual	void  setLocation(int inX, int inY);
-  			  	void  setSize(word inWidth,word inHeight);
-  			  	void  setRect(rect* inRect);                 					// Got a rect? Make this one the same.
-  			  	void  setRect(point* inPt1,point* inPt2);							// Or two points..
-  			  	void	setAll(int inX, int inY, word inWidth,word inHeight);	// Or the usual way..
-          	int  	maxX(void);                            					// Where's our last pixel?
-          	int  	maxY(void);                            					// Same as obove but in the Y direction.
-          	int  	minX(void);                            					// Where's our first pixel?
-          	int  	minY(void);                            					// Same as obove but in the Y direction.
-  			  	bool 	inRect(int inX, int inY);              					// Is this point in us?
-  			  	point	getCorner(rectPt corner);										// Pass back the corner point.
-				bool	overlap(rect* inRect);											// Is that rect touching us?
-					
-					int   x;
-					int   y;
-					word  width;
-					word  height;
-};
 
 // ***************************************************************
 // Base class for an object that can be drawn on the screen.
@@ -51,7 +16,8 @@ class drawObj : public rect, public dblLinkListObj {
 
 	public:
   				drawObj();
-  				drawObj(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks=false);
+  				drawObj(rect* inRect,bool inClicks=false);
+  				drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks=false);
 	virtual	~drawObj();
     
    virtual	bool	wantRefresh(void);
@@ -91,10 +57,12 @@ public:
 	virtual	~viewMgr(void);
     
 	virtual	void		addObj(drawObj* newObj);
-    			void		dumpList(void);
+    			void		dumpDrawObjList(void);
             bool 		checkClicks(void);
-				void    	checkRefresh(void);
-				word		numObjInList(void);
+	virtual	void    	checkRefresh(void);
+				int		numObjInList(void);
+				drawObj*	getObj(int index);
+				drawObj*	theList(void);
     virtual void    	idle(void);
     
             drawObj	listHeader;				// Header of the drawObj list;
@@ -116,9 +84,11 @@ void		setFocusPtr(drawObj* newFocus);
 class drawGroup : public drawObj, public viewMgr {
 
 	public:
-				drawGroup(int x, int y, word width,word height,bool clicks=false);
+				drawGroup(rect* inRect,bool clicks=false);
+				drawGroup(int x, int y, int width,int height,bool clicks=false);
   	virtual	~drawGroup();
 
+	virtual	bool	checkGroupRefresh(void);
 	virtual	void	setLocation(int x,int y);
 	virtual	void	setGroupRefresh(void);
 	virtual	bool	wantRefresh(void);
@@ -134,12 +104,18 @@ class drawGroup : public drawObj, public viewMgr {
 class drawList : public drawGroup {
  
 	public:
-				drawList(int x, int y, word width,word height,bool clicks=false);
+				drawList(rect* inRect,bool clicks=false,bool vertical=true);
+				drawList(int x, int y, int width,int height,bool clicks=false,bool vertical=true);
   	virtual	~drawList();
   					
   	virtual	void	addObj(drawObj* newObj);
-  	
-  				word	listHeight;
+  				void	resetPositions(void);
+  				int	lastY(void);
+  				bool	isVisible(drawObj* theItem);
+				void	showItem(drawObj* theItem);
+				
+  				int	itemHeight;
+  				bool	mVertical;
   	
 };
 

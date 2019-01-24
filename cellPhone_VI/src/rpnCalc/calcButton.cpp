@@ -1,6 +1,7 @@
 #include "calcButton.h"
 #include <calculator.h>
-#include "../../litlOS.h"
+#include <litlOS.h>
+
 #include "rpnCalc.h"
 
 #define TEXT_SIZE     2
@@ -11,7 +12,7 @@
 extern calculator mCalc;
 extern bool       buttonPressed;
        bool       gSecondFx = false;
-extern apps       nextApp;
+extern int			nextPanel;
 
 colorObj numberActiveBColor;
 colorObj numberActiveTColor;

@@ -17,10 +17,13 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
 qCSlave   ourComObj;
 
-bool  FONAOnline;
+bool    FONAOnline;
+timeObj toneTime;
+bool    playingSong;
 
 void setup() {
 
+    playingSong = false;
     FONAOnline = false;
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
@@ -30,8 +33,12 @@ void setup() {
       //digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
+<<<<<<< HEAD
     resetFONA();                          // Hit reaset, see if it'll come online.
-    fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+    //fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+=======
+    resetFONA();                          // Hit reset, see if it'll come online.
+>>>>>>> 0c776dfc8478e3f27db06a86f82c5f2ed0be2195
 }
 
 
@@ -49,7 +56,8 @@ void loop() {
           case getStatus    : doStatus();               break;
           case makeCall     : doCall(&inBuff[1]);       break;  
           case hangUp       : doHangUp( );              break;
-          case sendSNS      : doSendSNS(&inBuff[1]);    break;  
+          case sendSNS      : doSendSNS(&inBuff[1]);    break;
+          case pickUp       : doPickUp();               break;
           default           : break;
         } 
       }
@@ -73,8 +81,30 @@ void resetFONA(void) {
   delay(10);
   digitalWrite(FONA_RST, HIGH);
   delay(100);
+<<<<<<< HEAD
   fonaSS.begin(4800);                 // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);   // Able to fire up the FONA.
+
+  // Got these two online an the Adafruit Forum. Trying to get the speaker to work.
+  fona.sendCheckReply(F("AT+SNDLEVEL=0,50"), F("OK")); // Set the dialtone level 
+  fona.sendCheckReply(F("AT+SNDLEVEL=1,50"), F("OK")); // Set the DTMF level
+=======
+  fonaSS.begin(4800);                   // For talking to the FONA.
+  FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
+  fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
+  fona.setVolume(40);
+  fona.enableNetworkTimeSync(true);     // See if it works..
+
+/*
+For those who wonder : You can add a call fona
+setAudio(FONA_EXTAUDIO) to your initialization code or issue
+direct command 'AT+CHFA=1' towards SIM800 module.
+
+In my case this module is no longer losing SIM card when
+receiving or placing phone calls.
+Thanks for a tip!
+*/
+>>>>>>> 0c776dfc8478e3f27db06a86f82c5f2ed0be2195
 }
 
 
@@ -93,6 +123,19 @@ void doStatus(void) {
   fona.getTime(newStat.networkTime,23);
 
   ourComObj.replyBuff((byte*)&newStat,sizeof(cellStatus));
+}
+
+
+void doPickUp(void) {
+
+  uint8_t result;
+
+  if (fona.pickUp()) {
+    result = 0;                   // We'll pass a 0 for no error.
+  } else {
+    result = 1;                   // We'll pass a 1 for error.
+  }
+  ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
 }
 
 

@@ -5,9 +5,10 @@
 #include <lineObj.h>
 #include "calcButton.h"
 #include <calculator.h>
-#include "../../panel.h"
-#include "../../litlOS.h" 
+#include <panel.h>
+#include <litlOS.h>
 #include "anime.h"
+#include	"../../cellOS.h"
 
 
 class rpnCalc : public panel {

@@ -17,14 +17,12 @@ displayObj::~displayObj(void) { }
 
   
 void displayObj::pushOffset(int x, int y) {
-
 	offsetX = offsetX + x;
 	offsetY = offsetY + y;
 }
 
 
 void displayObj::popOffset(int x, int y) {
-
 	offsetX = offsetX - x;
 	offsetY = offsetY - y;
 }
@@ -45,7 +43,8 @@ point	displayObj::lP(point gP) {
 	return aPt;
 }
 
-
+void displayObj::startWrite(void) {  }
+void displayObj::endWrite(void) {  }
 bool displayObj::dispObjBegin(void) { return false; }
 void displayObj::setRotation(byte inRotation) { }
 void displayObj::setTextColor(colorObj* inColor) { }
@@ -56,20 +55,23 @@ void displayObj::setFont(const GFXfont* font) { }
 void displayObj::setCursor(int inX,int inY) { }
 void displayObj::drawText(char* inText) { }
 void displayObj::fillScreen(colorObj* inColor) { }
-void displayObj::fillRect(int locX,int locY,word width,word height,colorObj* inColor) { }
-void displayObj::drawRect(int locX,int locY,word width,word  height,colorObj* inColor) { }
-void displayObj::fillRectGradient(int inX,int inY,word inXSize,word inYSize,colorObj* startColor,colorObj* endColor,bool vertical) { }
+void displayObj::fillRect(int locX,int locY,int width,int height,colorObj* inColor) { }
+void displayObj::fillRect(rect* inRect,colorObj* inColor) { }
+void displayObj::drawRect(int locX,int locY,int width,int  height,colorObj* inColor) { }
+void displayObj::drawRect(rect* inRect,colorObj* inColor) { }
+void displayObj::fillRectGradient(int inX,int inY,int inXSize,int inYSize,colorObj* startColor,colorObj* endColor,bool vertical) { }
 void displayObj::fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical) { }
-void displayObj::fillRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor){ }
-void displayObj::drawRoundRect(int locX,int locY,word width,word height,word radius,colorObj* inColor){ }
-void displayObj::drawCircle(int locX,int locY,word inDiam, colorObj* inColor){ }
-void displayObj::fillCircle(int locX,int locY,word inDiam, colorObj* inColor){ }
-void displayObj::drawVLine(int locX,int locY,word height,colorObj* inColor) { }
-void displayObj::drawHLine(int locX,int locY,word width,colorObj* inColor) { }
+void displayObj::fillRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor){ }
+void displayObj::drawRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor){ }
+void displayObj::drawCircle(int locX,int locY,int inDiam, colorObj* inColor){ }
+void displayObj::drawCircleHelper(int locX,int locY,int inRad,byte corner,colorObj* inColor) { }
+void displayObj::fillCircle(int locX,int locY,int inDiam, colorObj* inColor){ }
+void displayObj::drawVLine(int locX,int locY,int height,colorObj* inColor) { }
+void displayObj::drawHLine(int locX,int locY,int width,colorObj* inColor) { }
 void displayObj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { }
 void displayObj::drawPixel(int locX,int locY,colorObj* pColor) { }
 void displayObj::drawPixelInvert(int x,int y) { }
-void displayObj::frameRectInvert(int x,int y,word width,word height) { }
+void displayObj::frameRectInvert(int x,int y,int width,int height) { }
 
 point   displayObj::getPoint(void) {
   

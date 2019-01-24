@@ -16,8 +16,15 @@
 // The master initiates communication. Sends a command and optionally waits for a reply.
 //
 // Slave side :
-// Slaves listen for a commands, take action on those commands and usually generate
+// Slaves listen for a commands, take action on those commands and usually generates
 // replies to those commands.
+//
+// Now these are just data smallish blocks of byes. They are not thought of as
+// c strings just blocks of data. You can send a cstring through this, up to 255 bytes.
+// But don't start thinking you have to add a byte for the trailing EOS or anything.
+// Its just blocks of bytes.
+//
+// I put that last note in because I forgot and had to come over here and look.
 
 
 #define MASTER_PORT	Serial1	// For now this ia all I could come up with.

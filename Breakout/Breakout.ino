@@ -1,6 +1,7 @@
 #include <Adafruit_GFX.h>
 #include <gfxfont.h>
 
+#include <baseGraphics.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -9,7 +10,10 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
+//#include <adafruit_1431_Obj.h> // ADAFRUIT_1431
+
+#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
+#include <Adafruit_ILI9341.h>
 
 #include <displayObj.h>
 #include <drawObj.h>
@@ -20,9 +24,12 @@
 #include "ballObj.h"
 #include "brickObj.h"
 
+#define TFT_W         240
+#define TFT_H         320
+
 #define PADDLE_WIDTH  16
 #define PADDLE_HEIGHT 3
-#define PADDLE_Y      112
+#define PADDLE_Y      TFT_H-16 //112
 
 #define PADDLE_MS 20
 #define FRAME_MS  10
@@ -33,21 +40,24 @@
 #define MESSAGE_W 78
 #define MESSAGE_H 8
 
-#define BALLS_TXT_X 40
+#define BALLS_TXT_X TFT_W - 80 //40
 #define BALLS_TXT_W 72
-#define BALLS_Y     118
+#define BALLS_Y     TFT_H - 10 //118
 #define BALLS_H     8
 #define BALLS_NUM_X BALLS_TXT_X + BALLS_TXT_W + 2
 #define BALLS_NUM_W 16
 
 #define NUM_BALLS 4
 
-#define OLED_CS     10
-#define OLED_RST    6
-#define OLED_SDCS   -1    // Not wired
+//#define OLED_CS     10
+//#define OLED_RST    6
+//#define OLED_SDCS   -1    // Not wired
 
-#define BUTTON_PIN  4
-#define POT_ANLG    A0 
+#define TFT_CS     10
+#define TFT_RST    6
+
+//#define BUTTON_PIN  4
+//#define POT_ANLG    A0 
 
 enum gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
@@ -58,7 +68,7 @@ label         message(MESSAGE_X,MESSAGE_Y,MESSAGE_W,MESSAGE_H);
 label         numBallsTxt(BALLS_TXT_X,BALLS_Y,BALLS_TXT_W,BALLS_H);
 label         numBallsNum(BALLS_NUM_X,BALLS_Y,BALLS_NUM_W,BALLS_H);
 colorMultiMap ballNumCMap;
-mapper        pMapper(1023,0,1,127-PADDLE_WIDTH);
+//mapper        pMapper(1023,0,1,127-PADDLE_WIDTH);
 timeObj       frameTimer(FRAME_MS);
 timeObj       paddleTimer(PADDLE_MS);
 timeObj       textTimer(TEXT_MS);
@@ -75,13 +85,18 @@ bool        buttonHit = false;
 
 void setup() {
 
-  if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
-    while(true); // Kill the process.
+  //if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
+  //  while(true); // Kill the process.
+  //}
+  
+  // First bring the screen online.
+  if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
+    while(true);
   }
-
+  
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
-  screen->drawRect(0,0,128,128,&white);   // Damn, looks good leave it!
+  screen->drawRect(0,0,TFT_W,TFT_H,&white);   // Damn, looks good leave it!
   
   paddle.setBackColor(&backColor);
   viewList.addObj(&paddle);
@@ -108,7 +123,7 @@ void setup() {
   theBall.setBackColor(&backColor);
   viewList.addObj(&theBall);
   fillBricks();
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  //pinMode(BUTTON_PIN, INPUT_PULLUP);
   setState(preGame); 
 }
 
@@ -120,7 +135,7 @@ void fillBricks(void) {
   int       offset;
   
   //y = BOTTOM_BRICK;
-  offset = (128-(NUM_BRICKS*BRICK_W))/2;
+  offset = (TFT_W-(NUM_BRICKS*BRICK_W))/2;
   colorObj aColor;
   y = BOTTOM_BRICK;
   aColor.setColor(&blue);
@@ -160,14 +175,19 @@ void doPaddle(void) {
 
     float val;
     int newLoc;
+    point touchPt;
     
     if (paddleTimer.ding()) {
       paddleTimer.stepTime();
-      val = smoother.addData(analogRead(POT_ANLG));
-      newLoc = round(pMapper.Map(val));
-      if (newLoc!=oldLoc) {
-        paddle.setLocation(newLoc,PADDLE_Y);
-        oldLoc = newLoc;
+      //val = smoother.addData(analogRead(POT_ANLG));
+      //newLoc = round(pMapper.Map(val));
+      if(screen->touched()) {
+        touchPt = screen->getPoint();
+        newLoc = touchPt.x;
+        if (newLoc!=oldLoc) {
+          paddle.setLocation(newLoc,PADDLE_Y);
+          oldLoc = newLoc;
+        }
       }
     }
   }
@@ -218,7 +238,7 @@ void setState(gameStates state) {
         showBallNum(ballCount);
         theBall.setLocation(BALL_X,BALL_Y);
         resetBricks();
-        message.setValue("Press start");
+        message.setValue("Tap to start");
         while(!paddleTimer.ding());
         doPaddle();
         savedPaddleX = paddle.x;
@@ -279,7 +299,8 @@ void loop(void) {
     }
     switch (userState) {
     case nothin : 
-      if (!digitalRead(BUTTON_PIN)) {
+      //if (!digitalRead(BUTTON_PIN)) {
+      if (screen->touched()) {
         userState = pressinTDamnButton;
         debounceTimer.start();
         buttonHit = true;
@@ -287,7 +308,8 @@ void loop(void) {
       break;
     case pressinTDamnButton : 
       if (debounceTimer.ding()) {
-        if (digitalRead(BUTTON_PIN)) {  // Is the bozo holding the damn button down?
+        //if (digitalRead(BUTTON_PIN)) {  // Is the bozo holding the damn button down?
+        if (screen->touched()) {
           userState = nothin;
         } else {
           debounceTimer.start();        // Whatever, I'll come back later..

@@ -113,22 +113,26 @@ void gameNode::writeToBuff(char* buffPtr, unsigned long maxBytes) {
 
 
 unsigned long gameNode::loadFromBuff(char* buffPtr, unsigned long maxBytes) {
-//  tracer trace("gameNode::loadFromBuff()");
 
-  unsigned long*  longPtr;
-
-  longPtr = (unsigned long*)buffPtr;                // Point at the buffer as if we were a number.
-  yesID = *longPtr;                                 // Read 'em.
-  buffPtr = (char*)longPtr;                         // Bring out byte pointer up to date.
-  buffPtr = buffPtr + sizeof(yesID);                // Move the pointer up for next write.
-
-  longPtr = (unsigned long*)buffPtr;               // Point at the buffer as if we were a number.
-  noID = *longPtr;                                 // Read 'em.
-  buffPtr = (char*)longPtr;                        // Bring out byte pointer up to date.
-  buffPtr = buffPtr + sizeof(noID);                // Move the pointer up for next write.
-
-  question = (char*)malloc(strlen(buffPtr) + 1);  // Make room.
-  if (question) {                                 // If we got room.
-    strcpy(question, buffPtr);                    // Copy out the string.
-  }
+	unsigned long*	longPtr;
+	unsigned long	byteCount;
+	int				numBytes;
+	
+	longPtr = (unsigned long*)buffPtr;		// Point at the buffer as if we were a number.
+	yesID = *longPtr;								// Read 'em.
+	buffPtr = (char*)longPtr;					// Bring out byte pointer up to date.
+	buffPtr = buffPtr + sizeof(yesID);		// Move the pointer up for next write.
+	byteCount = sizeof(yesID);					// Start counting.
+	longPtr = (unsigned long*)buffPtr;		// Point at the buffer as if we were a number.
+	noID = *longPtr;								// Read 'em.
+	buffPtr = (char*)longPtr;					// Bring out byte pointer up to date.
+	buffPtr = buffPtr + sizeof(noID);		// Move the pointer up for next write.
+	byteCount = byteCount + sizeof(noID);	// Measure number of databytes.
+	numBytes = strlen(buffPtr) + 1;			// remaining data..
+	byteCount = byteCount + numBytes;		// last bits..
+	question = (char*)malloc(numBytes);		// Make room.
+	if (question) {								// If we got room.
+		strcpy(question, buffPtr);                    // Copy out the string.
+	}
+	return byteCount;
 }

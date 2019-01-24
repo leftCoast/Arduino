@@ -37,15 +37,18 @@ class fListItem;
 class fList : public drawList, public pushPotGUI {
 
   public:
-              fList(void);
-virtual void  reset(void);
-        void  chooseItem(int index);
-virtual void  doPotVal(int aVal);
-virtual void  gainControl(void);
-        void  scroll(int ydist);
-        void  makeVisable(fListItem* theItem);
-        bool  visible(fListItem* theItem);
-        void  currentSongRefresh();
+          fList(void);
+  virtual ~fList(void);
+        
+  virtual void  reset(void);
+  virtual void  drawSelf(void);
+          void  chooseItem(int index);
+  virtual void  doPotVal(int aVal);
+  virtual void  gainControl(void);
+          void  scroll(int ydist);
+          void  makeVisable(fListItem* theItem);
+          bool  visible(fListItem* theItem);
+          void  currentSongRefresh();
 };
 
 
@@ -58,14 +61,15 @@ class playFile;
 class fListItem : public drawGroup, public pushPotGUI {
 
   public:
-                    fListItem(char* fileName);
-                    ~fListItem(void);
+          fListItem(char* fileName);
+  virtual ~fListItem(void);
 
   virtual void      setFocus(bool onOff);
   virtual void      gainControl(void);
   virtual void      doAction(void); 
   virtual void      doPotVal(int aVal);         
-  virtual boolean   wantRefresh(void);
+  virtual bool      wantRefresh(void);
+  virtual void      drawSelf(void);
 
           bmpLabel*   mText;
           marker*     mMarker;
@@ -78,8 +82,8 @@ class marker : public bmpDrawObj {
 
   public:
 
-                 marker(int x,int y, word width, word height);
-                ~marker(void);
+          marker(int x,int y, word width, word height);
+  virtual ~marker(void);
                 
           void  setColor(colorObj* aColor);
   virtual void  doAction(void); 
@@ -94,8 +98,8 @@ class playFile : public bmpDrawObj {
   
   public:
   
-                playFile(label* inLabel);
-                ~playFile(void);
+          playFile(label* inLabel);
+  virtual ~playFile(void);
   
   virtual void  doAction(void);
   virtual void  drawSelf(void);
@@ -108,8 +112,8 @@ class DBSelector : public bmpDrawObj {
   
   public:
   
-                DBSelector(label* inLabel);
-                ~DBSelector(void);
+          DBSelector(label* inLabel);
+  virtual ~DBSelector(void);
   
   virtual void  doAction(void);
   virtual void  drawSelf(void);

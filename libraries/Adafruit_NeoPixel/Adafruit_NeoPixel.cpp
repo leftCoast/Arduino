@@ -1538,6 +1538,7 @@ void Adafruit_NeoPixel::setPin(uint8_t p) {
 
 // Is this RGB type pixel? Or RGBW type?
 bool Adafruit_NeoPixel::isRGBType(void) { return wOffset == rOffset; }
+// My addition.
 
 // Set pixel color from separate R,G,B components:
 void Adafruit_NeoPixel::setPixelColor(

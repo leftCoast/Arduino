@@ -38,7 +38,9 @@
   typedef uint8_t PortMask;
 #elif defined (__arm__)
   #if defined(TEENSYDUINO)
-  typedef volatile uint8_t RwReg;
+#ifndef RwReg								// Yes this is my hack. - jim lee
+ typedef volatile uint8_t RwReg;
+#endif										// Other end of it.
   typedef uint8_t PortMask;
   #else
   typedef volatile uint32_t RwReg;
@@ -172,7 +174,7 @@ class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053 {
   File currentTrack;
   volatile boolean playingMusic;
   void feedBuffer(void);
-  boolean isMP3File(const char* fileName);
+  static boolean isMP3File(const char* fileName);
   unsigned long mp3_ID3Jumper(File mp3);
   boolean startPlayingFile(const char *trackname);
   boolean playFullFile(const char *trackname);
@@ -182,6 +184,8 @@ class Adafruit_VS1053_FilePlayer : public Adafruit_VS1053 {
   void pausePlaying(boolean pause);
 
  private:
+  void feedBuffer_noLock(void);
+
   uint8_t _cardCS;
 };
 

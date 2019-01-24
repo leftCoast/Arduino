@@ -1,119 +1,5 @@
 #include "drawObj.h"
 
-#define DEF_LOC_X  16    // Just anything so the user can see something.
-#define DEF_LOC_Y  16
-#define DEF_SIZE_X 16
-#define DEF_SIZE_Y 16
-
-rect::rect(void) {
-   
-   setLocation(DEF_LOC_X,DEF_LOC_Y);
-   setSize(DEF_SIZE_X,DEF_SIZE_Y);
- }
- 
- 
-rect::rect(int inX, int inY, word inWidth,word inHeight) {
-   
-   setAll(inX,inY,inWidth,inHeight);
-}
-
- 
-rect::~rect(void) { }
- 
- 
-void  rect::setLocation(int inX, int inY) {
-  
-  x = inX;
-  y = inY;
-}
-
-
-void  rect::setSize(word inWidth,word inHeight) {
-
-  width = inWidth;
-  height = inHeight;
-}
-
-
-void rect::setRect(rect* inRect) {
-  
-  setLocation(inRect->x,inRect->y);
-  setSize(inRect->width,inRect->height);
-}
-
-
-void rect::setRect(point* inPt1,point* inPt2) {
-
-  int locX = min(inPt1->x,inPt2->x);
-  int locY = max(inPt1->y,inPt2->y);
-  word width = abs((int)inPt1->x-(int)inPt2->x);
-  word height = abs((int)inPt1->y-(int)inPt2->y);
-  setLocation(locX,locY);
-  setSize(width,height);
-}
-
-
-void rect::setAll(int inX, int inY, word inWidth,word inHeight) {
-
-	setLocation(inX,inY);
-   setSize(inWidth,inHeight);
-}
-
-
-int rect::maxX(void) { return(x + width); }
-int rect::maxY(void)  { return(y + height); }
-int rect::minX(void) { return(x); }
-int rect::minY(void)  { return(y); }
-
-bool rect::inRect(int inX, int inY) {
-
-  return(
-  inX >= minX() &&
-  inX <= maxX() &&
-  inY >= minY() &&
-  inY <= maxY()
-  );
-}
-
-
-point rect::getCorner(rectPt corner) {
-
-	point	tempPt;
-	
-	switch(corner) {
-		case topLeftPt :
-			tempPt.x = x;
-			tempPt.y = y;
-		break;
-		case topRightPt :
-			tempPt.x = x + width;
-			tempPt.y = y;
-		break;
-		case bottomLeftPt :
-			tempPt.x = x;
-			tempPt.y = y + height;
-		break;
-		case bottomRightPt :
-			tempPt.x = x + width;
-			tempPt.y = y + height;
-		break;
-	}
-	return tempPt;
-}
-
-
-// Are we touching this passed in rectangle?
-bool rect::overlap(rect* checkRect) {
-
-		if(maxX()<checkRect->minX()) return false;
-		if(minX()>checkRect->maxX()) return false;
-		if(maxY()<checkRect->minY()) return false;
-		if(minY()>checkRect->maxY()) return false;
-		return true;
-	}
-
-
-
 
 // ***********************************
 
@@ -127,7 +13,18 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(int inLocX, int inLocY, word inWidth,word inHeight,bool inClicks)
+drawObj::drawObj(rect* inRect,bool inClicks)
+	: rect(inRect) {
+	
+	needRefresh = true;
+	focus = false;
+	clicked = false;
+	wantsClicks = inClicks;
+	callback = NULL;
+}
+
+
+drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks)
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
     needRefresh = true;
@@ -193,16 +90,15 @@ void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
 
 // Manager has detected a fresh click, is it ours?
 bool   drawObj::acceptClick(point where) {
-        
-    if (wantsClicks) {
-        if (inRect(where.x,where.y)) {
-            needRefresh = true;
-            clicked = true;
-            doAction();
-            return true;
-        }
-    }
-    return false;
+	if (wantsClicks) {
+		if (inRect(where.x,where.y)) {
+			needRefresh = true;
+			clicked = true;
+			doAction();
+			return true;
+		}
+	}
+	return false;
 }
   
             
@@ -266,6 +162,9 @@ void viewMgr::addObj(drawObj* newObj) {
     hookup();								// hookup on the first addition. Ignored otherwise.
 }
 
+// Now anyone can tell us to do that.
+void viewMgr::dumpDrawObjList(void) { listHeader.dumpList(); }
+
 
 // Checking clicks.
 bool viewMgr::checkClicks(void) {
@@ -319,9 +218,16 @@ void viewMgr::checkRefresh(void) {
  
  
 // Counts & returns the number of objects in the list.           
-word viewMgr::numObjInList(void) { return (word)listHeader.countTail(); }
+int viewMgr::numObjInList(void) { return (int)listHeader.countTail(); }
 
-        
+
+// Finds the "nth" item on the list, index starting at 0. NULL if not found.
+drawObj* viewMgr::getObj(int index) { return (drawObj*)listHeader.getTailObj((int)index); }
+
+
+drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.getTailObj(0); }
+
+
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
     
@@ -341,10 +247,14 @@ void viewMgr::idle(void) {
 // ***************************************************
 
 
-drawGroup::drawGroup(int x, int y, word width,word height,bool clicks) 
-	: drawObj(x,y,width,height,clicks) { needRefresh = true; }
+drawGroup::drawGroup(rect* inRect,bool clicks) 
+	: drawObj(inRect,clicks) {  } // drawObj sets wantRefresh, we don't need to. 1/21/2019
 
 
+drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
+	: drawObj(x,y,width,height,clicks) {  }
+	
+	
 // We don't actually allocate anything new. Just work old tools.
 drawGroup::~drawGroup() { }
 
@@ -365,19 +275,25 @@ void drawGroup::setGroupRefresh(void) {
 		} 
 	}
 	
+	
+bool drawGroup::checkGroupRefresh(void) {
+	
+	drawObj* trace;
+
+	trace = (drawObj*)listHeader.getTailObj(0);
+	while(trace && trace!=(&listHeader)) {
+		if(trace->wantRefresh()) {
+			return true;
+		}
+		trace = (drawObj*)trace->dllNext;
+	}
+	return false;
+}
+
 
 // The viewMgr that we live on wants to know if we need a redraw.
-// Before we act on that, lets let the kids redraw first.
-// NOTE: I THINK THIS IS MESSED UP. THINK ABOUT IT!
-bool drawGroup::wantRefresh(void) {
-
-	if (!needRefresh) {				// If we DON'T want a refresh.
-		screen->pushOffset(x,y);	// We set in our offset.
-		checkRefresh();				// And let the kiddies have a go.
-		screen->popOffset(x,y);		// Clear offset.
-	}
-	return needRefresh;				// In any case, return if we need a refresh or not.
-}
+// If we don't, the kids might.
+bool drawGroup::wantRefresh(void) { return (needRefresh || checkGroupRefresh()); }
 
 
 // Someone from the outside is hinting to us that we are
@@ -428,8 +344,8 @@ void drawGroup::clickOver(void) {
 }
 
 
-// The groups are NOT linked into the idle loop.
-// They get their time from the parent getting called.              					
+// The groups are NOT linked into the drawing loop.
+// They get their draw calls from the parent getting called.              					
 void drawGroup::addObj(drawObj* newObj) {
 
   	newObj->linkAfter(&listHeader);   	// Put the new guy at the top of the list.
@@ -441,17 +357,20 @@ void	drawGroup::draw(void) {
 
 	drawObj*	trace;
 
-	if (needRefresh) {
-		drawSelf();
+	if (needRefresh) {								// We may be the background.
+		drawSelf();										// Do our drawing.
+		setGroupRefresh();							// If we're drawing, the entire group needs it.
 	}
 	trace = (drawObj*)listHeader.getLast();	// make sure we're at the bottom.
 	screen->pushOffset(x,y);						// Ok, push our offset for the sublist.
 	while(trace && trace!=(&listHeader)) {		// And while we're not done..
-		trace->draw();									// Call his Draw method.
-		trace = (drawObj*)trace->dllPrev;		// if so lets go there.
+		if(trace->wantRefresh()) {					// If this guy needs it.
+			trace->draw();								// Call his Draw method.
+		}
+		trace = (drawObj*)trace->dllPrev;		// Hop to the next one up the list.
 	}
 	screen->popOffset(x,y);							// Pop off the offset.
-	needRefresh = false;								// in any case, we no longer need a refresh.
+	needRefresh = false;								// In any case, we no longer need a refresh.
 }
 
 
@@ -462,8 +381,20 @@ void	drawGroup::draw(void) {
 // ***************************************************
 
 
-drawList::drawList(int x, int y, word width,word height,bool clicks) 
-	: drawGroup(x,y,width,height,clicks) { listHeight = 1; }
+drawList::drawList(rect* inRect,bool clicks,bool vertical) 
+	: drawGroup(inRect,clicks) {
+
+	mVertical = vertical;	// Save it for now, deal with coding it later.
+	itemHeight = 1;
+}
+
+
+drawList::drawList(int x, int y, int width,int height,bool clicks,bool vertical) 
+	: drawGroup(x,y,width,height,clicks) {
+
+	mVertical = vertical;	// Save it for now, deal with coding it later.
+	itemHeight = 1;
+}
 
 
 drawList::~drawList() { }
@@ -475,10 +406,63 @@ drawList::~drawList() { }
 // anyway. Too bad, inherit and fix it if this ain't good enough.					
 void drawList::addObj(drawObj* newObj) {
 
-	word numObjs;
-	
-	listHeight = newObj->height;
-	numObjs = numObjInList();
-	newObj->setLocation(0,numObjs*listHeight);
+	itemHeight = max(itemHeight,newObj->height);
+	newObj->setLocation(0,numObjInList()*itemHeight);
 	drawGroup::addObj(newObj);	
 }
+
+
+// Good idea after adding your list items to run a reset on them all.
+void drawList::resetPositions(void) {
+
+	int		i;
+	drawObj*	trace;
+	
+	i = 0;											// Start our multiplier at zero.
+	trace = theList();
+	while(trace!=NULL) {							// Standard loop through link list.
+		trace->y = i++ *  itemHeight;			// Each is moved by itemHeight from the last.
+		trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+		trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+	}
+}
+
+
+// Seeing that all the list items are positioned as if they were the same size..
+// We can calculate the last possible y position an item can have to be viewable.
+int drawList::lastY(void) {
+	
+	int       numViewable;
+	
+	numViewable = (height/itemHeight);	// Quick int division to force truncation.
+	return (numViewable-1) * itemHeight;		// To make sure first is at zero. All overages to bottom.
+}
+
+
+// Any of our items can be passed in and find if its showing or not.
+// Good for deciding to draw or not.
+bool drawList::isVisible(drawObj* theItem) { return (theItem->y >= 0 && theItem->y<= lastY()); }
+
+
+// If this itm is not showing, show it. If above the window, bring it down to the first
+// position. If below the window bring it up to the last position of the window.
+void drawList::showItem(drawObj* theItem) {
+
+  int       yDif;
+  drawObj*  trace;
+  
+  if (theItem->y<0) {							// Need to scroll down.
+    yDif = theItem->y;							// Simple, we just bring it down to zero.
+  } else if (theItem->y>lastY()) {			// Need to scroll up.
+    yDif = theItem->y - lastY();				// This gives us how much to scroll up.
+  } else {
+    return;                               // No scrolling neccisary. Lets go home.
+  }
+  trace = theList();                      // EVERYBODY must scroll!
+  while(trace!=NULL) {                    // Standard loop through link list.
+    trace->y = trace->y-yDif;             // Each is moved by - xDif;
+    trace->setNeedRefresh();              // Just in case, everyione is told to redraw.
+    trace = (drawObj* )trace->dllNext;    // Hop to the next in the list.
+  }
+}
+

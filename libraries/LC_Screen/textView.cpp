@@ -304,6 +304,7 @@ void lineManager::indexSet(int endLineNum) {
   int          index;
   bool         hardBreak;
 
+  lineNum = 0;														// Ok, shut up compiler.
   if (mTextBuff) {                                    // We do have a text buffer.
     if (mTextBuff[0]!='\0') {                         // And at least some text.
       numLines = getCount();                          // Count up the lines we currently have..
@@ -549,8 +550,9 @@ void textView::setScroll(scrollCom choice,int inNum) {
       case lineAtTop      : newEditLine = inNum;                                  break;
       case indexAtBottom  : newEditLine = mManager.getLineNum(inNum) - mNumLines; break;
       case indexAtTop     : newEditLine = mManager.getLineNum(inNum);             break;
-      case upOne          : newEditLine--;                                        break;
-      case downOne        : newEditLine++;                                        break;
+      case upOne          : newEditLine = inNum--;                                break;	// These two, possibly backwards
+      case downOne        : newEditLine = inNum++;                                break;	// Untested as yet..
+      default				  : newEditLine = inNum;											 break;  // Shut up compiler.
     }
     if (newEditLine>=numLines) newEditLine = numLines-1;
     if (newEditLine<0) newEditLine = 0;

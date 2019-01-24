@@ -7,7 +7,7 @@ neoPixel::neoPixel(uint16_t n, uint8_t p, uint8_t t)
    
 neoPixel::~neoPixel() {  }
 
-
+/* Others won't have this call. Comment out for now.
 void neoPixel::setPixelColor(uint16_t n,colorObj* inColor) { 
     
     if (isRGBType()) {
@@ -21,8 +21,10 @@ void neoPixel::setPixelColor(uint16_t n,colorObj* inColor) {
 			Adafruit_NeoPixel::setPixelColor(n,r-minColor,g-minColor,b-minColor,minColor);
 		}
  }
+*/  
   
   
+/* Others won't have this call. Comment out for now.
 colorObj neoPixel::getPixelColor(uint16_t n) {
    
    uint32_t packColor;
@@ -38,6 +40,26 @@ colorObj neoPixel::getPixelColor(uint16_t n) {
    					colorPtr[1]+colorPtr[3],
    					colorPtr[0]+colorPtr[3]);
    }
+   return result;
+}
+*/
+
+
+void neoPixel::setPixelColor(uint16_t n,colorObj* inColor) { 
+
+	Adafruit_NeoPixel::setPixelColor(n,inColor->getRed(),inColor->getGreen(),inColor->getBlue());
+ }
+ 
+ 
+colorObj neoPixel::getPixelColor(uint16_t n) {
+   
+   uint32_t packColor;
+   uint8_t* colorPtr;
+   colorObj result;
+   
+   packColor = Adafruit_NeoPixel::getPixelColor(n);
+   colorPtr = (uint8_t*) &packColor;
+   result.setColor(colorPtr[2],colorPtr[1],colorPtr[0]);
    return result;
 }
 

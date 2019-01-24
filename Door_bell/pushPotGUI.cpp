@@ -39,9 +39,11 @@ bool  buttonClick(void) {
 pushPotGUI*  controlPtr = NULL;
 
 
-
 pushPotGUI::pushPotGUI(void) { }
+
+
 pushPotGUI::~pushPotGUI(void) { if (controlPtr==this) setControlPtr(NULL); }
+
 
 // Stuff to do when we're started or restarted.
 void pushPotGUI::reset(void) {  }           
@@ -54,8 +56,3 @@ void pushPotGUI::gainControl(void) {  }
 // Calliing program sends us in raw pot values.
 // I guess we're the controller.
 void pushPotGUI::doPotVal(int aVal) {  }  
-
-
-
-
-

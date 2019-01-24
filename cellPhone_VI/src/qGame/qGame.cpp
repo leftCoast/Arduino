@@ -1,15 +1,8 @@
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
-#include <Adafruit_ILI9341.h>
-#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
-#include <SD.h>
 
-#include <blinker.h>
+#include <SD.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
-#include <PulseOut.h>
-#include <runningAvg.h>
 #include <timeObj.h>
 #include <lilParser.h>
 
@@ -25,13 +18,10 @@
 #include <blockFile.h>
 #include <fileBuff.h>
 
-#include  "../../litlOS.h"
+#include	"../../cellOS.h"
 #include "gameNode.h"
 #include "qGame.h"
 
-#define TFT_CS  10
-#define TFT_RST -1  // I think I remember this is not used.
-#define SD_CS   4
 
 #define TB_X    10
 #define TB_Y    20
@@ -45,13 +35,13 @@
 #define TF_H      TB_H-(2*TF_INSET)
 
 #define EB_X    TB_X
-#define EB_Y    TB_Y+TB_H+8
+#define EB_Y    TB_Y+TB_H+18
 #define EB_W    TB_W
 #define EB_H    16
 
 #define ET_INSET  3
 #define ET_X      EB_X+ET_INSET
-#define ET_Y      EB_Y+5
+#define ET_Y      EB_Y+4
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
@@ -68,7 +58,7 @@ qGame::qGame(void)
 
 qGame::~qGame(void) {
 
-  if (theTextBase) delete theTextBase;
+  //if (theTextBase) delete theTextBase;
   if (theTextView) delete theTextView;
   if (theEditBase) delete theEditBase;
   if (theEditField) delete theEditField;
@@ -149,31 +139,24 @@ void qGame::setupParser(void) {
 }
 
 void qGame::setupScreen(void) {
-
-  colorObj aColor(LC_GREY);
   
-  if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
-    while(true); // Kill the process.
-  }
+  screen->fillScreen(&backColor);
   
-  screen->fillScreen(&aColor);
-  
-  theTextBase   = new colorRect(TB_X,TB_Y,TB_W,TB_H);
   theTextView   = new textView(TF_X,TF_Y,TF_W,TF_H);
   theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H);
   theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
-  //battIcon      = new battPercent(BATT_X,BATT_Y);
   
-  
-  viewList.addObj(theTextBase);
+  theEditField->setColors(&textSelectColor,&editFieldBColor);
+  theEditBase->setColor(&editFieldBColor);
+ 
   viewList.addObj(theTextView);
   viewList.addObj(theEditBase);
   viewList.addObj(theEditField);
-  //viewList.addObj(battIcon);
 
   ourKeyboard   = new IOandKeys(theEditField,theTextView);
-  theTextView->setTextColors(&black,&white);
-  //battIcon->setPercent(0);
+  theTextView->setTextColors(&textColor,&backColor);
+
+  screen->fillRect(TF_X,EB_Y-16,TF_W,3,&red);
 }
 
 
