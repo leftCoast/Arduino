@@ -9,7 +9,7 @@
 
 
 // Creation constructor.
-contact::contact(blockFile* inFile,unsigned long blockID,char* PN)
+contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,char* PN)
   : linkListObj(), fileBuff(inFile,blockID) {          
 
 	mPN				= NULL;
@@ -17,16 +17,14 @@ contact::contact(blockFile* inFile,unsigned long blockID,char* PN)
 	mFirstName		= NULL;
 	mLastName		= NULL;
 	mCompanyName	= NULL;
-	mTextList		= NULL;
-	mShortBuff		= false;
-	mTextBytes		= 0;
-	setPN(PN);
-	mChanged			= true;
+	mMsgID			= msgID;
+	mErased			= false;
+	setPN(PN);					// This sets the "i've been changed" thing.
 }
 
 
 // Re-creation constructor.
-contact::contact(blockFile* inFile,unsigned long blockID,bool shortBuff)
+contact::contact(blockFile* inFile,unsigned long blockID)
   : linkListObj(), fileBuff(inFile,blockID) {
 
 	mPN				= NULL;
@@ -34,11 +32,8 @@ contact::contact(blockFile* inFile,unsigned long blockID,bool shortBuff)
 	mFirstName		= NULL;
 	mLastName		= NULL;
 	mCompanyName	= NULL;
-	mTextList		= NULL;
-	mShortBuff		= shortBuff;
-	mTextBytes		= 0;
-	readFromFile();
-	mChanged			= false;
+	mErased			= false;
+	readFromFile();			// This sets the "i've been changed" thing.
 }
 
 
@@ -49,7 +44,6 @@ contact::~contact(void) {
 	if (mFirstName) free(mFirstName);
 	if (mLastName) free(mLastName);
 	if (mCompanyName) free(mCompanyName);
-	if (mTextList) free(mTextList);      
 }
 
 
@@ -114,120 +108,98 @@ void contact::setCompanyName(char* companyName) {
 }
 
 
-void contact::setTextList(char* textList) {
-
-  int numChars;
-
-  numChars = strlen(textList) + 1;
-  if (resizeBuff(numChars,(uint8_t**)&mTextList)) {
-    strcpy(mTextList,textList);
-    mShortBuff = false;
-    mChanged = true;
-  }
-}
-
-
 unsigned long contact::calculateBuffSize(void) {
 
   int numBytes;
 
-  numBytes =  strlen(mPN) + 1 +
-              strlen(mNickName) + 1 +
-              strlen(mFirstName) + 1 +
-              strlen(mLastName) + 1 +
-              strlen(mCompanyName) + 1;
-              if (mShortBuff) {
-                numBytes =  numBytes + mTextBytes;
-              } else {
-                numBytes =  numBytes + strlen(mTextList) + 1;
-              }
-  return numBytes;
+	if (mErased) return 0;						// We're dead. We ain't playing this game anymore.							
+	numBytes =  strlen(mPN) + 1 +
+				  strlen(mNickName) + 1 +
+				  strlen(mFirstName) + 1 +
+				  strlen(mLastName) + 1 +
+				  strlen(mCompanyName) + 1;
+	numBytes = numBytes + sizeof(mMsgID);
+	return numBytes;
 }
 
 
 void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
   
-  contact*  ourClone;   // The clone idea. If we don't have a full read, use a clone to grab what's missing.
-  int       offset;
-  int       numBytes;
-  int       i;
-  bool      savedShort;
+	int				offset;
+	int				numBytes;
+	unsigned long*	longPtr;
+	int				i;
 
-  savedShort = mShortBuff;                // We may loose this bit.
-  if (mShortBuff) {                       // If were missing the message list, we need to get it!
-      ourClone = new contact(mFile,mID);  // Create a clone to grab it from the SD card.
-      setTextList(ourClone->mTextList);   // Copy it over to us.
-      delete ourClone;                    // Recycle the clone.
-  }
-  mShortBuff = savedShort;                // Just in case..
-  offset = 0;                             // Now, proceed as if nothing happened..
+	if (mErased) return;							// We're dead. We ain't playing this game anymore.	
+	offset = 0;                       
+	numBytes = strlen(mPN) + 1;             // Write out phone number.
+	for(i=0;i<numBytes;i++) {
+		buffPtr[i] = mPN[i];
+	}
+	offset = offset + i;
+
+	numBytes = strlen(mNickName) + 1;       // Write out nick name. 
+	for(i=0;i<numBytes;i++) {
+		buffPtr[i+offset] = mNickName[i];
+	}
+	offset = offset + i;
+
+	numBytes = strlen(mFirstName) + 1;       // First name.
+	for(i=0;i<numBytes;i++) {
+		buffPtr[i+offset] = mFirstName[i];
+	}
+	offset = offset + i;
+
+	numBytes = strlen(mLastName) + 1;       // Last name.
+	for(i=0;i<numBytes;i++) {
+		buffPtr[i+offset] = mLastName[i];
+	}
+	offset = offset + i;
+
+	numBytes = strlen(mCompanyName) + 1;    // Company name.
+	for(i=0;i<numBytes;i++) {
+		buffPtr[i+offset] = mCompanyName[i];
+	}
+	offset = offset + i;
+	
+	longPtr = (unsigned long*)&(buffPtr[i+offset]);
+	*longPtr = mMsgID;
   
-  numBytes = strlen(mPN) + 1;             // Write out phone number.
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i] = mPN[i];
-  }
-  offset = offset + i;
+	mChanged = false;
+}
 
-  numBytes = strlen(mNickName) + 1;       // Write out nick name. 
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i+offset] = mNickName[i];
-  }
-  offset = offset + i;
 
-  numBytes = strlen(mFirstName) + 1;       // First name.
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i+offset] = mFirstName[i];
-  }
-  offset = offset + i;
+// We've been FIRED?!?
+void contact::eraseFromFile(void) {
 
-  numBytes = strlen(mLastName) + 1;       // Last name.
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i+offset] = mLastName[i];
-  }
-  offset = offset + i;
-
-  numBytes = strlen(mCompanyName) + 1;    // Company name.
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i+offset] = mCompanyName[i];
-  }
-  offset = offset + i;
-
-  numBytes = strlen(mTextList) + 1;       // The text message list.
-  for(i=0;i<numBytes;i++) {
-    buffPtr[i+offset] = mTextList[i];
-  }
-  offset = offset + i;
-  if (mShortBuff) {                       // If we didn't have it before.
-    resizeBuff(0,(uint8_t**)&mTextList);  // Toss it out now.
-  }
-  mChanged = false;
+	mFile->deleteBlock(mMsgID);
+	fileBuff::eraseFromFile();
+	mErased = true;
 }
 
 
 unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
-  unsigned long buffIndex;
-
-  buffIndex = 0;
-  setPN(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mPN) + 1;
-  setNickName(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mNickName) + 1;
-  setFirstName(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mFirstName) + 1;
-  setLastName(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mLastName) + 1;
-  setCompanyName(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mCompanyName) + 1;
-  setTextList(&(buffPtr[buffIndex]));
-  buffIndex = buffIndex + strlen(mTextList) + 1;
-  mTextBytes = strlen(mTextList) + 1;
-  buffIndex = buffIndex + mTextBytes;               // We may not keep them, but we need to know how many there are.
-  if (mShortBuff) {                                 // Asking only for indexing data.
-    resizeBuff(0,(uint8_t**)&mTextList);            // Dump the message text.
-  }
-  mChanged = false;
-  return buffIndex;   
+	unsigned long buffIndex;
+	unsigned long* longPtr;;
+  
+  	if (mErased) { return 0; }		// We're dead. We ain't playing this game anymore.	
+	buffIndex = 0;
+	setPN(&(buffPtr[buffIndex]));
+	buffIndex = buffIndex + strlen(mPN) + 1;
+	setNickName(&(buffPtr[buffIndex]));
+	buffIndex = buffIndex + strlen(mNickName) + 1;
+	setFirstName(&(buffPtr[buffIndex]));
+	buffIndex = buffIndex + strlen(mFirstName) + 1;
+	setLastName(&(buffPtr[buffIndex]));
+	buffIndex = buffIndex + strlen(mLastName) + 1;
+	setCompanyName(&(buffPtr[buffIndex]));
+	buffIndex = buffIndex + strlen(mCompanyName) + 1;
+	longPtr = (unsigned long*)&(buffPtr[buffIndex]);
+	mMsgID = *longPtr;
+	buffIndex = buffIndex + sizeof(mMsgID);
+  	mChanged = false;
+	return buffIndex;   
 }
 
 
@@ -239,7 +211,8 @@ void contact::printContact(void) {
 	Serial.print("First name : [");Serial.print(mFirstName);Serial.println("]");
 	Serial.print("Last name  : [");Serial.print(mLastName);Serial.println("]");
 	Serial.print("Company    : [");Serial.print(mCompanyName);Serial.println("]");
-	Serial.print("Messages   : [");Serial.print(mTextList);Serial.println("]");
+	Serial.print("Message ID : ");Serial.println(mMsgID);
+	Serial.print("Erased?    : ");Serial.println(mErased);
 	Serial.print("BYTES      : ");Serial.println(calculateBuffSize());
 	Serial.println("-------------------------------------");Serial.flush();
 }
@@ -280,11 +253,13 @@ contact* contactList::findOrAddContact(char* phoneNum) {
 
   contact*      contactPtr;
   unsigned long blockID;
+  unsigned long msgID;
 
   contactPtr = findByPN(phoneNum);
   if (!contactPtr) {
     blockID = mFile->getNewBlockID();
-    contactPtr = new contact(mFile,blockID,phoneNum);
+    msgID = mFile->getNewBlockID();
+    contactPtr = new contact(mFile,blockID,msgID,phoneNum);
     addToTop(contactPtr);
   }
   return contactPtr;
@@ -344,7 +319,7 @@ unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
   longPtr = (unsigned long*)buffPtr;                  // If we are a pointer to X, we index by X. So they say
   numIDs = maxBytes / sizeof(unsigned long);          // Figure out how many are in there.
   for (int i=0;i<numIDs;i++) {                        // Loop through them all..
-    newContact = new contact(mFile,longPtr[i],true);  // Just indexing please.
+    newContact = new contact(mFile,longPtr[i]);  		// Create contact node from the file.
     addToTop(newContact);                             // Add 'em to our list.
   }
   return numIDs * sizeof(unsigned long);              // That's how much we burned up.
@@ -352,14 +327,10 @@ unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
 
 void contactList::deleteContact(contact* theDoomed) {
-	
-	unsigned long	blockID;	
-		
+			
 	if (theDoomed) {						// Sanity, did they send us someting?
-		blockID = theDoomed->mID;		// Do it simple, save off the ID.
-		mFile->deleteBlock(blockID);	// Using the ID, erase it from our file.
+		theDoomed->eraseFromFile();	// Tell the contact to erase itself.
 		unlinkObj(theDoomed);			// Now lets pull the node out of the list. (single link list)
 		delete(theDoomed);				// Recycle the node.
-		saveToFile();						// Make the file reflect what we have.
 	}
 }

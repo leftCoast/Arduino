@@ -13,8 +13,8 @@ class contact :	public linkListObj,
 						public fileBuff {
 
 	public:
-				contact(blockFile* inFile,unsigned long blockID,char* PN);              // Creation constructor.
-				contact(blockFile* inFile,unsigned long blockID,bool shortBuff=false);  // Re-creation constructor.
+				contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,char* PN);	// Creation constructor.
+				contact(blockFile* inFile,unsigned long blockID);											// Re-creation constructor.
 	virtual	~contact(void);
 
 				void	setPN(char* PN);
@@ -22,22 +22,21 @@ class contact :	public linkListObj,
 				void  setFirstName(char* firstName);
 				void  setLastName(char* lastName);
 				void  setCompanyName(char* companyName);
-				void  setTextList(char* textList);
 				
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);
 	virtual	unsigned long	loadFromBuff(char* buffPtr,unsigned long maxBytes);
+	virtual	void				eraseFromFile(void);
 				void				printContact(void);
 				
-				char*		mPN;
-				char*		mNickName;
-				char*		mFirstName;
-				char*		mLastName;
-				char*		mCompanyName;
-				char*		mTextList;			// The message list.
-				bool		mShortBuff;			// We do or don't have the text list with us.
-				int		mTextBytes;			// This is how mony text bytes are stored on the SD card that we DIDN'T KEEP.
-				bool		mChanged;
+				char*				mPN;
+				char*				mNickName;
+				char*				mFirstName;
+				char*				mLastName;
+				char*				mCompanyName;
+				unsigned long	mMsgID;
+				bool				mChanged;
+				bool				mErased;
 };
 
 

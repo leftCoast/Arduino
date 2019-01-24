@@ -46,6 +46,9 @@ unsigned long fileBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) { ret
 bool fileBuff::saveSubFileBuffs(void) { return true; }
 
 
+void fileBuff::eraseFromFile(void) { mFile->deleteBlock(mID); }
+
+
 bool fileBuff::saveToFile(void) {
   
   unsigned long numBytes;

@@ -42,8 +42,10 @@ class fileBuff {
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);
 	virtual	unsigned	long	loadFromBuff(char* buffPtr,unsigned long maxBytes);
 	virtual	bool				saveSubFileBuffs(void);
+	virtual	void				eraseFromFile(void);
 				bool				saveToFile(void);
 				bool				readFromFile(void);
+	
 				
 				unsigned long	mID;
 				blockFile*		mFile;

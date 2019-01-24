@@ -454,8 +454,6 @@ void PNList::deleteContact(void) {
     anItem = itemByContact(aContact);           // Using our pointer, find the list item that's hosting it.
     Serial.print("And it returned :");Serial.println((int)anItem);
     if (anItem) {                               // If we found the list item..
-      Serial.println("Setting focus to NULL");
-      setFocusPtr(NULL);                        // Defocus the editing field.
       Serial.println("Setting currContact to NULL");
       currContact = NULL;                       // Just in case, loose the currentContact.
       Serial.println("Telling ourBlackBook to delete contact.");
@@ -521,14 +519,12 @@ void contactPanel::drawSelf(void) {
 
 void contactPanel::closing(void) {
 
-	Serial.println("Setting focus to NULL");
-  setFocusPtr(NULL);
-  Serial.println("Saving black book file.");
+  Serial.println("Saving black book file.");Serial.flush();
   ourBlackBook->saveToFile();
   if (ourKeyboard) {
-  	Serial.println("Deleting the keyboard. And setting the global to NULL.");
+  	Serial.println("Deleting the keyboard. And setting the global to NULL.");Serial.flush();
     delete ourKeyboard;
     ourKeyboard = NULL;
   }
-  Serial.println("We're done. See ya' starside!");
+  Serial.println("We're done. See ya' starside!");Serial.flush();
 }
