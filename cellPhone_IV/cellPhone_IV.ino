@@ -33,12 +33,7 @@ void setup() {
       //digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
-<<<<<<< HEAD
-    resetFONA();                          // Hit reaset, see if it'll come online.
-    //fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
-=======
     resetFONA();                          // Hit reset, see if it'll come online.
->>>>>>> 0c776dfc8478e3f27db06a86f82c5f2ed0be2195
 }
 
 
@@ -81,14 +76,6 @@ void resetFONA(void) {
   delay(10);
   digitalWrite(FONA_RST, HIGH);
   delay(100);
-<<<<<<< HEAD
-  fonaSS.begin(4800);                 // For talking to the FONA.
-  FONAOnline = fona.begin(fonaSS);   // Able to fire up the FONA.
-
-  // Got these two online an the Adafruit Forum. Trying to get the speaker to work.
-  fona.sendCheckReply(F("AT+SNDLEVEL=0,50"), F("OK")); // Set the dialtone level 
-  fona.sendCheckReply(F("AT+SNDLEVEL=1,50"), F("OK")); // Set the DTMF level
-=======
   fonaSS.begin(4800);                   // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
   fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
@@ -99,12 +86,10 @@ void resetFONA(void) {
 For those who wonder : You can add a call fona
 setAudio(FONA_EXTAUDIO) to your initialization code or issue
 direct command 'AT+CHFA=1' towards SIM800 module.
-
 In my case this module is no longer losing SIM card when
 receiving or placing phone calls.
 Thanks for a tip!
 */
->>>>>>> 0c776dfc8478e3f27db06a86f82c5f2ed0be2195
 }
 
 
