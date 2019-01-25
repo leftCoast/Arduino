@@ -27,7 +27,12 @@
 #endif
 
 #include <SPI.h> 
-#include <SD.h>
+#if defined(PREFER_SDFAT_LIBRARY)
+ #include <SdFat.h>
+ extern SdFat SD;
+#else
+ #include <SD.h>
+#endif
 
 // define here the size of a register!
 #if defined(ARDUINO_STM32_FEATHER)
@@ -38,9 +43,7 @@
   typedef uint8_t PortMask;
 #elif defined (__arm__)
   #if defined(TEENSYDUINO)
-#ifndef RwReg								// Yes this is my hack. - jim lee
- typedef volatile uint8_t RwReg;
-#endif										// Other end of it.
+  typedef volatile uint8_t RwReg;
   typedef uint8_t PortMask;
   #else
   typedef volatile uint32_t RwReg;

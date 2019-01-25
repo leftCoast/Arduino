@@ -13,7 +13,6 @@
  ****************************************************/
 
 #include <Adafruit_VS1053.h>
-#include <SD.h>
 
 #if defined(ARDUINO_STM32_FEATHER)
    #define digitalPinToInterrupt(x) x
@@ -171,49 +170,49 @@ boolean Adafruit_VS1053_FilePlayer::stopped(void) {
 
 // Just checks to see if the name ends in ".mp3"
 boolean Adafruit_VS1053_FilePlayer::isMP3File(const char* fileName) {
-	return (strlen(fileName) > 4) && !strcasecmp(fileName + strlen(fileName) - 4, ".mp3");
+    return (strlen(fileName) > 4) && !strcasecmp(fileName + strlen(fileName) - 4, ".mp3");
 }
-	
+
 unsigned long Adafruit_VS1053_FilePlayer::mp3_ID3Jumper(File mp3) {
+
+  char 					tag[4];
+  uint32_t 			start;
+	unsigned long current;
 	
-	  char 					tag[4];
-	  uint32_t 			start;
-		unsigned long current;
-	
-	  start = 0;
-	  if (mp3) {
-	  	current = mp3.position();
-	    if (mp3.seek(0)) {
-	      if (mp3.read(tag,3)) {
-	      	tag[3] = '\0';
-	        if (!strcmp(tag, "ID3")) {
-	          if (mp3.seek(6)) {
-	          	start = 0ul ;
-	  					for (byte i = 0 ; i < 4 ; i++) {
-	    					start <<= 7 ;
-	    					start |= (0x7F & mp3.read()) ;
-	  					}
-	          } else {
-	            //Serial.println("Second seek failed?");
-	          }
-	        } else {
-	          //Serial.println("It wasn't the damn TAG.");
-	        }
-	      } else {
-	        //Serial.println("Read for the tag failed");
-	      }
-	    } else {
-	      //Serial.println("Seek failed? How can seek fail?");
-	    }
-	    mp3.seek(current);	// Put you things away like you found 'em.
-	  } else {
-	    //Serial.println("They handed us a NULL file!");
-	  }
-	  //Serial.print("Jumper returning: "); Serial.println(start);
-	  return start;
-	}
-	
-	
+  start = 0;
+  if (mp3) {
+  	current = mp3.position();
+    if (mp3.seek(0)) {
+      if (mp3.read(tag,3)) {
+      	tag[3] = '\0';
+        if (!strcmp(tag, "ID3")) {
+          if (mp3.seek(6)) {
+          	start = 0ul ;
+  					for (byte i = 0 ; i < 4 ; i++) {
+    					start <<= 7 ;
+    					start |= (0x7F & mp3.read()) ;
+  					}
+          } else {
+            //Serial.println("Second seek failed?");
+          }
+        } else {
+          //Serial.println("It wasn't the damn TAG.");
+        }
+      } else {
+        //Serial.println("Read for the tag failed");
+      }
+    } else {
+      //Serial.println("Seek failed? How can seek fail?");
+    }
+    mp3.seek(current);	// Put you things away like you found 'em.
+  } else {
+    //Serial.println("They handed us a NULL file!");
+  }
+  //Serial.print("Jumper returning: "); Serial.println(start);
+  return start;
+}
+
+
 boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   // reset playback
   sciWrite(VS1053_REG_MODE, VS1053_MODE_SM_LINE1 | VS1053_MODE_SM_SDINEW);
@@ -225,12 +224,13 @@ boolean Adafruit_VS1053_FilePlayer::startPlayingFile(const char *trackname) {
   if (!currentTrack) {
     return false;
   }
+    
+  // We know we have a valid file. Check if .mp3
+  // If so, check for ID3 tag and jump it if present.
+  if (isMP3File(trackname)) {
+    currentTrack.seek(mp3_ID3Jumper(currentTrack));
+  }
 
-	// We know we have a valid file. Check if .mp3
-	// If so, check for ID3 tag and jump it if present.
-	if (isMP3File(trackname)) {
-		currentTrack.seek(mp3_ID3Jumper(currentTrack));
-	}
   // don't let the IRQ get triggered by accident here
   noInterrupts();
 

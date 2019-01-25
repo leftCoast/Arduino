@@ -25,7 +25,7 @@
 
 #define PN_EITEM_SW     68
 #define PN_EITEM_LW     104
-#define PN_EITEM_H      15 
+#define PN_EITEM_H      15
 
 #define PN_EITEM_SX     4
 #define PN_EITEM_SY     4
@@ -75,6 +75,7 @@ contactList*    ourBlackBook;
 keyboard*       ourKeyboard = NULL;
 contact*        currContact = NULL;
 
+
 // *****************************************************
 // *******************  addrStarter  *******************
 // *****************************************************
@@ -88,13 +89,29 @@ void addrStarter::begin(char* filePath,bool resetFile) {
   //Serial.println("Opening contact file.");Serial.flush();
   mFile = new blockFile(filePath);
   if (mFile) {
-      if (resetFile) {
-        mFile->deleteBlockfile();
-        delete mFile;
-        mFile = new blockFile(filePath);
-      }
-    mFile->printFile();
-    ourBlackBook = new contactList(mFile);
+    if (resetFile) {
+      contact* aContact;
+      mFile->deleteBlockfile();
+      delete mFile;
+      mFile = new blockFile(filePath);
+      ourBlackBook = new contactList(mFile);
+      aContact = ourBlackBook->findOrAddContact("14083400352");
+      aContact->setNickName("Me");
+      aContact->setFirstName("Jim");
+      aContact->setFirstName("Lee");
+      aContact = ourBlackBook->findOrAddContact("13603335200");
+      aContact->setNickName("AllieBob");
+      aContact->setFirstName("Alex");
+      aContact->setFirstName("Lee");
+      aContact = ourBlackBook->findOrAddContact("13607084218");
+      aContact->setNickName("Vern");
+      aContact->setFirstName("Julie");
+      aContact->setFirstName("Lee");
+      ourBlackBook->saveToFile();
+    } else {
+      mFile->printFile();
+      ourBlackBook = new contactList(mFile);
+    }
   }
 }
 
@@ -104,7 +121,7 @@ void addrStarter::begin(char* filePath,bool resetFile) {
 // ******************  contCloseBtn  *******************
 // *****************************************************
 
-        
+
 contCloseBtn::contCloseBtn(contactPanel* ourPanel)
   : closeBtn(CLOSE_X,CLOSE_Y) { mPanel = ourPanel; }
 
@@ -121,7 +138,7 @@ void contCloseBtn::doAction(void) { mPanel->close(); }
 contNewBtn::contNewBtn(PNList* ourList)
   : newBtn(NEWBTN_X,NEWBTN_Y) { mList = ourList; }
 
-    
+
 contNewBtn::~contNewBtn(void) {  }
 
 
@@ -147,7 +164,7 @@ void contNewBtn::doAction(void) {
 contTextBtn::contTextBtn(void)
   : textBtn(TEXT_X,TEXT_Y) {  }
 
-  
+
 contTextBtn::~contTextBtn(void) {  }
 
 
@@ -163,7 +180,7 @@ void contTextBtn::doAction(void) { }
 contCallBtn::contCallBtn(void)
   : callBtn(CALL_X,CALL_Y) {  }
 
-  
+
 contCallBtn::~contCallBtn(void) {  }
 
 
@@ -183,11 +200,15 @@ void contCallBtn::doAction(void) {
 contTrashBtn::contTrashBtn(PNList* ourList)
   : trashBtn(TRASH_X,TRASH_Y) { mList = ourList; }
 
-  
+
 contTrashBtn::~contTrashBtn(void) { }
 
 
-void contTrashBtn::doAction(void) { mList->deleteContact(); }
+void contTrashBtn::doAction(void) {
+  mList->deleteContact();
+  Serial.println("Contact deleted,lets see the file!");
+  mFile->printFile();
+  }
 
 
 
@@ -195,7 +216,7 @@ void contTrashBtn::doAction(void) { mList->deleteContact(); }
 // *******************  PNEditField  *******************
 // *****************************************************
 
-                         
+
 PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   : drawGroup(inRect,true) {
 
@@ -203,7 +224,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   rect  tRect;
 
   mOurListItem = ourListItem;
-  
+
   bRect.x = 0;
   bRect.y = 0;
   bRect.width = inRect->width;
@@ -211,7 +232,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
 
   tRect = bRect;
   tRect.insetRect(PN_EITEM_INSET);
-  
+
   mEditBase = new colorRect(&bRect,&backColor);
   mEditBase->setColor(&backColor);
   addObj(mEditBase);
@@ -278,27 +299,27 @@ PNListItem::PNListItem(PNList* ourList,contact* inContact)
 
   aDivider = new lineObj(PN_ITEM_LX,PN_ITEM_LY,PN_ITEM_LX2,PN_ITEM_LY,&redButtonColor);
   addObj(aDivider);
-  
+
   aRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
   pNumEditField = new PNEditField(&aRect,mContact->mPN,this);
   addObj(pNumEditField);
 
-  
+
   aRect.setRect(PN_EITEM_SX,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
   nickEditField = new PNEditField(&aRect,mContact->mNickName,this);
   addObj(nickEditField);
 
-  
+
   aRect.setRect(PN_EITEM_SX2,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
   fNameEditField = new PNEditField(&aRect,mContact->mFirstName,this);
   addObj(fNameEditField);
 
-  
+
   aRect.setRect(PN_EITEM_SX3,PN_EITEM_SY,PN_EITEM_SW,PN_EITEM_H);
   lNameEditField = new PNEditField(&aRect,mContact->mLastName,this);
   addObj(lNameEditField);
 
-  
+
   aRect.setRect(PN_EITEM_LX2,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
   compEditField = new PNEditField(&aRect,mContact->mCompanyName,this);
   addObj(compEditField);
@@ -339,7 +360,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       pNumEditField->getText(buff);
       if (strcmp(buff,mContact->mPN)) {
-        mContact->setPN(buff); 
+        mContact->setPN(buff);
       }
     }
   } else if(theField==nickEditField) {
@@ -347,7 +368,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       nickEditField->getText(buff);
       if (strcmp(buff,mContact->mNickName)) {
-        mContact->setNickName(buff); 
+        mContact->setNickName(buff);
       }
     }
   } else if(theField==fNameEditField) {
@@ -355,7 +376,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       fNameEditField->getText(buff);
       if (strcmp(buff,mContact->mFirstName)) {
-        mContact->setFirstName(buff); 
+        mContact->setFirstName(buff);
       }
     }
   } else if(theField==lNameEditField) {
@@ -363,7 +384,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       lNameEditField->getText(buff);
       if (strcmp(buff,mContact->mLastName)) {
-        mContact->setLastName(buff); 
+        mContact->setLastName(buff);
       }
     }
   } else if(theField==compEditField) {
@@ -371,7 +392,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       compEditField->getText(buff);
       if (strcmp(buff,mContact->mCompanyName)) {
-        mContact->setCompanyName(buff); 
+        mContact->setCompanyName(buff);
       }
     }
   }
@@ -391,7 +412,7 @@ contact* PNListItem::getContact(void) { return mContact; }
 PNList::PNList(int x,int y,int width,int height)
   : drawList(x,y,width,height) {  }
 
-  
+
 PNList::~PNList(void) {  }
 
 void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
@@ -400,7 +421,7 @@ void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
 void PNList::addContact(contact* contactPtr,bool showContact) {
 
   PNListItem*   itemPtr;
-  
+
   if (contactPtr) {
     itemPtr = new PNListItem(this,contactPtr);
     if (itemPtr) {
@@ -409,15 +430,15 @@ void PNList::addContact(contact* contactPtr,bool showContact) {
         showItem(itemPtr);
       }
     }
-  } 
+  }
 }
 
-  
+
 void PNList::fillList(void) {
 
   int           numAddr;
   contact*      contactPtr;
-  
+
   numAddr = ourBlackBook->getCount();
   for (int i=0;i<numAddr;i++) {
     contactPtr = (contact*)ourBlackBook->getByIndex(i);
@@ -480,7 +501,7 @@ contactPanel::contactPanel(void)
 
 contactPanel::~contactPanel(void) {  }
 
-           
+
 void contactPanel::setup(void) {
 
   if (ourKeyboard==NULL) {
@@ -498,7 +519,7 @@ void contactPanel::setup(void) {
 
   contTextBtn*  ourTextBtn = new contTextBtn();
   addObj(ourTextBtn);
-  
+
   contCallBtn* ourCallBtn = new contCallBtn();
   addObj(ourCallBtn);
 
@@ -510,7 +531,7 @@ void contactPanel::setup(void) {
 void contactPanel::loop(void) {  }
 
 
-void contactPanel::drawSelf(void) { 
+void contactPanel::drawSelf(void) {
 
   screen->fillScreen(&backColor);
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
@@ -521,6 +542,7 @@ void contactPanel::closing(void) {
 
   Serial.println("Saving black book file.");Serial.flush();
   ourBlackBook->saveToFile();
+  mFile->printFile();
   if (ourKeyboard) {
   	Serial.println("Deleting the keyboard. And setting the global to NULL.");Serial.flush();
     delete ourKeyboard;

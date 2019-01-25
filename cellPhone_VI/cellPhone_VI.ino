@@ -1,7 +1,7 @@
-
+  
 #include <Adafruit_GFX.h> 
 #include <gfxfont.h>
-#include <Adafruit_ILI9341.h>
+#include <Adafruit_SSD1351.h>
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <SD.h>
 
