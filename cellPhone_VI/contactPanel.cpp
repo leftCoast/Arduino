@@ -86,7 +86,6 @@ addrStarter::~addrStarter(void) {  }
 
 void addrStarter::begin(char* filePath,bool resetFile) {
 
-  //Serial.println("Opening contact file.");Serial.flush();
   mFile = new blockFile(filePath);
   if (mFile) {
     if (resetFile) {
@@ -206,8 +205,8 @@ contTrashBtn::~contTrashBtn(void) { }
 
 void contTrashBtn::doAction(void) {
   mList->deleteContact();
-  Serial.println("Contact deleted,lets see the file!");
-  mFile->printFile();
+  //Serial.println("Contact deleted,lets see the file!");
+  //mFile->printFile();
   }
 
 
@@ -467,21 +466,21 @@ void PNList::deleteContact(void) {
   contact*    aContact;                         // Local storage. Less to worry about.
   PNListItem* anItem;
 
-  Serial.println("DELETING. Looking at currContact.");
+  //Serial.println("DELETING. Looking at currContact.");
   if (currContact) {                            // If we have a contact to delete..
-    Serial.print("currContact is not NULL :");Serial.println((int)currContact);
+    //Serial.print("currContact is not NULL :");Serial.println((int)currContact);
     aContact = currContact;                     // Save off the contact pointer;
-    Serial.println("Saving off currContact.Looking for iys list item..");
+    //Serial.println("Saving off currContact.Looking for iys list item..");
     anItem = itemByContact(aContact);           // Using our pointer, find the list item that's hosting it.
-    Serial.print("And it returned :");Serial.println((int)anItem);
+    //Serial.print("And it returned :");Serial.println((int)anItem);
     if (anItem) {                               // If we found the list item..
-      Serial.println("Setting currContact to NULL");
+      //Serial.println("Setting currContact to NULL");
       currContact = NULL;                       // Just in case, loose the currentContact.
-      Serial.println("Telling ourBlackBook to delete contact.");
+      //Serial.println("Telling ourBlackBook to delete contact.");
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
-      Serial.println("Deleting the contact's list item.");
+      //Serial.println("Deleting the contact's list item.");
       delete(anItem);                           // Delete the list item.
-      Serial.println("resorting the remaining list items.");
+      //Serial.println("resorting the remaining list items.");
       resetPositions();                         // Close holes in the list of items.
       needRefresh = true;								// Force a redraw.
     }

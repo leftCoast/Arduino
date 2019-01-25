@@ -115,15 +115,15 @@ bool blockFile::writeBlock(unsigned long blockID, char* buffPtr, unsigned long b
 				}
 			}
 			if (findFit(bytes)) {																			// Start over. If we find an fitting slot..
-				if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header we have.
-               if (writeBlockHeader(blockID, bytes)) {											// Change the header to reflect what were writing.
-						if (writeBlockData(buffPtr, bytes)) {											// Write out the new data buffer.
-                     if (tempBlock.bytes!=bytes){
+				if (peekBlockHeader(&tempBlock)) {																// Get a copy of the header we have.
+               if (writeBlockHeader(blockID, bytes)) {												// Change the header to reflect what were writing.
+						if (writeBlockData(buffPtr, bytes)) {												// Write out the new data buffer.
+                     if (tempBlock.bytes!=bytes){														// If its not the same size, we must split a block.
                         remainigBytes = tempBlock.bytes - (bytes + sizeof(blockHeader));	// Calculate what's left of the free block.
    							writeBlockHeader(0, remainigBytes);									      // Add block header updating the new free size.
                      }
-   						fClose();																		// Cleanup..
-							return true;                                                	// All done, lets go get coffee.}
+   						fClose();																				// Cleanup..
+							return true;                                                			// All done, lets go get coffee.}
 						}
 					}
 				}
