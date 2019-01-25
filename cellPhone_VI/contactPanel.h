@@ -8,7 +8,7 @@
 #include <contactList.h>
 #include <colorRect.h>
 #include <keystroke.h>
-#include <keyboard.h>
+#include <scrKeyboard.h>
 
 
 extern contactList* ourBlackBook;

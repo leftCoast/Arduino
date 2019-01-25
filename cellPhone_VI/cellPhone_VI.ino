@@ -52,7 +52,7 @@ void setup() {
   }
   
   addrStarter kicker;                       // Once the disk is online we can..
-  kicker.begin(CONTACT_FILE_PATH,true);          // Boot our little black book. false, normal. true? Delete and reset the phonebook.
+  kicker.begin(CONTACT_FILE_PATH,false);          // Boot our little black book. false, normal. true? Delete and reset the phonebook.
                                             // kicker should auto-destruct at the end of setup(). As it should.
                                             // Hardware and services are up and running.
   ourOS.begin();                            // Boot OS manager. 
