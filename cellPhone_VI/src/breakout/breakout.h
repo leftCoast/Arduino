@@ -4,7 +4,7 @@
 #include <label.h>
 #include <panel.h>
 
-#include "movingObj.h"
+#include "paddleObj.h"
 #include "ballObj.h"
 #include "brickObj.h"
 
@@ -65,36 +65,35 @@ class ballObj;
 
 class breakout :  public panel {
 
-  public:
+	public:
 
-  enum    gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
-  
-          breakout(void);
-  virtual ~breakout(void);
+	enum		gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
-  virtual void setup();
-          void fillBricks(void);
-          void doPaddle(void);
-          void doBall(void);
-          void showBallNum(int balls);
-          void setState(gameStates state);
-  virtual void loop(void);
+				breakout(void);
+	virtual	~breakout(void);
 
-          
-          movingObj*      paddle;
-          ballObj*        theBall;
-          label*          message;
-          label*          numBallsTxt;
-          label*          numBallsNum;
-          colorMultiMap   ballNumCMap;
-          timeObj*        frameTimer;
-          timeObj*        paddleTimer;
-          timeObj*        textTimer;
-          colorObj        backColor;
-          gameStates      gameState;
-          int             oldLoc;
-          int             savedPaddleX;
-          int             ballCount;
+	virtual	void setup();
+				void fillBricks(void);
+				void doPaddle(void);
+				void doBall(void);
+				void showBallNum(int balls);
+				void setState(gameStates state);
+	virtual	void loop(void);
+
+				paddleObj*		paddle;
+				ballObj*			theBall;
+				label*			message;
+				label*			numBallsTxt;
+				label*			numBallsNum;
+				colorMultiMap	ballNumCMap;
+				timeObj*			frameTimer;
+				timeObj*			paddleTimer;
+				timeObj*			textTimer;
+				colorObj			backColor;
+				gameStates		gameState;
+				int				oldLoc;
+				int				savedPaddleX;
+				int				ballCount;
 };
 
 #endif

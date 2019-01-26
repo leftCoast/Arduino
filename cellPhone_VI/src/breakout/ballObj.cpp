@@ -85,15 +85,18 @@ point gameCompass::adjustCourse(int dy, int dx, courseChange change) {
 
 
 
-ballObj::ballObj(movingObj* inPaddle)
-  : movingObj(BALL_X, BALL_Y, BALL_DIA, BALL_DIA) {
+ballObj::ballObj(paddleObj* inPaddle)
+  : drawObj(BALL_X, BALL_Y, BALL_DIA, BALL_DIA) {
 
-  thePaddle = inPaddle;
-  ballLost = true;
+	thePaddle = inPaddle;
+	ballLost = true;
 }
 
 
 ballObj::~ballObj(void) {  }
+
+
+int ballObj::middleX(void) { return x+width/2; }
 
 
 void ballObj::reset(void) {
@@ -105,7 +108,7 @@ void ballObj::reset(void) {
   yCount = 0;
   xCount = 0;
   frameCount = 0;
-  movingObj::setLocation(BALL_X, BALL_Y);
+  setLocation(BALL_X, BALL_Y);
   ballLost = false;
 }
 
@@ -132,8 +135,8 @@ void ballObj::setLocation(int inX, int inY) {
       clearSkies = false;
     }
     if (inY >= (GAME_H-24) - height) {        // Hit bottom wall
-      ballLost = true;                // The ball was LOST!!
-      screen->fillRect(x,y,width,height,&backColor);
+      ballLost = true;                			// The ball was LOST!!
+      screen->fillRect(x,y,width,height,this);
       clearSkies = false;
     }
     if (inY <= GAME_TOP+8 - height) { // Hit top wall
@@ -182,16 +185,19 @@ void ballObj::setLocation(int inX, int inY) {
       clearSkies = false;
     }
     if (clearSkies) {
-      movingObj::setLocation(inX, inY);
+      drawObj::setLocation(inX, inY);
     }
   }
 }
 
+void ballObj::eraseSelf(void){ screen->fillRoundRect(lastX,lastY,width,height,width/3,this); }
+
 
 void ballObj::drawSelf(void) {
 
-  eraseSelf();
-  screen->fillRoundRect(x,y, width, height, width / 3, &red);
+	colorObj	aColor(LC_RED);
+	
+	screen->fillRoundRect(x,y,width,height,width/3,&aColor);
 }
 
 

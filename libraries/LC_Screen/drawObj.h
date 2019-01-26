@@ -23,14 +23,15 @@ class drawObj : public rect, public dblLinkListObj {
    virtual	bool	wantRefresh(void);
    virtual	void	setNeedRefresh(void);
 	virtual	void	setLocation(int x,int y);
-   virtual	void  draw(void);                    		// Call this one. Don't inherit this one.
-   virtual 	void  drawSelf(void);                		// Inherit this one and make it yours.
-	virtual	void	setFocus(bool setLoose);				// We are either getting or loosing focus.
+   virtual	void  draw(void);								// Call this one. Don't inherit this one.
+   virtual	void	eraseSelf(void);						// Mostly you can ignore this one. Used for animation.
+   virtual 	void  drawSelf(void);						// Inherit this one and make it yours.
+	virtual	void	setFocus(bool setLoose);			// We are either getting or loosing focus.
   		    	void	clickable(bool inWantsClicks);
    virtual 	bool	acceptClick(point where);
    virtual 	void  clickOver(void);
-   virtual	void  doAction(void);      					// Override me for action!
-          	void	setCallback(void(*funct)(void));		// Or use a callback?
+   virtual	void  doAction(void);						// Override me for action!
+          	void	setCallback(void(*funct)(void));	// Or use a callback? Forgot how to use this.
   
 protected:
   bool	needRefresh;
@@ -38,6 +39,8 @@ protected:
   bool	wantsClicks;
   bool	clicked;
   void	(*callback)(void);
+  int		lastX;					// Yes, these are where we were before we moved.
+  int		lastY;
 };
 
 

@@ -1,7 +1,7 @@
 #include <drawObj.h>
 
 #include "breakout.h"
-#include "movingObj.h"
+#include "paddleObj.h"
 #include "ballObj.h"
 #include "brickObj.h"
 
@@ -57,7 +57,7 @@ void breakout::setup() {
   screen->fillScreen(&backColor);
   screen->drawRect(0,GAME_TOP,TFT_W,GAME_H,&white);   // Damn, looks good leave it!
 
-  paddle = new movingObj(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
+  paddle = new paddleObj(54,PADDLE_Y,PADDLE_WIDTH,PADDLE_HEIGHT);
   paddle->setBackColor(&backColor);
   addObj(paddle);
 

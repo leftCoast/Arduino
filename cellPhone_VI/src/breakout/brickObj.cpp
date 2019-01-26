@@ -31,7 +31,7 @@ bool bricks(void) {
 
 
 brickObj::brickObj(int inX,int inY)
-  : movingObj(inX,inY,BRICK_W,BRICK_H),
+  : drawObj(inX,inY,BRICK_W,BRICK_H),
   bmpPipe() {
 
     homeX = inX;
@@ -55,10 +55,10 @@ void brickObj::setColor(char* path) {
 
 void brickObj::hit(void) {
 
-  screen->fillRect(x,y,width,height,&white);  // A flash!
-  delay(10);                                  // Nasty delay.
-  eraseSelf();                                // Erased, from exsistance.
-  drawObj::setLocation(-100,-100);            // We're outta' here!
+  screen->fillRect(x,y,width,height,&white);	// A flash!
+  delay(20);											// Nasty delay.
+  screen->fillRect(x,y,width,height,this);	// Erased, from exsistance.
+  drawObj::setLocation(-100,-100);				// We're outta' here!
 }
 
 

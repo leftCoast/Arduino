@@ -5,11 +5,13 @@
 
 drawObj::drawObj() {
 
-  needRefresh = true;			// Well Duh! We never been drawn yet!
-  focus = false;					// But we're hopefull.
+  needRefresh = true;	// Well Duh! We never been drawn yet!
+  focus = false;			// But we're hopefull.
   clicked = false;
-  wantsClicks = false;		// 'Cause this is actually the default.
-  callback = NULL;				// And, no.. We have none of this either.
+  wantsClicks = false;	// 'Cause this is actually the default.
+  callback = NULL;		// And, no.. We have none of this either.
+  lastX = 0;				// Yes, these are where we were before we moved.
+  lastY = 0;
 }
 
 
@@ -21,17 +23,21 @@ drawObj::drawObj(rect* inRect,bool inClicks)
 	clicked = false;
 	wantsClicks = inClicks;
 	callback = NULL;
+	lastX = x;		
+	lastY = y;
 }
 
 
 drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks)
     : rect(inLocX,inLocY,inWidth,inHeight) {
     
-    needRefresh = true;
-    focus = false;
-    clicked = false;
-    wantsClicks = inClicks;
-    callback = NULL;
+	needRefresh = true;
+	focus = false;
+	clicked = false;
+	wantsClicks = inClicks;
+	callback = NULL;
+	lastX = x;		
+	lastY = y;
 }
 
 
@@ -53,19 +59,27 @@ bool drawObj::wantRefresh(void) { return needRefresh; }
 void drawObj::setNeedRefresh(void) { needRefresh = true; }
 
 
-void drawObj::setLocation(int x,int y) {
+void drawObj::setLocation(int inX,int inY) {
 
-		rect::setLocation(x,y);
-		needRefresh = true;
+	lastX = x;					// Just in the off chance we're doing screen animation.
+	lastY = y;					// We'll save where we were.
+	rect::setLocation(inX,inY);
+	needRefresh = true;
 }
 	
 	
 // Call this one to draw..
 void  drawObj::draw(void) {
 
-  drawSelf();
-  needRefresh = false;
+	eraseSelf();			// Like I said, just in case you need it..
+	drawSelf();
+	needRefresh = false;
 }
+
+
+// Mostly you can ignore this one. Typically used for animation.
+// "I've moved, erase where I was before redrawing".
+void  drawObj::eraseSelf(void) {  }
 
 
 // override this one and draw yourself.
@@ -92,7 +106,7 @@ void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
 bool   drawObj::acceptClick(point where) {
 	if (wantsClicks) {
 		if (inRect(where.x,where.y)) {
-			needRefresh = true;
+			needRefresh = true;				// Is it right to just assume this here? 1/26/2019
 			clicked = true;
 			doAction();
 			return true;
@@ -118,7 +132,8 @@ void drawObj::doAction(void) {
 	}
 }
 
-
+// I tested this and it worked. But for the life of me, I can no longer figure
+// out how it make it work anymore.
 void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 
 
