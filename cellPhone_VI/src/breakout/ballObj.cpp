@@ -101,14 +101,14 @@ int ballObj::middleX(void) { return x+width/2; }
 
 void ballObj::reset(void) {
 
-  deltaY  = abs(BALL_DY);    // Always start heding down.
+  deltaY  = abs(BALL_DY);    // Always start heading down.
   deltaX = BALL_DX;
   framePerPix = BALL_FPM;
 
   yCount = 0;
   xCount = 0;
   frameCount = 0;
-  setLocation(BALL_X, BALL_Y);
+  drawObj::setLocation(BALL_X, BALL_Y);
   ballLost = false;
 }
 
@@ -190,13 +190,13 @@ void ballObj::setLocation(int inX, int inY) {
   }
 }
 
+
 void ballObj::eraseSelf(void){ screen->fillRoundRect(lastX,lastY,width,height,width/3,this); }
 
 
 void ballObj::drawSelf(void) {
 
 	colorObj	aColor(LC_RED);
-	
 	screen->fillRoundRect(x,y,width,height,width/3,&aColor);
 }
 

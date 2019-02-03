@@ -203,11 +203,7 @@ contTrashBtn::contTrashBtn(PNList* ourList)
 contTrashBtn::~contTrashBtn(void) { }
 
 
-void contTrashBtn::doAction(void) {
-  mList->deleteContact();
-  //Serial.println("Contact deleted,lets see the file!");
-  //mFile->printFile();
-  }
+void contTrashBtn::doAction(void) { mList->deleteContact(); }
 
 
 
@@ -246,9 +242,16 @@ PNEditField::~PNEditField(void) {  }
 
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
 
+bool PNEditField::acceptClick(point where) { 
+
+  Serial.println("Being asked to accept a click.");
+  return drawObj::acceptClick(where);
+}
+
 
 void PNEditField::setFocus(bool setLoose) {
 
+  Serial.println("Doing the focus thing.");
   if (setLoose) {
     mOurListItem->startedEdit();
     mEditField->setColors(&textSelectColor,&editFieldBColor);
@@ -409,6 +412,7 @@ contact* PNListItem::getContact(void) { return mContact; }
 
 
 PNList::PNList(int x,int y,int width,int height)
+  /*: scrollingList(x,y,width,height,touchScroll) {  }*/
   : drawList(x,y,width,height) {  }
 
 
@@ -466,23 +470,15 @@ void PNList::deleteContact(void) {
   contact*    aContact;                         // Local storage. Less to worry about.
   PNListItem* anItem;
 
-  //Serial.println("DELETING. Looking at currContact.");
   if (currContact) {                            // If we have a contact to delete..
-    //Serial.print("currContact is not NULL :");Serial.println((int)currContact);
     aContact = currContact;                     // Save off the contact pointer;
-    //Serial.println("Saving off currContact.Looking for iys list item..");
     anItem = itemByContact(aContact);           // Using our pointer, find the list item that's hosting it.
-    //Serial.print("And it returned :");Serial.println((int)anItem);
     if (anItem) {                               // If we found the list item..
-      //Serial.println("Setting currContact to NULL");
       currContact = NULL;                       // Just in case, loose the currentContact.
-      //Serial.println("Telling ourBlackBook to delete contact.");
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
-      //Serial.println("Deleting the contact's list item.");
       delete(anItem);                           // Delete the list item.
-      //Serial.println("resorting the remaining list items.");
       resetPositions();                         // Close holes in the list of items.
-      needRefresh = true;								// Force a redraw.
+      needRefresh = true;								        // Force a redraw.
     }
   }
 }

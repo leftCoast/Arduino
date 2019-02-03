@@ -6,11 +6,11 @@
 #include <baseGraphics.h>
 #include <screen.h>
 
-
 // ***************************************************************
 // Base class for an object that can be drawn on the screen.
 // Possibly clicked on.
 // ***************************************************************
+
 
 class drawObj : public rect, public dblLinkListObj {
 
@@ -20,18 +20,18 @@ class drawObj : public rect, public dblLinkListObj {
   				drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks=false);
 	virtual	~drawObj();
     
-   virtual	bool	wantRefresh(void);
-   virtual	void	setNeedRefresh(void);
-	virtual	void	setLocation(int x,int y);
-   virtual	void  draw(void);								// Call this one. Don't inherit this one.
-   virtual	void	eraseSelf(void);						// Mostly you can ignore this one. Used for animation.
-   virtual 	void  drawSelf(void);						// Inherit this one and make it yours.
-	virtual	void	setFocus(bool setLoose);			// We are either getting or loosing focus.
-  		    	void	clickable(bool inWantsClicks);
-   virtual 	bool	acceptClick(point where);
-   virtual 	void  clickOver(void);
-   virtual	void  doAction(void);						// Override me for action!
-          	void	setCallback(void(*funct)(void));	// Or use a callback? Forgot how to use this.
+   virtual	bool		wantRefresh(void);
+   virtual	void		setNeedRefresh(void);
+	virtual	void		setLocation(int x,int y);
+   virtual	void  	draw(void);								// Call this one. Don't inherit this one.
+   virtual	void		eraseSelf(void);						// Mostly you can ignore this one. Used for animation.
+   virtual 	void  	drawSelf(void);						// Inherit this one and make it yours.
+	virtual	void		setFocus(bool setLoose);			// We are either getting or loosing focus.
+  		    	void		clickable(bool inWantsClicks);
+   virtual 	bool		acceptClick(point where);
+   virtual 	void  	clickOver(void);
+   virtual	void  	doAction(void);						// Override me for action!
+          	void		setCallback(void(*funct)(void));	// Or use a callback? Forgot how to use this.
   
 protected:
   bool	needRefresh;
@@ -53,6 +53,7 @@ protected:
 // idle time.
 // ***************************************************************
 
+
 class viewMgr : public idler {
     
 public:
@@ -61,7 +62,7 @@ public:
     
 	virtual	void		addObj(drawObj* newObj);
     			void		dumpDrawObjList(void);
-            bool 		checkClicks(void);
+            bool		checkClicks(void);			// Ends up being a bit recursive.
 	virtual	void    	checkRefresh(void);
 				int		numObjInList(void);
 				drawObj*	getObj(int index);
@@ -69,12 +70,12 @@ public:
     virtual void    	idle(void);
     
             drawObj	listHeader;				// Header of the drawObj list;
-            drawObj*	theTouched;				// Pointer to who's been touched.
 };
 
-extern	viewMgr 	viewList;
-extern	drawObj*	currentFocus;				// Focus goes hand in hand with view management.
-void		setFocusPtr(drawObj* newFocus);
+extern	viewMgr 	viewList;								// Our global GUI manager.
+extern 	drawObj*	theTouched;								// Who's accepted a finger touch on the screen?
+extern	drawObj*	currentFocus;							// Focus goes hand in hand with view management.
+extern 	void		setFocusPtr(drawObj* newFocus);	// Anyone can set focus by calling this function.
 
 
 
@@ -91,15 +92,14 @@ class drawGroup : public drawObj, public viewMgr {
 				drawGroup(int x, int y, int width,int height,bool clicks=false);
   	virtual	~drawGroup();
 
-	virtual	bool	checkGroupRefresh(void);
-	virtual	void	setLocation(int x,int y);
-	virtual	void	setGroupRefresh(void);
-	virtual	bool	wantRefresh(void);
-	virtual	void	setNeedRefresh(void);
-	virtual	bool	acceptClick(point where);
-	virtual	void	clickOver(void);
-  	virtual	void  addObj(drawObj* newObj);
-  	virtual	void  draw(void);
+	virtual	bool		checkGroupRefresh(void);
+	virtual	void		setLocation(int x,int y);
+	virtual	void		setGroupRefresh(void);
+	virtual	bool		wantRefresh(void);
+	virtual	void		setNeedRefresh(void);
+	virtual	bool		acceptClick(point where);
+  	virtual	void  	addObj(drawObj* newObj);
+  	virtual	void  	draw(void);
 };			
 		
 		
@@ -111,13 +111,17 @@ class drawList : public drawGroup {
 				drawList(int x, int y, int width,int height,bool clicks=false,bool vertical=true);
   	virtual	~drawList();
   					
-  	virtual	void	addObj(drawObj* newObj);
-  				void	resetPositions(void);
-  				int	lastY(void);
-  				bool	isVisible(drawObj* theItem);
-				void	showItem(drawObj* theItem);
+  	virtual	void		addObj(drawObj* newObj);
+  				void		resetPositions(void);
+  				bool		canMove(bool upLeft);
+  				void		movelist(bool upLeft);
+  				int		lastY(void);
+  				bool		isVisible(drawObj* theItem);
+				void		showItem(drawObj* theItem);
+				drawObj*	findItem(point* where);
 				
   				int	itemHeight;
+  				int	itemWidth;
   				bool	mVertical;
   	
 };

@@ -4,6 +4,7 @@
 #include <drawObj.h>
 #include <label.h>
 #include <editField.h>
+#include <scrollingList.h>
 #include <panel.h>
 #include <contactList.h>
 #include <colorRect.h>
@@ -135,11 +136,12 @@ class PNEditField :  public drawGroup {
           PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  virtual void  drawSelf(void);
-  virtual void  setFocus(bool setLoose);
-  virtual void  doAction(void);
-          int   getNumChars(void);      // Not including the \0. You may need to add one.
-          void  getText(char* inBuff);  // You better have added the (1) for the \0.
+  virtual bool      acceptClick(point where);
+  virtual void      drawSelf(void);
+  virtual void      setFocus(bool setLoose);
+  virtual void      doAction(void);
+          int       getNumChars(void);      // Not including the \0. You may need to add one.
+          void      getText(char* inBuff);  // You better have added the (1) for the \0.
 
           PNListItem* mOurListItem;
           editField*  mEditField;       // Our editing field.
@@ -180,7 +182,7 @@ class PNListItem :  public drawGroup {
 // *********************  PNList  **********************
 // *****************************************************
 
-class PNList : public drawList {
+class PNList : public drawList/*scrollingList*/ {
 
   public:
           PNList(int x,int y,int width,int height);

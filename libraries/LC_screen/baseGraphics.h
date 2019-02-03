@@ -15,7 +15,7 @@
     int y;
   }; 
   
-  
+float distance(point ptA,point ptB);  
 
 // ***************************************************************
 // Base class for a rectangle. 
@@ -44,6 +44,7 @@ class rect {
           	int  	minX(void);                            					// Where's our first pixel?
           	int  	minY(void);                            					// Same as obove but in the Y direction.
   			  	bool 	inRect(int inX, int inY);              					// Is this point in us?
+  			  	bool 	inRect(point* inPoint);											// Is this point in us?
   			  	point	getCorner(rectPt corner);										// Pass back the corner point.
 				bool	overlap(rect* inRect);											// Is that rect touching us?
 				//void	printRect(char* = "");

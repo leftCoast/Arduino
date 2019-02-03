@@ -268,6 +268,7 @@ void blockFile::printFile(void) {
 				peekBlockHeader(&tempBlock);
 			}
 			printDataBlock(&tempBlock);
+			Serial.flush();
 		}
 		Serial.println("mErr : ");
 		switch(mErr) {
@@ -281,6 +282,7 @@ void blockFile::printFile(void) {
 			case BF_SEEK_ERR		:	Serial.println("BF_SEEK_ERR    // Trying to reposition the file pointer failed.");break;
 			default					:	Serial.println("?? // Some weird undocumented error.");break;
 		}
+		Serial.flush();
 		fClose();
 	}
 }

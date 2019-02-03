@@ -1,6 +1,5 @@
 #include "drawObj.h"
 
-
 // ***********************************
 
 drawObj::drawObj() {
@@ -45,7 +44,10 @@ drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks)
 drawObj::~drawObj() {
 
 		if (currentFocus == this) {	// We were great..
-			currentFocus = NULL;			// But, its all over now.
+			currentFocus = NULL;			// And how the great have fallen.
+		}
+		if (theTouched == this) {		// We were the movers and shakers..
+			theTouched = NULL;			// But, its all over now.
 		}
 	}
 
@@ -103,12 +105,14 @@ void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
 
 
 // Manager has detected a fresh click, is it ours?
-bool   drawObj::acceptClick(point where) {
+bool drawObj::acceptClick(point where) {
+
 	if (wantsClicks) {
 		if (inRect(where.x,where.y)) {
-			needRefresh = true;				// Is it right to just assume this here? 1/26/2019
+			needRefresh = true;
 			clicked = true;
 			doAction();
+			theTouched = this;
 			return true;
 		}
 	}
@@ -141,11 +145,25 @@ void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 // ***************************************************
 // viewMgr, This is they guy that runs the screenshow.
 // Handles redrawing, clicks, etc.
+//
+//
+// Two globals that are somewhat related.
+//
+// currentFocus : This is a pointer to show who has focus.
+// If (this==currentFocus) you know to draw yourslelf in a
+// way to show the user you have focus. This can be set by
+// anyone by calling setFocusPtr(); Pass in a NULL for no
+// focus.
+//
+// theTouched : This is a pointer to who just accepted the
+// last screen touch. This way its touchOver() method can
+// be located and called. Basically that's all it's for.
 // ***************************************************
 
 
 viewMgr 	viewList;
 drawObj*	currentFocus = NULL;	// Totally global because? There's only ONE user.
+drawObj*	theTouched = NULL;	// Who's accepted a finger touch on the screen?
 
 void	setFocusPtr(drawObj* newFocus) {
 
@@ -163,7 +181,7 @@ void	setFocusPtr(drawObj* newFocus) {
 	}
 	
 	
-viewMgr::viewMgr(void) { theTouched = NULL; }
+viewMgr::viewMgr(void) { }
 
 
 viewMgr::~viewMgr(void) { listHeader.dumpList(); }
@@ -187,33 +205,29 @@ bool viewMgr::checkClicks(void) {
 	drawObj*	trace;
 	point		gPoint;
 	point		lPoint;
-	bool		success;
     
-	if (!screen->hasTouchScreen()) return false;		// Sanity! Does it even have the hardware?
-	success = false;											// Did we change anything? Not yet.
-	if (!theTouched) {										// No current touch.
-		if (screen->touched()) {							// New touch, go look.
-			gPoint = screen->getPoint();              // Touch was here..
-			lPoint = screen->lP(gPoint);					// Possibly we're sublist, localize.						
-			trace = (drawObj*)listHeader.getFirst();	// make sure we're at the top.
-			while(trace) {										// While we have something to work with.
-				if (trace->acceptClick(lPoint)) {		// If the object accepts the click
-					theTouched = trace;						// Save that badboy's address.
-					success = true;							// We changed something.
-					trace = NULL;								// Flag that the loop's done.
-				} else {
-					trace = (drawObj*)trace->dllNext;	// Hop to the next.
+	if (screen->hasTouchScreen()) {								// Sanity! Does it even have the hardware?
+		if (theTouched==NULL) {										// No one has accepted a touch yet.
+			if (screen->touched()) {								// New touch, go look.
+				gPoint = screen->getPoint();              	// Touch was here..
+				lPoint = screen->lP(gPoint);						// Possibly we're sublist, localize.						
+				trace = (drawObj*)listHeader.getFirst();		// make sure we're at the top.
+				while(trace) {											// While we have something to work with.
+					if (trace->acceptClick(lPoint)) {
+						return true;
+					}
+					trace = (drawObj*)trace->dllNext;			// Hop to the next.
 				}
 			}
-		}
-	} else {														// We've been touched and delt with it.
-		if (!screen->touched()) {							// Touch has finally passed.
-			theTouched->clickOver();                  // Tell the last touched guy its over.
-			theTouched = NULL;                        // Clear out our flag/pointer.
-			success = true;                           // We changed something.
+		} else {														// Someone has accepted a touch.
+			if (!screen->touched()) {							// Touch has finally passed.
+				theTouched->clickOver();                  // Tell the last touched guy its over.
+				theTouched = NULL;                        // Clear out our flag/pointer.
+				return true;                           	// We changed something. Lets go.
+			}
 		}
 	}
-	return success;											// Tell the calling method if we changed something.
+	return false;												// No changes to report.
 }
 
 
@@ -245,9 +259,9 @@ drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.getTailObj(0); }
 
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
-    
-	if (!checkClicks()){		// I guess if we have a click we need  to do that.
-		checkRefresh();		// Otherwise check if we need to do some drawing?
+   
+	if (!checkClicks()) {	// Handle a clicks.
+		checkRefresh();		// If no click, check if we need to do some drawing?
 	}
 }
 
@@ -263,7 +277,7 @@ void viewMgr::idle(void) {
 
 
 drawGroup::drawGroup(rect* inRect,bool clicks) 
-	: drawObj(inRect,clicks) {  } // drawObj sets wantRefresh, we don't need to. 1/21/2019
+	: drawObj(inRect,clicks) {  }
 
 
 drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
@@ -330,32 +344,20 @@ void drawGroup::setLocation(int x,int y) {
 
 // First we see if a list item wants the click. then, if not
 // and we are accepting clicks, we take it.
-bool   drawGroup::acceptClick(point where) {
-    
-	bool	success;
-    
-	success = false;
-	if (inRect(where.x,where.y)) {			// It's in our list or us, somewhere.
-		screen->pushOffset(x,y);				// Ok, push our offset for the sublist.
-		success = checkClicks();				// See if they handle it.
-		screen->popOffset(x,y);					// Pop off the offset.
-		if (!success && wantsClicks) {		// No one else wanted it? Do we want clicks?
-			needRefresh = true;					// We'll take it.
-			doAction();								// And do things.
-			success = true;						// Noted..
+bool drawGroup::acceptClick(point where) {
+   
+   bool	success;
+   
+   success = false;									// No accepted yet.
+	if (inRect(where.x,where.y)) {				// It's in our list or us, somewhere.
+		screen->pushOffset(x,y);					// Ok, push our offset for the sublist.
+		success = checkClicks();					// See if they handle it.
+		screen->popOffset(x,y);						// Pop off the offset.
+		if (!success) {								// If no one took it.
+			return drawObj::acceptClick(where);	// We return the standard check on ourselves.
 		}
 	}
-	return success;
-}
-
-
-// click over. Possibly a sub obj?
-void drawGroup::clickOver(void) {
-	
-	if (theTouched) {					// If it was a subgroup.
-		theTouched->clickOver();	// Tell the last touched guy its over.
-		theTouched = NULL;			// Clear out our flag/pointer.
-	}
+	return success;									// Return the ultimate result.
 }
 
 
@@ -400,7 +402,8 @@ drawList::drawList(rect* inRect,bool clicks,bool vertical)
 	: drawGroup(inRect,clicks) {
 
 	mVertical = vertical;	// Save it for now, deal with coding it later.
-	itemHeight = 1;
+	itemHeight	= 1;
+	itemWidth	= 1;
 }
 
 
@@ -408,7 +411,8 @@ drawList::drawList(int x, int y, int width,int height,bool clicks,bool vertical)
 	: drawGroup(x,y,width,height,clicks) {
 
 	mVertical = vertical;	// Save it for now, deal with coding it later.
-	itemHeight = 1;
+	itemHeight	= 1;
+	itemWidth	= 1;
 }
 
 
@@ -421,13 +425,19 @@ drawList::~drawList() { }
 // anyway. Too bad, inherit and fix it if this ain't good enough.					
 void drawList::addObj(drawObj* newObj) {
 
-	itemHeight = max(itemHeight,newObj->height);
-	newObj->setLocation(0,numObjInList()*itemHeight);
+	if (mVertical) {
+		itemHeight = max(itemHeight,newObj->height);
+		newObj->setLocation(0,numObjInList()*itemHeight);
+	} else {
+		itemWidth = max(itemWidth,newObj->width);
+		newObj->setLocation(numObjInList()*itemWidth,0);
+	}
 	drawGroup::addObj(newObj);	
 }
 
 
 // Good idea after adding your list items to run a reset on them all.
+// This sets the list to item one at top (or left).
 void drawList::resetPositions(void) {
 
 	int		i;
@@ -443,11 +453,72 @@ void drawList::resetPositions(void) {
 }
 
 
+// Is the list already maxed out that direction?
+// This is about moving my one rect intervals.
+bool drawList::canMove(bool upLeft) {
+
+	drawObj*	trace;
+	
+	if (upLeft) {
+		trace = (drawObj*)theList()->getLast();
+		if (trace) {
+			return !isVisible(trace);
+		}
+	} else {
+		trace = (drawObj*)theList();
+		if (trace) {
+			return !isVisible(trace);
+		}
+	}
+	return false;
+}
+
+
+// This should click the list over by one.
+void drawList::movelist(bool upLeft) {
+
+	drawObj*	trace;
+	
+	if (canMove(upLeft)) {
+		trace = theList();
+		if (mVertical) {
+			if (upLeft) {
+				while(trace!=NULL) {							// Standard loop through link list.
+					trace->y = trace->y - itemHeight;	// Each is moved up by itemHeight.
+					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+				}
+			} else {
+				while(trace!=NULL) {							// Standard loop through link list.
+					trace->y = trace->y + itemHeight;	// Each is moved up by itemHeight.
+					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+				}
+			}
+		} else {
+			if (upLeft) {
+				while(trace!=NULL) {							// Standard loop through link list.
+					trace->x = trace->x - itemWidth;		// Each is moved up by itemWidth.
+					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+				}
+			} else {
+				while(trace!=NULL) {							// Standard loop through link list.
+					trace->x = trace->x + itemWidth;		// Each is moved up by itemWidth.
+					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
+					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
+				}
+			}
+		}
+	}
+}
+
+
 // Seeing that all the list items are positioned as if they were the same size..
 // We can calculate the last possible y position an item can have to be viewable.
 int drawList::lastY(void) {
 	
-	int       numViewable;
+	int	numViewable;
 	
 	numViewable = (height/itemHeight);	// Quick int division to force truncation.
 	return (numViewable-1) * itemHeight;		// To make sure first is at zero. All overages to bottom.
@@ -479,5 +550,21 @@ void drawList::showItem(drawObj* theItem) {
     trace->setNeedRefresh();              // Just in case, everyione is told to redraw.
     trace = (drawObj* )trace->dllNext;    // Hop to the next in the list.
   }
+}
+
+
+// What's the index of the guy at this position?
+drawObj* drawList::findItem(point* where) {
+	
+	drawObj*  trace;
+	
+	trace = theList();
+	while(trace!=NULL) {                    // Standard loop through link list.
+		if (trace->inRect(where)) {
+			return trace;
+		}
+		trace = (drawObj* )trace->dllNext;    // Hop to the next in the list. 
+	}
+	return NULL;
 }
 

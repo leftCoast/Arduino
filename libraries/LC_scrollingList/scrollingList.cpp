@@ -1,20 +1,24 @@
 #include "scrollingList.h"
 
-
+#define DRAG_TIME		750	// How long to wait before we call it a drag?
+#define DRAG_RAD		50		// Distacnce window for "Oh yeah, he's dragging".
 
 scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,bool clicks,bool vertical)
-  : drawList(x,y,width,height,clicks,vertical) {
+	: drawList(x,y,width,height,clicks,vertical) {
 
-  mType = sType;                // The kind of scroller we are.
-  mLoc = onList;
-  if (mType == touchScroll) {   // If we're the touch type.
-    clickable(true);            // We need to "feel" the touch.
-  }
+	mType = sType;                // The kind of scroller we are.
+	mLoc = onList;
+	if (mType == touchScroll) {   // If we're the touch type.
+		touchTimer = new timeObj(DRAG_TIME);
+	}
 }
 
 
 // Looks like we don't have anything to toss out. 
-scrollingList::~scrollingList(void) {  }
+scrollingList::~scrollingList(void) {
+
+	if (touchTimer) { delete touchTimer; }
+}
 
 
 // Many times the list itself doesn't draw. 
@@ -25,10 +29,57 @@ void scrollingList::drawSelf(void) { }
 // ************************************
 // *********** touchScroll ************
 // ************************************
+//
+// Well, drag it around with your finger. (Gulp!)
+
+void scrollingList::dragVertical(void) {
+	
+	point		now;
+	int		delta;
+	mapper	scrolTimeMApper(0,40,100,20);
+	timeObj	scrollTimer(100);
+	int		timeCount;
+	
+	Serial.println("Vertical drag");
+	timeCount = 0;
+	while(screen->touched()) {
+		now = screen->getPoint();
+		delta = now.y - mTouchPoint.y;
+		if (scrollTimer.ding()){
+			timeCount++;
+			scrollTimer.start();
+			if (timeCount>10) {
+				movelist(delta<0);
+				timeCount = 0;
+				scrollTimer.setTime(scrolTimeMApper.Map(delta));
+			}
+		}
+	}
+}
 
 
+void scrollingList::dragHorizontal(void) {
+
+}
 
 
+void scrollingList::doDrag(void) {
+
+	if (mVertical) {
+		dragVertical();
+	} else {
+		dragHorizontal();
+	}
+}
+
+
+int scrollingList::dragLen() { return round(distance(mTouchPoint,screen->getPoint())); }
+
+
+// This didn't work anyway.
+bool scrollingList::acceptClick(point where) {
+}
+	
 
 // ************************************
 // ************ dialScroll ************

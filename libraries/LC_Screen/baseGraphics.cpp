@@ -5,6 +5,18 @@
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
+
+float distance(point ptA,point ptB) {
+
+	float widthSq;
+	float heighSq;
+	
+	widthSq = (ptA.x - ptB.x)^2;
+	heighSq = (ptA.y - ptB.y)^2;
+	return sqrt(widthSq + heighSq);
+}
+
+
 /*
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
@@ -99,6 +111,9 @@ bool rect::inRect(int inX, int inY) {
   inY <= maxY()
   );
 }
+
+
+bool rect::inRect(point* inPoint) { return inRect(inPoint->x,inPoint->y); }
 
 
 point rect::getCorner(rectPt corner) {

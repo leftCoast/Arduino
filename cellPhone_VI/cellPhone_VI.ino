@@ -5,6 +5,7 @@
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <SD.h>
 
+#include <drawObj.h>
 #include <scrKeyboard.h>
 #include <colorObj.h>
 #include <idlers.h>
@@ -20,6 +21,7 @@
 #include <screen.h>
 #include <litlOS.h>
 #include <cellCommon.h>
+
 
 #include "icons.h"
 #include "cellOS.h"
