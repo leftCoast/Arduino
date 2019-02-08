@@ -14,8 +14,13 @@
     int x;
     int y;
   }; 
-  
+
+int	xDistance(point ptA,point ptB);
+int	yDistance(point ptA,point ptB);
 float distance(point ptA,point ptB);  
+float	angle(point ptA,point ptB);		// Radians, ptA is center point.
+
+
 
 // ***************************************************************
 // Base class for a rectangle. 

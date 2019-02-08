@@ -1,4 +1,4 @@
-The libraries provide MTP interface to onboard microSD card in a Teensy 3.5/3.6 board via a connected host PC.
+ The libraries provide MTP interface to onboard microSD card in a Teensy 3.5/3.6 board via a connected host PC.
 
 To test it, please install Teensyduino version 1.39.  Do the following steps:
 

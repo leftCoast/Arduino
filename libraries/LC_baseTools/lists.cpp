@@ -128,7 +128,7 @@ void linkList::dumpList(void) {
 	linkListObj*	trace;	// Temp pointer.
 	
 	while(theList) {			// While we still have something in the list.
-		trace = theList;		// Point at the top of the list.
+		trace = getFirst();	// Point at the top of the list.
 		unlinkTop();			// Unlink the top.
 		delete(trace);			// Delete the old top.
 	}	
@@ -214,9 +214,18 @@ queue::~queue(void) { }
 
 void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
-void queue::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
+linkListObj* queue::peek(void) { return getFirst(); }
 
-linkListObj* queue::top(void) { return getFirst(); }
+linkListObj* queue::pop(void) {
+	
+	linkListObj*	topObj;
+	
+	topObj = getFirst();
+	if (topObj) {
+		unlinkTop();
+	}
+	return topObj;
+}
 
 bool queue::empty(void) { return isEmpty(); }
 

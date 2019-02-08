@@ -1,22 +1,42 @@
 #include <baseGraphics.h>
+#include <math.h>
 
 #define DEF_LOC_X  16    // Just anything so the user can see something.
 #define DEF_LOC_Y  16
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
+int	xDistance(point ptA,point ptB) { return ptB.x - ptA.x; }
+
+int	yDistance(point ptA,point ptB) { return ptB.y - ptA.y; }
 
 float distance(point ptA,point ptB) {
 
 	float widthSq;
 	float heighSq;
 	
-	widthSq = (ptA.x - ptB.x)^2;
-	heighSq = (ptA.y - ptB.y)^2;
+	widthSq = xDistance(ptA,ptB)^2;
+	heighSq = yDistance(ptA,ptB)^2;
 	return sqrt(widthSq + heighSq);
 }
 
+float	angle(point ptA,point ptB) {
 
+	float xDist;
+	float	yDist;
+	float	angle;
+	
+	xDist = xDistance(ptA,ptB);
+	yDist	= xDistance(ptA,ptB);
+	if (xDist) {
+		angle = atan(yDist/xDist);
+	} else {
+		angle = M_PI/2;
+	}
+	return angle;
+}
+
+		
 /*
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
