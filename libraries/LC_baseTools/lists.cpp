@@ -95,8 +95,13 @@ void linkList::addToEnd(linkListObj* newObj) {
 // This one trusts you to keep track of the old top we are unlinking.
 void linkList::unlinkTop(void) {
 	
+	Serial.println("In unlinkTop().");Serial.flush();
+	delay(1000);
+	Serial.print("In unlinkTop(). theList : ");Serial.println((int)theList);Serial.flush();
 	if (theList) {								// if we have something there.
-		theList = theList->getNext();    // unlink.
+		Serial.println("In unlinkTop(). Going to call getNext().");Serial.flush();
+		theList = theList->next;/*getNext(); */   // unlink.
+		Serial.print("In unlinkTop(). theList is now : ");Serial.println((int)theList);Serial.flush();
 	}
 }
 
@@ -198,7 +203,7 @@ stack::~stack(void) {  }
 
 void stack::push(linkListObj* newObj) { addToTop(newObj); }
 
-void stack::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
+//void stack::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens to top?
 
 linkListObj* stack::top(void) { return getFirst(); }
 
@@ -221,9 +226,13 @@ linkListObj* queue::pop(void) {
 	
 	linkListObj*	topObj;
 	
+	Serial.println("In pop()");Serial.flush();
 	topObj = getFirst();
+	Serial.println("In pop() did grab at top of queue.");Serial.flush();
 	if (topObj) {
+		Serial.println("In pop() got top of queue. Going to unlink it.");Serial.flush();
 		unlinkTop();
+		Serial.println("In pop() unlinked, time to return.");Serial.flush();
 	}
 	return topObj;
 }

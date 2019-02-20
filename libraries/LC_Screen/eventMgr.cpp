@@ -19,8 +19,8 @@ void printEvent(event* anEvent) {
 		case clickEvent	: Serial.println(F("clickEvent"));	break;
 	}
 	Serial.print(F("Size in bytes : "));Serial.println(sizeof(event));
-	printPoint(&(anEvent->mLastPos),"mLastPos       : ");
-	printPoint(&(anEvent->mWhere),"mWhere         : ");
+	printPoint(&(anEvent->mLastPos),"mLastPos      : ");
+	printPoint(&(anEvent->mWhere),"mWhere        : ");
 	Serial.print(F("mMs           : "));Serial.println(anEvent->mMs);
 	Serial.print(F("mLastMs       : "));Serial.println(anEvent->mLastMs);
 	Serial.print(F("mNumMs        : "));Serial.println(anEvent->mNumMs);
@@ -38,7 +38,13 @@ void printEvent(event* anEvent) {
 eventObj::eventObj(event* inEvent) { mEvent = inEvent; }
 
 
-eventObj::~eventObj(void) { if (mEvent) free(mEvent); };
+eventObj::~eventObj(void) {
+
+	if (mEvent) {
+		resizeBuff(0,(uint8_t**)&mEvent);
+		//free(mEvent);
+		}
+	};
 				
 
 
@@ -99,7 +105,7 @@ event eventMgr::getEvent(void) {
 	
 	Serial.println("In getEvent()");Serial.flush();
 	nextEvent = (eventObj*)pop();			// Pop the queue for a pointer to the next event.
-	printEvent(nextEvent->mEvent);
+	//printEvent(nextEvent->mEvent);
 	if (nextEvent) {							// If there was an event to pop off the queue..
 		anEvent = *(nextEvent->mEvent);	// Save off the data to stack memory.
 		Serial.println("Grabbing event");Serial.flush();

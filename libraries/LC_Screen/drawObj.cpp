@@ -111,6 +111,7 @@ void drawObj::setEventSet(eventSet inEventSet) {
 //nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
 bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 
+	Serial.println("Being asked to accept an event");Serial.flush();
 	switch (mEventSet) {
 		case noEvents		: return false;			// noEvents, pass on..
 		case touchLift		: 								// Classic button events, clicked lets you draw clicked.
@@ -302,9 +303,10 @@ void viewMgr::idle(void) {
    
    if (ourEventMgr.haveEvent()) {			// Have an event for us?
    	Serial.println(F("In idle() have event!"));Serial.flush();
-		//theEvent = ourEventMgr.getEvent();	// Grab the event.
-		ourEventMgr.pop();
+		theEvent = ourEventMgr.getEvent();	// Grab the event.
+		Serial.println(F("In idle() grabbed event!"));Serial.flush();
 		printEvent(&theEvent);
+		delay(1000);
 		Serial.println(F("Calling checkEvents!"));Serial.flush();
 		checkEvents(&theEvent);					// Pass it in and see if its handled.
 		Serial.println(F("Returned from checkEvents!"));Serial.flush();
