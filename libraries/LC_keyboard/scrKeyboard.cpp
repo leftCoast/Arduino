@@ -61,7 +61,7 @@ inputKey::inputKey(char* inLabel,char* inNum,char* inSym,word locX, word locY,by
   : keyboardKey(inKeyboard),
   label(locX,locY,width-1,height-1,inLabel) {
     
-    clickable(true);
+    setEventSet(touchLift);
     mChar = buff[0];
     mNum = inNum[0];
     mSymbol = inSym[0];
@@ -142,7 +142,7 @@ controlKey::controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte
   : keyboardKey(inKeyboard),
   label(locX,locY,width-1,height-1,inLabel) {
 
-  clickable(true);
+  setEventSet(touchLift);
   mCom = inCom;
   if(inCom==enter){
     buff[0] = (char)175;

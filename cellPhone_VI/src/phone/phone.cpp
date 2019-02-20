@@ -64,7 +64,7 @@ contact*	pleaseCall;	// The cellOS will set this to NULL on bootup.
 
 
 phoneBtn::phoneBtn(int x,int y,char inKey,phone* inPhone)
-  : drawObj(x,y,KEY_W,KEY_H,true) {
+  : drawObj(x,y,KEY_W,KEY_H,touchLift) {
   
   mKeystroke[0] = inKey;
   mKeystroke[1] = '\0';
@@ -238,7 +238,7 @@ void callControl::idle() {
 
 
 phone::phone(void) 
-  : panel(phoneApp,false) {
+  : panel(phoneApp,noEvents) {
 
   mRawPN          = NULL;
   mCallingID      = -1;

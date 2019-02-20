@@ -10,8 +10,8 @@
 
 #define NO_VALUE  -1
 
-barGraphBar::barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir,bool inBinary,bool inTouch)
-  : drawObj(inX,inY,inwidth,inHeight,inTouch) {
+barGraphBar::barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir,bool inBinary,eventSet inEventSet)
+  : drawObj(inX,inY,inwidth,inHeight,inEventSet) {
 
   mDir = inDir;         // Set Direction.
   mBarVal = NO_VALUE;   // Flag that we have no value.

@@ -6,9 +6,23 @@
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
+void printPoint(point* inPt,char* name) {
+
+	if (name) {
+		Serial.print(name);
+	} else {
+		Serial.print(F("Point "));
+	}
+	Serial.print(inPt->x);
+	Serial.print(F(", "));Serial.println(inPt->y);
+}
+
+	
 int	xDistance(point ptA,point ptB) { return ptB.x - ptA.x; }
 
+
 int	yDistance(point ptA,point ptB) { return ptB.y - ptA.y; }
+
 
 float distance(point ptA,point ptB) {
 
@@ -19,6 +33,7 @@ float distance(point ptA,point ptB) {
 	heighSq = yDistance(ptA,ptB)^2;
 	return sqrt(widthSq + heighSq);
 }
+
 
 float	angle(point ptA,point ptB) {
 
@@ -36,16 +51,15 @@ float	angle(point ptA,point ptB) {
 	return angle;
 }
 
-		
-/*
+/*		
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
 
 	Serial.print(label);
-	Serial.print("x:");Serial.print(x);Serial.print(" ");
-	Serial.print("y:");Serial.print(y);Serial.print(" ");
-	Serial.print("w:");Serial.print(width);Serial.print(" ");
-	Serial.print("h:");Serial.println(height);
+	Serial.print(F("x:"));Serial.print(x);Serial.print(F(" "));
+	Serial.print(F("y:"));Serial.print(y);Serial.print(F(" "));
+	Serial.print(F("w:"));Serial.print(width);Serial.print(F(" "));
+	Serial.print(F("h:"));Serial.println(height);
 }
 */
 

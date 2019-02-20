@@ -28,7 +28,7 @@ enum locType { onList, aboveList, belowList };
 class scrollingList : public drawList {
 
 	public:
-				scrollingList(int x, int y, word width,word height,scrollType sType,bool clicks=false,bool vertical=true);
+				scrollingList(int x, int y, word width,word height,scrollType sType,eventSet inEventSet=noEvents,bool vertical=true);
 	virtual	~scrollingList(void);
 
 				void		setScrollValue(float percent);  // Who do we want to see next?

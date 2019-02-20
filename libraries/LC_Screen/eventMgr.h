@@ -1,5 +1,5 @@
-#ifndef viewMgr_h
-#define viewMgr_h
+#ifndef eventMgr_h
+#define eventMgr_h
 
 #include <lists.h>
 #include <idlers.h>
@@ -42,6 +42,7 @@ struct event {
 	float				mAngle;
 };
 
+void printEvent(event* anEvent);
 
 
 // ***************************************************
@@ -79,8 +80,9 @@ class eventMgr :	public queue,
             eventMgr(void);
 	virtual	~eventMgr(void);
     
-				
+				void	begin(void);
     			void	flushEvents(void);
+    			bool	haveEvent(void);
 				event	getEvent(void);
 				void	addEvent(event* newEvent);
 				void	createEvent(eventType inType);
@@ -93,7 +95,7 @@ class eventMgr :	public queue,
 				event				mNullEvent;           	
 };
 
-extern	eventMgr 	ourEvntMgr;								// Our global event manager.
+extern	eventMgr 	ourEventMgr;								// Our global event manager.
 
 
 #endif

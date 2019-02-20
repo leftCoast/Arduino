@@ -84,7 +84,7 @@ extern      bool            gSecondFx;
 
           
 rpnCalc::rpnCalc(void)
-  : panel(calcApp,false) {
+  : panel(calcApp,noEvents) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
           

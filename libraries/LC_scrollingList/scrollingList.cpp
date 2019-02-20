@@ -3,8 +3,8 @@
 #define DRAG_TIME		750	// How long to wait before we call it a drag?
 #define DRAG_RAD		50		// Distacnce window for "Oh yeah, he's dragging".
 
-scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,bool clicks,bool vertical)
-	: drawList(x,y,width,height,clicks,vertical) {
+scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,eventSet inEventSet,bool vertical)
+	: drawList(x,y,width,height,inEventSet,vertical) {
 
 	mType = sType;                // The kind of scroller we are.
 	mLoc = onList;

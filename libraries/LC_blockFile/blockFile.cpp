@@ -236,12 +236,12 @@ bool blockFile::isEmpty(void) {
 // Have a look at a datablock header.
 void blockFile::printDataBlock(blockHeader* aBlock) {
 
-    Serial.println("---------------------------");
-    Serial.println("DATA HEADER");
-    Serial.print("Block size : ");Serial.println(sizeof(blockHeader));
-    Serial.print("  Block ID : ");Serial.println(aBlock->blockID);
-    Serial.print("Buff bytes : ");Serial.println(aBlock->bytes);
-    Serial.println("---------------------------");
+    Serial.println(F("---------------------------"));
+    Serial.println(F("DATA HEADER"));
+    Serial.print(F("Block size : "));Serial.println(sizeof(blockHeader));
+    Serial.print(F("  Block ID : "));Serial.println(aBlock->blockID);
+    Serial.print(F("Buff bytes : "));Serial.println(aBlock->bytes);
+    Serial.println(F("---------------------------"));
 }
 
 
@@ -250,16 +250,16 @@ void blockFile::printFile(void) {
 
 	blockHeader tempBlock;
 
-	Serial.println("---------------------------");
-	Serial.println("------ Printing file ------");
+	Serial.println(F("---------------------------"));
+	Serial.println(F("------ Printing file ------"));
 	if (fOpen()) {
 		if(findFirst()) {
 			peekBlockHeader(&tempBlock);
 			while(mErr == BF_NO_ERR && tempBlock.bytes!=0) {
 				printDataBlock(&tempBlock);
             if (tempBlock.bytes>200) {
-               Serial.println("OVER 200!! Jumping out!");
-               Serial.print("Error : ");
+               Serial.println(F("OVER 200!! Jumping out!"));
+               Serial.print(F("Error : "));
                Serial.println(mErr);
                Serial.flush();
                return;
@@ -270,17 +270,17 @@ void blockFile::printFile(void) {
 			printDataBlock(&tempBlock);
 			Serial.flush();
 		}
-		Serial.println("mErr : ");
+		Serial.println(F("mErr : "));
 		switch(mErr) {
-			case BF_NO_ERR			:	Serial.println("BF_NO_ERR      // Everything's fine now, ain't it?");break;
-			case BF_MEM_ERR		:	Serial.println("BF_MEM_ERR     // malloc() failed.");break;
-			case BF_VERSION_ERR	:	Serial.println("BF_VERSION_ERR // We have the right kind of file. But, wrong version.");break;
-			case BF_FOPEN_ERR		:	Serial.println("BF_FOPEN_ERR   // Tried to open from a file path, but failed.");break;
-			case BF_FREAD_ERR		:	Serial.println("BF_FREAD_ERR   // Tried to read a buffer but failed.");break;
-			case BF_FWRITE_ERR	:	Serial.println("BF_FWRITE_ERR  // Tried to write a buffer but failed.");break;
-			case BF_ISDIR_ERR		:	Serial.println("BF_ISDIR_ERR   // Looking for a file, was handed path to directory.");break;
-			case BF_SEEK_ERR		:	Serial.println("BF_SEEK_ERR    // Trying to reposition the file pointer failed.");break;
-			default					:	Serial.println("?? // Some weird undocumented error.");break;
+			case BF_NO_ERR			:	Serial.println(F("BF_NO_ERR      // Everything's fine now, ain't it?"));break;
+			case BF_MEM_ERR		:	Serial.println(F("BF_MEM_ERR     // malloc() failed."));break;
+			case BF_VERSION_ERR	:	Serial.println(F("BF_VERSION_ERR // We have the right kind of file. But, wrong version."));break;
+			case BF_FOPEN_ERR		:	Serial.println(F("BF_FOPEN_ERR   // Tried to open from a file path, but failed."));break;
+			case BF_FREAD_ERR		:	Serial.println(F("BF_FREAD_ERR   // Tried to read a buffer but failed."));break;
+			case BF_FWRITE_ERR	:	Serial.println(F("BF_FWRITE_ERR  // Tried to write a buffer but failed."));break;
+			case BF_ISDIR_ERR		:	Serial.println(F("BF_ISDIR_ERR   // Looking for a file, was handed path to directory."));break;
+			case BF_SEEK_ERR		:	Serial.println(F("BF_SEEK_ERR    // Trying to reposition the file pointer failed."));break;
+			default					:	Serial.println(F("?? // Some weird undocumented error."));break;
 		}
 		Serial.flush();
 		fClose();

@@ -53,7 +53,7 @@
 #define out  theTextView->appendText
 
 qGame::qGame(void)
-  : panel(qGameApp,false) {  }
+  : panel(qGameApp,noEvents) {  }
 
 
 qGame::~qGame(void) {

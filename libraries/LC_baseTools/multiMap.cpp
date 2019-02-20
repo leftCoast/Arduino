@@ -115,9 +115,9 @@ double mapItem::doMap(double inVal) {  // We have been choosen to map this value
 /*
 void mapItem::outputItem() {
 
-  Serial.print("x = ");
+  Serial.print(F("x = "));
   Serial.print(x);
-  Serial.print(", y = ");
+  Serial.print(F(", y = "));
   Serial.println(y);
 }
 */
@@ -156,7 +156,6 @@ void multiMap::addPoint(double x, double y) {
 
 void multiMap::clearMap(void) {
 
-  //Serial.println("I'm being cleared!!");
   if (itemList!=NULL) {
     while(itemList->greaterItem!=NULL)
       delete(itemList->greaterItem);
@@ -189,7 +188,7 @@ void multiMap::outputList(void) {
     } 
   } 
   else  {                           // What the heck? We have no mappers at all?
-    Serial.println("Empty");
+    Serial.println(F("Empty"));
   }
 }
 */

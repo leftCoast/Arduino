@@ -3,7 +3,7 @@
 // Its a SQUARE icon. Used to be fixed at 32x32 but no..
 // Now we want different sizes, don't we?
 iconButton::iconButton(int xLoc,int yLoc,char* path,int pix)
-	: drawObj(xLoc,yLoc,pix,pix,true) {
+	: drawObj(xLoc,yLoc,pix,pix,touchLift) {
 	
 	rect	source(0,0,pix,pix);
 	int	numChars;

@@ -3,8 +3,8 @@
 
 
 // And it all starts up again..
-panel::panel(int panelID,bool wantClicks)
-  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,wantClicks)
+panel::panel(int panelID,eventSet inEventSet)
+  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet)
   { mPanelID = panelID; }                               // Save what "kind" of panel we are.
 
 

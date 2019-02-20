@@ -1,7 +1,7 @@
 #include "paddleObj.h"
 
 paddleObj::paddleObj(int x, int y, int width,int height) 
-  :drawObj(x,y,width,height,true) { }
+  :drawObj(x,y,width,height) { }	// Was true. I think that's wrong.
 
 paddleObj::~paddleObj(void) {  }
 

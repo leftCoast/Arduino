@@ -213,7 +213,7 @@ void contTrashBtn::doAction(void) { mList->deleteContact(); }
 
 
 PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
-  : drawGroup(inRect,true) {
+  : drawGroup(inRect,fullClick) {
 
   rect  bRect;
   rect  tRect;
@@ -242,10 +242,10 @@ PNEditField::~PNEditField(void) {  }
 
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
 
-bool PNEditField::acceptClick(point where) { 
+bool PNEditField::acceptEvent(event* inEvent,point* locaPt) { 
 
-  Serial.println("Being asked to accept a click.");
-  return drawObj::acceptClick(where);
+  Serial.println("Being asked to accept an event.");
+  return drawObj::acceptEvent(inEvent,locaPt);
 }
 
 
@@ -491,7 +491,7 @@ void PNList::deleteContact(void) {
 
 
 contactPanel::contactPanel(void)
-  : panel(contactApp,false) {  }
+  : panel(contactApp,noEvents) {  }
 
 
 contactPanel::~contactPanel(void) {  }

@@ -9,6 +9,7 @@ linkListObj::linkListObj(void) {
   next = NULL; 
 }
 
+
 linkListObj::~linkListObj(void) {
 
   // Bit of trouble here. We are single linked, so we
@@ -138,7 +139,7 @@ void linkList::dumpList(void) {
 bool linkList::isEmpty(void) { return(theList == NULL); }
 
 
-linkListObj* linkList::getFirst(void) { return (theList); }
+linkListObj* linkList::getFirst(void) { return theList; }
 
 
 linkListObj*  linkList::getLast(void) {
@@ -201,7 +202,7 @@ void stack::pop(void) { unlinkTop(); }		// POSSIBLE MEMORY LEAK,  what happens t
 
 linkListObj* stack::top(void) { return getFirst(); }
 
-bool stack::empty(void) { return isEmpty(); }
+//bool stack::empty(void) { return isEmpty(); }
 
 
 // ********** queue ****************
@@ -227,7 +228,7 @@ linkListObj* queue::pop(void) {
 	return topObj;
 }
 
-bool queue::empty(void) { return isEmpty(); }
+//bool queue::empty(void) { return isEmpty(); }
 
 
 // ********** double linked list ****************

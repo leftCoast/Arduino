@@ -205,16 +205,16 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
 void contact::printContact(void) {
 
-	Serial.print("ID#        : ");Serial.println(mID);
-	Serial.print("Nickname   : [");Serial.print(mNickName);Serial.println("]");
-	Serial.print("Phone      : [");Serial.print(mPN);Serial.println("]");
-	Serial.print("First name : [");Serial.print(mFirstName);Serial.println("]");
-	Serial.print("Last name  : [");Serial.print(mLastName);Serial.println("]");
-	Serial.print("Company    : [");Serial.print(mCompanyName);Serial.println("]");
-	Serial.print("Message ID : ");Serial.println(mMsgID);
-	Serial.print("Erased?    : ");Serial.println(mErased);
-	Serial.print("BYTES      : ");Serial.println(calculateBuffSize());
-	Serial.println("-------------------------------------");Serial.flush();
+	Serial.print(F("ID#        : "));Serial.println(mID);
+	Serial.print(F("Nickname   : ["));Serial.print(mNickName);Serial.println(F("]"));
+	Serial.print(F("Phone      : ["));Serial.print(mPN);Serial.println(F("]"));
+	Serial.print(F("First name : ["));Serial.print(mFirstName);Serial.println(F("]"));
+	Serial.print(F("Last name  : ["));Serial.print(mLastName);Serial.println(F("]"));
+	Serial.print(F("Company    : ["));Serial.print(mCompanyName);Serial.println(F("]"));
+	Serial.print(F("Message ID : "));Serial.println(mMsgID);
+	Serial.print(F("Erased?    : "));Serial.println(mErased);
+	Serial.print(F("BYTES      : "));Serial.println(calculateBuffSize());
+	Serial.println(F("-------------------------------------"));Serial.flush();
 }
 
 
@@ -273,9 +273,9 @@ bool contactList::saveSubFileBuffs(void) {
 
   contact*        trace;
 
-	Serial.println("-------------------------------------");
-	Serial.println("------ Saving contacts to file ------");
-	Serial.println("-------------------------------------");
+	Serial.println(F("-------------------------------------"));
+	Serial.println(F("------ Saving contacts to file ------"));
+	Serial.println(F("-------------------------------------"));
   trace = (contact*)getFirst();       // Grab the first contact on our list.
   while(trace) {                      // While we have contacts..
     if (trace->mChanged) {            // If they have been edited (or new).
@@ -295,14 +295,14 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
   int             index;
   unsigned long*  longPtr;
 
-	Serial.println("-------------------------------------");
-	Serial.println("---- Saving contact list to file ----");
-	Serial.println("-------------------------------------");
+	Serial.println(F("-------------------------------------"));
+	Serial.println(F("---- Saving contact list to file ----"));
+	Serial.println(F("-------------------------------------"));
   index = 0;                          // Starting at zero, usually a good plan.
   longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
   trace = (contact*)getFirst();       // Grab the first contact on our list.
   while(trace) {                      // While we have contacts..
-  		Serial.print("ID# : ");Serial.println(trace->mID);Serial.flush();
+  		Serial.print(F("ID# : "));Serial.println(trace->mID);Serial.flush();
     longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
     index++;                          // Bump up index by one.
     trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.

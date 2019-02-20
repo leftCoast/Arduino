@@ -68,7 +68,7 @@ class stack : public linkList {
     virtual void				push(linkListObj* newObj);
     virtual void				pop(void);
     virtual linkListObj*	top(void);
-    virtual bool				empty(void);
+    //virtual bool				empty(void);
   };
 
 
@@ -88,7 +88,7 @@ class queue : public linkList {
     virtual void         	push(linkListObj* newObj);
     virtual	linkListObj* 	peek(void);
     virtual linkListObj*   pop(void);
-    virtual bool				empty(void);
+    //virtual bool				empty(void);
   };
 
 

@@ -5,6 +5,7 @@
 #include <idlers.h>
 #include <baseGraphics.h>
 #include <screen.h>
+#include <eventMgr.h>
 
 // ***************************************************************
 // Base class for an object that can be drawn on the screen.
@@ -12,35 +13,39 @@
 // ***************************************************************
 
 
+enum eventSet	{ noEvents, touchLift, fullClick, dragEvents };
+
+
 class drawObj : public rect, public dblLinkListObj {
+
 
 	public:
   				drawObj();
-  				drawObj(rect* inRect,bool inClicks=false);
-  				drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks=false);
+  				drawObj(rect* inRect,eventSet inEventSet=noEvents);
+  				drawObj(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEventSet=noEvents);
 	virtual	~drawObj();
     
    virtual	bool		wantRefresh(void);
    virtual	void		setNeedRefresh(void);
 	virtual	void		setLocation(int x,int y);
-   virtual	void  	draw(void);								// Call this one. Don't inherit this one.
-   virtual	void		eraseSelf(void);						// Mostly you can ignore this one. Used for animation.
-   virtual 	void  	drawSelf(void);						// Inherit this one and make it yours.
-	virtual	void		setFocus(bool setLoose);			// We are either getting or loosing focus.
-  		    	void		clickable(bool inWantsClicks);
-   virtual 	bool		acceptClick(point where);
-   virtual 	void  	clickOver(void);
-   virtual	void  	doAction(void);						// Override me for action!
-          	void		setCallback(void(*funct)(void));	// Or use a callback? Forgot how to use this.
+   virtual	void  	draw(void);												// Call this one. Don't inherit this one.
+   virtual	void		eraseSelf(void);										// Mostly you can ignore this one. Used for animation.
+   virtual 	void  	drawSelf(void);										// Inherit this one and make it yours.
+	virtual	void		setFocus(bool setLoose);							// We are either getting or loosing focus.
+	virtual	void		setEventSet(eventSet inEventSet);				// Want to change our event set on the fly?
+  	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
+  	virtual	void  	doAction(void);										// Override me for action!
+  	virtual	void  	doAction(event* inEvent,point* locaPt);		//	Special for them that drag around.
+          	void		setCallback(void(*funct)(void));					// Or use a callback? Forgot how to use this.
   
 protected:
-  bool	needRefresh;
-  bool	focus;
-  bool	wantsClicks;
-  bool	clicked;
-  void	(*callback)(void);
-  int		lastX;					// Yes, these are where we were before we moved.
-  int		lastY;
+  bool		needRefresh;
+  bool		focus;
+  eventSet	mEventSet;
+  bool		clicked;
+  void		(*callback)(void);
+  int			lastX;					// Yes, these are where we were before we moved.
+  int			lastY;
 };
 
 
@@ -62,7 +67,7 @@ public:
     
 	virtual	void		addObj(drawObj* newObj);
     			void		dumpDrawObjList(void);
-            bool		checkClicks(void);			// Ends up being a bit recursive.
+            bool		checkEvents(event* theEvent);
 	virtual	void    	checkRefresh(void);
 				int		numObjInList(void);
 				drawObj*	getObj(int index);
@@ -88,8 +93,8 @@ extern 	void		setFocusPtr(drawObj* newFocus);	// Anyone can set focus by calling
 class drawGroup : public drawObj, public viewMgr {
 
 	public:
-				drawGroup(rect* inRect,bool clicks=false);
-				drawGroup(int x, int y, int width,int height,bool clicks=false);
+				drawGroup(rect* inRect,eventSet inEventSet=noEvents);
+				drawGroup(int x, int y, int width,int height,eventSet inEventSet=noEvents);
   	virtual	~drawGroup();
 
 	virtual	bool		checkGroupRefresh(void);
@@ -97,9 +102,10 @@ class drawGroup : public drawObj, public viewMgr {
 	virtual	void		setGroupRefresh(void);
 	virtual	bool		wantRefresh(void);
 	virtual	void		setNeedRefresh(void);
-	virtual	bool		acceptClick(point where);
+  	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
   	virtual	void  	addObj(drawObj* newObj);
   	virtual	void  	draw(void);
+  	virtual	void    	idle(void);
 };			
 		
 		
@@ -107,8 +113,8 @@ class drawGroup : public drawObj, public viewMgr {
 class drawList : public drawGroup {
  
 	public:
-				drawList(rect* inRect,bool clicks=false,bool vertical=true);
-				drawList(int x, int y, int width,int height,bool clicks=false,bool vertical=true);
+				drawList(rect* inRect,eventSet inEventSet=noEvents,bool vertical=true);
+				drawList(int x, int y, int width,int height,eventSet inEventSet=noEvents,bool vertical=true);
   	virtual	~drawList();
   					
   	virtual	void		addObj(drawObj* newObj);

@@ -15,7 +15,7 @@ enum barGraphDir { upBar, dwnBar, rBar, lBar };
 class barGraphBar : public drawObj {
 
   public:
-            barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir=upBar,bool inBinary=false,bool inTouch=false);
+            barGraphBar(int inX,int inY,int inwidth,int inHeight,barGraphDir inDir=upBar,bool inBinary=false,eventSet inEventSet=noEvents);
     virtual ~barGraphBar(void);
 
     virtual void        setCutoff(float inCutoff,bool leaveAPixle=false);

@@ -20,7 +20,7 @@
 class panel : public drawGroup {
 
 	public:
-				panel(int panelID,bool wantClicks);
+				panel(int panelID,eventSet inEventSet=noEvents);
 	virtual	~panel(void);
 
 				int	getPanelID();

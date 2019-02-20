@@ -3,8 +3,38 @@
 #include <screen.h>
 
 
-// We figure out every possible bit of information we
-// can about an event.
+// Our global event manager.
+eventMgr 	ourEventMgr;
+
+void printEvent(event* anEvent) {
+
+	
+	Serial.print(F("mType         : "));
+	switch (anEvent->mType) {
+		case nullEvent		: Serial.println(F("nullEvent"));	break;
+		case touchEvent	: Serial.println(F("touchEvent"));	break;
+		case liftEvent		: Serial.println(F("liftEvent"));	break;
+		case dragBegin		: Serial.println(F("dragBegin"));	break;
+		case dragOn			: Serial.println(F("dragOn")); 		break;
+		case clickEvent	: Serial.println(F("clickEvent"));	break;
+	}
+	Serial.print(F("Size in bytes : "));Serial.println(sizeof(event));
+	printPoint(&(anEvent->mLastPos),"mLastPos       : ");
+	printPoint(&(anEvent->mWhere),"mWhere         : ");
+	Serial.print(F("mMs           : "));Serial.println(anEvent->mMs);
+	Serial.print(F("mLastMs       : "));Serial.println(anEvent->mLastMs);
+	Serial.print(F("mNumMs        : "));Serial.println(anEvent->mNumMs);
+	Serial.print(F("mXDist        : "));Serial.println(anEvent->mXDist);
+	Serial.print(F("mXPixlePerSec : "));Serial.println(anEvent->mXPixlePerSec);
+	Serial.print(F("mYDist        : "));Serial.println(anEvent->mYDist);
+	Serial.print(F("mYPixlePerSec : "));Serial.println(anEvent->mYPixlePerSec);
+	Serial.print(F("mDist         : "));Serial.println(anEvent->mDist);
+	Serial.print(F("mPixalPerSec  : "));Serial.println(anEvent->mPixalPerSec);
+	Serial.print(F("mAngle        : "));Serial.println(anEvent->mAngle);
+};
+
+
+
 eventObj::eventObj(event* inEvent) { mEvent = inEvent; }
 
 
@@ -46,16 +76,19 @@ eventMgr::eventMgr(void) {
 eventMgr::~eventMgr(void) { }
 
 
+void eventMgr::begin(void) { hookup(); }
+
+
 // New events go in here.
-void eventMgr::addEvent(event* newEvent) {
-    
-    push((linkListObj*)newEvent);	// We are a queue. Push the new guy in.
-    hookup();						// hookup on the first addition. Ignored otherwise.
-}
+void eventMgr::addEvent(event* newEvent) { push((linkListObj*)newEvent); }
 
 
 // Sometimes you want a fresh start.
 void eventMgr::flushEvents(void) { dumpList(); }
+
+
+// We have an event for somebody?
+bool eventMgr::haveEvent(void) { return !isEmpty(); }
 
 
 // Someone wants the next event. That's our job!
@@ -64,21 +97,28 @@ event eventMgr::getEvent(void) {
 	eventObj*	nextEvent;
 	event			anEvent;
 	
+	Serial.println("In getEvent()");Serial.flush();
 	nextEvent = (eventObj*)pop();			// Pop the queue for a pointer to the next event.
+	printEvent(nextEvent->mEvent);
 	if (nextEvent) {							// If there was an event to pop off the queue..
 		anEvent = *(nextEvent->mEvent);	// Save off the data to stack memory.
+		Serial.println("Grabbing event");Serial.flush();
+		printEvent(&anEvent);
+		Serial.println("Deleting eventObj");Serial.flush();
 		delete nextEvent;						// Delete the copy we pulled off the queue.
+		Serial.println("Returning event");Serial.flush();
 		return anEvent;						// Return our local copy.
 	}
 	return mNullEvent;						// No event waiting? Send them a nullEvent.
 }
 
 
+// We figure out every possible bit of information we
+// can about an event.
 void eventMgr::createEvent(eventType inType) {
 
 	event* newEvent;
 	eventObj* newEventObj;
-	
 	newEvent = NULL;																				// The pointer needs to start as NULL.
 	if (resizeBuff(sizeof(event),(uint8_t**)&newEvent)) {								// Becuse we allocate with resizeBuff();
 		newEvent->mMs				= millis();													// Fist thing, grab the time.
@@ -97,13 +137,14 @@ void eventMgr::createEvent(eventType inType) {
 		newEvent->mPixalPerSec	= (newEvent->mDist/newEvent->mNumMs)*1000;		// Calculate the actual speed, for a drag.
 		newEvent->mAngle			= angle(newEvent->mLastPos,newEvent->mWhere);	// Calculate the actual angle, for a drag. In radians.
 		newEventObj = new eventObj(newEvent);												// Create the node this will live in.
+		printEvent(newEvent);
 		if (newEventObj) { push((linkListObj*)newEvent); }								// We are a queue. Push the new guy in.
 	}
 }
 	
 
 void eventMgr::idle(void) {
-
+	
 	if (mTouched) {								// Last time we checked we were mTouched.
 		if (!screen->touched()) {				// This time we are NOT mTouched.
 			createEvent(liftEvent);				// This means we got a lift.
@@ -117,7 +158,7 @@ void eventMgr::idle(void) {
 				if (!mDragging) {					// If we we weren't already dagging..
 					createEvent(dragBegin);		// Create a drag begin event.
 					mDragging = true;				// Note that we are mDragging.
-				} else if (empty()) {			// Else if already mDragging AND we have an empty queue.
+				} else if (isEmpty()) {			// Else if already mDragging AND we have an empty queue.
 					createEvent(dragOn);			// We pop in a dragOn event. Don't want to swamp the queue.
 				}
 			}

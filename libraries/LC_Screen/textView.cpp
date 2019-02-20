@@ -280,7 +280,6 @@ void lineManager::indexAll(void) {
   bool  endOfText;
 
   dumpList();
-  //Serial.print("Dumped list, Count : ");Serial.println(getCount());
   if (mTextBuff) {
     if (strlen(mTextBuff) > 0) {
       index = 0;
@@ -470,8 +469,8 @@ int lineManager::getNumLines(void) {
 // ********************************************************************************
 
 
-textView::textView(int inLocX, int inLocY, word inWidth, word inHeight, bool inClicks)
-  : drawObj(inLocX, inLocY, inWidth, inHeight, inClicks) {
+textView::textView(int inLocX, int inLocY, word inWidth, word inHeight,eventSet inEventSet)
+  : drawObj(inLocX, inLocY, inWidth, inHeight, inEventSet) {
 
   setTextSize(DEF_TEXT_SIZE);
   setTextColor(&black);

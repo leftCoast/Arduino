@@ -33,7 +33,7 @@ void myCloseBtn::doAction(void) { mApp->close(); }
 // ******************************
 
 breakout::breakout(void)
-  : panel(breakoutApp,false) {
+  : panel(breakoutApp,noEvents) {
 
   frameTimer    = new timeObj(FRAME_MS);
   paddleTimer   = new timeObj(PADDLE_MS);
@@ -43,7 +43,7 @@ breakout::breakout(void)
 }
 
 
-breakout::~breakout(void) {
+breakout::~breakout(void) {	// I think the brick list is leaking memory.
 
   if(frameTimer) { delete frameTimer; }
   if(paddleTimer) { delete paddleTimer; }

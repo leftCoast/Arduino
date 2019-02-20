@@ -4,39 +4,38 @@
 
 drawObj::drawObj() {
 
-  needRefresh = true;	// Well Duh! We never been drawn yet!
-  focus = false;			// But we're hopefull.
-  clicked = false;
-  wantsClicks = false;	// 'Cause this is actually the default.
-  callback = NULL;		// And, no.. We have none of this either.
-  lastX = 0;				// Yes, these are where we were before we moved.
-  lastY = 0;
+  needRefresh	= true;	// Well Duh! We never been drawn yet!
+  focus			= false;			// But we're hopefull.
+  clicked		= false;
+  mEventSet		= noEvents;	// 'Cause this is actually the default.
+  callback		= NULL;		// And, no.. We have none of this either.
+  lastX			= 0;				// Yes, these are where we were before we moved.
+  lastY			= 0;
 }
 
 
-drawObj::drawObj(rect* inRect,bool inClicks)
-	: rect(inRect) {
+drawObj::drawObj(rect* inRect,eventSet inEventSet) {
+
+	needRefresh	= true;		// Well Duh! We never been drawn yet!
+	focus			= false;		// But we're hopefull.
+	clicked		= false;
+	mEventSet	= inEventSet;	
+	callback		= NULL;		// And, no.. We have none of this either.
+	lastX			= 0;			// Yes, these are where we were before we moved.
+	lastY			= 0;
+}
+
+
+drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEventSet)
+	: rect(inLocX,inLocY,inWidth,inHeight) {
 	
-	needRefresh = true;
-	focus = false;
-	clicked = false;
-	wantsClicks = inClicks;
-	callback = NULL;
-	lastX = x;		
-	lastY = y;
-}
-
-
-drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,bool inClicks)
-    : rect(inLocX,inLocY,inWidth,inHeight) {
-    
-	needRefresh = true;
-	focus = false;
-	clicked = false;
-	wantsClicks = inClicks;
-	callback = NULL;
-	lastX = x;		
-	lastY = y;
+	needRefresh	= true;		// Well Duh! We never been drawn yet!
+	focus			= false;		// But we're hopefull.
+	clicked		= false;
+	mEventSet	= inEventSet;
+	callback		= NULL;		// And, no.. We have none of this either.
+	lastX			= 0;			// Yes, these are where we were before we moved.
+	lastY			= 0;
 }
 
 
@@ -100,41 +99,79 @@ void  drawObj::setFocus(bool setLoose) {
 }
 	
 				
-// The ability to control this is handy..
-void drawObj::clickable(bool inWantsClicks) { wantsClicks = inWantsClicks; }
+// The ability to control this may be handy..
+void drawObj::setEventSet(eventSet inEventSet) {
 
-
-// Manager has detected a fresh click, is it ours?
-bool drawObj::acceptClick(point where) {
-
-	if (wantsClicks) {
-		if (inRect(where.x,where.y)) {
-			needRefresh = true;
-			clicked = true;
-			doAction();
-			theTouched = this;
-			return true;
-		}
+	if (theTouched!=this) {		// I think we better not change this while in the middle of a event set.
+		mEventSet = inEventSet;
 	}
-	return false;
 }
-  
-            
-// We accepted a click. Well, now its over, deal with it.
-void   drawObj::clickOver(void) {
-    
-    needRefresh = true;
-    clicked = false;
-}
-            
 
-// Override me for different action.
+
+//nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
+bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
+
+	switch (mEventSet) {
+		case noEvents		: return false;			// noEvents, pass on..
+		case touchLift		: 								// Classic button events, clicked lets you draw clicked.
+			if (inEvent->mType==touchEvent) {		// If its a touch..
+				if (inRect(locaPt)) {					// - and if its on us..
+					needRefresh	= true;					// Its going to mess with things, we'll need to redraw.
+					clicked		= true;					// Might want to show we're clicked on.
+					doAction();								// Do those things we do.
+					theTouched	= this;					// Tell the world WE are accepting this event set.
+					return true;							// Tell the world the event has been accepted.
+				}
+			} else if (inEvent->mType==liftEvent) {	// We only get lifts if we'd accepted the touch.
+				needRefresh	= true;							// Things have changed, redraw.
+				clicked		= false;							// And we're no longer clicked.
+				return true;									// Again, tell the world the event has been accepted.
+			}
+			break;
+		case fullClick 	:								// Things like edit fields. A click changes their state.
+			if (inEvent->mType==clickEvent) {		// If its a click event, that matches.
+				if (inRect(locaPt)) {					// and if its on us..
+					needRefresh	= true;					// We're going to need to draw.
+					clicked		= false;					// No longer clicked by the time you see this.
+					doAction();								// Do the action.
+					return true;							// We don't set touched because this is a one shot event.
+				}
+			}
+			break;
+		case dragEvents	:								// Things that move by touch.
+			if (inEvent->mType==dragBegin) {			// If, the dragging finger has started..
+				if (inRect(locaPt)) {					// and if its on us..
+					needRefresh	= true;					// Things will change, redreaw.
+					doAction(inEvent,locaPt);			// Do our stuff.
+					theTouched	= this;					// Tell the world WE are accepting this event set.
+					return true;
+				}
+			}
+			if (inEvent->mType==dragOn					// still moving,
+				|| inEvent->mType==liftEvent) {		// or has gone away..
+				needRefresh	= true;						// Refresh is good.
+				doAction(inEvent,locaPt);				// Stil dragging? Keep drawing.
+				return true;								// Event has been accepted.
+			}
+			break;
+		}
+		return false;
+	}
+
+
+// Override this one to do an action.
 void drawObj::doAction(void) {
 
 	if (callback) {
 		  callback();
 	}
 }
+
+
+// Or override this for dragging. (The event has global point, we'll
+// pass in local point in case you need it.
+void drawObj::doAction(event* inEvent,point* localPt) {  }
+
 
 // I tested this and it worked. But for the life of me, I can no longer figure
 // out how it make it work anymore.
@@ -199,36 +236,37 @@ void viewMgr::addObj(drawObj* newObj) {
 void viewMgr::dumpDrawObjList(void) { listHeader.dumpList(); }
 
 
-// Checking clicks.
-bool viewMgr::checkClicks(void) {
+// Checking events. If no one is set as "theTouched" we begin a
+// new set of events. If a drawObj accepts an event it is fed
+// all subsequent events through a lift event. Then the process
+// starts over.
+bool viewMgr::checkEvents(event* theEvent) {
     
 	drawObj*	trace;
-	point		gPoint;
 	point		lPoint;
-    
+   /*
 	if (screen->hasTouchScreen()) {								// Sanity! Does it even have the hardware?
-		if (theTouched==NULL) {										// No one has accepted a touch yet.
-			if (screen->touched()) {								// New touch, go look.
-				gPoint = screen->getPoint();              	// Touch was here..
-				lPoint = screen->lP(gPoint);						// Possibly we're sublist, localize.						
-				trace = (drawObj*)listHeader.getFirst();		// make sure we're at the top.
-				while(trace) {											// While we have something to work with.
-					if (trace->acceptClick(lPoint)) {
-						return true;
-					}
-					trace = (drawObj*)trace->dllNext;			// Hop to the next.
+		lPoint = screen->lP(theEvent->mWhere);					// Possibly we're sublist, localize.
+		if (theTouched==NULL) {										// No one has accepted a touch yet.					
+			trace = (drawObj*)listHeader.getFirst();			// Make sure we're at the top.
+			while(trace) {												// While we have something to work with.
+				if (trace->acceptEvent(theEvent,&lPoint)) {	// If someone accepts this event..
+					return true;										// We are done. Return success.
 				}
+				trace = (drawObj*)trace->dllNext;				// Hop to the next.
 			}
-		} else {														// Someone has accepted a touch.
-			if (!screen->touched()) {							// Touch has finally passed.
-				theTouched->clickOver();                  // Tell the last touched guy its over.
-				theTouched = NULL;                        // Clear out our flag/pointer.
-				return true;                           	// We changed something. Lets go.
+		} else {															// Someone is accepting events.
+			theTouched->acceptEvent(theEvent,&lPoint);		// Let them have this one.
+			if (theEvent->mType==liftEvent) {					// If it was a lift?
+				theTouched = NULL;                        	// Clear out our pointer, event set is complete.
+				return true;                           		// We changed something. Lets go.
 			}
 		}
 	}
-	return false;												// No changes to report.
+	*/
+	return false;														// No changes to report.
 }
+
 
 
 // Checking for redraws.
@@ -239,7 +277,7 @@ void viewMgr::checkRefresh(void) {
 	trace = (drawObj*)listHeader.getLast();		// make sure we're at the bottom.
 	while(trace && trace!=(&listHeader)) {			// While not NULL or pointing at our header.
 		if (trace->wantRefresh()) {					// Does this guy want refresh?
-            trace->draw();								// Call his Draw method.
+      	trace->draw();								// Call his Draw method.
 		}
       trace = (drawObj*)trace->dllPrev;			// Bump up the list.
 	}
@@ -260,9 +298,19 @@ drawObj* viewMgr::theList(void) { return (drawObj*)listHeader.getTailObj(0); }
 // We have time to do stuff, NOT A LOT!
 void viewMgr::idle(void) {
    
-	if (!checkClicks()) {	// Handle a clicks.
-		checkRefresh();		// If no click, check if we need to do some drawing?
+   event	theEvent;
+   
+   if (ourEventMgr.haveEvent()) {			// Have an event for us?
+   	Serial.println(F("In idle() have event!"));Serial.flush();
+		//theEvent = ourEventMgr.getEvent();	// Grab the event.
+		ourEventMgr.pop();
+		printEvent(&theEvent);
+		Serial.println(F("Calling checkEvents!"));Serial.flush();
+		checkEvents(&theEvent);					// Pass it in and see if its handled.
+		Serial.println(F("Returned from checkEvents!"));Serial.flush();
 	}
+	//Serial.println(F("Calling checkRefresh()"));Serial.flush();
+	checkRefresh();								// Check if we need to do some drawing?
 }
 
 
@@ -276,12 +324,12 @@ void viewMgr::idle(void) {
 // ***************************************************
 
 
-drawGroup::drawGroup(rect* inRect,bool clicks) 
-	: drawObj(inRect,clicks) {  }
+drawGroup::drawGroup(rect* inRect,eventSet inEventSet) 
+	: drawObj(inRect,inEventSet) {  }
 
 
-drawGroup::drawGroup(int x, int y, int width,int height,bool clicks) 
-	: drawObj(x,y,width,height,clicks) {  }
+drawGroup::drawGroup(int x, int y, int width,int height,eventSet inEventSet)
+	: drawObj(x,y,width,height,inEventSet) {  }
 	
 	
 // We don't actually allocate anything new. Just work old tools.
@@ -344,20 +392,20 @@ void drawGroup::setLocation(int x,int y) {
 
 // First we see if a list item wants the click. then, if not
 // and we are accepting clicks, we take it.
-bool drawGroup::acceptClick(point where) {
+bool drawGroup::acceptEvent(event* inEvent,point* locaPt) {
    
    bool	success;
    
-   success = false;									// No accepted yet.
-	if (inRect(where.x,where.y)) {				// It's in our list or us, somewhere.
-		screen->pushOffset(x,y);					// Ok, push our offset for the sublist.
-		success = checkClicks();					// See if they handle it.
-		screen->popOffset(x,y);						// Pop off the offset.
-		if (!success) {								// If no one took it.
-			return drawObj::acceptClick(where);	// We return the standard check on ourselves.
+   success = false;												// No accepted yet.
+	if (inRect(locaPt)) {										// It's in our list or us, somewhere.
+		screen->pushOffset(x,y);								// Ok, push our offset for the sublist.
+		success = checkEvents(inEvent);						// See if they handle it.
+		screen->popOffset(x,y);									// Pop off the offset.
+		if (!success) {											// If no one took it.
+			return drawObj::acceptEvent(inEvent,locaPt);	// We return the standard check on ourselves.
 		}
 	}
-	return success;									// Return the ultimate result.
+	return success;												// Return the ultimate result.
 }
 
 
@@ -391,6 +439,13 @@ void	drawGroup::draw(void) {
 }
 
 
+// I'm pretty sure we don't want to be calling idle like viewMgr.
+// We're NOT the one to initiate the event chain. Inherited can
+// overwrite and do stuff, that'll be fine. This should block
+// bad behavior by us.
+void	drawGroup::idle(void) { }
+
+
 
 // ***************************************************
 // drawList is the same as a drawGroup except it arranges
@@ -398,8 +453,8 @@ void	drawGroup::draw(void) {
 // ***************************************************
 
 
-drawList::drawList(rect* inRect,bool clicks,bool vertical) 
-	: drawGroup(inRect,clicks) {
+drawList::drawList(rect* inRect,eventSet inEventSet,bool vertical) 
+	: drawGroup(inRect,inEventSet) {
 
 	mVertical = vertical;	// Save it for now, deal with coding it later.
 	itemHeight	= 1;
@@ -407,8 +462,8 @@ drawList::drawList(rect* inRect,bool clicks,bool vertical)
 }
 
 
-drawList::drawList(int x, int y, int width,int height,bool clicks,bool vertical) 
-	: drawGroup(x,y,width,height,clicks) {
+drawList::drawList(int x, int y, int width,int height,eventSet inEventSet,bool vertical) 
+	: drawGroup(x,y,width,height,inEventSet) {
 
 	mVertical = vertical;	// Save it for now, deal with coding it later.
 	itemHeight	= 1;

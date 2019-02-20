@@ -376,27 +376,27 @@ void cellManager::doStatus(void) {
 
 void cellManager::showCellStatus(void) {
   
-  out("------------ cellStatus ------------");outln;
-  out("battery V  : ");out(statusReg.batteryVolts);out("mV\n");
-  out("battery %  : ");out(statusReg.batteryPercent);out("%\n");
-  out("RSSI       : ");out(statusReg.RSSI);outln;;
-  out("Net Stat   : ");
+  out(F("------------ cellStatus ------------"));outln;
+  out(F("battery V  : "));out(statusReg.batteryVolts);out(F("mV\n"));
+  out(F("battery %  : "));out(statusReg.batteryPercent);out(F("%\n"));
+  out(F("RSSI       : "));out(statusReg.RSSI);outln;;
+  out(F("Net Stat   : "));
   switch (statusReg.networkStat) {
-    case 0 : out("Not registered"); break;
-    case 1 : out("Reg. (home)"); break;
-    case 2 : out("Reg. (searching)"); break;
-    case 3 : out("Denied"); break;
-    case 4 : out("Unknown"); break;
-    case 5 : out("Reg. (roaming)"); break;
-    default : out("Undefined"); break;
+    case 0 : out(F("Not registered")); break;
+    case 1 : out(F("Reg. (home)")); break;
+    case 2 : out(F("Reg. (searching)")); break;
+    case 3 : out(F("Denied")); break;
+    case 4 : out(F("Unknown")); break;
+    case 5 : out(F("Reg. (roaming)")); break;
+    default : out(F("Undefined")); break;
   }
   outln;
-  out("volume     : ");out(statusReg.volume);out("\n");
-  out("callStat   : ");out(statusReg.callStat);out("\n");
-  out("numSMSs    : ");out(statusReg.numSMSs);out("\n");
-  out("Net Time   : ");out(statusReg.networkTime);out("\n");
-  out("------------------------------------");outln;
-  out("------------------------------------");outln; 
+  out(F("volume     : "));out(statusReg.volume);out(F("\n"));
+  out(F("callStat   : "));out(statusReg.callStat);out(F("\n"));
+  out(F("numSMSs    : "));out(statusReg.numSMSs);out(F("\n"));
+  out(F("Net Time   : "));out(statusReg.networkTime);out(F("\n"));
+  out(F("------------------------------------"));outln;
+  out(F("------------------------------------"));outln; 
 }
 
 void cellManager::idle(void) {

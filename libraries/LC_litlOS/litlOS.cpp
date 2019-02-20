@@ -25,7 +25,7 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 
 
 homePanel::homePanel(void)
-  : panel(HOME_PANEL_ID,false) { }
+  : panel(HOME_PANEL_ID,noEvents) { }
 
 
 homePanel::~homePanel(void) {  }

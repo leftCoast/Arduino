@@ -14,7 +14,8 @@
     int x;
     int y;
   }; 
-
+  
+void	printPoint(point* inPt,char* name=NULL);
 int	xDistance(point ptA,point ptB);
 int	yDistance(point ptA,point ptB);
 float distance(point ptA,point ptB);  
