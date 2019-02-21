@@ -112,6 +112,10 @@ void drawObj::setEventSet(eventSet inEventSet) {
 bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 
 	Serial.println("Being asked to accept an event");Serial.flush();
+	Serial.println("My rectangle : ");Serial.flush();
+	printRect();
+	Serial.println("Local points : ");Serial.flush();
+	printPoint(locaPt);
 	switch (mEventSet) {
 		case noEvents		: return false;			// noEvents, pass on..
 		case touchLift		: 								// Classic button events, clicked lets you draw clicked.
@@ -245,11 +249,11 @@ bool viewMgr::checkEvents(event* theEvent) {
     
 	drawObj*	trace;
 	point		lPoint;
-   /*
+
 	if (screen->hasTouchScreen()) {								// Sanity! Does it even have the hardware?
 		lPoint = screen->lP(theEvent->mWhere);					// Possibly we're sublist, localize.
 		if (theTouched==NULL) {										// No one has accepted a touch yet.					
-			trace = (drawObj*)listHeader.getFirst();			// Make sure we're at the top.
+			trace = theList();										// Make sure we're at the top.
 			while(trace) {												// While we have something to work with.
 				if (trace->acceptEvent(theEvent,&lPoint)) {	// If someone accepts this event..
 					return true;										// We are done. Return success.
@@ -264,7 +268,6 @@ bool viewMgr::checkEvents(event* theEvent) {
 			}
 		}
 	}
-	*/
 	return false;														// No changes to report.
 }
 
@@ -302,16 +305,11 @@ void viewMgr::idle(void) {
    event	theEvent;
    
    if (ourEventMgr.haveEvent()) {			// Have an event for us?
-   	Serial.println(F("In idle() have event!"));Serial.flush();
 		theEvent = ourEventMgr.getEvent();	// Grab the event.
 		Serial.println(F("In idle() grabbed event!"));Serial.flush();
 		printEvent(&theEvent);
-		delay(1000);
-		Serial.println(F("Calling checkEvents!"));Serial.flush();
 		checkEvents(&theEvent);					// Pass it in and see if its handled.
-		Serial.println(F("Returned from checkEvents!"));Serial.flush();
 	}
-	//Serial.println(F("Calling checkRefresh()"));Serial.flush();
 	checkRefresh();								// Check if we need to do some drawing?
 }
 

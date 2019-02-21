@@ -8,13 +8,10 @@
 
 void printPoint(point* inPt,char* name) {
 
-	if (name) {
-		Serial.print(name);
-	} else {
-		Serial.print(F("Point "));
-	}
+	Serial.print(name);
 	Serial.print(inPt->x);
-	Serial.print(F(", "));Serial.println(inPt->y);
+	Serial.print(F(", "));
+	Serial.println(inPt->y);
 }
 
 	
@@ -51,7 +48,7 @@ float	angle(point ptA,point ptB) {
 	return angle;
 }
 
-/*		
+		
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
 
@@ -61,7 +58,7 @@ void rect::printRect(char* label) {
 	Serial.print(F("w:"));Serial.print(width);Serial.print(F(" "));
 	Serial.print(F("h:"));Serial.println(height);
 }
-*/
+
 
 rect::rect(void) {
    

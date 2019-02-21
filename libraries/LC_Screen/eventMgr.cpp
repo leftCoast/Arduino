@@ -38,13 +38,7 @@ void printEvent(event* anEvent) {
 eventObj::eventObj(event* inEvent) { mEvent = inEvent; }
 
 
-eventObj::~eventObj(void) {
-
-	if (mEvent) {
-		resizeBuff(0,(uint8_t**)&mEvent);
-		//free(mEvent);
-		}
-	};
+eventObj::~eventObj(void) { if (mEvent) free(mEvent); };
 				
 
 
@@ -57,6 +51,7 @@ eventObj::~eventObj(void) {
 
 eventMgr::eventMgr(void) {
 	
+	setTime(DRAG_TIME);		// Set up our timer.
 	mTouched		= false;		// Initialize the past.
 	mDragging	= false;		// This is a lot like rewriting history.
 	mLastPos.x	= 0;
@@ -103,16 +98,10 @@ event eventMgr::getEvent(void) {
 	eventObj*	nextEvent;
 	event			anEvent;
 	
-	Serial.println("In getEvent()");Serial.flush();
 	nextEvent = (eventObj*)pop();			// Pop the queue for a pointer to the next event.
-	//printEvent(nextEvent->mEvent);
 	if (nextEvent) {							// If there was an event to pop off the queue..
 		anEvent = *(nextEvent->mEvent);	// Save off the data to stack memory.
-		Serial.println("Grabbing event");Serial.flush();
-		printEvent(&anEvent);
-		Serial.println("Deleting eventObj");Serial.flush();
 		delete nextEvent;						// Delete the copy we pulled off the queue.
-		Serial.println("Returning event");Serial.flush();
 		return anEvent;						// Return our local copy.
 	}
 	return mNullEvent;						// No event waiting? Send them a nullEvent.
@@ -123,14 +112,19 @@ event eventMgr::getEvent(void) {
 // can about an event.
 void eventMgr::createEvent(eventType inType) {
 
-	event* newEvent;
-	eventObj* newEventObj;
+	event*		newEvent;
+	eventObj*	newEventObj;
+	
 	newEvent = NULL;																				// The pointer needs to start as NULL.
 	if (resizeBuff(sizeof(event),(uint8_t**)&newEvent)) {								// Becuse we allocate with resizeBuff();
 		newEvent->mMs				= millis();													// Fist thing, grab the time.
 		newEvent->mType			= inType;													// They give us the type.
 		newEvent->mLastPos		= mLastPos;													// Save off the lat position we saw.
-		newEvent->mWhere			= screen->getPoint();									// Grab the location of the event.
+		if ((inType==liftEvent)||(inType==clickEvent)){									// Wait! If its a lift, getPoint() returns nonsense.
+			newEvent->mWhere = mLastPos;		
+		} else {
+			newEvent->mWhere = screen->getPoint();											// Grab the location of the event.
+		}
 		mLastPos						= newEvent->mWhere;										// Update the global last position.
 		newEvent->mLastMs			= mLastMs;													// Save off the last time.
 		mLastMs						= newEvent->mMs;											// Update the global last time.
@@ -143,8 +137,7 @@ void eventMgr::createEvent(eventType inType) {
 		newEvent->mPixalPerSec	= (newEvent->mDist/newEvent->mNumMs)*1000;		// Calculate the actual speed, for a drag.
 		newEvent->mAngle			= angle(newEvent->mLastPos,newEvent->mWhere);	// Calculate the actual angle, for a drag. In radians.
 		newEventObj = new eventObj(newEvent);												// Create the node this will live in.
-		printEvent(newEvent);
-		if (newEventObj) { push((linkListObj*)newEvent); }								// We are a queue. Push the new guy in.
+		if (newEventObj) { push((linkListObj*)newEventObj); }							// We are a queue. Push the new guy in.
 	}
 }
 	

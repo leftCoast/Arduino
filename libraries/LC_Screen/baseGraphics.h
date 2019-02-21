@@ -15,7 +15,7 @@
     int y;
   }; 
   
-void	printPoint(point* inPt,char* name=NULL);
+void	printPoint(point* inPt,char* name="Point : ");
 int	xDistance(point ptA,point ptB);
 int	yDistance(point ptA,point ptB);
 float distance(point ptA,point ptB);  
@@ -53,7 +53,7 @@ class rect {
   			  	bool 	inRect(point* inPoint);											// Is this point in us?
   			  	point	getCorner(rectPt corner);										// Pass back the corner point.
 				bool	overlap(rect* inRect);											// Is that rect touching us?
-				//void	printRect(char* = "");
+				void	printRect(char* = "Rect : ");
 					
 					int   x;
 					int   y;

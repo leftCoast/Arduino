@@ -26,33 +26,74 @@
 #define SD_CS   4
 
 
-class dragRect :  public colorRect {
+class clickRect :  public colorRect {
 
   public:
-            dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
-    virtual ~dragRect(void);
+            clickRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
+    virtual ~clickRect(void);
     virtual void  doAction();
     
 };
 
   
-dragRect::dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset)
+clickRect::clickRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset)
   : colorRect(inLocX,inLocY, inWidth,inHeight) {
 
   setEventSet(fullClick);  
 }
 
 
-dragRect::~dragRect(void) { }
+clickRect::~clickRect(void) { }
 
-void dragRect::doAction() {
+void clickRect::doAction() {
 
     Serial.println("POW!");Serial.flush();
 }
 
 
-dragRect* aRect; 
 
+
+// ***************************************
+
+
+class dragRect :  public colorRect {
+
+  public:
+            dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
+    virtual ~dragRect(void);
+    virtual void  eraseSelf(void);
+    virtual void    doAction(event* inEvent,point* locaPt);
+
+            point startPoint;
+};
+
+  
+dragRect::dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset)
+  : colorRect(inLocX,inLocY, inWidth,inHeight) {
+
+  setEventSet(dragEvents);  
+}
+
+void dragRect::eraseSelf(void) { screen->fillRect(this,&black); }
+
+void dragRect::doAction(event* inEvent,point* locaPt) {
+
+  if (inEvent->mType==dragBegin) {
+    startPoint.x = x;
+    startPoint.y = y;
+  } else if (inEvent->mType==dragOn) {
+    int newX = startPoint.x + inEvent->mXDist;
+    int newY = startPoint.y + inEvent->mYDist;
+    setLocation(newX,newY);
+  }
+}
+
+
+dragRect::~dragRect(void) { }
+
+
+clickRect* cRect; 
+dragRect* dRect;
 
 void setup() {
   
@@ -72,10 +113,15 @@ void setup() {
 
   screen->fillScreen(&black);
 
-  aRect = new dragRect(50,50, 100,100);
-  aRect->setColor(LC_GREEN);
+  cRect = new clickRect(50,50, 100,100);
+  cRect->setColor(LC_GREEN);
   
-  viewList.addObj(aRect);
+  viewList.addObj(cRect);
+
+   dRect = new dragRect(75,200, 100,100);
+  dRect->setColor(LC_RED);
+  
+  viewList.addObj(dRect);
 }
 
 void loop() {
