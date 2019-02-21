@@ -74,7 +74,18 @@ dragRect::dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset)
   setEventSet(dragEvents);  
 }
 
-void dragRect::eraseSelf(void) { screen->fillRect(this,&black); }
+void dragRect::eraseSelf(void) {
+
+    point curPos;
+
+    curPos.x = x;
+    curPos.y = y;
+    x = lastX;
+    y = lastY;
+    screen->fillRect(this,&black);
+    x = curPos.x;
+    y = curPos.y;
+}
 
 void dragRect::doAction(event* inEvent,point* locaPt) {
 
@@ -110,18 +121,18 @@ void setup() {
   ourEventMgr.begin();                      // Kickstart our event manager.
   
   Serial.println("Everything's running."); 
-
   screen->fillScreen(&black);
-
+  
+  dRect = new dragRect(75,200, 100,100);
+  dRect->setColor(LC_RED);
+  
+  viewList.addObj(dRect);
   cRect = new clickRect(50,50, 100,100);
   cRect->setColor(LC_GREEN);
   
   viewList.addObj(cRect);
 
-   dRect = new dragRect(75,200, 100,100);
-  dRect->setColor(LC_RED);
-  
-  viewList.addObj(dRect);
+   
 }
 
 void loop() {

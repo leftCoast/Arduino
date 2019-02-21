@@ -111,11 +111,6 @@ void drawObj::setEventSet(eventSet inEventSet) {
 //nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
 bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 
-	Serial.println("Being asked to accept an event");Serial.flush();
-	Serial.println("My rectangle : ");Serial.flush();
-	printRect();
-	Serial.println("Local points : ");Serial.flush();
-	printPoint(locaPt);
 	switch (mEventSet) {
 		case noEvents		: return false;			// noEvents, pass on..
 		case touchLift		: 								// Classic button events, clicked lets you draw clicked.
@@ -251,7 +246,7 @@ bool viewMgr::checkEvents(event* theEvent) {
 	point		lPoint;
 
 	if (screen->hasTouchScreen()) {								// Sanity! Does it even have the hardware?
-		lPoint = screen->lP(theEvent->mWhere);					// Possibly we're sublist, localize.
+		lPoint = screen->lP(theEvent->mTouchPos);				// Possibly we're sublist, localize.
 		if (theTouched==NULL) {										// No one has accepted a touch yet.					
 			trace = theList();										// Make sure we're at the top.
 			while(trace) {												// While we have something to work with.
@@ -306,8 +301,6 @@ void viewMgr::idle(void) {
    
    if (ourEventMgr.haveEvent()) {			// Have an event for us?
 		theEvent = ourEventMgr.getEvent();	// Grab the event.
-		Serial.println(F("In idle() grabbed event!"));Serial.flush();
-		printEvent(&theEvent);
 		checkEvents(&theEvent);					// Pass it in and see if its handled.
 	}
 	checkRefresh();								// Check if we need to do some drawing?

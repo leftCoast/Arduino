@@ -26,8 +26,8 @@ float distance(point ptA,point ptB) {
 	float widthSq;
 	float heighSq;
 	
-	widthSq = xDistance(ptA,ptB)^2;
-	heighSq = yDistance(ptA,ptB)^2;
+	widthSq = pow(xDistance(ptA,ptB),2);
+	heighSq = pow(yDistance(ptA,ptB),2);
 	return sqrt(widthSq + heighSq);
 }
 
@@ -35,11 +35,11 @@ float distance(point ptA,point ptB) {
 float	angle(point ptA,point ptB) {
 
 	float xDist;
-	float	yDist;
+	float yDist;
 	float	angle;
-	
+		
 	xDist = xDistance(ptA,ptB);
-	yDist	= xDistance(ptA,ptB);
+	yDist	= yDistance(ptA,ptB);
 	if (xDist) {
 		angle = atan(yDist/xDist);
 	} else {
@@ -48,7 +48,7 @@ float	angle(point ptA,point ptB) {
 	return angle;
 }
 
-		
+
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
 
