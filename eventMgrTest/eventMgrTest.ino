@@ -56,20 +56,20 @@ void clickRect::doAction() {
 // ***************************************
 
 
-class dragRect :  public colorRect {
+class dragRect :  public drawGroup {
 
   public:
             dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
     virtual ~dragRect(void);
     virtual void  eraseSelf(void);
     virtual void    doAction(event* inEvent,point* locaPt);
-
+    virtual void    drawSelf(void);
             point startPoint;
 };
 
   
 dragRect::dragRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset)
-  : colorRect(inLocX,inLocY, inWidth,inHeight) {
+  : drawGroup(inLocX,inLocY, inWidth,inHeight) {
 
   setEventSet(dragEvents);  
 }
@@ -86,6 +86,10 @@ void dragRect::eraseSelf(void) {
     x = curPos.x;
     y = curPos.y;
 }
+
+
+void dragRect::drawSelf(void) { screen->fillRect(this,&red); }
+
 
 void dragRect::doAction(event* inEvent,point* locaPt) {
 
@@ -105,6 +109,7 @@ dragRect::~dragRect(void) { }
 
 clickRect* cRect; 
 dragRect* dRect;
+colorRect*  aRect;
 
 void setup() {
   
@@ -123,11 +128,15 @@ void setup() {
   Serial.println("Everything's running."); 
   screen->fillScreen(&black);
   
-  dRect = new dragRect(75,200, 100,100);
-  dRect->setColor(LC_RED);
+  dRect = new dragRect(75,200, 50,50);
+  
+  aRect = new colorRect(5,5,30,30,1);
+  aRect->setColor(LC_YELLOW);
+  aRect->setEventSet(dragEvents);
+  dRect->addObj(aRect);
   
   viewList.addObj(dRect);
-  cRect = new clickRect(50,50, 100,100);
+  cRect = new clickRect(50,50, 50,50);
   cRect->setColor(LC_GREEN);
   
   viewList.addObj(cRect);

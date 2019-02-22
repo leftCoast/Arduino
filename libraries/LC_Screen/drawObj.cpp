@@ -14,8 +14,9 @@ drawObj::drawObj() {
 }
 
 
-drawObj::drawObj(rect* inRect,eventSet inEventSet) {
-
+drawObj::drawObj(rect* inRect,eventSet inEventSet)
+	: rect(inRect) {
+	
 	needRefresh	= true;		// Well Duh! We never been drawn yet!
 	focus			= false;		// But we're hopefull.
 	clicked		= false;
@@ -338,7 +339,8 @@ void drawGroup::setGroupRefresh(void) {
 		
 		drawObj* trace;
 
-		trace = (drawObj*)listHeader.getFirst();
+		//trace = (drawObj*)listHeader.getFirst();
+		trace = theList();										// Make sure we're at the top.
 		while(trace) {
 			trace->setNeedRefresh();
 			trace = (drawObj*)trace->dllNext;
@@ -350,7 +352,8 @@ bool drawGroup::checkGroupRefresh(void) {
 	
 	drawObj* trace;
 
-	trace = (drawObj*)listHeader.getTailObj(0);
+	//trace = (drawObj*)listHeader.getTailObj(0);
+	trace = theList();										// Make sure we're at the top.
 	while(trace && trace!=(&listHeader)) {
 		if(trace->wantRefresh()) {
 			return true;
@@ -390,6 +393,9 @@ bool drawGroup::acceptEvent(event* inEvent,point* locaPt) {
    bool	success;
    
    success = false;												// No accepted yet.
+   if (theTouched==this) {										// Oh God no! Its me?!
+   	return drawObj::acceptEvent(inEvent,locaPt);		// In this one case, we are being dragged as a group.
+   }
 	if (inRect(locaPt)) {										// It's in our list or us, somewhere.
 		screen->pushOffset(x,y);								// Ok, push our offset for the sublist.
 		success = checkEvents(inEvent);						// See if they handle it.
@@ -411,11 +417,15 @@ void drawGroup::addObj(drawObj* newObj) {
 }
 
 
+// Drawing for a group. Sometimes we are visabile sometimes not. Also, drawing is
+// done as a stack. Start at the bottom and draw all the pictures 'till you reach
+// the top. We as the group are defined as the bottom of this stack.
 void	drawGroup::draw(void) {
 
 	drawObj*	trace;
 
 	if (needRefresh) {								// We may be the background.
+		eraseSelf();
 		drawSelf();										// Do our drawing.
 		setGroupRefresh();							// If we're drawing, the entire group needs it.
 	}

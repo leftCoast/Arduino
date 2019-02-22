@@ -136,7 +136,7 @@ class PNEditField :  public drawGroup {
           PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  virtual bool      acceptEvent(event* inEvent,point* locaPt);
+  //virtual bool      acceptEvent(event* inEvent,point* locaPt);
   virtual void      drawSelf(void);
   virtual void      setFocus(bool setLoose);
   virtual void      doAction(void);

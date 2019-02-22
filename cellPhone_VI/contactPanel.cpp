@@ -213,8 +213,9 @@ void contTrashBtn::doAction(void) { mList->deleteContact(); }
 
 
 PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
-  : drawGroup(inRect,fullClick) {
+  : drawGroup(inRect) {
 
+  printRect();
   rect  bRect;
   rect  tRect;
 
@@ -241,12 +242,6 @@ PNEditField::~PNEditField(void) {  }
 
 
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
-
-bool PNEditField::acceptEvent(event* inEvent,point* locaPt) { 
-
-  Serial.println("Being asked to accept an event.");
-  return drawObj::acceptEvent(inEvent,locaPt);
-}
 
 
 void PNEditField::setFocus(bool setLoose) {
@@ -340,7 +335,7 @@ void PNListItem::draw(void) {
 }
 
 
-void PNListItem::drawSelf(void) {  }
+void PNListItem::drawSelf(void) { /*screen->drawRect(this,&green);*/ }
 
 
 // globals used for texting, calling & deleting.
