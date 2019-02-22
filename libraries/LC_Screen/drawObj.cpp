@@ -512,7 +512,7 @@ void drawList::resetPositions(void) {
 
 
 // Is the list already maxed out that direction?
-// This is about moving my one rect intervals.
+// This is about moving by one rect intervals.
 bool drawList::canMove(bool upLeft) {
 
 	drawObj*	trace;
@@ -523,7 +523,7 @@ bool drawList::canMove(bool upLeft) {
 			return !isVisible(trace);
 		}
 	} else {
-		trace = (drawObj*)theList();
+		trace = theList();
 		if (trace) {
 			return !isVisible(trace);
 		}

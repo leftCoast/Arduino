@@ -182,7 +182,7 @@ class PNListItem :  public drawGroup {
 // *********************  PNList  **********************
 // *****************************************************
 
-class PNList : public drawList/*scrollingList*/ {
+class PNList : public /*drawList*/scrollingList {
 
   public:
           PNList(int x,int y,int width,int height);

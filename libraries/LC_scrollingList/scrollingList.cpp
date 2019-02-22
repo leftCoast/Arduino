@@ -1,16 +1,11 @@
 #include "scrollingList.h"
 
-#define DRAG_TIME		750	// How long to wait before we call it a drag?
-#define DRAG_RAD		50		// Distacnce window for "Oh yeah, he's dragging".
 
 scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,eventSet inEventSet,bool vertical)
 	: drawList(x,y,width,height,inEventSet,vertical) {
 
 	mType = sType;                // The kind of scroller we are.
 	mLoc = onList;
-	if (mType == touchScroll) {   // If we're the touch type.
-		touchTimer = new timeObj(DRAG_TIME);
-	}
 }
 
 
@@ -32,54 +27,48 @@ void scrollingList::drawSelf(void) { }
 //
 // Well, drag it around with your finger. (Gulp!)
 
-void scrollingList::dragVertical(void) {
+void scrollingList::dragVertical(event* inEvent) {
 	
-	point		now;
-	int		delta;
-	mapper	scrolTimeMApper(0,40,100,20);
-	timeObj	scrollTimer(100);
-	int		timeCount;
+	int	clicks;
+	int	dY;
 	
-	Serial.println("Vertical drag");
-	timeCount = 0;
-	while(screen->touched()) {
-		now = screen->getPoint();
-		delta = now.y - mTouchPoint.y;
-		if (scrollTimer.ding()){
-			timeCount++;
-			scrollTimer.start();
-			if (timeCount>10) {
-				movelist(delta<0);
-				timeCount = 0;
-				scrollTimer.setTime(scrolTimeMApper.Map(delta));
-			}
+	clicks = inEvent->mYDist/itemHeight;
+	Serial.print("Clicks : ");Serial.println(clicks);
+	dY = clicks * itemHeight;
+	if (dY>0) {										// dY>0 is down.
+		for (int i=0;i<abs(clicks);i++) {
+			movelist(false);
+		}
+	} else {
+		for (int i=0;i<abs(clicks);i++) {
+			movelist(true);
 		}
 	}
 }
 
 
-void scrollingList::dragHorizontal(void) {
+void scrollingList::dragHorizontal(event* inEvent) {
 
 }
 
 
-void scrollingList::doDrag(void) {
-
-	if (mVertical) {
-		dragVertical();
-	} else {
-		dragHorizontal();
+void scrollingList::doAction(event* inEvent,point* locaPt) {
+	
+	drawObj*	trace;
+	
+	if (inEvent->mType==dragBegin) {
+		trace = theList();
+		mStartPt.x = trace.x;
+		mStartPt.y = trace.y;
+	} else if (inEvent->mType==dragOn) {
+		if (mVertical) {
+			dragVertical(inEvent);
+		} else {
+			dragHorizontal(inEvent);
+   	}
 	}
 }
 
-
-int scrollingList::dragLen() { return round(distance(mTouchPoint,screen->getPoint())); }
-
-
-// This didn't work anyway.
-bool scrollingList::acceptClick(point where) {
-}
-	
 
 // ************************************
 // ************ dialScroll ************

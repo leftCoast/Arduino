@@ -215,7 +215,6 @@ void contTrashBtn::doAction(void) { mList->deleteContact(); }
 PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   : drawGroup(inRect) {
 
-  printRect();
   rect  bRect;
   rect  tRect;
 
@@ -235,6 +234,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   mEditField = new editField(&tRect,inText,1);
   mEditField->setColors(&textColor,&backColor);
   addObj(mEditField);
+  setEventSet(fullClick);
 }
 
 
@@ -407,8 +407,8 @@ contact* PNListItem::getContact(void) { return mContact; }
 
 
 PNList::PNList(int x,int y,int width,int height)
-  /*: scrollingList(x,y,width,height,touchScroll) {  }*/
-  : drawList(x,y,width,height) {  }
+  : scrollingList(x,y,width,height,touchScroll,dragEvents) {  }
+  /*: drawList(x,y,width,height) {  }*/
 
 
 PNList::~PNList(void) {  }
