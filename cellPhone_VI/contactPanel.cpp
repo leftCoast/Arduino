@@ -233,6 +233,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   addObj(mEditBase);
   mEditField = new editField(&tRect,inText,1);
   mEditField->setColors(&textColor,&backColor);
+  mEditField->setParent(this);
   addObj(mEditField);
   setEventSet(fullClick);
 }
@@ -244,9 +245,11 @@ PNEditField::~PNEditField(void) {  }
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
 
 
+// If we get focus, we pass it on to the edit field. When the edit field
+// looses focus, it will tell us by calling this this method. SO we don't
+// "unset" the edit field's focus, we only set it.
 void PNEditField::setFocus(bool setLoose) {
 
-  Serial.println("Doing the focus thing.");
   if (setLoose) {
     mOurListItem->startedEdit();
     mEditField->setColors(&textSelectColor,&editFieldBColor);
@@ -254,6 +257,8 @@ void PNEditField::setFocus(bool setLoose) {
     if (ourKeyboard) {
       ourKeyboard->setEditField(mEditField);
     }
+    currentFocus = mEditField;    // We manually switch focus to mEditField..
+    mEditField->setFocus(true);   // mEditField will call this with "false" when it looses focus.
   } else {
     mEditField->setColors(&textColor,&backColor);
     mEditBase->setColor(&backColor);
@@ -264,7 +269,6 @@ void PNEditField::setFocus(bool setLoose) {
     }
     mOurListItem->finishEdit(this);
   }
-  mEditField->setFocus(setLoose);
 }
 
 
@@ -408,10 +412,10 @@ contact* PNListItem::getContact(void) { return mContact; }
 
 PNList::PNList(int x,int y,int width,int height)
   : scrollingList(x,y,width,height,touchScroll,dragEvents) {  }
-  /*: drawList(x,y,width,height) {  }*/
 
 
 PNList::~PNList(void) {  }
+
 
 void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
 
@@ -472,13 +476,20 @@ void PNList::deleteContact(void) {
       currContact = NULL;                       // Just in case, loose the currentContact.
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
       delete(anItem);                           // Delete the list item.
-      resetPositions();                         // Close holes in the list of items.
+      setPositions();                           // Close holes in the list of items.
       needRefresh = true;								        // Force a redraw.
     }
   }
 }
 
 
+void PNList::doAction(event* inEvent,point* locaPt) {
+
+  if (inEvent->mType==dragBegin) {      // If its the start of a drag..
+    setFocusPtr(NULL);
+  }
+  scrollingList::doAction(inEvent,locaPt); 
+}
 
 // *****************************************************
 // ******************  contactPanel  *******************
@@ -530,13 +541,10 @@ void contactPanel::drawSelf(void) {
 
 void contactPanel::closing(void) {
 
-  Serial.println("Saving black book file.");Serial.flush();
   ourBlackBook->saveToFile();
   mFile->printFile();
   if (ourKeyboard) {
-  	Serial.println("Deleting the keyboard. And setting the global to NULL.");Serial.flush();
     delete ourKeyboard;
     ourKeyboard = NULL;
   }
-  Serial.println("We're done. See ya' starside!");Serial.flush();
 }

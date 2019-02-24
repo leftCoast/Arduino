@@ -117,22 +117,21 @@ bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 		case touchLift		: 								// Classic button events, clicked lets you draw clicked.
 			if (inEvent->mType==touchEvent) {		// If its a touch..
 				if (inRect(locaPt)) {					// - and if its on us..
-					needRefresh	= true;					// Its going to mess with things, we'll need to redraw.
 					clicked		= true;					// Might want to show we're clicked on.
 					doAction();								// Do those things we do.
 					theTouched	= this;					// Tell the world WE are accepting this event set.
+					needRefresh = true;					// touchLift doesn't get a lift event. So it needs the setRefresh here.
 					return true;							// Tell the world the event has been accepted.
 				}
 			} else if (inEvent->mType==liftEvent) {	// We only get lifts if we'd accepted the touch.
-				needRefresh	= true;							// Things have changed, redraw.
 				clicked		= false;							// And we're no longer clicked.
+				needRefresh = true;							// And here.. (see above)
 				return true;									// Again, tell the world the event has been accepted.
 			}
 			break;
 		case fullClick 	:								// Things like edit fields. A click changes their state.
 			if (inEvent->mType==clickEvent) {		// If its a click event, that matches.
 				if (inRect(locaPt)) {					// and if its on us..
-					needRefresh	= true;					// We're going to need to draw.
 					clicked		= false;					// No longer clicked by the time you see this.
 					doAction();								// Do the action.
 					return true;							// We don't set touched because this is a one shot event.
@@ -142,17 +141,16 @@ bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 		case dragEvents	:								// Things that move by touch.
 			if (inEvent->mType==dragBegin) {			// If, the dragging finger has started..
 				if (inRect(locaPt)) {					// and if its on us..
-					needRefresh	= true;					// Things will change, redreaw.
 					doAction(inEvent,locaPt);			// Do our stuff.
 					theTouched	= this;					// Tell the world WE are accepting this event set.
 					return true;
 				}
-			}
-			if (inEvent->mType==dragOn					// still moving,
-				|| inEvent->mType==liftEvent) {		// or has gone away..
-				needRefresh	= true;						// Refresh is good.
-				doAction(inEvent,locaPt);				// Stil dragging? Keep drawing.
-				return true;								// Event has been accepted.
+			} else if (inEvent->mType==dragOn) {		// still moving,
+				doAction(inEvent,locaPt);					// Stil dragging? Keep drawing.
+				return true;									// Event has been accepted.
+			} else if (inEvent->mType==liftEvent) {	// Done dragging.
+				doAction(inEvent,locaPt);					// Do our stuff.
+				return true;									// Again, tell the world the event has been accepted.
 			}
 			break;
 		}
@@ -205,15 +203,13 @@ drawObj*	theTouched = NULL;	// Who's accepted a finger touch on the screen?
 
 void	setFocusPtr(drawObj* newFocus) {
 
-		if (newFocus!=currentFocus) {					// People are lazy. Now they don't need to check.
-			if (newFocus) {								// If we're actually passed in something.
-				if (currentFocus) {						// Check for NULL..
-					currentFocus->setFocus(false);	// Warn them that their star is falling.
-				}
-				currentFocus = newFocus;				// The up and coming..
-				currentFocus->setFocus(true);			// Tell 'em their star is rising!!
-			} else {											// We got a NULL.
-				currentFocus = NULL;						// Just stamp it in.
+		if (newFocus!=currentFocus) {				// People are lazy. Now they don't need to check.
+			if (currentFocus) {						// Check for NULL..
+				currentFocus->setFocus(false);	// Warn them that their star is falling.
+			}
+			currentFocus = newFocus;				// The up and coming..
+			if (currentFocus) {						// If we're actually passed in something.
+				currentFocus->setFocus(true);		// Tell 'em their star is rising!!
 			}
 		}
 	}
@@ -285,7 +281,7 @@ void viewMgr::checkRefresh(void) {
  
  
 // Counts & returns the number of objects in the list.           
-int viewMgr::numObjInList(void) { return (int)listHeader.countTail(); }
+int viewMgr::numObjects(void) { return (int)listHeader.countTail(); }
 
 
 // Finds the "nth" item on the list, index starting at 0. NULL if not found.
@@ -339,7 +335,6 @@ void drawGroup::setGroupRefresh(void) {
 		
 		drawObj* trace;
 
-		//trace = (drawObj*)listHeader.getFirst();
 		trace = theList();										// Make sure we're at the top.
 		while(trace) {
 			trace->setNeedRefresh();
@@ -352,7 +347,6 @@ bool drawGroup::checkGroupRefresh(void) {
 	
 	drawObj* trace;
 
-	//trace = (drawObj*)listHeader.getTailObj(0);
 	trace = theList();										// Make sure we're at the top.
 	while(trace && trace!=(&listHeader)) {
 		if(trace->wantRefresh()) {
@@ -485,89 +479,29 @@ void drawList::addObj(drawObj* newObj) {
 
 	if (mVertical) {
 		itemHeight = max(itemHeight,newObj->height);
-		newObj->setLocation(0,numObjInList()*itemHeight);
+		newObj->setLocation(0,numObjects()*itemHeight);
 	} else {
 		itemWidth = max(itemWidth,newObj->width);
-		newObj->setLocation(numObjInList()*itemWidth,0);
+		newObj->setLocation(numObjects()*itemWidth,0);
 	}
-	drawGroup::addObj(newObj);	
+	newObj->linkToEnd(&listHeader);   									// Put the new guy at the BOTTOM of the list.
+	needRefresh = true;
 }
 
 
-// Good idea after adding your list items to run a reset on them all.
+// Perhaps you deleted an item from your list? This'll patch the hole.
 // This sets the list to item one at top (or left).
-void drawList::resetPositions(void) {
+void drawList::setPositions(int offset) {
 
 	int		i;
 	drawObj*	trace;
 	
-	i = 0;											// Start our multiplier at zero.
+	i = 0;														// Start our multiplier at zero.
 	trace = theList();
-	while(trace!=NULL) {							// Standard loop through link list.
-		trace->y = i++ *  itemHeight;			// Each is moved by itemHeight from the last.
-		trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
-		trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
-	}
-}
-
-
-// Is the list already maxed out that direction?
-// This is about moving by one rect intervals.
-bool drawList::canMove(bool upLeft) {
-
-	drawObj*	trace;
-	
-	if (upLeft) {
-		trace = (drawObj*)theList()->getLast();
-		if (trace) {
-			return !isVisible(trace);
-		}
-	} else {
-		trace = theList();
-		if (trace) {
-			return !isVisible(trace);
-		}
-	}
-	return false;
-}
-
-
-// This should click the list over by one.
-void drawList::movelist(bool upLeft) {
-
-	drawObj*	trace;
-	
-	if (canMove(upLeft)) {
-		trace = theList();
-		if (mVertical) {
-			if (upLeft) {
-				while(trace!=NULL) {							// Standard loop through link list.
-					trace->y = trace->y - itemHeight;	// Each is moved up by itemHeight.
-					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
-					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
-				}
-			} else {
-				while(trace!=NULL) {							// Standard loop through link list.
-					trace->y = trace->y + itemHeight;	// Each is moved up by itemHeight.
-					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
-					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
-				}
-			}
-		} else {
-			if (upLeft) {
-				while(trace!=NULL) {							// Standard loop through link list.
-					trace->x = trace->x - itemWidth;		// Each is moved up by itemWidth.
-					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
-					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
-				}
-			} else {
-				while(trace!=NULL) {							// Standard loop through link list.
-					trace->x = trace->x + itemWidth;		// Each is moved up by itemWidth.
-					trace->setNeedRefresh();				// Just in case, everyione is told to redraw.
-					trace = (drawObj* )trace->dllNext;	// Hop to the next in the list.
-				}
-			}
-		}
+	while(trace!=NULL) {										// Standard loop through link list.
+		trace->y = offset + i++ *  itemHeight;			// Each is moved by itemHeight from the last.
+		trace->setNeedRefresh();							// Just in case, everyione is told to redraw.
+		trace = (drawObj* )trace->dllNext;				// Hop to the next in the list.
 	}
 }
 

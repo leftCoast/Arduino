@@ -23,11 +23,11 @@ class rpnCalc : public panel {
 
           label*          XReg;
           lineObj*        aLine;
-          lineObj*        aLine2;
-          lineObj*        aLine3;
-          lineObj*        aLine4;
+          //lineObj*        aLine2;
+          //lineObj*        aLine3;
+          //lineObj*        aLine4;
           degRadButton*   degRad;
-          anime*          theSprit;
+          //anime*          theSprit;
           calcButton*     btn1;
           calcButton*     btn2;
           calcButton*     btn3;

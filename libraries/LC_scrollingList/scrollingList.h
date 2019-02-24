@@ -32,7 +32,6 @@ class scrollingList : public drawList {
 	virtual	~scrollingList(void);
 
 				void		setScrollValue(float percent);  // Who do we want to see next?
-	virtual	void		drawSelf(void);                 // Possibly want to draw? Or not..
 	virtual	void		offList(void);                  // We off list? If so, here is where you find out.         
 
 				void		dragVertical(event* inEvent);

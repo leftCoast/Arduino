@@ -136,7 +136,6 @@ class PNEditField :  public drawGroup {
           PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  //virtual bool      acceptEvent(event* inEvent,point* locaPt);
   virtual void      drawSelf(void);
   virtual void      setFocus(bool setLoose);
   virtual void      doAction(void);
@@ -193,6 +192,7 @@ class PNList : public /*drawList*/scrollingList {
           void          fillList(void);
           PNListItem*   itemByContact(contact* aContact);
           void          deleteContact(void);
+  virtual void          doAction(event* inEvent,point* locaPt);
 };
 
 
