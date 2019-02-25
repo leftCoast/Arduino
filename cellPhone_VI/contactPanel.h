@@ -140,6 +140,7 @@ class PNEditField :  public drawGroup {
   virtual void      setFocus(bool setLoose);
   virtual void      doAction(void);
           int       getNumChars(void);      // Not including the \0. You may need to add one.
+          void      formatAsPN(void);
           void      getText(char* inBuff);  // You better have added the (1) for the \0.
 
           PNListItem* mOurListItem;

@@ -273,22 +273,25 @@ eventObj* eventMgr::pop(void) { return (eventObj*)queue::pop();	}
 
 void eventMgr::idle(void) {
 	
-	if (mTouched) {								// Last time we checked we were mTouched.
-		if (!screen->touched()) {				// This time we are NOT mTouched.
-			addEvent(liftEvent);				// This means we got a lift.
-			mDragging = false;					// No matter, we're not mDragging.
-			mTouched = false;						// Save off that we're no longer mTouched.
-			if (!ding()) {							// If it was a "short" touch.
-				addEvent(clickEvent);		// That'll pass for a "click".
+	float	moveDist;
+	
+	if (mTouched) {											// Last time we checked we were mTouched.
+		if (!screen->touched()) {							// This time we are NOT mTouched.
+			addEvent(liftEvent);								// This means we got a lift.
+			mDragging = false;								// No matter, we're not mDragging.
+			mTouched = false;									// Save off that we're no longer mTouched.
+			if (!ding()) {										// If it was a "short" touch.
+				addEvent(clickEvent);						// That'll pass for a "click".
 			}
-		} else {										// Else, still mTouched.
-			mLastPos = screen->getPoint();
-			if (ding()) {							// If our timer expired, its a drag.
-				if (!mDragging) {					// If we we weren't already dagging..
-					addEvent(dragBegin);		// Create a drag begin event.
-					mDragging = true;				// Note that we are mDragging.
-				} else if (isEmpty()) {			// Else if already mDragging AND we have an empty queue.
-					addEvent(dragOn);			// We pop in a dragOn event. Don't want to swamp the queue.
+		} else {													// Else, still mTouched.
+			mLastPos = screen->getPoint();				//	Update the last point we saw.
+			moveDist = distance(mTouchPos,mLastPos);	// Calculate the total distance.	
+			if (ding()||moveDist>DRAG_DIST) {			// If our timer expired or were moving, it's a drag.
+				if (!mDragging) {								// If we we weren't already dagging..
+					addEvent(dragBegin);						// Create a drag begin event.
+					mDragging = true;							// Note that we are mDragging.
+				} else if (isEmpty()) {						// Else if already mDragging AND we have an empty queue.
+					addEvent(dragOn);							// We pop in a dragOn event. Don't want to swamp the queue.
 				}
 			}
 		}

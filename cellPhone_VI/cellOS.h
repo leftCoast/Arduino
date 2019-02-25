@@ -133,7 +133,7 @@ class homeScreen : public homePanel {
           appIcon*    breakoutIcon;
           appIcon*    phoneIcon;
           timeObj     statusTimer;
-          //textView*   mText;
+          textView*   mText;
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
   

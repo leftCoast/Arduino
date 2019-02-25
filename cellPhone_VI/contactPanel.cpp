@@ -5,6 +5,7 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 #include <lineObj.h>
+#include <PNLabel.h>
 
 #include "contactPanel.h"
 
@@ -74,6 +75,37 @@ blockFile*      mFile;
 contactList*    ourBlackBook;
 keyboard*       ourKeyboard = NULL;
 contact*        currContact = NULL;
+
+
+void formatPN(label* numField);
+
+
+// *****************************************************
+// *********************  formatPN  ********************
+// *****************************************************
+
+
+void formatPN(label* numField) {
+ 
+  PNLabel formatter(1,1,1,1,1);
+  int     numBytes;
+  char*   textBuff;
+  
+  textBuff = NULL;
+  numBytes = numField->getNumChars() + 1;
+  if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+    numField->getText(textBuff);
+    formatter.setValue(textBuff);
+    resizeBuff(0,(uint8_t**)&textBuff);
+    numBytes = formatter.getNumChars() + 1;
+    if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+      formatter.getText(textBuff);
+      numField->setValue(textBuff);
+      resizeBuff(0,(uint8_t**)&textBuff);
+    }
+  }
+}
+
 
 
 // *****************************************************
@@ -243,13 +275,13 @@ PNEditField::~PNEditField(void) {  }
 
 
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
-
+ 
 
 // If we get focus, we pass it on to the edit field. When the edit field
 // looses focus, it will tell us by calling this this method. SO we don't
 // "unset" the edit field's focus, we only set it.
 void PNEditField::setFocus(bool setLoose) {
-
+  
   if (setLoose) {
     mOurListItem->startedEdit();
     mEditField->setColors(&textSelectColor,&editFieldBColor);
@@ -277,6 +309,9 @@ void PNEditField::doAction(void) { setFocusPtr(this); }
 
 // Not including the \0. You may need to add one.
 int PNEditField::getNumChars(void) { return mEditField->getNumChars(); }
+
+
+void PNEditField::formatAsPN(void) { formatPN(mEditField); }
 
 
 // You better have added the (1) for the \0.
@@ -357,6 +392,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
   currContact = NULL;
   buff = NULL;
   if(theField==pNumEditField) {
+    pNumEditField->formatAsPN();
     numChars = pNumEditField->getNumChars() + 1;
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       pNumEditField->getText(buff);
@@ -541,6 +577,7 @@ void contactPanel::drawSelf(void) {
 
 void contactPanel::closing(void) {
 
+  setFocusPtr(NULL);
   ourBlackBook->saveToFile();
   mFile->printFile();
   if (ourKeyboard) {

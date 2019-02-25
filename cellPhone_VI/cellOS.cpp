@@ -119,8 +119,8 @@ trashBtn::~trashBtn(void) {  }
 #define BMP_AX        (BMP_W - BMP_AW) / 2
 #define BMP_AY        BMP_Y + (BMP_H - BMP_AH) / 2
 
-//#define out     mText->appendText
-//#define outln   mText->appendText("\n")
+#define out     mText->appendText
+#define outln   mText->appendText("\n")
 
 homeScreen::homeScreen(void)
   : homePanel() {
@@ -144,10 +144,10 @@ homeScreen::homeScreen(void)
   iconX=iconX+HP_ICON_XSTEP;
   breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
   
-  //colorObj aColor(LC_NAVY);
-  //mText = new textView(10,10,220,150);
-  //mText->setTextColors(&white,&aColor);
-  //addObj(mText);
+  colorObj aColor(LC_NAVY);
+  mText = new textView(10,20,220,150);
+  mText->setTextColors(&white,&aColor);
+  addObj(mText);
   statusTimer.setTime(1500);
 }
 
@@ -173,7 +173,7 @@ void homeScreen::setup(void) {
 
 
 void  homeScreen::showStatus(void) {
-  /*
+  
   mText->setText("");
   outln;
   out("           cellStatus");outln;outln;
@@ -204,7 +204,7 @@ void  homeScreen::showStatus(void) {
   outln;
   out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
   out(" Net Time   : ");out(statusReg.networkTime);out("\n");
-  */
+  
 }
 
 
@@ -213,20 +213,20 @@ void homeScreen::loop(void) {
   if (statusTimer.ding()) {
     mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
     mRSSI->setRSSI(statusReg.RSSI);
-    //showStatus();
+    showStatus();
     statusTimer.start();
   }
 }
 
 
 void homeScreen::drawSelf(void) { 
-  //colorObj aColor(LC_NAVY);
-  //screen->fillScreen(&aColor);
+  colorObj aColor(LC_NAVY);
+  screen->fillScreen(&aColor);
 
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
   //unsigned long startT = millis();
-  screen->fillRect(BMP_X,BMP_Y,BMP_W,BMP_H,&white);
-  mBackImage->drawBitmap(BMP_AX,BMP_AY);
+  //screen->fillRect(BMP_X,BMP_Y,BMP_W,BMP_H,&white);
+  //mBackImage->drawBitmap(BMP_AX,BMP_AY);
   //unsigned long endT = millis();
   //Serial.println(endT-startT);
   
