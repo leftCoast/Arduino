@@ -2,6 +2,8 @@
 #include "phone.h"
 #include <cellCommon.h>
 #include <drawDelete.h>
+#include <resizeBuff.h>
+#include <PNLabel.h>
 #include "cellManager.h"
 #include	"../../cellOS.h"
 #include "../cellListener/cellListener.h"
@@ -403,10 +405,20 @@ void phone::answerCall(void) {
 
 void phone::startCall(void) {
 
-  if (!mConnected) {
-    out("Calling..");
-    mCallingID = ourCellManager.sendCommand(makeCall,mRawPN,true);
-  }
+	char*	numBuff;
+	
+	numBuff = NULL;																			// Ok, init numBuff for later.
+	if (!mConnected) {																		// If we're not connected..
+   	if (resizeBuff(numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
+   		numDisplay->getText(numBuff);													// Grab the number off the display.
+   		filterPNStr(numBuff);															// Filter the formatting out of it.
+			mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
+			resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
+			out("Calling..");																	// Show the user we're doing it.
+		} else {																					// Or else we didn't get the RAAM?
+			out("Memory error?!");															// Show the user we ran out of memory.
+		}
+	}																								// Already connected? Just ignore everything.
 }
 
 
@@ -421,28 +433,30 @@ void phone::startHangup(void) {
 
 void phone::checkCall(void) {
 
-  int           numBytes;
-  byte          reply;
+	int           numBytes;
+	byte          reply;
   
-  if (mCallingID!=-1) {                                       // Working on a call?
-    if (ourCellManager.progress(mCallingID)==com_holding) {   // We found it and its holding a reply?
-      numBytes = ourCellManager.numReplyBytes(mCallingID);     // This is how big the reply is.
-      if (numBytes==1) {                                      // We're looking for a one byte reply.
-        ourCellManager.readReply(mCallingID,&reply);          // Grab the byte.
-        if (reply==0) {                                       // Is it a zero?
-          mConnected = true;                                  // Cool!, we're connected!
-          out("Connected.");
-        }
-      } else {
-        ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
-        out("Connect error.");
-      }
-      mCallingID = -1;                                        // In any case, we're done with the command.
-    } else if (ourCellManager.progress(mCallingID)==com_missing) {
-      out("Call failed.");
-      mCallingID = -1;
-    }
-  }
+	if (mCallingID!=-1) {														// Working on a call?
+		if (ourCellManager.progress(mCallingID)==com_holding) {		// We found it and its holding a reply?
+			numBytes = ourCellManager.numReplyBytes(mCallingID);		// This is how big the reply is.
+			if (numBytes==1) {													// We're looking for a one byte reply.
+				ourCellManager.readReply(mCallingID,&reply);				// Grab the byte.
+				if (reply==0) {													// Is it a zero?
+					mConnected = true;											// Cool!, we're connected!
+					out("Connected.");											// Show that the call's going through.
+				} else {
+					out("Connect error.");										// FONA passed back an error.
+				}
+			} else {																	// Internal communication error.
+				ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
+				out("Internal error.");
+			}
+			mCallingID = -1;                                        // In any case, we're done with the command.
+		} else if (ourCellManager.progress(mCallingID)==com_missing) {
+			out("No response.");
+			mCallingID = -1;
+		}
+	}
 }
 
 
@@ -469,10 +483,13 @@ void phone::checkHangup(void) {
           ourCellManager.dumpBuff();                        // Unknown what it is. Toss it.
           out("Reply error.");                              // Something weird going on..
         }
+        mHangupID = -1;													// This command is done. Shouldn't we note that?
       break;
-      case com_complete :                                   // All this means is it gave us back a reply. (Any reply)                           
+      case com_complete :  break;                           // All this means is it gave us back a reply. (Any reply)                           
       case com_missing  :                                   // Possibly timed out or we already got it.
-        mHangupID = -1;
+      	out("No response.");
+        	mConnected = false;											// If the FONA crashed, we're not connected anymore..
+        	mHangupID = -1;
       break;
     }
   }

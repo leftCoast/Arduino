@@ -6,7 +6,8 @@
 
 // Make a button with a 32x32 pixel icon stored in a .bmp file.
 // Seeing its expecting a 32x32 pixel file we can simplify a bunch.
-
+//
+// Well, so much for fixed size. Now its a square thing of any size.
 
 class iconButton :	public drawObj,
 							public bmpPipe {

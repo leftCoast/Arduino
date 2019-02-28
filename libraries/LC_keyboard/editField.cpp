@@ -177,6 +177,5 @@ void editField::setFocus(bool setLoose) {
 	if (!setLoose && parent) {
 		parent->setFocus(false);
 	}
-	Serial.print("Focus : ");Serial.println(focus);
 }
     

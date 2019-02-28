@@ -166,11 +166,10 @@ void addrStarter::begin(char* filePath,bool resetFile) {
       aContact->setLastName("Horning");
       aContact->setCompanyName("Dock rat");
       ourBlackBook->saveToFile();
-      Serial.println("Saved to file.");Serial.flush();
+      //Serial.println("Saved to file.");Serial.flush();
       //mFile->printFile();
       //Serial.flush();
     } else {
-      mFile->printFile();
       ourBlackBook = new contactList(mFile);
     }
   }
@@ -610,7 +609,6 @@ void contactPanel::closing(void) {
 
   setFocusPtr(NULL);
   ourBlackBook->saveToFile();
-  mFile->printFile();
   if (ourKeyboard) {
     delete ourKeyboard;
     ourKeyboard = NULL;

@@ -148,9 +148,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	int				numBytes;
 	unsigned long*	longPtr;
 	int				i;
-	
-	Serial.println("Writing contact to buff..");Serial.flush();
-	
+		
 	if (mErased) return;							// We're dead. We ain't playing this game anymore.	
 	offset = 0;                       
 	numBytes = strlen(mPN) + 1;             // Write out phone number.
@@ -188,8 +186,6 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	*longPtr = mMsgID;
   
 	mChanged = false;
-	
-	Serial.println("That should have stuffed this contact into the buff..");Serial.flush();
 }
 
 
@@ -297,17 +293,10 @@ bool contactList::saveSubFileBuffs(void) {
 
 	contact*        trace;
 
-	Serial.println(F("-------------------------------------"));
-	Serial.println(F("------ Saving contacts to file ------"));
-	Serial.println(F("-------------------------------------"));
 	trace = (contact*)getFirst();       // Grab the first contact on our list.
 	while(trace) {                      // While we have contacts..
-		Serial.println("Grabbing contact to maybe save.");Serial.flush();
-		trace->printContact();
 		if (trace->mChanged) {            // If they have been edited (or new).
-			Serial.println("This one's changed, saving..");Serial.flush();
 			trace->saveToFile();            // Save them to disk.
-			Serial.println("All saved, next!");Serial.flush();
 		}
 		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
 	}  
@@ -322,14 +311,10 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	int             index;
 	unsigned long*  longPtr;
 
-	Serial.println(F("-------------------------------------"));
-	Serial.println(F("---- Saving contact list to file ----"));
-	Serial.println(F("-------------------------------------"));
 	index = 0;                          // Starting at zero, usually a good plan.
 	longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
 	trace = (contact*)getFirst();       // Grab the first contact on our list.
 	while(trace) {                      // While we have contacts..
-		Serial.print(F("ID# : "));Serial.println(trace->mID);Serial.flush();
 		longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
 		index++;                          // Bump up index by one.
 		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.

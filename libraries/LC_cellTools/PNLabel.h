@@ -3,6 +3,10 @@
 
 #include <label.h>
 
+// Handy function to strip any un-dial-able characters out of a
+// c string. I'll just leave it here in case someone wants to use it.
+void filterPNStr(char* str);
+
 
 class PNLabel : public label {
 
