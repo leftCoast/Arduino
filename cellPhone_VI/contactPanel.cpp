@@ -115,7 +115,7 @@ void formatPN(label* numField) {
 
 addrStarter::addrStarter(void) {  }
 addrStarter::~addrStarter(void) {  }
-
+//13751 daybreak lane.
 void addrStarter::begin(char* filePath,bool resetFile) {
 
   mFile = new blockFile(filePath);
@@ -129,16 +129,46 @@ void addrStarter::begin(char* filePath,bool resetFile) {
       aContact = ourBlackBook->findOrAddContact("14083400352");
       aContact->setNickName("Me");
       aContact->setFirstName("Jim");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Left Coast");
       aContact = ourBlackBook->findOrAddContact("13603335200");
       aContact->setNickName("AllieBob");
       aContact->setFirstName("Alex");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
       aContact = ourBlackBook->findOrAddContact("13607084218");
       aContact->setNickName("Vern");
       aContact->setFirstName("Julie");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Slave");
+      aContact = ourBlackBook->findOrAddContact("13603332799");
+      aContact->setNickName("Shelbers");
+      aContact->setFirstName("Shelby");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("UW");
+      aContact = ourBlackBook->findOrAddContact("13609298457");
+      aContact->setNickName("Danny-D");
+      aContact->setFirstName("Daniel");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Western");
+      aContact = ourBlackBook->findOrAddContact("13603337892");
+      aContact->setNickName("Guy");
+      aContact->setFirstName("Guy");
+      aContact->setLastName("Masters");
+      aContact->setCompanyName("Shell Oil");
+      aContact = ourBlackBook->findOrAddContact("13608403255");
+      aContact->setNickName("Tyler");
+      aContact->setFirstName("Tyler");
+      aContact->setLastName("Smith");
+      aContact->setCompanyName("Contractor");
+      aContact = ourBlackBook->findOrAddContact("13603593687");
+      aContact->setNickName("Tycho");
+      aContact->setFirstName("Tycho");
+      aContact->setLastName("Horning");
+      aContact->setCompanyName("Dock rat");
       ourBlackBook->saveToFile();
+      Serial.println("Saved to file.");Serial.flush();
+      //mFile->printFile();
+      //Serial.flush();
     } else {
       mFile->printFile();
       ourBlackBook = new contactList(mFile);
@@ -338,6 +368,7 @@ PNListItem::PNListItem(PNList* ourList,contact* inContact)
 
   aRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
   pNumEditField = new PNEditField(&aRect,mContact->mPN,this);
+  pNumEditField->formatAsPN();
   addObj(pNumEditField);
 
 

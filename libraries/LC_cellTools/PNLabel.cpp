@@ -1,4 +1,36 @@
 #include "PNLabel.h"
+#include <resizeBuff.h>
+   
+   
+// Drop in a string and this'll strip out anything
+// that's not a "dial-able" character.
+void filterPNStr(char* str) {
+
+	int numChars;
+	int index;
+
+	if (str) {									// Samity, they could pass in a NULL. They do that now and then.
+		numChars = strlen(str);				// Ok have something. Lets count 'em.
+		index = 0;								// We'll use this to index mRawPN.
+		for(int i=0;i<=numChars;i++) {	// We'll loop though including the EOL.
+			switch(str[i]) {					// There may be better ways of doing this,
+				case '0'  :						//  but this makes it realaly obvious what we're doing.
+				case '1'  :
+				case '2'  :
+				case '3'  :
+				case '4'  :
+				case '5'  :
+				case '6'  :
+				case '7'  :
+				case '8'  :
+				case '9'  :
+				case '#'  :
+				case '*'  :
+				case '\0' : str[index++] = str[i]; break;  // Stuff in the "filtered" char.
+			}
+		}
+	}
+}
 
 
 
@@ -6,7 +38,6 @@ PNLabel::PNLabel(int inLocX, int inLocY, int inWidth,int inHeight,int textSize)
   : label(inLocX,inLocY,inWidth,inHeight) {
     
   setTextSize(textSize);
-  //setColors(&blue,&white);
   mFormattedPN  = NULL;
   mRawPN        = NULL;
 }
@@ -19,56 +50,50 @@ PNLabel::~PNLabel(void) {
 }
 
 
+// This sets our label to a nice formatted phone number string.
 void PNLabel::setValue(char* str) {
 
-  int numChars;
-  int index;
-  
-  if (str) {                              // Samity, they could pass in a NULL. They do that now and then.
-    numChars = strlen(str);               // Ok have something. Lets count 'em.
-    if (numChars) {                       // Got some chars then.
-      if (mRawPN) {                       // Work on setting up mRawPN as a buffer.
-        free(mRawPN);                     // Not NULL? Free it.
-      }
-      mRawPN = (char*)malloc(numChars+1); // Grab some RAM.
-      if (mRawPN) {                       // If we got the RAM..
-        index = 0;                        // We'll use this to index mRawPN.
-        for(int i=0;i<=numChars;i++) {    // We'll loop though including the EOL.
-          switch(str[i]) {                // There may be better ways of doing this,
-            case '0'  :                   //  but this makes it realaly obvious what we're doing.
-            case '1'  :
-            case '2'  :
-            case '3'  :
-            case '4'  :
-            case '5'  :
-            case '6'  :
-            case '7'  :
-            case '8'  :
-            case '9'  :
-            case '#'  :
-            case '*'  :
-            case '\0' : mRawPN[index++] = str[i]; break;  // Stuff in the "filtered" char.
-          }
-        }
-        formatPN();                     // Create the formatted version.
-        label::setValue(mFormattedPN);  // Set the label with the formatted string.
-        free(mRawPN);                   // Dump mRawPN.
-        mRawPN = NULL;                  // Mark it.
-        return;                         // Basically, if it was formattable, we formatted it.
-      }                                 // We exit now.
-    }
-  }
-  label::setValue(str);                 // Formatter didn't like something, just pass it on.                
+	int numBytes;
+	
+	
+	if (str) {																		// No NULLs!
+		filterPNStr(str);															// Remove the "junk".
+		numBytes = strlen(str)+1;												// Count what's left over.
+		if (resizeBuff(numBytes,(uint8_t**)&mRawPN)) {					// Grab some RAM.
+			strcpy(mRawPN,str);													// copy this over to our raw string
+			numBytes = strlen(mRawPN) + 8; 									// b ( ) b - \0;
+  			if (resizeBuff(numBytes,(uint8_t**)&mFormattedPN)) {		// Grab RAM for our formatted version.
+				formatPN();															// Create the formatted version.
+				label::setValue(mFormattedPN);								// Set the label with the formatted string.
+				resizeBuff(0,(uint8_t**)&mFormattedPN);					// Recycle our formattedPN string.
+			} else {
+				label::setValue("Out of RAM!");								// Set the label; We're out of RAM!"
+			}
+			resizeBuff(0,(uint8_t**)&mRawPN);								// Recycle mRawPN's RAM.
+		} else {
+			label::setValue("Out of RAM!");									// Set the label; We're out of RAM!"
+		}
+	} else {
+		label::setValue("");														// NULLs look like this.
+	}
 }
 
 
-void PNLabel::formatPN(void) {
+// How big of a buffer should you create to fit the raw number string?
+// Well, this should be more than big enough.
+int PNLabel::getRawNumBytes(void) { return strlen(buff) + 1; }
 
-  if (mFormattedPN) {
-    free(mFormattedPN);
-    mFormattedPN = NULL;
-  }
-  mFormattedPN = (char*)malloc(strlen(mRawPN) + 8);  // b ( ) b - \0;
+
+void PNLabel::getRawPN(char* inBuff) {
+
+	if (buff) {
+		strcpy(inBuff,buff);
+	}
+}
+				
+				
+void PNLabel::formatPN(void) {
+  
   switch(mRawPN[0]) {
     case '1'  : formatOne();    break;
     case '*'  : formatStar();   break;
@@ -78,7 +103,7 @@ void PNLabel::formatPN(void) {
 }
 
 
-void PNLabel::formatOne() {
+void PNLabel::formatOne(void) {
 
   int numChars;
 
@@ -167,7 +192,7 @@ void PNLabel::formatOne() {
 }
 
 
-void PNLabel::formatStar() {
+void PNLabel::formatStar(void) {
 
   int numChars;
 
@@ -200,7 +225,7 @@ void PNLabel::formatStar() {
 }
 
 
-void PNLabel::formatHash() {
+void PNLabel::formatHash(void) {
 
   int numChars;
 
@@ -219,7 +244,7 @@ void PNLabel::formatHash() {
 }
 
 
-void PNLabel::formatStd() {
+void PNLabel::formatStd(void) {
 
   int numChars;
 

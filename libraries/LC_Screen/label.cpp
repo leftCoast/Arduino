@@ -1,5 +1,7 @@
 #include "label.h"
- 
+#include <resizeBuff.h>
+
+
 char  temp[TEMP_BUFF_SIZE];
 
 label::label() : 
@@ -59,7 +61,7 @@ label::label(rect* inRect,char* inText,int textSize)
 
 
 label::~label() { 
-  resizeBuff(0); 
+  resizeBuff(0,(uint8_t**)&buff); 
 }
 
 
@@ -71,19 +73,6 @@ void label::initLabel(void) {
   buff = NULL;
   prec = DEF_PRECISION;
   needRefresh = true;
-}
-
-
-bool label::resizeBuff(int numBytes) {
-	if (buff!=NULL) {
-		free(buff);
-		buff = NULL;
-	}
-	if (numBytes>0) {
-		buff = (char*)malloc(numBytes);
-		return buff != NULL;
-	}
-	return true;			// Asking for none, got none.
 }
 
 
@@ -159,12 +148,12 @@ void label::setValue(char* str) {
 	
 	
 	if (!str) {
-		if (resizeBuff(1)) {
+		if (resizeBuff(1,(uint8_t**)&buff)) {
 			buff[0] = '\0';
 		}
 	} else {
 		numChars = strlen(str) + 1;
-		if (resizeBuff(numChars)) {
+		if (resizeBuff(numChars,(uint8_t**)&buff)) {
 			strcpy (buff,str);
 		}
 	}

@@ -4,6 +4,12 @@
 #include <lists.h>
 #include <fileBuff.h>
 
+
+// Handy function to strip any un-dial-able characters out of a
+// c string. I'll just leave it here in case someone wants to use it.
+void filterPNStr(char* str);
+
+
 // **************************************************
 // ********************  contact ********************
 // **************************************************
@@ -28,7 +34,7 @@ class contact :	public linkListObj,
 	virtual	unsigned long	loadFromBuff(char* buffPtr,unsigned long maxBytes);
 	virtual	void				eraseFromFile(void);
 				void				printContact(void);
-				
+					
 				char*				mPN;
 				char*				mNickName;
 				char*				mFirstName;

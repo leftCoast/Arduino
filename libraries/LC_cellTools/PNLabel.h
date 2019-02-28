@@ -6,19 +6,21 @@
 
 class PNLabel : public label {
 
-  public:
-          PNLabel(int inLocX, int inLocY, int inWidth,int inHeight,int textSize);
-  virtual ~PNLabel(void);
+	public:
+				PNLabel(int inLocX, int inLocY, int inWidth,int inHeight,int textSize);
+	virtual	~PNLabel(void);
 
-  virtual void  setValue(char* str);
-          void  formatPN(void);
-          void  formatOne(void);
-          void  formatStar(void);
-          void  formatHash(void);
-          void  formatStd(void);
+	virtual	void  setValue(char* str);
+				int	getRawNumBytes(void);
+				void	getRawPN(char* inBuff);
+				void  formatPN(void);
+				void  formatOne(void);
+				void  formatStar(void);
+				void  formatHash(void);
+				void  formatStd(void);
 
-          char* mFormattedPN;
-          char* mRawPN;
+				char* mFormattedPN;
+				char* mRawPN;
 };
 
 

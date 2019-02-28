@@ -1,7 +1,6 @@
 #include "contactList.h"
 #include "resizeBuff.h"
-
-
+#include "PNLabel.h"			// For the filterPN() function.
 
 // **************************************************
 // ********************  contact ********************
@@ -19,7 +18,7 @@ contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,cha
 	mCompanyName	= NULL;
 	mMsgID			= msgID;
 	mErased			= false;
-	setPN(PN);					// This sets the "i've been changed" thing.
+	setPN(PN);					// This sets the "I've been changed" thing.
 }
 
 
@@ -33,7 +32,7 @@ contact::contact(blockFile* inFile,unsigned long blockID)
 	mLastName		= NULL;
 	mCompanyName	= NULL;
 	mErased			= false;
-	readFromFile();			// This sets the "i've been changed" thing.
+	readFromFile();			// This sets the "I've been changed" thing.
 }
 
 
@@ -46,15 +45,35 @@ contact::~contact(void) {
 	if (mCompanyName) free(mCompanyName);
 }
 
+/*
+void contact::setPN(char* PN) {
+
+	int numChars;
+	char*	temp;
+
+	temp = NULL;												// Initialize..
+	numChars = strlen(PN) + 1;								// Enough room.
+	if (resizeBuff(numChars,(uint8_t**)&temp)) {		// Grab some RAM
+		strcpy(temp,PN);										// Make local copy.
+		filterPNStr(temp);									// Filter out the gunk.
+		numChars = strlen(temp) + 1;						// Enough room, again.
+		if (resizeBuff(numChars,(uint8_t**)&mPN)) {	// Grab some more RAM. We'll keep this chunk.
+			strcpy(mPN,temp);									// Copy the number over.
+			mChanged = true;									// And flag the change.
+		}
+		resizeBuff(0,(uint8_t**)&temp);					// Recycle temp;
+	}
+}
+*/
 
 void contact::setPN(char* PN) {
 
   int numChars;
 
-
   numChars = strlen(PN) + 1;
   if (resizeBuff(numChars,(uint8_t**)&mPN)) {
     strcpy(mPN,PN);
+    filterPNStr(mPN);
     mChanged = true;
   }
 }
@@ -129,7 +148,9 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	int				numBytes;
 	unsigned long*	longPtr;
 	int				i;
-
+	
+	Serial.println("Writing contact to buff..");Serial.flush();
+	
 	if (mErased) return;							// We're dead. We ain't playing this game anymore.	
 	offset = 0;                       
 	numBytes = strlen(mPN) + 1;             // Write out phone number.
@@ -162,10 +183,13 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	}
 	offset = offset + i;
 	
-	longPtr = (unsigned long*)&(buffPtr[i+offset]);
+	//longPtr = (unsigned long*)&(buffPtr[i+offset]);
+	longPtr = (unsigned long*)&(buffPtr[offset]);
 	*longPtr = mMsgID;
   
 	mChanged = false;
+	
+	Serial.println("That should have stuffed this contact into the buff..");Serial.flush();
 }
 
 
@@ -271,42 +295,46 @@ unsigned long contactList::calculateBuffSize(void) { return sizeof(unsigned long
   
 bool contactList::saveSubFileBuffs(void) {
 
-  contact*        trace;
+	contact*        trace;
 
 	Serial.println(F("-------------------------------------"));
 	Serial.println(F("------ Saving contacts to file ------"));
 	Serial.println(F("-------------------------------------"));
-  trace = (contact*)getFirst();       // Grab the first contact on our list.
-  while(trace) {                      // While we have contacts..
-    if (trace->mChanged) {            // If they have been edited (or new).
-    	trace->printContact();
-      trace->saveToFile();            // Save them to disk.
-    }
-    trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
-  }  
-  return true;                        // Easy peasy, return true;
+	trace = (contact*)getFirst();       // Grab the first contact on our list.
+	while(trace) {                      // While we have contacts..
+		Serial.println("Grabbing contact to maybe save.");Serial.flush();
+		trace->printContact();
+		if (trace->mChanged) {            // If they have been edited (or new).
+			Serial.println("This one's changed, saving..");Serial.flush();
+			trace->saveToFile();            // Save them to disk.
+			Serial.println("All saved, next!");Serial.flush();
+		}
+		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
+	}  
+	return true;                        // Easy peasy, return true;
 }
 
 
  
 void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 
-  contact*        trace;
-  int             index;
-  unsigned long*  longPtr;
+	contact*        trace;
+	int             index;
+	unsigned long*  longPtr;
 
 	Serial.println(F("-------------------------------------"));
 	Serial.println(F("---- Saving contact list to file ----"));
 	Serial.println(F("-------------------------------------"));
-  index = 0;                          // Starting at zero, usually a good plan.
-  longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
-  trace = (contact*)getFirst();       // Grab the first contact on our list.
-  while(trace) {                      // While we have contacts..
-  		Serial.print(F("ID# : "));Serial.println(trace->mID);Serial.flush();
-    longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
-    index++;                          // Bump up index by one.
-    trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
-  }  
+	index = 0;                          // Starting at zero, usually a good plan.
+	longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
+	trace = (contact*)getFirst();       // Grab the first contact on our list.
+	while(trace) {                      // While we have contacts..
+		Serial.print(F("ID# : "));Serial.println(trace->mID);Serial.flush();
+		longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
+		index++;                          // Bump up index by one.
+		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
+	}
+	  
 }
 
 
