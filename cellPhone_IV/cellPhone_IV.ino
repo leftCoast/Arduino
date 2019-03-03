@@ -28,9 +28,10 @@ void setup() {
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
+    digitalWrite(13, LOW);
     ourComObj.begin(9600);                // For talking to the GUI.
     if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
-      //digitalWrite(13, HIGH);
+      digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
     resetFONA();                          // Hit reset, see if it'll come online.

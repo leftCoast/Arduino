@@ -413,8 +413,9 @@ void phone::startCall(void) {
    		numDisplay->getText(numBuff);													// Grab the number off the display.
    		filterPNStr(numBuff);															// Filter the formatting out of it.
 			mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
+			out(numBuff);
 			resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
-			out("Calling..");																	// Show the user we're doing it.
+			//out("Calling..");																// Show the user we're doing it.
 		} else {																					// Or else we didn't get the RAAM?
 			out("Memory error?!");															// Show the user we ran out of memory.
 		}
@@ -424,9 +425,9 @@ void phone::startCall(void) {
 
 void phone::startHangup(void) {
 
-  if (mConnected) {
-    out("Hanging up..");
-    mHangupID = ourCellManager.sendCommand(hangUp,true);
+  if (mConnected && mHangupID==-1) {								// If we are connected and not already trying to hang up.
+    out("Hanging up..");												// Show were going to try hanging up.
+    mHangupID = ourCellManager.sendCommand(hangUp,true);		// Create the command and send it on its way.
   }
 }
 
@@ -485,7 +486,9 @@ void phone::checkHangup(void) {
         }
         mHangupID = -1;													// This command is done. Shouldn't we note that?
       break;
-      case com_complete :  break;                           // All this means is it gave us back a reply. (Any reply)                           
+      case com_complete :												// All this means is it gave us back a reply. (Any reply)
+      	out("A reply arrived.");
+      break;                             
       case com_missing  :                                   // Possibly timed out or we already got it.
       	out("No response.");
         	mConnected = false;											// If the FONA crashed, we're not connected anymore..

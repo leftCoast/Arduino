@@ -302,7 +302,7 @@ bool qCSlave::replyBuff(byte* buff,byte buffLen) {
 	if (mState == listening) {				// Yes, listening is still technically the correct state for a reply.
 		if (resizeBuff(buffLen+1)) {		// Stretch the buffer to fit.		
 			mBuff[0] = buffLen;
-			for (i=0;i<=buffLen;i++) {		// Save off he info.
+			for (i=0;i<buffLen;i++) {		// Save off he info. THAT IS WRONG!
 				mBuff[i+1]=buff[i];
 			}
 			mNumBytesMoved = 0;				// Nothing's moved yet.
