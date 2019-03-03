@@ -1,8 +1,7 @@
 #include <idlers.h>
 #include <lists.h>
-#include <timeObj.h>
 #include <quickCom.h>
-#include <cellCommon.h>
+#include "cellCommon.h"
 
 #include <SoftwareSerial.h>
 #include "Adafruit_FONA.h"
@@ -18,19 +17,18 @@ Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 qCSlave   ourComObj;
 
 bool    FONAOnline;
-timeObj toneTime;
-bool    playingSong;
 
 void setup() {
 
-    playingSong = false;
     FONAOnline = false;
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
-    digitalWrite(13, LOW);
+    digitalWrite(13, HIGH);
     ourComObj.begin(9600);                // For talking to the GUI.
     if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
+      digitalWrite(13, LOW);
+    } else {
       digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.

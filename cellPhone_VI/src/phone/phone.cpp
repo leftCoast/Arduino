@@ -409,15 +409,20 @@ void phone::startCall(void) {
 	
 	numBuff = NULL;																			// Ok, init numBuff for later.
 	if (!mConnected) {																		// If we're not connected..
-   	if (resizeBuff(numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
-   		numDisplay->getText(numBuff);													// Grab the number off the display.
-   		filterPNStr(numBuff);															// Filter the formatting out of it.
-			mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
-			out(numBuff);
-			resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
-			//out("Calling..");																// Show the user we're doing it.
-		} else {																					// Or else we didn't get the RAAM?
-			out("Memory error?!");															// Show the user we ran out of memory.
+		if (	statusReg.networkStat==NS_registeredHome||
+				statusReg.networkStat==NS_registeredRoaming ) {
+			if (resizeBuff(numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
+				numDisplay->getText(numBuff);													// Grab the number off the display.
+				filterPNStr(numBuff);															// Filter the formatting out of it.
+				mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
+				out(numBuff);
+				resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
+				out("Calling..");																// Show the user we're doing it.
+			} else {																					// Or else we didn't get the RAAM?
+				out("Memory error?!");															// Show the user we ran out of memory.
+			}
+		} else {
+			out("No network.");
 		}
 	}																								// Already connected? Just ignore everything.
 }
