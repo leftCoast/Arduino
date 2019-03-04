@@ -70,8 +70,8 @@ class qCSlave : public idler, public timeObj {
 	public:
 				enum slaveStates { offline, listening, recieveing, holding, replying };
 				
-				qCSlave(void);		// Get our port and set initial values.
-	virtual	~qCSlave(void);	// We're done here.
+				qCSlave(int numBytes=0);		// Get our port and set initial values.
+	virtual	~qCSlave(void);					// We're done here.
 
 				void				begin(int baud);							// Get the baud rate and fire up the connection.
 				void				setComTimeout(int timeOutMS=1000);	// How long we will wait for command to complete.
@@ -90,6 +90,8 @@ class qCSlave : public idler, public timeObj {
 				byte			mNumBytesMoved;
 				byte			mError;
 				byte*			mBuff;
+				bool			fixeBuff;
+
 };
 #endif
 

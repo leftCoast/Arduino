@@ -34,9 +34,6 @@ char        inBuff[30];
 
 void setup() {
 
-    
-    FONAOnline = false;
-  
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
@@ -47,6 +44,7 @@ void setup() {
       digitalWrite(13, HIGH);
     }
     pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
+    FONAOnline = false;
     resetFONA();                          // Hit reset, see if it'll come online.
 }
 

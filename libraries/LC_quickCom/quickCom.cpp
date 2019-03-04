@@ -221,17 +221,31 @@ bool qCMaster::resizeBuff(byte numBytes) {
 // ***************************************************************************
 
 
-qCSlave::qCSlave(void) {
+// The slave constructor. Now, for you smaller processors. You can set a fixed buffer size
+// and it will allocate that buffer once and use it unchanged for the duration. Keeping
+// your precious memory un-hacked. You should allocate one byte more that your expected
+// message size in or out for internal use.
+qCSlave::qCSlave(int numBytes) {
 
-	mNumBytesMoved = 0;
-	mError = NO_ERR;
-	mBuff = NULL;
-	setComTimeout(SLAVE_COMMAND_TIMEOUT);
+	mNumBytesMoved = 0;								// Not moved any yet..
+	mError = NO_ERR;									// Not had an error yet either. Imagine!
+	mBuff = NULL;										// resizeBuff() requires the buffer to start at NULL.
+	fixedBuff = false;								// Default to dynamic buffer.
+	if (numByes>0) {									// If they passed in a buffer size..
+		resizeBuff(numBytes);						// Set the buffer to that size.
+		fixeBuff = true;								// Turn resizeBuff() off. We won't play with dynamic RAM. (Small processor)
+	}
+	setComTimeout(SLAVE_COMMAND_TIMEOUT);		// Set the deadman timer.
 	mState = offline;
+	
 }
 	
 	
-qCSlave::~qCSlave(void) {  resizeBuff(0); }
+qCSlave::~qCSlave(void) {
+
+	fixeBuff = false;				// Turn 	resizeBuff() back on..
+	resizeBuff(0);					// Use resizeBuff() to recycle the memory.
+}
 
 
 void qCSlave::begin(int baud) {
@@ -302,7 +316,7 @@ bool qCSlave::replyBuff(byte* buff,byte buffLen) {
 	if (mState == listening) {				// Yes, listening is still technically the correct state for a reply.
 		if (resizeBuff(buffLen+1)) {		// Stretch the buffer to fit.		
 			mBuff[0] = buffLen;
-			for (i=0;i<buffLen;i++) {		// Save off he info. THAT IS WRONG!
+			for (i=0;i<buffLen;i++) {		// Save off he info.
 				mBuff[i+1]=buff[i];
 			}
 			mNumBytesMoved = 0;				// Nothing's moved yet.
@@ -402,14 +416,15 @@ void qCSlave::doSending(void) {
 // just auto-manages all of this.
 bool qCSlave::resizeBuff(byte numBytes) {
 
-	if (mBuff) {
-		free(mBuff);
-		mBuff = NULL;
+	if (fixedBuff) { return true; }			// In the case of fixedBuff, we do nothing. (Small processor)
+	if (mBuff) {									// Normal case, we have a buffer?
+		free(mBuff);								// Free the buffer.
+		mBuff = NULL;								// Flag it with NULL.
 	}
-	if (numBytes) {
-		mBuff = (byte*)malloc(numBytes);
-		return mBuff != NULL;
+	if (numBytes) {								// Want some RAM?
+		mBuff = (byte*)malloc(numBytes);		// Make a grab for some.
+		return mBuff != NULL;					// Return whether we got it or not.
 	}
-	return true;							// Because they asked for none.
+	return true;									// Because they asked for none.
 }
 
