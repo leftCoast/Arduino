@@ -102,6 +102,7 @@ cellManager::cellManager(void)
   mCurrentCommand = NULL;   // No current command.
   mStatusID       = -1;     // Flag for no status cooking.
   mStatusTimer.setTime(STATUS_TIME);
+  clearStatus();
 }
 
 
@@ -364,6 +365,7 @@ void cellManager::doStatus(void) {
       break;                              
       case com_complete :                           // Its already been read but not dumped out.
       case com_missing  :                           // Its already been deletd.
+        clearStatus();
         mStatusID = -1;                             // Flag no command working.
         if (mStatusTimer.ding()) {                  // If the timer is still running, H=Just let it go.
           mStatusTimer.start();                     // If the timer has expired, reset it.
@@ -374,9 +376,26 @@ void cellManager::doStatus(void) {
 }
 
 
+// what should the status look like when we loose connection.
+void	cellManager::clearStatus(void) {
+	
+	statusReg.FONAOnline			= 0;
+	statusReg.batteryVolts		= 0;
+	statusReg.batteryPercent	= 0;
+	statusReg.RSSI					= 0;
+	statusReg.networkStat		= NS_unknown;
+	statusReg.volume				= 0;
+	statusReg.callStat			= CS_unknown;
+	statusReg.numSMSs				= 0;
+	strcpy(statusReg.networkTime,"unknown");
+  	statusReg.errByte				= 0;
+}
+
+
 void cellManager::showCellStatus(void) {
   
   out(F("------------ cellStatus ------------"));outln;
+  out(F("FONA online: "));out(statusReg.FONAOnline);out("\n");
   out(F("battery V  : "));out(statusReg.batteryVolts);out(F("mV\n"));
   out(F("battery %  : "));out(statusReg.batteryPercent);out(F("%\n"));
   out(F("RSSI       : "));out(statusReg.RSSI);outln;;
@@ -395,6 +414,7 @@ void cellManager::showCellStatus(void) {
   out(F("callStat   : "));out(statusReg.callStat);out(F("\n"));
   out(F("numSMSs    : "));out(statusReg.numSMSs);out(F("\n"));
   out(F("Net Time   : "));out(statusReg.networkTime);out(F("\n"));
+  out(F("Error Byte : "));out(statusReg.errByte);out(F("\n"));
   out(F("------------------------------------"));outln;
   out(F("------------------------------------"));outln; 
 }

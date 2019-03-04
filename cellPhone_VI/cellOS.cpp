@@ -177,6 +177,7 @@ void  homeScreen::showStatus(void) {
   mText->setText("");
   outln;
   out("           cellStatus");outln;outln;
+  out(" FONA online: ");out(statusReg.FONAOnline);outln;
   out(" Battery V  : ");out(statusReg.batteryVolts);out("mV\n");
   out(" Battery %  : ");out(statusReg.batteryPercent);out("%\n");
   out(" RSSI       : ");out(statusReg.RSSI);outln;
@@ -199,12 +200,12 @@ void  homeScreen::showStatus(void) {
     case 2  : out("Unknown"); break;
     case 3  : out("Ringing In"); break;
     case 4  : out("Ringing Out"); break;
-    default : out("Unknown II"); break;
+    default : out("Unknown II"); break; 
   }
   outln;
   out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
+  out(" Error byte : ");out(statusReg.errByte);outln;
   out(" Net Time   : ");out(statusReg.networkTime);out("\n");
-  
 }
 
 

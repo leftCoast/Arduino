@@ -56,6 +56,7 @@ class cellManager : public qCMaster,
           void          launchCommand(cellCommand* aCom);
           void          checkForRreply(cellCommand* aCom);
           void          doStatus(void);
+          void				clearStatus(void);
           void          showCellStatus(void);
   virtual void          idle();
           

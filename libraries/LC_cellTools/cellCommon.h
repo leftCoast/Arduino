@@ -18,6 +18,7 @@ struct cellStatus {
 	uint16_t		callStat;
 	uint16_t		numSMSs;
 	char			networkTime[24];
+  	uint16_t    errByte;
 };
  
  

@@ -11,17 +11,32 @@
 #define FONA_RST 4
 #define FONA_RI  7
 
+
+void blink(int numBlinks) {
+
+  for (int i=0;i<numBlinks;i++) {
+    digitalWrite(13, HIGH);
+    delay(75);
+    digitalWrite(13, LOW);
+    delay(150);
+  }
+  delay(250);
+}
+
+
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
-qCSlave   ourComObj;
-
-bool    FONAOnline;
+qCSlave     ourComObj;
+bool        FONAOnline;
+cellStatus  curStat;
+char        inBuff[30];
 
 void setup() {
 
+    
     FONAOnline = false;
-
+  
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
@@ -43,8 +58,10 @@ void loop() {
   idle();
   numBytes = ourComObj.haveBuff();
   if (numBytes>0) {
-    inBuff = (byte*)malloc(numBytes);            
-    if (inBuff) {
+    digitalWrite(13, HIGH);
+    if (numBytes>30)  {
+      blink(25);
+    } else {
       if (ourComObj.readBuff(inBuff)) {   // Its a c string.
         switch(inBuff[0]) {
           case getStatus    : doStatus();               break;
@@ -55,10 +72,9 @@ void loop() {
           default           : break;
         } 
       }
-      free(inBuff);
-      inBuff = NULL;
     }
-  } 
+  }
+  digitalWrite(13, LOW); 
 }
 
 
@@ -94,19 +110,37 @@ Thanks for a tip!
 
 void doStatus(void) {
 
-  cellStatus  newStat;
+  uint8_t error;
+  int numSMS;
 
-  newStat.FONAOnline = FONAOnline;
-  fona.getBattVoltage(&newStat.batteryVolts);
-  fona.getBattPercent(&newStat.batteryPercent);
-  newStat.RSSI = fona.getRSSI();
-  newStat.networkStat = (networkStatus)fona.getNetworkStatus();
-  newStat.volume = fona.getVolume();
-  newStat.callStat = (callStatus)fona.getCallStatus();
-  newStat.numSMSs = fona.getNumSMS();
-  fona.getTime(newStat.networkTime,23);
+  error = 0;
+  curStat.FONAOnline = FONAOnline;                                    // First thing, FONA is online or not?
+  if (curStat.FONAOnline) {
+    if (!fona.getBattVoltage(&curStat.batteryVolts)) {
+      curStat.batteryVolts = 0;
+      error = error | B00000010;    // noVoltRead;
+    }
+    if (!fona.getBattPercent(&curStat.batteryPercent)) {
+      curStat.batteryPercent = 0;
+      error = error | B00000100;    // no percent read;
+    }
+    curStat.RSSI = fona.getRSSI();
+    curStat.networkStat = (networkStatus)fona.getNetworkStatus();
+    curStat.volume = fona.getVolume();
+    curStat.callStat = (callStatus)fona.getCallStatus();
+    numSMS = fona.getNumSMS();
+    if (numSMS<0) {
+      curStat.numSMSs = 0;
+      error = error | B00001000;  // No SMS number ready.
+    }
+    curStat.numSMSs = numSMS;
+    fona.getTime(curStat.networkTime,23);
+  } else {
+    error = B00000001;            // No FONA online.
+  }
+  curStat.errByte = error;  
 
-  ourComObj.replyBuff((byte*)&newStat,sizeof(cellStatus));
+  ourComObj.replyBuff((byte*)&curStat,sizeof(cellStatus));
 }
 
 
@@ -132,20 +166,22 @@ void doCall(char* inNum) {
     } else {
       result = 1;                   // We'll pass a 1 for error.
     }
-    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
+    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
+    blink(3);
 }
 
 
 void doHangUp(void) {
 
     uint8_t result;
-
+    
     if (fona.hangUp()) {
       result = 0;           // We'll pass a 0 for no error.
     } else {
       result = 1;           // We'll pass a 1 for error.
     }
     ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
+    blink(3);
 }
 
 
