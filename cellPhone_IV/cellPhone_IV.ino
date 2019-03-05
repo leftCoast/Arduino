@@ -11,6 +11,7 @@
 #define FONA_RST 4
 #define FONA_RI  7
 
+#define COM_BUFF_BYTES  255
 
 void blink(int numBlinks) {
 
@@ -27,18 +28,20 @@ void blink(int numBlinks) {
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
-qCSlave     ourComObj;
-bool        FONAOnline;
-cellStatus  curStat;
-char        inBuff[30];
+bool          FONAOnline;
+qCSlave*      ourComObj;
+byte          comBuff[COM_BUFF_BYTES]; // Buffer for all comunication.
+byte*         comPtr;
+
 
 void setup() {
 
     pinMode(0,INPUT);                     // Adafruit says to do this. Otherwise it may read noise.
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
-    ourComObj.begin(9600);                // For talking to the GUI.
-    if (ourComObj.readErr()==NO_ERR) {    // Did the poor thing fire up?
+    ourComObj = new qCSlave(255,comBuff);
+    ourComObj->begin(9600);                // For talking to the GUI.
+    if (ourComObj->readErr()==NO_ERR) {    // Did the poor thing fire up?
       digitalWrite(13, LOW);
     } else {
       digitalWrite(13, HIGH);
@@ -51,26 +54,19 @@ void setup() {
 
 void loop() {
   byte  numBytes;
-  byte* inBuff;
   
   idle();
-  numBytes = ourComObj.haveBuff();
-  if (numBytes>0) {
+  if (ourComObj->haveBuff()) {
     digitalWrite(13, HIGH);
-    if (numBytes>30)  {
-      blink(25);
-    } else {
-      if (ourComObj.readBuff(inBuff)) {   // Its a c string.
-        switch(inBuff[0]) {
-          case getStatus    : doStatus();               break;
-          case makeCall     : doCall(&inBuff[1]);       break;  
-          case hangUp       : doHangUp( );              break;
-          case sendSNS      : doSendSNS(&inBuff[1]);    break;
-          case pickUp       : doPickUp();               break;
-          default           : break;
-        } 
-      }
-    }
+    comPtr = ourComObj->getComBuff();
+    switch(comPtr[0]) {
+      case getStatus    : doStatus(comPtr);   break;
+      case makeCall     : doCall(comPtr);     break;  
+      case hangUp       : doHangUp(comPtr);   break;
+      case sendSNS      : doSendSNS(comPtr);  break;
+      case pickUp       : doPickUp(comPtr);   break;
+      default           : break;
+    } 
   }
   digitalWrite(13, LOW); 
 }
@@ -106,84 +102,77 @@ Thanks for a tip!
 }
 
 
-void doStatus(void) {
+void doStatus(byte* buff) {
 
-  uint8_t error;
-  int numSMS;
+  cellStatus* statPtr;
+  int         error;
+  int         numSMS;
 
-  error = 0;
-  curStat.FONAOnline = FONAOnline;                                    // First thing, FONA is online or not?
-  if (curStat.FONAOnline) {
-    if (!fona.getBattVoltage(&curStat.batteryVolts)) {
-      curStat.batteryVolts = 0;
-      error = error | B00000010;    // noVoltRead;
+  statPtr = (cellStatus*)buff;                                      // Basically lay a template over the com buffer.
+  error = 0;                                                        // No erors yet.
+  statPtr->FONAOnline = FONAOnline;                                 // First thing. Is FONA online or not?
+  if (statPtr->FONAOnline) {                                        // If FONA is online..
+    if (!fona.getBattVoltage(&statPtr->batteryVolts)) {             // Attempt to read the battery voltage..
+      statPtr->batteryVolts = 0;                                    // If there was an error, send out 0 volts.
+      error = error | B00000010;                                    // Set the error bit for our error flag.
     }
-    if (!fona.getBattPercent(&curStat.batteryPercent)) {
-      curStat.batteryPercent = 0;
-      error = error | B00000100;    // no percent read;
+    if (!fona.getBattPercent(&statPtr->batteryPercent)) {           // Attmept to read the battery percent value.
+      statPtr->batteryPercent = 0;                                  // If there was an error, send out 0 percent.
+      error = error | B00000100;                                    // And set the error bit for our error flag.
     }
-    curStat.RSSI = fona.getRSSI();
-    curStat.networkStat = (networkStatus)fona.getNetworkStatus();
-    curStat.volume = fona.getVolume();
-    curStat.callStat = (callStatus)fona.getCallStatus();
-    numSMS = fona.getNumSMS();
-    if (numSMS<0) {
-      curStat.numSMSs = 0;
-      error = error | B00001000;  // No SMS number ready.
+    statPtr->RSSI = fona.getRSSI();                                 // Read RSSI, no error checking available here.
+    statPtr->networkStat = (networkStatus)fona.getNetworkStatus();  // Read network status. Same, no error checking.  
+    statPtr->volume = fona.getVolume();                             // Volume.
+    statPtr->callStat = (callStatus)fona.getCallStatus();           // Call status, no error checking.
+    numSMS = fona.getNumSMS();                                      // Number SMS(s). This one gives bogus numbers at times.
+    if (numSMS<0) {                                                 // Try to catch the errors but might not work.
+      statPtr->numSMSs = 0;                                         // Bogus readings get zero.
+      error = error | B00001000;                                    // Flag the error.
     }
-    curStat.numSMSs = numSMS;
-    fona.getTime(curStat.networkTime,23);
+    statPtr->numSMSs = numSMS;                                      // Send on what we found.
+    fona.getTime(statPtr->networkTime,23);                          // Write out the network time string.
   } else {
-    error = B00000001;            // No FONA online.
+    error = B00000001;                                              // If the FONA was offline, flag the eror.
   }
-  curStat.errByte = error;  
-
-  ourComObj.replyBuff((byte*)&curStat,sizeof(cellStatus));
+  statPtr->errByte = error;                                         // And finally the error flag goes in.
+  ourComObj->replyComBuff(sizeof(cellStatus));                      // Send the info on its way.
 }
 
 
-void doPickUp(void) {
-
-  uint8_t result;
+void doPickUp(byte* buff) {
 
   if (fona.pickUp()) {
-    result = 0;                   // We'll pass a 0 for no error.
+    buff[0] = 0;                   // We'll pass a 0 for no error.
   } else {
-    result = 1;                   // We'll pass a 1 for error.
+    buff[0] = 1;                   // We'll pass a 1 for error.
   }
-  ourComObj.replyBuff((byte*)&result,sizeof(uint8_t)); 
+  ourComObj->replyComBuff(1); 
 }
 
 
-void doCall(char* inNum) {
-
-    uint8_t result;
-
-    if (fona.callPhone(inNum)) {
-      result = 0;                   // We'll pass a 0 for no error.
-    } else {
-      result = 1;                   // We'll pass a 1 for error.
-    }
-    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
-    blink(3);
+void doCall(byte* buff) {
+  
+  if (fona.callPhone((char*)buff)) {
+    buff[0] = 0;                   // We'll pass a 0 for no error.
+  } else {
+    buff[0] = 1;                   // We'll pass a 1 for error.
+  }
+  ourComObj->replyComBuff(1);
 }
 
 
-void doHangUp(void) {
-
-    uint8_t result;
+void doHangUp(byte* buff) {
     
-    if (fona.hangUp()) {
-      result = 0;           // We'll pass a 0 for no error.
-    } else {
-      result = 1;           // We'll pass a 1 for error.
-    }
-    ourComObj.replyBuff((byte*)&result,sizeof(uint8_t));
-    blink(3);
+  if (fona.hangUp()) {
+    buff[0] = 0;                   // We'll pass a 0 for no error.
+  } else {
+    buff[0] = 1;                   // We'll pass a 1 for error.
+  }
+  ourComObj->replyComBuff(1);
 }
 
 
-void doSendSNS(char* inBuff) {
+void doSendSNS(byte* buff) {
 /*
   uint8_t result;
   
