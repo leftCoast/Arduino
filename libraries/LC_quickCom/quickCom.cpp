@@ -221,20 +221,13 @@ bool qCMaster::resizeBuff(byte numBytes) {
 // ***************************************************************************
 
 
-// The slave part is different. The owner of this bit sets up a single buffer for
-// both input and output. Pass in the size and the address of this buffer. Then when
-// data comes in, it'll be written into this buffer. Then when you want to send a
-// reply you write it onto this same buffer. This is to save as much RAM footprint
-// as possible for -little- processors.
-//
-// NOTE : The most bytes that can be sent is 256. So don't go overboard on buffer
-// size.
-qCSlave::qCSlave(byte numBytes,byte* buff) {
+
+qCSlave::qCSlave(void) {
 
 	mNumBytesMoved = 0;								// Not moved any yet..
 	mError = NO_ERR;									// Not had an error yet either. Imagine!
-	mBuff =	buff;										// Save off the address of our buffer.
-	mNumBytes = numBytes;
+	mBuff =	NULL;										// Save off the address of our buffer.
+	mNumBytes = 0;
 	setComTimeout(SLAVE_COMMAND_TIMEOUT);		// Set the deadman timer.
 	mState = offline;
 	
@@ -244,9 +237,19 @@ qCSlave::qCSlave(byte numBytes,byte* buff) {
 qCSlave::~qCSlave(void) { }
 
 
-void qCSlave::begin(int baud) {
+// The slave part is different. The owner of this bit sets up a single buffer for
+// both input and output. Pass in the size and the address of this buffer. Then when
+// data comes in, it'll be written into this buffer. Then when you want to send a
+// reply you write it onto this same buffer. This is to save as much RAM footprint
+// as possible for -little- processors.
+//
+// NOTE : The most bytes that can be sent is 256. So don't go overboard on buffer
+// size.
+void qCSlave::begin(byte* buff,byte numBytes,int baud) {
 
 	if (mState==offline) {		// A quick sanity check. 
+		mBuff =	buff;				// Save off the address of our buffer.
+		mNumBytes = numBytes;	// How many bytes is that buffer?
 		SLAVE_PORT.begin(baud);	// Give the port a kick to start.
 		hookup();					// Puts us in the idler queue.
 		mState = listening;		// Then we are open for business!
@@ -285,18 +288,21 @@ byte qCSlave::haveBuff(void) {
 
 
 // Get the comunication buffer;
-byte* qCSlave::getComBuff(void) { return &(mBuff[1]); }
+byte* qCSlave::getComBuff(void) {
+
+	return &(mBuff[1]);
+}
 
 
 // Send the reply on its way.
 bool qCSlave::replyComBuff(byte numBytes) {
 
-	if (mState == listening) {		// Ok, if we've nothing better going on..
-		mBuff[0] = numBytes;
+	if (mState == holding) {	// We have to be holding to want a reply.
+		mBuff[0] = numBytes;		// 
 		mNumBytesMoved = 0;
 		mState = replying;
 	} else {
-		mError = STATE_ERR;						// Getting your calls mixed up there?
+		mError = STATE_ERR;		// Getting your calls mixed up there?
 	}
 }
 
@@ -327,7 +333,7 @@ void qCSlave::doListen(void) {
 	if (SLAVE_PORT.available()) {							// Is there someting to read from the port?
 		numBytes = SLAVE_PORT.read();						// First byte SHALL BE the number of bytes for the message.
 		if (numBytes>0) {										// First byte can't be a zero.
-			if (mNumBytes>=(numBytes+1)) {				// Resize the buffer to hold the message.
+			if (mNumBytes>=(numBytes+1)) {				// If we can hold the message.
 				mBuff[0] = numBytes;							// That first byte shwing size.
 				mNumBytesMoved = 0;							// Setup for a reading..
 				start();											// We start the timer from the first byte.
@@ -360,7 +366,6 @@ void qCSlave::doReceiving(void) {
 	if (mNumBytesMoved == mBuff[0]) {					// Got 'em all? Good!
 		mState = holding;										// Move on!
 	} else if(ding()) {										// Oh oh.. did the timer ding?
-		mBuff[0] = 0;											// May not need to do this, but its tidy.
 		mError = TIMEOUT_ERR;								// Master may have died.
 		mState = listening;									// Go back to listening. Its all we can do..
 	}
@@ -374,8 +379,6 @@ void qCSlave::doSending(void) {
 		mNumBytesMoved++;																	// Increment the index.
 	}
 	if (mNumBytesMoved == mBuff[0]+1) {												// If we've moved them all..
-		mBuff[0] = 0;																		// May not need to do this, but its tidy.
-		mNumBytesMoved = 0;																// Reset counter. Also tidy.
 		mState = listening;																// Go back to listening.
 	}
 }
