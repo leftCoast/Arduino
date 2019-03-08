@@ -159,9 +159,9 @@ void doStatus(byte* buff) {
 void doPickUp(byte* buff) {
 
   if (fona.pickUp()) {
-    buff[0] = 0;                   // We'll pass a 0 for no error.
+    buff[0] = 0;                   // We'll pass a 0 for no error. (We got the call.)
   } else {
-    buff[0] = 1;                   // We'll pass a 1 for error.
+    buff[0] = 1;                   // We'll pass a 1 for error. (We missed the call.)
   }
   ourComObj.replyComBuff(1); 
 }
@@ -169,7 +169,7 @@ void doPickUp(byte* buff) {
 
 void doCall(byte* buff) {
   
-  if (fona.callPhone((char*)buff)) {
+  if (fona.callPhone((char*)&buff[1])) {
     buff[0] = 0;                   // We'll pass a 0 for no error.
   } else {
     buff[0] = 1;                   // We'll pass a 1 for error.
@@ -181,9 +181,9 @@ void doCall(byte* buff) {
 void doHangUp(byte* buff) {
     
   if (fona.hangUp()) {
-    buff[0] = 0;                   // We'll pass a 0 for no error.
+    buff[0] = 0;                   // We'll pass a 0 for no error.(We hung up)
   } else {
-    buff[0] = 1;                   // We'll pass a 1 for error.
+    buff[0] = 1;                   // We'll pass a 1 for error.(Help! We can't hang up!)
   }
   ourComObj.replyComBuff(1);
 }
