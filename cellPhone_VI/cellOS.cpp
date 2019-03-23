@@ -12,6 +12,7 @@
 #include "src/cellListener/cellListener.h"
 #include "contactPanel.h"
 #include "src/breakout/breakout.h"
+#include "toolsPanel.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -99,9 +100,15 @@ trashBtn::~trashBtn(void) {  }
 #define ICON_BAR_W    SCR_W
 #define ICON_BAR_H    SCR_H - ICON_BAR_Y
 
-#define HP_ICON_X       3               // Forgot what HP stood for.. 
-#define HP_ICON_XSTEP   40
+#define HP_ICON_X       3               // Forgot what HP stood for.. (AH! Home Panel)
+#define HP_ICON_XSTEP   50
 #define HP_ICON_Y       ICON_BAR_Y + 5
+
+#define APP_ICON_X      3
+#define APP_ICON_XSTEP  50
+#define APP_ICON_Y      30
+#define APP_ICON_YSTEP  40
+
 
 #define BATT_X        199
 #define BATT_Y        2
@@ -119,8 +126,63 @@ trashBtn::~trashBtn(void) {  }
 #define BMP_AX        (BMP_W - BMP_AW) / 2
 #define BMP_AY        BMP_Y + (BMP_H - BMP_AH) / 2
 
-#define out     mText->appendText
-#define outln   mText->appendText("\n")
+
+
+// *********** roundedIconBtn ***********
+
+#define COLOR_BUF_SIZE  4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
+ 
+roundedIconBtn::roundedIconBtn(int xLoc,int yLoc,int message,char* path) 
+  : appIcon(xLoc,yLoc,message,path,32) { }
+
+  
+roundedIconBtn::~roundedIconBtn(void) {  }
+
+
+void roundedIconBtn::drawPixel(int gx,int gy,colorObj* pixel) {
+
+  int x = gx - xLoc;
+  int y = gy - yLoc;
+  
+  if ((y==0)||(y==31)) {
+    if ((x>=0 && x<3)) return;
+    if (x>27) return;
+  } else if ((y==1)||(y==30)) {
+    if ((x>=0 && x<2)) return;
+    if (x>28) return;
+  } else if ((y==2)||(y==3)||(y==29)||(y==28)) {
+    if (x==0) return;
+    if (x==31) return;
+  }
+  screen->drawPixel(gx,gy,pixel);       // Spat it out to the screen.
+}
+
+
+void roundedIconBtn::drawLine(File bmpFile,int x,int y) {
+
+    colorObj  thePixal;
+    uint8_t   buf[COLOR_BUF_SIZE];   
+    int       trace;
+    int       endTrace;
+    
+    endTrace = x+sourceRect.width;
+    for (trace=x;trace<endTrace; trace++) {       // Ok, trace does x..x+width.
+      bmpFile.read(buf,pixBytes);                 // Grab a pixel.
+      thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
+      drawPixel(trace,y,&thePixal);            // Try spatting it our to the screen.
+  }
+}
+
+
+void roundedIconBtn::drawBitmap(int x,int y) {
+
+  xLoc = x;
+  yLoc = y;
+  bmpPipe::drawBitmap(x,y);
+ }
+          
+// *********** homeScreen ***********
+
 
 homeScreen::homeScreen(void)
   : homePanel() {
@@ -140,14 +202,13 @@ homeScreen::homeScreen(void)
   iconX=iconX+HP_ICON_XSTEP;
   calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,"/system/icons/calc.bmp");
   iconX=iconX+HP_ICON_XSTEP;
-  qGameIcon = new appIcon(iconX,HP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
-  iconX=iconX+HP_ICON_XSTEP;
-  breakoutIcon = new appIcon(iconX,HP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
+  toolsIcon = new appIcon(iconX,HP_ICON_Y,toolsApp,"/system/icons/tools.bmp");
+
+  iconX = APP_ICON_X;
+  qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
+  iconX=iconX+APP_ICON_XSTEP;
+  breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
   
-  colorObj aColor(LC_NAVY);
-  mText = new textView(10,20,220,150);
-  mText->setTextColors(&white,&aColor);
-  addObj(mText);
   statusTimer.setTime(1500);
 }
 
@@ -161,6 +222,7 @@ void homeScreen::setup(void) {
   if (textIcon)     { addObj(textIcon);     textIcon->begin(); }
   if (contactIcon)  { addObj(contactIcon);  contactIcon->begin(); }
   if (qGameIcon)    { addObj(qGameIcon);    qGameIcon->begin(); }
+  if (toolsIcon)    { addObj(toolsIcon);    toolsIcon->begin(); }
   if (breakoutIcon) { addObj(breakoutIcon); breakoutIcon->begin(); }
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 
@@ -172,65 +234,21 @@ void homeScreen::setup(void) {
 }
 
 
-void  homeScreen::showStatus(void) {
-  
-  mText->setText("");
-  outln;
-  out("           cellStatus");outln;outln;
-  out(" FONA online: ");out(statusReg.FONAOnline);outln;
-  out(" Battery V  : ");out(statusReg.batteryVolts);out("mV\n");
-  out(" Battery %  : ");out(statusReg.batteryPercent);out("%\n");
-  out(" RSSI       : ");out(statusReg.RSSI);outln;
-  out(" Net Stat   : ");
-  switch (statusReg.networkStat) {
-    case 0 : out("Not registered"); break;
-    case 1 : out("Reg. (home)"); break;
-    case 2 : out("Reg. (searching)"); break;
-    case 3 : out("Denied"); break;
-    case 4 : out("Unknown"); break;
-    case 5 : out("Reg. (roaming)"); break;
-    default : out("Undefined"); break;
-  }
-  outln;  
-  out(" Volume     : ");out(statusReg.volume);out("\n");
-  out(" CallState  : ");
-  switch (statusReg.callStat) {
-    case 0  : out("Ready"); break;
-    case 1  : out("No Status"); break;
-    case 2  : out("Unknown"); break;
-    case 3  : out("Ringing In"); break;
-    case 4  : out("Ringing Out"); break;
-    default : out("Unknown II"); break; 
-  }
-  outln;
-  out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
-  out(" Error byte : ");out(statusReg.errByte);outln;
-  out(" Net Time   : ");out(statusReg.networkTime);out("\n");
-}
-
-
 void homeScreen::loop(void) { 
 
   if (statusTimer.ding()) {
     mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
     mRSSI->setRSSI(statusReg.RSSI);
-    showStatus();
     statusTimer.start();
   }
 }
 
 
 void homeScreen::drawSelf(void) { 
-  colorObj aColor(LC_NAVY);
+  colorObj aColor(LC_WHITE);
   screen->fillScreen(&aColor);
-
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
-  //unsigned long startT = millis();
-  //screen->fillRect(BMP_X,BMP_Y,BMP_W,BMP_H,&white);
-  //mBackImage->drawBitmap(BMP_AX,BMP_AY);
-  //unsigned long endT = millis();
-  //Serial.println(endT-startT);
-  
+  mBackImage->drawBitmap(BMP_AX,BMP_AY);
   screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&black);
 }
 
@@ -319,6 +337,7 @@ panel* cellOS::createPanel(int panelID) {
     case contactApp   : return new contactPanel();
     case calcApp      : return new rpnCalc();
     case qGameApp     : return new qGame();
+    case toolsApp     : return new toolsPanel();
     case breakoutApp  : return new breakout();
     default           : return NULL;
   }

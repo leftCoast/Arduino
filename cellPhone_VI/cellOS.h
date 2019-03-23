@@ -52,7 +52,7 @@ extern colorObj  greenButtonHighlight;
 extern colorObj battLineColor;
 extern colorObj menuBarColor;
 
-enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
+enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, toolsApp, breakoutApp };
 
 
 // *****************************************************
@@ -108,9 +108,27 @@ class trashBtn : public iconButton {
 };
 
 
+
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
+
+
+// Hardcode a clipping rouded rect to a 32x32 icon. Total hack!
+// Stop-gap for not having clipping regions or alpha channels.
+class roundedIconBtn : public appIcon {
+ 
+ public:
+          roundedIconBtn(int xLoc,int yLoc,int message,char* path);
+  virtual ~roundedIconBtn(void);
+  
+          void  drawPixel(int x,int y,colorObj* pixel);
+  virtual void  drawLine(File bmpFile,int x,int y);
+  virtual void  drawBitmap(int x,int y);
+
+          int xLoc;
+          int yLoc;
+};
 
 
 
@@ -129,11 +147,11 @@ class homeScreen : public homePanel {
           appIcon*    calcIcon;
           appIcon*    textIcon;
           appIcon*    contactIcon;
-          appIcon*    qGameIcon;
-          appIcon*    breakoutIcon;
+          roundedIconBtn*    qGameIcon;
+          appIcon*    toolsIcon;
+          roundedIconBtn*    breakoutIcon;
           appIcon*    phoneIcon;
           timeObj     statusTimer;
-          textView*   mText;
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
   

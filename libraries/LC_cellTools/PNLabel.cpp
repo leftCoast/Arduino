@@ -9,7 +9,7 @@ void filterPNStr(char* str) {
 	int numChars;
 	int index;
 
-	if (str) {									// Samity, they could pass in a NULL. They do that now and then.
+	if (str) {									// Sanity, they could pass in a NULL. They do that now and then.
 		numChars = strlen(str);				// Ok have something. Lets count 'em.
 		index = 0;								// We'll use this to index mRawPN.
 		for(int i=0;i<=numChars;i++) {	// We'll loop though including the EOL.

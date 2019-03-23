@@ -26,7 +26,7 @@ class bmpPipe {
 				void      		setSourceRect(rect inRect);
 	virtual	void      		drawBitmap(int x,int y);
 				File				getFile(void);
-				void				drawLine(File bmpFile,int x,int y);
+	virtual	void				drawLine(File bmpFile,int x,int y);
 				void				drawLine(File bmpFile,int x,int y,RGBpack* colorBuff);
 				unsigned long	filePtr(int x,int y);
       		//void      	showPipe(void);
