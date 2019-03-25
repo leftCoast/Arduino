@@ -15,19 +15,6 @@
 #define out     mText->appendText
 #define outln   mText->appendText("\n")
 
-// *****************************************************
-// ******************  toolsCloseBtn  *******************
-// *****************************************************
-
-
-toolsCloseBtn::toolsCloseBtn(toolsPanel* ourPanel)
-  : closeBtn(CLOSE_X,CLOSE_Y) { mPanel = ourPanel; }
-
-toolsCloseBtn::~toolsCloseBtn(void) {  }
-
-void toolsCloseBtn::doAction(void) { mPanel->close(); }
-
-
 
 // *****************************************************
 // ******************  toolsPanel  *******************
@@ -50,14 +37,15 @@ toolsPanel::~toolsPanel(void) {  }
 
 void toolsPanel::setup(void) {
 
-  toolsCloseBtn* ourCloseButton = new toolsCloseBtn(this);
-  addObj(ourCloseButton);
+  closeBtn* ourCloseBtn = new closeBtn((panel*)this);
+  addObj(ourCloseBtn);
   mBatPct = new battPercent(BATT_X,BATT_Y);
   addObj(mBatPct);
   mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
   mRSSI   = new RSSIicon(SIG_X,SIG_Y);
   addObj(mRSSI);
 }
+
 
 void  toolsPanel::showStatus(void) {
   

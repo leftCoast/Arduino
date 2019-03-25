@@ -31,6 +31,17 @@
 
 #define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
 
+#define CLOSE_X         0
+#define CLOSE_Y         1
+#define CLOSE_W         22
+#define CLOSE_H         CLOSE_W
+
+#define BATT_X        199
+#define BATT_Y        2
+
+#define SIG_X         BATT_X + 15
+#define SIG_Y         BATT_Y
+
 // Starting points, they are tweaked in setup().
 extern colorObj  backColor;
 extern colorObj  textColor;
@@ -59,12 +70,19 @@ enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qG
 // *****************   std buttons  ********************
 // *****************************************************
 
+// these are the little 22x22 pix buttons that do functions like make a call,
+// text someone, new document, delete current document. An entire grab bag of functons.
+
 
 class closeBtn : public iconButton {
 
   public:
-          closeBtn(int x,int y);
+          closeBtn(panel* inPanel);
   virtual ~closeBtn(void);
+  
+  virtual void  doAction(void);
+  
+          panel* mPanel;
 };
 
 

@@ -8,6 +8,7 @@
 #include <PNLabel.h>
 
 #include "contactPanel.h"
+#include "textPanel.h"
 
 #define PNLIST_X        10
 #define PNLIST_Y        30
@@ -44,11 +45,6 @@
 
 #define CONT_BTN_RAD    3
 #define CONT_BTN_SPC    20
-
-#define CLOSE_X         0
-#define CLOSE_Y         1
-#define CLOSE_W         22
-#define CLOSE_H         CLOSE_W
 
 #define NEWBTN_X        CLOSE_X + CLOSE_W + CONT_BTN_SPC
 #define NEWBTN_Y        CLOSE_Y
@@ -175,21 +171,6 @@ void addrStarter::begin(char* filePath,bool resetFile) {
   }
 }
 
-
-
-// *****************************************************
-// ******************  contCloseBtn  *******************
-// *****************************************************
-
-
-contCloseBtn::contCloseBtn(contactPanel* ourPanel)
-  : closeBtn(CLOSE_X,CLOSE_Y) { mPanel = ourPanel; }
-
-contCloseBtn::~contCloseBtn(void) {  }
-
-void contCloseBtn::doAction(void) { mPanel->close(); }
-
-
 // *****************************************************
 // *******************  contNewBtn  ********************
 // *****************************************************
@@ -228,7 +209,11 @@ contTextBtn::contTextBtn(void)
 contTextBtn::~contTextBtn(void) {  }
 
 
-void contTextBtn::doAction(void) { }
+void contTextBtn::doAction(void) {
+
+  pleaseText = currContact;
+  nextPanel = textApp;
+}
 
 
 
@@ -578,7 +563,7 @@ void contactPanel::setup(void) {
   mPNList->fillList();                                        // Fill it with goodies.
   addObj(mPNList);                                            // Pass it to the a group.
 
-  contCloseBtn* ourCloseButton = new contCloseBtn(this);
+  closeBtn* ourCloseButton = new closeBtn(this);
   addObj(ourCloseButton);
 
   contNewBtn* ourNewButton = new contNewBtn(mPNList);

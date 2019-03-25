@@ -37,26 +37,6 @@ class addrStarter {
 };
 
 
-
-// *****************************************************
-// ******************  contCloseBtn  *******************
-// *****************************************************
-
-
-
-class contCloseBtn :  public closeBtn {
-
-   public:
-          contCloseBtn(contactPanel* ourPanel);
-  virtual ~contCloseBtn(void);
-
-  virtual void  doAction(void);
-
-          contactPanel* mPanel;
-};
-
-
-
 // *****************************************************
 // *******************  contNewBtn  ********************
 // *****************************************************

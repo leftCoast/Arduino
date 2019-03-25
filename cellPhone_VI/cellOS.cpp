@@ -13,6 +13,7 @@
 #include "contactPanel.h"
 #include "src/breakout/breakout.h"
 #include "toolsPanel.h"
+#include "textPanel.h"
 
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
@@ -51,39 +52,52 @@ cellOS  ourOS;
 // *****************************************************
 
 
-closeBtn::closeBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_X22,22) { begin(); }
-    
+closeBtn::closeBtn(panel* inPanel)
+  : iconButton(CLOSE_X,CLOSE_Y,ICON_PATH_X22,22) {
+  
+  mPanel = inPanel;
+  begin();
+ }
+
 closeBtn::~closeBtn(void) {  }
 
+void closeBtn::doAction(void) { mPanel->close(); }
+
+// ******
 
 newBtn::newBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_NEW22,22) { begin(); }
-    
+  : iconButton(x,y,ICON_PATH_NEW22,22)  { begin(); }
+   
 newBtn::~newBtn(void) {  }
 
+// *****
 
 searchBtn::searchBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_SEARCH22,22) { begin(); }
+  : iconButton(x,y,ICON_PATH_SEARCH22,22)  { begin(); }
     
 searchBtn::~searchBtn(void) {  }
 
+// *****
 
 textBtn::textBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_TEXT22,22) { begin(); }
+  : iconButton(x,y,ICON_PATH_TEXT22,22)  { begin(); }
     
 textBtn::~textBtn(void) {  }
 
+// *****
 
 callBtn::callBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_PHONE22,22) { begin(); }
-    
+  : iconButton(x,y,ICON_PATH_PHONE22,22)  { begin(); }
+
+   
 callBtn::~callBtn(void) {  }
+
+// *****
 
 
 trashBtn::trashBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_TRASH22,22) { begin(); }
-    
+  : iconButton(x,y,ICON_PATH_TRASH22,22)  { begin(); }
+
 trashBtn::~trashBtn(void) {  }
 
 
@@ -110,12 +124,6 @@ trashBtn::~trashBtn(void) {  }
 #define APP_ICON_YSTEP  40
 
 
-#define BATT_X        199
-#define BATT_Y        2
-
-#define SIG_X         BATT_X + 15
-#define SIG_Y         BATT_Y
-
 #define BMP_X         0
 #define BMP_Y         MENU_BAR_H
 #define BMP_W         SCR_W
@@ -130,6 +138,10 @@ trashBtn::~trashBtn(void) {  }
 
 // *********** roundedIconBtn ***********
 
+// Our icon buttons have that "rounded corner" look. Well, we have no mask ability so
+// we use this to fake it. Basically we'll hard code the corners off the rectangle.
+
+
 #define COLOR_BUF_SIZE  4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
  
 roundedIconBtn::roundedIconBtn(int xLoc,int yLoc,int message,char* path) 
@@ -139,6 +151,9 @@ roundedIconBtn::roundedIconBtn(int xLoc,int yLoc,int message,char* path)
 roundedIconBtn::~roundedIconBtn(void) {  }
 
 
+// This is such the hack. We just look at the local x,y value and if its
+// a corner? Just drop out of the funtion. And its all hardcoded for a
+// 32x32 icon.
 void roundedIconBtn::drawPixel(int gx,int gy,colorObj* pixel) {
 
   int x = gx - xLoc;
@@ -160,16 +175,16 @@ void roundedIconBtn::drawPixel(int gx,int gy,colorObj* pixel) {
 
 void roundedIconBtn::drawLine(File bmpFile,int x,int y) {
 
-    colorObj  thePixal;
-    uint8_t   buf[COLOR_BUF_SIZE];   
-    int       trace;
-    int       endTrace;
-    
-    endTrace = x+sourceRect.width;
-    for (trace=x;trace<endTrace; trace++) {       // Ok, trace does x..x+width.
-      bmpFile.read(buf,pixBytes);                 // Grab a pixel.
-      thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
-      drawPixel(trace,y,&thePixal);            // Try spatting it our to the screen.
+  colorObj  thePixal;
+  uint8_t   buf[COLOR_BUF_SIZE];   
+  int       trace;
+  int       endTrace;
+  
+  endTrace = x+sourceRect.width;
+  for (trace=x;trace<endTrace; trace++) {       // Ok, trace does x..x+width.
+    bmpFile.read(buf,pixBytes);                 // Grab a pixel.
+    thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
+    drawPixel(trace,y,&thePixal);               // Try spatting it our to the screen.
   }
 }
 
@@ -179,7 +194,8 @@ void roundedIconBtn::drawBitmap(int x,int y) {
   xLoc = x;
   yLoc = y;
   bmpPipe::drawBitmap(x,y);
- }
+}
+
           
 // *********** homeScreen ***********
 
@@ -319,6 +335,7 @@ int cellOS::begin(void) {
   ourListener.begin(phoneApp);
 
   pleaseCall = NULL;  // For the phone panel.
+  pleaseText = NULL;  // For the text panel.
   
   bringUp();
   return litlOS::begin();
