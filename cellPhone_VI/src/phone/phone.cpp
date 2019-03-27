@@ -78,6 +78,9 @@ phoneBtn::phoneBtn(int x,int y,char inKey,phone* inPhone)
 phoneBtn::~phoneBtn(void) {  }
 
 
+// Its amazing how much code it takes just to "draw" a button. Is it active?
+// Clicked? Inactive? Is it a character? A symbol? Its all here for all our
+// standard phone buttons.
 void phoneBtn::drawSelf(void) {
 
   int         inset = 5;                      // All the hand tweaking to
@@ -121,6 +124,8 @@ void phoneBtn::drawSelf(void) {
 }
 
 
+// Button got a click? send its saved keystroke character to our phone
+// object.
 void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 
 
@@ -129,7 +134,10 @@ void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 // *******************  callControl  *******************
 // *****************************************************
 
-  
+
+// CallControl is a "special" button that controls the calling or hang-up
+// commands for the phone. So it has a special size, special colors, special
+// handling of its actions.. Its its own thing. Inherited from phoneBtn.
 callControl::callControl(int x,int y,char inKey,phone* inPhone)
   : phoneBtn(x,y,inKey,inPhone) {
 
@@ -141,6 +149,11 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 callControl::~callControl(void) { }
 
 
+// Not only is there a bunch of drawing code for this fancy button, we also
+// mix in calls to the message text about what's going on in the world of
+// cell phone hardware. This is kinda' a hack, mixing things, but it was
+// such a good spot to do this. Seeing as we know the state of what's going
+// on at the moment.
 void callControl::drawSelf(void) {
 
   hookup();
@@ -189,6 +202,9 @@ void callControl::drawSelf(void) {
 }
 
 
+// Our actions. We have three states we can be in idle, ringning or talking.
+// When we get a click, its time to change state. All three methods will
+// fire off our state in a new direction.
 void callControl::doAction(void) {
 
   switch(mState) {
@@ -199,6 +215,10 @@ void callControl::doAction(void) {
 }
 
 
+// callControl manages the phone status in the background. It can initiate a
+// call upon creation, via the pleasCall variable. That's somewhat of a
+// special task. The rest are keeping track of the phone object state
+// changes and making sure we reflect those.
 void callControl::idle() {
 
 	if (pleaseCall) {
@@ -238,7 +258,9 @@ void callControl::idle() {
 // *********************  phone   **********************
 // *****************************************************
 
-
+// phone object. This is the phone screen you use to dial with. It is also
+// the interface used to start calls from other areas of the cell phone
+// program.
 phone::phone(void) 
   : panel(phoneApp,noEvents) {
 
@@ -254,6 +276,10 @@ phone::phone(void)
 phone::~phone(void) { if (mRawPN) free(mRawPN); }
 
 
+// Being a panel we are a draw object. actually a drawGroup object. So we
+// can add viewable things to ourselves and let the user interact with them.
+// Hence, phone buttons, labels etc. This is where we "build" our screen of
+// things like buttons, controls & labels.
 void phone::setup(void) {
 
   statTimer.setTime(STAT_TIME);
@@ -302,6 +328,8 @@ void phone::setup(void) {
 }
 
 
+// Seeing as we are a panel, we have a loop() call. This is used for our
+// "main" focus. Typically watching for user interaction.
 void phone::loop(void) {
 
   // Weird hack to get the battery & RSSI things to draw
@@ -326,6 +354,9 @@ void phone::loop(void) {
 }
 
 
+// For drawing ourselves. Not much to do because we are basically just a
+// background for all the bits in our group. They all take care of drawing
+// themselves. (As it should be.)
 void phone::drawSelf(void) {
 
   screen->fillScreen(&backColor);
@@ -333,6 +364,8 @@ void phone::drawSelf(void) {
 }
 
 
+// Fielding keystrokes. We built all the buttons and gave them keystrokes.
+// This is where we respond to these as the user clicks on stuff.
 void phone::keystroke(char inKey) {
 
   switch(inKey) {
@@ -363,6 +396,9 @@ void phone::keystroke(char inKey) {
 }
 
 
+// If it was a printable character we would like to show the user that we
+// saw it. And that's what we're doing here. Basically managing a string
+// buffer and growing it as characters come in.
 void phone::addChar(char keyStroke) {
   
   int   numChars;
@@ -384,6 +420,7 @@ void phone::addChar(char keyStroke) {
 }
 
 
+// Or deleting characters if they call for a delete..
 void phone::deleteChar(void) {
 
   if (mRawPN) {
@@ -394,6 +431,9 @@ void phone::deleteChar(void) {
 }
 
 
+// Someone thinks there is a call coming in. How do they know this stuff?
+// Anyway, this is where the command to "Pick up the damn phone!" Is
+// generated.
 void phone::answerCall(void) {
 
   if (!mConnected) {
@@ -403,6 +443,9 @@ void phone::answerCall(void) {
 }
 
 
+// Starting a call sequence. Starting a call can take a LONG time in
+// computer land. So, we'll just fire off the command, and deal with getting
+// things hooked up, or not, during loop() time.
 void phone::startCall(void) {
 
 	char*	numBuff;
@@ -428,6 +471,9 @@ void phone::startCall(void) {
 }
 
 
+// Just like starting a call, doing the hangup sequence can take a long
+// time. So, we just fire off the command and let the loop() code take care
+// of managing it.
 void phone::startHangup(void) {
 
   if (mConnected && mHangupID==-1) {								// If we are connected and not already trying to hang up.
@@ -437,6 +483,9 @@ void phone::startHangup(void) {
 }
 
 
+// loop() wants us to check the status of our makeCall command. It may be
+// still working on making the call, it could have failed, possibly timed
+// out? Whatever, we deal with it and take action appropriately here.
 void phone::checkCall(void) {
 
 	int           numBytes;
@@ -466,6 +515,9 @@ void phone::checkCall(void) {
 }
 
 
+// loop() wants us to check the status of our hangUp command. Basically
+// this is the same kind of method as checkCall(). Just checking a different
+// command with a little different style of coding.
 void phone::checkHangup(void) {
 
   int   numBytes;
@@ -504,6 +556,9 @@ void phone::checkHangup(void) {
 }
 
 
+// We have a staus area for sending messages to the user. It will show the
+//message for a but then slowly fade away. I think its pretty cool.
+// Originally developed for Allie's doorbell. This one sends a number.
 void phone::out(int message) {
   
   stateDisplay->setColors(&textColor,&backColor);
@@ -512,6 +567,7 @@ void phone::out(int message) {
 }
 
 
+// And this will send a string.
 void phone::out(char* message) {
   
   stateDisplay->setColors(&textColor,&backColor);

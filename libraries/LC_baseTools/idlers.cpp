@@ -1,10 +1,16 @@
 #include "idlers.h"
 
 // The global idler object  list and call for "loop();"
-idlers theIdlers;
+idlers	theIdlers;
 
-void idle(void) { 
+// The flag that says we are in the idle loop. So we don't get all reentrant on things.
+bool		idling = false;
+
+// Our call that goes into loop() to run the idlers.
+void		idle(void) { 
+  idling = true;
   theIdlers.idle(); 
+  idling = false;
 }
 
 

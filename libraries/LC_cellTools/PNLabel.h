@@ -3,6 +3,10 @@
 
 #include <label.h>
 
+// A label that will auto format a phone number to "look" correct.
+// With paretheses, spaces and dashes in all the right places. Its
+// tougher thann  you'd think.
+
 // Handy function to strip any un-dial-able characters out of a
 // c string. I'll just leave it here in case someone wants to use it.
 void filterPNStr(char* str);

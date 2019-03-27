@@ -11,6 +11,26 @@
 #include "panel.h"
 #include "../../icons.h"
 
+
+// Better put notes on this before I completely forget. This is the screen that
+// gives you a phone to dial. There's a label showing you a formatted version of
+// what you are dialing, a status label, buttons to push and a close box to go
+// back to your homescreen.
+//
+// Another function is to give the user an interface to answer incoming calls.
+// This will be fired up when the background phone listener sees an incoming call,
+// allowing the user to either answer or ignore it.
+// 
+// And thirdly.. There's more? Of course there's more. This is also called when a
+// contact is chosen from any contact list with the command to call. The "pleaseCall"
+// pointer is set to a contact and that number is auto-dialed.
+//
+// So this keeps track of what's going on in communicating commands as a phone to
+// the FONA controller. Start a call, hangup, did the controller crash? Are you
+// ghosting me?! Much of is is just watching button presses and doing the right
+// things to reflect what's going on.
+
+
 extern	contact* pleaseCall;
 
 class phone;

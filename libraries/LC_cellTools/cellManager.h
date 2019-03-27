@@ -6,6 +6,35 @@
 #include <quickCom.h>
 #include <cellCommon.h>
 
+// This is the guy that actually talks to the FONA controller. And that, in turn, talks
+// to the SIM800 celphone hardware. The overall design is to have a queue for cell
+// commands. This is because, who knows how long each command will take? So we queue
+// them up and deal with them during idle time. Some need responses, some do not.
+//
+// All commands get a a unique ID number, they hold their own state (cellComStates), and
+// a set lifespan. If a command sits in the queue for too long, its timed out and
+// deleted. The section of the code that originated the command may ask for a command by
+// ID. A possible valid response is that the command is not found. Why? Probably because
+// the FONA controller crashed. Who really knows? But at least it knows something went
+// wrong and can take some sort of appropriate action.
+//
+// Along with all this is a status block of data that is agreed on by both sides to pass
+// back what's going on over in cell-hardware-land. This status thing is used as a
+// background service getting info like; How charged is the battery? How much cell
+// signal do we have? Is anyone trying to call us right now? This way the different
+// sections of the phone application can display battery usage, cell "bars", know to
+// start the call answer screen etc.
+//
+// The structure of the status block is in cellCommon.h. Well, at least our version of
+// it is. Because of Arduino stupidity, when you put in a .h file, the IDE also adds
+// EVERYTHING from that file's folder.. Into your code. This completely blew away all
+// available memory on the poor FONA controller, trying to host code that was deigned
+// for a larger platform. So REMEBER, there are two copies of cellCommon.h. If you
+// want to make a change, you have to change BOTH. Where is the other one? You'll have
+// to go look for it. (Who knows where it'll end up by the time your reading this.)
+
+
+
 enum cellComStates { com_standby, com_working, com_holding, com_complete, com_missing };
 
 

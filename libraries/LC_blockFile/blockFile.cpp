@@ -1,6 +1,7 @@
 #include "blockFile.h"
 
-
+// You start off with a full file path string. This associates our object with a file on
+// the SD drive. It will create a new file if neccissary.
 blockFile::blockFile(char* inFilePath) {
 
   mFileReady = false;                                 // Is the file ready? Well, not yet.
@@ -98,24 +99,24 @@ bool blockFile::writeBlock(unsigned long blockID, char* buffPtr, unsigned long b
 	blockHeader   tempBlock;
 	unsigned long remainigBytes;
 
-	if(bytes>0) {																							// When it comes right down to it, you just can't write nothing!
+	if(bytes>0) {																									// When it comes right down to it, you just can't write nothing!
 		if (fOpen()) {
-			if (findID(blockID)) {																			// If we have this one already.
-				if (peekBlockHeader(&tempBlock)) {														// Get a copy of the header.
-					if (tempBlock.bytes == bytes) {														// If its the same size..
-						if (writeBlockHeader(tempBlock.blockID, tempBlock.bytes)) {				// Moves file pointer to the data.
-							if (writeBlockData(buffPtr, bytes)) {										// Write out the new data buffer.
+			if (findID(blockID)) {																				// If we have this one already.
+				if (peekBlockHeader(&tempBlock)) {															// Get a copy of the header.
+					if (tempBlock.bytes == bytes) {															// If its the same size..
+						if (writeBlockHeader(tempBlock.blockID, tempBlock.bytes)) {					// Moves file pointer to the data.
+							if (writeBlockData(buffPtr, bytes)) {											// Write out the new data buffer.
 								fClose();
-								return true;																	// We are done, bail out.
+								return true;																		// We are done, bail out.
 							}
 						}
-					} else {                                                                // The size had changed.
-						writeBlockHeader(0, tempBlock.bytes);											// Mark the buffer as free. Move on..
+					} else {                                                                	// The size had changed.
+						writeBlockHeader(0, tempBlock.bytes);												// Mark the buffer as free. Move on..
 					}
 				}
 			}
-			if (findFit(bytes)) {																			// Start over. If we find an fitting slot..
-				if (peekBlockHeader(&tempBlock)) {																// Get a copy of the header we have.
+			if (findFit(bytes)) {																				// Start over. If we find an fitting slot..
+				if (peekBlockHeader(&tempBlock)) {															// Get a copy of the header we have.
                if (writeBlockHeader(blockID, bytes)) {												// Change the header to reflect what were writing.
 						if (writeBlockData(buffPtr, bytes)) {												// Write out the new data buffer.
                      if (tempBlock.bytes!=bytes){														// If its not the same size, we must split a block.

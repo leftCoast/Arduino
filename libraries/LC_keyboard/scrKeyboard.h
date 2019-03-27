@@ -18,7 +18,7 @@
 
 // Keys need to know the state of the keyboard. When they get time
 // they'll check the keyboard to see what state things are in and
-// redraw themselves accordingly. also output their data accordingly.
+// redraw themselves accordingly. Also output their data accordingly.
 
 
 enum  keyStates { chars, shifted, numbers, symbols };

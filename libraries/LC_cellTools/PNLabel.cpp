@@ -33,7 +33,7 @@ void filterPNStr(char* str) {
 }
 
 
-
+// Your standard drawObject kind of constructor..
 PNLabel::PNLabel(int inLocX, int inLocY, int inWidth,int inHeight,int textSize)
   : label(inLocX,inLocY,inWidth,inHeight) {
     
@@ -42,7 +42,8 @@ PNLabel::PNLabel(int inLocX, int inLocY, int inWidth,int inHeight,int textSize)
   mRawPN        = NULL;
 }
 
-  
+ 
+// And destructor.. 
 PNLabel::~PNLabel(void) {
 
   if (mFormattedPN) free(mFormattedPN);
@@ -84,6 +85,8 @@ void PNLabel::setValue(char* str) {
 int PNLabel::getRawNumBytes(void) { return strlen(buff) + 1; }
 
 
+// Someone wants the raw, numbers only versoin of the phone number. Probably
+// wants to try dialing it.
 void PNLabel::getRawPN(char* inBuff) {
 
 	if (buff) {
@@ -91,7 +94,10 @@ void PNLabel::getRawPN(char* inBuff) {
 	}
 }
 				
-				
+
+// This is the formatting method check first letter opening method. It
+// decides, from reading the first character, what subsequent method to
+// call.				
 void PNLabel::formatPN(void) {
   
   switch(mRawPN[0]) {
@@ -102,7 +108,8 @@ void PNLabel::formatPN(void) {
   }
 }
 
-
+// The rest are different ways a phone number can be formatted geven the
+// first character.
 void PNLabel::formatOne(void) {
 
   int numChars;

@@ -7,7 +7,9 @@
 // **************************************************
 
 
-// Creation constructor.
+// Creation constructor. This is for creating a fresh new, never been seen
+// before contact. Like you just met someone and they gave you their number.
+// Or a SPAM call came in and your phone wants to log it in your call log.
 contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,char* PN)
   : linkListObj(), fileBuff(inFile,blockID) {          
 
@@ -22,7 +24,8 @@ contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,cha
 }
 
 
-// Re-creation constructor.
+// Re-creation constructor. This is for pulling an existing contact off the
+// SD card. (Disk dive, what have you.)
 contact::contact(blockFile* inFile,unsigned long blockID)
   : linkListObj(), fileBuff(inFile,blockID) {
 
@@ -36,6 +39,7 @@ contact::contact(blockFile* inFile,unsigned long blockID)
 }
 
 
+// Recycle the memory we used.
 contact::~contact(void) {
 
 	if (mPN) free(mPN);
@@ -45,37 +49,19 @@ contact::~contact(void) {
 	if (mCompanyName) free(mCompanyName);
 }
 
-/*
-void contact::setPN(char* PN) {
 
-	int numChars;
-	char*	temp;
-
-	temp = NULL;												// Initialize..
-	numChars = strlen(PN) + 1;								// Enough room.
-	if (resizeBuff(numChars,(uint8_t**)&temp)) {		// Grab some RAM
-		strcpy(temp,PN);										// Make local copy.
-		filterPNStr(temp);									// Filter out the gunk.
-		numChars = strlen(temp) + 1;						// Enough room, again.
-		if (resizeBuff(numChars,(uint8_t**)&mPN)) {	// Grab some more RAM. We'll keep this chunk.
-			strcpy(mPN,temp);									// Copy the number over.
-			mChanged = true;									// And flag the change.
-		}
-		resizeBuff(0,(uint8_t**)&temp);					// Recycle temp;
-	}
-}
-*/
-
+// These next few are just for setting strings to differen't fields. The
+// phone number string is actually stripped of un-dial-able characters.
 void contact::setPN(char* PN) {
 
   int numChars;
 
-  numChars = strlen(PN) + 1;
-  if (resizeBuff(numChars,(uint8_t**)&mPN)) {
-    strcpy(mPN,PN);
-    filterPNStr(mPN);
-    mChanged = true;
-  }
+  numChars = strlen(PN) + 1;							// Enough room.
+  if (resizeBuff(numChars,(uint8_t**)&mPN)) {	// Grab some RAM
+    strcpy(mPN,PN);										// Copy the number over.
+    filterPNStr(mPN);									// Filter out the gunk.
+    mChanged = true;										// And flag the change.
+  }															// No RAM, no change. Bigger troubles coming anyway.
 }
 
 
@@ -127,6 +113,9 @@ void contact::setCompanyName(char* companyName) {
 }
 
 
+// We are being asked how much of a buffer will we need to save ourselves to
+// a block of bytes. Currently its the length of all the strings strung
+// together and 4 bytes for our message list file ID.
 unsigned long contact::calculateBuffSize(void) {
 
   int numBytes;
@@ -142,6 +131,9 @@ unsigned long contact::calculateBuffSize(void) {
 }
 
 
+// Write ourselves to a buffer in such a way that, given this buffer again
+// we will be able to re-create ourselves. Currently its a list of c strings
+// with the terminating '\0's. Then a file ID for our text message list.
 void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
   
 	int				offset;
@@ -149,7 +141,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	unsigned long*	longPtr;
 	int				i;
 		
-	if (mErased) return;							// We're dead. We ain't playing this game anymore.	
+	if (mErased) return;							// I said, we're dead. You not listening?	
 	offset = 0;                       
 	numBytes = strlen(mPN) + 1;             // Write out phone number.
 	for(i=0;i<numBytes;i++) {
@@ -181,8 +173,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	}
 	offset = offset + i;
 	
-	//longPtr = (unsigned long*)&(buffPtr[i+offset]);
-	longPtr = (unsigned long*)&(buffPtr[offset]);
+	longPtr = (unsigned long*)&(buffPtr[offset]);	// Our message list file ID.
 	*longPtr = mMsgID;
   
 	mChanged = false;
@@ -192,18 +183,21 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 // We've been FIRED?!?
 void contact::eraseFromFile(void) {
 
-	mFile->deleteBlock(mMsgID);
-	fileBuff::eraseFromFile();
-	mErased = true;
+	mFile->deleteBlock(mMsgID);	// This deletes our list of text messages.
+	fileBuff::eraseFromFile();		// This deletes ourselves from the file.
+	mErased = true;					// This marks us as deleted for the rest of this code.
 }
 
 
+// Remember I said we need to be able to re-create ourselves from a byte
+// buffer? Here's that buffer. Currently we pull the strings out, one after
+// another, then grab our message list file ID off the end.
 unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
 	unsigned long buffIndex;
 	unsigned long* longPtr;;
   
-  	if (mErased) { return 0; }		// We're dead. We ain't playing this game anymore.	
+  	if (mErased) { return 0; }		// Again, we're dead. Not doing this.	
 	buffIndex = 0;
 	setPN(&(buffPtr[buffIndex]));
 	buffIndex = buffIndex + strlen(mPN) + 1;
@@ -223,6 +217,7 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 }
 
 
+// Prints to the serailport, for debugging.
 void contact::printContact(void) {
 
 	Serial.print(F("ID#        : "));Serial.println(mID);
@@ -238,11 +233,14 @@ void contact::printContact(void) {
 }
 
 
+
 // **************************************************
 // *****************  contactList *******************
 // **************************************************
 
-          
+
+// Deep inside we are only a fileBuff object that lives in a blockFile. In
+// our RAM state we are a linkListObj manager.           
 contactList::contactList(blockFile* inFile)
   : linkList(), fileBuff(inFile) {
     
@@ -253,6 +251,8 @@ contactList::contactList(blockFile* inFile)
 contactList::~contactList(void) {  }
 
 
+// Given a phone number this'll find the contact object from the list. If it
+// can't find one, it returns NULL as a flag.
 contact* contactList::findByPN(char* phoneNum) {
 
   contact*  trace;
@@ -268,7 +268,10 @@ contact* contactList::findByPN(char* phoneNum) {
 }
 
 
-// This is for creating a fresh new contact. Not re-creation.
+// This is for creating a fresh new contact. First it looks to see if it
+// can find this phone number in the list. If so, it'll just pass this
+// back. (Does not make duplicats. NO Duplucates!) Otherwise it will
+// create a new contact with this phone number and pass that back.
 contact* contactList::findOrAddContact(char* phoneNum) {
 
   contact*      contactPtr;
@@ -286,25 +289,36 @@ contact* contactList::findOrAddContact(char* phoneNum) {
 }
 
 
+// How much of a RAM buffer will we need to save ourselves? Well, for
+// ourselves, we only save a list of contact file IDs. So its just
+// ID size * count.
 unsigned long contactList::calculateBuffSize(void) { return sizeof(unsigned long) * getCount(); }
 
-  
+
+// This is an inherited call we fill out. We have a list of objects we need
+// to save. I our case its the changed contact objects. This is where we do
+// the "thing" to save them. Basically write them out into a buffer to ship
+// off to the SD card. We don't worry about order or not saving unchanged
+// ones. Its all sorted out by the contact file IDs. Pretty slick actually.
 bool contactList::saveSubFileBuffs(void) {
 
 	contact*        trace;
 
-	trace = (contact*)getFirst();       // Grab the first contact on our list.
-	while(trace) {                      // While we have contacts..
-		if (trace->mChanged) {            // If they have been edited (or new).
-			trace->saveToFile();            // Save them to disk.
+	trace = (contact*)getFirst();			// Grab the first contact on our list.
+	while(trace) {								// While we have contacts..
+		if (trace->mChanged) {				// If they have been edited (or new).
+			trace->saveToFile();				// Save them to disk.
 		}
-		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
+		trace = (contact*)trace->next;	// Grab another contact. Or a NULL if we ran out.
 	}  
-	return true;                        // Easy peasy, return true;
+	return true;								// Easy peasy, return true;
 }
 
 
- 
+// Another inherited call. What do we save as the list manager? We only save
+// a list of contact IDs. Its enough to do our part in recreating this data
+// structure in RAM next time we need it. The contacts we manage will be
+// saved in the inherited saveSubFileBuffs() method above.
 void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 
 	contact*        trace;
@@ -322,7 +336,10 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	  
 }
 
-
+// This is where we're handed a buffer and we recreate our database of
+// contacts in RAM. Now remember, our buffer is only a list of file ID
+// numbers. So we read out a number, use that to create a contact, add it to
+// our list then read the next.
 unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 
   unsigned long*  longPtr;
@@ -339,6 +356,8 @@ unsigned long contactList::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 }
 
 
+// We manage the list of contacts in RAM. This on has been marked for
+// deletion. We need to do whatever it takes to delete it.
 void contactList::deleteContact(contact* theDoomed) {
 			
 	if (theDoomed) {						// Sanity, did they send us someting?

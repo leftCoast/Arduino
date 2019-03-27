@@ -24,7 +24,7 @@ void panel::setup(void) { }
 void panel::loop(void) {  }
 
 
-// The default here is to not draw ourselves. You can chnge that.
+// The default here is to not draw ourselves. You can change that.
 void panel::drawSelf(void) {  }
 
 
@@ -43,6 +43,12 @@ void panel::closing(void) {  }
 // Just hold in a loop calling idle() 'til it's done.
 void panel::delay(unsigned long ms) {
 
-    mTimer.setTime(ms);
-    while(!mTimer.ding()) theIdlers.idle();
+	if (!idling) {						// If we are not IN the idle loop.. (Don't get all reentrant here!)
+		mTimer.setTime(ms);			// Set up our timer. We have a timer just for this?
+		while(!mTimer.ding()) {		// While waiting for the timer to expire..
+			theIdlers.idle();			// We repeatedly call idle() to keep the background stuff running.
+		}
+	} else {								// Oh lord no! We ARE in the idle loop.
+		delay(ms);						// We're going to punch a delay() right in the middle of the idle loop. Ugh!
+   }
 }

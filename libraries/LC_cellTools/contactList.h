@@ -4,9 +4,22 @@
 #include <lists.h>
 #include <fileBuff.h>
 
+// Contact list. This is the bases of your contact database. It reads your
+// contact list from long term storage to RAM. It also keeps your contact
+// list up to date in long term storage. You use this to create, edit, call
+// or text contacts. Well, at least choosing contacts to call, or text. Its
+// good at updating contact edits.
+//
+// Hopefully it'll be good to search and sort contacts as well. But that'll
+// have to wait for another time.
+
 
 // Handy function to strip any un-dial-able characters out of a
 // c string. I'll just leave it here in case someone wants to use it.
+// 
+// This function is actually written in PNLabel.cpp so you have to have
+// that linked in somewhere for this to work. (If your using this, there
+// is a good chance it is linked in.)
 void filterPNStr(char* str);
 
 
