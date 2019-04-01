@@ -26,7 +26,8 @@ class idlers : public linkList {
   				void	idle(void);
 };
 
-extern idlers theIdlers;
-extern void idle(void);
+extern	idlers	theIdlers;
+extern	void		idle(void);
+extern	bool		idling;
 
 #endif

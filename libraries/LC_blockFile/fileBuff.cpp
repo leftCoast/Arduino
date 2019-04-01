@@ -1,7 +1,7 @@
 #include "fileBuff.h"
 
 
-// constructor for root ID
+// constructor for root ID. For explanation of root file ID see : blockFile.h
 fileBuff::fileBuff(blockFile* inFile) {
   
 	mFile	= inFile;							// Allright, the blockfile.
@@ -24,7 +24,8 @@ fileBuff::fileBuff(blockFile* inFile,unsigned long blockID) {
 
 fileBuff::~fileBuff(void) {  }
   
-
+  
+// Papers please..
 unsigned long fileBuff::getID(void) { return mID; }
 
 
@@ -46,9 +47,12 @@ unsigned long fileBuff::loadFromBuff(char* buffPtr,unsigned long maxBytes) { ret
 bool fileBuff::saveSubFileBuffs(void) { return true; }
 
 
+// There's always the chance we are no longer useful.
 void fileBuff::eraseFromFile(void) { mFile->deleteBlock(mID); }
 
 
+// This orchestrates the saving of a fileBuff. Some have subfiles and these
+// are delt with here as well.
 bool fileBuff::saveToFile(void) {
   
   unsigned long numBytes;
@@ -73,6 +77,10 @@ bool fileBuff::saveToFile(void) {
 }
 
 
+// Here we're orchestrating the reading of ourselves from long term storage.
+// We don't have a call to pull the subBuffs from storage. This is left up
+// to the inherited filebuff itself to know that it needs to do that and
+// how.
 bool fileBuff::readFromFile(void) {
   
   unsigned long numBytes;

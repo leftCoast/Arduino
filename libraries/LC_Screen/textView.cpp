@@ -372,7 +372,6 @@ char* lineManager::formatLine(int lineNum) {
     }
   }
   aLine = (lineMarker*)getByIndex(lineNum);           // We can get a line.
-  //Serial.print("Line #, Count : ");Serial.print(lineNum);Serial.print(", ");Serial.print(getCount());Serial.print("|");
   aLine->formatLine(mTextBuff, mOutBuff, mWidthChars);
   return mOutBuff;
 }

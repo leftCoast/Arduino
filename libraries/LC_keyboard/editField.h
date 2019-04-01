@@ -16,21 +16,26 @@ class editField : public label,
                   public idler,
                   public timeObj {
 
-  public:
-                editField(rect* inRect,char* inText,word inTextSize);
-                editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize);
-  virtual       ~editField(void);
+	public:
+				editField(rect* inRect,char* inText,word inTextSize);
+				editField(int inLocX, int inLocY, int inWidth,int inHeight,char* inText,word inTextSize);
+	virtual	~editField(void);
 
-  virtual void    setValue(char* str);
-  virtual void    insertChar(char theChar);
-  virtual void    deleteChar(void);
-  virtual void    handleKeystroke(keystroke* inKeystroke);
-  virtual void    getCursorPos(int* cursX,int* cursY,int* cursH);
-  virtual void    idle(void);
-  virtual void    drawSelf(void);
+				void	setParent(drawObj*	inParent);
+				void	setRetExit(bool inRetExit);
+	virtual	void	setValue(char* str);
+	virtual	void	insertChar(char theChar);
+	virtual	void	deleteChar(void);
+	virtual	void	handleKeystroke(keystroke* inKeystroke);
+	virtual	void	getCursorPos(int* cursX,int* cursY,int* cursH);
+	virtual	void	idle(void);
+	virtual	void	drawSelf(void);
+	virtual	void	setFocus(bool setLoose);	
 
-          int     cursorPos;
-          bool    cursorOnOff;
+				int		cursorPos;
+				bool		cursorOnOff;
+				bool		returnExit;
+				drawObj*	parent;
 };
 
 #endif

@@ -70,26 +70,27 @@ class qCSlave : public idler, public timeObj {
 	public:
 				enum slaveStates { offline, listening, recieveing, holding, replying };
 				
-				qCSlave(void);		// Get our port and set initial values.
-	virtual	~qCSlave(void);	// We're done here.
+				qCSlave(void);						// Get our port and set initial values.
+	virtual	~qCSlave(void);												// We're done here.
 
-				void				begin(int baud);							// Get the baud rate and fire up the connection.
+				void				begin(byte* buff,byte numBytes,int baud);				// Get buffer bytes & baud then fire up the connection.
 				void				setComTimeout(int timeOutMS=1000);	// How long we will wait for command to complete.
 				byte				readErr(void);								// Something broken?
 				byte				haveBuff(void);							// We received a buffer, how big?
-				bool				readBuff(byte* buff);					// Copy the data we got back into here.
-				bool				replyBuff(byte* buff,byte buffLen);	// Send a reply buffer.
+				byte*				getComBuff(void);							// Hand back a pointer to the start of the com buffer.
+				bool				replyComBuff(byte buffLen);				// Com buffer has been loaded with data, send it back.
 
 	virtual	void				idle(void);									// Again, the servants run things in the background.
 				void				doListen(void);
 				void 				doReceiving(void);
 				void				doSending(void);
-				bool				resizeBuff(byte numBytes);
 				
 				slaveStates	mState;
 				byte			mNumBytesMoved;
 				byte			mError;
 				byte*			mBuff;
+				byte			mNumBytes;
+
 };
 #endif
 

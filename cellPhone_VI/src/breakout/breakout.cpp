@@ -9,29 +9,6 @@
 
 // ******************************
 
-class myCloseBtn :  public closeBtn {
-
-  public:
-          myCloseBtn(int x, int y,breakout* myApp);
-  virtual ~myCloseBtn(void);
-
-  virtual void doAction(void);
-  
-          breakout* mApp;
-};
-
-
-myCloseBtn::myCloseBtn(int x, int y,breakout* myApp)
-  : closeBtn(x,y) { mApp = myApp; }
-
-  
-myCloseBtn::~myCloseBtn(void) {  }
-
-
-void myCloseBtn::doAction(void) { mApp->close(); }
-
-// ******************************
-
 breakout::breakout(void)
   : panel(breakoutApp,noEvents) {
 
@@ -78,8 +55,7 @@ void breakout::setup() {
   numBallsNum->setValue(" ");
   addObj(numBallsNum);
 
-  myCloseBtn* aCloseBtn = new myCloseBtn(3,0,this);
-  aCloseBtn->begin();
+  closeBtn* aCloseBtn = new closeBtn((panel*)this);
   addObj(aCloseBtn);
 
   ballNumCMap.addColor(NUM_BALLS,&green);

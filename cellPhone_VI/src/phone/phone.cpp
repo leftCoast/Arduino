@@ -2,6 +2,8 @@
 #include "phone.h"
 #include <cellCommon.h>
 #include <drawDelete.h>
+#include <resizeBuff.h>
+#include <PNLabel.h>
 #include "cellManager.h"
 #include	"../../cellOS.h"
 #include "../cellListener/cellListener.h"
@@ -76,6 +78,9 @@ phoneBtn::phoneBtn(int x,int y,char inKey,phone* inPhone)
 phoneBtn::~phoneBtn(void) {  }
 
 
+// Its amazing how much code it takes just to "draw" a button. Is it active?
+// Clicked? Inactive? Is it a character? A symbol? Its all here for all our
+// standard phone buttons.
 void phoneBtn::drawSelf(void) {
 
   int         inset = 5;                      // All the hand tweaking to
@@ -119,6 +124,8 @@ void phoneBtn::drawSelf(void) {
 }
 
 
+// Button got a click? send its saved keystroke character to our phone
+// object.
 void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 
 
@@ -127,7 +134,10 @@ void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 // *******************  callControl  *******************
 // *****************************************************
 
-  
+
+// CallControl is a "special" button that controls the calling or hang-up
+// commands for the phone. So it has a special size, special colors, special
+// handling of its actions.. Its its own thing. Inherited from phoneBtn.
 callControl::callControl(int x,int y,char inKey,phone* inPhone)
   : phoneBtn(x,y,inKey,inPhone) {
 
@@ -139,6 +149,11 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 callControl::~callControl(void) { }
 
 
+// Not only is there a bunch of drawing code for this fancy button, we also
+// mix in calls to the message text about what's going on in the world of
+// cell phone hardware. This is kinda' a hack, mixing things, but it was
+// such a good spot to do this. Seeing as we know the state of what's going
+// on at the moment.
 void callControl::drawSelf(void) {
 
   hookup();
@@ -187,6 +202,9 @@ void callControl::drawSelf(void) {
 }
 
 
+// Our actions. We have three states we can be in idle, ringning or talking.
+// When we get a click, its time to change state. All three methods will
+// fire off our state in a new direction.
 void callControl::doAction(void) {
 
   switch(mState) {
@@ -197,6 +215,10 @@ void callControl::doAction(void) {
 }
 
 
+// callControl manages the phone status in the background. It can initiate a
+// call upon creation, via the pleasCall variable. That's somewhat of a
+// special task. The rest are keeping track of the phone object state
+// changes and making sure we reflect those.
 void callControl::idle() {
 
 	if (pleaseCall) {
@@ -236,7 +258,9 @@ void callControl::idle() {
 // *********************  phone   **********************
 // *****************************************************
 
-
+// phone object. This is the phone screen you use to dial with. It is also
+// the interface used to start calls from other areas of the cell phone
+// program.
 phone::phone(void) 
   : panel(phoneApp,noEvents) {
 
@@ -252,6 +276,10 @@ phone::phone(void)
 phone::~phone(void) { if (mRawPN) free(mRawPN); }
 
 
+// Being a panel we are a draw object. actually a drawGroup object. So we
+// can add viewable things to ourselves and let the user interact with them.
+// Hence, phone buttons, labels etc. This is where we "build" our screen of
+// things like buttons, controls & labels.
 void phone::setup(void) {
 
   statTimer.setTime(STAT_TIME);
@@ -300,6 +328,8 @@ void phone::setup(void) {
 }
 
 
+// Seeing as we are a panel, we have a loop() call. This is used for our
+// "main" focus. Typically watching for user interaction.
 void phone::loop(void) {
 
   // Weird hack to get the battery & RSSI things to draw
@@ -324,6 +354,9 @@ void phone::loop(void) {
 }
 
 
+// For drawing ourselves. Not much to do because we are basically just a
+// background for all the bits in our group. They all take care of drawing
+// themselves. (As it should be.)
 void phone::drawSelf(void) {
 
   screen->fillScreen(&backColor);
@@ -331,6 +364,8 @@ void phone::drawSelf(void) {
 }
 
 
+// Fielding keystrokes. We built all the buttons and gave them keystrokes.
+// This is where we respond to these as the user clicks on stuff.
 void phone::keystroke(char inKey) {
 
   switch(inKey) {
@@ -361,6 +396,9 @@ void phone::keystroke(char inKey) {
 }
 
 
+// If it was a printable character we would like to show the user that we
+// saw it. And that's what we're doing here. Basically managing a string
+// buffer and growing it as characters come in.
 void phone::addChar(char keyStroke) {
   
   int   numChars;
@@ -382,6 +420,7 @@ void phone::addChar(char keyStroke) {
 }
 
 
+// Or deleting characters if they call for a delete..
 void phone::deleteChar(void) {
 
   if (mRawPN) {
@@ -392,6 +431,9 @@ void phone::deleteChar(void) {
 }
 
 
+// Someone thinks there is a call coming in. How do they know this stuff?
+// Anyway, this is where the command to "Pick up the damn phone!" Is
+// generated.
 void phone::answerCall(void) {
 
   if (!mConnected) {
@@ -401,51 +443,81 @@ void phone::answerCall(void) {
 }
 
 
+// Starting a call sequence. Starting a call can take a LONG time in
+// computer land. So, we'll just fire off the command, and deal with getting
+// things hooked up, or not, during loop() time.
 void phone::startCall(void) {
 
-  if (!mConnected) {
-    out("Calling..");
-    mCallingID = ourCellManager.sendCommand(makeCall,mRawPN,true);
-  }
+	char*	numBuff;
+	
+	numBuff = NULL;																			// Ok, init numBuff for later.
+	if (!mConnected) {																		// If we're not connected..
+		if (	statusReg.networkStat==NS_registeredHome||
+				statusReg.networkStat==NS_registeredRoaming ) {
+			if (resizeBuff(numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
+				numDisplay->getText(numBuff);													// Grab the number off the display.
+				filterPNStr(numBuff);															// Filter the formatting out of it.
+				mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
+				out(numBuff);
+				resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
+				out("Calling..");																// Show the user we're doing it.
+			} else {																					// Or else we didn't get the RAAM?
+				out("Memory error?!");															// Show the user we ran out of memory.
+			}
+		} else {
+			out("No network.");
+		}
+	}																								// Already connected? Just ignore everything.
 }
 
 
+// Just like starting a call, doing the hangup sequence can take a long
+// time. So, we just fire off the command and let the loop() code take care
+// of managing it.
 void phone::startHangup(void) {
 
-  if (mConnected) {
-    out("Hanging up..");
-    mHangupID = ourCellManager.sendCommand(hangUp,true);
+  if (mConnected && mHangupID==-1) {								// If we are connected and not already trying to hang up.
+    out("Hanging up..");												// Show were going to try hanging up.
+    mHangupID = ourCellManager.sendCommand(hangUp,true);		// Create the command and send it on its way.
   }
 }
 
 
+// loop() wants us to check the status of our makeCall command. It may be
+// still working on making the call, it could have failed, possibly timed
+// out? Whatever, we deal with it and take action appropriately here.
 void phone::checkCall(void) {
 
-  int           numBytes;
-  byte          reply;
+	int           numBytes;
+	byte          reply;
   
-  if (mCallingID!=-1) {                                       // Working on a call?
-    if (ourCellManager.progress(mCallingID)==com_holding) {   // We found it and its holding a reply?
-      numBytes = ourCellManager.numReplyBytes(mCallingID);     // This is how big the reply is.
-      if (numBytes==1) {                                      // We're looking for a one byte reply.
-        ourCellManager.readReply(mCallingID,&reply);          // Grab the byte.
-        if (reply==0) {                                       // Is it a zero?
-          mConnected = true;                                  // Cool!, we're connected!
-          out("Connected.");
-        }
-      } else {
-        ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
-        out("Connect error.");
-      }
-      mCallingID = -1;                                        // In any case, we're done with the command.
-    } else if (ourCellManager.progress(mCallingID)==com_missing) {
-      out("Call failed.");
-      mCallingID = -1;
-    }
-  }
+	if (mCallingID!=-1) {														// Working on a call?
+		if (ourCellManager.progress(mCallingID)==com_holding) {		// We found it and its holding a reply?
+			numBytes = ourCellManager.numReplyBytes(mCallingID);		// This is how big the reply is.
+			if (numBytes==1) {													// We're looking for a one byte reply.
+				ourCellManager.readReply(mCallingID,&reply);				// Grab the byte.
+				if (reply==0) {													// Is it a zero?
+					mConnected = true;											// Cool!, we're connected!
+					out("Connected.");											// Show that the call's going through.
+				} else {
+					out("Connect error.");										// FONA passed back an error.
+				}
+			} else {																	// Internal communication error.
+				ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
+				out("Internal error.");
+			}
+			mCallingID = -1;                                        // In any case, we're done with the command.
+		} else if (ourCellManager.progress(mCallingID)==com_missing) {
+			out("No response.");
+			mCallingID = -1;
+		}
+	}
 }
 
 
+// loop() wants us to check the status of our hangUp command. Basically
+// this is the same kind of method as checkCall(). Just checking a different
+// command with a little different style of coding.
 void phone::checkHangup(void) {
 
   int   numBytes;
@@ -469,16 +541,24 @@ void phone::checkHangup(void) {
           ourCellManager.dumpBuff();                        // Unknown what it is. Toss it.
           out("Reply error.");                              // Something weird going on..
         }
+        mHangupID = -1;													// This command is done. Shouldn't we note that?
       break;
-      case com_complete :                                   // All this means is it gave us back a reply. (Any reply)                           
+      case com_complete :												// All this means is it gave us back a reply. (Any reply)
+      	out("A reply arrived.");
+      break;                             
       case com_missing  :                                   // Possibly timed out or we already got it.
-        mHangupID = -1;
+      	out("No response.");
+        	mConnected = false;											// If the FONA crashed, we're not connected anymore..
+        	mHangupID = -1;
       break;
     }
   }
 }
 
 
+// We have a staus area for sending messages to the user. It will show the
+//message for a but then slowly fade away. I think its pretty cool.
+// Originally developed for Allie's doorbell. This one sends a number.
 void phone::out(int message) {
   
   stateDisplay->setColors(&textColor,&backColor);
@@ -487,6 +567,7 @@ void phone::out(int message) {
 }
 
 
+// And this will send a string.
 void phone::out(char* message) {
   
   stateDisplay->setColors(&textColor,&backColor);

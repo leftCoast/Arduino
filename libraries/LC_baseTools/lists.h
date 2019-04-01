@@ -56,7 +56,7 @@ class linkList {
 
 //*******************************************************
 // stack
-// In the stack we have push, pop, top & empty.
+// In the stack we have push, pop, peek & isEmpty.
 //*******************************************************
 
 class stack : public linkList {
@@ -66,16 +66,15 @@ class stack : public linkList {
     virtual	~stack(void);
     
     virtual void				push(linkListObj* newObj);
-    virtual void				pop(void);
-    virtual linkListObj*	top(void);
-    //virtual bool				empty(void);
+    virtual linkListObj* 	pop(void);
+    virtual linkListObj*	peek(void);	
   };
 
 
 //*******************************************************
 // queue
 // Just like in the stack, in the queue we have push, peek,
-// pop & empty. But, when we add an object we don't
+// pop & isEmpty. But, when we add an object we don't
 // add it to the top of the list. We add it to the end.
 //*******************************************************
 
@@ -86,9 +85,8 @@ class queue : public linkList {
     virtual	~queue(void);
     
     virtual void         	push(linkListObj* newObj);
-    virtual	linkListObj* 	peek(void);
     virtual linkListObj*   pop(void);
-    //virtual bool				empty(void);
+    virtual	linkListObj* 	peek(void);
   };
 
 

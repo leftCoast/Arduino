@@ -102,11 +102,12 @@ cellManager::cellManager(void)
   mCurrentCommand = NULL;   // No current command.
   mStatusID       = -1;     // Flag for no status cooking.
   mStatusTimer.setTime(STATUS_TIME);
+  clearStatus();
 }
 
 
 // Nothing really to do. Inherited will dump
-// and delete all the rmaining commands.
+// and delete all the remaining commands.
 cellManager::~cellManager(void) {  }
 
 
@@ -141,7 +142,7 @@ int cellManager::sendCommand(byte commandNum,byte numBytes,uint8_t* comData,bool
     newCommand->commandNum = commandNum;                // The command they want to send.
     newCommand->wantReply = wantReply;                  // Do they want a reply?
     newCommand->numComBytes = numBytes;                 // Note the buff size.
-    if (numBytes>0) {                                   // Som sort of data going out?
+    if (numBytes>0) {                                   // Some sort of data going out?
       newCommand->comData = (uint8_t*)malloc(numBytes); // Ask for some RAM.
       if (newCommand->comData) {                        // If we got the RAM..
         for(byte i=0;i<numBytes;i++) {                  // Loop through an fill in the buff.
@@ -160,7 +161,7 @@ int cellManager::sendCommand(byte commandNum,byte numBytes,uint8_t* comData,bool
 
 
 // Find a command by ID. And, if found? Return the status of that command.
-// If no command is found, return -1 as a flag.
+// If no command is found, return com_missing as a flag.
 int cellManager::progress(int commandID) {
 
   cellCommand*  trace;
@@ -304,7 +305,7 @@ void cellManager::launchCommand(cellCommand* aCom) {
     dumpBuff();                                         // Dump it out.
   }
   if (mState==standby) {                                // We're waiting too!
-    numBytes = aCom->getNumComBytes();                  // Howw big is this going to be?
+    numBytes = aCom->getNumComBytes();                  // How big is this going to be?
     ourComBuff = (uint8_t*)malloc(numBytes);            // Grab some RAM.
     if (ourComBuff) {                                   // Got it?
       aCom->getComBuff(ourComBuff);                     // Get the command buffer.
@@ -349,7 +350,7 @@ void cellManager::doStatus(void) {
   if (mStatusID==-1) {                              // We need to fire one off?
      mStatusID = sendCommand(getStatus,true);       // Well, that was easy.
   } else {                                          // We have a current one to work with?
-    switch(progress(mStatusID)) {                   // Se what its up to..
+    switch(progress(mStatusID)) {                   // See what its up to..
       case com_standby  : break;                    // Its on the list.
       case com_working  : break;                    // Its cooking now!
       case com_holding  :                           // Ha! Got a reply!
@@ -364,8 +365,9 @@ void cellManager::doStatus(void) {
       break;                              
       case com_complete :                           // Its already been read but not dumped out.
       case com_missing  :                           // Its already been deletd.
+        clearStatus();
         mStatusID = -1;                             // Flag no command working.
-        if (mStatusTimer.ding()) {                  // If the timer is still running, H=Just let it go.
+        if (mStatusTimer.ding()) {                  // If the timer is still running, just let it go.
           mStatusTimer.start();                     // If the timer has expired, reset it.
         }
       break;
@@ -374,9 +376,27 @@ void cellManager::doStatus(void) {
 }
 
 
+// what should the status look like when we loose connection.
+void	cellManager::clearStatus(void) {
+	
+	statusReg.FONAOnline			= 0;
+	statusReg.batteryVolts		= 0;
+	statusReg.batteryPercent	= 0;
+	statusReg.RSSI					= 0;
+	statusReg.networkStat		= NS_unknown;
+	statusReg.volume				= 0;
+	statusReg.callStat			= CS_unknown;
+	statusReg.numSMSs				= 0;
+	strcpy(statusReg.networkTime,"unknown");
+  	statusReg.errByte				= 0;
+}
+
+
+// This sends it out the serial port. Good for debugging.
 void cellManager::showCellStatus(void) {
   
   out(F("------------ cellStatus ------------"));outln;
+  out(F("FONA online: "));out(statusReg.FONAOnline);out("\n");
   out(F("battery V  : "));out(statusReg.batteryVolts);out(F("mV\n"));
   out(F("battery %  : "));out(statusReg.batteryPercent);out(F("%\n"));
   out(F("RSSI       : "));out(statusReg.RSSI);outln;;
@@ -395,16 +415,19 @@ void cellManager::showCellStatus(void) {
   out(F("callStat   : "));out(statusReg.callStat);out(F("\n"));
   out(F("numSMSs    : "));out(statusReg.numSMSs);out(F("\n"));
   out(F("Net Time   : "));out(statusReg.networkTime);out(F("\n"));
+  out(F("Error Byte : "));out(statusReg.errByte);out(F("\n"));
   out(F("------------------------------------"));outln;
   out(F("------------------------------------"));outln; 
 }
 
+
+// And here's what we do over and over in the background idle() loop.
 void cellManager::idle(void) {
 
-  qCMaster::idle();
-  cleanList();
-  if (mStatusTimer.ding()) {
-    doStatus();
-  }
-  runCommand();
+  qCMaster::idle();					// Let the communications code do its thing. (We inherit from qCMaster, so we need to patch its idle(); call.)
+  cleanList();							// Check to see if any commands need recycling.
+  if (mStatusTimer.ding()) {		// If its time to update status info..
+    doStatus();						// Fire off a status command.
+  }		
+  runCommand();						// And finally, we have a look at our command list to see if anything needs doing.
 }

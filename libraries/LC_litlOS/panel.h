@@ -4,7 +4,7 @@
 // The panel object. Base class for swapping in and out of different objects
 // that want to use the screen. The plan is that the OS can swap panels back
 // and forth as the user chooses different things he wants to do. Like
-// different apps. Each panel has its own setup() and loop() functions yu can
+// different apps. Each panel has its own setup() and loop() functions you can
 // fill in to pretend your in a "real" sketch. Wow, just like a real boy!
 
 #include <drawObj.h>

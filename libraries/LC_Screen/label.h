@@ -52,7 +52,6 @@ class label : public drawObj {
 
 //private :
 	void initLabel(void);
-	bool resizeBuff(int numBytes);
   
 	word		textSize;
 	word		justify;

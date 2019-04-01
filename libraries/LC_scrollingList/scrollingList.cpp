@@ -1,28 +1,16 @@
 #include "scrollingList.h"
 
-#define DRAG_TIME		750	// How long to wait before we call it a drag?
-#define DRAG_RAD		50		// Distacnce window for "Oh yeah, he's dragging".
 
 scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,eventSet inEventSet,bool vertical)
 	: drawList(x,y,width,height,inEventSet,vertical) {
 
 	mType = sType;                // The kind of scroller we are.
 	mLoc = onList;
-	if (mType == touchScroll) {   // If we're the touch type.
-		touchTimer = new timeObj(DRAG_TIME);
-	}
 }
 
 
 // Looks like we don't have anything to toss out. 
-scrollingList::~scrollingList(void) {
-
-	if (touchTimer) { delete touchTimer; }
-}
-
-
-// Many times the list itself doesn't draw. 
-void scrollingList::drawSelf(void) { }
+scrollingList::~scrollingList(void) { }
 
 
 
@@ -32,54 +20,60 @@ void scrollingList::drawSelf(void) { }
 //
 // Well, drag it around with your finger. (Gulp!)
 
-void scrollingList::dragVertical(void) {
+void scrollingList::dragVertical(event* inEvent) {
 	
-	point		now;
-	int		delta;
-	mapper	scrolTimeMApper(0,40,100,20);
-	timeObj	scrollTimer(100);
-	int		timeCount;
+	int		clicks;
+	int		dY;
+	int		startY;
+	int		lastY;
+	drawObj*	firstItem;
 	
-	Serial.println("Vertical drag");
-	timeCount = 0;
-	while(screen->touched()) {
-		now = screen->getPoint();
-		delta = now.y - mTouchPoint.y;
-		if (scrollTimer.ding()){
-			timeCount++;
-			scrollTimer.start();
-			if (timeCount>10) {
-				movelist(delta<0);
-				timeCount = 0;
-				scrollTimer.setTime(scrolTimeMApper.Map(delta));
+	firstItem = theList();												// Get pointer to the first item on list.								
+	if (firstItem) {														// Sanity check, is there an item here?
+		clicks = inEvent->mYDist/itemHeight;						// Figure out, in units of item height, how far we've draged.
+		if (clicks!=0) {													// If we have dragged more than an item height..
+			dY = clicks * itemHeight;									// Truncate it back to pixels. (Gives us even item jumps)
+			startY = mStartPt.y + dY;									// This is where the user dragged the top corner.
+			lastY = startY + itemHeight * numObjects();			// And where she drug the bottom corner.
+			if (startY>0) {												// If the drag ended up with the top below our window..
+				return;														// We're not doing that!
+			} else if (lastY<height) {									// Else, if we want to scroll the bottom too far up?
+				return;														// We're not doing that either!
+			} else {															// Else everything is, I guess ok..
+				setPositions(startY);									// We'll do that.
 			}
 		}
 	}
 }
 
 
-void scrollingList::dragHorizontal(void) {
+void scrollingList::dragHorizontal(event* inEvent) {
 
+	// After vertical is working, I'll look into writing this one.
 }
 
 
-void scrollingList::doDrag(void) {
-
-	if (mVertical) {
-		dragVertical();
-	} else {
-		dragHorizontal();
+void scrollingList::doAction(event* inEvent,point* locaPt) {
+	
+	drawObj*	trace;
+	
+	if (inEvent->mType==dragBegin) {			// If its the start of a drag..
+		trace = theList();						// Locate the top item of the list.
+		if (trace) {
+			mStartPt.x = trace->x;				// Save off where it is now.
+			mStartPt.y = trace->y;				// More save off where it is now.
+		}
+	} else if (inEvent->mType==dragOn) {	// Or else, we're actually dragging..
+		if (mVertical) {							// If we're a vertical list..
+			dragVertical(inEvent);				// Deal with a vertical drag.
+		} else {										// Or esle we are a horizontal list..
+			dragHorizontal(inEvent);			// Deal with a horizontal drag.
+		}
+	} else if (inEvent->mType==liftEvent) {	// Or else, we're finished dragging..
+		needRefresh = false;							// We shouldn't need the refresh. We only scroll full lists. (No gaps)
 	}
 }
 
-
-int scrollingList::dragLen() { return round(distance(mTouchPoint,screen->getPoint())); }
-
-
-// This didn't work anyway.
-bool scrollingList::acceptClick(point where) {
-}
-	
 
 // ************************************
 // ************ dialScroll ************
@@ -105,7 +99,7 @@ void scrollingList::setScrollValue(float percent) {
   int       itemIndex;
   drawObj* newFocus;
 
-  numItems = numObjInList();                    // How many items on the list.
+  numItems = numObjects();            	        // How many items on the list.
   switch(mType) {
     case dialScroll : itemMapper.setValues(0,100,0,numItems-1); break;  // Setup the mapper, 0-100 to 0..last item. Just the list.
     case dSOpenTop  : itemMapper.setValues(0,100,-1,numItems-1); break; // Setup the mapper,0-100 to -1..last item. The list and "above".

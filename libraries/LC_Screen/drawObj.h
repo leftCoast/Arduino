@@ -69,7 +69,7 @@ public:
     			void		dumpDrawObjList(void);
             bool		checkEvents(event* theEvent);
 	virtual	void    	checkRefresh(void);
-				int		numObjInList(void);
+				int		numObjects(void);
 				drawObj*	getObj(int index);
 				drawObj*	theList(void);
     virtual void    	idle(void);
@@ -118,9 +118,7 @@ class drawList : public drawGroup {
   	virtual	~drawList();
   					
   	virtual	void		addObj(drawObj* newObj);
-  				void		resetPositions(void);
-  				bool		canMove(bool upLeft);
-  				void		movelist(bool upLeft);
+  				void		setPositions(int offset=0);
   				int		lastY(void);
   				bool		isVisible(drawObj* theItem);
 				void		showItem(drawObj* theItem);

@@ -5,8 +5,10 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 #include <lineObj.h>
+#include <PNLabel.h>
 
 #include "contactPanel.h"
+#include "textPanel.h"
 
 #define PNLIST_X        10
 #define PNLIST_Y        30
@@ -44,11 +46,6 @@
 #define CONT_BTN_RAD    3
 #define CONT_BTN_SPC    20
 
-#define CLOSE_X         0
-#define CLOSE_Y         1
-#define CLOSE_W         22
-#define CLOSE_H         CLOSE_W
-
 #define NEWBTN_X        CLOSE_X + CLOSE_W + CONT_BTN_SPC
 #define NEWBTN_Y        CLOSE_Y
 #define NEWBTN_W        CLOSE_W
@@ -76,6 +73,37 @@ keyboard*       ourKeyboard = NULL;
 contact*        currContact = NULL;
 
 
+void formatPN(label* numField);
+
+
+// *****************************************************
+// *********************  formatPN  ********************
+// *****************************************************
+
+
+void formatPN(label* numField) {
+ 
+  PNLabel formatter(1,1,1,1,1);
+  int     numBytes;
+  char*   textBuff;
+  
+  textBuff = NULL;
+  numBytes = numField->getNumChars() + 1;
+  if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+    numField->getText(textBuff);
+    formatter.setValue(textBuff);
+    resizeBuff(0,(uint8_t**)&textBuff);
+    numBytes = formatter.getNumChars() + 1;
+    if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+      formatter.getText(textBuff);
+      numField->setValue(textBuff);
+      resizeBuff(0,(uint8_t**)&textBuff);
+    }
+  }
+}
+
+
+
 // *****************************************************
 // *******************  addrStarter  *******************
 // *****************************************************
@@ -83,7 +111,7 @@ contact*        currContact = NULL;
 
 addrStarter::addrStarter(void) {  }
 addrStarter::~addrStarter(void) {  }
-
+//13751 daybreak lane.
 void addrStarter::begin(char* filePath,bool resetFile) {
 
   mFile = new blockFile(filePath);
@@ -97,37 +125,51 @@ void addrStarter::begin(char* filePath,bool resetFile) {
       aContact = ourBlackBook->findOrAddContact("14083400352");
       aContact->setNickName("Me");
       aContact->setFirstName("Jim");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Left Coast");
       aContact = ourBlackBook->findOrAddContact("13603335200");
       aContact->setNickName("AllieBob");
       aContact->setFirstName("Alex");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
       aContact = ourBlackBook->findOrAddContact("13607084218");
       aContact->setNickName("Vern");
       aContact->setFirstName("Julie");
-      aContact->setFirstName("Lee");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Slave");
+      aContact = ourBlackBook->findOrAddContact("13603332799");
+      aContact->setNickName("Shelbers");
+      aContact->setFirstName("Shelby");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("UW");
+      aContact = ourBlackBook->findOrAddContact("13609298457");
+      aContact->setNickName("Danny-D");
+      aContact->setFirstName("Daniel");
+      aContact->setLastName("Lee");
+      aContact->setCompanyName("Western");
+      aContact = ourBlackBook->findOrAddContact("13603337892");
+      aContact->setNickName("Guy");
+      aContact->setFirstName("Guy");
+      aContact->setLastName("Masters");
+      aContact->setCompanyName("Shell Oil");
+      aContact = ourBlackBook->findOrAddContact("13608403255");
+      aContact->setNickName("Tyler");
+      aContact->setFirstName("Tyler");
+      aContact->setLastName("Smith");
+      aContact->setCompanyName("Contractor");
+      aContact = ourBlackBook->findOrAddContact("13603593687");
+      aContact->setNickName("Tycho");
+      aContact->setFirstName("Tycho");
+      aContact->setLastName("Horning");
+      aContact->setCompanyName("Dock rat");
       ourBlackBook->saveToFile();
+      //Serial.println("Saved to file.");Serial.flush();
+      //mFile->printFile();
+      //Serial.flush();
     } else {
-      mFile->printFile();
       ourBlackBook = new contactList(mFile);
     }
   }
 }
-
-
-
-// *****************************************************
-// ******************  contCloseBtn  *******************
-// *****************************************************
-
-
-contCloseBtn::contCloseBtn(contactPanel* ourPanel)
-  : closeBtn(CLOSE_X,CLOSE_Y) { mPanel = ourPanel; }
-
-contCloseBtn::~contCloseBtn(void) {  }
-
-void contCloseBtn::doAction(void) { mPanel->close(); }
-
 
 // *****************************************************
 // *******************  contNewBtn  ********************
@@ -167,7 +209,11 @@ contTextBtn::contTextBtn(void)
 contTextBtn::~contTextBtn(void) {  }
 
 
-void contTextBtn::doAction(void) { }
+void contTextBtn::doAction(void) {
+
+  pleaseText = currContact;
+  nextPanel = textApp;
+}
 
 
 
@@ -213,7 +259,7 @@ void contTrashBtn::doAction(void) { mList->deleteContact(); }
 
 
 PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
-  : drawGroup(inRect,fullClick) {
+  : drawGroup(inRect) {
 
   rect  bRect;
   rect  tRect;
@@ -233,7 +279,9 @@ PNEditField::PNEditField (rect* inRect,char* inText,PNListItem* ourListItem)
   addObj(mEditBase);
   mEditField = new editField(&tRect,inText,1);
   mEditField->setColors(&textColor,&backColor);
+  mEditField->setParent(this);
   addObj(mEditField);
+  setEventSet(fullClick);
 }
 
 
@@ -241,17 +289,13 @@ PNEditField::~PNEditField(void) {  }
 
 
 void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
+ 
 
-bool PNEditField::acceptEvent(event* inEvent,point* locaPt) { 
-
-  Serial.println("Being asked to accept an event.");
-  return drawObj::acceptEvent(inEvent,locaPt);
-}
-
-
+// If we get focus, we pass it on to the edit field. When the edit field
+// looses focus, it will tell us by calling this this method. SO we don't
+// "unset" the edit field's focus, we only set it.
 void PNEditField::setFocus(bool setLoose) {
-
-  Serial.println("Doing the focus thing.");
+  
   if (setLoose) {
     mOurListItem->startedEdit();
     mEditField->setColors(&textSelectColor,&editFieldBColor);
@@ -259,6 +303,8 @@ void PNEditField::setFocus(bool setLoose) {
     if (ourKeyboard) {
       ourKeyboard->setEditField(mEditField);
     }
+    currentFocus = mEditField;    // We manually switch focus to mEditField..
+    mEditField->setFocus(true);   // mEditField will call this with "false" when it looses focus.
   } else {
     mEditField->setColors(&textColor,&backColor);
     mEditBase->setColor(&backColor);
@@ -269,7 +315,6 @@ void PNEditField::setFocus(bool setLoose) {
     }
     mOurListItem->finishEdit(this);
   }
-  mEditField->setFocus(setLoose);
 }
 
 
@@ -278,6 +323,9 @@ void PNEditField::doAction(void) { setFocusPtr(this); }
 
 // Not including the \0. You may need to add one.
 int PNEditField::getNumChars(void) { return mEditField->getNumChars(); }
+
+
+void PNEditField::formatAsPN(void) { formatPN(mEditField); }
 
 
 // You better have added the (1) for the \0.
@@ -304,6 +352,7 @@ PNListItem::PNListItem(PNList* ourList,contact* inContact)
 
   aRect.setRect(PN_EITEM_LX,PN_EITEM_LY,PN_EITEM_LW,PN_EITEM_H);
   pNumEditField = new PNEditField(&aRect,mContact->mPN,this);
+  pNumEditField->formatAsPN();
   addObj(pNumEditField);
 
 
@@ -340,7 +389,7 @@ void PNListItem::draw(void) {
 }
 
 
-void PNListItem::drawSelf(void) {  }
+void PNListItem::drawSelf(void) { /*screen->drawRect(this,&green);*/ }
 
 
 // globals used for texting, calling & deleting.
@@ -358,6 +407,7 @@ void PNListItem::finishEdit(PNEditField* theField) {
   currContact = NULL;
   buff = NULL;
   if(theField==pNumEditField) {
+    pNumEditField->formatAsPN();
     numChars = pNumEditField->getNumChars() + 1;
     if (resizeBuff(numChars,(uint8_t**)&buff)) {
       pNumEditField->getText(buff);
@@ -412,11 +462,11 @@ contact* PNListItem::getContact(void) { return mContact; }
 
 
 PNList::PNList(int x,int y,int width,int height)
-  /*: scrollingList(x,y,width,height,touchScroll) {  }*/
-  : drawList(x,y,width,height) {  }
+  : scrollingList(x,y,width,height,touchScroll,dragEvents) {  }
 
 
 PNList::~PNList(void) {  }
+
 
 void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
 
@@ -477,13 +527,20 @@ void PNList::deleteContact(void) {
       currContact = NULL;                       // Just in case, loose the currentContact.
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
       delete(anItem);                           // Delete the list item.
-      resetPositions();                         // Close holes in the list of items.
+      setPositions();                           // Close holes in the list of items.
       needRefresh = true;								        // Force a redraw.
     }
   }
 }
 
 
+void PNList::doAction(event* inEvent,point* locaPt) {
+
+  if (inEvent->mType==dragBegin) {      // If its the start of a drag..
+    setFocusPtr(NULL);
+  }
+  scrollingList::doAction(inEvent,locaPt); 
+}
 
 // *****************************************************
 // ******************  contactPanel  *******************
@@ -506,7 +563,7 @@ void contactPanel::setup(void) {
   mPNList->fillList();                                        // Fill it with goodies.
   addObj(mPNList);                                            // Pass it to the a group.
 
-  contCloseBtn* ourCloseButton = new contCloseBtn(this);
+  closeBtn* ourCloseButton = new closeBtn(this);
   addObj(ourCloseButton);
 
   contNewBtn* ourNewButton = new contNewBtn(mPNList);
@@ -535,13 +592,10 @@ void contactPanel::drawSelf(void) {
 
 void contactPanel::closing(void) {
 
-  Serial.println("Saving black book file.");Serial.flush();
+  setFocusPtr(NULL);
   ourBlackBook->saveToFile();
-  mFile->printFile();
   if (ourKeyboard) {
-  	Serial.println("Deleting the keyboard. And setting the global to NULL.");Serial.flush();
     delete ourKeyboard;
     ourKeyboard = NULL;
   }
-  Serial.println("We're done. See ya' starside!");Serial.flush();
 }

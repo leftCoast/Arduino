@@ -31,6 +31,17 @@
 
 #define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
 
+#define CLOSE_X         0
+#define CLOSE_Y         1
+#define CLOSE_W         22
+#define CLOSE_H         CLOSE_W
+
+#define BATT_X        199
+#define BATT_Y        2
+
+#define SIG_X         BATT_X + 15
+#define SIG_Y         BATT_Y
+
 // Starting points, they are tweaked in setup().
 extern colorObj  backColor;
 extern colorObj  textColor;
@@ -52,19 +63,26 @@ extern colorObj  greenButtonHighlight;
 extern colorObj battLineColor;
 extern colorObj menuBarColor;
 
-enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, breakoutApp };
+enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, toolsApp, breakoutApp };
 
 
 // *****************************************************
 // *****************   std buttons  ********************
 // *****************************************************
 
+// these are the little 22x22 pix buttons that do functions like make a call,
+// text someone, new document, delete current document. An entire grab bag of functons.
+
 
 class closeBtn : public iconButton {
 
   public:
-          closeBtn(int x,int y);
+          closeBtn(panel* inPanel);
   virtual ~closeBtn(void);
+  
+  virtual void  doAction(void);
+  
+          panel* mPanel;
 };
 
 
@@ -108,9 +126,27 @@ class trashBtn : public iconButton {
 };
 
 
+
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
+
+
+// Hardcode a clipping rouded rect to a 32x32 icon. Total hack!
+// Stop-gap for not having clipping regions or alpha channels.
+class roundedIconBtn : public appIcon {
+ 
+ public:
+          roundedIconBtn(int xLoc,int yLoc,int message,char* path);
+  virtual ~roundedIconBtn(void);
+  
+          void  drawPixel(int x,int y,colorObj* pixel);
+  virtual void  drawLine(File bmpFile,int x,int y);
+  virtual void  drawBitmap(int x,int y);
+
+          int xLoc;
+          int yLoc;
+};
 
 
 
@@ -129,11 +165,11 @@ class homeScreen : public homePanel {
           appIcon*    calcIcon;
           appIcon*    textIcon;
           appIcon*    contactIcon;
-          appIcon*    qGameIcon;
-          appIcon*    breakoutIcon;
+          roundedIconBtn*    qGameIcon;
+          appIcon*    toolsIcon;
+          roundedIconBtn*    breakoutIcon;
           appIcon*    phoneIcon;
           timeObj     statusTimer;
-          //textView*   mText;
           battPercent*  mBatPct;
           RSSIicon*     mRSSI;
   

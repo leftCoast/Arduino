@@ -3,6 +3,22 @@
 
 #include <SD.h>
 
+// blockFile.. This is an object that will manage a file on an SD card much like dynamic
+// memory. You ask for a file block ID. From that you can store, retrieve, delete or
+// resize your block of data, as your whim takes you. Files can have pretty near an
+// unlimited number of numbered blocks.
+//
+// Now, when you start up your program, the big problem is... In what block is anything
+// stored? There are no guarantees as to the order of the block ID allocation. What to do?
+// Here is how it this problem is addressed. The first block allocated is known as the
+// "root" block ID. You use this file block to hold whatever information you need to
+// decode the rest of your file.
+//
+// Something to remember. You can only read and write complete blocks. Therefore, make
+// them small enough that this won't be an issue. You can have as many as you want, so
+// don't design your code around big multi use blocks. Break things up in smaller single
+// use blocks.
+
 
 #define BLOCKFILE_TAG             "BLOCKFILE"
 #define BLOCKFILE_TAG_SIZE        12

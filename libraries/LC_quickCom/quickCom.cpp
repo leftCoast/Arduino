@@ -221,22 +221,35 @@ bool qCMaster::resizeBuff(byte numBytes) {
 // ***************************************************************************
 
 
+
 qCSlave::qCSlave(void) {
 
-	mNumBytesMoved = 0;
-	mError = NO_ERR;
-	mBuff = NULL;
-	setComTimeout(SLAVE_COMMAND_TIMEOUT);
+	mNumBytesMoved = 0;								// Not moved any yet..
+	mError = NO_ERR;									// Not had an error yet either. Imagine!
+	mBuff =	NULL;										// Save off the address of our buffer.
+	mNumBytes = 0;
+	setComTimeout(SLAVE_COMMAND_TIMEOUT);		// Set the deadman timer.
 	mState = offline;
+	
 }
 	
 	
-qCSlave::~qCSlave(void) {  resizeBuff(0); }
+qCSlave::~qCSlave(void) { }
 
 
-void qCSlave::begin(int baud) {
+// The slave part is different. The owner of this bit sets up a single buffer for
+// both input and output. Pass in the size and the address of this buffer. Then when
+// data comes in, it'll be written into this buffer. Then when you want to send a
+// reply you write it onto this same buffer. This is to save as much RAM footprint
+// as possible for -little- processors.
+//
+// NOTE : The most bytes that can be sent is 256. So don't go overboard on buffer
+// size.
+void qCSlave::begin(byte* buff,byte numBytes,int baud) {
 
 	if (mState==offline) {		// A quick sanity check. 
+		mBuff =	buff;				// Save off the address of our buffer.
+		mNumBytes = numBytes;	// How many bytes is that buffer?
 		SLAVE_PORT.begin(baud);	// Give the port a kick to start.
 		hookup();					// Puts us in the idler queue.
 		mState = listening;		// Then we are open for business!
@@ -274,47 +287,23 @@ byte qCSlave::haveBuff(void) {
 }
 
 
-// This will read them all out. Use haveBuff() to know how
-// many that is going to be.
-bool qCSlave::readBuff(byte* buff) {
-	
-	byte 	i;
-	
-	if(mState==holding) {
-		for(i=0;i<mBuff[0];i++) {
-			buff[i] = mBuff[i+1];
-		}
-		resizeBuff(0);
-		mState = listening;
-		return true;
-	} else {
-		mError = STATE_ERR;
-	}
-	return false;
+// Get the comunication buffer;
+byte* qCSlave::getComBuff(void) {
+
+	return &(mBuff[1]);
 }
 
 
-// Send this as the reply buffer;
-bool qCSlave::replyBuff(byte* buff,byte buffLen) {
+// Send the reply on its way.
+bool qCSlave::replyComBuff(byte numBytes) {
 
-	byte	i;
-	
-	if (mState == listening) {				// Yes, listening is still technically the correct state for a reply.
-		if (resizeBuff(buffLen+1)) {		// Stretch the buffer to fit.		
-			mBuff[0] = buffLen;
-			for (i=0;i<=buffLen;i++) {		// Save off he info.
-				mBuff[i+1]=buff[i];
-			}
-			mNumBytesMoved = 0;				// Nothing's moved yet.
-			mState = replying;				// We're going to be replying now.
-			return true;						// Success!
-		} else {									// Oh ohh.. Not enough memory for the buffer!
-			mError = MEMORY_ERR;				// Note it.
-		}
+	if (mState == holding) {	// We have to be holding to want a reply.
+		mBuff[0] = numBytes;		// 
+		mNumBytesMoved = 0;
+		mState = replying;
 	} else {
-		mError = STATE_ERR;
+		mError = STATE_ERR;		// Getting your calls mixed up there?
 	}
-	return false;
 }
 
 
@@ -344,7 +333,7 @@ void qCSlave::doListen(void) {
 	if (SLAVE_PORT.available()) {							// Is there someting to read from the port?
 		numBytes = SLAVE_PORT.read();						// First byte SHALL BE the number of bytes for the message.
 		if (numBytes>0) {										// First byte can't be a zero.
-			if (resizeBuff(numBytes+1)) {					// Resize the buffer to hold the message.
+			if (mNumBytes>=(numBytes+1)) {				// If we can hold the message.
 				mBuff[0] = numBytes;							// That first byte shwing size.
 				mNumBytesMoved = 0;							// Setup for a reading..
 				start();											// We start the timer from the first byte.
@@ -377,7 +366,6 @@ void qCSlave::doReceiving(void) {
 	if (mNumBytesMoved == mBuff[0]) {					// Got 'em all? Good!
 		mState = holding;										// Move on!
 	} else if(ding()) {										// Oh oh.. did the timer ding?
-		resizeBuff(0);											// Recycle, reuse..
 		mError = TIMEOUT_ERR;								// Master may have died.
 		mState = listening;									// Go back to listening. Its all we can do..
 	}
@@ -386,30 +374,14 @@ void qCSlave::doReceiving(void) {
 	
 void qCSlave::doSending(void) {
 	
-	while(SLAVE_PORT.availableForWrite() && mNumBytesMoved<=mBuff[0]) {
-		SLAVE_PORT.write(mBuff[mNumBytesMoved]);
-		mNumBytesMoved++;	
+	while(SLAVE_PORT.availableForWrite() && mNumBytesMoved<=mBuff[0]) {	// While we can write something and we have something to write..
+		SLAVE_PORT.write(mBuff[mNumBytesMoved]);									// Write out a byte.
+		mNumBytesMoved++;																	// Increment the index.
 	}
-	if (mNumBytesMoved == mBuff[0]+1) {
-		resizeBuff(0);
-		mNumBytesMoved = 0;
-		mState = listening;
+	if (mNumBytesMoved == mBuff[0]+1) {												// If we've moved them all..
+		mState = listening;																// Go back to listening.
 	}
 }
 
 
-// We're using a dynamically sized buffer. malloc() & free(). This
-// just auto-manages all of this.
-bool qCSlave::resizeBuff(byte numBytes) {
-
-	if (mBuff) {
-		free(mBuff);
-		mBuff = NULL;
-	}
-	if (numBytes) {
-		mBuff = (byte*)malloc(numBytes);
-		return mBuff != NULL;
-	}
-	return true;							// Because they asked for none.
-}
 

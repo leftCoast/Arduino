@@ -6,7 +6,8 @@
 #include <timeObj.h>
 #include <baseGraphics.h>
 
-
+#define	DRAG_TIME	500	// How many milliseconds before it goes from a click to a drag?
+#define	DRAG_DIST	10		// If the finger moves further than this, we'll call it a drag.
 // ***************************************************************
 // Here we have the management of screen actions. Get the touches
 // and lifts then interpret them into touch, click, drag etc.
@@ -28,17 +29,22 @@ enum eventType { nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
 
 struct event {
 	eventType		mType;
-	point				mLastPos;
-	point				mWhere;
-	unsigned long	mMs;
+	
+	unsigned long	mTouchMs;
 	unsigned long	mLastMs;
 	unsigned long	mNumMs;
+	
+	point				mTouchPos;
+	point				mLastPos;
+	
 	int				mXDist;
-	float				mXPixlePerSec;
 	int				mYDist;
-	float				mYPixlePerSec;
 	float				mDist;
+	
+	float				mXPixlePerSec;
+	float				mYPixlePerSec;
 	float				mPixalPerSec;
+	
 	float				mAngle;
 };
 
@@ -80,18 +86,22 @@ class eventMgr :	public queue,
             eventMgr(void);
 	virtual	~eventMgr(void);
     
-				void	begin(void);
-    			void	flushEvents(void);
-    			bool	haveEvent(void);
-				event	getEvent(void);
-				void	addEvent(event* newEvent);
-				void	createEvent(eventType inType);
-	virtual	void	idle(void);
+				void			begin(void);
+    			void			flushEvents(void);
+    			bool			haveEvent(void);
+				event			getEvent(void);
+				
+				void			addEvent(eventType inType);
+	virtual	void			push(eventObj* newEventObj);
+	virtual	eventObj*	pop(void);
+	virtual	void			idle(void);
 	
 				bool				mTouched;
 				bool				mDragging;
-				point				mLastPos;
+				unsigned long	mTouchMs;
 				unsigned long	mLastMs;
+				point				mTouchPos;
+				point				mLastPos;
 				event				mNullEvent;           	
 };
 

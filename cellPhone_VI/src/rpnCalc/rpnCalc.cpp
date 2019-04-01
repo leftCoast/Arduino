@@ -19,11 +19,6 @@
 #include "anime.h"
 #include "calcButton.h"
 
-#define  CLOSE_X    0
-#define  CLOSE_Y    3
-#define  CLOSE_W    18
-#define  CLOSE_H    18
-
 #define  BACK_COLOR (&black)
 #define  DISP_COLOR (&red)
 #define  DISP_Y     4
@@ -41,7 +36,8 @@
 #define  LINE3_X2     207
 #define  LINE3_Y      DISP_Y + 27
             
-#define DEG_RAD_X       LINE_X1
+//#define DEG_RAD_X       LINE_X1
+#define DEG_RAD_X       LINE3_X1
 #define DEG_RAD_Y       LINE_Y + 6
 #define DEG_RAD_WIDTH   50
 #define DEG_RAD_HEIGHT  15
@@ -78,6 +74,11 @@
 #define BTN_COL_3    125
 #define BTN_COL_4    175
 
+#define  CLOSE_X    BTN_COL_1
+#define  CLOSE_Y    LINE_Y + 6
+#define  CLOSE_W    BTN_WIDTH2
+#define  CLOSE_H    10
+
 extern      bool            gSecondFx;
             calculator      mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
             bool            buttonPressed;
@@ -87,15 +88,10 @@ rpnCalc::rpnCalc(void)
   : panel(calcApp,noEvents) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
-          
-  theSprit = new anime(SPRIT_X,SPRIT_Y,SPRIT_WIDTH,SPRIT_HEIGHT,SPRIT_TIME);
          
   XReg = new label(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0");
   
-  aLine = new lineObj(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);
-  aLine2 = new lineObj(LINE2_X1,LINE2_Y,LINE2_X2,LINE2_Y,DISP_COLOR);
-  aLine3 = new lineObj(LINE3_X1,LINE3_Y,LINE3_X2,LINE3_Y,DISP_COLOR);
-  aLine4 = new lineObj(LINE3_X1,LINE4_Y,LINE3_X2,LINE4_Y,DISP_COLOR);  
+  aLine = new lineObj(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);  
   
   btn1 = new calcButton("1", BTN_COL_2, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
   btn2 = new calcButton("2", BTN_COL_3, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
@@ -147,15 +143,10 @@ rpnCalc::rpnCalc(void)
 rpnCalc::~rpnCalc(void) {
 
   if(degRad) delete degRad;
-          
-  if(theSprit) delete theSprit;
-         
+            
   if(XReg) delete XReg;
   
   if(aLine) delete aLine;
-  if(aLine2) delete aLine2;
-  if(aLine3) delete aLine3;
-  if(aLine4) delete aLine4;
   
   if(btn1) delete btn1;
   if(btn2) delete btn2;
@@ -223,19 +214,10 @@ void rpnCalc::loadScreen(void) {
 
   aLine->setColor(DISP_COLOR);
   addObj(aLine);
-  aLine2->setColor(DISP_COLOR);
-  addObj(aLine2);
-  aLine3->setColor(DISP_COLOR);
-  addObj(aLine3);
-  aLine4->setColor(DISP_COLOR);
-  addObj(aLine4);
   
   degRad->setColors(DISP_COLOR, &white, BACK_COLOR);
   addObj(degRad);
 
-  theSprit->begin();
-  addObj(theSprit);
-  
   addObj(btn1);
   addObj(btn2);
   addObj(btn3);

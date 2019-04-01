@@ -37,26 +37,6 @@ class addrStarter {
 };
 
 
-
-// *****************************************************
-// ******************  contCloseBtn  *******************
-// *****************************************************
-
-
-
-class contCloseBtn :  public closeBtn {
-
-   public:
-          contCloseBtn(contactPanel* ourPanel);
-  virtual ~contCloseBtn(void);
-
-  virtual void  doAction(void);
-
-          contactPanel* mPanel;
-};
-
-
-
 // *****************************************************
 // *******************  contNewBtn  ********************
 // *****************************************************
@@ -136,11 +116,11 @@ class PNEditField :  public drawGroup {
           PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  virtual bool      acceptEvent(event* inEvent,point* locaPt);
   virtual void      drawSelf(void);
   virtual void      setFocus(bool setLoose);
   virtual void      doAction(void);
           int       getNumChars(void);      // Not including the \0. You may need to add one.
+          void      formatAsPN(void);
           void      getText(char* inBuff);  // You better have added the (1) for the \0.
 
           PNListItem* mOurListItem;
@@ -182,7 +162,7 @@ class PNListItem :  public drawGroup {
 // *********************  PNList  **********************
 // *****************************************************
 
-class PNList : public drawList/*scrollingList*/ {
+class PNList : public /*drawList*/scrollingList {
 
   public:
           PNList(int x,int y,int width,int height);
@@ -193,6 +173,7 @@ class PNList : public drawList/*scrollingList*/ {
           void          fillList(void);
           PNListItem*   itemByContact(contact* aContact);
           void          deleteContact(void);
+  virtual void          doAction(event* inEvent,point* locaPt);
 };
 
 
