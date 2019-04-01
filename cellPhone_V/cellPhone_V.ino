@@ -1,5 +1,5 @@
 
-//This one is all about simple test cases. I'm tired of being in the dark
+// This one is all about simple test cases. I'm tired of being in the dark
 // on how this stupid thing works.
  
 
@@ -38,7 +38,7 @@ void setup() {
     Serial.print("FONA onine : ");Serial.println(FONAOnline);
 }
 
-
+/*
 void loop() {
   uint16_t batteryVolts;
   
@@ -50,7 +50,26 @@ void loop() {
   }
   delay(1000);
 }
+*/
 
+void loop() {
+
+  char aChar;
+  
+  if (Serial.available()) {
+    aChar = Serial.read();
+    fonaSS.write(aChar);
+  }
+  if (fonaSS.available()) {
+    aChar = fonaSS.read();
+    switch(aChar) {
+      case '\n' : Serial.print("[NL]"); break;
+      case '\r' : Serial.print("[RT]"); break;
+      case '\0' : Serial.print("[NULL]"); break;
+    }
+    Serial.print(aChar);
+  }
+}
 
 // *************************************************
 // ******************* handlers ********************
