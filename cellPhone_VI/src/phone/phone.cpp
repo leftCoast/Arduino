@@ -286,7 +286,6 @@ phone::phone(void)
   mConnected      = false;
   mHangupID       = -1;
   mNeedClose      = false;
-  mSeenStatus     = false;
 }
 
 
@@ -299,7 +298,6 @@ phone::~phone(void) { if (mRawPN) free(mRawPN); }
 // things like buttons, controls & labels.
 void phone::setup(void) {
 
-  statTimer.setTime(STAT_TIME);
   pBtndel   = new phoneBtn(KEY_C3,KEY_R0,'D',this);
   
   pBtn7     = new phoneBtn(KEY_C1,KEY_R1,'7',this);
@@ -336,11 +334,12 @@ void phone::setup(void) {
   stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
-  //menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
-  //addObj(ourMenuBar);
+  menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
+  addObj(ourMenuBar);
   
-  //phCloseBtn* ourCloseBtn = new phCloseBtn(this);
-  //ourMenuBar->addObj(ourCloseBtn);
+  phCloseBtn* ourCloseBtn = new phCloseBtn(this);
+  ourMenuBar->addObj(ourCloseBtn);
+  Serial.println("Finished setup()");Serial.flush();
 }
 
 
@@ -348,25 +347,11 @@ void phone::setup(void) {
 // "main" focus. Typically watching for user interaction.
 void phone::loop(void) {
 
-  // Weird hack to get the battery & RSSI things to draw
-  // correctly. Why would there be a time issue? How could
-  // time be a factor? And as you add more things, you need
-  // more time.
-  if(!mSeenStatus) {  
-    delay(150);                                                 // Calls idle for 150 ms.
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor); // Stuff in a value.
-    mRSSI->setRSSI(statusReg.RSSI);                             // Ditto.
-    mSeenStatus = true;                                         // Done it, lets not come back here again.
-  }
-  
-  if (statTimer.ding()) {
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-    mRSSI->setRSSI(statusReg.RSSI);
-    statTimer.start();
-  }
-  if (!mConnected && mNeedClose) close();
-  checkCall();
-  checkHangup();
+	if (!mConnected && mNeedClose) {
+  		close();
+	}
+	checkCall();
+	checkHangup();
 }
 
 

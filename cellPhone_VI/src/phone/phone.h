@@ -88,9 +88,7 @@ class phone : public panel {
   virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
-          
-          timeObj statTimer;
-          
+                    
           void  keystroke(char inKey);
           void  addChar(char inKey);
           void  deleteChar(void);
@@ -108,7 +106,6 @@ class phone : public panel {
           int   mHangupID;      // We're in the hangup sequence. Here's our command ID.
           bool  mNeedClose;
 
-          
           phoneBtn* pBtndel;
                 
           phoneBtn* pBtn7;
@@ -128,15 +125,10 @@ class phone : public panel {
           phoneBtn* pBtnHash;
                 
           phoneBtn* pBtnCall;
-          //phoneBtn* pBtnClose;
 
           colorRect*  theEditBase;     // Background of the PNLabel.
           PNLabel*  numDisplay;
           liveText* stateDisplay;
-          
-          battPercent*  mBatPct;
-          RSSIicon*     mRSSI;
-          bool          mSeenStatus;
 };
 
 #endif
