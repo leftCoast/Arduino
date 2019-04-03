@@ -37,7 +37,7 @@ typedef Adafruit_SSD1351 displayType; // Using OLED display(s)
 #define DISPLAY_RESET   8 // Reset pin for BOTH displays
 #define SELECT_L_PIN    10 // 9 // LEFT eye chip select pin
 #define SELECT_R_PIN    7 // 10 // RIGHT eye chip select pin
-          xx  vv
+        
 // INPUT CONFIG (for eye motion -- enable or comment out as needed) --------
 
 //#define JOYSTICK_X_PIN A0 // Analog pin for eye horiz pos (else auto)
@@ -480,4 +480,3 @@ void loop() {
 
 #endif // IRIS_PIN
 }
-

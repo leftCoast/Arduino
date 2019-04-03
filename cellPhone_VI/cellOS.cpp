@@ -350,7 +350,7 @@ panel* cellOS::createPanel(int panelID) {
   switch (panelID) {
     case homeApp      : return new homeScreen(); 
     case phoneApp     : return new phone();
-    case textApp      : nextPanel = HOME_PANEL_ID; return new homeScreen();
+    case textApp      : return new textPanel();
     case contactApp   : return new contactPanel();
     case calcApp      : return new rpnCalc();
     case qGameApp     : return new qGame();

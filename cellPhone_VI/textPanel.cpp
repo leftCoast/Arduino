@@ -58,8 +58,8 @@ void convList::doAction(event* inEvent,point* locaPt) { }
 // ******************  textPanel  *******************
 // *****************************************************
 
-// Ok, there's two levels here. First is loopking at the list of conversations by
-//contanct name and the other would be list of messages by order of time. Both
+// Ok, there's two levels here. First is looking at the list of conversations by
+// contanct name and the other would be list of messages by order of time. Both
 // will need a keyboard for searching and typing messages.
 
 textPanel::textPanel(void)
@@ -80,5 +80,11 @@ void textPanel::setup(void) {
 
 
 void textPanel::loop(void) { }
-void textPanel::drawSelf(void) { }
+void textPanel::drawSelf(void) {
+
+  rect  userRect(0,24,240,320-24);
+
+  screen->fillRect(&userRect,&backColor);
+}
+
 void textPanel::closing(void) { }
