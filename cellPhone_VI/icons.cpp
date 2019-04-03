@@ -231,45 +231,11 @@ void RSSIicon::setRSSI(int inRSSI) {
   for (int i=0;i<RSSI_NUM_BARS;i++) {
     if (mBars[i]) {
       mBars[i]->setValue(inRSSI);
-      mBars[i]->setColors(&barColor,&backColor);
+      mBars[i]->setColors(&barColor,&battLineColor);
     } 
   }
   needRefresh = true; 
 }
 
 
-void RSSIicon::drawSelf(void) { /*screen->fillRect(x,y,width,height,&black);*/ }
-
-
-
-// *********************************************
-// ************* closeBtn *****************
-// *********************************************
-
-/*
-#define CLOSE_X 2
-#define CLOSE_Y 2
-#define CLOSE_W 14
-#define CLOSE_H 14
-
-closeBtn::closeBtn(void)
-  : drawObj(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,true) { }
-
-  
-closeBtn::~closeBtn(void) {  }
-
-void closeBtn::drawSelf(void) {
-  colorObj  darkRed(LC_RED);
-  darkRed.blend(&black,50);
-
-  if (clicked) {
-    screen->fillRoundRect(x,y,width,height,3,&white);
-    screen->drawRoundRect(x,y,width,height,3,&red);
-    screen->drawCircle(x+3,y+2,9,&white);
-  } else {
-    screen->fillRoundRect(x,y,width,height,3,&red);
-    screen->drawRoundRect(x,y,width,height,3,&darkRed);
-    screen->drawCircle(x+3,y+2,9,&darkRed);
-  }
-}
-*/
+void RSSIicon::drawSelf(void) { }

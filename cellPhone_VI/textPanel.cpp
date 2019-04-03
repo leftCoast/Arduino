@@ -39,7 +39,7 @@ void  doAction(void) {  }
 // ********************  convList  **********************
 // *****************************************************
 
-// List of text conversations by contact name.
+// List of text dialogs by contact name.
 
  convList::convList(int x,int y,int width,int height)
   : scrollingList(x,y,width,height,touchScroll,dragEvents) {  }
@@ -69,13 +69,8 @@ textPanel::~textPanel(void) {  }
            
 void textPanel::setup(void) {
 
-  closeBtn* ourCloseBtn = new closeBtn((panel*)this);
-  addObj(ourCloseBtn);
-  mBatPct = new battPercent(BATT_X,BATT_Y);
-  addObj(mBatPct);
-  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
-  addObj(mRSSI);
+  menuBar* ourMenuBar = new menuBar((panel*)this);
+  addObj(ourMenuBar);
 }
 
 

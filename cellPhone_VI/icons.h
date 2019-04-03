@@ -82,20 +82,4 @@ class RSSIicon : public drawGroup {
 };
 
 
-/*
-// *********************************************
-// ************* closeBtn *****************
-// *********************************************
-
-class closeBtn : public drawObj {
-
-  public:
-            closeBtn(void);
-    virtual ~closeBtn(void);
-
-    virtual void drawSelf(void);
-};
-
-*/
-
 #endif

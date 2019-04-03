@@ -60,6 +60,23 @@
 contact*	pleaseCall;	// The cellOS will set this to NULL on bootup.
 
 
+
+// *****************************************************
+// *******************  phCloseBtn  ********************
+// *****************************************************
+
+phCloseBtn::phCloseBtn(phone* inPhone)
+	: closeBtn(inPhone) { mPhone = inPhone; }
+
+phCloseBtn::~phCloseBtn(void) {  }
+
+
+void phCloseBtn::doAction(void) {
+
+	mPhone->startHangup();
+   mPhone->mNeedClose = true;
+}
+
 // *****************************************************
 // ********************  phoneBtn  *********************
 // *****************************************************
@@ -302,7 +319,6 @@ void phone::setup(void) {
   pBtnHash  = new phoneBtn(KEY_C3,KEY_R4,'#',this);
   
   pBtnCall  = new callControl(KEY_C1,KEY_R5,'C',this);
-  pBtnClose = new phoneBtn(KEY_C3,KEY_R5,'X',this);
 
   theEditBase = new colorRect(EB_X,EB_Y,EB_W,EB_H);
   theEditBase->setColor(&editFieldBColor);
@@ -320,11 +336,11 @@ void phone::setup(void) {
   stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
-  mBatPct = new battPercent(BATT_X,BATT_Y);
-  addObj(mBatPct);
-  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
-  addObj(mRSSI);
+  //menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
+  //addObj(ourMenuBar);
+  
+  //phCloseBtn* ourCloseBtn = new phCloseBtn(this);
+  //ourMenuBar->addObj(ourCloseBtn);
 }
 
 

@@ -37,13 +37,8 @@ toolsPanel::~toolsPanel(void) {  }
 
 void toolsPanel::setup(void) {
 
-  closeBtn* ourCloseBtn = new closeBtn((panel*)this);
-  addObj(ourCloseBtn);
-  mBatPct = new battPercent(BATT_X,BATT_Y);
-  addObj(mBatPct);
-  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
-  addObj(mRSSI);
+  menuBar* ourMenuBar = new menuBar((panel*)this);
+  addObj(ourMenuBar);
 }
 
 
@@ -87,8 +82,6 @@ void  toolsPanel::showStatus(void) {
 void toolsPanel::loop(void) { 
 
   if (statusTimer.ding()) {
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-    mRSSI->setRSSI(statusReg.RSSI);
     showStatus();
     statusTimer.start();
   }

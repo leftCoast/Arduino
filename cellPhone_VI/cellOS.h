@@ -36,11 +36,12 @@
 #define CLOSE_W         22
 #define CLOSE_H         CLOSE_W
 
-#define BATT_X        199
-#define BATT_Y        2
+#define STATUS_X        200
+#define STATUS_Y        2
+#define STATUS_W        40
+#define STATUS_H        22   
 
-#define SIG_X         BATT_X + 15
-#define SIG_Y         BATT_Y
+#define SIG_X           15
 
 // Starting points, they are tweaked in setup().
 extern colorObj  backColor;
@@ -125,13 +126,46 @@ class trashBtn : public iconButton {
   virtual ~trashBtn(void);
 };
 
+// *****************************************************
+// ******************   statusIcon  ********************
+// *****************************************************
+
+
+
+class statusIcon  : public drawGroup,
+                    public timeObj {
+
+  public:
+            statusIcon(void);
+    virtual ~statusIcon(void);
+    
+    virtual void  setStatus(void);
+    virtual void  idle(void);
+    virtual void  drawSelf(void);
+    
+            battPercent*  mBatPct;
+            RSSIicon*     mRSSI;
+};
+
+
 
 // *****************************************************
 // ******************   menueBar  ********************
 // *****************************************************
 
 
-//class menueBar :  
+class menuBar  : public drawGroup {
+
+  public:
+            menuBar(panel* inPanel,bool closeBox=true,bool statusIcon=true);
+    virtual ~menuBar(void);
+
+    virtual void    drawSelf(void);
+
+            panel*  mPanel;
+};
+
+
    
 // *****************************************************
 // ******************   homeScreen  ********************
@@ -164,21 +198,16 @@ class homeScreen : public homePanel {
   
   virtual void  setup(void);
   virtual void  loop(void);
-          void  showStatus(void);
   virtual void  drawSelf(void);
 
-          bmpPipe*    mBackImage;
-          appIcon*    calcIcon;
-          appIcon*    textIcon;
-          appIcon*    contactIcon;
-          roundedIconBtn*    qGameIcon;
-          appIcon*    toolsIcon;
-          roundedIconBtn*    breakoutIcon;
-          appIcon*    phoneIcon;
-          timeObj     statusTimer;
-          battPercent*  mBatPct;
-          RSSIicon*     mRSSI;
-  
+          bmpPipe*        mBackImage;
+          appIcon*        calcIcon;
+          appIcon*        textIcon;
+          appIcon*        contactIcon;
+          appIcon*        toolsIcon;
+          appIcon*        phoneIcon;
+          roundedIconBtn* breakoutIcon;
+          roundedIconBtn* qGameIcon;
 };
 
 

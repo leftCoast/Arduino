@@ -10,7 +10,7 @@
 #include <contactList.h>
 #include "panel.h"
 #include "../../icons.h"
-
+#include	"../../cellOS.h"
 
 // Better put notes on this before I completely forget. This is the screen that
 // gives you a phone to dial. There's a label showing you a formatted version of
@@ -35,6 +35,18 @@ extern	contact* pleaseCall;
 
 class phone;
 
+class phCloseBtn	: public closeBtn {
+
+	public:
+				phCloseBtn(phone* inPhone);
+	virtual	~phCloseBtn(void);
+	
+	virtual	void  doAction(void);
+	
+				phone* mPhone;
+};
+
+	
 class phoneBtn :  public drawObj {
 
    public:
@@ -116,7 +128,7 @@ class phone : public panel {
           phoneBtn* pBtnHash;
                 
           phoneBtn* pBtnCall;
-          phoneBtn* pBtnClose;
+          //phoneBtn* pBtnClose;
 
           colorRect*  theEditBase;     // Background of the PNLabel.
           PNLabel*  numDisplay;

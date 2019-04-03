@@ -563,20 +563,20 @@ void contactPanel::setup(void) {
   mPNList->fillList();                                        // Fill it with goodies.
   addObj(mPNList);                                            // Pass it to the a group.
 
-  closeBtn* ourCloseButton = new closeBtn(this);
-  addObj(ourCloseButton);
+  menuBar* ourMenuBar = new menuBar((panel*)this);
+  addObj(ourMenuBar);
 
   contNewBtn* ourNewButton = new contNewBtn(mPNList);
-  addObj(ourNewButton);
+  ourMenuBar->addObj(ourNewButton);
 
   contTextBtn*  ourTextBtn = new contTextBtn();
-  addObj(ourTextBtn);
+  ourMenuBar->addObj(ourTextBtn);
 
   contCallBtn* ourCallBtn = new contCallBtn();
-  addObj(ourCallBtn);
+  ourMenuBar->addObj(ourCallBtn);
 
   contTrashBtn* ourTrashBtn = new contTrashBtn(mPNList);
-  addObj(ourTrashBtn);
+  ourMenuBar->addObj(ourTrashBtn);
 }
 
 

@@ -103,6 +103,76 @@ trashBtn::~trashBtn(void) {  }
 
 
 // *****************************************************
+// ******************   statusIcon  ********************
+// *****************************************************
+
+
+statusIcon::statusIcon(void)
+  : drawGroup(STATUS_X,STATUS_Y,STATUS_W,STATUS_H) {
+    
+  mBatPct = new battPercent(0,3);
+  addObj(mBatPct);
+  mRSSI = new RSSIicon(SIG_X,3);
+  addObj(mRSSI);
+  hookup();
+  setStatus();
+  setTime(1500);
+}
+
+
+statusIcon::~statusIcon(void) {  }
+
+
+void statusIcon::setStatus(void) {
+
+  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
+  mRSSI->setRSSI(statusReg.RSSI);
+}
+
+
+void statusIcon::idle(void) {
+
+  if (ding()) {
+    setStatus();
+    start();
+  }
+  drawGroup::idle();
+}
+
+void statusIcon::drawSelf(void) { }
+
+// *****************************************************
+// ******************   menueBar  ********************
+// *****************************************************
+
+
+menuBar::menuBar(panel* inPanel,bool closeBox,bool showStatus)
+  : drawGroup(0,0,240,MENU_BAR_H) {
+    
+  closeBtn*   ourCloseBtn;
+  statusIcon* ourStatusIcon;
+  
+  mPanel = inPanel;
+  if (closeBox) {
+    ourCloseBtn = new closeBtn(mPanel);
+    addObj(ourCloseBtn);
+  }
+  if (showStatus) {
+    ourStatusIcon = new statusIcon();
+    addObj(ourStatusIcon);
+  }
+}
+
+
+menuBar::~menuBar(void) {  }
+
+
+
+void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
+
+
+ 
+// *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
 
@@ -224,8 +294,6 @@ homeScreen::homeScreen(void)
   qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
   iconX=iconX+APP_ICON_XSTEP;
   breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
-  
-  statusTimer.setTime(1500);
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
@@ -242,22 +310,12 @@ void homeScreen::setup(void) {
   if (breakoutIcon) { addObj(breakoutIcon); breakoutIcon->begin(); }
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 
-  mBatPct = new battPercent(BATT_X,BATT_Y);
-  addObj(mBatPct);
-  mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-  mRSSI   = new RSSIicon(SIG_X,SIG_Y);
-  addObj(mRSSI);
+  menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
+  addObj(ourMenuBar);
 }
 
 
-void homeScreen::loop(void) { 
-
-  if (statusTimer.ding()) {
-    mBatPct->setPercent((byte)statusReg.batteryPercent,&backColor);
-    mRSSI->setRSSI(statusReg.RSSI);
-    statusTimer.start();
-  }
-}
+void homeScreen::loop(void) {  }
 
 
 void homeScreen::drawSelf(void) { 
@@ -304,7 +362,7 @@ int cellOS::begin(void) {
   greenbuttonColor.blend(&green,50);
   greenButtonHighlight.blend(&white,90);
 
-  //battLineColor = lightbButtonColor;
+  battLineColor.blend(&white,30);
   menuBarColor.blend(&black,95);
   
   // Fill in the keyboard pallette.

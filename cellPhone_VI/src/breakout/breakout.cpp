@@ -55,9 +55,6 @@ void breakout::setup() {
   numBallsNum->setValue(" ");
   addObj(numBallsNum);
 
-  closeBtn* aCloseBtn = new closeBtn((panel*)this);
-  addObj(aCloseBtn);
-
   ballNumCMap.addColor(NUM_BALLS,&green);
   ballNumCMap.addColor(2,&yellow);
   ballNumCMap.addColor(1,&red);
@@ -65,6 +62,10 @@ void breakout::setup() {
   theBall = new ballObj(paddle);
   theBall->setBackColor(&backColor);
   addObj(theBall);
+  
+  menuBar* ourMenuBar = new menuBar((panel*)this);
+  addObj(ourMenuBar);
+  
   fillBricks();
   setState(preGame);
 }

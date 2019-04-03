@@ -5,21 +5,6 @@
 
 class toolsPanel;
 
-// *****************************************************
-// ******************  toolsCloseBtn  *******************
-// *****************************************************
-
-
-class toolsCloseBtn :  public closeBtn {
-
-   public:
-          toolsCloseBtn(toolsPanel* ourPanel);
-  virtual ~toolsCloseBtn(void);
-
-  virtual void  doAction(void);
-
-          toolsPanel* mPanel;
-};
 
 
 
@@ -42,8 +27,6 @@ class toolsPanel :  public panel {
 
           timeObj     statusTimer;
           textView*   mText;
-          battPercent*  mBatPct;
-          RSSIicon*     mRSSI;
 };
 
 #endif
