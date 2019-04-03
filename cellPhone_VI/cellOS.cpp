@@ -79,6 +79,15 @@ searchBtn::~searchBtn(void) {  }
 
 // *****
 
+contactsBtn::contactsBtn(int x,int y)
+  : iconButton(x,y,ICON_PATH_CONTACT22,22)  { begin(); }
+  
+contactsBtn::~contactsBtn(void) { }
+
+void contactsBtn::doAction(void) { nextPanel = contactApp; }
+
+// *****
+
 textBtn::textBtn(int x,int y)
   : iconButton(x,y,ICON_PATH_TEXT22,22)  { begin(); }
     

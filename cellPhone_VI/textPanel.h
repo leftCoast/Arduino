@@ -29,7 +29,7 @@ class textSortBtn :  public sortBtn {
 
           textPanel* mPanel;
 };
-*/
+
 
 // *****************************************************
 // ******************  textSearchBtn  ******************
@@ -45,7 +45,7 @@ class textSearchBtn :  public searchBtn {
   virtual void  doAction(void);
 
 };
-
+*/
 
 
 // *****************************************************

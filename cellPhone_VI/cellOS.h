@@ -24,6 +24,7 @@
 #define ICON_PATH_X22       "/system/icons/redX22.bmp"
 #define ICON_PATH_NEW22     "/system/icons/new22.bmp"
 #define ICON_PATH_SEARCH22  "/system/icons/search22.bmp"
+#define ICON_PATH_CONTACT22  "/system/icons/addr22.bmp"
 #define ICON_PATH_TEXT22    "/system/icons/text22.bmp"
 #define ICON_PATH_PHONE22   "/system/icons/call22.bmp"
 #define ICON_PATH_TRASH22   "/system/icons/trash22.bmp"
@@ -100,6 +101,16 @@ class searchBtn : public iconButton {
   public:
           searchBtn(int x,int y);
   virtual ~searchBtn(void);
+};
+
+
+class contactsBtn : public iconButton {
+
+  public:
+          contactsBtn(int x,int y);
+  virtual ~contactsBtn(void);
+
+  virtual void  doAction(void);
 };
 
 

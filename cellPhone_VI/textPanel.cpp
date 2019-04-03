@@ -21,18 +21,18 @@ textSortBtn::~textSortBtn(void) {  }
 void textSortBtn::doAction(void) {  }
 */
 
-
+/*
 // *****************************************************
-// ******************  textSearchBtn  ******************
+// ******************  textContactBtn  ******************
 // *****************************************************
 
-textSearchBtn::textSearchBtn(int x, int y)
+textContactBtn::textContactBtn(int x, int y)
   : searchBtn(x,y) { }
   
-textSearchBtn::~textSearchBtn(void) {  }
+textContactBtn::~textContactBtn(void) {  }
 
 void  doAction(void) {  }
-
+*/
 
 
 // *****************************************************
@@ -71,6 +71,9 @@ void textPanel::setup(void) {
 
   menuBar* ourMenuBar = new menuBar((panel*)this);
   addObj(ourMenuBar);
+
+  contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
+  addObj(ourContactsBtn);
 }
 
 
