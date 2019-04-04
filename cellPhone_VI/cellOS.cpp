@@ -1,6 +1,7 @@
 
 #include "cellOS.h"
 
+#include <resizeBuff.h>
 #include <screen.h>
 #include <cellCommon.h>
 #include <cellManager.h>
@@ -19,6 +20,8 @@
 #define RAMPUP_END    1500
 #define RAMPDN_START  RAMPUP_END
 #define RAMPDN_END    RAMPDN_START + 100
+
+#define CELL_EITEM_INSET  3
 
 #define STEPTIME  20 //ms
 
@@ -45,6 +48,33 @@ colorObj  menuBarColor(LC_RED);
 
 cellOS  ourOS;
 
+
+// *****************************************************
+// *********************  formatPN  ********************
+// *****************************************************
+
+void formatPN(label* numField);
+
+void formatPN(label* numField) {
+ 
+  PNLabel formatter(1,1,1,1,1);
+  int     numBytes;
+  char*   textBuff;
+  
+  textBuff = NULL;
+  numBytes = numField->getNumChars() + 1;
+  if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+    numField->getText(textBuff);
+    formatter.setValue(textBuff);
+    resizeBuff(0,(uint8_t**)&textBuff);
+    numBytes = formatter.getNumChars() + 1;
+    if (resizeBuff(numBytes,(uint8_t**)&textBuff)) {
+      formatter.getText(textBuff);
+      numField->setValue(textBuff);
+      resizeBuff(0,(uint8_t**)&textBuff);
+    }
+  }
+}
 
 
 // *****************************************************
@@ -150,6 +180,8 @@ void statusIcon::idle(void) {
 
 void statusIcon::drawSelf(void) { }
 
+
+
 // *****************************************************
 // ******************   menueBar  ********************
 // *****************************************************
@@ -180,10 +212,88 @@ menuBar::~menuBar(void) {  }
 void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
 
 
+
+// *****************************************************
+// ******************  cellEditField  ******************
+// *****************************************************
+
+
+cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
+  : drawGroup(inRect) {
+  
+  mKeyboard = inKeyboard;
+  rect  bRect;
+  rect  tRect;
+
+  bRect.x = 0;
+  bRect.y = 0;
+  bRect.width = inRect->width;
+  bRect.height = inRect->height;
+
+  tRect = bRect;
+  tRect.insetRect(CELL_EITEM_INSET);
+
+  mEditBase = new colorRect(&bRect,&backColor);
+  mEditBase->setColor(&backColor);
+  addObj(mEditBase);
+  mEditField = new editField(&tRect,inText,1);
+  mEditField->setColors(&textColor,&backColor);
+  mEditField->setParent(this);
+  addObj(mEditField);
+  setEventSet(fullClick);
+}
+
+
+cellEditField::~cellEditField(void) {  }
+
+
+void cellEditField::drawSelf(void) { screen->drawRect(this,&white); }
  
+
+// If we get focus, we pass it on to the edit field. When the edit field
+// looses focus, it will tell us by calling this this method. SO we don't
+// "unset" the edit field's focus, we only set it.
+void cellEditField::setFocus(bool setLoose) {
+  
+  if (setLoose) {
+    mEditField->setColors(&textSelectColor,&editFieldBColor);
+    mEditBase->setColor(&editFieldBColor);
+    if (mKeyboard) {
+      mKeyboard->setEditField(mEditField);
+    }
+    currentFocus = mEditField;    // We manually switch focus to mEditField..
+    mEditField->setFocus(true);   // mEditField will call this with "false" when it looses focus.
+  } else {
+    mEditField->setColors(&textColor,&backColor);
+    mEditBase->setColor(&backColor);
+    if (mKeyboard) {
+      if (mKeyboard->mEditField==mEditField) {
+        mKeyboard->setEditField(NULL);
+      }
+    }
+  }
+}
+
+
+void cellEditField::doAction(void) { setFocusPtr(this); }
+
+
+// Not including the \0. You may need to add one.
+int cellEditField::getNumChars(void) { return mEditField->getNumChars(); }
+
+
+void cellEditField::formatAsPN(void) { formatPN(mEditField); }
+
+
+// You better have added the (1) for the \0.
+void cellEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
+
+
+
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
+
 
 #define SCR_W         240
 #define SCR_H         320
@@ -402,7 +512,7 @@ int cellOS::begin(void) {
   ourListener.begin(phoneApp);
 
   pleaseCall = NULL;  // For the phone panel.
-  pleaseText = NULL;  // For the text panel.
+  currentDialog = NULL;  // For the text panel.
   
   bringUp();
   return litlOS::begin();

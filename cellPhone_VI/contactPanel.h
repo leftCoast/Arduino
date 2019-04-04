@@ -110,22 +110,16 @@ class contTrashBtn : public trashBtn {
 // *****************************************************
 
 
-class PNEditField :  public drawGroup {
+class PNEditField :  public cellEditField {
 
   public:
-          PNEditField (rect* inRect,char* inText,PNListItem* ourListItem);
+          PNEditField (rect* inRect,char* inText,keyboard* inKeyboard,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  virtual void      drawSelf(void);
-  virtual void      setFocus(bool setLoose);
-  virtual void      doAction(void);
-          int       getNumChars(void);      // Not including the \0. You may need to add one.
-          void      formatAsPN(void);
-          void      getText(char* inBuff);  // You better have added the (1) for the \0.
+  virtual void        drawSelf(void);
+  virtual void        setFocus(bool setLoose);
 
           PNListItem* mOurListItem;
-          editField*  mEditField;       // Our editing field.
-          colorRect*  mEditBase;        // Our editing field's base.     
 };
 
 
@@ -138,7 +132,7 @@ class PNEditField :  public drawGroup {
 class PNListItem :  public drawGroup {
 
   public:
-          PNListItem(PNList* ourList,contact* inContact);
+          PNListItem(PNList* ourList,contact* inContact,keyboard* inKeyboard);
   virtual ~PNListItem(void);
 
   virtual void      draw(void);
@@ -165,7 +159,7 @@ class PNListItem :  public drawGroup {
 class PNList : public /*drawList*/scrollingList {
 
   public:
-          PNList(int x,int y,int width,int height);
+          PNList(int x,int y,int width,int height,keyboard* inKeyboard);
   virtual ~PNList(void);
   
   virtual void          drawSelf(void);
@@ -174,6 +168,8 @@ class PNList : public /*drawList*/scrollingList {
           PNListItem*   itemByContact(contact* aContact);
           void          deleteContact(void);
   virtual void          doAction(event* inEvent,point* locaPt);
+
+          keyboard*     mKeyboard;  // So we canpass on the pointer.
 };
 
 
@@ -194,7 +190,8 @@ class contactPanel :  public panel {
   virtual void    drawSelf(void);
   virtual void    closing(void);
 
-          PNList* mPNList;
+          PNList*   mPNList;
+          keyboard* mKeyboard;
 };
 
 

@@ -11,71 +11,18 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 
-extern  contact* pleaseText;
+#include "contactPanel.h" // For our edit field. Soon to be moved to cellOS I think.
 
+extern  contact* currentDialog;
 
-// *****************************************************
-// ******************  textSortBtn  *******************
-// *****************************************************
-
-/*
-class textSortBtn :  public sortBtn {
-
-   public:
-          textSortBtn(contactPanel* ourPanel);
-  virtual ~textSortBtn(void);
-
-  virtual void  doAction(void);
-
-          textPanel* mPanel;
-};
-
+ 
+// Ok, if there is no currentDialog, then we pop over to contacts and select one.
+// This panel is only used for actual dialogs with contacts.
 
 // *****************************************************
-// ******************  textSearchBtn  ******************
+// *******************  textPanel  *********************
 // *****************************************************
 
-
-class textSearchBtn :  public searchBtn {
-
-   public:
-          textSearchBtn(int x,int y);
-  virtual ~textSearchBtn(void);
-
-  virtual void  doAction(void);
-
-};
-*/
-
-
-// *****************************************************
-// ********************  convList  **********************
-// *****************************************************
-
-// List of text conversations by contact name.
-
-class convList : public scrollingList {
-
-  public:
-          convList(int x,int y,int width,int height);
-  virtual ~convList(void);
-  
-  virtual void          drawSelf(void);
-          void          fillList(void);
-          //convListItem* itemByContact(contact* aContact);
-          void          deleteConv(void);
-  virtual void          doAction(event* inEvent,point* locaPt);
-};
-
-
-
-// *****************************************************
-// ******************  textPanel  *******************
-// *****************************************************
-
-// Ok, there's two levels here. First is loopking at the list of conversations by
-//contanct name and the other would be list of messages by order of time. Both
-// will need a keyboard for searching and typing messages.
 
 class textPanel  :  public panel {
 
@@ -83,16 +30,12 @@ class textPanel  :  public panel {
           textPanel(void);
   virtual ~textPanel(void);
            
-  virtual void    setup(void);
-  virtual void    loop(void);
-  virtual void    drawSelf(void);
-  virtual void    closing(void);
+  virtual void      setup(void);
+  virtual void      loop(void);
+  virtual void      drawSelf(void);
+  virtual void      closing(void);
 
-          convList* mConvList;
-          //timeObj     statusTimer;
-          textView*   mText;
-          battPercent*  mBatPct;
-          RSSIicon*     mRSSI;
+          keyboard* mKeyboard;
 };
 
 

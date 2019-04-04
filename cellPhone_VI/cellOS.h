@@ -8,6 +8,9 @@
 #include <timeObj.h>
 #include <textView.h>
 #include <bmpPipe.h>
+#include <colorRect.h>
+#include <keystroke.h>
+#include <scrKeyboard.h>
 #include <litlOS.h>
 #include "panel.h"
 #include "src/cellListener/cellListener.h"
@@ -177,7 +180,35 @@ class menuBar  : public drawGroup {
 };
 
 
-   
+
+// *****************************************************
+// ******************  cellEditField  ******************
+// *****************************************************
+
+// NOTE!! This, as currently written, can not be created in your constructor. It
+// won't be able to get its initial drawing commands there. Set it to NULL in your
+// constructor thencreate it as the first thing in your setup().
+
+class cellEditField :  public drawGroup {
+
+  public:
+          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard);
+  virtual ~cellEditField(void);
+
+  virtual void      drawSelf(void);
+  virtual void      setFocus(bool setLoose);
+  virtual void      doAction(void);
+          int       getNumChars(void);      // Not including the \0. You may need to add one.
+          void      formatAsPN(void);
+          void      getText(char* inBuff);  // You better have added the (1) for the \0.
+
+          keyboard*   mKeyboard;            // They'll pass this in. DON'T delete it!
+          editField*  mEditField;           // Our editing field.
+          colorRect*  mEditBase;            // Our editing field's base.     
+};
+
+
+
 // *****************************************************
 // ******************   homeScreen  ********************
 // *****************************************************
