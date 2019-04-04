@@ -511,8 +511,8 @@ int cellOS::begin(void) {
   screenMap.addPoint(RAMPDN_END,0);
   ourListener.begin(phoneApp);
 
-  pleaseCall = NULL;  // For the phone panel.
-  currentDialog = NULL;  // For the text panel.
+  pleaseCall      = NULL;  // For the phone panel.
+  currentContact  = NULL;  // For the text panel.
   
   bringUp();
   return litlOS::begin();

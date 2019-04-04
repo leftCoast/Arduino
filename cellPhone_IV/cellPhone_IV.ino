@@ -226,14 +226,24 @@ void doSendSNSMsg(byte* buff) {
 
 void doGetSNSMsg(byte* buff) {
 
-  uint16_t numBytes;
-  
-  if (fona.readSMS(1, &(buff[1]),COM_BUFF_BYTES-2,&numBytes)) { // If we are successfull.. (Subtract 2 for luck.)
-    fona.deleteSMS(1);                                          // Delete the message from the SIM.
-    buff[0] = 0;                                                // Set no error flag.
-    ourComObj.replyComBuff(numBytes+1);                         // Send back our result. + the error flag.
-  } else {
-    buff[0] = 1;                                                // Note the error.
-    ourComObj.replyComBuff(1);                                  // Send back the error.
+  uint16_t  numPNBytes;
+  uint16_t  numMsgBytes;
+  uint16_t  buffLen;
+  char*     buffPtr;
+
+  buffPtr = &(buff[1]);                                           // In the buffer, this is where our reply message starts.
+  buffLen = COM_BUFF_BYTES-2;                                     // How many bytes we have to work wih here? (Subtract 2 for luck.)
+  if (fona.getSMSSender(1,buffPtr,buffLen)) {                     // First we read out the phone number..
+    numPNBytes = strlen(buffPtr)+1;                               // They don't tell us how many bytes they used. So we count 'em ourselves.
+    buffPtr = buffPtr + numPNBytes;                               // Offset the buffer pointer.
+    buffLen = buffLen - numPNBytes;                               // Reset the buffer length.                                  
+    if (fona.readSMS(1,buffPtr,buffLen,&numMsgBytes)) {           // If we are successfull.. 
+      fona.deleteSMS(1);                                          // Delete the message from the SIM.
+      buff[0] = 0;                                                // Set no error flag.
+      ourComObj.replyComBuff(numPNBytes+numMsgBytes);             // Send back our result. + the error flag.
+      return;                                                     // At this point its success and we're done!
+    }
   }
+  buff[0] = 1;                                                    // We got here? Note the error.
+  ourComObj.replyComBuff(1);                                      // Send back the error.
 }

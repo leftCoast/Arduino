@@ -181,7 +181,7 @@ contTextBtn::~contTextBtn(void) {  }
 
 void contTextBtn::doAction(void) {
 
-  currentDialog = currContact;
+  currentContact = currContact;
   nextPanel = textApp;
 }
 

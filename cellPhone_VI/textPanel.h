@@ -11,9 +11,9 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 
-#include "contactPanel.h" // For our edit field. Soon to be moved to cellOS I think.
+//#include "contactPanel.h" // For our edit field. Soon to be moved to cellOS I think.
 
-extern  contact* currentDialog;
+extern  contact* currentContact;
 
  
 // Ok, if there is no currentDialog, then we pop over to contacts and select one.

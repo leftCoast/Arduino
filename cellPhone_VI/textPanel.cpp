@@ -16,7 +16,7 @@
 #define ML_X    TW_X
 #define ML_Y    TW_Y
 
-contact* currentDialog;        
+contact* currentContact;        
 
 // *****************************************************
 // ******************  textPanel  *******************
@@ -34,7 +34,7 @@ void textPanel::setup(void) {
 
   rect  aRect;
 
-  if (currentDialog) {
+  if (currentContact) {
     mKeyboard = new keyboard(NULL);
     aRect.setRect(ET_X,ET_Y,ET_W,ET_H);
     cellEditField* ourEditField  = new cellEditField(&aRect,"",mKeyboard);
@@ -46,7 +46,7 @@ void textPanel::setup(void) {
     addObj(ourMenuBar);
     contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
     ourMenuBar->addObj(ourContactsBtn);
-    label* nickname = new label(CLOSE_X+80,7,100,22,currentDialog->mNickName,1);
+    label* nickname = new label(CLOSE_X+80,7,100,22,currentContact->mNickName,1);
     nickname->setJustify(TEXT_CENTER);
     nickname->setColors(&textColor,&menuBarColor);
     ourMenuBar->addObj(nickname);
