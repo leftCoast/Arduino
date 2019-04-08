@@ -18,6 +18,7 @@
 
 contact* currentContact;        
 
+
 // *****************************************************
 // ******************  textPanel  *******************
 // *****************************************************
@@ -65,5 +66,6 @@ void textPanel::drawSelf(void) {
 
   screen->fillRect(&userRect,&backColor);
 }
+
 
 void textPanel::closing(void) { }

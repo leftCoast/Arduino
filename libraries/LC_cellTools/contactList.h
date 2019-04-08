@@ -41,6 +41,7 @@ class contact :	public linkListObj,
 				void  setFirstName(char* firstName);
 				void  setLastName(char* lastName);
 				void  setCompanyName(char* companyName);
+				void	addMessage(char* message,bool reply);
 				
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);
@@ -53,7 +54,8 @@ class contact :	public linkListObj,
 				char*				mFirstName;
 				char*				mLastName;
 				char*				mCompanyName;
-				unsigned long	mMsgID;
+				unsigned long	mDialogID;
+				dialog*			mDialog;
 				bool				mChanged;
 				bool				mErased;
 };
@@ -75,6 +77,7 @@ class contactList :	public linkList,
 				contact*			findByPN(char* phoneNum);
 				contact*			findOrAddContact(char* phoneNum);
 				void				deleteContact(contact* theDoomed);
+				void				addMessage(char* rawMsgStr);
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	bool				saveSubFileBuffs(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);

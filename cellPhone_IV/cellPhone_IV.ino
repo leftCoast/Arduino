@@ -223,24 +223,30 @@ void doSendSNSMsg(byte* buff) {
   ourComObj.replyComBuff(1);              // Send back our result.
 }
 
-
+// First byte was the command, second byte is the index of
+// the message we're after. When we pack our reply it will
+// be two c-strings. First is sending phone number, second
+// is the text message itself. Once a message is sent, it's
+// deleted from the SIM chip.
 void doGetSNSMsg(byte* buff) {
 
   uint16_t  numPNBytes;
   uint16_t  numMsgBytes;
   uint16_t  buffLen;
   char*     buffPtr;
-
+  byte      msgIndex;
+  
+  msgIndex = buff[1];                                             // What message are we talking about here?
   buffPtr = &(buff[1]);                                           // In the buffer, this is where our reply message starts.
   buffLen = COM_BUFF_BYTES-2;                                     // How many bytes we have to work wih here? (Subtract 2 for luck.)
-  if (fona.getSMSSender(1,buffPtr,buffLen)) {                     // First we read out the phone number..
+  if (fona.getSMSSender(msgIndex,buffPtr,buffLen)) {              // First we read out the phone number..
     numPNBytes = strlen(buffPtr)+1;                               // They don't tell us how many bytes they used. So we count 'em ourselves.
     buffPtr = buffPtr + numPNBytes;                               // Offset the buffer pointer.
     buffLen = buffLen - numPNBytes;                               // Reset the buffer length.                                  
-    if (fona.readSMS(1,buffPtr,buffLen,&numMsgBytes)) {           // If we are successfull.. 
-      fona.deleteSMS(1);                                          // Delete the message from the SIM.
+    if (fona.readSMS(msgIndex,buffPtr,buffLen,&numMsgBytes)) {    // If we are successfull.. 
+      fona.deleteSMS(msgIndex);                                   // Delete the message from the SIM.
       buff[0] = 0;                                                // Set no error flag.
-      ourComObj.replyComBuff(numPNBytes+numMsgBytes);             // Send back our result. + the error flag.
+      ourComObj.replyComBuff(numPNBytes+numMsgBytes+1);           // Send back our result. + the error flag.
       return;                                                     // At this point its success and we're done!
     }
   }

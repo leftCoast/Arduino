@@ -18,7 +18,7 @@ contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,cha
 	mFirstName		= NULL;
 	mLastName		= NULL;
 	mCompanyName	= NULL;
-	mMsgID			= msgID;
+	mDialogID			= msgID;
 	mErased			= false;
 	setPN(PN);					// This sets the "I've been changed" thing.
 }
@@ -126,7 +126,7 @@ unsigned long contact::calculateBuffSize(void) {
 				  strlen(mFirstName) + 1 +
 				  strlen(mLastName) + 1 +
 				  strlen(mCompanyName) + 1;
-	numBytes = numBytes + sizeof(mMsgID);
+	numBytes = numBytes + sizeof(mDialogID);
 	return numBytes;
 }
 
@@ -174,7 +174,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	offset = offset + i;
 	
 	longPtr = (unsigned long*)&(buffPtr[offset]);	// Our message list file ID.
-	*longPtr = mMsgID;
+	*longPtr = mDialogID;
   
 	mChanged = false;
 }
@@ -183,7 +183,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 // We've been FIRED?!?
 void contact::eraseFromFile(void) {
 
-	mFile->deleteBlock(mMsgID);	// This deletes our list of text messages.
+	mFile->deleteBlock(mDialogID);	// This deletes our list of text messages.
 	fileBuff::eraseFromFile();		// This deletes ourselves from the file.
 	mErased = true;					// This marks us as deleted for the rest of this code.
 }
@@ -210,8 +210,8 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 	setCompanyName(&(buffPtr[buffIndex]));
 	buffIndex = buffIndex + strlen(mCompanyName) + 1;
 	longPtr = (unsigned long*)&(buffPtr[buffIndex]);
-	mMsgID = *longPtr;
-	buffIndex = buffIndex + sizeof(mMsgID);
+	mDialogID = *longPtr;
+	buffIndex = buffIndex + sizeof(mDialogID);
   	mChanged = false;
 	return buffIndex;   
 }
@@ -226,7 +226,7 @@ void contact::printContact(void) {
 	Serial.print(F("First name : ["));Serial.print(mFirstName);Serial.println(F("]"));
 	Serial.print(F("Last name  : ["));Serial.print(mLastName);Serial.println(F("]"));
 	Serial.print(F("Company    : ["));Serial.print(mCompanyName);Serial.println(F("]"));
-	Serial.print(F("Message ID : "));Serial.println(mMsgID);
+	Serial.print(F("Dialog ID  : "));Serial.println(mDialogID);
 	Serial.print(F("Erased?    : "));Serial.println(mErased);
 	Serial.print(F("BYTES      : "));Serial.println(calculateBuffSize());
 	Serial.println(F("-------------------------------------"));Serial.flush();
@@ -366,3 +366,21 @@ void contactList::deleteContact(contact* theDoomed) {
 		delete(theDoomed);				// Recycle the node.
 	}
 }
+
+
+// Either the background phone service or the user has added a message to a
+// dialog. This is where it gets added into the contact/message framework.
+void contactList::addMessage(char* phoneNum,char* message,bool reply) {
+	
+	contact*	theContact;
+	
+	theContact = findOrAddContact(phoneNum);
+	if (theContact) {
+		theContact->addMessage(message,reply);
+	}
+}
+
+
+
+
+

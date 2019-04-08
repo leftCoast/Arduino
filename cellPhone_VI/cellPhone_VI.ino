@@ -27,7 +27,7 @@
 #include "icons.h"
 #include "cellOS.h"
 #include "cellManager.h"
-#include "contactPanel.h"
+#include "src/contacts/contactPanel.h"
 
 #define TFT_CS  10
 #define TFT_RST -1    // I think I remember this is not used.

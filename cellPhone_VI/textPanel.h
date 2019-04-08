@@ -11,12 +11,10 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 
-//#include "contactPanel.h" // For our edit field. Soon to be moved to cellOS I think.
-
 extern  contact* currentContact;
 
  
-// Ok, if there is no currentDialog, then we pop over to contacts and select one.
+// Ok, if there is no currentContact, then we pop over to contacts and select one.
 // This panel is only used for actual dialogs with contacts.
 
 // *****************************************************

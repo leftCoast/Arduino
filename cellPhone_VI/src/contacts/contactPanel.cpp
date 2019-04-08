@@ -1,5 +1,5 @@
-#include "cellOS.h"
-#include "src/phone/phone.h"
+#include	"../../cellOS.h"
+#include "../phone/phone.h"
 
 #include <resizeBuff.h>
 #include <keystroke.h>
@@ -8,7 +8,7 @@
 #include <PNLabel.h>
 
 #include "contactPanel.h"
-#include "textPanel.h"
+#include "../../textPanel.h"
 
 #define PNLIST_X        10
 #define PNLIST_Y        30

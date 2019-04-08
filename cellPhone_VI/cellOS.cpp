@@ -11,7 +11,7 @@
 #include "src/qGame/qGame.h"
 #include "src/phone/phone.h"
 #include "src/cellListener/cellListener.h"
-#include "contactPanel.h"
+#include "src/contacts/contactPanel.h"
 #include "src/breakout/breakout.h"
 #include "toolsPanel.h"
 #include "textPanel.h"
