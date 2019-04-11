@@ -36,12 +36,16 @@ class contact :	public linkListObj,
 				contact(blockFile* inFile,unsigned long blockID);											// Re-creation constructor.
 	virtual	~contact(void);
 
-				void	setPN(char* PN);
-				void  setNickName(char* nickName);
-				void  setFirstName(char* firstName);
-				void  setLastName(char* lastName);
-				void  setCompanyName(char* companyName);
-				void	addMessage(char* message,bool reply);
+				void				setPN(char* PN);
+				void  			setNickName(char* nickName);
+				void  			setFirstName(char* firstName);
+				void  			setLastName(char* lastName);
+				void  			setCompanyName(char* companyName);
+				
+				unsigned long	sizeOfMsgBlock(void);
+				bool				readMsgBlock(char* buff,unsigned long bytes);
+				bool				saveMsgBlock(char* buff,unsigned long bytes);
+				void				addMsg(char* buff,bool us);
 				
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);
@@ -54,8 +58,8 @@ class contact :	public linkListObj,
 				char*				mFirstName;
 				char*				mLastName;
 				char*				mCompanyName;
-				unsigned long	mDialogID;
-				dialog*			mDialog;
+				unsigned long	mMsgID;
+				bool				mHaveMSG;
 				bool				mChanged;
 				bool				mErased;
 };

@@ -18,8 +18,9 @@ contact::contact(blockFile* inFile,unsigned long blockID,unsigned long msgID,cha
 	mFirstName		= NULL;
 	mLastName		= NULL;
 	mCompanyName	= NULL;
-	mDialogID			= msgID;
+	mMsgID			= msgID;
 	mErased			= false;
+	mHaveMSG 		= false;
 	setPN(PN);					// This sets the "I've been changed" thing.
 }
 
@@ -113,6 +114,54 @@ void contact::setCompanyName(char* companyName) {
 }
 
 
+// How many bytes is our block of text messages?
+unsigned long contact::sizeOfMsgBlock(void) { return mFile->getBlockSize(mMsgID); }
+
+
+// Someone wants the block of text messages. Lets read them out of the file for them.
+bool contact::readMsgBlock(char* buff,unsigned long bytes) { return mFile->getBlock(mMsgID,buff,bytes); }
+
+// Here's the updated block of text messages. We need to write them out to the SD drive to
+// save them. Now, trying to write a zero number of bytes is actually an error. So, in
+// this case, we ignore it and just pass back false.
+bool contact::saveMsgBlock(char* buff,unsigned long bytes) {
+
+	if (bytes) {
+		mHaveMSG = true;
+		return mFile->writeBlock(mMsgID,buff,bytes);
+	}	
+	else return false;
+}			
+
+// We are being handed a c-string with a new message to add to the message block.				
+void  contact::addMsg(char* strBuff,bool us) {
+	
+	unsigned long 	buffBytes;
+	unsigned long 	newBuffBytes;
+	unsigned long 	numChars;
+	char*				fileBuff;
+	
+	numChars = strlen(strBuff);												// How many chars is this new message?
+	if (numChars>0) {																// Lets make sure we have some bytes to add. 
+		buffBytes = mFile->getBlockSize(mMsgID);							// Lets see if we can grab the file block size.
+		newBuffBytes = buffBytes + numChars + 2;							// The new buff size, old buff, chars, leading flag & ending null.
+		fileBuff = NULL;															// Init the file buff pointer.
+		if (resizeBuff(newBuffBytes,(uint8_t**)&fileBuff)) {			// Allocate the block buffer. Enough for everything.
+			if (mFile->getBlock(mMsgID,fileBuff,newBuffBytes)) {		// Grab the block out of the file.
+				if (us) {															// Pop in the leading flag. Us or them?
+					fileBuff[0] = 'U';
+				} else {
+					fileBuff[0] = 'T';
+				}
+				strcpy(&(fileBuff[1]),strBuff);								// Stuff in the new message.
+				mFile->writeBlock(mMsgID,fileBuff,newBuffBytes);		// Write out the updated buffer to the file.
+			}
+			resizeBuff(0,(uint8_t**)&fileBuff);								// Recycle the buffer.
+		}
+	}
+}
+
+			
 // We are being asked how much of a buffer will we need to save ourselves to
 // a block of bytes. Currently its the length of all the strings strung
 // together and 4 bytes for our message list file ID.
@@ -126,7 +175,7 @@ unsigned long contact::calculateBuffSize(void) {
 				  strlen(mFirstName) + 1 +
 				  strlen(mLastName) + 1 +
 				  strlen(mCompanyName) + 1;
-	numBytes = numBytes + sizeof(mDialogID);
+	numBytes = numBytes + sizeof(mMsgID);
 	return numBytes;
 }
 
@@ -174,7 +223,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	offset = offset + i;
 	
 	longPtr = (unsigned long*)&(buffPtr[offset]);	// Our message list file ID.
-	*longPtr = mDialogID;
+	*longPtr = mMsgID;
   
 	mChanged = false;
 }
@@ -183,7 +232,7 @@ void contact::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 // We've been FIRED?!?
 void contact::eraseFromFile(void) {
 
-	mFile->deleteBlock(mDialogID);	// This deletes our list of text messages.
+	mFile->deleteBlock(mMsgID);	// This deletes our list of text messages.
 	fileBuff::eraseFromFile();		// This deletes ourselves from the file.
 	mErased = true;					// This marks us as deleted for the rest of this code.
 }
@@ -210,8 +259,9 @@ unsigned long contact::loadFromBuff(char* buffPtr,unsigned long maxBytes) {
 	setCompanyName(&(buffPtr[buffIndex]));
 	buffIndex = buffIndex + strlen(mCompanyName) + 1;
 	longPtr = (unsigned long*)&(buffPtr[buffIndex]);
-	mDialogID = *longPtr;
-	buffIndex = buffIndex + sizeof(mDialogID);
+	mMsgID = *longPtr;
+	buffIndex = buffIndex + sizeof(mMsgID);
+	mHaveMSG  = sizeOfMsgBlock()>0;
   	mChanged = false;
 	return buffIndex;   
 }
@@ -226,7 +276,7 @@ void contact::printContact(void) {
 	Serial.print(F("First name : ["));Serial.print(mFirstName);Serial.println(F("]"));
 	Serial.print(F("Last name  : ["));Serial.print(mLastName);Serial.println(F("]"));
 	Serial.print(F("Company    : ["));Serial.print(mCompanyName);Serial.println(F("]"));
-	Serial.print(F("Dialog ID  : "));Serial.println(mDialogID);
+	Serial.print(F("Msg ID  	: "));Serial.println(mMsgID);
 	Serial.print(F("Erased?    : "));Serial.println(mErased);
 	Serial.print(F("BYTES      : "));Serial.println(calculateBuffSize());
 	Serial.println(F("-------------------------------------"));Serial.flush();
@@ -366,21 +416,3 @@ void contactList::deleteContact(contact* theDoomed) {
 		delete(theDoomed);				// Recycle the node.
 	}
 }
-
-
-// Either the background phone service or the user has added a message to a
-// dialog. This is where it gets added into the contact/message framework.
-void contactList::addMessage(char* phoneNum,char* message,bool reply) {
-	
-	contact*	theContact;
-	
-	theContact = findOrAddContact(phoneNum);
-	if (theContact) {
-		theContact->addMessage(message,reply);
-	}
-}
-
-
-
-
-
