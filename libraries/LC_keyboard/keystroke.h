@@ -15,7 +15,7 @@ enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack
 // The keyboard is resposible for assembling one of these and sending
 // it on to what is being edited.
 struct keystroke {
-  keyCommands editCommand;  // Edit command or inputtd charactor?
+  keyCommands editCommand;  // Edit command or inputted charactor?
   char        theChar;      // If inputted charactor, here it is!
 };
 

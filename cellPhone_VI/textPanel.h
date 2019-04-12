@@ -19,6 +19,9 @@ extern  contact* currentContact;
 // Ok, if there is no currentContact, then we pop over to contacts and select one.
 // This panel is only used for actual dialogs with contacts.
 
+class textPanel;
+
+
 // *****************************************************
 // ********************  msgItem  **********************
 // *****************************************************
@@ -27,29 +30,49 @@ extern  contact* currentContact;
 class msgItem : public drawGroup {
   
   public:
-          msgItem(char* msg,bool us);
+          msgItem(char* msg,bool us,drawList* inDrawList);
   virtual ~msgItem(void);
-  
+
+  virtual void  draw(void);
   virtual void  drawSelf(void);
+    
+    drawList* mDrawList;
+    textView* mText;
 };
 
 
 
 // *****************************************************
-// ********************  textKBD  **********************
+// ********************  msgList  **********************
 // *****************************************************
-class textPanel;
 
-class textKBD : public keyboard {
+
+class msgList : public scrollingList {
 
   public:
-          textKBD(textPanel* inPanel);
-  virtual ~textKBD(void);
-  
-  virtual void  handleKey(keyCommands inEditCom);
+          msgList(void);
+  virtual ~msgList(void);
 
+  virtual void  drawSelf(void);      
+};
+
+
+// *****************************************************
+// *****************  msgEditField  ********************
+// *****************************************************
+
+
+class msgEditField  : public editField {
+
+  public:
+          msgEditField(textPanel* inPanel);
+  virtual ~msgEditField(void);
+  
+  virtual void  handleKeystroke(keystroke* aKeystroke);
+  
           textPanel*  mPanel;
 };
+
 
 
 // *****************************************************
@@ -70,10 +93,10 @@ class textPanel  :  public panel {
   virtual void      drawSelf(void);
   virtual void      closing(void);
 
-          textKBD*        mKeyboard;
-          scrollingList*  mMsgList;
-          char*           msgBuff;
-          int             buffBytes;
+          keyboard* mKeyboard;
+          msgList*  mMsgList;
+          char*     msgBuff;
+          int       buffBytes;
 };
 
 

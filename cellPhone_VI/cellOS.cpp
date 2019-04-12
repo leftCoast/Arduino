@@ -218,7 +218,7 @@ void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
 // *****************************************************
 
 
-cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
+cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard,editField* inEditField)
   : drawGroup(inRect) {
   
   mKeyboard = inKeyboard;
@@ -236,9 +236,15 @@ cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
   mEditBase = new colorRect(&bRect,&backColor);
   mEditBase->setColor(&backColor);
   addObj(mEditBase);
-  mEditField = new editField(&tRect,inText,1);
-  mEditField->setColors(&textColor,&backColor);
+  if (inEditField) {
+    mEditField = inEditField;
+    mEditField->setRect(&tRect);
+    mEditField->setValue(inText);
+  } else {
+    mEditField = new editField(&tRect,inText,1);
+  }
   mEditField->setParent(this);
+  mEditField->setColors(&textColor,&backColor);
   addObj(mEditField);
   setEventSet(fullClick);
 }
@@ -287,6 +293,9 @@ void cellEditField::formatAsPN(void) { formatPN(mEditField); }
 
 // You better have added the (1) for the \0.
 void cellEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
+
+
+void  cellEditField::setText(char* inText) { mEditField->setValue(inText); }
 
 
 

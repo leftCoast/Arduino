@@ -187,12 +187,12 @@ class menuBar  : public drawGroup {
 
 // NOTE!! This, as currently written, can not be created in your constructor. It
 // won't be able to get its initial drawing commands there. Set it to NULL in your
-// constructor thencreate it as the first thing in your setup().
+// constructor then create it as the first thing in your setup().
 
 class cellEditField :  public drawGroup {
 
   public:
-          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard);
+          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard,editField* inEditField=NULL);
   virtual ~cellEditField(void);
 
   virtual void      drawSelf(void);
@@ -201,6 +201,8 @@ class cellEditField :  public drawGroup {
           int       getNumChars(void);      // Not including the \0. You may need to add one.
           void      formatAsPN(void);
           void      getText(char* inBuff);  // You better have added the (1) for the \0.
+          void      setText(char* inText);
+          
 
           keyboard*   mKeyboard;            // They'll pass this in. DON'T delete it!
           editField*  mEditField;           // Our editing field.
