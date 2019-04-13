@@ -36,17 +36,34 @@ contact* currentContact;
 
 
 // *****************************************************
+// ******************  trashMsgBtn  ********************
+// *****************************************************
+
+
+trashMsgBtn::trashMsgBtn(int x,int y,textPanel* inPanel)
+  : trashBtn(x,y) { mPanel = inPanel; }
+
+  
+trashMsgBtn::~trashMsgBtn(void) {  }
+
+void trashMsgBtn::doAction(void) { mPanel->deleteMsgs(); }
+
+
+
+// *****************************************************
 // ********************  msgItem  **********************
 // *****************************************************
 
+
 msgItem::msgItem(char* msg,bool us,drawList* inDrawList)
   : drawGroup(MI_X,MI_Y,MI_W,MI_H) {
+    
   mDrawList = inDrawList;
   if (us) {
-    mText = new textView(TV_X,TV_Y,TV_W,TV_H);
-    mText->setTextColors(&textActiveColor,&backColor);
+    mText = (textView*) new sendTextView(TV_X+40,TV_Y,TV_W-40,TV_H);
+    mText->setTextColors(&textSelectColor  ,&backColor);
   } else {
-    mText = new textView(TV_X,TV_Y,TV_W,TV_H);
+    mText = new textView(TV_X,TV_Y,TV_W-40,TV_H);
     mText->setTextColors(&textColor,&backColor);
   }
   mText->setText(msg);
@@ -104,19 +121,77 @@ void msgEditField::handleKeystroke(keystroke* aKeystroke) {
   char* msgBuff;
 
   if (aKeystroke->theChar=='\0') {
-    if (aKeystroke->editCommand==enter) {
-      msgBuff = NULL;                                   // Init msgBuff
-      numBytes = getNumChars() + 1;                     // How big is this new message?
-      if (resizeBuff(numBytes,(uint8_t**)&msgBuff)) {   // If we got the room..
-        getText(msgBuff);                               // Grab our message.
-        setValue("");                                   // Clear the message.
-        mPanel->addMsg(msgBuff,true);                   // Send in our message.
-        resizeBuff(0,(uint8_t**)&msgBuff);             // Recycle reuse..
-        return;                                         // In this case? We're done, lets go!
+    if (aKeystroke->editCommand==enter) {                 // We are going to handle ANY click on enter.
+      if (mPanel->mPNSet) {                               // If we've not been able to set the phone number, don't bother.
+        msgBuff = NULL;                                   // Init msgBuff
+        numBytes = getNumChars() + 1;                     // How big is this new message?
+        if (resizeBuff(numBytes,(uint8_t**)&msgBuff)) {   // If we got the room..
+          getText(msgBuff);                               // Grab our message.
+          setValue("");                                   // Clear the message.
+          mPanel->addMsg(msgBuff,true);                   // Send in our message.
+          resizeBuff(0,(uint8_t**)&msgBuff);              // Recycle reuse..
+        }
       }
+      return;                                             // Enter handled, time to go.
     }
   }
-  editField::handleKeystroke(aKeystroke);              // In every other case we let the inherited do its thing.
+  editField::handleKeystroke(aKeystroke);                 // In every other case we let the inherited do its thing.
+}
+
+
+
+// *****************************************************
+// *****************  sendTextView  ********************
+// *****************************************************
+
+
+sendTextView::sendTextView(int inLocX, int inLocY, word inWidth,word inHeight,eventSet inEventSet)
+  : textView(inLocX,inLocY,inWidth,inHeight,inEventSet) {
+
+  mCmdID = -1;
+  hookup();
+}
+
+  
+sendTextView::~sendTextView(void) { }
+
+
+void sendTextView::setText(char* text) {
+  
+  textView::setText(text);
+  mCmdID = ourCellManager.sendCommand(sendSMS,text,true);
+}
+
+
+void  sendTextView::idle(void) {
+
+  byte  numBytes;
+  byte  answer;
+  
+  if (mCmdID!=-1) {                                         // If we have a valid command ID, and phone number is not set..
+    switch (ourCellManager.progress(mCmdID)) {              // Check status of our command ID and take appopriate action..
+      case com_standby  : 
+      case com_working  : break;                            // Standby or working means its in the queue or in process. Come back later.
+      case com_holding  :                                   // Holding means we have some sort of answer.
+        numBytes = ourCellManager.numReplyBytes(mCmdID);    // Read the number of bytes we have being held of us.
+        if (numBytes==1) {                                  // We only are interested if its one byte. Otherwise something had broken somewhere.
+          ourCellManager.readReply(mCmdID,&answer);         // It was one byte, lets pick it up.
+          if (answer==0) {                                  // The answer we want is 0, meaning 0 errors.
+            setTextColors(&green,&backColor);
+            currentContact->addMsg(seeText(),true);
+            break;
+          }
+        }
+        setTextColors(&red,&menuBarColor);                  // If we got here, its broken.
+        mCmdID = -1;                                        // Errors or not, we are done with it.
+      break;
+      case com_complete      :        
+      case com_missing       :
+        setTextColors(&red,&menuBarColor);                  // And, if we got here, its broken. 
+        mCmdID = -1;                                        // Done with it, I think something broke.
+      break;                                                
+    }
+  }
 }
 
 
@@ -160,8 +235,12 @@ void textPanel::setup(void) {
     
     contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
     ourMenuBar->addObj(ourContactsBtn);
+
     
-    label* nickname = new label(CLOSE_X+80,7,100,22,currentContact->mNickName,1);
+    trashMsgBtn* ourTrashMsgBtn = new trashMsgBtn(CLOSE_X+172,CLOSE_Y,this);
+    ourMenuBar->addObj(ourTrashMsgBtn);
+    
+    nickname = new label(CLOSE_X+75,7,100,22,currentContact->mNickName,1);
     nickname->setJustify(TEXT_CENTER);
     nickname->setColors(&textColor,&menuBarColor);
     ourMenuBar->addObj(nickname);
@@ -176,7 +255,8 @@ void textPanel::setup(void) {
         buffBytes = 0;
       }
     }
-    
+    mPNSet = false;
+    mCmdID = ourCellManager.sendCommand(setCurrentPN,currentContact->mPN,true);
   } else {
     nextPanel = contactApp;
   }
@@ -191,7 +271,7 @@ void textPanel::fillMsgList(void) {
   int       chars;
   bool      us;
   msgItem*  newItem;
-  
+
   index = 0;
   while(index<buffBytes) {
     us = msgBuff[index]=='U';
@@ -215,11 +295,47 @@ void textPanel::addMsg(char* msg,bool us) {
   mMsgList->addObj(newItem);
   mMsgList->setPositions();
   mMsgList->showItem(newItem);
-  currentContact->addMsg(msg,us);
 }
 
 
-void textPanel::loop(void) { }
+void textPanel::deleteMsgs(void) {
+
+  currentContact->deleteMsgBlock();
+  mMsgList->dumpDrawObjList();
+  screen->fillRect(mMsgList,&backColor);
+}
+
+
+void textPanel::loop(void) {
+
+  byte  numBytes;
+  byte  answer;
+  
+  if (mCmdID!=-1 && !mPNSet) {                              // If we have a valid command ID, and phone number is not set..
+    switch (ourCellManager.progress(mCmdID)) {              // Check status of our command ID and take appopriate action..
+      case com_standby  : 
+      case com_working  : break;                            // Standby or working means its in the queue or in process. Come back later.
+      case com_holding  :                                   // Holding means we have some sort of answer.
+        numBytes = ourCellManager.numReplyBytes(mCmdID);    // Read the number of bytes we have being held of us.
+        if (numBytes==1) {                                  // We only are interested if its one byte. Otherwise something had broken somewhere.
+          ourCellManager.readReply(mCmdID,&answer);         // It was one byte, lets pick it up.
+          if (answer==0) {                                  // The answer we want is 0, meaning 0 errors.
+            nickname->setColors(&green,&menuBarColor);
+            mPNSet = true;                                  // Ok, set the flag that the phone number is set.
+            break;
+          }
+        }
+        nickname->setColors(&red,&menuBarColor);            // If we got here, its broken.
+        mCmdID = -1;                                        // Errors or not, we are done with it.
+      break;
+      case com_complete      :        
+      case com_missing       :
+        nickname->setColors(&red,&menuBarColor);            // And, if we got here, its broken. 
+        mCmdID = -1;                                        // Done with it, I think something broke.
+      break;                                                
+    }
+  }
+}
 
 
 void textPanel::drawSelf(void) {

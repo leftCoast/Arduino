@@ -2,7 +2,7 @@
 #define cellCommon_h
 
 
-enum cellCommands { getStatus, setCurrentPN, sendSNS, getSNS, makeCall, hangUp, pickUp, setVolume, playTone, somethingElse  };
+enum cellCommands { getStatus, setCurrentPN, sendSMS, getSMS, makeCall, hangUp, pickUp, setVolume, playTone, somethingElse  };
 
 enum networkStatus { NS_notRegistered, NS_registeredHome, NS_registeredSearching, NS_denied, NS_unknown, NS_registeredRoaming };
 

@@ -286,7 +286,7 @@ void cellManager::runCommand(void) {
   if (aCom) {                                       // Got one? Ok!
     switch(aCom->comState) {
       case com_standby  : launchCommand(aCom);    break;  // Launch it and go.
-      case com_working  : checkForRreply(aCom);   break;  // Check to see if there is a reply.
+      case com_working  : checkForReply(aCom);    break;  // Check to see if there is a reply.
       case com_holding  : 
       case com_complete :
       case com_missing  : mCurrentCommand = NULL; break;  // In these cases there's nothing more we can do.
@@ -325,7 +325,7 @@ void cellManager::launchCommand(cellCommand* aCom) {
 }
 
 
-void cellManager::checkForRreply(cellCommand* aCom) {
+void cellManager::checkForReply(cellCommand* aCom) {
 
   byte  numBytes;
   

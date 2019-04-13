@@ -18,7 +18,7 @@
 // the FONA controller crashed. Who really knows? But at least it knows something went
 // wrong and can take some sort of appropriate action.
 //
-// Along with all this is a status block of data that is agreed on by both sides to pass
+// Along with all this, is a status block of data that is agreed on by both sides to pass
 // back what's going on over in cell-hardware-land. This status thing is used as a
 // background service getting info like; How charged is the battery? How much cell
 // signal do we have? Is anyone trying to call us right now? This way the different
@@ -37,6 +37,8 @@
 
 enum cellComStates { com_standby, com_working, com_holding, com_complete, com_missing };
 
+// You typically don't interact with this "cellCommand" class. Its used by "cellManager"
+// and that's the one you should interact with.
 
 class cellCommand : public linkListObj,
                     public  timeObj {
@@ -61,6 +63,13 @@ class cellCommand : public linkListObj,
           cellComStates comState;
 };
 
+// Globals below
+//
+// There is a global "ourCellManager" that is a global version of this class "cellManager"
+// that you should interact with.
+//
+// To see what's going on in cell-phone land, have a look at the global "statusReg". It'll
+// have all the pertinate data filled in.
 
 class cellManager : public qCMaster,
                     public linkList {
@@ -83,7 +92,7 @@ class cellManager : public qCMaster,
           void          cleanList(void);
           void          runCommand(void);
           void          launchCommand(cellCommand* aCom);
-          void          checkForRreply(cellCommand* aCom);
+          void          checkForReply(cellCommand* aCom);
           void          doStatus(void);
           void				clearStatus(void);
           void          showCellStatus(void);

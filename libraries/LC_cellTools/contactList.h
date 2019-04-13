@@ -45,6 +45,7 @@ class contact :	public linkListObj,
 				unsigned long	sizeOfMsgBlock(void);
 				bool				readMsgBlock(char* buff,unsigned long bytes);
 				bool				saveMsgBlock(char* buff,unsigned long bytes);
+				void				deleteMsgBlock(void);
 				void				addMsg(char* buff,bool us);
 				
 	virtual	unsigned long	calculateBuffSize(void);

@@ -133,6 +133,12 @@ bool contact::saveMsgBlock(char* buff,unsigned long bytes) {
 	else return false;
 }			
 
+
+// We're going to toss out our message block. As of this writing, you can still reuse the
+// file ID. So we just leave it and reuse it later if we like.
+void contact::deleteMsgBlock(void) { mFile->deleteBlock(mMsgID); }
+
+
 // We are being handed a c-string with a new message to add to the message block.				
 void  contact::addMsg(char* strBuff,bool us) {
 	
@@ -147,15 +153,14 @@ void  contact::addMsg(char* strBuff,bool us) {
 		newBuffBytes = buffBytes + numChars + 2;							// The new buff size, old buff, chars, leading flag & ending null.
 		fileBuff = NULL;															// Init the file buff pointer.
 		if (resizeBuff(newBuffBytes,(uint8_t**)&fileBuff)) {			// Allocate the block buffer. Enough for everything.
-			if (mFile->getBlock(mMsgID,fileBuff,newBuffBytes)) {		// Grab the block out of the file.
-				if (us) {															// Pop in the leading flag. Us or them?
-					fileBuff[0] = 'U';
-				} else {
-					fileBuff[0] = 'T';
-				}
-				strcpy(&(fileBuff[1]),strBuff);								// Stuff in the new message.
-				mFile->writeBlock(mMsgID,fileBuff,newBuffBytes);		// Write out the updated buffer to the file.
+			mFile->getBlock(mMsgID,fileBuff,newBuffBytes);				// Grab the block out of the file. empty block throws error, ignore error.
+			if (us) {																// Pop in the leading flag. Us or them?
+				fileBuff[buffBytes] = 'U';
+			} else {
+				fileBuff[buffBytes] = 'T';
 			}
+			strcpy(&(fileBuff[buffBytes+1]),strBuff);						// Stuff in the new message.
+			mFile->writeBlock(mMsgID,fileBuff,newBuffBytes);			// Write out the updated buffer to the file.
 			resizeBuff(0,(uint8_t**)&fileBuff);								// Recycle the buffer.
 		}
 	}

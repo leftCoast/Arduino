@@ -84,8 +84,8 @@ void loop() {
       case makeCall     : doCall(comPtr);       break;    // Make a call. PN is to be packed in the buffer.
       case hangUp       : doHangUp(comPtr);     break;    // Hang up.
       case setCurrentPN : doSetPN(comPtr);      break;    // Set the phone number we plan to have a dialog with.
-      case sendSNS      : doSendSNSMsg(comPtr); break;    // Send a message to the current phone number.
-      case getSNS       : doGetSNSMsg(comPtr);  break;    // Send a message to the current phone number.
+      case sendSMS      : doSendSMSMsg(comPtr); break;    // Send a message to the current phone number.
+      case getSMS       : doGetSMSMsg(comPtr);  break;    // Send a message to the current phone number.
       case pickUp       : doPickUp(comPtr);     break;    // If there's a incoming call, pick it up.
       default           : break;                        // Who knows? Some sort of nonsense.
     } 
@@ -209,7 +209,7 @@ void doSetPN(byte* buff) {
 }
 
 
-void doSendSNSMsg(byte* buff) {
+void doSendSMSMsg(byte* buff) {
 
   if (havePN) {                           // Sanity, do we even have a phone number?
     if (fona.sendSMS(pnBuff,buff)) {      // Let the FONA code have a go at sending the message.
@@ -228,7 +228,7 @@ void doSendSNSMsg(byte* buff) {
 // be two c-strings. First is sending phone number, second
 // is the text message itself. Once a message is sent, it's
 // deleted from the SIM chip.
-void doGetSNSMsg(byte* buff) {
+void doGetSMSMsg(byte* buff) {
 
   uint16_t  numPNBytes;
   uint16_t  numMsgBytes;
