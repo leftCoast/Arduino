@@ -2,6 +2,57 @@
 #include "cellOS.h"
 
 
+// *********************************************
+// **************** SMSMark ********************
+// *********************************************
+
+#define SMS_X0  0
+#define SMS_X1  10
+#define SMS_X2  40
+#define SMS_X3  50
+#define SMS_X4  60
+#define SMS_X5  90
+#define SMS_X6  100
+
+#define SMS_Y0  0
+#define SMS_Y1  25
+#define SMS_Y2  40
+#define SMS_Y3  50
+#define SMS_Y4  80
+#define SMS_Y5  100
+
+
+SMSMark::SMSMark(rect* aRect)
+  : stampObj(aRect) {
+
+  mColor.setColor(LC_GREY); // Default color.
+  mapper  xMapper(0,100,x,x+width);
+  mapper  yMapper(0,100,y,y+height);
+  mPoint1.x = x;                          mPoint1.y = round(yMapper.Map(SMS_Y1));
+  mPoint2.x = round(xMapper.Map(SMS_X3)); mPoint2.y = round(yMapper.Map(SMS_Y2));
+  mPoint3.x = x+width;                    mPoint3.y = round(yMapper.Map(SMS_Y1));
+  mPoint4.x = round(xMapper.Map(SMS_X1)); mPoint4.y = round(yMapper.Map(SMS_Y4));
+  mPoint5.x = round(xMapper.Map(SMS_X2)); mPoint5.y = round(yMapper.Map(SMS_Y3));
+  mPoint6.x = round(xMapper.Map(SMS_X4)); mPoint6.y = round(yMapper.Map(SMS_Y3));
+  mPoint7.x = round(xMapper.Map(SMS_X5)); mPoint6.y = round(yMapper.Map(SMS_Y4));
+}
+
+
+SMSMark::~SMSMark(void) {  }
+
+void SMSMark::setColor(colorObj* inColor) { mColor.setColor(inColor); }
+
+
+void SMSMark::stamp(void) {
+
+  screen->drawRect(this,&mColor);
+  screen->drawLine(&mPoint1,&mPoint2,&mColor);
+  screen->drawLine(&mPoint2,&mPoint3,&mColor);
+  screen->drawLine(&mPoint4,&mPoint5,&mColor);
+  screen->drawLine(&mPoint6,&mPoint7,&mColor);
+}
+
+
 
 // *********************************************
 // ************** barGraphBar ******************

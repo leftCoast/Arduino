@@ -24,7 +24,7 @@
 
 
 #define TB_X    10
-#define TB_Y    20
+#define TB_Y    28
 #define TB_W    220
 #define TB_H    148
 
@@ -142,21 +142,25 @@ void qGame::setupScreen(void) {
   
   screen->fillScreen(&backColor);
   
-  theTextView   = new textView(TF_X,TF_Y,TF_W,TF_H);
-  theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H);
-  theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
+  menuBar* ourMenuBar = new menuBar((panel*)this);
+  addObj(ourMenuBar);
   
-  theEditField->setColors(&textSelectColor,&editFieldBColor);
+  theTextView   = new textView(TF_X,TF_Y,TF_W,TF_H);
+  addObj(theTextView);
+  
+  theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H);
   theEditBase->setColor(&editFieldBColor);
- 
-  viewList.addObj(theTextView);
-  viewList.addObj(theEditBase);
-  viewList.addObj(theEditField);
+  addObj(theEditBase);
+  
+  theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
+  theEditField->setColors(&textSelectColor,&editFieldBColor);
+  setFocusPtr(theEditField);
+  addObj(theEditField);
 
   ourKeyboard   = new IOandKeys(theEditField,theTextView);
   theTextView->setTextColors(&textColor,&backColor);
 
-  screen->fillRect(TF_X,EB_Y-16,TF_W,3,&red);
+  screen->fillRect(TF_X,EB_Y-16,TF_W,2,&red);
 }
 
 
@@ -325,11 +329,16 @@ void qGame::hookinNewNodes(bool yesNo) {
     gameState = waitingToStart;
 }
 
-void qGame::shutDown(void) {
+
+// Typically this would be in closing(), but that ended up messing up the next panel's
+// redraw timing.
+void qGame::close(void) {
 	
-	out("\nOk, thanks for playing!\n");
-	delay(2000);
-	close();
+	if (!idling) {	
+		out("\nOk, thanks for playing!\n");
+		sleep(1500);
+	}
+	panel::close();	
 }
 
 
@@ -383,14 +392,14 @@ void qGame::loop() {
           } else if (gameState==newQYNAnswer) {
             hookinNewNodes(false);
           }  else if (gameState==needRestart||gameState == waitingToStart) {
-            shutDown();
+            close();
             gameState = waitingToStart;
           }
         break;
         case quit     :
         case stopx    :
         case exitGame :
-          shutDown();
+          close();
           gameState = waitingToStart;
         break;
         case swap     :

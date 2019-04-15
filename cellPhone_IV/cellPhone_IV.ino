@@ -211,16 +211,16 @@ void doSetPN(byte* buff) {
 
 void doSendSMSMsg(byte* buff) {
 
-  if (havePN) {                           // Sanity, do we even have a phone number?
-    if (fona.sendSMS(pnBuff,buff)) {      // Let the FONA code have a go at sending the message.
-      buff[0] = 0;                        // Success, 0 errors.
-    } else {                              // else FONA didn't like it for some reason.
-      buff[0] = 1;                        // Note the error.
+  if (havePN) {                                 // Sanity, do we even have a phone number?
+    if (fona.sendSMS(pnBuff,(char*)&buff[1])) { // Let the FONA code have a go at sending the message.
+      buff[0] = 0;                              // Success, 0 errors.
+    } else {                                    // else FONA didn't like it for some reason.
+      buff[0] = 1;                              // Note the error.
     }
-  } else {                                // We don't have a phone number to text to.
-    buff[0]=2;                            // Note the error.
+  } else {                                      // We don't have a phone number to text to.
+    buff[0]=2;                                  // Note the error.
   }
-  ourComObj.replyComBuff(1);              // Send back our result.
+  ourComObj.replyComBuff(1);                    // Send back our result.
 }
 
 // First byte was the command, second byte is the index of

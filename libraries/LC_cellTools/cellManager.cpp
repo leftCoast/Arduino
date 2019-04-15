@@ -1,8 +1,8 @@
 #include <cellManager.h>
 #include <cellCommon.h>
 
-#define COM_TIMEOUT 16000
-#define STATUS_TIME 2000
+#define COM_TIMEOUT 30000
+#define STATUS_TIME 500
 #define ID_MAX      2000
 
 #define out Serial.print
@@ -345,34 +345,31 @@ void cellManager::checkForReply(cellCommand* aCom) {
 // a good example on how to use this machine.
 void cellManager::doStatus(void) {
 
-  byte  numBytes;
+	byte  numBytes;
 
-  if (mStatusID==-1) {                              // We need to fire one off?
-     mStatusID = sendCommand(getStatus,true);       // Well, that was easy.
-  } else {                                          // We have a current one to work with?
-    switch(progress(mStatusID)) {                   // See what its up to..
-      case com_standby  : break;                    // Its on the list.
-      case com_working  : break;                    // Its cooking now!
-      case com_holding  :                           // Ha! Got a reply!
-        numBytes = numReplyBytes(mStatusID);        // Reply size in bytes.
-        if (numBytes) {                             // Non zero means we got a reply.
-          if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
-            readReply(mStatusID,(byte*)&statusReg); // Stuff the data into the struct.
-          }
-          mStatusID = -1;                           // Flag no command working.
-          mStatusTimer.start();                     // Set our timer to start the next one.
-        }
-      break;                              
-      case com_complete :                           // Its already been read but not dumped out.
-      case com_missing  :                           // Its already been deletd.
-        clearStatus();
-        mStatusID = -1;                             // Flag no command working.
-        if (mStatusTimer.ding()) {                  // If the timer is still running, just let it go.
-          mStatusTimer.start();                     // If the timer has expired, reset it.
-        }
-      break;
-    }
-  }
+	if (mStatusID==-1) {                              // We need to fire one off?
+		mStatusID = sendCommand(getStatus,true);       // Well, that was easy.
+	} else {                                          // We have a current one to work with?
+		switch(progress(mStatusID)) {                   // See what its up to..
+			case com_standby  : break;                    // Its on the list.
+			case com_working  : break;                    // Its cooking now!
+			case com_holding  :                           // Ha! Got a reply!
+				numBytes = numReplyBytes(mStatusID);        // Reply size in bytes.
+				if (numBytes) {                             // Non zero means we got a reply.
+					if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
+						readReply(mStatusID,(byte*)&statusReg); // Stuff the data into the struct.
+					}
+					mStatusID = -1;                           // Flag no command working.
+				}
+      	break;                              
+			case com_complete :                           // Its already been read but not dumped out.
+			case com_missing  :                           // Its already been deletd.
+				clearStatus();
+				mStatusID = -1;                             // Flag no command working.
+			break;
+		}
+	}
+	mStatusTimer.start();                     			// Set our timer to start the next one.
 }
 
 
@@ -424,10 +421,10 @@ void cellManager::showCellStatus(void) {
 // And here's what we do over and over in the background idle() loop.
 void cellManager::idle(void) {
 
-  qCMaster::idle();					// Let the communications code do its thing. (We inherit from qCMaster, so we need to patch its idle(); call.)
-  cleanList();							// Check to see if any commands need recycling.
-  if (mStatusTimer.ding()) {		// If its time to update status info..
-    doStatus();						// Fire off a status command.
+  qCMaster::idle();									// Let the communications code do its thing. (We inherit from qCMaster, so we need to patch its idle(); call.)
+  cleanList();											// Check to see if any commands need recycling.
+  if (mStatusID!=-1||mStatusTimer.ding()) {	// If working on a status or its time to update status..
+    doStatus();										// Fire off or check a status command.
   }		
-  runCommand();						// And finally, we have a look at our command list to see if anything needs doing.
+  runCommand();										// And finally, we have a look at our command list to see if anything needs doing.
 }

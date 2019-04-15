@@ -16,6 +16,7 @@ class cellListener :  public idler {
 				void	begin(int answerPanelID);
 	virtual	void	idle(void);
 				void	doSMS(void);
+				void	decodeSMS(void);
 				
 				int	answerID;
 				int	mSMSID;
@@ -23,8 +24,10 @@ class cellListener :  public idler {
 };
 
 extern bool				callIncoming;
-extern bool				newSMSmsg;		// HEY! Clear this once you've read the SMS message.
-extern char*			SMSMsg;
+extern bool				newSMSmsg;				// This is for the current text msg screen to see & clear.
+extern char				SMSPN[];
+extern char				SMSMsg[];
+extern char				SMSRaw[];
 extern cellListener	ourListener;
 
 #endif

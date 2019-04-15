@@ -3,6 +3,7 @@
 
 #include <lists.h>
 #include <fileBuff.h>
+#include <PNLabel.h>
 
 // Contact list. This is the bases of your contact database. It reads your
 // contact list from long term storage to RAM. It also keeps your contact
@@ -38,6 +39,7 @@ class contact :	public linkListObj,
 
 				void				setPN(char* PN);
 				void  			setNickName(char* nickName);
+				void				setPNNick();							// If it has no nickname, this'll make the nick the phone number.
 				void  			setFirstName(char* firstName);
 				void  			setLastName(char* lastName);
 				void  			setCompanyName(char* companyName);
@@ -82,7 +84,7 @@ class contactList :	public linkList,
 				contact*			findByPN(char* phoneNum);
 				contact*			findOrAddContact(char* phoneNum);
 				void				deleteContact(contact* theDoomed);
-				void				addMessage(char* rawMsgStr);
+				void				addMessage(char* PN, char* msg);
 	virtual	unsigned long	calculateBuffSize(void);
 	virtual	bool				saveSubFileBuffs(void);
 	virtual	void				writeToBuff(char* buffPtr,unsigned long maxBytes);

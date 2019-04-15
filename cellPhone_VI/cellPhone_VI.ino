@@ -66,5 +66,5 @@ void setup() {
 
 void loop() {     // During loop..
   idle();         // Idlers get their time.
-  ourOS.loop();   // ourOS gets a kick to pass on the the current panel.
+  ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
 }

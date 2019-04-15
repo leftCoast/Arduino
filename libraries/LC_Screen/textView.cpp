@@ -308,7 +308,7 @@ void lineManager::indexSet(int endLineNum) {
     if (mTextBuff[0]!='\0') {                         // And at least some text.
       numLines = getCount();                          // Count up the lines we currently have..
       if (!numLines) {                                // We have no lines?
-        index = 0;                                    // Setup for a god parsing.
+        index = 0;                                    // Setup for a good parsing.
         hardBreak = true;
         endOfText = false;
       } else {                                        // We have some lines, I guess.

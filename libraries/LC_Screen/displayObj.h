@@ -49,6 +49,7 @@ class displayObj {
 	virtual	void	drawVLine(int locX,int locY,int height,colorObj* inColor);
 	virtual	void	drawHLine(int locX,int locY,int width,colorObj* inColor);
 	virtual	void	drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
+	virtual	void	drawLine(point* startPt,point* endPt,colorObj* inColor);
 	virtual	void	drawPixel(int locX,int locY,colorObj* pColor);
     
 	virtual	void	drawPixelInvert(int x,int y);

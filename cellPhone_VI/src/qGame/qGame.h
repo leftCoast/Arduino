@@ -54,7 +54,7 @@ class qGame : public  panel {
           void  newObjChar(char inChar);
           void  newQChar(char inChar);
           void  hookinNewNodes(bool yesNo);
-          void  shutDown(void);
+  virtual void	 close(void);
   virtual void  loop();
 
           textView*   theTextView;        // The text window.

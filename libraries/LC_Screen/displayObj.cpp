@@ -69,6 +69,7 @@ void displayObj::fillCircle(int locX,int locY,int inDiam, colorObj* inColor){ }
 void displayObj::drawVLine(int locX,int locY,int height,colorObj* inColor) { }
 void displayObj::drawHLine(int locX,int locY,int width,colorObj* inColor) { }
 void displayObj::drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor) { }
+void displayObj::drawLine(point* startPt,point* endPt,colorObj* inColor) { drawLine(startPt->x,startPt->y,endPt->x,endPt->y,inColor); }
 void displayObj::drawPixel(int locX,int locY,colorObj* pColor) { }
 void displayObj::drawPixelInvert(int x,int y) { }
 void displayObj::frameRectInvert(int x,int y,int width,int height) { }

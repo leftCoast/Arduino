@@ -29,7 +29,7 @@ class panel : public drawGroup {
 	virtual	void	drawSelf(void);
 	virtual	void	close(void);
 	virtual	void	closing(void);
-				void	delay(unsigned long);
+	virtual	void	sleep(unsigned long);
   
 				int		mPanelID;   // What panal am I?
 				timeObj	mTimer;     // We'll use it for the delay() thing.

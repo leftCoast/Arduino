@@ -1,4 +1,4 @@
-#include	"../../cellOS.h"
+
 #include "../phone/phone.h"
 
 #include <resizeBuff.h>
@@ -79,7 +79,7 @@ contact*        currContact = NULL;
 
 addrStarter::addrStarter(void) {  }
 addrStarter::~addrStarter(void) {  }
-//13751 daybreak lane.
+
 void addrStarter::begin(char* filePath,bool resetFile) {
 
   mFile = new blockFile(filePath);

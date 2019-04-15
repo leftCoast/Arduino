@@ -2,6 +2,31 @@
 #define icons_h
 
 #include "drawObj.h"
+#include <stampObj.h>
+
+// *********************************************
+// **************** SMSMark ********************
+// *********************************************
+
+
+class SMSMark : public stampObj {
+
+public:
+          SMSMark(rect* aRect);
+  virtual ~SMSMark(void);
+
+          void setColor(colorObj* inColor);
+  virtual void stamp(void);
+
+          colorObj  mColor;
+          point     mPoint1;
+          point     mPoint2;
+          point     mPoint3;
+          point     mPoint4;
+          point     mPoint5;
+          point     mPoint6;
+          point     mPoint7;
+};
 
 
 

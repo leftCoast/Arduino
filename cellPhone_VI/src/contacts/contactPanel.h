@@ -10,7 +10,7 @@
 #include <colorRect.h>
 #include <keystroke.h>
 #include <scrKeyboard.h>
-
+#include	"../../cellOS.h"
 
 extern contactList* ourBlackBook;
 
@@ -155,6 +155,7 @@ class PNListItem :  public drawGroup {
 // *****************************************************
 // *********************  PNList  **********************
 // *****************************************************
+
 
 class PNList : public scrollingList {
 

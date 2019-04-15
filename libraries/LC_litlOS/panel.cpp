@@ -41,14 +41,16 @@ void panel::closing(void) {  }
 
 // DELAY!! OMG! Here's an idea on how to finally kill this beast.
 // Just hold in a loop calling idle() 'til it's done.
-void panel::delay(unsigned long ms) {
+//
+// We'll call this sleep() because its much like telling a thread to "sleep." Originally
+// I called it delay() and that didn't work, because when called during idle, it became
+// endlessly recursive. 
+void panel::sleep(unsigned long ms) {
 
 	if (!idling) {						// If we are not IN the idle loop.. (Don't get all reentrant here!)
 		mTimer.setTime(ms);			// Set up our timer. We have a timer just for this?
 		while(!mTimer.ding()) {		// While waiting for the timer to expire..
 			theIdlers.idle();			// We repeatedly call idle() to keep the background stuff running.
 		}
-	} else {								// Oh lord no! We ARE in the idle loop.
-		delay(ms);						// We're going to punch a delay() right in the middle of the idle loop. Ugh!
-   }
+	}
 }

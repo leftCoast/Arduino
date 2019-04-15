@@ -78,6 +78,34 @@ void contact::setNickName(char* nickName) {
 }
 
 
+// If we have no nick name, we can set our nick name to a formatted version of our phone
+// number.
+void contact::setPNNick() {
+
+	PNLabel	numField(1,1,1,1,1);
+	int		numBytes;
+	char*		buff;
+	
+	Serial.println("setPNNick.");Serial.flush();
+	if (!strlen(mNickName)) {									// If we have no nickname.
+		Serial.println("Nick was empty, setting new value of the phone number.");Serial.flush();
+		Serial.print("mPN : ");Serial.println(mPN);Serial.flush();
+		numField.setValue(mPN);									// Set the phone number into the formatter.
+		Serial.println("Getting new byte count.");Serial.flush();
+		numBytes = numField.getNumChars() + 1;				// How big is the result?
+		Serial.println("Resizing buffer.");Serial.flush();
+		if (resizeBuff(numBytes,(uint8_t**)&buff)) {		// Stretch out the buffer.
+			Serial.println("Grabbing formatted number.");Serial.flush();
+			numField.getText(buff);								// Grab the formatted string.
+      	Serial.println("Setting nick name.");Serial.flush();
+      	setNickName(buff);									// Set out nick name to the formatted phone number.
+      	Serial.println("DUmping the buffer..");Serial.flush();
+      	resizeBuff(0,(uint8_t**)&buff);					// Recycle the buffer.
+   	 }
+	}
+}
+
+
 void contact::setFirstName(char* firstName) {
 
   int numChars;
@@ -157,7 +185,7 @@ void  contact::addMsg(char* strBuff,bool us) {
 			if (us) {																// Pop in the leading flag. Us or them?
 				fileBuff[buffBytes] = 'U';
 			} else {
-				fileBuff[buffBytes] = 'T';
+				fileBuff[buffBytes] = 'T';										// Show that this is "theirs".
 			}
 			strcpy(&(fileBuff[buffBytes+1]),strBuff);						// Stuff in the new message.
 			mFile->writeBlock(mMsgID,fileBuff,newBuffBytes);			// Write out the updated buffer to the file.
@@ -310,16 +338,17 @@ contactList::~contactList(void) {  }
 // can't find one, it returns NULL as a flag.
 contact* contactList::findByPN(char* phoneNum) {
 
-  contact*  trace;
-
-  trace = (contact*)getFirst();
-  while(trace) {
-    if (!strcmp(trace->mPN,phoneNum)) {
-      return trace;
-    }
-    trace = (contact*)trace->next;
-  }
-  return trace;
+	contact*  trace;
+	
+	filterPNStr(phoneNum);							// First we rip the junk from the number.
+	trace = (contact*)getFirst();					// Set up our standard tracer.
+	while(trace) {										// While we ain't sitting on a NULL.
+		if (!strcmp(trace->mPN,phoneNum)) {		// Do the compare. If we got it?
+			return trace;								// Return the pointer to it.
+		}
+		trace = (contact*)trace->next;			// Or we just move on. Nothing to see here.
+	}
+	return trace;										// If we got to this point we return the NULL as a flag.
 }
 
 
@@ -391,6 +420,7 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	  
 }
 
+
 // This is where we're handed a buffer and we recreate our database of
 // contacts in RAM. Now remember, our buffer is only a list of file ID
 // numbers. So we read out a number, use that to create a contact, add it to
@@ -421,3 +451,17 @@ void contactList::deleteContact(contact* theDoomed) {
 		delete(theDoomed);				// Recycle the node.
 	}
 }
+
+
+// We have incoming raw text message coming in from the outside world. Save it to the
+// contact.
+void contactList::addMessage(char* PN, char* msg) {
+
+	contact*	aContact;
+	
+	aContact = findOrAddContact(PN);		// Using the phone number whip op a contact. Possibly a new one?
+	aContact->setPNNick();					// If its a new one, set the nick name to the phone number.
+	aContact->addMsg(msg,false);			// Add the message to the contact.
+}
+
+
