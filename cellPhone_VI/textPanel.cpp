@@ -293,6 +293,8 @@ void textPanel::fillMsgList(void) {
     mMsgList->addObj(newItem);
     index = index+chars+1;
   }
+  mMsgList->setPositions();
+  mMsgList->showItem(newItem);
 }
 
 
