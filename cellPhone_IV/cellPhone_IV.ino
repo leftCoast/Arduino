@@ -108,18 +108,9 @@ void resetFONA(void) {
   delay(100);
   fonaSS.begin(4800);                   // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
-  fona.setAudio(FONA_EXTAUDIO);         // Um.. Why is this here?
-  fona.setVolume(40);
+  fona.setAudio(FONA_EXTAUDIO);         // Use speaker, not headseat.
+  fona.setVolume(40);                   
   fona.enableNetworkTimeSync(true);     // See if it works..
-
-/*
-For those who wonder : You can add a call fona
-setAudio(FONA_EXTAUDIO) to your initialization code or issue
-direct command 'AT+CHFA=1' towards SIM800 module.
-In my case this module is no longer losing SIM card when
-receiving or placing phone calls.
-Thanks for a tip!
-*/
 }
 
 
@@ -184,10 +175,11 @@ void doCall(byte* buff) {
 
 void doHangUp(byte* buff) {
     
-  if (fona.hangUp()) {
-    buff[0] = 0;                   // We'll pass a 0 for no error.(We hung up)
+  if (fona.getCallStatus()==0
+    ||(fona.hangUp()+fona.hangUp())<2) {    // If were not connected, or we can get a hangup at least once. We'll call it good.
+    buff[0] = 0;                            // We'll pass a 0 for no error.(We hung up)
   } else {
-    buff[0] = 1;                   // We'll pass a 1 for error.(Help! We can't hang up!)
+    buff[0] = 1;                            // We'll pass a 1 for error.(Help! We can't hang up!)
   }
   ourComObj.replyComBuff(1);
 }
@@ -223,11 +215,10 @@ void doSendSMSMsg(byte* buff) {
   ourComObj.replyComBuff(1);                    // Send back our result.
 }
 
-// First byte was the command, second byte is the index of
-// the message we're after. When we pack our reply it will
-// be two c-strings. First is sending phone number, second
-// is the text message itself. Once a message is sent, it's
-// deleted from the SIM chip.
+// First incoming byte was the command, second byte is the index of the
+// message we're after. When we pack our reply it will be error byte
+// then two c-strings. First is sending phone number, second is the text
+// message itself. Once a message is sent, it's deleted from the SIM chip.
 void doGetSMSMsg(byte* buff) {
 
   uint16_t  numPNBytes;
@@ -246,7 +237,7 @@ void doGetSMSMsg(byte* buff) {
     if (fona.readSMS(msgIndex,buffPtr,buffLen,&numMsgBytes)) {    // If we are successfull.. 
       fona.deleteSMS(msgIndex);                                   // Delete the message from the SIM.
       buff[0] = 0;                                                // Set no error flag.
-      ourComObj.replyComBuff(numPNBytes+numMsgBytes+1);           // Send back our result. + the error flag.
+      ourComObj.replyComBuff(numPNBytes+numMsgBytes+2);           // Send back our result. + the error flag. (Add one, I'm missing the '\0')
       return;                                                     // At this point its success and we're done!
     }
   }

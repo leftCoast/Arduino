@@ -4,8 +4,8 @@
 #include "../contacts/contactPanel.h"		// We pass off message to these guys.
 #include	"../../cellOS.h"						// One of our jobs is to open panels. litlOS is the guy for this.
 
-#define PN_BUFF_BYTES    255
-#define MSG_BUFF_BYTES   255
+#define PN_BUFF_BYTES    20
+#define MSG_BUFF_BYTES   200
 #define RAW_BUFF_BYTES   255
          
 cellListener	ourListener;
@@ -24,6 +24,9 @@ cellListener::cellListener(void)
   mSMSID = -1;
   mSMSIndex = 1;							
   newSMSmsg = false;
+  SMSPN[0] 	= '\0';
+  SMSMsg[0] = '\0';
+  SMSRaw[0] = '\0';
 }
 
 
@@ -75,7 +78,7 @@ void cellListener::doSMS(void) {
 			case com_holding  :                           							// Ha! Got a reply!
 				numBytes = ourCellManager.numReplyBytes(mSMSID);      			// Reply size in bytes.
 				if (numBytes>1) {																// More than 1 means we got a reply.
-					ourCellManager.readReply(mSMSID,(uint8_t*)&(SMSRaw[0])); 	// Stuff the data into the buffer.
+					ourCellManager.readReply(mSMSID,(uint8_t*)SMSRaw); 			// Stuff the data into the buffer.
 					decodeSMS();																// Parse it into the two buffers.
 					ourBlackBook->addMessage(SMSPN,SMSMsg);							// Save it to the contact list.
 					newSMSmsg = true;															// Tell the world to come and get it!
@@ -95,13 +98,11 @@ void cellListener::doSMS(void) {
 
 void cellListener::decodeSMS(void) {
 
-
 	byte		index;
-	contact*	aContact;
 	
-	strcpy(SMSPN,SMSRaw);				// First bit is the phone number.
-	filterPNStr(SMSPN);					// Clear out the junk.
-	index = strlen(SMSRaw)+1;			// Locate the message part.
+	strcpy(SMSPN,&(SMSRaw[1]));		// Byte 0 is error, after that is the phone number.
+	index = strlen(SMSPN)+2;			// Locate the message part. Add two, error byte & EOS byte.
 	strcpy(SMSMsg,&(SMSRaw[index]));	// Copy out the message.
+	filterPNStr(SMSPN);					// Clear out the phone number junk.
 }
 

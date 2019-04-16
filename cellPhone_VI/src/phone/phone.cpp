@@ -352,6 +352,12 @@ void phone::loop(void) {
 	}
 	checkCall();
 	checkHangup();
+	if (mConnected 
+		&& mHangupID==-1
+		&& statusReg.callStat==0) {	// We think we're connected. We've not clicked the hangup button.. But we are NOT connected. We've been hung up on!
+		mConnected = false;
+		out("Disconnectd.");          // Tell the world!
+	}
 }
 
 
@@ -499,6 +505,7 @@ void phone::checkCall(void) {
 				ourCellManager.readReply(mCallingID,&reply);				// Grab the byte.
 				if (reply==0) {													// Is it a zero?
 					mConnected = true;											// Cool!, we're connected!
+					statusReg.callStat = CS_unknown;							// Push this off of CS_ready so the hangup stuff doesn't trip.
 					out("Connected.");											// Show that the call's going through.
 				} else {
 					out("Connect error.");										// FONA passed back an error.

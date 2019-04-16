@@ -340,15 +340,19 @@ contact* contactList::findByPN(char* phoneNum) {
 
 	contact*  trace;
 	
-	filterPNStr(phoneNum);							// First we rip the junk from the number.
-	trace = (contact*)getFirst();					// Set up our standard tracer.
-	while(trace) {										// While we ain't sitting on a NULL.
-		if (!strcmp(trace->mPN,phoneNum)) {		// Do the compare. If we got it?
-			return trace;								// Return the pointer to it.
+	if (strlen(phoneNum)>0) {							// Make sure we actually got something to work with.
+		filterPNStr(phoneNum);							// Now, rip the junk from the number.
+		if (strlen(phoneNum)>0) {						// Make sure we have anything left to work with.
+			trace = (contact*)getFirst();					// Set up our standard tracer.
+			while(trace) {										// While we ain't sitting on a NULL.
+				if (!strcmp(trace->mPN,phoneNum)) {		// Do the compare. If we got it?
+					return trace;								// Return the pointer to it.
+				}
+				trace = (contact*)trace->next;			// Or we just move on. Nothing to see here.
+			}
 		}
-		trace = (contact*)trace->next;			// Or we just move on. Nothing to see here.
 	}
-	return trace;										// If we got to this point we return the NULL as a flag.
+	return NULL;												// If we've arrived here, we couldn't find anything.
 }
 
 
@@ -358,18 +362,18 @@ contact* contactList::findByPN(char* phoneNum) {
 // create a new contact with this phone number and pass that back.
 contact* contactList::findOrAddContact(char* phoneNum) {
 
-  contact*      contactPtr;
-  unsigned long blockID;
-  unsigned long msgID;
+	contact*      contactPtr;
+	unsigned long blockID;
+	unsigned long msgID;
 
-  contactPtr = findByPN(phoneNum);
-  if (!contactPtr) {
-    blockID = mFile->getNewBlockID();
-    msgID = mFile->getNewBlockID();
-    contactPtr = new contact(mFile,blockID,msgID,phoneNum);
-    addToTop(contactPtr);
-  }
-  return contactPtr;
+	contactPtr = findByPN(phoneNum);
+	if (!contactPtr && strlen(phoneNum)>0) {							// If it wasn't there and we actually have some sort of phone number..
+		blockID = mFile->getNewBlockID();								// Grab a new issued block ID.
+		msgID = mFile->getNewBlockID();									// And another block ID for a message block.
+		contactPtr = new contact(mFile,blockID,msgID,phoneNum);	// Put it all together to create a new contact.
+		addToTop(contactPtr);												// Add this new guy to the list.
+	}
+  	return contactPtr;														// return our result. NULL for complete failure.
 }
 
 
@@ -459,9 +463,11 @@ void contactList::addMessage(char* PN, char* msg) {
 
 	contact*	aContact;
 	
-	aContact = findOrAddContact(PN);		// Using the phone number whip op a contact. Possibly a new one?
-	aContact->setPNNick();					// If its a new one, set the nick name to the phone number.
-	aContact->addMsg(msg,false);			// Add the message to the contact.
+	if (strlen(PN)>0 && strlen(msg)>0) {	// Lets just be sure we got something to work with.
+		aContact = findOrAddContact(PN);		// Using the phone number, whip up a contact. Possibly a new one?
+		aContact->setPNNick();					// If its a new one, set the nick name to the phone number.
+		aContact->addMsg(msg,false);			// Add the message to the contact.
+	}
 }
 
 

@@ -76,6 +76,12 @@ void  toolsPanel::showStatus(void) {
   out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
   out(" Error byte : ");out(statusReg.errByte);out("\n");
   out(" Net Time   : ");out(statusReg.networkTime);out("\n");
+  /*
+  out("DEBUGGING\n");
+  out("Raw SMS    : [");out(SMSRaw);out("]\n");
+  out("SMS PN     : [");out(SMSPN);out("]\n");
+  out("SMS Msg    : [");out(SMSMsg);out("]\n");
+  */
 }
 
 
