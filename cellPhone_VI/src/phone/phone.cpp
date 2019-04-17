@@ -226,7 +226,7 @@ void callControl::doAction(void) {
 
   switch(mState) {
     case isIdle       : mPhone->startCall();    break;
-    case hasIncoming  : mPhone->answerCall(); break;
+    case hasIncoming  : mPhone->answerCall();	break;
     case isConnected  : mPhone->startHangup();  break;
   }
 }

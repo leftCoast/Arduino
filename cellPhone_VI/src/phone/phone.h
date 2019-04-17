@@ -66,7 +66,7 @@ class callControl : public phoneBtn,
     
   public:
 
-  enum callConState { isIdle, hasIncoming, isConnected };
+  enum callConState { isIdle, hasIncoming, connecting, hangingUp, isConnected };
   
           callControl(int x,int y,char inKey,phone* inPhone);
   virtual ~callControl(void);
