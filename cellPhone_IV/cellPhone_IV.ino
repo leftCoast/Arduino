@@ -1,4 +1,4 @@
-#include <idlers.h>
+ #include <idlers.h>
 #include <lists.h>
 #include <quickCom.h>
 #include "cellCommon.h"
@@ -14,10 +14,35 @@
 #define COM_BUFF_BYTES  255
 #define PN_BUFF_BYTES    20
 
+class LC_fona : public Adafruit_FONA {
+
+  public:
+          LC_fona(void);
+  virtual ~LC_fona(void);
+
+          bool setParam(FONAFlashStringPtr send,int32_t param); 
+          
+          FONAFlashStringPtr ok_reply;
+};
+
+
+LC_fona::LC_fona(void)
+  : Adafruit_FONA(FONA_RST) { ok_reply = F("OK"); }
+
+
+LC_fona::~LC_fona(void) {  }
+
+
+bool LC_fona::setParam(FONAFlashStringPtr send,int32_t param) {
+  
+    return sendCheckReply(send,param,ok_reply);
+}
 
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+//Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+
+LC_fona fona = LC_fona();
 
 bool          FONAOnline;
 qCSlave       ourComObj;
@@ -98,7 +123,7 @@ void loop() {
 // *************************************************
 
 void resetFONA(void) {
-
+  
   FONAOnline = false;
   digitalWrite(FONA_RST, HIGH);
   delay(100);
@@ -109,7 +134,9 @@ void resetFONA(void) {
   fonaSS.begin(4800);                   // For talking to the FONA.
   FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
   fona.setAudio(FONA_EXTAUDIO);         // Use speaker, not headseat.
-  fona.setVolume(40);                   
+  fona.setVolume(40);                   // This is the audio volume.
+  fona.setParam(F("AT+CRSL="),60);      // Set ringer volume.
+  fona.setParam(F("AT+CALS="),3);       // Set 3rd ringtone. 0..19
   fona.enableNetworkTimeSync(true);     // See if it works..
 }
 

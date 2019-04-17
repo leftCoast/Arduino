@@ -255,8 +255,11 @@ void callControl::idle() {
     break;
     case hasIncoming  :
       if (mPhone->mConnected) {
-        mState = isConnected;
-        setNeedRefresh();
+			mState = isConnected;
+			setNeedRefresh();
+      } else if (statusReg.callStat==0) {	// Not connected but no longer ringing..
+      	mState = isIdle;
+			setNeedRefresh();
       }
     break;
     case isConnected  :
