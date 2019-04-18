@@ -144,7 +144,7 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 	width			= width + COL_GAP;  // All the buttons are smaller, we're "special".
 	mCallingID	= -1;
 	mHangupID	= -1;
-	mCallerIDID	= -1;
+	//mCallerIDID	= -1;
 	mState		= wakeUp;
 }
 
