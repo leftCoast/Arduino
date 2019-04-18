@@ -60,23 +60,6 @@
 contact*	pleaseCall;	// The cellOS will set this to NULL on bootup.
 
 
-
-// *****************************************************
-// *******************  phCloseBtn  ********************
-// *****************************************************
-
-phCloseBtn::phCloseBtn(phone* inPhone)
-	: closeBtn(inPhone) { mPhone = inPhone; }
-
-phCloseBtn::~phCloseBtn(void) {  }
-
-
-void phCloseBtn::doAction(void) {
-
-	mPhone->startHangup();
-   mPhone->mNeedClose = true;
-}
-
 // *****************************************************
 // ********************  phoneBtn  *********************
 // *****************************************************
@@ -158,122 +141,321 @@ void phoneBtn::doAction(void) { mPhone->keystroke(mKeystroke[0]); }
 callControl::callControl(int x,int y,char inKey,phone* inPhone)
   : phoneBtn(x,y,inKey,inPhone) {
 
-  width = width + COL_GAP;  // All the buttons are smaller, we're "special".
-  mState = isIdle;
+	width			= width + COL_GAP;  // All the buttons are smaller, we're "special".
+	mCallingID	= -1;
+	mHangupID	= -1;
+	mCallerIDID	= -1;
+	mState		= wakeUp;
 }
 
 
-callControl::~callControl(void) { }
+// We're going down, blindly send out a hangup command.
+callControl::~callControl(void) {
+
+	mHangupID = ourCellManager.sendCommand(hangUp,false); 	// Create the command and send it on its way.
+}
 
 
 // Not only is there a bunch of drawing code for this fancy button, we also
 // mix in calls to the message text about what's going on in the world of
-// cell phone hardware. This is kinda' a hack, mixing things, but it was
-// such a good spot to do this. Seeing as we know the state of what's going
-// on at the moment.
+// cell phone hardware.
 void callControl::drawSelf(void) {
 
-  hookup();
-  screen->setTextSize(TEXT_SIZE);
-  switch(mState) {
-    case isIdle       :
-      if (clicked) {
-        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
-        screen->setTextColor(&green);
-      } else {
-        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
-        screen->setTextColor(&white);
-      }
-      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-      screen->drawText("Call");
-    break;
-    case hasIncoming  :
-      if (clicked) {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&green);
-      } else {
-        screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
-        screen->setTextColor(&white);
-      }
-      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-      screen->drawText("Answer");
-      mPhone->out("Click X to refuse call.");
-    break;
-    case isConnected  :
-      if (clicked) {
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&backColor);
-        screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-        screen->setTextColor(&redButtonColor);
-      } else {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
-      screen->setTextColor(&white);
-      }
-      screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-      screen->drawText("Hangup");
-    break;   
-  }
+	hookup();
+	screen->setTextSize(TEXT_SIZE);
+	switch(mState) {
+		case wakeUp			:
+		case isIdle       :
+			if (clicked) {
+				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
+				screen->setTextColor(&green);
+			} else {
+				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
+				screen->setTextColor(&white);
+			}
+			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+			screen->drawText("Call");
+		break;
+		case hasIncoming  :
+			if (clicked) {
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+				screen->setTextColor(&green);
+			} else {
+				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
+				screen->setTextColor(&white);
+			}
+			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+			screen->drawText("Answer");
+			mPhone->out("Click X to refuse call.");
+		break;
+		case connecting	:
+			screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
+			screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
+			screen->setTextColor(&white);
+			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+			screen->drawText("...");
+		break;
+		case hangingUp		:
+			screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
+			screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
+			screen->setTextColor(&white);
+			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+			screen->drawText("...");
+		case isConnected  :
+			if (clicked) {
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&backColor);
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
+				screen->setTextColor(&redButtonColor);
+			} else {
+				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
+				screen->setTextColor(&white);
+			}
+			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
+			screen->drawText("Hangup");
+		break;   
+	}
 }
 
 
-// Our actions. We have three states we can be in idle, ringning or talking.
+// Our actions. We have three states we can effect. idle, ringning or talking.
 // When we get a click, its time to change state. All three methods will
 // fire off our state in a new direction.
 void callControl::doAction(void) {
 
-  switch(mState) {
-    case isIdle       : mPhone->startCall();    break;
-    case hasIncoming  : mPhone->answerCall();	break;
-    case isConnected  : mPhone->startHangup();  break;
+	char*	numBuff;
+	
+	switch(mState) {
+		case wakeUp			: break;																			// You get only a couple microseconds here.
+		case isIdle			: 
+			numBuff = NULL;																					// Init numBuff for later.
+			if (haveService()) {																				// If we have service..
+				if (resizeBuff(mPhone->numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
+					mPhone->numDisplay->getText(numBuff);												// Grab the number off the display.
+					filterPNStr(numBuff);																	// Filter the formatting out of it.
+					mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);			// Send the call command.
+					resizeBuff(0,(uint8_t**)&numBuff);													// Recycle numBuff.
+					mPhone->out("Calling..");																// Show the user we're doing it.
+					mState = connecting;																		// Slip into connecting state.
+				} else {																							// We didn't get the RAM?
+					mPhone->out("Memory error?!");														// Show the user we ran out of memory.
+				}
+			} else {
+				mPhone->out("No service.");																// No cell service, tell' em.
+			}
+		break;
+		case hasIncoming	: 
+    		mCallingID = ourCellManager.sendCommand(pickUp,true);
+    		mPhone->out("Answering..");
+    		mState = connecting;
+		break;
+		case connecting	: break;											// We do nothing in the intermediate states.
+		case hangingUp		: break;
+		case isConnected	:
+			mHangupID = ourCellManager.sendCommand(hangUp,true);	// Create the command and send it on its way. 
+    		mPhone->out("Hanging up..");									// Show were going to try hanging up.
+    		mState = hangingUp;
+		break;
   }
 }
 
 
-// callControl manages the phone status in the background. It can initiate a
+bool callControl::haveService(void) {
+
+	return statusReg.networkStat==NS_registeredHome || statusReg.networkStat==NS_registeredRoaming;
+}
+
+
+// callControl also manages the phone status in the background. It can initiate a
 // call upon creation, via the pleasCall variable. That's somewhat of a
 // special task. The rest are keeping track of the phone object state
 // changes and making sure we reflect those.
 void callControl::idle() {
-
-	if (pleaseCall) {
-		mPhone->numDisplay->setValue(pleaseCall->mPN);
-		pleaseCall = NULL;
-		doAction();
+	
+	int   numBytes;
+	byte  reply;
+  
+  	//mPhone->out(statusReg.callStat);
+	switch(mState) {
+		case wakeUp :
+			mState = isIdle;												// No matter what, wakeUp is done. We want isIdle now.									
+			if (pleaseCall) {												// We've been woken up to make this call.
+				mPhone->numDisplay->setValue(pleaseCall->mPN);	// Grab the number off the saved contact.
+				pleaseCall = NULL;										// Clear out the saved contact ptr.
+				doAction();													// Since we are now in "isIdle" we call doAction to connect.
+				setNeedRefresh();											// Show it.
+			}
+		break;
+		case isIdle       :															// Waiting to see what happens.
+      	if(statusReg.callStat==CS_ringingIn) {								// If we have a connection ringing in..
+      		//mCallerIDID = ourCellManager.sendCommand(callerID,true);	// Start callerID command.
+        		mState = hasIncoming;												// Set the state to deal with it.
+        		setNeedRefresh();														// Show it.
+        	}
+		break;
+		case hasIncoming  :
+      	if (statusReg.callStat==CS_ready) {						// Not connected but no longer ringing..
+      		mState = isIdle;											// I guess they gave up, back to isIdle.
+				setNeedRefresh();											// As always, show it.
+     	 	}
+		break;
+		/*
+		case	getCallID	:
+			checkCallID();
+		break;
+		*/
+		case	connecting	:												// A connection attempt is in process.
+			checkCall();													// We do the checking inhere.
+		break;
+		case	hangingUp	:												// Trying to hang up the phone.
+			checkHangup();													// Again, we check the progress in here.
+		break;
+		case isConnected  :												// We're connected..
+			if (statusReg.callStat==CS_ready) {						// If CS_ready means we lost connection.
+				mState = isIdle;											// So we go back to idle state.
+				setNeedRefresh();											// And show it.
+			}
+		break;
 	}
-  switch(mState) {
-    case isIdle       : 
-      if(callIncoming) {
-        mState = hasIncoming;
-        setNeedRefresh();
-      } else if (mPhone->mConnected) {
-        mState = isConnected;
-        setNeedRefresh();
-      }
-    break;
-    case hasIncoming  :
-      if (mPhone->mConnected) {
-			mState = isConnected;
-			setNeedRefresh();
-      } else if (statusReg.callStat==0) {	// Not connected but no longer ringing..
-      	mState = isIdle;
-			setNeedRefresh();
-      }
-    break;
-    case isConnected  :
-      if (!mPhone->mConnected) {
-        mState = isIdle;
-        setNeedRefresh();
-      }
-    break;
-  }
 }
 
 
+// idle() wants us to check the status of our hangUp command. Basically
+// this is the same kind of method as checkCall(). Just checking a different
+// command with a little different result.
+void callControl::checkHangup(void) {
 
-          
+	int   numBytes;
+	byte  reply;
+  
+	switch (ourCellManager.progress(mHangupID)){						// See what's going on here..
+		case com_standby  : 
+		case com_working  :  break;										// Nothing we can do here.
+		case com_holding  :													// Holding means there's a reply waiting for us.
+			numBytes = ourCellManager.numReplyBytes(mHangupID);	// This is how big the reply is.
+			if (numBytes==1) {												// We're looking for a one byte reply.
+				ourCellManager.readReply(mHangupID,&reply);			// Grab the byte.
+				if (reply==0) {												// Is it a zero?
+					statusReg.callStat=CS_ready;							// Poke in we succeeded. (Too much lag otherwise)
+					mPhone->out("Disconnectd.");							// Tell the world!
+					mState = isIdle;											// Set the state.
+				} else {
+					mPhone->out("Hangup error.");							// Troubles somewhere.
+					mState = isConnected;
+				}
+			} else {
+				ourCellManager.dumpBuff();									// Unknown what it is. Toss it.
+				mPhone->out("Reply error.");								// Something weird going on..
+				mState = isConnected;										// We assume hangup failed. Still connected.
+			}
+			mHangupID = -1;													// This command is done.
+			setNeedRefresh();													// Show whatever changed.
+		break;
+		case com_complete :													// We missed something?													
+			mState = isConnected;												// Assume failure.
+			setNeedRefresh();													// Show new state.
+		case com_missing  :                                   	// Possibly timed out or we already got it.
+			mPhone->out("No response.");									// Just so we know.
+			mState = isIdle;													// If the FONA crashed, we're not connected anymore..
+			mHangupID = -1;													// In any case we're done with this command.
+			setNeedRefresh();													// Things changed, lets see it.
+		break;
+	}
+}
+ 
+ 
+// idle() wants us to check the status of our makeCall command. It may be
+// still working on making the call, it could have failed, possibly timed
+// out? Whatever, we deal with it and take action appropriately here.
+void callControl::checkCall(void) {
+
+	int   numBytes;
+	byte  reply;
+  
+	switch (ourCellManager.progress(mCallingID)){					// See what's going on here..
+		case com_standby  : 
+		case com_working  :  break;										// Nothing we can do here.
+		case com_holding  :													// Holding means there's a reply waiting for us.
+			numBytes = ourCellManager.numReplyBytes(mCallingID);	// This is how big the reply is.
+			if (numBytes==1) {												// We're looking for a one byte reply.
+				ourCellManager.readReply(mCallingID,&reply);			// Grab the byte.
+				if (reply==0) {												// Is it a zero?
+					statusReg.callStat=CS_ringingOut;					// Poke in we succeeded. (Too much lag otherwise)
+					mPhone->out("Connected.");								// Tell the world!
+					mState = isConnected;									// Set the state.
+				} else {
+					mPhone->out("Connection failed.");					// Troubles somewhere.
+					mState = isIdle;
+				}
+			} else {
+				ourCellManager.dumpBuff();									// Unknown what it is. Toss it.
+				mPhone->out("Internal error.");							// Something weird going on..
+				mState = isIdle;												// We assume hangup failed. Still connected.
+			}
+			mCallingID = -1;													// This command is done.
+			setNeedRefresh();													// Show whatever changed.
+		break;
+		case com_complete :													// We missed something?													
+			mState = isIdle;														// Assume failure.
+			setNeedRefresh();													// Show new state.
+		case com_missing  :                                   	// Possibly timed out or we already got it.
+			mPhone->out("No response.");									// Just so we know.
+			mState = isIdle;													// If the FONA crashed, we're not connected..
+			mCallingID = -1;													// In any case we're done with this command.
+			setNeedRefresh();													// Things changed, lets see it.
+		break;
+	}
+}
+    
+
+/*    
+// idle() wants us to check the status of our get called ID command. It may be
+// still working on making the call, it could have failed, possibly timed
+// out? Whatever, we deal with it and take action appropriately here.
+void callControl::checkCallID(void) {
+
+	int   numBytes;
+	byte  reply;
+  
+	switch (ourCellManager.progress(mCallerIDID)){					// See what's going on here..
+		case com_standby  : 
+		case com_working  :  break;										// Nothing we can do here.
+		case com_holding  :													// Holding means there's a reply waiting for us.
+			numBytes = ourCellManager.numReplyBytes(mCallingID);	// This is how big the reply is.
+			if (numBytes==1) {												// We're looking for a one byte reply.
+				ourCellManager.readReply(mCallingID,&reply);			// Grab the byte.
+				if (reply==0) {												// Is it a zero?
+					statusReg.callStat=CS_ringingOut;					// Poke in we succeeded. (Too much lag otherwise)
+					mPhone->out("Connected.");								// Tell the world!
+					mState = isConnected;									// Set the state.
+				} else {
+					mPhone->out("Connection failed.");					// Troubles somewhere.
+					mState = isIdle;
+				}
+			} else {
+				ourCellManager.dumpBuff();									// Unknown what it is. Toss it.
+				mPhone->out("Internal error.");							// Something weird going on..
+				mState = isIdle;												// We assume hangup failed. Still connected.
+			}
+			mCallingID = -1;													// This command is done.
+			setNeedRefresh();													// Show whatever changed.
+		break;
+		case com_complete :													// We missed something?													
+			mState = isIdle;														// Assume failure.
+			setNeedRefresh();													// Show new state.
+		case com_missing  :                                   	// Possibly timed out or we already got it.
+			mPhone->out("No response.");									// Just so we know.
+			mState = isIdle;													// If the FONA crashed, we're not connected..
+			mCallingID = -1;													// In any case we're done with this command.
+			setNeedRefresh();													// Things changed, lets see it.
+		break;
+	}
+}
+*/
+       
 // *****************************************************
 // *********************  phone   **********************
 // *****************************************************
@@ -282,14 +464,7 @@ void callControl::idle() {
 // the interface used to start calls from other areas of the cell phone
 // program.
 phone::phone(void) 
-  : panel(phoneApp,noEvents) {
-
-  mRawPN          = NULL;
-  mCallingID      = -1;
-  mConnected      = false;
-  mHangupID       = -1;
-  mNeedClose      = false;
-}
+  : panel(phoneApp,noEvents) { mRawPN = NULL; }
 
 
 phone::~phone(void) { if (mRawPN) free(mRawPN); }
@@ -337,31 +512,15 @@ void phone::setup(void) {
   stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
-  menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
+  menuBar* ourMenuBar = new menuBar((panel*)this,true,true);
   addObj(ourMenuBar);
-  
-  phCloseBtn* ourCloseBtn = new phCloseBtn(this);
-  ourMenuBar->addObj(ourCloseBtn);
-  Serial.println("Finished setup()");Serial.flush();
+
 }
 
 
 // Seeing as we are a panel, we have a loop() call. This is used for our
 // "main" focus. Typically watching for user interaction.
-void phone::loop(void) {
-
-	if (!mConnected && mNeedClose) {
-  		close();
-	}
-	checkCall();
-	checkHangup();
-	if (mConnected 
-		&& mHangupID==-1
-		&& statusReg.callStat==0) {	// We think we're connected. We've not clicked the hangup button.. But we are NOT connected. We've been hung up on!
-		mConnected = false;
-		out("Disconnectd.");          // Tell the world!
-	}
-}
+void phone::loop(void) { }
 
 
 // For drawing ourselves. Not much to do because we are basically just a
@@ -399,8 +558,7 @@ void phone::keystroke(char inKey) {
       numDisplay->setValue(mRawPN);
     break;
     case 'X'   : 
-      startHangup();
-      mNeedClose = true;
+      // This case no longer exists.
     break;
   }  
 }
@@ -436,132 +594,6 @@ void phone::deleteChar(void) {
   if (mRawPN) {
     if (mRawPN[0]!='\0') {
       mRawPN[strlen(mRawPN)-1] = '\0';
-    }
-  }
-}
-
-
-// Someone thinks there is a call coming in. How do they know this stuff?
-// Anyway, this is where the command to "Pick up the damn phone!" Is
-// generated.
-void phone::answerCall(void) {
-
-  if (!mConnected) {
-    out("Answering..");
-    mCallingID = ourCellManager.sendCommand(pickUp,true);
-  }
-}
-
-
-// Starting a call sequence. Starting a call can take a LONG time in
-// computer land. So, we'll just fire off the command, and deal with getting
-// things hooked up, or not, during loop() time.
-void phone::startCall(void) {
-
-	char*	numBuff;
-	
-	numBuff = NULL;																			// Ok, init numBuff for later.
-	if (!mConnected) {																		// If we're not connected..
-		if (	statusReg.networkStat==NS_registeredHome||
-				statusReg.networkStat==NS_registeredRoaming ) {
-			if (resizeBuff(numDisplay->getNumChars()+1,(uint8_t**)&numBuff)) {	// If we can allocate the text buffer..
-				numDisplay->getText(numBuff);													// Grab the number off the display.
-				filterPNStr(numBuff);															// Filter the formatting out of it.
-				mCallingID = ourCellManager.sendCommand(makeCall,numBuff,true);	// Send the call command.
-				out(numBuff);
-				resizeBuff(0,(uint8_t**)&numBuff);											// Recycle numBuff.
-				out("Calling..");																// Show the user we're doing it.
-			} else {																					// Or else we didn't get the RAAM?
-				out("Memory error?!");															// Show the user we ran out of memory.
-			}
-		} else {
-			out("No network.");
-		}
-	}																								// Already connected? Just ignore everything.
-}
-
-
-// Just like starting a call, doing the hangup sequence can take a long
-// time. So, we just fire off the command and let the loop() code take care
-// of managing it.
-void phone::startHangup(void) {
-
-  if (mConnected && mHangupID==-1) {								// If we are connected and not already trying to hang up.
-    out("Hanging up..");												// Show were going to try hanging up.
-    mHangupID = ourCellManager.sendCommand(hangUp,true);		// Create the command and send it on its way.
-  }
-}
-
-
-// loop() wants us to check the status of our makeCall command. It may be
-// still working on making the call, it could have failed, possibly timed
-// out? Whatever, we deal with it and take action appropriately here.
-void phone::checkCall(void) {
-
-	int           numBytes;
-	byte          reply;
-  
-	if (mCallingID!=-1) {														// Working on a call?
-		if (ourCellManager.progress(mCallingID)==com_holding) {		// We found it and its holding a reply?
-			numBytes = ourCellManager.numReplyBytes(mCallingID);		// This is how big the reply is.
-			if (numBytes==1) {													// We're looking for a one byte reply.
-				ourCellManager.readReply(mCallingID,&reply);				// Grab the byte.
-				if (reply==0) {													// Is it a zero?
-					mConnected = true;											// Cool!, we're connected!
-					statusReg.callStat = CS_unknown;							// Push this off of CS_ready so the hangup stuff doesn't trip.
-					out("Connected.");											// Show that the call's going through.
-				} else {
-					out("Connect error.");										// FONA passed back an error.
-				}
-			} else {																	// Internal communication error.
-				ourCellManager.dumpBuff();                            // Unknown what it is. Toss it.
-				out("Internal error.");
-			}
-			mCallingID = -1;                                        // In any case, we're done with the command.
-		} else if (ourCellManager.progress(mCallingID)==com_missing) {
-			out("No response.");
-			mCallingID = -1;
-		}
-	}
-}
-
-
-// loop() wants us to check the status of our hangUp command. Basically
-// this is the same kind of method as checkCall(). Just checking a different
-// command with a little different style of coding.
-void phone::checkHangup(void) {
-
-  int   numBytes;
-  byte  reply;
-  
-  if (mHangupID!=-1) {                                      // Working on a call?
-    switch (ourCellManager.progress(mHangupID)){            // See what's going on here..
-      case com_standby  : 
-      case com_working  :  break;                           // Nothing we can do here.
-      case com_holding  :                                   // Holding means there's a reply waiting for us.
-        numBytes = ourCellManager.numReplyBytes(mHangupID); // This is how big the reply is.
-        if (numBytes==1) {                                  // We're looking for a one byte reply.
-          ourCellManager.readReply(mHangupID,&reply);       // Grab the byte.
-          if (reply==0) {                                   // Is it a zero?
-            mConnected = false;                             // Cool!, we're disconnected!
-            out("Disconnectd.");                            // Tell the world!
-          } else {
-            out("Hangup error.");                           // Troubles somewhere.
-          }
-        } else {
-          ourCellManager.dumpBuff();                        // Unknown what it is. Toss it.
-          out("Reply error.");                              // Something weird going on..
-        }
-        mHangupID = -1;													// This command is done. Shouldn't we note that?
-      break;
-      case com_complete :												// All this means is it gave us back a reply. (Any reply)
-      	out("A reply arrived.");
-      break;                             
-      case com_missing  :                                   // Possibly timed out or we already got it.
-      	out("No response.");
-        	mConnected = false;											// If the FONA crashed, we're not connected anymore..
-        	mHangupID = -1;
-      break;
     }
   }
 }

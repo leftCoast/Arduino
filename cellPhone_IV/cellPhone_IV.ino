@@ -32,7 +32,6 @@ LC_fona::LC_fona(void)
 
 LC_fona::~LC_fona(void) {  }
 
-
 bool LC_fona::setParam(FONAFlashStringPtr send,int32_t param) {
   
     return sendCheckReply(send,param,ok_reply);
@@ -58,9 +57,9 @@ void setup() {
     pinMode(13, OUTPUT);                            // Our one and only debugging tool.
     ourComObj.begin(comBuff,COM_BUFF_BYTES,9600);   // Buff, bytes & Baud. Setup for talking to the GUI.
     checkComErr();
-    pinMode(FONA_RST, OUTPUT);            // Used for resetting the FONA.
+    pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
     FONAOnline = false;
-    resetFONA();                          // Hit reset, see if it'll come online.
+    resetFONA();                                    // Hit reset, see if it'll come online.
 }
 
 
@@ -100,11 +99,11 @@ void checkComErr() {
 
 void loop() {
   
-  idle();                                               // Let anyone that's idleing have some time.
-  checkComErr();                                        // Clear possible errors from before.
-  if (ourComObj.haveBuff()) {                           // If we have a complete command..
-    comPtr = ourComObj.getComBuff();                    // Lets point at the command character.
-    switch(comPtr[0]) {                                 // Using the command character, decide our action.
+  idle();                                                 // Let anyone that's idleing have some time.
+  checkComErr();                                          // Clear possible errors from before.
+  if (ourComObj.haveBuff()) {                             // If we have a complete command..
+    comPtr = ourComObj.getComBuff();                      // Lets point at the command character.
+    switch(comPtr[0]) {                                   // Using the command character, decide our action.
       case getStatus    : doStatus(comPtr);     break;    // Pack up a status struct and send it back.
       case makeCall     : doCall(comPtr);       break;    // Make a call. PN is to be packed in the buffer.
       case hangUp       : doHangUp(comPtr);     break;    // Hang up.
@@ -112,7 +111,8 @@ void loop() {
       case sendSMS      : doSendSMSMsg(comPtr); break;    // Send a message to the current phone number.
       case getSMS       : doGetSMSMsg(comPtr);  break;    // Send a message to the current phone number.
       case pickUp       : doPickUp(comPtr);     break;    // If there's a incoming call, pick it up.
-      default           : break;                        // Who knows? Some sort of nonsense.
+      case touchTone    : doTouchTone(comPtr);  break;    // Start or stop a touch tone.
+      default           : break;                          // Who knows? Some sort of nonsense.
     } 
   }
 }
@@ -260,7 +260,7 @@ void doGetSMSMsg(byte* buff) {
   if (fona.getSMSSender(msgIndex,buffPtr,buffLen)) {              // First we read out the phone number..
     numPNBytes = strlen(buffPtr)+1;                               // They don't tell us how many bytes they used. So we count 'em ourselves.
     buffPtr = buffPtr + numPNBytes;                               // Offset the buffer pointer.
-    buffLen = buffLen - numPNBytes;                               // Reset the buffer length.                                  
+    buffLen = buffLen - numPNBytes;                               // Reset the buffer length.
     if (fona.readSMS(msgIndex,buffPtr,buffLen,&numMsgBytes)) {    // If we are successfull.. 
       fona.deleteSMS(msgIndex);                                   // Delete the message from the SIM.
       buff[0] = 0;                                                // Set no error flag.
@@ -270,4 +270,15 @@ void doGetSMSMsg(byte* buff) {
   }
   buff[0] = 1;                                                    // We got here? Note the error.
   ourComObj.replyComBuff(1);                                      // Send back the error.
+}
+
+
+void doTouchTone(byte* buff) { 
+  
+  if (fona.playDTMF(buff[1])) {
+    buff[0] = 0;
+  } else {
+    buff[0] = 1;
+  }
+  ourComObj.replyComBuff(1);
 }

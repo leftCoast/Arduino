@@ -34,18 +34,6 @@
 extern	contact* pleaseCall;
 
 class phone;
-
-class phCloseBtn	: public closeBtn {
-
-	public:
-				phCloseBtn(phone* inPhone);
-	virtual	~phCloseBtn(void);
-	
-	virtual	void  doAction(void);
-	
-				phone* mPhone;
-};
-
 	
 class phoneBtn :  public drawObj {
 
@@ -61,74 +49,72 @@ class phoneBtn :  public drawObj {
 };
 
 
-class callControl : public phoneBtn,
-                    public idler {
-    
-  public:
+class callControl :	public phoneBtn,
+							public idler {
+	public:
 
-  enum callConState { isIdle, hasIncoming, connecting, hangingUp, isConnected };
+	enum callConState { wakeUp, isIdle, hasIncoming, connecting, hangingUp, isConnected };
   
-          callControl(int x,int y,char inKey,phone* inPhone);
-  virtual ~callControl(void);
-
-  virtual void  drawSelf(void);
-  virtual void  doAction(void);
-  virtual void  idle();
-
-          callConState  mState;
-};
-
-
-class phone : public panel {
-
-  public:
-          phone(void);
-  virtual ~phone(void);
-
-  virtual void  setup(void);
-  virtual void  loop(void);
-  virtual void  drawSelf(void);
-                    
-          void  keystroke(char inKey);
-          void  addChar(char inKey);
-          void  deleteChar(void);
-          void  answerCall(void);
-          void  startCall(void);
-          void  startHangup(void);
-          void  checkCall(void);
-          void  checkHangup(void);
-          void  out(char* message);
-          void  out(int message);
+				callControl(int x,int y,char inKey,phone* inPhone);
+	virtual	~callControl(void);
           
-          char* mRawPN;
-          int   mCallingID;     // We're in the calling sequence. Here's our command ID.
-          bool  mConnected;     // Successful, as far as we can tell, calling sequence.
-          int   mHangupID;      // We're in the hangup sequence. Here's our command ID.
-          bool  mNeedClose;
+	virtual	void  drawSelf(void);
+	virtual	void  doAction(void);
+				bool	haveService(void);
+	virtual	void  idle();
+				void  checkCall(void);
+				void  checkHangup(void);
+				
+				callConState	mState;
+				int				mCallingID;     // We're in the calling sequence. Here's our command ID.
+				int				mHangupID;      // We're in the hangup sequence. Here's our command ID.
+				//int				mCallerIDID;	 // Looking for caller ID sequence.
+				bool				mNeedClose;
 
-          phoneBtn* pBtndel;
-                
-          phoneBtn* pBtn7;
-          phoneBtn* pBtn8;
-          phoneBtn* pBtn9;
-                
-          phoneBtn* pBtn4;
-          phoneBtn* pBtn5;
-          phoneBtn* pBtn6;
-                
-          phoneBtn* pBtn1;
-          phoneBtn* pBtn2;
-          phoneBtn* pBtn3;
-                
-          phoneBtn* pBtn0;
-          phoneBtn* pBtnStar;
-          phoneBtn* pBtnHash;
-                
-          phoneBtn* pBtnCall;
-
-          colorRect*  theEditBase;     // Background of the PNLabel.
-          PNLabel*  numDisplay;
-          liveText* stateDisplay;
 };
+
+
+class phone :	public panel {
+
+	public:
+				phone(void);
+	virtual	~phone(void);
+
+	virtual	void	setup(void);
+	virtual	void	loop(void);
+	virtual	void	drawSelf(void);
+                    
+				void	keystroke(char inKey);
+				void	addChar(char inKey);
+				void	deleteChar(void);
+				void	out(char* message);
+				void	out(int message);
+          
+				char*			mRawPN;
+
+				phoneBtn*	pBtndel;
+ 
+				phoneBtn*	pBtn7;
+				phoneBtn*	pBtn8;
+				phoneBtn*	pBtn9;
+ 
+				phoneBtn*	pBtn4;
+				phoneBtn*	pBtn5;
+				phoneBtn*	pBtn6;
+ 
+				phoneBtn*	pBtn1;
+				phoneBtn*	pBtn2;
+				phoneBtn*	pBtn3;
+ 
+				phoneBtn*	pBtn0;
+				phoneBtn*	pBtnStar;
+				phoneBtn*	pBtnHash;
+ 
+				phoneBtn*	pBtnCall;
+
+				colorRect*	theEditBase;     // Background of the PNLabel.
+				PNLabel*		numDisplay;
+				liveText*	stateDisplay;
+				};
 
 #endif

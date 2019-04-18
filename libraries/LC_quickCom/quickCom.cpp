@@ -52,7 +52,7 @@ bool qCMaster::sendBuff(byte* buff,byte buffLen,bool wantReply) {
 	byte	i;
 	
 	if (mState==standby && buffLen) {		// Ok, if we've nothing better going on..
-		if (resizeBuff(buffLen+1)) {			// we are abe to get a buffer.
+		if (resizeBuff(buffLen+1)) {			// we are abl	e to get a buffer.
 			mNumBytesMoved = 0;
 			mWantReply = wantReply;
 			mBuff[0] = buffLen;
@@ -131,15 +131,17 @@ void qCMaster::idle(void) {
 // We already know we're sending something. Get busy.	
 void qCMaster::doSending(void) {
 	
-
+	while(MASTER_PORT.available()) {				// Is there someting left over in the port?
+			MASTER_PORT.read();						// Flush it out!
+	}
 	while(MASTER_PORT.availableForWrite() && mNumBytesMoved<=mBuff[0]) {
 		MASTER_PORT.write(mBuff[mNumBytesMoved]);
 		mNumBytesMoved++;
 	}
 	if (mNumBytesMoved == mBuff[0]+1) {
-		resizeBuff(0);								// Done with it.
+		resizeBuff(0);									// Done with it.
 		if (mWantReply) {
-			start();									// Start the reply timer.
+			start();										// Start the reply timer.
 			mState = listening;
 		} else {
 			mState = standby;
