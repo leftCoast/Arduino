@@ -30,6 +30,8 @@
 // ghosting me?! Much of is is just watching button presses and doing the right
 // things to reflect what's going on.
 
+#define	GRACE_TIME	3000	// Once we make a change, we'll wait this long (ms) before checking status.
+
 
 extern	contact* pleaseCall;
 
@@ -70,7 +72,7 @@ class callControl :	public phoneBtn,
 				int				mHangupID;      // We're in the hangup sequence. Here's our command ID.
 				//int				mCallerIDID;	 // Looking for caller ID sequence.
 				bool				mNeedClose;
-
+				timeObj			graceTimer;
 };
 
 

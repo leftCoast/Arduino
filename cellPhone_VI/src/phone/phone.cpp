@@ -146,6 +146,7 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 	mHangupID	= -1;
 	//mCallerIDID	= -1;
 	mState		= wakeUp;
+	graceTimer.setTime(GRACE_TIME);
 }
 
 
@@ -277,7 +278,7 @@ void callControl::idle() {
 	
 	int   numBytes;
 	byte  reply;
-  
+   
   	//mPhone->out(statusReg.callStat);
 	switch(mState) {
 		case wakeUp :
@@ -289,24 +290,20 @@ void callControl::idle() {
 				setNeedRefresh();											// Show it.
 			}
 		break;
-		case isIdle       :															// Waiting to see what happens.
-      	if(statusReg.callStat==CS_ringingIn) {								// If we have a connection ringing in..
-      		//mCallerIDID = ourCellManager.sendCommand(callerID,true);	// Start callerID command.
-        		mState = hasIncoming;												// Set the state to deal with it.
-        		setNeedRefresh();														// Show it.
-        	}
+		case isIdle       :												// Waiting to see what happens.
+			if (graceTimer.ding()) {
+				if(statusReg.callStat==CS_ringingIn) {					// If we have a connection ringing in..
+					mState = hasIncoming;									// Set the state to deal with it.
+					setNeedRefresh();											// Show it.
+				}
+			}
 		break;
 		case hasIncoming  :
-      	if (statusReg.callStat==CS_ready) {						// Not connected but no longer ringing..
-      		mState = isIdle;											// I guess they gave up, back to isIdle.
+			if (statusReg.callStat==CS_ready) {						// Not connected but no longer ringing..
+				mState = isIdle;											// I guess they gave up, back to isIdle.
 				setNeedRefresh();											// As always, show it.
-     	 	}
+			}
 		break;
-		/*
-		case	getCallID	:
-			checkCallID();
-		break;
-		*/
 		case	connecting	:												// A connection attempt is in process.
 			checkCall();													// We do the checking inhere.
 		break;
@@ -314,10 +311,12 @@ void callControl::idle() {
 			checkHangup();													// Again, we check the progress in here.
 		break;
 		case isConnected  :												// We're connected..
-			if (statusReg.callStat==CS_ready) {						// If CS_ready means we lost connection.
-				mState = isIdle;											// So we go back to idle state.
-				setNeedRefresh();											// And show it.
-			}
+			if (graceTimer.ding()) {
+				if (statusReg.callStat==CS_ready) {						// If CS_ready means we lost connection.
+					mState = isIdle;											// So we go back to idle state.
+					setNeedRefresh();											// And show it.
+				}
+			}	
 		break;
 	}
 }
@@ -339,7 +338,6 @@ void callControl::checkHangup(void) {
 			if (numBytes==1) {												// We're looking for a one byte reply.
 				ourCellManager.readReply(mHangupID,&reply);			// Grab the byte.
 				if (reply==0) {												// Is it a zero?
-					statusReg.callStat=CS_ready;							// Poke in we succeeded. (Too much lag otherwise)
 					mPhone->out("Disconnectd.");							// Tell the world!
 					mState = isIdle;											// Set the state.
 				} else {
@@ -351,6 +349,7 @@ void callControl::checkHangup(void) {
 				mPhone->out("Reply error.");								// Something weird going on..
 				mState = isConnected;										// We assume hangup failed. Still connected.
 			}
+			graceTimer.start();												// Start the grace timer. (Status lags and can mess us up.)
 			mHangupID = -1;													// This command is done.
 			setNeedRefresh();													// Show whatever changed.
 		break;
@@ -383,7 +382,6 @@ void callControl::checkCall(void) {
 			if (numBytes==1) {												// We're looking for a one byte reply.
 				ourCellManager.readReply(mCallingID,&reply);			// Grab the byte.
 				if (reply==0) {												// Is it a zero?
-					statusReg.callStat=CS_ringingOut;					// Poke in we succeeded. (Too much lag otherwise)
 					mPhone->out("Connected.");								// Tell the world!
 					mState = isConnected;									// Set the state.
 				} else {
@@ -395,6 +393,7 @@ void callControl::checkCall(void) {
 				mPhone->out("Internal error.");							// Something weird going on..
 				mState = isIdle;												// We assume hangup failed. Still connected.
 			}
+			graceTimer.start();												// Start the grace timer. (Status lags and can mess us up.)
 			mCallingID = -1;													// This command is done.
 			setNeedRefresh();													// Show whatever changed.
 		break;

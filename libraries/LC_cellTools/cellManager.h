@@ -6,6 +6,10 @@
 #include <quickCom.h>
 #include <cellCommon.h>
 
+#define rat	6
+//#define STATUS_TIME 1000
+
+
 // This is the guy that actually talks to the FONA controller. And that, in turn, talks
 // to the SIM800 celphone hardware. The overall design is to have a queue for cell
 // commands. This is because, who knows how long each command will take? So we queue
@@ -32,7 +36,6 @@
 // for a larger platform. So REMEBER, there are two copies of cellCommon.h. If you
 // want to make a change, you have to change BOTH. Where is the other one? You'll have
 // to go look for it. (Who knows where it'll end up by the time your reading this.)
-
 
 
 enum cellComStates { com_standby, com_working, com_holding, com_complete, com_missing };
