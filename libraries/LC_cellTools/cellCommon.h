@@ -2,14 +2,14 @@
 #define cellCommon_h
 
 
-enum cellCommands { getStatus, setCurrentPN, sendSMS, getSMS, makeCall, hangUp, pickUp, setVolume, chooseRing, touchTone, somethingElse  };
+enum cellCommands { getStatus, setCurrentPN, sendSMS, getSMS, makeCall, hangUp, pickUp, setVolume, chooseRing, touchTone, sweepUNS, somethingElse  };
 
 enum networkStatus { NS_notRegistered, NS_registeredHome, NS_registeredSearching, NS_denied, NS_unknown, NS_registeredRoaming };
 
-enum callStatus	{ CS_ready, CS_noStatus, CS_unknown, CS_ringingIn, CS_ringingOut };
+enum callStatus  { CS_ready, CS_noStatus, CS_unknown, CS_ringingIn, CS_ringingOut };
 
 struct cellStatus {
-	uint16_t    FONAOnline;
+  uint16_t    FONAOnline;
   uint16_t    batteryVolts;
   uint16_t    batteryPercent;
   uint16_t    RSSI;
@@ -23,8 +23,8 @@ struct cellStatus {
  
  
 struct tone {
-	uint16_t	freq;
-	uint16_t	durationMS;
+  uint16_t  freq;
+  uint16_t  durationMS;
 };
 
 
