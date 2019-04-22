@@ -55,7 +55,7 @@ class callControl :	public phoneBtn,
 							public idler {
 	public:
 
-	enum callConState { wakeUp, isIdle, hasIncoming, connecting, hangingUp, isConnected };
+	enum callConState { wakeUp, isIdle, hasIncoming, readCallerID, connecting, hangingUp, isConnected };
   
 				callControl(int x,int y,char inKey,phone* inPhone);
 	virtual	~callControl(void);
@@ -65,13 +65,15 @@ class callControl :	public phoneBtn,
 				bool	haveService(void);
 	virtual	void  idle();
 				void  checkCall(void);
+				bool	filterCallerID(char* rawID,byte numChars);
+				void	checkSweep(void);
 				void  checkHangup(void);
 				
 				callConState	mState;
-				int				mCallingID;     // We're in the calling sequence. Here's our command ID.
-				int				mHangupID;      // We're in the hangup sequence. Here's our command ID.
-				//int				mCallerIDID;	 // Looking for caller ID sequence.
-				bool				mNeedClose;
+				int				mCallingID;			// We're in the calling sequence. Here's our command ID.
+				char				mOurCallerID[20];	// If we find one, our caller ID will be here.
+				int				mHangupID;			// We're in the hangup sequence. Here's our command ID.
+				int				mSweepID;			// Looking for caller ID sequence using serial sweep.
 				timeObj			graceTimer;
 };
 

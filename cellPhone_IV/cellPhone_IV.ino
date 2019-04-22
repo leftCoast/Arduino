@@ -21,7 +21,8 @@ class LC_fona : public Adafruit_FONA {
     LC_fona(void);
     virtual ~LC_fona(void);
 
-    bool setParam(FONAFlashStringPtr send, int32_t param);
+    void  flushSweep(void);
+    bool  setParam(FONAFlashStringPtr send, int32_t param);
 
     FONAFlashStringPtr ok_reply;
 };
@@ -34,6 +35,10 @@ LC_fona::LC_fona(void)
 
 
 LC_fona::~LC_fona(void) {  }
+
+
+void LC_fona::flushSweep(void) { flushInput(); }
+
 
 bool LC_fona::setParam(FONAFlashStringPtr send, int32_t param) {
 
@@ -52,79 +57,107 @@ byte          comBuff[COM_BUFF_BYTES];  // Buffer for all comunication.
 byte          pnBuff[PN_BUFF_BYTES];    // Buffer for current phone number.
 byte          unsBuff[UNS_BUFF_BYTES];  // Buffer for unsolicited bytes.
 byte          unsIndex;
+bool          sweepState;
 byte*         comPtr;
 bool          havePN;
+
 
 void setup() {
 
   havePN = false;                                 // We do not yet have a phone number to text to.
   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
-  unsIndex = 0;                                   // Init unsolicited bbuff index.
+  unsIndex = 0;                                   // Init unsolicited(sweep) buff index.
+  unsBuff[0] = 0;                                 // Reset the unsolicited(sweep) buffer.
   ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup for talking to the GUI.
-  checkComErr();
+  checkComErr();                                  // Read comunications error. On error we stop here and blink.
   pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
-  FONAOnline = false;
+  FONAOnline = false;                             // Not ready yet..
   resetFONA();                                    // Hit reset, see if it'll come online.
 }
 
 
+// Single blink..
+void aBlink(void) {
+  
+  digitalWrite(13, HIGH);
+  delay(75);
+  digitalWrite(13, LOW);
+}
+
+
+// String of blinks.
 void blink(int numBlinks) {
 
   if (numBlinks == 1) {
-    digitalWrite(13, HIGH);
-    delay(75);
-    digitalWrite(13, LOW);
-    delay(75);
-    return;
-  }
-  for (int i = 0; i < numBlinks; i++) {
-    digitalWrite(13, HIGH);
-    delay(75);
-    digitalWrite(13, LOW);
-    delay(150);
+    aBlink();
+  } else {
+    for (int i = 1; i < numBlinks; i++) {
+      aBlink();
+      delay(150);
+    }
+    aBlink();
   }
 }
 
 
+// If we get a comunications error, we give up and just loop blinking
+// the error number on our LED.
 void checkComErr() {
+  
   int error;
-  error = ourComObj.readErr();
-  if (!error == NO_ERR) {  // Did the poor thing fire up?
-    while (true) {
-      digitalWrite(13, HIGH);
-      delay(1000);
-      digitalWrite(13, LOW);
-      delay(1000);
-      blink(error);
-      delay(1000);
+  
+  error = ourComObj.readErr();  // Read the error.
+  if (!error == NO_ERR) {       // If we had an error..
+    while (true) {              // Loop forever..
+      digitalWrite(13, HIGH);   // Light on.
+      delay(1000);              // Wait a second.
+      digitalWrite(13, LOW);    // Light off.
+      delay(1000);              // Wait a second.
+      blink(error);             // Blink out the error number.
+      delay(1000);              // Wait a second.
     }
   }
 }
 
 
 void loop() {
-
-  idle();                                                 // Let anyone that's idleing have some time.
-  checkComErr();                                          // Clear possible errors from before.
-  if (ourComObj.haveBuff()) {                             // If we have a complete command..
-    comPtr = ourComObj.getComBuff();                      // Lets point at the command character.
-    switch (comPtr[0]) {                                  // Using the command character, decide our action.
-      case getStatus    : doStatus(comPtr);     break;    // Pack up a status struct and send it back.
-      case makeCall     : doCall(comPtr);       break;    // Make a call. PN is to be packed in the buffer.
-      case hangUp       : doHangUp(comPtr);     break;    // Hang up.
-      case setCurrentPN : doSetPN(comPtr);      break;    // Set the phone number we plan to have a dialog with.
-      case sendSMS      : doSendSMSMsg(comPtr); break;    // Send a message to the current phone number.
-      case getSMS       : doGetSMSMsg(comPtr);  break;    // Send a message to the current phone number.
-      case pickUp       : doPickUp(comPtr);     break;    // If there's a incoming call, pick it up.
-      case touchTone    : doTouchTone(comPtr);  break;    // Start or stop a touch tone.
-      case sweepUNS     : doSweepUNS(comPtr);   break;    // Wrap up all the bytes we saved and send them off.
-      default           : break;                          // Who knows? Some sort of nonsense.
+  
+  char  aChar;
+  
+  idle();                                                       // Let anyone that's idleing have some time.
+  checkComErr();                                                // Check for errors.
+  if (ourComObj.haveBuff()) {                                   // If we have a complete command..
+    comPtr = ourComObj.getComBuff();                            // Lets point at the command character.
+    switch (comPtr[0]) {                                        // Using the command character, decide our action.
+      case getStatus    : doStatus(comPtr);     break;          // Pack up a status struct and send it back.
+      case makeCall     : doCall(comPtr);       break;          // Make a call. PN is to be packed in the buffer.
+      case hangUp       : doHangUp(comPtr);     break;          // Hang up.
+      case setCurrentPN : doSetPN(comPtr);      break;          // Set the phone number we plan to have a dialog with.
+      case sendSMS      : doSendSMSMsg(comPtr); break;          // Send a message to the current phone number.
+      case getSMS       : doGetSMSMsg(comPtr);  break;          // Read & delete an incoming message.
+      case pickUp       : doPickUp(comPtr);     break;          // If there's a incoming call, pick it up.
+      case touchTone    : doTouchTone(comPtr);  break;          // Start or stop a touch tone.
+      case sweepUNS     : doSweepUNS(comPtr);   break;          // Wrap up the first 20 bytes we saved and send them off.
+      case callerID     : doCallID(comPtr);     break;          // Turn caller ID on/off. Comes in on every ring. uugh!
+      default           : break;                                // Who knows? Some sort of nonsense.
     }
-  } else {                                                // If we don't have a command..
-    while(fonaSS.available()&&unsIndex<UNS_BUFF_BYTES) {  // If some stray bytes float in..
-      unsBuff[unsIndex] = fonaSS.read();                  // Grab a byte and save it away.
-      unsIndex++;                                         // Increment the index.
+  } else {                                                      // If we don't have a command..
+    if (sweepState) {                                           // If Mr user wants to track unsolicited(sweep) data.
+      while(fonaSS.available()&&unsIndex<(UNS_BUFF_BYTES-1)) {  // If some stray bytes float in..
+        aChar = fonaSS.read();                                  // Grab a byte.`
+        if (isprint(aChar)) {                                   // If the char is printable..
+          unsBuff[unsIndex] = aChar;                            // Save it away.
+          unsIndex++;                                           // Increment the index.
+        } else {
+          unsIndex = 0;                                         // We toss everything but a string of 20 printable chars.
+        }
+      }
+      if (unsIndex==UNS_BUFF_BYTES-1) {                         // If we've maxed out the buffer..
+        unsBuff[unsIndex] = 0;                                  // Pop in a null as a end of string marker.`  
+        fona.setParam(F("AT+CLIP="),0);                         // Shut off the callerID stuff.
+        sweepState = false;                                     // Stop looking.
+      }
     }
   }
 }
@@ -143,13 +176,14 @@ void resetFONA(void) {
   delay(10);
   digitalWrite(FONA_RST, HIGH);
   delay(100);
-  fonaSS.begin(4800);                   // For talking to the FONA.
-  FONAOnline = fona.begin(fonaSS);      // Able to fire up the FONA.
-  fona.setAudio(FONA_EXTAUDIO);         // Use speaker, not headseat.
-  fona.setVolume(40);                   // This is the audio volume.
-  fona.setParam(F("AT+CRSL="), 60);     // Set ringer volume.
-  fona.setParam(F("AT+CALS="), 3);      // Set 3rd ringtone. 0..19
-  fona.enableNetworkTimeSync(true);     // See if it works..
+  fonaSS.begin(4800);                           // For talking to the FONA.
+  FONAOnline = fona.begin(fonaSS);              // Able to fire up the FONA.
+  fona.setAudio(FONA_EXTAUDIO);                 // Use speaker, not headseat.
+  fona.setVolume(35);                           // This is the audio volume.
+  fona.setParam(F("AT+CRSL="), 60);             // Set ringer volume.
+  fona.setParam(F("AT+CALS="), 0);              // Set 3rd ringtone. 0..19
+  sweepState = fona.setParam(F("AT+CLIP="),1);  // Send caller ID after each ring.
+  fona.enableNetworkTimeSync(true);             // See if it works..
 }
 
 
@@ -233,6 +267,8 @@ void doHangUp(byte* buff) {
 }
 
 
+// Calling program sends us a c string of a packed phone number. Save it to
+// our pnBuff to be used for outgoing SMS texts.
 void doSetPN(byte* buff) {
 
   char numChars;
@@ -262,6 +298,7 @@ void doSendSMSMsg(byte* buff) {
   }
   ourComObj.replyComBuff(1);                    // Send back our result.
 }
+
 
 // First incoming byte was the command, second byte is the index of the
 // message we're after. When we pack our reply it will be error byte
@@ -294,14 +331,34 @@ void doGetSMSMsg(byte* buff) {
 }
 
 
+// This packs up the contents of the sweep buffer as a c string and sends it to the calling program.
 void doSweepUNS(byte* buff) {
 
-  buff[0] = unsIndex;                   // First byte is num bytes coming..
-  for(int i=0;i<unsIndex;i++) {         // Loop through the bytes..
-    buff[i+1] = unsBuff[i];             // Load up the reply buffer.
-  }
-  ourComObj.replyComBuff(unsIndex+1);   // Send off what we got.
-  unsIndex = 0;                         // Reset the index for the next batch.
+  unsBuff[unsIndex] = 0;                  // Add trailing '\0'.
+  strcpy(buff,unsBuff);                   // Copy our bytes to the reply buff.
+  ourComObj.replyComBuff(unsIndex+1);     // Send off what we got.
+  unsIndex = 0;                           // Reset the index for the next batch.
+  unsBuff[0] = 0;                         // Reset the sweep buffer.
+}
+
+
+// CallerID comes in as "unsolicited data". Meaning, between FONA commands. The buffer we save this
+// unsolicited data in is sometimes called the sweep buffer. You want caller ID info.? Turn on the
+// sweep buffer and it will save off the first 20 or so bytes of unsolicited data. Another issue is
+// that this callerID stuff comes in on every ring! So once we get a load of it, we shut the damn
+// thing off. The calling program can turn it back on when the call is complete.
+void doCallID(byte* buff) {
+
+  if(fona.setParam(F("AT+CLIP="),buff[1])) {  // Turn caller ID on/off.
+    buff[0] = 0;                              // Success, reply 0 errors.
+  } else {
+    buff[0] = 1;                              // Fail, reply some sort of error.
+  }                                           // Reset the sweep buffer.
+  sweepState = !(buff[1]==0);                 // Either way, set the sweep state to what they wanted.
+  unsIndex = 0;                               // Reset the sweep index.
+  unsBuff[0] = 0;                             // Reset buffer.
+  fona.flushSweep();                          // Clear out the old junk.
+  ourComObj.replyComBuff(1);                  // Send back the reply.
 }
 
 
