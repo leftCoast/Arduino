@@ -453,9 +453,10 @@ bool callControl::filterCallerID(char* rawID,byte numChars) {
 	Serial.print("numChars : ");Serial.println(numChars);
 	Serial.print("[");
 	for(byte i=0;i<numChars;i++) {Serial.print((byte)(rawID[i]));Serial.print(",");}
-	//Serial.print(rawID);
 	Serial.println("]");
-	
+		Serial.print("[");
+	for(byte i=0;i<numChars;i++) {Serial.print(rawID[i]);}
+	Serial.println("]");
 	success = false;														// init success.
 	if (numChars>2) {														// It has to be more that two to be anything.
 		outBuff = NULL;													// init the outBuff.
@@ -492,33 +493,33 @@ bool callControl::filterCallerID(char* rawID,byte numChars) {
 void callControl::checkSweep(void) {
 
 	int   numBytes;
-	uint8_t	reply[22];
+	char	reply[22];
 
-	switch (ourCellManager.progress(mSweepID)){						// See what's going on here..
+	switch (ourCellManager.progress(mSweepID)){							// See what's going on here..
 		case com_standby  : 
-		case com_working  :  break;										// Nothing we can do here.
-		case com_holding  :													// Holding means there's a reply waiting for us.
-			numBytes = ourCellManager.numReplyBytes(mSweepID);		// This is how big the reply is.
+		case com_working  :  break;											// Nothing we can do here.
+		case com_holding  :														// Holding means there's a reply waiting for us.
+			numBytes = ourCellManager.numReplyBytes(mSweepID);			// This is how big the reply is.
 			Serial.print("Holding : ");Serial.print(numBytes);
-			ourCellManager.readReply(mCallingID,reply);				// Grab the data.
-			Serial.print(" [");Serial.print((char*)reply);Serial.println("]");
-			if (numBytes>11) {												// We got something?												
-				if (filterCallerID((char*)reply,numBytes)) {			// Attempt to isolate a caller ID from the raw data.
-					strcpy(mOurCallerID,(char*)reply);					// If we got something, save it.
+			ourCellManager.readReply(mCallingID,(uint8_t*)reply);		// Grab the data.
+			Serial.print(" [");Serial.print(reply);Serial.println("]");
+			if (numBytes>5) {														// We got something?												
+				if (filterCallerID(reply,numBytes)) {						// Attempt to isolate a caller ID from the raw data.
+					strcpy(mOurCallerID,reply);								// If we got something, save it.
 				}
 			}
-			mSweepID = -1;														// This command is done.
-			mState = hasIncoming;											// Set the state.
-			setNeedRefresh();													// Show whatever changed.
+			mSweepID = -1;															// This command is done.
+			mState = hasIncoming;												// Set the state.
+			setNeedRefresh();														// Show whatever changed.
 		break;
-		case com_complete :													// We missed something?													
-			mState = isIdle;													// Assume failure.
-			setNeedRefresh();													// Show new state.
-		case com_missing  :                                   	// Possibly timed out or we already got it.
-			mPhone->out("No response.");									// Just so we know.
-			mState = isIdle;													// If the FONA crashed, we're not connected..
-			mCallingID = -1;													// In any case we're done with this command.
-			setNeedRefresh();													// Things changed, lets see it.
+		case com_complete :														// We missed something?													
+			mState = isIdle;														// Assume failure.
+			setNeedRefresh();														// Show new state.
+		case com_missing  :                                   		// Possibly timed out or we already got it.
+			mPhone->out("No response.");										// Just so we know.
+			mState = isIdle;														// If the FONA crashed, we're not connected..
+			mCallingID = -1;														// In any case we're done with this command.
+			setNeedRefresh();														// Things changed, lets see it.
 		break;
 	}
 }

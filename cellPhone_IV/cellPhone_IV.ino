@@ -149,8 +149,8 @@ void loop() {
         if (isprint(aChar)) {                                   // If the char is printable..
           unsBuff[unsIndex] = aChar;                            // Save it away.
           unsIndex++;                                           // Increment the index.
-        } else {
-          unsIndex = 0;                                         // We toss everything but a string of 20 printable chars.
+        } else {                                                // Not printable..
+          unsIndex = 0;                                         // We toss everything and restart. Looking for a string of 20 printable chars.
         }
       }
       if (unsIndex==UNS_BUFF_BYTES-1) {                         // If we've maxed out the buffer..
@@ -334,9 +334,17 @@ void doGetSMSMsg(byte* buff) {
 // This packs up the contents of the sweep buffer as a c string and sends it to the calling program.
 void doSweepUNS(byte* buff) {
 
+  /*
   unsBuff[unsIndex] = 0;                  // Add trailing '\0'.
-  strcpy(buff,unsBuff);                   // Copy our bytes to the reply buff.
+  for(byte i=0;i<=unsIndex;i++) {         // Copy our bytes to the reply buff.
+    buff[i]==unsBuff[i];
+  }
   ourComObj.replyComBuff(unsIndex+1);     // Send off what we got.
+  unsIndex = 0;                           // Reset the index for the next batch.
+  unsBuff[0] = 0;                         // Reset the sweep buffer.
+  */
+  strcpy(buff,"Blubber");
+  ourComObj.replyComBuff(strlen(buff)+1);
   unsIndex = 0;                           // Reset the index for the next batch.
   unsBuff[0] = 0;                         // Reset the sweep buffer.
 }
