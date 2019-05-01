@@ -64,6 +64,12 @@ bool          havePN;
 
 void setup() {
 
+      Serial.begin(57600);
+    while (!Serial) {
+      
+    }
+    Serial.println("I'm here.");
+    
   havePN = false;                                 // We do not yet have a phone number to text to.
   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
@@ -145,16 +151,17 @@ void loop() {
   } else {                                                      // If we don't have a command..
     if (sweepState) {                                           // If Mr user wants to track unsolicited(sweep) data.
       while(fonaSS.available()&&unsIndex<(UNS_BUFF_BYTES-1)) {  // If some stray bytes float in..
-        aChar = fonaSS.read();                                  // Grab a byte.`
+        aChar = fonaSS.read();                                  // Grab a byte.
         if (isprint(aChar)) {                                   // If the char is printable..
+          Serial.print(aChar);Serial.print("[");Serial.print(unsIndex);Serial.print("] ");
           unsBuff[unsIndex] = aChar;                            // Save it away.
           unsIndex++;                                           // Increment the index.
         } else {                                                // Not printable..
           unsIndex = 0;                                         // We toss everything and restart. Looking for a string of 20 printable chars.
         }
+        unsBuff[unsIndex] = 0;                                  // Keep the buffer terminated.
       }
       if (unsIndex==UNS_BUFF_BYTES-1) {                         // If we've maxed out the buffer..
-        unsBuff[unsIndex] = 0;                                  // Pop in a null as a end of string marker.`  
         fona.setParam(F("AT+CLIP="),0);                         // Shut off the callerID stuff.
         sweepState = false;                                     // Stop looking.
       }
@@ -215,7 +222,8 @@ void doStatus(byte* buff) {
       error = error | B00001000;                                    // Flag the error.
     }
     statPtr->numSMSs = numSMS;                                      // Send on what we found.
-    fona.getTime(statPtr->networkTime, 23);                         // Write out the network time string.
+    //fona.getTime(statPtr->networkTime, 23);                       // Write out the network time string.
+    strcpy(statPtr->networkTime,"Disabled");
   } else {
     error = B00000001;                                              // If the FONA was offline, flag the eror.
   }
@@ -334,19 +342,16 @@ void doGetSMSMsg(byte* buff) {
 // This packs up the contents of the sweep buffer as a c string and sends it to the calling program.
 void doSweepUNS(byte* buff) {
 
-  /*
-  unsBuff[unsIndex] = 0;                  // Add trailing '\0'.
   for(byte i=0;i<=unsIndex;i++) {         // Copy our bytes to the reply buff.
     buff[i]==unsBuff[i];
   }
   ourComObj.replyComBuff(unsIndex+1);     // Send off what we got.
   unsIndex = 0;                           // Reset the index for the next batch.
   unsBuff[0] = 0;                         // Reset the sweep buffer.
-  */
-  strcpy(buff,"Blubber");
+  /*
+  strcpy((char*)buff,"Blubbering");
   ourComObj.replyComBuff(strlen(buff)+1);
-  unsIndex = 0;                           // Reset the index for the next batch.
-  unsBuff[0] = 0;                         // Reset the sweep buffer.
+  */
 }
 
 

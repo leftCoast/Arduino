@@ -6,7 +6,6 @@
 #include <quickCom.h>
 #include <cellCommon.h>
 
-#define rat	6
 //#define STATUS_TIME 1000
 
 
