@@ -190,13 +190,9 @@ void qCMaster::doReceiving(void) {
 			&& !ding()) {
 		mNumBytesMoved++;
 		mBuff[mNumBytesMoved] = MASTER_PORT.read();
-		Serial.print("[");Serial.print(mBuff[mNumBytesMoved]);Serial.print("] - ");
-		Serial.print("[");Serial.print((char)mBuff[mNumBytesMoved]);Serial.println("]");
 	}
 	if (mNumBytesMoved == mBuff[0]) {
 		mState = holding;
-		Serial.println("--");
-		Serial.println("--");
 	} else if (ding()) {
 		resizeBuff(0);
 		mError = TIMEOUT_ERR;

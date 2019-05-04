@@ -12,15 +12,54 @@
 #define FONA_RI  7
 
 #define COM_BUFF_BYTES  255
+#define CID_BUFF_BYTES  20
+
+class LC_fona : public Adafruit_FONA {
+
+  public:
+    LC_fona(void);
+    virtual ~LC_fona(void);
+
+    bool  setParam(FONAFlashStringPtr send, int32_t param);
+    bool  checkForCallerID(char* IDBuff, byte numBytes);
+
+    FONAFlashStringPtr ok_reply;
+};
+
+
+LC_fona::LC_fona(void)
+  : Adafruit_FONA(FONA_RST) {
+  ok_reply = F("OK");
+}
+
+
+LC_fona::~LC_fona(void) {  }
+
+
+bool LC_fona::setParam(FONAFlashStringPtr send, int32_t param) {
+
+  return sendCheckReply(send, param, ok_reply);
+}
+
+
+bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
+
+  if (strlen(replybuffer) > 15) {
+    return parseReplyQuoted(F("+CLIP: "), IDBuff, numBytes, ',', 0);
+  }
+  return false;
+}
+
 
 
 
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+Adafruit_FONA fona = LC_fona();
 
 bool          FONAOnline;
 byte          comBuff[COM_BUFF_BYTES]; // Buffer for all comunication.
+char          CIDBuff[CID_BUFF_BYTES];  // Buffer for callerID.
 
 
 void setup() {

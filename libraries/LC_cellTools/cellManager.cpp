@@ -384,7 +384,8 @@ void	cellManager::clearStatus(void) {
 	statusReg.volume				= 0;
 	statusReg.callStat			= CS_unknown;
 	statusReg.numSMSs				= 0;
-	strcpy(statusReg.networkTime,"unknown");
+	statusReg.statNum				= 0;
+	//strcpy(statusReg.callerID,"unknown");
   	statusReg.errByte				= 0;
 }
 
@@ -411,7 +412,8 @@ void cellManager::showCellStatus(void) {
   out(F("volume     : "));out(statusReg.volume);out(F("\n"));
   out(F("callStat   : "));out(statusReg.callStat);out(F("\n"));
   out(F("numSMSs    : "));out(statusReg.numSMSs);out(F("\n"));
-  out(F("Net Time   : "));out(statusReg.networkTime);out(F("\n"));
+  out(F("statNum    : "));out(statusReg.statNum);out(F("\n"));
+  //out(F("Caller ID  : "));out(statusReg.callerID);out(F("\n"));
   out(F("Error Byte : "));out(statusReg.errByte);out(F("\n"));
   out(F("------------------------------------"));outln;
   out(F("------------------------------------"));outln; 

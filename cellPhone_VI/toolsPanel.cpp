@@ -75,7 +75,8 @@ void  toolsPanel::showStatus(void) {
   outln;
   out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
   out(" Error byte : ");out(statusReg.errByte);out("\n");
-  out(" Net Time   : ");out(statusReg.networkTime);out("\n");
+  out(" Caller ID  : ");out(statusReg.callerID);out("\n");
+  out(" Stat No.   : ");out(statusReg.statNum);out("\n");
   /*
   out("DEBUGGING\n");
   out("Raw SMS    : [");out(SMSRaw);out("]\n");

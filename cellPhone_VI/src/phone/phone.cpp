@@ -59,7 +59,6 @@
 
 
 contact*	pleaseCall;	// The cellOS will set this to NULL on bootup.
-byte	byteBuff;		// Need an address for a byte? Here ya' go.
 
 // *****************************************************
 // ********************  phoneBtn  *********************
@@ -145,8 +144,6 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 	width					= width + COL_GAP;  // All the buttons are smaller, we're "special".
 	mCallingID			= -1;
 	mHangupID			= -1;
-	mSweepID				= -1;
-	mOurCallerID[0]	= '\0';
 	mState				= wakeUp;
 	graceTimer.setTime(GRACE_TIME);
 }
@@ -155,8 +152,6 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 // We're going down, blindly send out callerID on as well as a hangup command.
 callControl::~callControl(void) {
 
-	byteBuff = 1;
-	ourCellManager.sendCommand(callerID,1,&byteBuff,false);	// Make sure we leave this turned on.
 	mHangupID = ourCellManager.sendCommand(hangUp,false); 	// And make sure we hang up the phone .
 }
 
@@ -196,16 +191,16 @@ void callControl::drawSelf(void) {
 			}
 			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
 			screen->drawText("Answer");
-			if (mOurCallerID[0]=='\0') {
+			if (statusReg.callerID[0]=='\0') {
 				mPhone->out("Unknown caller.");
 			} else {
-				aContact = ourBlackBook->findByPN(mOurCallerID);
+				aContact = ourBlackBook->findByPN(statusReg.callerID);
 				if (aContact) {
 					mPhone->out(aContact->mNickName);
 				} else {
 					 PNLabel formatter(1,1,1,1,1);
 					 char	buff[30];
-					 formatter.setValue(mOurCallerID);
+					 formatter.setValue(statusReg.callerID);
 					 mPhone->out(formatter.mFormattedPN);
 				}
 			}
@@ -298,7 +293,17 @@ void callControl::idle() {
 	int   numBytes;
 	byte  reply;
    
-  	//mPhone->out(statusReg.callStat);
+   /*
+	switch (statusReg.callStat) {
+		case 0  : mPhone->out("Ready"); break;
+		case 1  : mPhone->out("No Status"); break;
+		case 2  : mPhone->out("Unknown"); break;
+		case 3  : mPhone->out("Ringing In"); break;
+		case 4  : mPhone->out("Ringing Out"); break;
+		default : mPhone->out("Unknown II"); break; 
+	}
+	*/
+  	//mPhone->out(statusReg.statNum);
 	switch(mState) {
 		case wakeUp 			:
 			mState = isIdle;												// No matter what, wakeUp is done. We want isIdle now.									
@@ -309,25 +314,19 @@ void callControl::idle() {
 				setNeedRefresh();											// Show it.
 			}
 		break;
-		case isIdle       	:															// Waiting to see what happens.
-			if (graceTimer.ding()) {													// Wait a bit for the state to reach us "through channels".
-				if(statusReg.callStat==CS_ringingIn) {								// If we have a connection ringing in..
-					mOurCallerID[0] = '\0';												// Clear this for the new call.
-					mSweepID = ourCellManager.sendCommand(sweepUNS,true);		// Send the sweep buffer. (look for caller ID)
-					mState = readCallerID;												// Set the state to deal with it.
+		case isIdle       	:											// Waiting to see what happens.
+			if (graceTimer.ding()) {									// Wait a bit for the state to reach us "through channels".
+				if(statusReg.callStat==CS_ringingIn) {				// If we have a connection ringing in..
+					mState = hasIncoming;								// Set the state to deal with it.
+					setNeedRefresh();										// As always, show it.
 				}
 			}
 		break;
 		case hasIncoming  	:
-			if (statusReg.callStat==CS_ready) {										// Not connected but no longer ringing..
-				byteBuff = 1;
-				ourCellManager.sendCommand(callerID,1,&byteBuff,false);		// In any case, turn this back on.
-				mState = isIdle;															// I guess they gave up, back to isIdle.
-				setNeedRefresh();															// As always, show it.
+			if (statusReg.callStat==CS_ready) {						// Not connected but no longer ringing..
+				mState = isIdle;											// I guess they gave up, back to isIdle.
+				setNeedRefresh();											// As always, show it.
 			}
-		break;
-		case	readCallerID	:											// We're looking for a caller ID.
-			checkSweep();													// We do the checking here.
 		break;
 		case	connecting		:											// A connection attempt is in process.
 			checkCall();													// We do the checking inhere.
@@ -338,7 +337,6 @@ void callControl::idle() {
 		case isConnected  	:															// We're connected..
 			if (graceTimer.ding()) {													// Wait a bit for the state to reach us "through channels".
 				if (statusReg.callStat==CS_ready) {									// If CS_ready means we lost connection.
-					byteBuff = 1;															// Set addressable byte to 1.
 					mState = isIdle;														// So we go back to idle state.
 					setNeedRefresh();														// And show it.
 				}
@@ -355,7 +353,7 @@ void callControl::checkHangup(void) {
 
 	int   numBytes;
 	byte  reply;
-  
+   
 	switch (ourCellManager.progress(mHangupID)){						// See what's going on here..
 		case com_standby  : 
 		case com_working  :  break;										// Nothing we can do here.
@@ -375,8 +373,6 @@ void callControl::checkHangup(void) {
 				mPhone->out("Reply error.");								// Something weird going on..
 				mState = isConnected;										// We assume hangup failed. Still connected.
 			}
-			byteBuff = 1;
-			ourCellManager.sendCommand(callerID,1,&byteBuff,false);	// In any case, turn this back on.
 			graceTimer.start();												// Start the grace timer. (Status lags and can mess us up.)
 			mHangupID = -1;													// This command is done.
 			setNeedRefresh();													// Show whatever changed.
@@ -401,7 +397,7 @@ void callControl::checkCall(void) {
 
 	int   numBytes;
 	byte  reply;
-  
+  	
 	switch (ourCellManager.progress(mCallingID)){					// See what's going on here..
 		case com_standby  : 
 		case com_working  :  break;										// Nothing we can do here.
@@ -421,8 +417,6 @@ void callControl::checkCall(void) {
 				mPhone->out("Internal error.");							// Something weird going on..
 				mState = isIdle;												// We assume hangup failed. Still connected.
 			}
-			byteBuff = 1;
-			ourCellManager.sendCommand(callerID,1,&byteBuff,false);	// In any case, turn this back on.
 			graceTimer.start();												// Start the grace timer. (Status lags and can mess us up.)
 			mCallingID = -1;													// This command is done.
 			setNeedRefresh();													// Show whatever changed.
@@ -440,91 +434,6 @@ void callControl::checkCall(void) {
 }
 
 
-// We want to strip everything but the caller ID out of rawID. If we are
-// successful, we'll leave a '\0' at its end for you. We'll either successfully
-// do this, or just shred rawID trying.
-bool callControl::filterCallerID(char* rawID,byte numChars) {
-	
-	char* outBuff;
-	byte	trace;
-	byte	index;
-	bool	success;
-	
-	Serial.print("numChars : ");Serial.println(numChars);
-	Serial.print("[");
-	for(byte i=0;i<numChars;i++) {Serial.print((byte)(rawID[i]));Serial.print(",");}
-	Serial.println("]");
-		Serial.print("[");
-	for(byte i=0;i<numChars;i++) {Serial.print(rawID[i]);}
-	Serial.println("]");
-	success = false;														// init success.
-	if (numChars>2) {														// It has to be more that two to be anything.
-		outBuff = NULL;													// init the outBuff.
-		if (resizeBuff(numChars,(uint8_t**)&outBuff)) {			// Stretch out the outBuff to fit our raw string.
-			memcpy(outBuff,rawID,numChars);							// Dump the raw buff into the outBuff.
-			index = 0;														// init index.
-			trace = 1;														// init trace. Ignore first byte, its length.
-			while(outBuff[trace]!='"'&&trace<numChars) {			// find first ".
-				trace++;
-			}														
-			if (trace<numChars) {										// If we didn't run out, were pointing at the first ".
-				trace++;														// Point at first char past the first ".
-				while(outBuff[trace]!='"'&&trace<numChars) {		// Find the next ".
-					rawID[index]=outBuff[trace];						// As we go along, start refilling the rawID with the chars.
-					trace++;													// bump.
-					index++;													// bump.
-				}
-				if (trace<numChars) {									// If we didn't run out, were pointing at the second ".
-					rawID[index]='\0';									// End the string here.
-					filterPNStr(rawID);									// Drop it into our filter function to strip out junk.
-					success = strlen(rawID)>0;							// If we have anything left, we call it good.
-				}
-			}
-			resizeBuff(0,(uint8_t**)&outBuff);						// Recycle the buffer.
-		}
-	}
-	return success;														// Return the result.
-}
-
- 
-// idle() wants us to check the status of our get called ID command. It may be
-// still working on making the call, it could have failed, possibly timed
-// out? Whatever, we deal with it and take action appropriately here.
-void callControl::checkSweep(void) {
-
-	int   numBytes;
-	char	reply[22];
-
-	switch (ourCellManager.progress(mSweepID)){							// See what's going on here..
-		case com_standby  : 
-		case com_working  :  break;											// Nothing we can do here.
-		case com_holding  :														// Holding means there's a reply waiting for us.
-			numBytes = ourCellManager.numReplyBytes(mSweepID);			// This is how big the reply is.
-			Serial.print("Holding : ");Serial.print(numBytes);
-			ourCellManager.readReply(mCallingID,(uint8_t*)reply);		// Grab the data.
-			Serial.print(" [");Serial.print(reply);Serial.println("]");
-			if (numBytes>5) {														// We got something?												
-				if (filterCallerID(reply,numBytes)) {						// Attempt to isolate a caller ID from the raw data.
-					strcpy(mOurCallerID,reply);								// If we got something, save it.
-				}
-			}
-			mSweepID = -1;															// This command is done.
-			mState = hasIncoming;												// Set the state.
-			setNeedRefresh();														// Show whatever changed.
-		break;
-		case com_complete :														// We missed something?													
-			mState = isIdle;														// Assume failure.
-			setNeedRefresh();														// Show new state.
-		case com_missing  :                                   		// Possibly timed out or we already got it.
-			mPhone->out("No response.");										// Just so we know.
-			mState = isIdle;														// If the FONA crashed, we're not connected..
-			mCallingID = -1;														// In any case we're done with this command.
-			setNeedRefresh();														// Things changed, lets see it.
-		break;
-	}
-}
-
-       
 // *****************************************************
 // *********************  phone   **********************
 // *****************************************************

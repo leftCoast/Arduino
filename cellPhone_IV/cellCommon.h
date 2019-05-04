@@ -1,8 +1,9 @@
 #ifndef cellCommon_h
 #define cellCommon_h
 
+#define CID_BUFF_BYTES  20
 
-enum cellCommands { getStatus, setCurrentPN, sendSMS, getSMS, makeCall, hangUp, pickUp, setVolume, chooseRing, touchTone, sweepUNS, callerID, somethingElse  };
+enum cellCommands { getStatus, setCurrentPN, sendSMS, getSMS, makeCall, hangUp, pickUp, setVolume, chooseRing, touchTone, somethingElse  };
 
 enum networkStatus { NS_notRegistered, NS_registeredHome, NS_registeredSearching, NS_denied, NS_unknown, NS_registeredRoaming };
 
@@ -17,7 +18,8 @@ struct cellStatus {
   uint16_t    volume;
   uint16_t    callStat;
   uint16_t    numSMSs;
-  char        networkTime[24];
+  char        callerID[CID_BUFF_BYTES];
+  uint16_t    statNum;
   uint16_t    errByte;
 };
  
