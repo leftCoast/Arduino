@@ -15,6 +15,7 @@
 #define out     mText->appendText
 #define outln   mText->appendText("\n")
 
+int statID = -1;
 
 // *****************************************************
 // ******************  toolsPanel  *******************
@@ -43,46 +44,49 @@ void toolsPanel::setup(void) {
 
 
 void  toolsPanel::showStatus(void) {
-  
-  mText->setText("");
-  outln;
-  out("           cellStatus");outln;outln;
-  out(" FONA online: ");out(statusReg.FONAOnline);outln;
-  out(" Battery V  : ");out(statusReg.batteryVolts);out("mV\n");
-  out(" Battery %  : ");out(statusReg.batteryPercent);out("%\n");
-  out(" RSSI       : ");out(statusReg.RSSI);outln;
-  out(" Net Stat   : ");
-  switch (statusReg.networkStat) {
-    case 0 : out("Not registered"); break;
-    case 1 : out("Reg. (home)"); break;
-    case 2 : out("Reg. (searching)"); break;
-    case 3 : out("Denied"); break;
-    case 4 : out("Unknown"); break;
-    case 5 : out("Reg. (roaming)"); break;
-    default : out("Undefined"); break;
+
+  if (statID!=statusReg.statNum) {
+    statID = statusReg.statNum;
+    mText->setText("");
+    outln;
+    out("           cellStatus");outln;outln;
+    out(" FONA online: ");out(statusReg.FONAOnline);outln;
+    out(" Battery V  : ");out(statusReg.batteryVolts);out("mV\n");
+    out(" Battery %  : ");out(statusReg.batteryPercent);out("%\n");
+    out(" RSSI       : ");out(statusReg.RSSI);outln;
+    out(" Net Stat   : ");
+    switch (statusReg.networkStat) {
+      case 0 : out("Not registered"); break;
+      case 1 : out("Reg. (home)"); break;
+      case 2 : out("Reg. (searching)"); break;
+      case 3 : out("Denied"); break;
+      case 4 : out("Unknown"); break;
+      case 5 : out("Reg. (roaming)"); break;
+      default : out("Undefined"); break;
+    }
+    outln;  
+    out(" Volume     : ");out(statusReg.volume);out("\n");
+    out(" CallState  : ");
+    switch (statusReg.callStat) {
+      case 0  : out("Ready"); break;
+      case 1  : out("No Status"); break;
+      case 2  : out("Unknown"); break;
+      case 3  : out("Ringing In"); break;
+      case 4  : out("Ringing Out"); break;
+      default : out("Unknown II"); break; 
+    }
+    outln;
+    out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
+    out(" Error byte : ");out(statusReg.errByte);out("\n");
+    out(" Caller ID  : ");out(statusReg.callerID);out("\n");
+    out(" Stat No.   : ");out(statusReg.statNum);out("\n");
+    /*
+    out("DEBUGGING\n");
+    out("Raw SMS    : [");out(SMSRaw);out("]\n");
+    out("SMS PN     : [");out(SMSPN);out("]\n");
+    out("SMS Msg    : [");out(SMSMsg);out("]\n");
+    */
   }
-  outln;  
-  out(" Volume     : ");out(statusReg.volume);out("\n");
-  out(" CallState  : ");
-  switch (statusReg.callStat) {
-    case 0  : out("Ready"); break;
-    case 1  : out("No Status"); break;
-    case 2  : out("Unknown"); break;
-    case 3  : out("Ringing In"); break;
-    case 4  : out("Ringing Out"); break;
-    default : out("Unknown II"); break; 
-  }
-  outln;
-  out(" Num SMSs   : ");out(statusReg.numSMSs);out("\n");
-  out(" Error byte : ");out(statusReg.errByte);out("\n");
-  out(" Caller ID  : ");out(statusReg.callerID);out("\n");
-  out(" Stat No.   : ");out(statusReg.statNum);out("\n");
-  /*
-  out("DEBUGGING\n");
-  out("Raw SMS    : [");out(SMSRaw);out("]\n");
-  out("SMS PN     : [");out(SMSPN);out("]\n");
-  out("SMS Msg    : [");out(SMSMsg);out("]\n");
-  */
 }
 
 

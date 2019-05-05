@@ -137,6 +137,7 @@ void loop() {
   checkComErr();                                                // Check for errors.
   if (ourComObj.haveBuff()) {                                   // If we have a complete command..
     comPtr = ourComObj.getComBuff();                            // Lets point at the command character.
+    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);             // And the last thing we do, befor dumping the buffers? Look for a caller ID.
     switch (comPtr[0]) {                                        // Using the command character, decide our action.
       case getStatus    : doStatus(comPtr);     break;          // Pack up a status struct and send it back.
       case makeCall     : doCall(comPtr);       break;          // Make a call. PN is to be packed in the buffer.
@@ -148,8 +149,6 @@ void loop() {
       case touchTone    : doTouchTone(comPtr);  break;          // Start or stop a touch tone.
       default           : break;                                // Who knows? Some sort of nonsense.
     }
-  } else {
-    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);
   }
 }
 
@@ -188,7 +187,6 @@ void doStatus(byte* buff) {
   error = 0;                                                        // No errors yet.
   statPtr->FONAOnline = FONAOnline;                                 // First thing. Is FONA online or not?
   if (statPtr->FONAOnline) {                                        // If FONA is online..
-    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);                 // BEFORE tromping all over. See if there is a caller ID waiting for us.
     if (!fona.getBattVoltage(&statPtr->batteryVolts)) {             // Attempt to read the battery voltage..
       statPtr->batteryVolts = 0;                                    // If there was an error, send out 0 volts.
       error = error | B00000010;                                    // Set the error bit for our error flag.
@@ -202,15 +200,15 @@ void doStatus(byte* buff) {
     statPtr->volume = fona.getVolume();                             // Volume.
     statPtr->callStat = (callStatus)fona.getCallStatus();           // Call status, no error checking.
     if (statPtr->callStat == CS_ready) {
-      CIDBuff[0] = 0;                                             // No one calling? Clear the buffer.
+      CIDBuff[0] = 0;                                               // No one calling? Clear the buffer.
     }
     numSMS = fona.getNumSMS();                                      // Number SMS(s). This one gives bogus numbers at times. Max is 30.
     if (numSMS > 30) {                                              // Try to catch the errors but might not work.
-      numSMS = 0;                                                    // Bogus readings get zero.
+      numSMS = 0;                                                   // Bogus readings get zero.
       error = error | B00001000;                                    // Flag the error.
     }
     statPtr->numSMSs = numSMS;                                      // Send on what we found.
-    statPtr->statNum = statNum++;
+    statPtr->statNum = statNum++;                                   // Bump the counter as a "I'm still alive." heartbeat.
     strcpy(statPtr->callerID, CIDBuff);                             // Send back the current caller ID.
   } else {
     error = B00000001;                                              // If the FONA was offline, flag the eror.
