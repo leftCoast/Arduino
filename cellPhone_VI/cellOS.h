@@ -22,6 +22,7 @@
 #define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"
 //#define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TGIVE.BMP"
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
+//#define IMAGE_FILE_PATH     "/system/icons/redX22.bmp"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
 #define ICON_PATH_X22       "/system/icons/redX22.bmp"

@@ -20,13 +20,15 @@ cellListener::cellListener(void)
   :idler() {
     
   callIncoming = false;
-  answerID = -1;
-  mSMSID = -1;
-  mSMSIndex = 1;							
-  newSMSmsg = false;
-  SMSPN[0] 	= '\0';
-  SMSMsg[0] = '\0';
-  SMSRaw[0] = '\0';
+  answerID		= -1;
+  mSMSID			= -1;
+  mSMSIndex		= 1;							
+  newSMSmsg		= false;
+  mFirstRing	= true;
+  mStatNum		= -1;
+  SMSPN[0] 		= '\0';
+  SMSMsg[0] 	= '\0';
+  SMSRaw[0] 	= '\0';
 }
 
 
@@ -42,10 +44,17 @@ void cellListener::begin(int answerPanelID) {
 
 void cellListener::idle(void) {
 	
-	if (!callIncoming) {
-		if (statusReg.callStat == CS_ringingIn) {
-			callIncoming = true;
-			nextPanel = answerID;
+	if (!callIncoming) {													// If we've not seen an incoming call yet..
+		if (statusReg.callStat == CS_ringingIn) {					// Oh! A call's coming in!
+			if (mFirstRing) {												// First ring?
+				mFirstRing = false;										// We've now seen the first ring.
+				mStatNum = statusReg.statNum;							// ..and this was the statNum we saw it on.
+			} else if (mStatNum != statusReg.statNum) {			// Else if the statNum has changed..
+				mFirstRing = true;										// Second stat since ringing in. Reset first ring.
+				callIncoming = true;										// Tell the world we have a call.
+				nextPanel = answerID;									// Call up the telephone App.
+			}
+			return;															// First or second, we're done here.
 		}
 	}  else {
 		if(statusReg.callStat != CS_ringingIn) {

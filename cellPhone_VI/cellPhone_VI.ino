@@ -37,6 +37,10 @@
 
 void setup() {
 
+  Serial.begin(9600);
+  while(!Serial);
+  Serial.println("I'm here");
+  Serial.flush();
   analogWrite(SCREEN_PIN,0);    // Turn off backlight.
   
   // First bring the screen online.
@@ -49,7 +53,7 @@ void setup() {
   if (ourCellManager.readErr()!=NO_ERR) { // Did the poor thing fire up?
     while(true);
   }
-  
+
   if (!SD.begin(SD_CS)) {     // Bring the diskdrive online.
     while(true);
   }

@@ -29,7 +29,7 @@ class bmpPipe {
 	virtual	void				drawLine(File bmpFile,int x,int y);
 				void				drawLine(File bmpFile,int x,int y,RGBpack* colorBuff);
 				unsigned long	filePtr(int x,int y);
-      		//void      	showPipe(void);
+      		void      		showPipe(void);
     
 	protected:
     			uint16_t  		read16(File f);

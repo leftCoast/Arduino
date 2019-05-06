@@ -45,7 +45,7 @@ bool LC_fona::setParam(FONAFlashStringPtr send, int32_t param) {
 bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
 
   if (mySerial->available()) {                                          // Is something is there we didn't ask for..
-    if (readline(20,false) > 15) {                                      // See if we can grab the first 20 or so chars.
+    if (readline(25,true) > 15) {                                      // See if we can grab the first 20 or so chars.
       return parseReplyQuoted(F("+CLIP: "), IDBuff, numBytes, ',', 0);  // Run it through the Adafruit parser thing to see if its a caller ID.
     }
   }
@@ -137,7 +137,7 @@ void loop() {
   checkComErr();                                                // Check for errors.
   if (ourComObj.haveBuff()) {                                   // If we have a complete command..
     comPtr = ourComObj.getComBuff();                            // Lets point at the command character.
-    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);             // And the last thing we do, befor dumping the buffers? Look for a caller ID.
+    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);             // And the last thing we do, before dumping the buffers? Look for a caller ID.
     switch (comPtr[0]) {                                        // Using the command character, decide our action.
       case getStatus    : doStatus(comPtr);     break;          // Pack up a status struct and send it back.
       case makeCall     : doCall(comPtr);       break;          // Make a call. PN is to be packed in the buffer.
@@ -200,7 +200,7 @@ void doStatus(byte* buff) {
     statPtr->volume = fona.getVolume();                             // Volume.
     statPtr->callStat = (callStatus)fona.getCallStatus();           // Call status, no error checking.
     if (statPtr->callStat == CS_ready) {
-      CIDBuff[0] = 0;                                               // No one calling? Clear the buffer.
+      //CIDBuff[0] = 0;                                               // No one calling? Clear the buffer.
     }
     numSMS = fona.getNumSMS();                                      // Number SMS(s). This one gives bogus numbers at times. Max is 30.
     if (numSMS > 30) {                                              // Try to catch the errors but might not work.
