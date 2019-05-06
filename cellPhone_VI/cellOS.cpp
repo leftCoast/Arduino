@@ -406,12 +406,7 @@ homeScreen::homeScreen(void)
 
   imageRect.setRect(0,0,BMP_AW,BMP_AH);
   mBackImage = new bmpPipe(imageRect);
-  if(mBackImage->openPipe(IMAGE_FILE_PATH)){
-    Serial.println("Opened image pipe");
-  } else {
-    Serial.println("Failed to open image pipe");
-  }
-  mBackImage->showPipe();
+  mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;
   phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/call.bmp");
   iconX=iconX+HP_ICON_XSTEP;

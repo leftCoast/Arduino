@@ -34,18 +34,13 @@ boolean bmpPipe::openPipe(char* filename) {
 	rect aRect;
 	File bmpFile;
 
-  Serial.print("Attempting to open : ");Serial.println(filename);
   haveInfo = false;												// Ok, assume failure..									
   if (filePath) {													// If we have a path, loose it.
   	free(filePath);												// Free memory.
   	filePath=NULL;													// And flag it!
   }
   bmpFile = SD.open(filename);								// See if it works.
-  if (!bmpFile) {
-  		Serial.print("Can't open : ");Serial.println(filename);
-  }
   if (bmpFile) {    												// We got a file?
-    Serial.print("File opened : ");Serial.println(filename);
     if (readInfo(bmpFile)) {									// Then see if we can understand it	
     	filePath = (char*) malloc(strlen(filename)+1);	// Grab storage for name;
     	if (filePath) {											// Got some?

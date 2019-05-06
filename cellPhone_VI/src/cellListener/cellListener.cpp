@@ -41,6 +41,27 @@ void cellListener::begin(int answerPanelID) {
 	answerID = answerPanelID;
 }
 
+/*
+void cellListener::idle(void) {
+	
+	if (!callIncoming) {													// If we've not seen an incoming call yet..
+		if (statusReg.callStat == CS_ringingIn) {					// Oh! A call's coming in!
+			callIncoming = true;										// Tell the world we have a call.
+			nextPanel = answerID;									// Call up the telephone App.
+		}
+	}  else {
+		if(statusReg.callStat != CS_ringingIn) {
+			callIncoming = false;
+		}
+	}
+	if (statusReg.numSMSs>0) {
+		doSMS();
+	} else {
+		mSMSIndex = 1;											// No messages? Restart our next search at 1.
+	}
+}
+*/
+
 
 void cellListener::idle(void) {
 	

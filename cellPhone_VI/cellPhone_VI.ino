@@ -41,6 +41,7 @@ void setup() {
   while(!Serial);
   Serial.println("I'm here");
   Serial.flush();
+  
   analogWrite(SCREEN_PIN,0);    // Turn off backlight.
   
   // First bring the screen online.
