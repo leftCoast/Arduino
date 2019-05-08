@@ -31,7 +31,7 @@
 // things to reflect what's going on.
 
 #define	GRACE_TIME	3000	// Once we make a change, we'll wait this long (ms) before checking status.
-
+#define	CID_BYTES	15
 
 extern	contact* pleaseCall;
 
@@ -55,7 +55,7 @@ class callControl :	public phoneBtn,
 							public idler {
 	public:
 
-	enum callConState { wakeUp, isIdle, hasIncoming, readCallerID, connecting, hangingUp, isConnected };
+	enum callConState { wakeUp, isIdle, hasIncoming, connecting, hangingUp, isConnected };
   
 				callControl(int x,int y,char inKey,phone* inPhone);
 	virtual	~callControl(void);
@@ -70,6 +70,7 @@ class callControl :	public phoneBtn,
 				callConState	mState;
 				int				mCallingID;			// We're in the calling sequence. Here's our command ID.
 				int				mHangupID;			// We're in the hangup sequence. Here's our command ID.
+				char				mSavedCallerID[CID_BYTES];
 				timeObj			graceTimer;
 };
 

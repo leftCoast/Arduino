@@ -145,6 +145,7 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 	mCallingID			= -1;
 	mHangupID			= -1;
 	mState				= wakeUp;
+	mSavedCallerID[0]	= '\0';
 	graceTimer.setTime(GRACE_TIME);
 }
 
@@ -199,7 +200,6 @@ void callControl::drawSelf(void) {
 					mPhone->out(aContact->mNickName);
 				} else {
 					 PNLabel formatter(1,1,1,1,1);
-					 char	buff[30];
 					 formatter.setValue(statusReg.callerID);
 					 mPhone->out(formatter.mFormattedPN);
 				}
@@ -266,8 +266,7 @@ void callControl::doAction(void) {
     		mPhone->out("Answering..");
     		mState = connecting;
 		break;
-		case readCallerID	: break;																			// We do nothing in the intermediate states.
-		case connecting	: break;											
+		case connecting	: break;																			// We do nothing in the intermediate states.										
 		case hangingUp		: break;
 		case isConnected	:
 			mHangupID = ourCellManager.sendCommand(hangUp,true);									// Create the command and send it on its way. 
@@ -323,6 +322,10 @@ void callControl::idle() {
 			}
 		break;
 		case hasIncoming  	:
+			if (strcmp(mSavedCallerID,statusReg.callerID)) {	// The caller ID has changed?
+				strcpy(mSavedCallerID,statusReg.callerID);		// Copy the new string to our saved space.
+				setNeedRefresh();											// Force a redraw to see the result.
+			}
 			if (statusReg.callStat==CS_ready) {						// Not connected but no longer ringing..
 				mState = isIdle;											// I guess they gave up, back to isIdle.
 				setNeedRefresh();											// As always, show it.

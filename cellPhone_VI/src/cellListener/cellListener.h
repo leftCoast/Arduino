@@ -21,8 +21,6 @@ class cellListener :  public idler {
 				int	answerID;
 				int	mSMSID;
  			 	int	mSMSIndex;
- 			 	bool	mFirstRing;
- 			 	int	mStatNum;
 };
 
 extern bool				callIncoming;

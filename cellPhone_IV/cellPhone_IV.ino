@@ -200,7 +200,7 @@ void doStatus(byte* buff) {
     statPtr->volume = fona.getVolume();                             // Volume.
     statPtr->callStat = (callStatus)fona.getCallStatus();           // Call status, no error checking.
     if (statPtr->callStat == CS_ready) {
-      //CIDBuff[0] = 0;                                               // No one calling? Clear the buffer.
+      CIDBuff[0] = 0;                                               // No one calling? Clear the buffer.
     }
     numSMS = fona.getNumSMS();                                      // Number SMS(s). This one gives bogus numbers at times. Max is 30.
     if (numSMS > 30) {                                              // Try to catch the errors but might not work.
@@ -214,7 +214,7 @@ void doStatus(byte* buff) {
     error = B00000001;                                              // If the FONA was offline, flag the eror.
   }
   statPtr->errByte = error;                                         // And finally the error flag goes in.
-  ourComObj.replyComBuff(sizeof(cellStatus));                      // Send the info on its way.
+  ourComObj.replyComBuff(sizeof(cellStatus));                       // Send the info on its way.
 }
 
 
