@@ -144,7 +144,6 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 	width					= width + COL_GAP;  // All the buttons are smaller, we're "special".
 	mCallingID			= -1;
 	mHangupID			= -1;
-	mCallerID			= NULL;
 	mState				= wakeUp;
 	mSavedCallerID[0]	= '\0';
 	graceTimer.setTime(GRACE_TIME);
@@ -155,33 +154,6 @@ callControl::callControl(int x,int y,char inKey,phone* inPhone)
 callControl::~callControl(void) {
 
 	mHangupID = ourCellManager.sendCommand(hangUp,false); 	// And make sure we hang up the phone .
-}
-
-
-void callControl::checkID(void) {
-	
-	byte	numBytes;
-	
-	if (mCallerID==NULL) {
-		if (statusReg.callerID[0]=='\0') {
-			return false;
-		} else {
-			numBytes = strlen(statusReg.callerID ) + 1;
-			if (resizeBuff(numBytes,(uint8_t**)&mCallerID)) {
-				strcpy(mCallerID,statusReg.callerID);
-				resizeBuff(0,(uint8_t**)&mCallerID);
-				setNeedRefresh();
-			}
-		}
-	} else {
-		if (strcmp(statusReg.callerID,mCallerID)) {
-			if (resizeBuff(numBytes,(uint8_t**)&mCallerID)) {
-				strcpy(mCallerID,statusReg.callerID);
-				resizeBuff(0,(uint8_t**)&mCallerID);
-				setNeedRefresh();			}
-		} else {
-		}
-	}	
 }
 
 
