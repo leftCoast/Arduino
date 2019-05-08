@@ -2,8 +2,8 @@
 #include <cellCommon.h>
 
 #define COM_TIMEOUT 30000
-#define STATUS_TIME 1000
-#define ID_MAX      2000
+#define STATUS_TIME   750
+#define ID_MAX       2000
 
 #define out Serial.print
 #define outln Serial.println()

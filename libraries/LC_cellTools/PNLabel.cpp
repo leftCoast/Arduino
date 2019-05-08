@@ -58,7 +58,6 @@ void PNLabel::setValue(char* str) {
 
 	int numBytes;
 	
-	
 	if (str) {																		// No NULLs!
 		filterPNStr(str);															// Remove the "junk".
 		numBytes = strlen(str)+1;												// Count what's left over.
@@ -101,7 +100,6 @@ void PNLabel::getRawPN(char* inBuff) {
 // decides, from reading the first character, what subsequent method to
 // call.				
 void PNLabel::formatPN(void) {
-  
   switch(mRawPN[0]) {
     case '1'  : formatOne();    break;
     case '*'  : formatStar();   break;

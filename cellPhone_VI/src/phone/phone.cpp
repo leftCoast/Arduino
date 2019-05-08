@@ -163,6 +163,8 @@ callControl::~callControl(void) {
 void callControl::drawSelf(void) {
 
 	contact*	aContact;
+	char		PNBuff[CID_BYTES];
+	PNLabel formatter(1,1,1,1,1);
 	
 	hookup();
 	screen->setTextSize(TEXT_SIZE);
@@ -195,13 +197,13 @@ void callControl::drawSelf(void) {
 			if (statusReg.callerID[0]=='\0') {
 				mPhone->out("Unknown caller.");
 			} else {
-				aContact = ourBlackBook->findByPN(statusReg.callerID);
+				strcpy(PNBuff,statusReg.callerID);
+				aContact = ourBlackBook->findByPN(PNBuff);
 				if (aContact) {
 					mPhone->out(aContact->mNickName);
 				} else {
-					 PNLabel formatter(1,1,1,1,1);
-					 formatter.setValue(statusReg.callerID);
-					 mPhone->out(formatter.mFormattedPN);
+					 formatter.setValue(PNBuff);
+					 mPhone->out(formatter.buff);
 				}
 			}
 		break;
@@ -305,17 +307,22 @@ void callControl::idle() {
   	//mPhone->out(statusReg.statNum);
 	switch(mState) {
 		case wakeUp 			:
-			mState = isIdle;												// No matter what, wakeUp is done. We want isIdle now.									
+			mState = isIdle;												// NAs a default, wakeUp is done. We want isIdle now.									
 			if (pleaseCall) {												// We've been woken up to make this call.
 				mPhone->numDisplay->setValue(pleaseCall->mPN);	// Grab the number off the saved contact.
 				pleaseCall = NULL;										// Clear out the saved contact ptr.
 				doAction();													// Since we are now in "isIdle" we call doAction to connect.
 				setNeedRefresh();											// Show it.
+			} else if (statusReg.callStat==CS_ringingIn) {		// Else if we woke up to a connection ringing in..
+				strcpy(mSavedCallerID,statusReg.callerID);		// Copy the new string to our saved space.
+				mState = hasIncoming;									// Set the state to deal with it.
+				setNeedRefresh();											// As always, show it.
 			}
 		break;
 		case isIdle       	:											// Waiting to see what happens.
 			if (graceTimer.ding()) {									// Wait a bit for the state to reach us "through channels".
 				if(statusReg.callStat==CS_ringingIn) {				// If we have a connection ringing in..
+					strcpy(mSavedCallerID,statusReg.callerID);	// Copy the new string to our saved space.
 					mState = hasIncoming;								// Set the state to deal with it.
 					setNeedRefresh();										// As always, show it.
 				}

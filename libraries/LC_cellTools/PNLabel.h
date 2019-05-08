@@ -26,9 +26,10 @@ class PNLabel : public label {
 				void  formatStar(void);
 				void  formatHash(void);
 				void  formatStd(void);
-
-				char* mFormattedPN;
-				char* mRawPN;
+				
+	private:
+				char* mFormattedPN;		// Don't be thinking there's anything useful saved here.
+				char* mRawPN;				// Or in here.
 };
 
 

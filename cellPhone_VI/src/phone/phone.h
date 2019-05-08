@@ -31,7 +31,7 @@
 // things to reflect what's going on.
 
 #define	GRACE_TIME	3000	// Once we make a change, we'll wait this long (ms) before checking status.
-#define	CID_BYTES	15
+#define	CID_BYTES	20
 
 extern	contact* pleaseCall;
 
