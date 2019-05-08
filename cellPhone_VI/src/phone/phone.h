@@ -70,6 +70,7 @@ class callControl :	public phoneBtn,
 				callConState	mState;
 				int				mCallingID;			// We're in the calling sequence. Here's our command ID.
 				int				mHangupID;			// We're in the hangup sequence. Here's our command ID.
+				char*				mCallerID;			// The last callerID we saw. Handy for forcing redraws.
 				timeObj			graceTimer;
 };
 
