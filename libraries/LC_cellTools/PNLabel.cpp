@@ -4,11 +4,13 @@
    
 // Drop in a string and this'll strip out anything
 // that's not a "dial-able" character.
+// ** WARNING ** This writes to the string in place. So you can't pass a string that was
+// allocated at compile time IE char myNum = "1 408 340-0352"
 void filterPNStr(char* str) {
 
 	int numChars;
 	int index;
-
+	
 	if (str) {									// Sanity, they could pass in a NULL. They do that now and then.
 		numChars = strlen(str);				// Ok have something. Lets count 'em.
 		index = 0;								// We'll use this to index mRawPN.

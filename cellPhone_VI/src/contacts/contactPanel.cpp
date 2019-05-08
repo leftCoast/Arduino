@@ -91,7 +91,7 @@ void addrStarter::begin(char* filePath,bool resetFile) {
       mFile = new blockFile(filePath);
       ourBlackBook = new contactList(mFile);
       aContact = ourBlackBook->findOrAddContact("14083400352");
-      aContact->setNickName("Me");
+      aContact->setNickName("Left Coast");
       aContact->setFirstName("Jim");
       aContact->setLastName("Lee");
       aContact->setCompanyName("Left Coast");

@@ -86,20 +86,12 @@ void contact::setPNNick() {
 	int		numBytes;
 	char*		buff;
 	
-	Serial.println("setPNNick.");Serial.flush();
 	if (!strlen(mNickName)) {									// If we have no nickname.
-		Serial.println("Nick was empty, setting new value of the phone number.");Serial.flush();
-		Serial.print("mPN : ");Serial.println(mPN);Serial.flush();
 		numField.setValue(mPN);									// Set the phone number into the formatter.
-		Serial.println("Getting new byte count.");Serial.flush();
 		numBytes = numField.getNumChars() + 1;				// How big is the result?
-		Serial.println("Resizing buffer.");Serial.flush();
 		if (resizeBuff(numBytes,(uint8_t**)&buff)) {		// Stretch out the buffer.
-			Serial.println("Grabbing formatted number.");Serial.flush();
 			numField.getText(buff);								// Grab the formatted string.
-      	Serial.println("Setting nick name.");Serial.flush();
       	setNickName(buff);									// Set out nick name to the formatted phone number.
-      	Serial.println("DUmping the buffer..");Serial.flush();
       	resizeBuff(0,(uint8_t**)&buff);					// Recycle the buffer.
    	 }
 	}
@@ -338,21 +330,30 @@ contactList::~contactList(void) {  }
 // can't find one, it returns NULL as a flag.
 contact* contactList::findByPN(char* phoneNum) {
 
-	contact*  trace;
+	contact*	trace;
+	int		numChars;
+	char*		strBuff;
 	
-	if (strlen(phoneNum)>0) {							// Make sure we actually got something to work with.
-		filterPNStr(phoneNum);							// Now, rip the junk from the number.
-		if (strlen(phoneNum)>0) {						// Make sure we have anything left to work with.
-			trace = (contact*)getFirst();					// Set up our standard tracer.
-			while(trace) {										// While we ain't sitting on a NULL.
-				if (!strcmp(trace->mPN,phoneNum)) {		// Do the compare. If we got it?
-					return trace;								// Return the pointer to it.
+	strBuff = NULL;													// Init the string buffer.
+	numChars = strlen(phoneNum);									// Count the chars.
+	if (numChars>0) {													// Make sure we actually got something to work with.
+		if (resizeBuff(numChars+1,(uint8_t**)&strBuff)) {	// Allocate a buffer. (We can't accidentally pass in a constant, this avoids that.)
+			strcpy(strBuff,phoneNum);								// Make the dynamic copy of the phone number.
+			filterPNStr(strBuff);									// Now, rip the junk from the number.
+			if (strlen(strBuff)>0) {								// Make sure we have anything left to work with.
+				trace = (contact*)getFirst();						// Set up our standard tracer.
+				while(trace) {											// While we ain't sitting on a NULL.
+					if (!strcmp(trace->mPN,strBuff)) {			// Do the compare. If we got it?
+						resizeBuff(0,(uint8_t**)&strBuff);		// Recycle the string buffer.
+						return trace;									// Return the contact pointer.
+					}
+					trace = (contact*)trace->next;				// Or we just move on. Nothing to see here.
 				}
-				trace = (contact*)trace->next;			// Or we just move on. Nothing to see here.
 			}
+			resizeBuff(0,(uint8_t**)&strBuff);					// Recycle the string buffer.
 		}
 	}
-	return NULL;												// If we've arrived here, we couldn't find anything.
+	return NULL;														// If we've arrived here, we couldn't find anything.
 }
 
 
