@@ -62,6 +62,19 @@ void linkListObj::deleteTail(void) {
 }				
 
 
+// *** If you plan on sorting, its a good idea to fill out both! Even if one is a just function of the other. ***
+//
+// Are we greater than the linkListObj that has been passed in? You fill this out if you
+// plan to use the sorting method of linkList.
+bool linkListObj::isGreaterThan(linkListObj* compObj) { return false; }
+
+
+// Are we less than the linkListObj that has been passed in? You fill this out if you
+// plan to use the sorting method of linkList.
+bool linkListObj::isLessThan(linkListObj* compObj) { return false; }
+
+
+
 //********************* linkList *************************
 // your basic linked list. Good base for linked list things, you know.
 
@@ -187,7 +200,68 @@ linkListObj* linkList::getByIndex(int index) {
 	}
 	return NULL;
 }
+
+
+linkListObj*	linkList::findMax(linkListObj* present) {
+
+	linkListObj*	trace;
+	linkListObj*	maxNode;
 	
+	maxNode = present;
+	trace = present;
+	while(trace) {
+		if (trace->isGreaterThan(maxNode)) {
+			maxNode = trace;
+		}
+		trace = trace->getNext();
+	}
+	return maxNode;
+}
+
+
+linkListObj*	linkList::findMin(linkListObj* present) {
+
+	linkListObj*	trace;
+	linkListObj*	minNode;
+	
+	minNode = present;
+	trace = present;
+	while(trace) {
+		if (trace->isLessThan(minNode)) {
+			minNode = trace;
+		}
+		trace = trace->getNext();
+	}
+	return minNode;
+}
+
+
+// If the virtual isGreaterThan() and isLessThan() methods have been filled out this will
+// sort your list for you.
+void linkList::sort(bool ascending) {
+
+	linkListObj*	trace;
+	linkListObj*	maxMin;
+	int				i;
+	
+	i = 0;
+	trace = getByIndex(i);
+	while(trace) {
+		if (ascending) {
+			maxMin = findMax(trace);
+		} else {
+			maxMin = findMin(trace);
+		}
+		if (maxMin) {
+			unlinkObj(maxMin);
+			addToTop(maxMin);
+		}
+		i++;
+		trace = getByIndex(i);
+	}
+}
+
+
 // ********** stack ****************
 // Your basic stack. Mostly pass throughs with the usual names.
 

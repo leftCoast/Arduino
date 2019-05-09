@@ -134,6 +134,68 @@ void contact::setCompanyName(char* companyName) {
 }
 
 
+// Are we greater than the obj being passed in?
+bool contact::isGreaterThan(linkListObj* compObj) {
+	
+	contact*	compContact;
+	char*		myUPStr;
+	char*		compUPStr;
+	bool		result;
+	
+	myUPStr		= NULL;
+	compUPStr	= NULL;
+	result		= false;
+	if (compObj) {
+		compContact	= (contact*)compObj;
+		if (resizeBuff(strlen(mNickName)+1,(uint8_t**)&myUPStr)) {
+			if (resizeBuff(strlen(compContact->mNickName)+1,(uint8_t**)&compUPStr)) {
+				strcpy(myUPStr,mNickName);
+				for(int i=0;i<strlen(myUPStr);i++) { toupper(myUPStr[i]); }
+				strcpy(compUPStr,compContact->mNickName);
+				for(int i=0;i<strlen(compUPStr);i++) { toupper(compUPStr[i]); }
+				if (strcmp(myUPStr,compUPStr)>0) {
+					result = true;
+				}
+				resizeBuff(0,(uint8_t**)&compUPStr);
+			}
+			resizeBuff(0,(uint8_t**)&myUPStr);
+		}
+	}
+	return result;
+}
+
+	
+// Are we less than the obj being passed in?	
+bool contact::isLessThan(linkListObj* compObj) {
+
+	contact*	compContact;
+	char*		myUPStr;
+	char*		compUPStr;
+	bool		result;
+	
+	myUPStr		= NULL;
+	compUPStr	= NULL;
+	result		= false;
+	if (compObj) {
+		compContact	= (contact*)compObj;
+		if (resizeBuff(strlen(mNickName)+1,(uint8_t**)&myUPStr)) {
+			if (resizeBuff(strlen(compContact->mNickName)+1,(uint8_t**)&compUPStr)) {
+				strcpy(myUPStr,mNickName);
+				for(int i=0;i<strlen(myUPStr);i++) { toupper(myUPStr[i]); }
+				strcpy(compUPStr,compContact->mNickName);
+				for(int i=0;i<strlen(compUPStr);i++) { toupper(compUPStr[i]); }
+				if (strcmp(myUPStr,compUPStr)<0) {
+					result = true;
+				}
+				resizeBuff(0,(uint8_t**)&compUPStr);
+			}
+			resizeBuff(0,(uint8_t**)&myUPStr);
+		}
+	}
+	return result;
+}
+
+	
 // How many bytes is our block of text messages?
 unsigned long contact::sizeOfMsgBlock(void) { return mFile->getBlockSize(mMsgID); }
 

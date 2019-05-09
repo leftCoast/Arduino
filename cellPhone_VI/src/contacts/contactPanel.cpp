@@ -408,14 +408,15 @@ void PNList::addContact(contact* contactPtr,bool showContact) {
 
 void PNList::fillList(void) {
 
-  int           numAddr;
-  contact*      contactPtr;
+	int		numAddr;
+	contact*	contactPtr;
 
-  numAddr = ourBlackBook->getCount();
-  for (int i=0;i<numAddr;i++) {
-    contactPtr = (contact*)ourBlackBook->getByIndex(i);
-    addContact(contactPtr);
-  }
+	ourBlackBook->sort(true);
+	numAddr = ourBlackBook->getCount();
+	for (int i=0;i<numAddr;i++) {
+		contactPtr = (contact*)ourBlackBook->getByIndex(i);
+		addContact(contactPtr);
+	}
 }
 
 
@@ -445,9 +446,10 @@ void PNList::deleteContact(void) {
     if (anItem) {                               // If we found the list item..
       currContact = NULL;                       // Just in case, loose the currentContact.
       ourBlackBook->deleteContact(aContact);    // Tell our black book to delete the contact. Using local address copy.
+      ourBlackBook->sort(true);						// Resort the contact list.
       delete(anItem);                           // Delete the list item.
       setPositions();                           // Close holes in the list of items.
-      needRefresh = true;								        // Force a redraw.
+      setNeedRefresh();									// Force a redraw.
     }
   }
 }

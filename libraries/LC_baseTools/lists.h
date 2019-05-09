@@ -19,12 +19,13 @@ class linkListObj {
     			linkListObj(void);
     virtual	~linkListObj(void);
     
-    virtual	void 				linkAfter(linkListObj* present);	// Given a pointer to a node, link yourself after it.
-    virtual	void 				linkToEnd(linkListObj* present);	// Given a pointer to a node, link yourself after the last in the chain.
-    virtual linkListObj*	getNext(void);							// Pass back the next pointer.
-    virtual	void				setNext(linkListObj* ptr);			// Point somewhere else.
-    virtual void				deleteTail(void);						// Call delete on everyone hooked to us.
-  
+    virtual	void 				linkAfter(linkListObj* present);			// Given a pointer to a node, link yourself after it.
+    virtual	void 				linkToEnd(linkListObj* present);			// Given a pointer to a node, link yourself after the last in the chain.
+    virtual linkListObj*	getNext(void);									// Pass back the next pointer.
+    virtual	void				setNext(linkListObj* ptr);					// Point somewhere else.
+    virtual void				deleteTail(void);								// Call delete on everyone hooked to us.
+    virtual bool				isGreaterThan(linkListObj* compObj);	// Are we greater than the obj being passed in? Primary sorting function.
+    virtual bool				isLessThan(linkListObj* compObj);		// Are we less than the obj being passed in? Primary sorting function.
   //protected : 		// Protected seems broken. 
     linkListObj* next;
 };
@@ -45,6 +46,9 @@ class linkList {
     virtual bool				isEmpty(void);
     virtual linkListObj*	getFirst(void);
     virtual linkListObj*	getLast(void);
+    virtual linkListObj*	findMax(linkListObj* present);
+    virtual linkListObj*	findMin(linkListObj* present);
+    virtual	void				sort(bool decending);
     
     		int			 		getCount(void);
     		linkListObj* 		getByIndex(int index);										
