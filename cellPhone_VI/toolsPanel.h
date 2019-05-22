@@ -27,6 +27,11 @@ class toolsPanel :  public panel {
 
           timeObj     statusTimer;
           textView*   mText;
+
+          bmpPipe*    fire;
+          int         frame;
+          timeObj     fireTimer;
+          
 };
 
 #endif

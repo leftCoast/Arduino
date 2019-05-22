@@ -15,6 +15,17 @@
 #define out     mText->appendText
 #define outln   mText->appendText("\n")
 
+
+#define FIRE_IMG_W      488
+#define FIRE_IMG_H      96
+#define FIRE_FRAME_W    64
+#define FIRE_RECT_X     100
+#define FIRE_RECT_Y     200
+#define FIRE_RECT_W     64
+#define FIRE_RECT_H     FIRE_IMG_H
+#define FIRE_FILE_PATH  "/SYSTEM/IMAGES/FIRE.BMP"
+
+
 int statID = -1;
 
 // *****************************************************
@@ -30,21 +41,28 @@ toolsPanel::toolsPanel(void)
   mText->setTextColors(&white,&aColor);
   addObj(mText);
   statusTimer.setTime(1500);
+  
+  frame = 0;
+  fireTimer.setTime(250);
 }
 
 
-toolsPanel::~toolsPanel(void) {  }
+toolsPanel::~toolsPanel(void) { if (fire) { delete fire; } }
 
 
 void toolsPanel::setup(void) {
 
   menuBar* ourMenuBar = new menuBar((panel*)this);
   addObj(ourMenuBar);
+
+  fire = new bmpPipe();
+  fire->openPipe(FIRE_FILE_PATH);
+  fireTimer.start(); 
 }
 
 
 void  toolsPanel::showStatus(void) {
-
+  return;
   if (statID!=statusReg.statNum) {
     statID = statusReg.statNum;
     mText->setText("");
@@ -81,6 +99,7 @@ void  toolsPanel::showStatus(void) {
     out(" Caller ID  : ");out(statusReg.callerID);out("\n");
     out(" Stat No.   : ");out(statusReg.statNum);out("\n");
     out(" In queue   : ");out(ourCellManager.getCount());out("\n");
+    out(" Frame      : ");out(frame);out("\n");
     /*
     out("DEBUGGING\n");
     out("Raw SMS    : [");out(SMSRaw);out("]\n");
@@ -96,6 +115,18 @@ void toolsPanel::loop(void) {
   if (statusTimer.ding()) {
     showStatus();
     statusTimer.start();
+  }
+  if (fireTimer.ding()) {
+    if (frame==7) {
+      frame=0;
+    }
+    rect sRect(frame*FIRE_FRAME_W,0,FIRE_FRAME_W,FIRE_IMG_H);
+    fire->setSourceRect(sRect);
+    //analogWrite(SCREEN_PIN,0);
+    fire->drawBitmap(FIRE_RECT_X,FIRE_RECT_Y);
+    //analogWrite(SCREEN_PIN,255);
+    fireTimer.start();
+    frame++;
   }
 }
 
