@@ -1,4 +1,4 @@
-LC_baseTools
+LC_RCTools
 
 This toolset is for communicating with radio control systems. Servos & receivers. R/C systems use a 1..2 ms pulse to communicate. 1.5 ms is center position. These pulses have to be repeated at 20ms or less intervals or the servos will turn off.
 
