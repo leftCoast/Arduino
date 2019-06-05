@@ -72,7 +72,7 @@ public:
   				void		printRGB(void);
 #endif
 
-private :
+protected :
   byte red;
   byte green;
   byte blue;
