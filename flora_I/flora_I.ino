@@ -1,5 +1,3 @@
-#include <RCReciver.h>
-#include <servo.h>
 
 #include <blinker.h>
 #include <colorObj.h>
@@ -13,24 +11,30 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-servo gauge(2);
 runningAvg smother(10);
 mapper moistMap(0,560,0,100);
-mapper gaugeMap(0,100,-100,100);
+colorMpper colorMap(0,100,&black,&blue);
  
 void setup() {
 
-  Serial.begin(57600);   
-  gauge.setServo(-100);
+  pinMode(0, OUTPUT); // motor
+  pinMode(1, INPUT);  // Sensor reading
+  pinMode(2, OUTPUT); // Not connected
+  pinMode(3, OUTPUT); // Not connected
+  pinMode(4, OUTPUT); // Sensor power
+  
+
+  Serial.begin(57600);
+   
 }
 
 void loop() {
   
-  idle();
-  unsigned long rawValue = analogRead(A0);
+  //idle();
+  unsigned long rawValue = analogRead(1);
   float         mappedVal = moistMap.Map(rawValue);
   float         gaugeVal = gaugeMap.Map(mappedVal);
-  gauge.setServo(gaugeVal);
-  //Serial.println(round(moistMap.Map(smother.addData(analogRead(A0)))));
-  //delay(100);
+  //gauge.setServo(gaugeVal);
+  Serial.println(round(moistMap.Map(smother.addData(analogRead(1)))));
+  delay(100);
 }
