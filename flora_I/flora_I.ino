@@ -13,15 +13,18 @@
 
 runningAvg smother(10);
 mapper moistMap(0,560,0,100);
-colorMpper colorMap(0,100,&black,&blue);
+//colorMpper colorMap(0,100,&black,&blue);
  
 void setup() {
 
   pinMode(0, OUTPUT); // motor
-  pinMode(1, INPUT);  // Sensor reading
+  digitalWrite(0, LOW); // motor off.
+  
+  //pinMode(1, INPUT);  // Sensor reading
   pinMode(2, OUTPUT); // Not connected
   pinMode(3, OUTPUT); // Not connected
   pinMode(4, OUTPUT); // Sensor power
+  digitalWrite(4,LOW); // Power up the sensor.
   
 
   Serial.begin(57600);
@@ -30,11 +33,15 @@ void setup() {
 
 void loop() {
   
-  //idle();
-  unsigned long rawValue = analogRead(1);
-  float         mappedVal = moistMap.Map(rawValue);
-  float         gaugeVal = gaugeMap.Map(mappedVal);
-  //gauge.setServo(gaugeVal);
-  Serial.println(round(moistMap.Map(smother.addData(analogRead(1)))));
-  delay(100);
+  unsigned long rawValue = analogRead(A0);
+  //float         mappedVal = moistMap.Map(rawValue);
+  Serial.print(rawValue);Serial.print(" ,");
+  Serial.println(round(moistMap.Map(smother.addData(analogRead(A0)))));
+  
+  delay(500);
+  digitalWrite(0, LOW);
+  Serial.println("motor off.");
+  delay(500);
+  digitalWrite(0, HIGH);
+  Serial.println("motor on.");
 }
