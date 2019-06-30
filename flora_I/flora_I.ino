@@ -11,30 +11,21 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-runningAvg smother(10);
-mapper moistMap(0,560,0,100);
-colorMpper colorMap(0,100,&black,&blue);
- 
 void setup() {
 
-  pinMode(0, OUTPUT); // motor
-  pinMode(1, INPUT);  // Sensor reading
-  pinMode(2, OUTPUT); // Not connected
-  pinMode(3, OUTPUT); // Not connected
-  pinMode(4, OUTPUT); // Sensor power
+  pinMode(0, OUTPUT); // 
+  pinMode(1, OUTPUT); // 
+  pinMode(2, INPUT_PULLUP);  // Motor button
+  pinMode(3, OUTPUT); // IN2 Motor
+  digitalWrite(3, LOW); 
+  pinMode(4, OUTPUT); // IN1 Motor
+  digitalWrite(4, LOW);
   
-
   Serial.begin(57600);
    
 }
 
 void loop() {
   
-  //idle();
-  unsigned long rawValue = analogRead(1);
-  float         mappedVal = moistMap.Map(rawValue);
-  float         gaugeVal = gaugeMap.Map(mappedVal);
-  //gauge.setServo(gaugeVal);
-  Serial.println(round(moistMap.Map(smother.addData(analogRead(1)))));
-  delay(100);
+  digitalWrite(3, !digitalRead(2));
 }
