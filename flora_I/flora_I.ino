@@ -22,9 +22,9 @@
 
 #define DRY                 315
 #define MUD                 1015
-#define DEF_MOISTURE_LIMIT  30
-#define DEF_WATER_TIME      5000
-#define DEF_SOAK_TIME       30000
+#define DEF_MOISTURE_LIMIT  45
+#define DEF_WATER_TIME      10000
+#define DEF_SOAK_TIME       120000
 
 Adafruit_DotStar px(1, D_STAR_DAT_PIN, D_STAR_CLK_PIN, DOTSTAR_BRG);
 
@@ -69,15 +69,31 @@ void setup() {
   weAre = sitting;
 }
 
+void setColor(colorObj* aColor) {
+
+  px.setPixelColor(0,aColor->getGreen(),aColor->getRed(),aColor->getBlue());
+  px.show();
+  delay(10); 
+}
+
+
+void setPump(void) {
+
+  if (!digitalRead(BUTTON_PIN) || weAre==watering) {
+    digitalWrite(13, HIGH);
+    digitalWrite(MOTOR_1_PIN,HIGH);
+  } else {
+    digitalWrite(13, LOW);
+    digitalWrite(MOTOR_1_PIN,LOW);
+  }
+}
+
 
 void loop() {
 
   float     tempC;
   uint16_t  capread;
   
-  digitalWrite(13, !digitalRead(BUTTON_PIN));
-  digitalWrite(MOTOR_1_PIN, !digitalRead(BUTTON_PIN));
-    
   if (readTime.ding()) {
     tempC = ss.getTemp();
     capread = ss.touchRead(0);
@@ -99,26 +115,28 @@ void loop() {
 
   switch (weAre) {
     case sitting :
+      setColor(&black);
       if (moisture<moistureLimit) {
-        digitalWrite(MOTOR_1_PIN,true);
         Serial.println("Watering");
         waterTime.start();
         weAre = watering;
       }
      break;
      case watering :
+      setColor(&blue);
       if (waterTime.ding()) {
-        digitalWrite(MOTOR_1_PIN,false);
         Serial.println("Soaking");
         soakTime.start();
         weAre = soaking;
       }
      break;
      case soaking :
+      setColor(&green);
       if (soakTime.ding()) {
         Serial.println("Back to sitting.");
         weAre = sitting;
       }
      break;
-  } 
+  }
+  setPump();
 }
