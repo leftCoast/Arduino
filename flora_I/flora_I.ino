@@ -38,7 +38,9 @@ timeObj     soakTime(DEF_SOAK_TIME);
 mapper      mudMapper(DRY,MUD,0,100);
 float       moisture;
 float       moistureLimit;
-
+blinker     sittingLight(13,10,4000); 
+blinker     motorPulse(MOTOR_1_PIN,125,250);
+bool        motorOn;
 enum        weDo { sitting, watering, soaking };
 weDo        weAre;
 
@@ -52,8 +54,8 @@ void setup() {
   digitalWrite(MOTOR_1_PIN, LOW);         // This direction off.
   pinMode(MOTOR_2_PIN, OUTPUT);           // IN2Motor
   digitalWrite(MOTOR_2_PIN, LOW);         // This direction off.
-  pinMode(13, OUTPUT);                    // Standard red LED.
-  
+  sittingLight.setLight(false);           // Shut off the LED.
+  motorPulse.setLight(false);             // Shut off the pump.
   Serial.begin(57600);                    // Fire up serial port.
   
   if (!ss.begin(0x36)) {                  // Start up moisture sensor.
@@ -67,6 +69,8 @@ void setup() {
   moisture = 100;
   readTime.start();
   weAre = sitting;
+  sittingLight.setBlink(true);
+  motorOn = false;
 }
 
 void setColor(colorObj* aColor) {
@@ -80,11 +84,15 @@ void setColor(colorObj* aColor) {
 void setPump(void) {
 
   if (!digitalRead(BUTTON_PIN) || weAre==watering) {
-    digitalWrite(13, HIGH);
-    digitalWrite(MOTOR_1_PIN,HIGH);
+    if (!motorOn) {
+      //digitalWrite(MOTOR_1_PIN,HIGH);
+      motorPulse.setBlink(true);
+      motorOn = true;
+    }
   } else {
-    digitalWrite(13, LOW);
-    digitalWrite(MOTOR_1_PIN,LOW);
+    //digitalWrite(MOTOR_1_PIN,LOW);
+    motorPulse.setBlink(false);
+    motorOn = false;
   }
 }
 
@@ -94,6 +102,7 @@ void loop() {
   float     tempC;
   uint16_t  capread;
   
+  idle();  
   if (readTime.ding()) {
     tempC = ss.getTemp();
     capread = ss.touchRead(0);
@@ -119,6 +128,7 @@ void loop() {
       if (moisture<moistureLimit) {
         Serial.println("Watering");
         waterTime.start();
+        sittingLight.setBlink(false);
         weAre = watering;
       }
      break;
@@ -131,9 +141,10 @@ void loop() {
       }
      break;
      case soaking :
-      setColor(&green);
+      setColor(&yellow);
       if (soakTime.ding()) {
         Serial.println("Back to sitting.");
+        sittingLight.setBlink(true);
         weAre = sitting;
       }
      break;
