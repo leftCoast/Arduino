@@ -48,7 +48,7 @@ void setupButtonColors(void) {
 
 
 calcButton::calcButton(char* inFStr, word inLocX, word iny, byte width, byte inType)
-  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, true) {
+  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, touchLift) {
 
   int numChars = strlen(inFStr) + 1;
   fStr = (char*) malloc(numChars);
@@ -60,7 +60,7 @@ calcButton::calcButton(char* inFStr, word inLocX, word iny, byte width, byte inT
 
 
 calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word iny, byte width, byte inType)
-  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, true) {
+  : drawObj(inLocX, iny, width, BUTTON_HEIGHT, touchLift) {
 
   int numChars = strlen(inFStr) + 1;
   fStr = (char*) malloc(numChars);

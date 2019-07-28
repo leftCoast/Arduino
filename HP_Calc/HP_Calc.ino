@@ -127,7 +127,7 @@ calculator mCalc;           // The calculator object. Feed it key strokes and it
 boolean    buttonPressed;
 
 void setup() {
-  //Serial.begin(9600); while(!Serial);
+
   //Serial.println(F("Serial online"));
   if (initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
     //Serial.println(F("Got screen"));
@@ -141,6 +141,7 @@ void setup() {
   buttonPressed = false;
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
+  ourEventMgr.begin();
 }
 
 
@@ -218,4 +219,3 @@ void loop() {
     buttonPressed = false;
   }
 }
-
