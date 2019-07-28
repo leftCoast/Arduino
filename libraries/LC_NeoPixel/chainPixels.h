@@ -31,13 +31,13 @@ class chainPixels : public queue, public idler {
             chainPixels(byte inPin);
 	virtual	~chainPixels(void);
               
-            void		resetChain(void);
-	virtual  void		push(linkListObj* item);
-	virtual  void		pop(void);
-				void		addGroup(pixelGroup* inGroup);
-	virtual  void		idle(void);
-				colorObj	getPixelColor(word index);
-				void		setPixelColor(word index,colorObj* inColor);
+            void				resetChain(void);
+	virtual  void				push(linkListObj* item);	// I THINK this should be a pointer to a pixel group. No time now to deal with it.
+	virtual  linkListObj*	pop(void);
+				void				addGroup(pixelGroup* inGroup);
+	virtual  void				idle(void);
+				colorObj			getPixelColor(word index);
+				void				setPixelColor(word index,colorObj* inColor);
              
   protected:
   

@@ -8,8 +8,10 @@
 #define PIXEL_PIN         2
 #define DARK_PERCENT      75
 #define SPARKLE_LOW_LIFE  5
-#define SPARKLE_LIFE      30
-#define SPARKLE_ODDS      40 // to one.
+#define SPARKLE_LIFE      15
+#define SPARKLE_ODDS      80 // to one.
+#define FLASH_ODDS        4000 // to one.
+#define FLASH_MS          50
 #define MAX_SPARKLES      15
 
 
@@ -76,7 +78,7 @@ class sparkles : public linkList {
             sparkles(neoPixel* inLEDs);
     virtual ~sparkles(void);
 
-    void  addSparkle(uint16_t index, colorObj* flashColor);
+    void  addSparkle(uint16_t index, colorObj* sparkleColor);
     void  erase(void);
     void  cleanUp(void);
     void  draw(void);
@@ -90,11 +92,11 @@ sparkles::sparkles(neoPixel* inLEDs) : linkList() { LEDs = inLEDs; }
 sparkles::~sparkles(void) { }
 
 
-void sparkles::addSparkle(uint16_t index, colorObj* flashColor) {
+void sparkles::addSparkle(uint16_t index, colorObj* sparkleColor) {
 
   sparkle* newSparkle;
   if (getCount() < MAX_SPARKLES) {  // Lets not blow up the RAM please..
-    newSparkle = new sparkle(LEDs, index, flashColor);
+    newSparkle = new sparkle(LEDs, index, sparkleColor);
     addToTop((linkListObj*)newSparkle);
   }
 }
@@ -169,16 +171,19 @@ neoPixel lites(NUM_LEDS, PIXEL_PIN);
 sparkles theSparkles(&lites);
 
 colorObj backColor;
+colorObj sparkleColor;
 colorObj flashColor;
 
 void setup() {
 
   Serial.begin(9600);
 
-  flashColor.setColor(&white);
+  sparkleColor.setColor(&white);
   backColor.setColor(&blue);
   backColor.blend(&black, DARK_PERCENT);
-
+  flashColor.setColor(&yellow);
+  flashColor.blend(&white,40);
+  
   lites.begin();
   lites.setAll(&backColor);
   lites.show();
@@ -190,9 +195,16 @@ void loop() {
   colorObj  aColor;
 
   theSparkles.erase();
+  if (!random(0,FLASH_ODDS)) {
+    lites.setAll(&flashColor);
+    lites.show();
+    lites.setAll(&black);
+    delay(random(0,FLASH_MS));
+    lites.show();
+  }
   lites.setAll(&backColor);
   if (!random(0, SPARKLE_ODDS)) {
-    theSparkles.addSparkle(random(0, NUM_LEDS - 1), &flashColor);
+    theSparkles.addSparkle(random(0, NUM_LEDS - 1), &sparkleColor);
   }
   theSparkles.draw();
   lites.show();

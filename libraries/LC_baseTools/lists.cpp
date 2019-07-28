@@ -299,6 +299,7 @@ void queue::push(linkListObj* newObj) { addToEnd(newObj); }
 
 linkListObj* queue::peek(void) { return getFirst(); }
 
+
 linkListObj* queue::pop(void) {
 	
 	linkListObj*	topObj;
@@ -309,8 +310,6 @@ linkListObj* queue::pop(void) {
 	}
 	return topObj;
 }
-
-//bool queue::empty(void) { return isEmpty(); }
 
 
 // ********** double linked list ****************

@@ -29,7 +29,7 @@ void chainPixels::resetChain(void) {
   linkListObj* trace;
   
   numPixels = 0;
-  trace = top();
+  trace = peek();
   while(trace) {
     ((pixelGroup*)trace)->setIndex(numPixels);
     numPixels = numPixels + ((pixelGroup*)trace)->getNumPixels();
@@ -55,13 +55,13 @@ void chainPixels::push(linkListObj* item) {
 
 
 // Hook into pop to show a change in config.
-void chainPixels::pop(void) {
-  
+linkListObj* chainPixels::pop(void) {
+ 	  	
    if (pixelDriver) {        // Configuration is changing! Dump the driver!
       delete pixelDriver;
       pixelDriver = NULL;
     }
-   queue::pop();            // Then do what a queue would do.
+   return queue::pop();            // Then do what a queue would do.
 }
 
 
@@ -85,7 +85,7 @@ void chainPixels::idle(void) {
   if (!pixelDriver) {        // Ok, do we need a reset? NULL diver is the flag.
     resetChain();
   }
-  trace = top();
+  trace = peek();
   while(trace) {            // Now everyone gets time to change thigns if they want.
     ((pixelGroup*)trace)->draw();
     trace = trace->next;
