@@ -1,5 +1,5 @@
 #include "floraOS.h"
-
+#include "controlPanel.h"
 
 // *****************************************************
 // ******************   homeScreen   *******************
@@ -16,9 +16,7 @@ void homeScreen::loop(void) { }
 
 void homeScreen::drawSelf(void) {
   
-  ourOS.beep();
-  screen->fillScreen(&black);
-  ourOS.beep();
+  nextPanel = controlApp;
 }
 
 
@@ -43,7 +41,8 @@ floraOS::~floraOS(void) { }
 // Possibly we'll need to do something during startup.
 // cellOS uses this to tweak its color pallette.
 int floraOS::begin(void) { 
-  
+
+  ourComPort.begin(9600);
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
   return litlOS::begin();
@@ -54,7 +53,8 @@ int floraOS::begin(void) {
 panel* floraOS::createPanel(int panelID) {
 
   switch (panelID) {
-    case homeApp      : return new homeScreen(); 
+    case homeApp      : return new homeScreen();
+    case controlApp   : return new controlPanel();
     default           : return NULL;
   }
 }
@@ -74,3 +74,8 @@ void floraOS::beep(void) {
 
 // Just in case we need it, here it is..
 void floraOS::idle(void) { }
+
+
+// Globals
+
+qCMaster ourComPort;

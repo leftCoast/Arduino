@@ -31,7 +31,7 @@
 // The structure of the status block is in cellCommon.h. Well, at least our version of
 // it is. Because of Arduino stupidity, when you put in a .h file, the IDE also adds
 // EVERYTHING from that file's folder.. Into your code. This completely blew away all
-// available memory on the poor FONA controller, trying to host code that was deigned
+// available memory on the poor FONA controller, trying to host code that was designed
 // for a larger platform. So REMEBER, there are two copies of cellCommon.h. If you
 // want to make a change, you have to change BOTH. Where is the other one? You'll have
 // to go look for it. (Who knows where it'll end up by the time your reading this.)

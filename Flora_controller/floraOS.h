@@ -3,11 +3,13 @@
 
 #include "litlOS.h"
 #include "panel.h"
-
+#include "quickCom.h"
+#include "baseButton.h"
 #define BEEP_PIN    23
 
-enum  apps { homeApp = HOME_PANEL_ID, firstApp, nextApp };
+enum  apps { homeApp = HOME_PANEL_ID, controlApp, nextApp };
 
+extern qCMaster ourComPort;
 
 
 // *****************************************************
@@ -44,8 +46,6 @@ class floraOS : public litlOS {
           void    beep(void);
   virtual void    idle(void);           // If we need to do something in the background, here we are.
 };
-
-  
 
 extern floraOS  ourOS;
 

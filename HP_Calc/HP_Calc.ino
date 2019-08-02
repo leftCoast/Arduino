@@ -128,7 +128,7 @@ boolean    buttonPressed;
 
 void setup() {
 
-  //Serial.println(F("Serial online"));
+  Serial.println(F("Serial online"));
   if (initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
     //Serial.println(F("Got screen"));
     screen->fillScreen(&black);

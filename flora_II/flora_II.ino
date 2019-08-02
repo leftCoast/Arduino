@@ -12,7 +12,7 @@
 #include <resizeBuff.h>
 #include <runningAvg.h>
 #include <timeObj.h>
-
+#include <quickCom.h>
 
 #define MOTOR_1_PIN 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 
@@ -24,6 +24,8 @@
 #define DEF_MOISTURE_LIMIT  45
 #define DEF_WATER_TIME      10000
 #define DEF_SOAK_TIME       120000
+
+#define COM_BUFF_BYTES  255
 
 Adafruit_DotStar px(1, D_STAR_DAT_PIN, D_STAR_CLK_PIN, DOTSTAR_BRG);
 
@@ -40,8 +42,11 @@ float       moistureLimit;
 blinker     sittingLight(13,10,4000); 
 blinker     motorPulse(MOTOR_1_PIN,125,250);
 bool        motorOn;
+bool        pumpCom;
 enum        weDo { sitting, watering, soaking };
 weDo        weAre;
+qCSlave     ourComObj;
+byte        comBuff[COM_BUFF_BYTES];  // Buffer for all comunication.
 
 void setup() {
 
@@ -54,6 +59,8 @@ void setup() {
   motorPulse.setLight(false);             // Shut off the pump.
   Serial.begin(57600);                    // Fire up serial port.
   
+  ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup for talking to the GUI.
+
   if (!ss.begin(0x36)) {                  // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");  // Failed!
     while(1);                             // Lock here.
@@ -67,6 +74,7 @@ void setup() {
   weAre = sitting;
   sittingLight.setBlink(true);
   motorOn = false;
+  pumpCom = false;
 }
 
 void setColor(colorObj* aColor) {
@@ -79,7 +87,7 @@ void setColor(colorObj* aColor) {
 
 void setPump(void) {
 
-  if (weAre==watering) {
+  if (pumpCom||weAre==watering) {
     if (!motorOn) {
       motorPulse.setBlink(true);
       motorOn = true;
@@ -95,8 +103,22 @@ void loop() {
 
   float     tempC;
   uint16_t  capread;
+  byte*     comPtr;
   
-  idle();  
+  idle();
+  
+  if (ourComObj.haveBuff()) {           // If we have a complete command..
+    Serial.println("Have a command!");/
+    comPtr = ourComObj.getComBuff();    // Lets point at the command character.
+    if (comPtr[0]=='1') {
+      pumpCom = true;
+    } else {
+      pumpCom = false;
+    }
+    comPtr[0] = 0;
+    ourComObj.replyComBuff(1);
+  }
+  
   if (readTime.ding()) {
     tempC = ss.getTemp();
     capread = ss.touchRead(0);
