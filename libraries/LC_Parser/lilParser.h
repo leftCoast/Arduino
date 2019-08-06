@@ -3,14 +3,22 @@
 
 #include <lists.h>
 
+// 8/2019 - I must have been on something when I wrote this. It all works, but WOW I can't
+// make heads or tails of it now.
+
+
 // A Command is: CMD params.. \n
 // Parameters are seperated by whitespace.
 // Succesful parsed commands return positive integers.
 // Commands "in process" return 0. IE not end of text.
 // Unparsable commands return -1
+// Meaning? Your enum of commands should start with noCommand. IE a 0 to skip over in your
+// switch statment.
 
 // I think I'm going to do a buff = realloc(buff,size); thing here.
 // Need to add numBytes for params.
+
+
 #define EOL '\n'            // Set this to match your system.
 #define PARAM_BUFF_SIZE 40  // One buff to fit them all..
 
@@ -26,7 +34,7 @@ class lilParser : public linkList {
 				int	addChar(char inChar);
 				int	numParams(void);
 				int	getParamSize(void);
-				char*	getParam(void);
+				char*	getParam(void);			// YOU HAVE TO FREE THIS WHEN YOUR DONE!
 				void	reset(void);
     
 				cmdTemplate*	currentCmd;
