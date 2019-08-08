@@ -1,7 +1,5 @@
-#include <FlashAsEEPROM.h>
-
-#include <Adafruit_DotStar.h>
 #include <Adafruit_seesaw.h>
+#include <EEPROM.h>
 
 #include <blinker.h>
 #include <colorObj.h>
@@ -18,15 +16,12 @@
 #include <lilParser.h>
 
 
-#define MOTOR_1_PIN 1
-
-#define D_STAR_DAT_PIN  7
-#define D_STAR_CLK_PIN  8
+#define MOTOR_1_PIN 16
 
 #define DRY                     315
 #define MUD                     1015
 #define DEF_MOISTURE_LIMIT      45
-#define DEF_READ_TIME           1000
+#define DEF_READ_TIME           10000
 #define DEF_WATER_TIME          10000
 #define DEF_SOAK_TIME           120000
 #define DEF_CSMOOTHER           20
@@ -55,12 +50,10 @@ struct paramType {
   char name[NAME_BUFF_BYTES];
 };
 
-FlashStorage(paramStorage,paramType);           // Setup ersatz eeprom storage for params.
 
 // ******************************************
 // ******************************************
 // ******************************************
-Adafruit_DotStar px(1,D_STAR_DAT_PIN,D_STAR_CLK_PIN,DOTSTAR_BRG);   // The buiilt in RGB LED.
 
 Adafruit_seesaw ss;                               // The moisture sensor.
 
@@ -70,7 +63,7 @@ bool        pumpCom;                              // Are we being told to turn t
 
 enum        weDo { sitting, watering, soaking };  // Possible states.
 weDo        weAre;                                // Current state.
-blinker     sittingLight(13,40,4000);             // Red blinker saaying we're watching moisture.
+blinker     sittingLight(13,80,4000);             // Red blinker saaying we're watching moisture.
 
 qCSlave     ourComObj;                            // Our object that comunicates with the handheld controller.
 byte        comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
@@ -95,8 +88,6 @@ enum      commands { noCommand, resetAll, showParams, setSetPoint, setWTime, set
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
 
-  px.begin();                                     // Initialize the LED.
-  px.show();                                       // Turn the LED off.
 
   pinMode(MOTOR_1_PIN, OUTPUT);                   // IN1 = Pump
   digitalWrite(MOTOR_1_PIN, LOW);                 // Pump off.
@@ -114,8 +105,15 @@ void setup() {
     while(1);                                     // Lock here.
   }
   
-  //doReadParams();                                 // Read our saved running params and start operation.
- 
+  doReadParams();                                 // Read our saved running params and start operation.
+
+  Serial.println("Initial readings to setup system.");
+  for (int i=1;i<DEF_CSMOOTHER;i++) {
+    doReading();
+    delay(250);
+  }
+  Serial.println("Sytem ready.");
+    
 }
 
 
@@ -146,16 +144,8 @@ void setUpParser() {
   mParser.addCmd(setSetPoint, "moisture");
   mParser.addCmd(setWTime, "wtime"); 
   mParser.addCmd(setSTime, "stime");
-}
-
-
-// We can't just set the color of the RGB LED. It needs some hand holding.
-// So we hold ands here.
-void setColor(colorObj* aColor) {
-
-  px.setPixelColor(0,aColor->getGreen(),aColor->getRed(),aColor->getBlue());  // Set the pixal color.
-  px.show();                                                                  // Send the color out to the pixel.
-  delay(10);                                                                  // Wait for 10ms because it needs it. (For some reason)
+  //mParser.addCmd(setSTime, "pump");
+  mParser.addCmd(setSTime, "name");
 }
 
 
@@ -176,14 +166,7 @@ void setPump(void) {
 
 
 // We want to save the param set we are using right now.
-void doWriteParams(void) {
-  
-  digitalWrite(13, HIGH);
-  paramStorage.write(params);
-  delay(100);
-  digitalWrite(13, LOW);
-  delay(100);
-}
+void doWriteParams(void) { EEPROM.put(0,params); }
 
 
 // From any state we want to reset to the default parameters. (Goood for first fire ups)
@@ -203,8 +186,8 @@ void doResetParams(void) {
 // From any state lets read in a fresh set of parameters and (re)start operation.
 void doReadParams(void) {
 
-  params = paramStorage.read();   // Grab the set of params out of storage.
-  doInit();                         // (re)start operation.
+  EEPROM.get(0,params);   // Grab the set of params out of storage.
+  doInit();               // (re)start operation.
 }
 
 
@@ -230,7 +213,8 @@ void checkCompComs(void) {
   }
 }
 
-// very time thought loop() we need to see if there's a command from the handheld controller
+
+// Every time though the loop() we need to see if there's a command from the handheld controller
 // waiting for us. If so, we need to handle it. This is what we do here.
 void checkComs(void) {
 
@@ -276,30 +260,35 @@ void debugDataOut(float tempC,uint16_t capread) {
     }
 }
 
-    
-// Ah loop(). This is what we do all day.
-void loop() {
+// Get the infor from the sensor and refine it to the point we can use it.
+void doReading(void) {
 
   float     tempC;
   uint16_t  capread;
+  
+  tempC = ss.getTemp();                   // Read the tempature from the sensor.
+  capread = ss.touchRead(0);              // Read the capacitive value from the sensor.
+  capread = cSmoother.addData(capread);   // Pop the capacitive value into the capacitive smoother. (Running avarage)
+  tempC = tSmoother.addData(tempC);       // Pop the tempature value into the tempature smoother. (Again, running avarage)
+  moisture = mudMapper.Map(capread);      // Map the resulting capacitive value to a percent.
+  moisture = round(moisture);             // Round it to an int.
+  debugDataOut(tempC,capread);            // Show the world, if its looking.
+}
+
+
+// Ah loop(). This is what we do all day.
+void loop() {
   
   idle();                                   // Calling idle() first is always a good idea. Just in case there are idlers that need it.
   checkCompComs();                          // Check to see if theres a guy at the computer looking to talk to us.
   checkComs();                              // Now we bop off and check to see if anything has come in from a handheld controller.
   if (readTime.ding()) {                    // If its tiome to do a reading..
-    tempC = ss.getTemp();                   // Read the tempature from the sensor.
-    capread = ss.touchRead(0);              // Read the capacitive value from the sensor.
-    capread = cSmoother.addData(capread);   // Pop the capacitive value into the capacitive smoother. (Running avarage)
-    tempC = tSmoother.addData(tempC);       // Pop the tempature value into the tempature smoother. (Again, running avarage)
-    moisture = mudMapper.Map(capread);      // Map the resulting capacitive value to a percent.
-    moisture = round(moisture);             // Round it to an int.
-    debugDataOut(tempC,capread);            // Show the world, if its looking.
+    doReading();
     readTime.stepTime();                    // Reset the timer for the next reading.
   }
 
   switch (weAre) {                          // OK state stuff. depending on our current state..
     case sitting :                          // Sitting = watching moisture wating to start watering.
-      setColor(&black);                     // When sitting the RGB LED is off.
       if (moisture<params.moisture) {       // If its too dry and time to water..
         Serial.println("Watering");         // Tell the world what's up next. (Again, if they are listening)
         waterTime->start();                 // Start up the watring timer.
@@ -308,7 +297,6 @@ void loop() {
       }
      break;                                 // All done, jet!
      case watering :                        // Watering = running the pump and watering plants.
-      setColor(&blue);                      // Set the RGB LED to blue. I figured blue is good for watering.
       if (waterTime->ding()) {              // If our time for watering has expired...            
         Serial.println("Soaking");          // Tell the world what's up next. (And again, if they are listening) 
         soakTime->start();                  // Start up the soaking timer.
@@ -316,7 +304,6 @@ void loop() {
       }
      break;                                 // That's it for now.
      case soaking :                         // soaking = waiting for the water to soak through the soil to the sensor.
-      setColor(&yellow);                    // I figured Yellow would be good for soak time.
       if (soakTime->ding()) {               // If soak time has expired..
         Serial.println("Back sitting.");    // Tell the world what's up next.
         sittingLight.setBlink(true);        // Turn the sitting blinker back on.
@@ -446,7 +433,7 @@ void handleSetMoisture(byte* comPtr) {
 
   int newVal;
   
-  newVal = *((int*)comPtr[1]); // Grab the value from the buffer.
+  newVal = *((int*)&(comPtr[1])); // Grab the value from the buffer.
   if (newVal>=0&&newVal<=100) {
     params.moisture = newVal;
     doWriteParams();
