@@ -12,6 +12,28 @@ enum  apps { homeApp = HOME_PANEL_ID, controlApp, nextApp };
 extern qCMaster ourComPort;
 
 
+// ******************************************
+// *********   COPY TO CONTROLLER   *********
+// ******************************************
+
+#define NAME_BUFF_BYTES         24
+
+enum floraComSet    { floraReset, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
+enum floraReplySet  { noErr, unknownCom, badParam };
+
+struct paramType {
+  int moisture;
+  int waterTime;
+  int soakTime;
+  int pulse;
+  int period;
+  char name[NAME_BUFF_BYTES];
+};
+
+
+// ******************************************
+// ******************************************
+// ******************************************
 // *****************************************************
 // ******************   homeScreen   *******************
 // *****************************************************

@@ -14,18 +14,19 @@ pumpBtn::~pumpBtn(void) {  }
 
 void  pumpBtn::doAction(event* inEvent,point* locaPt) {
 
-  byte  pumpOn = '1';
-  byte  pumpOff = '0';
+  byte outVal;
   
   Serial.println("doAction()");
   switch(inEvent->mType) {
     case touchEvent : 
       Serial.println("PUMP ON!!");
-      ourComPort.sendBuff(&pumpOn,1,false);
+      outVal = pumpOn;
+      ourComPort.sendBuff(&outVal,1,false);
     break;
     case liftEvent :
       Serial.println("PUMP OFF!!");
-      ourComPort.sendBuff(&pumpOff,1,false);
+      outVal = pumpOff;
+      ourComPort.sendBuff(&outVal,1,false);
     break;
   }
 }

@@ -30,13 +30,14 @@
 #define DEF_MOTORPULSE_PERIOD   250
 #define DEF_NAME                "Plant name"
 #define COM_BUFF_BYTES          255
-#define NAME_BUFF_BYTES         24
+
 
 
 // ******************************************
 // *********   COPY TO CONTROLLER   *********
 // ******************************************
 
+#define NAME_BUFF_BYTES         24
 
 enum floraComSet    { floraReset, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
 enum floraReplySet  { noErr, unknownCom, badParam };
@@ -96,10 +97,11 @@ void setup() {
   setUpParser();                                  // So we can talk to the computer.
   
   ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup coms for the handheld controller.
-
+  Serial.println(ourComObj.readErr());
   Serial.begin(57600);                            // Fire up serial port. (Debugging)
   Serial.println("Hello?");
-  
+
+  delay(1000);                                    // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
   if (!ss.begin(0x36)) {                          // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");          // Failed!
     while(1);                                     // Lock here.
@@ -221,7 +223,9 @@ void checkComs(void) {
   byte*     comPtr;
   
   if (ourComObj.haveBuff()) {                                     // If we have a complete command..
+    Serial.println(ourComObj.readErr());
     comPtr = ourComObj.getComBuff();                              // Point at the command character.
+    Serial.println(comPtr[0]);
     switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
       case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
       case readParams     : handleReadParams(comPtr);     break;
