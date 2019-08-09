@@ -78,7 +78,7 @@ class qCSlave : public idler, public timeObj {
 				byte				readErr(void);								// Something broken?
 				byte				haveBuff(void);							// We received a buffer, how big?
 				byte*				getComBuff(void);							// Hand back a pointer to the start of the com buffer.
-				bool				replyComBuff(byte buffLen);				// Com buffer has been loaded with data, send it back.
+				void				replyComBuff(byte buffLen);			// Com buffer has been loaded with data, send it back.
 
 	virtual	void				idle(void);									// Again, the servants run things in the background.
 				void				doListen(void);

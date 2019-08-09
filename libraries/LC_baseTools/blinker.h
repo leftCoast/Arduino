@@ -9,7 +9,7 @@
 #define defOnMs 50
 #define defPeriodMs 400
 
-class blinker : public idler, timeObj {
+class blinker : public idler, public timeObj {
 	
 public:
 				blinker(int inPin=defPin,float inOnMs=defOnMs, float inPeriodMs=defPeriodMs,bool inInverse=false);
@@ -22,7 +22,7 @@ public:
 	
 				void	setTimes(float inOnMs, float inPeriodMs);	// Want to change the blink?
 	
-	private:
+	protected:
 		bool  	init;
 		timeObj*	onTimer;
 		bool  	running;

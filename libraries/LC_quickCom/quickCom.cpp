@@ -297,7 +297,7 @@ byte* qCSlave::getComBuff(void) {
 
 
 // Send the reply on its way.
-bool qCSlave::replyComBuff(byte numBytes) {
+void qCSlave::replyComBuff(byte numBytes) {
 
 	if (mState == holding) {	// We have to be holding to want a reply.
 		mBuff[0] = numBytes;		// 

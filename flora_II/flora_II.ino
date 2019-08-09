@@ -15,6 +15,7 @@
 #include <quickCom.h>
 #include <lilParser.h>
 
+#include "pumpObj.h"
 
 #define MOTOR_1_PIN 16
 
@@ -26,8 +27,8 @@
 #define DEF_SOAK_TIME           120000
 #define DEF_CSMOOTHER           20
 #define DEF_TSMOOTHER           20
-#define DEF_MOTORPULSE_ON       125
-#define DEF_MOTORPULSE_PERIOD   250
+#define DEF_MOTORPULSE_PERCENT  10
+#define DEF_MOTORPULSE_PERIOD   2000
 #define DEF_NAME                "Plant name"
 #define COM_BUFF_BYTES          255
 
@@ -46,7 +47,7 @@ struct paramType {
   int moisture;
   int waterTime;
   int soakTime;
-  int pulse;
+  int percent;
   int period;
   char name[NAME_BUFF_BYTES];
 };
@@ -58,8 +59,8 @@ struct paramType {
 
 Adafruit_seesaw ss;                               // The moisture sensor.
 
+pumpObj     ourPump(MOTOR_1_PIN,DEF_MOTORPULSE_PERCENT,DEF_MOTORPULSE_PERIOD);
 float       moisture;                             // The current moisture reading.
-bool        motorOn;                              // Is the pump currently running?
 bool        pumpCom;                              // Are we being told to turn the pump on by the controller?
 
 enum        weDo { sitting, watering, soaking };  // Possible states.
@@ -75,13 +76,13 @@ timeObj*      waterTime = NULL;                   // Time length to water when p
 timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
 blinker*      motorPulse = NULL;                  // Object that controls the timing of pump pulsing. (Optional)
 
-runningAvg   cSmoother(DEF_CSMOOTHER);            // Running avarage for the raw capacitive readings.
-runningAvg   tSmoother(DEF_TSMOOTHER);            // Running avarage for the raw tempature readings.
-timeObj      readTime(DEF_READ_TIME);             // Time between moisture readings.
-mapper       mudMapper(DRY,MUD,0,100);            // Mapper from raw capacitive reading to percent.
+runningAvg    cSmoother(DEF_CSMOOTHER);            // Running avarage for the raw capacitive readings.
+runningAvg    tSmoother(DEF_TSMOOTHER);            // Running avarage for the raw tempature readings.
+timeObj       readTime(DEF_READ_TIME);             // Time between moisture readings.
+mapper        mudMapper(DRY,MUD,0,100);            // Mapper from raw capacitive reading to percent.
 
-lilParser mParser;
-enum      commands { noCommand, resetAll, showParams, setSetPoint, setWTime, setSTime };
+lilParser     mParser;
+enum commands { noCommand, resetAll, showParams, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
 
 
 // Setup everything we can without a param set. Everything that is only done once.
@@ -89,9 +90,7 @@ enum      commands { noCommand, resetAll, showParams, setSetPoint, setWTime, set
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
 
-
-  pinMode(MOTOR_1_PIN, OUTPUT);                   // IN1 = Pump
-  digitalWrite(MOTOR_1_PIN, LOW);                 // Pump off.
+  ourPump.setPump(false);                         // Pump off!
   sittingLight.setLight(false);                   // Red LED blinker off.
   
   setUpParser();                                  // So we can talk to the computer.
@@ -106,7 +105,7 @@ void setup() {
     Serial.println("ERROR! no Sensor.");          // Failed!
     while(1);                                     // Lock here.
   }
-  
+  pumpCom = false;                                // No one has told us to turn it on.
   doReadParams();                                 // Read our saved running params and start operation.
 
   Serial.println("Initial readings to setup system.");
@@ -124,16 +123,15 @@ void doInit(void) {
 
   if (waterTime) delete(waterTime);                                   // These three are for freeing memeory from the
   if (soakTime) delete(soakTime);                                     // Last set of parameters. We'll need to build up
-  if (motorPulse) delete(motorPulse);                                 // a fresh set for these new parameters.
   
   waterTime   = new timeObj(params.waterTime);                        // Create an object for tracking watering time.
   soakTime    = new timeObj(params.soakTime);                         // Create an object for tracking soak time.
-  motorPulse  = new blinker(MOTOR_1_PIN,params.pulse,params.period);  // Create an object for controlling the pump pulsing.
+  
+  ourPump.setPercent(params.percent);
+  ourPump.setPeriod(params.period); 
   
   weAre = sitting;                                                    // Our state is sitting. (Watching moisture level)
   sittingLight.setBlink(true);                                        // Turn on the red blinking LED.
-  motorOn = false;                                                    // Pump is NOT on.
-  pumpCom = false;                                                    // No one has told us to turn it on.
   readTime.start();                                                   // Fire up the read timer. We're live!
 }
 
@@ -146,23 +144,22 @@ void setUpParser() {
   mParser.addCmd(setSetPoint, "moisture");
   mParser.addCmd(setWTime, "wtime"); 
   mParser.addCmd(setSTime, "stime");
-  //mParser.addCmd(setSTime, "pump");
-  mParser.addCmd(setSTime, "name");
+  mParser.addCmd(setPump, "pump");
+  mParser.addCmd(setPercent, "percent");
+  mParser.addCmd(setPeriod, "period");
 }
 
 
 // After all the nonsense in loop(). It all boils down to, do we want the pump on or not?
 // Here's where we look at everything and do just that.
-void setPump(void) {
+void doSetPump(void) {
 
   if (pumpCom||weAre==watering) {   // Currently two things tell us to water. pumpCom from the controller and our state.
-    if (!motorOn) {                 // We want the pump on and its not on now?
-      motorPulse->setBlink(true);    // Turn on the motor pulse thing. This controlls the pump.
-      motorOn = true;               // Note that we turned it on.
+    if (!ourPump.pumpOn()) {        // We want the pump on and its not on now?
+      ourPump.setPump(true);        // Turn on the motor pulse thing. This controlls the pump.
     }
   } else {                          // We want the pump off?
-    motorPulse->setBlink(false);     // Easy peasy! Just shut down the pulse thing.
-    motorOn = false;                // Note that the pump's off.
+    ourPump.setPump(false);          // Easy peasy! Just shut down the pulse thing.
   }
 }
 
@@ -177,7 +174,7 @@ void doResetParams(void) {
   params.moisture   = DEF_MOISTURE_LIMIT;     // Default numbers.
   params.waterTime  = DEF_WATER_TIME;
   params.soakTime   = DEF_SOAK_TIME;
-  params.pulse      = DEF_MOTORPULSE_ON;
+  params.percent    = DEF_MOTORPULSE_PERCENT;
   params.period     = DEF_MOTORPULSE_PERIOD;
   strcpy(params.name,DEF_NAME);               // Our default name.
   doWriteParams();                            // Put these values out to "disk"                              
@@ -209,6 +206,9 @@ void checkCompComs(void) {
       case setSetPoint  : handelCompSetPoint(); break;
       case setWTime     : handelCompSetWTime(); break;
       case setSTime     : handelCompSetSTime(); break;
+      case setPump      : handleCompSetPump();  break;
+      case setPercent   : handleCompSetPercent(); break;
+      case setPeriod    : handleCompSetPeriod(); break;
       default           : Serial.println("Sorry, have no idea what you want.");
     }
     if (command) Serial.print(">");
@@ -315,7 +315,7 @@ void loop() {
       }
      break;                                 // All done, lets bolt!
   }
-  setPump();                                // Now that commands nd state have been checked, decide if the pump goes on or off.
+  doSetPump();                              // Now that commands nd state have been checked, decide if the pump goes on or off.
 }
 
 
@@ -332,7 +332,7 @@ void doShowParams(void) {
   Serial.print("moisture  : ");Serial.println(params.moisture);
   Serial.print("waterTime : ");Serial.println(params.waterTime);
   Serial.print("soakTime  : ");Serial.println(params.soakTime);
-  Serial.print("pulse     : ");Serial.println(params.pulse);
+  Serial.print("percent   : ");Serial.println(params.percent);
   Serial.print("period    : ");Serial.println(params.period);
   Serial.print("name      : ");Serial.println(params.name);
   Serial.println();
@@ -397,7 +397,63 @@ void handelCompSetSTime(void) {
 }
 
 
+void handleCompSetPercent(void) {
 
+  int   newVal;
+  char* paramBuff;
+  
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    newVal = atoi (paramBuff);
+    free(paramBuff);
+    if (newVal<0) newVal = 0;
+    if (newVal>100) newVal = 100;
+    params.percent = newVal;
+    doWriteParams();
+    doInit();
+    Serial.print("Percent now set to ");
+    Serial.println(params.percent);
+  }
+}
+
+
+void handleCompSetPeriod(void) {
+
+  int   newVal;
+  char* paramBuff;
+  
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    newVal = atoi (paramBuff);
+    free(paramBuff);
+    if (newVal<0) newVal = 0;
+    params.period = newVal;
+    doWriteParams();
+    doInit();
+    Serial.print("Period now set to ");
+    Serial.println(params.period);
+  }
+}
+
+
+void handleCompSetPump(void) {
+
+  int numChars;
+  char* paramBuff;
+  
+  pumpCom = false;
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    numChars = strlen(paramBuff);
+    for (int i=0;i<numChars;i++) {
+      paramBuff[i] = toupper(paramBuff[i]);
+    }
+    if (!strcmp(paramBuff,"ON")) {
+      pumpCom = true;
+    }
+    free(paramBuff);
+  }
+}
     
 // ******************************
 // ********** Handlers **********
