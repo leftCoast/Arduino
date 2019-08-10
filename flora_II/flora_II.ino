@@ -1,5 +1,4 @@
 #include <Adafruit_seesaw.h>
-#include <EEPROM.h>
 
 #include <blinker.h>
 #include <colorObj.h>
@@ -15,138 +14,89 @@
 #include <quickCom.h>
 #include <lilParser.h>
 
+#include "parameters.h"
 #include "pumpObj.h"
-
-#define MOTOR_1_PIN 16
-
-#define DRY                     315
-#define MUD                     1015
-#define DEF_MOISTURE_LIMIT      45
-#define DEF_READ_TIME           10000
-#define DEF_WATER_TIME          10000
-#define DEF_SOAK_TIME           120000
-#define DEF_CSMOOTHER           20
-#define DEF_TSMOOTHER           20
-#define DEF_MOTORPULSE_PERCENT  10
-#define DEF_MOTORPULSE_PERIOD   2000
-#define DEF_NAME                "Plant name"
-#define COM_BUFF_BYTES          255
+#include "textComObj.h"
 
 
-
-// ******************************************
-// *********   COPY TO CONTROLLER   *********
-// ******************************************
-
-#define NAME_BUFF_BYTES         24
+#define DRY             315
+#define MUD             1015
+#define COM_BUFF_BYTES  255
 
 enum floraComSet    { floraReset, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
-struct paramType {
-  int moisture;
-  int waterTime;
-  int soakTime;
-  int percent;
-  int period;
-  char name[NAME_BUFF_BYTES];
-};
-
-
-// ******************************************
-// ******************************************
-// ******************************************
 
 Adafruit_seesaw ss;                               // The moisture sensor.
 
-pumpObj     ourPump(MOTOR_1_PIN,DEF_MOTORPULSE_PERCENT,DEF_MOTORPULSE_PERIOD);
 float       moisture;                             // The current moisture reading.
-bool        pumpCom;                              // Are we being told to turn the pump on by the controller?
 
 enum        weDo { sitting, watering, soaking };  // Possible states.
 weDo        weAre;                                // Current state.
-blinker     sittingLight(13,80,4000);             // Red blinker saaying we're watching moisture.
+blinker     idleLight(13,80,2000);                // Blinker saying we're running.
 
 qCSlave     ourComObj;                            // Our object that comunicates with the handheld controller.
 byte        comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
 
-paramType     params;                             // Struct of operation parameters.
-char*         plantName = NULL;                   // We save a plant name for the controller to display.
+
 timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
 timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
-blinker*      motorPulse = NULL;                  // Object that controls the timing of pump pulsing. (Optional)
 
 runningAvg    cSmoother(DEF_CSMOOTHER);            // Running avarage for the raw capacitive readings.
 runningAvg    tSmoother(DEF_TSMOOTHER);            // Running avarage for the raw tempature readings.
 timeObj       readTime(DEF_READ_TIME);             // Time between moisture readings.
 mapper        mudMapper(DRY,MUD,0,100);            // Mapper from raw capacitive reading to percent.
 
-lilParser     mParser;
-enum commands { noCommand, resetAll, showParams, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
-
 
 // Setup everything we can without a param set. Everything that is only done once.
 // Then we read in the parameters and start up operation. The doReadParams() call is
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
-
-  ourPump.setPump(false);                         // Pump off!
-  sittingLight.setLight(false);                   // Red LED blinker off.
   
-  setUpParser();                                  // So we can talk to the computer.
+  ourPump.setPump(false);                               // Off with the pump.
   
-  ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup coms for the handheld controller.
-  Serial.println(ourComObj.readErr());
-  Serial.begin(57600);                            // Fire up serial port. (Debugging)
+  Serial.begin(57600);                                  // Fire up serial port. (Debugging)
   Serial.println("Hello?");
-
-  delay(1000);                                    // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
-  if (!ss.begin(0x36)) {                          // Start up moisture sensor.
-    Serial.println("ERROR! no Sensor.");          // Failed!
-    while(1);                                     // Lock here.
+    
+  textComs.begin();                                     // Set up parser so we can talk to the computer.
+  
+  ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600);       // Buff, bytes & Baud. Setup coms for the handheld controller.
+  Serial.print("ourComObj result (0 is good) : ");
+  Serial.println(ourComObj.readErr());
+  
+  delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
+  if (!ss.begin(0x36)) {                                // Start up moisture sensor.
+    Serial.println("ERROR! no Sensor.");                // Failed!
+    while(1);                                           // Lock here.
   }
-  pumpCom = false;                                // No one has told us to turn it on.
-  doReadParams();                                 // Read our saved running params and start operation.
-
-  Serial.println("Initial readings to setup system.");
+  Serial.println("Prime running avarage buffers");
   for (int i=1;i<DEF_CSMOOTHER;i++) {
     doReading();
-    delay(250);
+    delay(100);
   }
-  Serial.println("Sytem ready.");
-    
+  
+  ourParamObj.readParams();                             // Read our saved running params.
+  updateEnv();                                          // Setup what we need to setup with params.
+  weAre = sitting;                                      // Our state is sitting. (Watching moisture level)
+  readTime.start();                                     // Fire up the read timer. We're live!
+
+  idleLight.setBlink(true);                             // Start up our running light.
+  Serial.println("Sytem ready."); 
 }
 
 
 // We have a fresh load of parameters. Initialze the machine with them,
-void doInit(void) {
+void updateEnv(void) {
 
   if (waterTime) delete(waterTime);                                   // These three are for freeing memeory from the
   if (soakTime) delete(soakTime);                                     // Last set of parameters. We'll need to build up
   
-  waterTime   = new timeObj(params.waterTime);                        // Create an object for tracking watering time.
-  soakTime    = new timeObj(params.soakTime);                         // Create an object for tracking soak time.
+  waterTime   = new timeObj(ourParamObj.getWaterTime());              // Create an object for tracking watering time.
+  soakTime    = new timeObj(ourParamObj.getSoakTime());               // Create an object for tracking soak time.
   
-  ourPump.setPercent(params.percent);
-  ourPump.setPeriod(params.period); 
-  
-  weAre = sitting;                                                    // Our state is sitting. (Watching moisture level)
-  sittingLight.setBlink(true);                                        // Turn on the red blinking LED.
-  readTime.start();                                                   // Fire up the read timer. We're live!
-}
-
-
-// Link command bytes to text sstrings that can be typed.
-void setUpParser() {
-
-  mParser.addCmd(resetAll, "reset");
-  mParser.addCmd(showParams, "see");
-  mParser.addCmd(setSetPoint, "moisture");
-  mParser.addCmd(setWTime, "wtime"); 
-  mParser.addCmd(setSTime, "stime");
-  mParser.addCmd(setPump, "pump");
-  mParser.addCmd(setPercent, "percent");
-  mParser.addCmd(setPeriod, "period");
+  ourPump.setPercent(ourParamObj.getPWMPercent());
+  ourPump.setPeriod(ourParamObj.getPWMPeriod());
+  needReset = false;
 }
 
 
@@ -156,62 +106,10 @@ void doSetPump(void) {
 
   if (pumpCom||weAre==watering) {   // Currently two things tell us to water. pumpCom from the controller and our state.
     if (!ourPump.pumpOn()) {        // We want the pump on and its not on now?
-      ourPump.setPump(true);        // Turn on the motor pulse thing. This controlls the pump.
+      ourPump.setPump(true);        // Turn on the pump.
     }
   } else {                          // We want the pump off?
-    ourPump.setPump(false);          // Easy peasy! Just shut down the pulse thing.
-  }
-}
-
-
-// We want to save the param set we are using right now.
-void doWriteParams(void) { EEPROM.put(0,params); }
-
-
-// From any state we want to reset to the default parameters. (Goood for first fire ups)
-void doResetParams(void) {  
-                
-  params.moisture   = DEF_MOISTURE_LIMIT;     // Default numbers.
-  params.waterTime  = DEF_WATER_TIME;
-  params.soakTime   = DEF_SOAK_TIME;
-  params.percent    = DEF_MOTORPULSE_PERCENT;
-  params.period     = DEF_MOTORPULSE_PERIOD;
-  strcpy(params.name,DEF_NAME);               // Our default name.
-  doWriteParams();                            // Put these values out to "disk"                              
-  doInit();                                     // Init everything using these values.
-}
-
-
-// From any state lets read in a fresh set of parameters and (re)start operation.
-void doReadParams(void) {
-
-  EEPROM.get(0,params);   // Grab the set of params out of storage.
-  doInit();               // (re)start operation.
-}
-
-
-void checkCompComs(void) {
-
-  char  inChar;
-  int   command;
-  
-  if (Serial.available()) {
-    inChar = Serial.read();
-    Serial.print(inChar);
-    command = mParser.addChar(inChar);
-    switch (command) {                       
-      case noCommand    : break;
-      case resetAll     : doResetParams(); break;
-      case showParams   : doShowParams(); break;
-      case setSetPoint  : handelCompSetPoint(); break;
-      case setWTime     : handelCompSetWTime(); break;
-      case setSTime     : handelCompSetSTime(); break;
-      case setPump      : handleCompSetPump();  break;
-      case setPercent   : handleCompSetPercent(); break;
-      case setPeriod    : handleCompSetPeriod(); break;
-      default           : Serial.println("Sorry, have no idea what you want.");
-    }
-    if (command) Serial.print(">");
+    ourPump.setPump(false);         // Off with the pump.
   }
 }
 
@@ -264,7 +162,7 @@ void debugDataOut(float tempC,uint16_t capread) {
     }
 }
 
-// Get the infor from the sensor and refine it to the point we can use it.
+// Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
 
   float     tempC;
@@ -283,177 +181,42 @@ void doReading(void) {
 // Ah loop(). This is what we do all day.
 void loop() {
   
-  idle();                                   // Calling idle() first is always a good idea. Just in case there are idlers that need it.
-  checkCompComs();                          // Check to see if theres a guy at the computer looking to talk to us.
-  checkComs();                              // Now we bop off and check to see if anything has come in from a handheld controller.
-  if (readTime.ding()) {                    // If its tiome to do a reading..
+  idle();                                             // Calling idle() first is always a good idea. Just in case there are idlers that need it.
+  if (needReset) {                                    // If our params have changed..
+    updateEnv();                                      // Update all the things they effect.
+  }
+  textComs.checkTextCom();                            // Check to see if theres a guy at the computer looking to talk to us.
+  checkComs();                                        // Now we bop off and check to see if anything has come in from a handheld controller.
+  if (readTime.ding()) {                              // If its tiome to do a reading..
     doReading();
-    readTime.stepTime();                    // Reset the timer for the next reading.
+    readTime.stepTime();                              // Reset the timer for the next reading.
   }
 
-  switch (weAre) {                          // OK state stuff. depending on our current state..
-    case sitting :                          // Sitting = watching moisture wating to start watering.
-      if (moisture<params.moisture) {       // If its too dry and time to water..
-        Serial.println("Watering");         // Tell the world what's up next. (Again, if they are listening)
-        waterTime->start();                 // Start up the watring timer.
-        sittingLight.setBlink(false);       // Shut off the blinking "I'm watching" LED.
-        weAre = watering;                   // Set state that we are in watering mode.
+  switch (weAre) {                                    // OK state stuff. depending on our current state..
+    case sitting :                                    // Sitting = watching moisture wating to start watering.
+      if (moisture<ourParamObj.getMoisture()) {   // If its too dry and time to water..
+        Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
+        waterTime->start();                           // Start up the watring timer.
+        weAre = watering;                             // Set state that we are in watering mode.
       }
-     break;                                 // All done, jet!
-     case watering :                        // Watering = running the pump and watering plants.
-      if (waterTime->ding()) {              // If our time for watering has expired...            
-        Serial.println("Soaking");          // Tell the world what's up next. (And again, if they are listening) 
-        soakTime->start();                  // Start up the soaking timer.
-        weAre = soaking;                    // Set state that we are in soaking mode.
+     break;                                           // All done, jet!
+     case watering :                                  // Watering = running the pump and watering plants.
+      if (waterTime->ding()) {                        // If our time for watering has expired...            
+        Serial.println("Soaking");                    // Tell the world what's up next. (And again, if they are listening) 
+        soakTime->start();                            // Start up the soaking timer.
+        weAre = soaking;                              // Set state that we are in soaking mode.
       }
-     break;                                 // That's it for now.
-     case soaking :                         // soaking = waiting for the water to soak through the soil to the sensor.
-      if (soakTime->ding()) {               // If soak time has expired..
-        Serial.println("Back sitting.");    // Tell the world what's up next.
-        sittingLight.setBlink(true);        // Turn the sitting blinker back on.
-        weAre = sitting;                    // Set state that we are in sitting mode. 
+     break;                                           // That's it for now.
+     case soaking :                                   // soaking = waiting for the water to soak through the soil to the sensor.
+      if (soakTime->ding()) {                         // If soak time has expired..
+        Serial.println("Back sitting.");              // Tell the world what's up next.
+        weAre = sitting;                              // Set state that we are in sitting mode. 
       }
-     break;                                 // All done, lets bolt!
+     break;                                           // All done, lets bolt!
   }
-  doSetPump();                              // Now that commands nd state have been checked, decide if the pump goes on or off.
+  doSetPump();                                        // Now that commands nd state have been checked, decide if the pump goes on or off.
 }
 
-
-// ******************************
-// ********** Handlers **********
-// ********** for the  **********
-// ***** computer commmands *****
-// ******************************
-
-
-void doShowParams(void) {
-
-  Serial.print("Parameters for ");Serial.println(plantName);
-  Serial.print("moisture  : ");Serial.println(params.moisture);
-  Serial.print("waterTime : ");Serial.println(params.waterTime);
-  Serial.print("soakTime  : ");Serial.println(params.soakTime);
-  Serial.print("percent   : ");Serial.println(params.percent);
-  Serial.print("period    : ");Serial.println(params.period);
-  Serial.print("name      : ");Serial.println(params.name);
-  Serial.println();
-}
-
-
-void handelCompSetPoint(void) {
-
-  int   newVal;
-  char* paramBuff;
-  
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    newVal = atoi (paramBuff);
-    free(paramBuff);
-    if (newVal<0) newVal = 0;
-    if (newVal>100) newVal = 100;
-    params.moisture = newVal;
-    doWriteParams();
-    doInit();
-    Serial.print("Moisture set point now set to ");
-    Serial.println(params.moisture);
-  }
-}
-
-
-void handelCompSetWTime(void) {
-
-  int   newVal;
-  char* paramBuff;
-  
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    newVal = atoi (paramBuff);
-    free(paramBuff);
-    if (newVal<0) newVal = 0;
-    params.waterTime = newVal;
-    doWriteParams();
-    doInit();
-    Serial.print("Watering tmie now set to ");
-    Serial.println(params.waterTime);
-  }
-}
-
-
-void handelCompSetSTime(void) {
-
-  int   newVal;
-  char* paramBuff;
-  
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    newVal = atoi (paramBuff);
-    free(paramBuff);
-    if (newVal<0) newVal = 0;
-    params.soakTime = newVal;
-    doWriteParams();
-    doInit();
-    Serial.print("Soak time now set to ");
-    Serial.println(params.soakTime);
-  }
-}
-
-
-void handleCompSetPercent(void) {
-
-  int   newVal;
-  char* paramBuff;
-  
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    newVal = atoi (paramBuff);
-    free(paramBuff);
-    if (newVal<0) newVal = 0;
-    if (newVal>100) newVal = 100;
-    params.percent = newVal;
-    doWriteParams();
-    doInit();
-    Serial.print("Percent now set to ");
-    Serial.println(params.percent);
-  }
-}
-
-
-void handleCompSetPeriod(void) {
-
-  int   newVal;
-  char* paramBuff;
-  
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    newVal = atoi (paramBuff);
-    free(paramBuff);
-    if (newVal<0) newVal = 0;
-    params.period = newVal;
-    doWriteParams();
-    doInit();
-    Serial.print("Period now set to ");
-    Serial.println(params.period);
-  }
-}
-
-
-void handleCompSetPump(void) {
-
-  int numChars;
-  char* paramBuff;
-  
-  pumpCom = false;
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    numChars = strlen(paramBuff);
-    for (int i=0;i<numChars;i++) {
-      paramBuff[i] = toupper(paramBuff[i]);
-    }
-    if (!strcmp(paramBuff,"ON")) {
-      pumpCom = true;
-    }
-    free(paramBuff);
-  }
-}
     
 // ******************************
 // ********** Handlers **********
@@ -464,7 +227,7 @@ void handleCompSetPump(void) {
 
 void handleReset(byte* comPtr) {
 
-  doResetParams();
+  ourParamObj.floraReset();
   comPtr[0] = noErr;
   ourComObj.replyComBuff(1);
 }
@@ -472,7 +235,7 @@ void handleReset(byte* comPtr) {
 
 void handleReadParams(byte* comPtr) {
 
-  doReadParams();
+  ourParamObj.readParams();
   comPtr[0] = noErr;
   ourComObj.replyComBuff(1); 
 }
@@ -494,14 +257,9 @@ void handleSetMoisture(byte* comPtr) {
   int newVal;
   
   newVal = *((int*)&(comPtr[1])); // Grab the value from the buffer.
-  if (newVal>=0&&newVal<=100) {
-    params.moisture = newVal;
-    doWriteParams();
-    doInit();
-    comPtr[0] = noErr;
-  } else {
-    comPtr[0] = badParam;
-  }
+  ourParamObj.setMoisture(newVal);
+  updateEnv();
+  comPtr[0] = noErr;
   ourComObj.replyComBuff(1);
 }
 

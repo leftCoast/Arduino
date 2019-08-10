@@ -35,6 +35,7 @@ class lilParser : public linkList {
 				int	numParams(void);
 				int	getParamSize(void);
 				char*	getParam(void);			// YOU HAVE TO FREE THIS WHEN YOUR DONE!
+				char*	getParamBuff(void);		// YOU HAVE TO FREE THIS WHEN YOUR DONE!
 				void	reset(void);
     
 				cmdTemplate*	currentCmd;

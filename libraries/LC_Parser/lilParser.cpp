@@ -76,11 +76,11 @@ int lilParser::numParams(void) {
   int count;
   int index;
 
-  if (paramBuff[0] == '\0') return 0;                       // Actually is a special case.
-  count = 0;                                                // Ready for looping.
+  if (paramBuff[0] == '\0') return 0;                       		// Actually is a special case.
+  count = 0;                                                		// Ready for looping.
   index = 0;
-  while (paramBuff[index] != '\0' && index < PARAM_BUFF_SIZE) { // Until we run out of string.
-    if (paramBuff[index] == EOL) {                          // Count up all the EOFs.
+  while (paramBuff[index] != '\0' && index < PARAM_BUFF_SIZE) {	// Until we run out of string.
+    if (paramBuff[index] == EOL) {                          		// Count up all the EOLs.
       count++;
     }
     index++;
@@ -95,17 +95,17 @@ int lilParser::getParamSize(void) {
 	int index;
 	int	count;
 	
-	count = 0;																													// Nothin' yet..
-  if (currentCmd) {                                                   // Had successful parse.
-    index = paramIndex;																								// local copy of paramIndex.
-    if (paramBuff[index] != '\0') {                                 	// Not at the end of the buffer.
-      while (paramBuff[index] != '\0' && paramBuff[index] != EOL) { 	// Loop through the next param.
-        count++;                          														// Counting..
-        index++;
-      }
+	count = 0;																			// Nothin' yet..
+	if (currentCmd) {																	// Had successful parse.
+		index = paramIndex;																// local copy of paramIndex.
+		if (paramBuff[index] != '\0') {                                 	// Not at the end of the buffer.
+			while (paramBuff[index] != '\0' && paramBuff[index] != EOL) {	// Loop through the next param.
+				count++;																		// Counting..
+				index++;
+			}
 		}
 	}
-	return count;																												// Tell the world.
+	return count;																		// Tell the world.
 }
 
 
@@ -115,10 +115,10 @@ char* lilParser::getParam(void) {
   int 	index;
 	
 	buff = NULL;
-	if (currentCmd) {																															// Had successful parse.
-		buff = (char*) malloc(getParamSize()+1);																		// Ask for memory.
-		if (buff) {																																	// If we got memory.
-  		index = 0;																																// Ready to write in the chars..
+	if (currentCmd) {																					// Had successful parse.
+		buff = (char*) malloc(getParamSize()+1);												// Ask for memory.
+		if (buff) {																						// If we got memory.
+  		index = 0;																						// Ready to write in the chars..
     	if (paramBuff[paramIndex] != '\0') {                                  		// Not looking at empty buffer.
       	while (paramBuff[paramIndex] != '\0' && paramBuff[paramIndex] != EOL) { // Loop through to the next param.
         	buff[index++] = paramBuff[paramIndex++];                          		// Filling the user buff.
@@ -131,6 +131,25 @@ char* lilParser::getParam(void) {
   	}
   }
   return buff;                                                           				// Pass back the result.
+}
+
+
+// Ok, its not -really- the param buff. All whitespace is reduced to SINGLE spaces.
+char* lilParser::getParamBuff(void) {
+	
+	char* outStr;
+	int	i;
+	
+	outStr = (char*) malloc(strlen(paramBuff)+1);
+	strcpy(outStr,paramBuff);
+	i=0;
+	while(outStr[i]!='\0') {
+		if (outStr[i]==EOL) {
+			outStr[i]=' ';
+		}
+		i++;
+	}
+	return outStr;
 }
 
 

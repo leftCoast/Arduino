@@ -1,6 +1,10 @@
 #include "pumpObj.h"
 #include <timeObj.h>
 
+bool    pumpCom;
+pumpObj ourPump(MOTOR_1_PIN,DEF_MOTORPULSE_PERCENT,DEF_MOTORPULSE_PERIOD);
+
+
 pumpObj::pumpObj(int inPin,float inPercent,float inPeriodMs)
   : blinker(inPin) {
     
@@ -9,6 +13,7 @@ pumpObj::pumpObj(int inPin,float inPercent,float inPeriodMs)
   mPercent = inPercent;
   setPeriod(inPeriodMs);
   setPercent(inPercent);
+  pumpCom = false;
 }
 
     
