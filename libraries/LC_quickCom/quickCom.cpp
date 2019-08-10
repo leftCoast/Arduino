@@ -39,7 +39,7 @@ void qCMaster::setReplyTimeout(int timeOutMS) { setTime(timeOutMS,false); }
 byte qCMaster::readErr(void) {
 	
 	byte temp;
-	
+
 	temp = mError;
 	mError = NO_ERR;
 	return temp;

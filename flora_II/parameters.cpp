@@ -20,8 +20,8 @@ void parameters::floraReset(void) {
   params.moisture   = DEF_MOISTURE_LIMIT;     // Default numbers.
   params.waterTime  = DEF_WATER_TIME;
   params.soakTime   = DEF_SOAK_TIME;
-  params.percent    = DEF_MOTORPULSE_PERCENT;
-  params.period     = DEF_MOTORPULSE_PERIOD;
+  params.percent    = DEF_MOTOR_PWM_PERCENT;
+  params.period     = DEF_MOTOR_PWM_PERIOD;
   strcpy(params.name,DEF_NAME);               // Our default name.
   saveParams();                               // Put these values out to "disk"                              
 }

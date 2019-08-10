@@ -4,7 +4,7 @@
 #include <EEPROM.h>
 
 #define DEF_MOISTURE_LIMIT      45
-#define DEF_READ_TIME           10000
+#define DEF_READ_TIME           500
 #define DEF_WATER_TIME          10000
 #define DEF_SOAK_TIME           120000
 #define DEF_CSMOOTHER           20

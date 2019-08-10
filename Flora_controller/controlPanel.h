@@ -1,6 +1,7 @@
 #ifndef controlPanel_h
 #define controlPanel_h
 
+#include "label.h"
 #include "panel.h"
 #include "baseButton.h"
 
@@ -32,11 +33,16 @@ class controlPanel : public panel {
   public:
           controlPanel(void);
   virtual ~controlPanel(void);
+
+          void  moistureText(int moisture);
   virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
   virtual void  close(void);
   virtual void  closing(void);
+
+  timeObj mReadTimer;
+  label*  mMoistureLabel;
 };
 
 #endif

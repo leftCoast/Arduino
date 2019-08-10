@@ -14,19 +14,18 @@
 #include <quickCom.h>
 #include <lilParser.h>
 
+
 #include "parameters.h"
 #include "pumpObj.h"
 #include "textComObj.h"
 #include "handheld.h"
-
+#include "globals.h"
 
 #define DRY             315
-#define MUD             1015
+#define MUD             753 //1015
 
 
 Adafruit_seesaw ss;                               // The moisture sensor.
-
-float       moisture;                             // The current moisture reading.
 
 enum        weDo { sitting, watering, soaking };  // Possible states.
 weDo        weAre;                                // Current state.
@@ -88,8 +87,8 @@ void updateEnv(void) {
   waterTime   = new timeObj(ourParamObj.getWaterTime());              // Create an object for tracking watering time.
   soakTime    = new timeObj(ourParamObj.getSoakTime());               // Create an object for tracking soak time.
   
-  ourPump.setPercent(ourParamObj.getPWMPercent());
-  ourPump.setPeriod(ourParamObj.getPWMPeriod());
+  ourPump.setPWMPercent(ourParamObj.getPWMPercent());
+  ourPump.setPWMPeriod(ourParamObj.getPWMPeriod());
   needReset = false;
 }
 
@@ -104,6 +103,9 @@ void doSetPump(void) {
     }
   } else {                          // We want the pump off?
     ourPump.setPump(false);         // Off with the pump.
+  }
+  if (ourPump.pumpOn()) {
+    ourPump.setSpeed();
   }
 }
 
@@ -140,7 +142,7 @@ void doReading(void) {
   tempC = tSmoother.addData(tempC);       // Pop the tempature value into the tempature smoother. (Again, running avarage)
   moisture = mudMapper.Map(capread);      // Map the resulting capacitive value to a percent.
   moisture = round(moisture);             // Round it to an int.
-  debugDataOut(tempC,capread);            // Show the world, if its looking.
+  //debugDataOut(tempC,capread);            // Show the world, if its looking.
 }
 
 

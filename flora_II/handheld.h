@@ -11,6 +11,7 @@ class handheld : public qCSlave {
 
   virtual void  begin(void);
           void  checkComs(void);
+          void  handleReadMoisture(byte* comPtr);
           void  handleReset(byte* comPtr);
           void  handleReadParams(byte* comPtr);              
           void  handleSetPump(byte* comPtr);
