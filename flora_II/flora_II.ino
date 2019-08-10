@@ -17,14 +17,11 @@
 #include "parameters.h"
 #include "pumpObj.h"
 #include "textComObj.h"
+#include "handheld.h"
 
 
 #define DRY             315
 #define MUD             1015
-#define COM_BUFF_BYTES  255
-
-enum floraComSet    { floraReset, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
-enum floraReplySet  { noErr, unknownCom, badParam };
 
 
 Adafruit_seesaw ss;                               // The moisture sensor.
@@ -34,9 +31,6 @@ float       moisture;                             // The current moisture readin
 enum        weDo { sitting, watering, soaking };  // Possible states.
 weDo        weAre;                                // Current state.
 blinker     idleLight(13,80,2000);                // Blinker saying we're running.
-
-qCSlave     ourComObj;                            // Our object that comunicates with the handheld controller.
-byte        comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
 
 
 timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
@@ -60,9 +54,9 @@ void setup() {
     
   textComs.begin();                                     // Set up parser so we can talk to the computer.
   
-  ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600);       // Buff, bytes & Baud. Setup coms for the handheld controller.
-  Serial.print("ourComObj result (0 is good) : ");
-  Serial.println(ourComObj.readErr());
+  ourHandheld.begin();                                  // Setup coms for the handheld controller.
+  Serial.print("ourHandheld result (0 is good) : ");
+  Serial.println(ourHandheld.readErr());
   
   delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
@@ -114,34 +108,6 @@ void doSetPump(void) {
 }
 
 
-// Every time though the loop() we need to see if there's a command from the handheld controller
-// waiting for us. If so, we need to handle it. This is what we do here.
-void checkComs(void) {
-
-  byte*     comPtr;
-  
-  if (ourComObj.haveBuff()) {                                     // If we have a complete command..
-    Serial.println(ourComObj.readErr());
-    comPtr = ourComObj.getComBuff();                              // Point at the command character.
-    Serial.println(comPtr[0]);
-    switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
-      case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
-      case readParams     : handleReadParams(comPtr);     break;
-      case pumpOn         :
-      case pumpOff        : handleSetPump(comPtr);        break;
-      case setMoisture    : handleSetMoisture(comPtr);    break;
-      case setWaterTime   : handleSetWaterTime(comPtr);   break;
-      case setSoakTime    : handleSetSoakTime(comPtr);    break;
-      case setPulseOn     : handleSetPulseOn(comPtr);     break;
-      case setPulsePeriod : handleSetPulsePeriod(comPtr); break;
-      default :                                                   // If we can't we pass back and error. (What? I don't get it..)
-        comPtr[0] = unknownCom;                                   // Stuff in "unknown command" reply byte.
-        ourComObj.replyComBuff(1);                                // And send that one byte on its way back to the handheld.
-      break;
-    }
-  }
-}
-
 
 // If your watching with the serial port on the computer, this'l give output to see what's up.
 void debugDataOut(float tempC,uint16_t capread) {
@@ -186,17 +152,18 @@ void loop() {
     updateEnv();                                      // Update all the things they effect.
   }
   textComs.checkTextCom();                            // Check to see if theres a guy at the computer looking to talk to us.
-  checkComs();                                        // Now we bop off and check to see if anything has come in from a handheld controller.
+  ourHandheld.checkComs();                            // Now we bop off and check to see if anything has come in from a handheld controller.
+  
   if (readTime.ding()) {                              // If its tiome to do a reading..
-    doReading();
+    doReading();                                      // Well, do it.
     readTime.stepTime();                              // Reset the timer for the next reading.
   }
 
-  switch (weAre) {                                    // OK state stuff. depending on our current state..
+  switch (weAre) {                                    // OK, state stuff. Depending on our current state..
     case sitting :                                    // Sitting = watching moisture wating to start watering.
-      if (moisture<ourParamObj.getMoisture()) {   // If its too dry and time to water..
+      if (moisture<ourParamObj.getMoisture()) {       // If its too dry? Time to water..
         Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
-        waterTime->start();                           // Start up the watring timer.
+        waterTime->start();                           // Start up the watering timer.
         weAre = watering;                             // Set state that we are in watering mode.
       }
      break;                                           // All done, jet!
@@ -214,7 +181,7 @@ void loop() {
       }
      break;                                           // All done, lets bolt!
   }
-  doSetPump();                                        // Now that commands nd state have been checked, decide if the pump goes on or off.
+  doSetPump();                                        // Now that commands and state have been checked, decide if the pump goes on or off.
 }
 
     
@@ -223,66 +190,3 @@ void loop() {
 // ********** for the  **********
 // ***** handheld commmands *****
 // ******************************
-
-
-void handleReset(byte* comPtr) {
-
-  ourParamObj.floraReset();
-  comPtr[0] = noErr;
-  ourComObj.replyComBuff(1);
-}
-
-
-void handleReadParams(byte* comPtr) {
-
-  ourParamObj.readParams();
-  comPtr[0] = noErr;
-  ourComObj.replyComBuff(1); 
-}
-
-              
-void handleSetPump(byte* comPtr) {
-
-  pumpCom = false;
-  if (comPtr[0]==pumpOn) {
-    pumpCom = true;
-  }
-  comPtr[0] = noErr;
-  ourComObj.replyComBuff(1);
-}
-
-
-void handleSetMoisture(byte* comPtr) {
-
-  int newVal;
-  
-  newVal = *((int*)&(comPtr[1])); // Grab the value from the buffer.
-  ourParamObj.setMoisture(newVal);
-  updateEnv();
-  comPtr[0] = noErr;
-  ourComObj.replyComBuff(1);
-}
-
-
-void handleSetWaterTime(byte* comPtr){
-
-  
-}
-
-
-void handleSetSoakTime(byte* comPtr){
-
-  
-}
-
-
-void handleSetPulseOn(byte* comPtr){
-
-  
-}
-
-
-void handleSetPulsePeriod(byte* comPtr){
-
-
-}
