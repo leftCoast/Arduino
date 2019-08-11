@@ -65,10 +65,10 @@ void textComObj::initParams(void) {
 void textComObj::printParams(void) {
 
   Serial.print("Parameters for : ");Serial.println(ourParamObj.getName());
-  Serial.print("moisture  : ");Serial.print(ourParamObj.getMoisture());Serial.println("%");
+  Serial.print("moisture  : ");Serial.print(ourParamObj.getMoisture());Serial.println(" %");
   Serial.print("waterTime : ");Serial.print(ourParamObj.getWaterTime());Serial.println(" ms");
   Serial.print("soakTime  : ");Serial.print(ourParamObj.getSoakTime());Serial.println(" ms");
-  Serial.print("percent   : ");Serial.print(ourParamObj.getPWMPercent());Serial.println(" ms");
+  Serial.print("percent   : ");Serial.print(ourParamObj.getPWMPercent());Serial.println(" %");
   Serial.print("period    : ");Serial.print(ourParamObj.getPWMPeriod());Serial.println(" ms");
   Serial.println();
 }

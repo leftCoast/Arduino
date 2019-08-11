@@ -52,6 +52,7 @@ void setup() {
   Serial.println("Hello?");
     
   textComs.begin();                                     // Set up parser so we can talk to the computer.
+  Serial.println("text coms are up.");
   
   ourHandheld.begin();                                  // Setup coms for the handheld controller.
   Serial.print("ourHandheld result (0 is good) : ");
@@ -60,7 +61,13 @@ void setup() {
   delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");                // Failed!
-    while(1);                                           // Lock here.
+    pinMode(13, OUTPUT);
+    while(1) {                                          // Lock here.
+      digitalWrite(13,HIGH);
+      delay(20);
+      digitalWrite(13,LOW);
+      delay(100);
+    }
   }
   Serial.println("Prime running avarage buffers");
   for (int i=1;i<DEF_CSMOOTHER;i++) {
