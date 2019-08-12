@@ -22,6 +22,8 @@ void parameters::floraReset(void) {
   params.soakTime   = DEF_SOAK_TIME;
   params.percent    = DEF_MOTOR_PWM_PERCENT;
   params.period     = DEF_MOTOR_PWM_PERIOD;
+  params.dry        = DEF_DRY;
+  params.mud        = DEF_MUD;
   strcpy(params.name,DEF_NAME);               // Our default name.
   saveParams();                               // Put these values out to "disk"                              
 }
@@ -71,6 +73,14 @@ int parameters::getPWMPercent(void) { return params.percent; }
 
 // Read the saved PWM percent peroid Ms value.
 int parameters::getPWMPeriod(void) { return params.period; }
+
+
+// Read the saved "dry" capacitance level.
+int parameters::getDry(void) { return params.dry; }
+
+
+// Read the saved "mud" capacitance level.
+int parameters::getMud(void) { return params.mud; }
 
 
 // Save a new moisture percent value.
@@ -127,6 +137,24 @@ void parameters::setPWMPeriod(int periodMs) {
 
   if (periodMs<0) periodMs = 0;
   params.period = periodMs;
+  saveParams();
+}
+
+
+// Set a new "dry" cap value.
+void parameters::setDry(int dryCap) {
+
+  if (dryCap<0) dryCap = 0;
+  params.dry = dryCap;
+  saveParams();
+}
+
+
+// Set a new "dry" cap value.
+void parameters::setMud(int mudCap) {
+
+  if (mudCap<0) mudCap = 0;
+  params.mud = mudCap;
   saveParams();
 }
 

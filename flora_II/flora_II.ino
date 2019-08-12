@@ -21,24 +21,18 @@
 #include "handheld.h"
 #include "globals.h"
 
-#define DRY             315
-#define MUD             753 //1015
-
-
 Adafruit_seesaw ss;                               // The moisture sensor.
 
-enum        weDo { sitting, watering, soaking };  // Possible states.
-weDo        weAre;                                // Current state.
 blinker     idleLight(13,80,2000);                // Blinker saying we're running.
 
 
 timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
 timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
+mapper*       mudMapper = NULL;                   // Mapper from raw capacitive reading to percent.
 
-runningAvg    cSmoother(DEF_CSMOOTHER);            // Running avarage for the raw capacitive readings.
-runningAvg    tSmoother(DEF_TSMOOTHER);            // Running avarage for the raw tempature readings.
-timeObj       readTime(DEF_READ_TIME);             // Time between moisture readings.
-mapper        mudMapper(DRY,MUD,0,100);            // Mapper from raw capacitive reading to percent.
+runningAvg    cSmoother(DEF_CSMOOTHER);           // Running avarage for the raw capacitive readings.
+runningAvg    tSmoother(DEF_TSMOOTHER);           // Running avarage for the raw tempature readings.
+timeObj       readTime(DEF_READ_TIME);            // Time between moisture readings.
 
 
 // Setup everything we can without a param set. Everything that is only done once.
@@ -85,14 +79,16 @@ void setup() {
 }
 
 
-// We have a fresh load of parameters. Initialze the machine with them,
+// We have a fresh load of parameters. Initialze the machine with them
 void updateEnv(void) {
 
-  if (waterTime) delete(waterTime);                                   // These three are for freeing memeory from the
-  if (soakTime) delete(soakTime);                                     // Last set of parameters. We'll need to build up
+  if (waterTime) delete(waterTime);                                             // These three are for freeing memeory from the
+  if (soakTime) delete(soakTime);                                               // Last set of parameters. We'll need to build up
+  if (soakTime) delete(soakTime);                                               // a new set for doing all the math, timing n stuff.
   
-  waterTime   = new timeObj(ourParamObj.getWaterTime());              // Create an object for tracking watering time.
-  soakTime    = new timeObj(ourParamObj.getSoakTime());               // Create an object for tracking soak time.
+  waterTime   = new timeObj(ourParamObj.getWaterTime());                        // Create an object for tracking watering time.
+  soakTime    = new timeObj(ourParamObj.getSoakTime());                         // Create an object for tracking soak time.
+  mudMapper   = new mapper(ourParamObj.getDry(),ourParamObj.getMud(),0,100);    // Create the mapper to calculate moiture percent.
   
   ourPump.setPWMPercent(ourParamObj.getPWMPercent());
   ourPump.setPWMPeriod(ourParamObj.getPWMPeriod());
@@ -117,39 +113,15 @@ void doSetPump(void) {
 }
 
 
-
-// If your watching with the serial port on the computer, this'l give output to see what's up.
-void debugDataOut(float tempC,uint16_t capread) {
-  
-    Serial.print("Temperature: ");
-    Serial.print(tempC);
-    Serial.print("*C   ");
-    Serial.print("Capacitive: ");
-    Serial.print(capread);Serial.print("   ");
-    Serial.print("Moisture: ");
-    Serial.print((int)moisture);
-    Serial.print("%  current state : ");
-    
-    switch (weAre) {
-      case sitting  : Serial.println("sitting");  break;
-      case watering : Serial.println("watering"); break;
-      case soaking  : Serial.println("soaking");  break;
-    }
-}
-
 // Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
-
-  float     tempC;
-  uint16_t  capread;
   
   tempC = ss.getTemp();                   // Read the tempature from the sensor.
   capread = ss.touchRead(0);              // Read the capacitive value from the sensor.
   capread = cSmoother.addData(capread);   // Pop the capacitive value into the capacitive smoother. (Running avarage)
   tempC = tSmoother.addData(tempC);       // Pop the tempature value into the tempature smoother. (Again, running avarage)
-  moisture = mudMapper.Map(capread);      // Map the resulting capacitive value to a percent.
+  moisture = mudMapper->Map(capread);      // Map the resulting capacitive value to a percent.
   moisture = round(moisture);             // Round it to an int.
-  //debugDataOut(tempC,capread);            // Show the world, if its looking.
 }
 
 
@@ -192,10 +164,3 @@ void loop() {
   }
   doSetPump();                                        // Now that commands and state have been checked, decide if the pump goes on or off.
 }
-
-    
-// ******************************
-// ********** Handlers **********
-// ********** for the  **********
-// ***** handheld commmands *****
-// ******************************
