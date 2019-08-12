@@ -35,6 +35,8 @@ class controlPanel : public panel {
   virtual ~controlPanel(void);
 
           void  moistureText(int moisture);
+          void  waterTimeText(unsigned long wTime);
+          void  soakTimeText(unsigned long sTime);
   virtual void  setup(void);
   virtual void  loop(void);
   virtual void  drawSelf(void);
@@ -43,6 +45,8 @@ class controlPanel : public panel {
 
   timeObj mReadTimer;
   label*  mMoistureLabel;
+  label*  mWaterTimeLabel;
+  label*  mSoakTimeLabel;
 };
 
 #endif

@@ -6,7 +6,7 @@
 #define COM_BUFF_BYTES  255
 
 
-enum floraComSet    { floraReset, readMoisture, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
+enum floraComSet    { floraReset, readMoisture, readWaterTime, readSoakTime, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 byte  comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
@@ -29,13 +29,15 @@ void handheld::begin(void) { qCSlave::begin(comBuff, COM_BUFF_BYTES, 9600); }
 void handheld::checkComs(void) {
 
   byte*     comPtr;
-  
+
   if (haveBuff()) {                                     // If we have a complete command..
     Serial.println("Got command!");
     comPtr = getComBuff();                              // Point at the command character.
     switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
       case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
       case readMoisture   : handleReadMoisture(comPtr);   break;
+      case readWaterTime  : handleReadWTime(comPtr);      break;
+      case readSoakTime   : handleReadSTime(comPtr);      break;
       case readParams     : handleReadParams(comPtr);     break;
       case pumpOn         :
       case pumpOff        : handleSetPump(comPtr);        break;
@@ -70,6 +72,34 @@ void handheld::handleReadMoisture(byte* comPtr) {
   comPtr[0] = moistureReading;
   comPtr[1] = noErr;
   replyComBuff(1);
+}
+
+
+void handheld::handleReadWTime(byte* comPtr) {
+
+  unsigned long   waterTime;
+  unsigned long*  ulPtr;
+  
+  waterTime = ourParamObj.getWaterTime();
+  Serial.println(waterTime);
+  ulPtr = (unsigned long*)&(comPtr[0]);
+  *ulPtr = waterTime;
+  comPtr[sizeof(unsigned long)] = noErr;
+  replyComBuff(sizeof(unsigned long)+1);
+}
+
+
+void handheld::handleReadSTime(byte* comPtr) {
+
+  unsigned long   soakTime;
+  unsigned long*  ulPtr;
+  
+  soakTime = ourParamObj.getSoakTime();
+  Serial.println(soakTime);
+  ulPtr = (unsigned long*)&(comPtr[0]);
+  *ulPtr = soakTime;
+  comPtr[sizeof(unsigned long)] = noErr;
+  replyComBuff(sizeof(unsigned long)+1);
 }
 
 

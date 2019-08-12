@@ -59,6 +59,7 @@ int parameters::getSoakTime(void) { return params.soakTime; }
 
 // Return a copy of the name string. YOU HAVE TO FREE IT!!
 char* parameters::getName(void) { 
+  
   char* newCopy;
 
   newCopy = (char*)malloc(strlen(params.name)+1);
