@@ -19,7 +19,7 @@ class textComObj : public idler {
           void  printParams(void);
           void  printReadings(void);
           void  doPrintReadings(void);
-          void  setMoisture(void);
+          void  setDryLimit(void);
           void  setWaterTime(void);
           void  setSoakTime(void);
           void  setPlantName(void);

@@ -35,16 +35,28 @@ class controlPanel : public panel {
   virtual ~controlPanel(void);
 
           void  moistureText(int moisture);
+          void  dryLimitText(int dryLimit);
           void  waterTimeText(unsigned long wTime);
           void  soakTimeText(unsigned long sTime);
   virtual void  setup(void);
+
+          void  checkMoisture(void);
+          void  checkDryLimit(void);
+          void  checkWaterTime(void);
+          void  checkSoakTime(void);
+          void  checkName(void);
+          
+          void  doComPump(bool onOff);
+          
   virtual void  loop(void);
   virtual void  drawSelf(void);
   virtual void  close(void);
   virtual void  closing(void);
 
   timeObj mReadTimer;
+  label*  mNameLabel;
   label*  mMoistureLabel;
+  label*  mDryLimitLabel;
   label*  mWaterTimeLabel;
   label*  mSoakTimeLabel;
 };

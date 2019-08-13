@@ -3,7 +3,7 @@
 #include "pumpObj.h"
 #include "globals.h"
 
-enum commands { noCommand, resetAll, showParams, showReadings, setMudLimit, setDryLimit, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
+enum commands { noCommand, resetAll, showParams, showReadings, setMudMapLimit, setDryMapLimit, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
 
 
 textComObj textComs;
@@ -20,9 +20,9 @@ void textComObj::begin(void) {
   mParser.addCmd(resetAll, "reset");
   mParser.addCmd(showParams, "see");
   mParser.addCmd(showReadings, "read");
-  mParser.addCmd(setMudLimit, "mud");
-  mParser.addCmd(setDryLimit, "dry");
-  mParser.addCmd(setSetPoint, "moisture");
+  mParser.addCmd(setMudMapLimit, "mud");
+  mParser.addCmd(setDryMapLimit, "dry");
+  mParser.addCmd(setSetPoint, "limit");
   mParser.addCmd(setWTime, "wtime"); 
   mParser.addCmd(setSTime, "stime");
   mParser.addCmd(setName, "name");
@@ -43,20 +43,20 @@ void textComObj::checkTextCom(void) {
     Serial.print(inChar);
     command = mParser.addChar(inChar);
     switch (command) {                       
-      case noCommand    : break;
-      case resetAll     : initParams();     break;
-      case showParams   : printParams();    break;
-      case showReadings : printReadings();  break;
-      case setSetPoint  : setMoisture();    break;
-      case setWTime     : setWaterTime();   break;
-      case setSTime     : setSoakTime();    break;
-      case setName      : setPlantName();   break;
-      case setPump      : turnPump();       break;
-      case setPercent   : setPWMPercent();  break;
-      case setPeriod    : setPWMPeriod();   break;
-      case setDryLimit  : setDry();         break;
-      case setMudLimit  : setMud();         break;
-      default           : Serial.println("Sorry, have no idea what you want.");
+      case noCommand      : break;
+      case resetAll       : initParams();     break;
+      case showParams     : printParams();    break;
+      case showReadings   : printReadings();  break;
+      case setSetPoint    : setDryLimit();    break;
+      case setWTime       : setWaterTime();   break;
+      case setSTime       : setSoakTime();    break;
+      case setName        : setPlantName();   break;
+      case setPump        : turnPump();       break;
+      case setPercent     : setPWMPercent();  break;
+      case setPeriod      : setPWMPeriod();   break;
+      case setDryMapLimit : setDry();         break;
+      case setMudMapLimit : setMud();         break;
+      default             : Serial.println("Sorry, have no idea what you want.");
     }
   }
 }
@@ -72,7 +72,7 @@ void textComObj::initParams(void) {
 void textComObj::printParams(void) {
 
   Serial.print("Parameters for : ");Serial.println(ourParamObj.getName());
-  Serial.print("moisture  : ");Serial.print(ourParamObj.getMoisture());Serial.println(" %");
+  Serial.print("dryLimit  : ");Serial.print(ourParamObj.getDryLimit());Serial.println(" %");
   Serial.print("waterTime : ");Serial.print(ourParamObj.getWaterTime());Serial.println(" ms");
   Serial.print("soakTime  : ");Serial.print(ourParamObj.getSoakTime());Serial.println(" ms");
   Serial.print("percent   : ");Serial.print(ourParamObj.getPWMPercent());Serial.println(" %");
@@ -117,7 +117,7 @@ void textComObj::doPrintReadings(void) {
 }      
 
 
-void textComObj::setMoisture(void) {
+void textComObj::setDryLimit(void) {
 
   int   newVal;
   char* paramBuff;
@@ -126,9 +126,9 @@ void textComObj::setMoisture(void) {
     paramBuff = mParser.getParam();
     newVal = atoi (paramBuff);
     free(paramBuff);
-    ourParamObj.setMoisture(newVal);
+    ourParamObj.setDryLimit(newVal);
     Serial.print("Moisture set point now set to ");
-    Serial.println(ourParamObj.getMoisture());
+    Serial.println(ourParamObj.getDryLimit());
   }
 }
 

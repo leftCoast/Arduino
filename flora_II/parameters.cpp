@@ -17,7 +17,7 @@ parameters::~parameters(void) { }
 // Store set of default parameters.
 void parameters::floraReset(void) {
   
-  params.moisture   = DEF_MOISTURE_LIMIT;     // Default numbers.
+  params.dryLimit   = DEF_DRY_LIMIT;          // Default numbers.
   params.waterTime  = DEF_WATER_TIME;
   params.soakTime   = DEF_SOAK_TIME;
   params.percent    = DEF_MOTOR_PWM_PERCENT;
@@ -46,7 +46,7 @@ void parameters::saveParams(void) {
 
 
 // Read the saved moisture value.
-int parameters::getMoisture(void) { return params.moisture; }
+int parameters::getDryLimit(void) { return params.dryLimit; }
 
 
 // Read the saved water time value.
@@ -85,11 +85,11 @@ int parameters::getMud(void) { return params.mud; }
 
 
 // Save a new moisture percent value.
-void parameters::setMoisture(int percent) {
+void parameters::setDryLimit(int percent) {
 
   if (percent<0) percent = 0;
   if (percent>100) percent = 100;
-  params.moisture = percent;
+  params.dryLimit = percent;
   saveParams();         
 }
 

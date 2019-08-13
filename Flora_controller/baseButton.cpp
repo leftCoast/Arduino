@@ -100,12 +100,11 @@ void baseButton::drawSelf(void) {
   word textWidth;
   
   if (clicked) {
+    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &activeBColor);
     screen->fillRoundRect(x, y, width, height, RADIUS, &clickedBColor);
-    screen->drawRoundRect(x-1, y-1, width+2, height+2, RADIUS+1, &white);
-    screen->drawRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white);
     screen->setTextColor(&clickedTColor, &clickedBColor);
   } else {
-    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &black); 
+    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white); 
     screen->fillRoundRect(x, y, width, height, RADIUS, &activeBColor);
     screen->setTextColor(&activeTColor, &activeBColor);
   }
@@ -114,7 +113,7 @@ void baseButton::drawSelf(void) {
   dispWidth = width - (2 * RADIUS);
   textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(label)) - 1;
   if (dispWidth > textWidth) {
-    screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 1);
+    screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 2);
     screen->drawText(label);
   }
 }

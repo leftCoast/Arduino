@@ -142,7 +142,7 @@ void loop() {
 
   switch (weAre) {                                    // OK, state stuff. Depending on our current state..
     case sitting :                                    // Sitting = watching moisture wating to start watering.
-      if (moisture<ourParamObj.getMoisture()) {       // If its too dry? Time to water..
+      if (moisture<ourParamObj.getDryLimit()) {       // If its too dry? Time to water..
         Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
         waterTime->start();                           // Start up the watering timer.
         weAre = watering;                             // Set state that we are in watering mode.

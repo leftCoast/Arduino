@@ -3,7 +3,7 @@
 
 #include <EEPROM.h>
 
-#define DEF_MOISTURE_LIMIT      40            // These guys are in the parameer block.
+#define DEF_DRY_LIMIT           40            // These guys are in the parameer block.
 #define DEF_WATER_TIME          10000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
 #define DEF_NAME                "Plant name"
@@ -21,7 +21,7 @@
 #define NAME_BUFF_BYTES         24
 
 struct paramType {
-  int moisture;
+  int dryLimit;
   int waterTime;
   int soakTime;
   int percent;
@@ -46,7 +46,7 @@ virtual   ~parameters(void);
           void readParams(void);
           void saveParams(void);
 
-          int   getMoisture(void);
+          int   getDryLimit(void);
           int   getWaterTime(void);
           int   getSoakTime(void);
           char* getName(void);
@@ -55,7 +55,7 @@ virtual   ~parameters(void);
           int   getDry(void);
           int   getMud(void);
           
-          void  setMoisture(int percent);
+          void  setDryLimit(int percent);
           void  setWaterTime(int waterMs);
           void  setSoakTime(int soakMs);
           void  setName(char* nameStr);
