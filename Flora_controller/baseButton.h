@@ -3,6 +3,7 @@
 
 #include "floraOS.h"
 
+
 class baseButton : public drawObj, public idler {
   
   public :
@@ -13,6 +14,11 @@ class baseButton : public drawObj, public idler {
   virtual void    idle(void);
   virtual void    drawSelf(void);
 
+                  colorObj activeBColor;
+                  colorObj activeTColor;
+                  colorObj clickedBColor;
+                  colorObj clickedTColor;
+                  
           char*   label;
 };
 

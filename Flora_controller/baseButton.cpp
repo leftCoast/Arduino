@@ -7,21 +7,16 @@
 #define RADIUS        3
 
 
-// initial button colors.
-colorObj activeBColor(LC_BLUE);
-colorObj activeTColor(LC_WHITE);
-colorObj clickedBColor(LC_WHITE);
-colorObj clickedTColor(LC_BLACK);
-
-// Tweak the button colors
-void setupButtonColors(void) {
-
-  activeBColor.blend(&white, 40);
-}
-
 
 baseButton::baseButton(char* inLabel,int x, int y,int width, int height)
   : drawObj(x, y, width, height, touchLift) {
+
+  // default button colors.
+  activeBColor.setColor(LC_BLUE);
+  activeBColor.blend(&white, 40);
+  activeTColor.setColor(LC_WHITE);
+  clickedBColor.setColor(LC_WHITE);
+  clickedTColor.setColor(LC_BLACK);
 
   int numChars = strlen(inLabel) + 1;
   label = (char*) malloc(numChars);
@@ -41,22 +36,23 @@ baseButton::~baseButton(void) {
 bool baseButton::acceptEvent(event* inEvent,point* locaPt) {
 
   switch (mEventSet) {
-    case noEvents   : return false;     // noEvents, pass on..
-    case touchLift    :                 // Classic button events, clicked lets you draw clicked.
-      if (inEvent->mType==touchEvent) {   // If its a touch..
-        if (inRect(locaPt)) {         // - and if its on us..
-          clicked   = true;         // Might want to show we're clicked on.
-          ourOS.beep();
-          doAction(inEvent,locaPt);     // Do our stuff.
-          theTouched  = this;         // Tell the world WE are accepting this event set.
-          needRefresh = true;         // touchLift doesn't get a lift event. So it needs the setRefresh here.
-          return true;              // Tell the world the event has been accepted.
+    case noEvents   : return false;             // noEvents, pass on..
+    case touchLift    :                         // Classic button events, clicked lets you draw clicked.
+      if (inEvent->mType==touchEvent) {         // If its a touch..
+        if (inRect(locaPt)) {                   // - and if its on us..
+          clicked   = true;                     // Might want to show we're clicked on.
+          ourOS.beep(clicked);
+          doAction(inEvent,locaPt);             // Do our stuff.
+          theTouched  = this;                   // Tell the world WE are accepting this event set.
+          needRefresh = true;                   // touchLift doesn't get a lift event. So it needs the setRefresh here.
+          return true;                          // Tell the world the event has been accepted.
         }
-      } else if (inEvent->mType==liftEvent) { // We only get lifts if we'd accepted the touch.
-        clicked   = false;              // And we're no longer clicked.
-        doAction(inEvent,locaPt);     // Do our other stuff.
-        needRefresh = true;             // And here.. (see above)
-        return true;                  // Again, tell the world the event has been accepted.
+      } else if (theTouched==this && inEvent->mType==liftEvent) {   // We only want lifts if we'd accepted the touch.
+        clicked   = false;                      // And we're no longer clicked.
+        ourOS.beep(clicked);
+        doAction(inEvent,locaPt);               // Do our other stuff.
+        needRefresh = true;                     // And here.. (see above)
+        return true;                            // Again, tell the world the event has been accepted.
       }
       break;
     case fullClick  :               // Things like edit fields. A click changes their state.

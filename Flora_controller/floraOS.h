@@ -63,7 +63,7 @@ class floraOS : public litlOS {
   
   virtual int     begin(void);          // The global world is online, do hookups.
   virtual panel*  createPanel(int panelID);
-          void    beep(void);
+          void    beep(bool beepUp);
   virtual void    idle(void);           // If we need to do something in the background, here we are.
 };
 

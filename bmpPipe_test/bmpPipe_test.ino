@@ -1,7 +1,7 @@
 #include <Adafruit_GFX.h>
+#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <gfxfont.h>
-
-#include <Adafruit_ILI9341.h>
+#include <SD.h>
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -11,7 +11,6 @@
 #include <runningAvg.h>
 #include <timeObj.h>
 
-#include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <bmpPipe.h>
 #include <displayObj.h>
 #include <drawObj.h>
@@ -19,25 +18,44 @@
 #include <lineObj.h>
 #include <screen.h>
 
+#define TFT_CS  10
+#define TFT_RST -1
+#define SD_CS   4
+
 bmpPipe bitMap1;
 
 void setup() {
   
   rect  sourceRect;
-  
-  //Serial.begin(9600);while(!Serial);
+
+  /*
   if (!initScreen(ADAFRUIT_1947,PORTRAIT)) {
     while(true); // Kill the process.
   }
-  screen->fillScreen(&black);
-  if (bitMap1.openPipe("vacPnl.bmp")) {
+  */
+
+
+  if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
+    while(true);
+  }
+
+  if (!SD.begin(SD_CS)) {     // Bring the diskdrive online.
+    Serial.println("NO SD drive.");Serial.flush();
+    while(true);
+  }
+  
+  Serial.println("Painting screen.");Serial.flush();
+  screen->fillScreen(&blue);
+  Serial.println("Opennig pipe.");Serial.flush();
+  if (bitMap1.openPipe("icons/gChHL22.bmp")) {
+    Serial.println("Pipe open?");Serial.flush();
     sourceRect.x = 0;
     sourceRect.y = 0;
-    sourceRect.width = 240;
-    sourceRect.height = 320;
+    sourceRect.width = 44;
+    sourceRect.height = 22;
     bitMap1.setSourceRect(sourceRect);
-    bitMap1.drawBitmap(0,0);
-    
+    bitMap1.drawBitmap(10,1);
+    /*
     sourceRect.x = 36;  //36
     sourceRect.y = 127;   //127
     sourceRect.width = 91;
@@ -47,8 +65,10 @@ void setup() {
     //Serial.println("Time to draw...");
     bitMap1.drawBitmap(36,127);
     Serial.println("All drawn...");
+    */
   } else {
     Serial.println("Pipe failed to open.");
+    Serial.flush();
   }
 }
 
