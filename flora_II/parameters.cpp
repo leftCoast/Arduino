@@ -17,11 +17,13 @@ parameters::~parameters(void) { }
 // Store set of default parameters.
 void parameters::floraReset(void) {
   
-  params.moisture   = DEF_MOISTURE_LIMIT;     // Default numbers.
+  params.dryLimit   = DEF_DRY_LIMIT;          // Default numbers.
   params.waterTime  = DEF_WATER_TIME;
   params.soakTime   = DEF_SOAK_TIME;
   params.percent    = DEF_MOTOR_PWM_PERCENT;
   params.period     = DEF_MOTOR_PWM_PERIOD;
+  params.dry        = DEF_DRY;
+  params.mud        = DEF_MUD;
   strcpy(params.name,DEF_NAME);               // Our default name.
   saveParams();                               // Put these values out to "disk"                              
 }
@@ -44,7 +46,7 @@ void parameters::saveParams(void) {
 
 
 // Read the saved moisture value.
-int parameters::getMoisture(void) { return params.moisture; }
+int parameters::getDryLimit(void) { return params.dryLimit; }
 
 
 // Read the saved water time value.
@@ -57,6 +59,7 @@ int parameters::getSoakTime(void) { return params.soakTime; }
 
 // Return a copy of the name string. YOU HAVE TO FREE IT!!
 char* parameters::getName(void) { 
+  
   char* newCopy;
 
   newCopy = (char*)malloc(strlen(params.name)+1);
@@ -73,12 +76,20 @@ int parameters::getPWMPercent(void) { return params.percent; }
 int parameters::getPWMPeriod(void) { return params.period; }
 
 
+// Read the saved "dry" capacitance level.
+int parameters::getDry(void) { return params.dry; }
+
+
+// Read the saved "mud" capacitance level.
+int parameters::getMud(void) { return params.mud; }
+
+
 // Save a new moisture percent value.
-void parameters::setMoisture(int percent) {
+void parameters::setDryLimit(int percent) {
 
   if (percent<0) percent = 0;
   if (percent>100) percent = 100;
-  params.moisture = percent;
+  params.dryLimit = percent;
   saveParams();         
 }
 
@@ -127,6 +138,24 @@ void parameters::setPWMPeriod(int periodMs) {
 
   if (periodMs<0) periodMs = 0;
   params.period = periodMs;
+  saveParams();
+}
+
+
+// Set a new "dry" cap value.
+void parameters::setDry(int dryCap) {
+
+  if (dryCap<0) dryCap = 0;
+  params.dry = dryCap;
+  saveParams();
+}
+
+
+// Set a new "dry" cap value.
+void parameters::setMud(int mudCap) {
+
+  if (mudCap<0) mudCap = 0;
+  params.mud = mudCap;
   saveParams();
 }
 

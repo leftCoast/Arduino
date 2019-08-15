@@ -4,10 +4,13 @@
 #include "blinker.h"
 #include "multiMap.h"
 
-#define MOTOR_1_PIN 16                  // Pin the motor runs on.
+// First block here is saved in the parameters.
 #define DEF_MOTOR_PWM_PERCENT   100     // Basicaly throttle setting.
 #define DEF_MOTOR_PWM_PERIOD    20      // PWM peroid. Smooth with control is the goal.
-#define DELTA_SPEED_TIME        250     // How often do we plan on changing throttle settings, ms.
+
+
+#define MOTOR_1_PIN             16      // Pin the motor runs on. (Hard coded)
+#define DELTA_SPEED_TIME        250     // How often do we plan on changing throttle settings, ms. (Also hard coded for now)
 
 
 class pumpObj : public blinker {

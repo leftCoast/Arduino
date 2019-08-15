@@ -43,6 +43,8 @@ class displayObj {
 	virtual	void	fillScreenGradient(colorObj* startColor,colorObj* endColor,bool vertical=true);
 	virtual	void	fillRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
 	virtual	void	drawRoundRect(int locX,int locY,int width,int height,int radius,colorObj* inColor);
+	virtual	void	fillRoundRect(rect* inRect,int radius,colorObj* inColor);
+	virtual	void	drawRoundRect(rect* inRect,int radius,colorObj* inColor);
 	virtual	void	drawCircle(int locX,int locY,int inDiam, colorObj* inColor);
 	virtual	void	drawCircleHelper(int locX,int locY,int inRad,byte corner,colorObj* inColor);
 	virtual	void	fillCircle(int locX,int locY,int inDiam, colorObj* inColor);

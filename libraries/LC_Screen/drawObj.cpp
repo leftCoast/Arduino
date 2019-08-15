@@ -123,7 +123,8 @@ bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 					needRefresh = true;					// touchLift doesn't get a lift event. So it needs the setRefresh here.
 					return true;							// Tell the world the event has been accepted.
 				}
-			} else if (inEvent->mType==liftEvent) {	// We only get lifts if we'd accepted the touch.
+			} else if (theTouched==this 
+						&& inEvent->mType==liftEvent) {	// We only want lifts if we'd accepted the touch.
 				clicked		= false;							// And we're no longer clicked.
 				needRefresh = true;							// And here.. (see above)
 				return true;									// Again, tell the world the event has been accepted.

@@ -5,6 +5,7 @@
 #include "panel.h"
 #include "quickCom.h"
 #include "baseButton.h"
+
 #define BEEP_PIN    23
 
 enum  apps { homeApp = HOME_PANEL_ID, controlApp, nextApp };
@@ -16,7 +17,7 @@ extern qCMaster ourComPort;
 // *********   From unit.   *********
 // ******************************************
 
-enum floraComSet    { floraReset, readMoisture, readParams, pumpOn, pumpOff, setMoisture, setWaterTime, setSoakTime, setPulseOn, setPulsePeriod };
+enum floraComSet    { floraReset, readName, readMoisture, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 #define NAME_BUFF_BYTES         24
@@ -63,7 +64,7 @@ class floraOS : public litlOS {
   
   virtual int     begin(void);          // The global world is online, do hookups.
   virtual panel*  createPanel(int panelID);
-          void    beep(void);
+          void    beep(bool beepUp);
   virtual void    idle(void);           // If we need to do something in the background, here we are.
 };
 

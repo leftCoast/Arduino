@@ -59,16 +59,28 @@ panel* floraOS::createPanel(int panelID) {
   }
 }
 
+#define BEEP_LOOPS  4
+#define BEEP_CONST  500
+void floraOS::beep(bool beepUp) {
 
-void floraOS::beep(void) {
-
-  for(int i=0;i<20;i++) {
-    digitalWrite(BEEP_PIN, HIGH);
-    delay(1);
-    digitalWrite(BEEP_PIN, LOW);
-    delay(1);
+  unsigned int dTime;
+  if (beepUp) {
+    for(int i=0;i<BEEP_LOOPS;i++) {
+      dTime = BEEP_CONST*(BEEP_LOOPS-i);
+      digitalWrite(BEEP_PIN, LOW);
+      delayMicroseconds(dTime);
+      digitalWrite(BEEP_PIN, HIGH);
+      delayMicroseconds(dTime);
+    }
+  } else {
+    for(int i=0;i<BEEP_LOOPS;i++) {
+      dTime = BEEP_CONST*BEEP_LOOPS;
+      digitalWrite(BEEP_PIN, LOW);
+      delayMicroseconds(dTime);
+      digitalWrite(BEEP_PIN, HIGH);
+      delayMicroseconds(dTime);
+    }
   }
-  digitalWrite(BEEP_PIN, HIGH);
 }
 
 
