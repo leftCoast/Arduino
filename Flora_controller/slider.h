@@ -5,7 +5,19 @@
 #include <drawObj.h>
 #include <eventMgr.h>
 
-class slider :  public drawObj {
+
+#define DEF_SLIDER_KNOB_W   8
+#define DEF_SLIDER_LINE_H   3
+#define DEF_SLIDER_LVAL     0
+#define DEF_SLIDER_RVAL     100
+
+#define DEF_SLIDER_BCOLOR   LC_BLACK
+#define DEF_SLIDER_OLCOLOR  LC_GREY
+#define DEF_SLIDER_KNBCOLOR LC_RED
+
+#include "switchable.h"
+
+class slider :  public switchable {
 
   public:
                 slider(int x,int y,int width,int height);

@@ -5,6 +5,7 @@
 #include "panel.h"
 #include "quickCom.h"
 #include "baseButton.h"
+
 #define BEEP_PIN    23
 
 enum  apps { homeApp = HOME_PANEL_ID, controlApp, nextApp };

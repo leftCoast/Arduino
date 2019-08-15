@@ -144,9 +144,9 @@ void handheld::handleSetPump(byte* comPtr) {
 
 void handheld::handleSetDryLimit(byte* comPtr) {
 
-  int newVal;
+  byte newVal;
   
-  newVal = *((int*)&(comPtr[1])); // Grab the value from the buffer.
+  newVal = *((byte*)&(comPtr[1])); // Grab the value from the buffer.
   ourParamObj.setDryLimit(newVal);
   comPtr[0] = noErr;
   replyComBuff(1);

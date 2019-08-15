@@ -9,15 +9,15 @@
 class controlPanel;
 
 // *****************************************************
-// ******************    pumpBtn   *********************
+// ******************    waterBtn   *********************
 // *****************************************************
 
 
-class pumpBtn : public baseButton {
+class waterBtn : public baseButton {
 
     public:
-            pumpBtn(int x, int y,int width, int height);
-    virtual ~pumpBtn(void);
+            waterBtn(int x, int y,int width, int height);
+    virtual ~waterBtn(void);
 
     virtual void  doAction(event* inEvent,point* locaPt);
 
@@ -34,14 +34,15 @@ class pumpBtn : public baseButton {
 class selectBtn : public baseButton {
 
   public:
-                selectBtn(int x,int y,int width,int height,int inChoice);
+                selectBtn(int x,int y,int width,int height,int inChoice,controlPanel* inPanel);
   virtual       ~selectBtn(void);
 
           int     getChoice(void);
   virtual void    drawSelf(void);
   virtual void    doAction(event* inEvent,point* locaPt);
 
-          int     mChoice;
+          int           mChoice;
+          controlPanel* mPanel;
 };
 
 extern  selectBtn*  selectedVal;
@@ -75,11 +76,14 @@ class editSlider :  public slider {
 class okBtn : public baseButton {
 
     public:
-                  okBtn(int x, int y,int width, int height);
+                  okBtn(int x, int y,int width, int height,controlPanel* inPanel);
     virtual       ~okBtn(void);
 
     virtual void  doAction(event* inEvent,point* locaPt);
+
+            controlPanel* mPanel;
 };
+
 
 
 // *****************************************************
@@ -90,10 +94,12 @@ class okBtn : public baseButton {
 class cancelBtn : public baseButton {
 
   public:
-                  cancelBtn(int x, int y,int width, int height);
+                  cancelBtn(int x, int y,int width, int height,controlPanel* inPanel);
   virtual         ~cancelBtn(void);
 
   virtual   void  doAction(event* inEvent,point* locaPt);
+  
+            controlPanel* mPanel;
 };
 
 
@@ -122,16 +128,25 @@ class controlPanel : public panel {
           void  checkName(void);
           
           void  doComPump(bool onOff);
+
+          void  doComSetDryLimit(float limit);
+          void  doComSetWTime(float wTime);
+          void  doComSetSTime(float sTime);
           
   virtual void  loop(void);
   virtual void  drawSelf(void);
   virtual void  close(void);
   virtual void  closing(void);
 
+          int         mLastLimit;
+          int         mLastWTime;
+          int         mLastSTime;
+          
           timeObj     mReadTimer;
           label*      mNameLabel;
           label*      mMoistureLabel;
           label*      mDryLimitLabel;
+          waterBtn*   mWaterBtn;
           selectBtn*  mDryLimitBtn;
           label*      mWaterTimeLabel;
           selectBtn*  mWaterTimeBtn;

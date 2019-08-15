@@ -6,7 +6,7 @@
 #define DEF_DRY_LIMIT           40            // These guys are in the parameer block.
 #define DEF_WATER_TIME          10000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
-#define DEF_NAME                "Plant name"
+#define DEF_NAME                "LC Plant Tender"
 #define DEF_DRY                  335          // Wipe it dry and block it up aff the wood table.
 #define DEF_MUD                  1015         // Holding it in your hand it maxes out.
 

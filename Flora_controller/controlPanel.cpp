@@ -1,7 +1,6 @@
 #include "controlPanel.h"
 
 
-#define NO_SELECTION  0
 #define DRY_LIMIT     1
 #define W_TIME        2
 #define S_TIME        3
@@ -12,30 +11,30 @@
 #define SELECT_YOFFS  3
 
 #define READ_TIME 500
+#define MAX_WTIME 120000
+#define MAX_STIME 600000
 
-enum commandChoices { comIdle  ,comPumpOn, comPumpOff };
+enum commandChoices { comIdle  ,comPumpOn, comPumpOff, comSetDryLimit, comSetWTime, comSetSTime };
 commandChoices  commandChoice = comIdle;
 
 char tempStrBuff[256];
 
-
-
 // *****************************************************
-// ******************    pumpBtn   *********************
+// ******************    waterBtn   *********************
 // *****************************************************
 
 
-pumpBtn::pumpBtn(int x, int y,int width, int height)
+waterBtn::waterBtn(int x, int y,int width, int height)
   :baseButton("Water",x,y,width,height) { 
     
   mOnOff = true;
 }
 
   
-pumpBtn::~pumpBtn(void) {  }
+waterBtn::~waterBtn(void) {  }
 
 
-void  pumpBtn::doAction(event* inEvent,point* locaPt) {
+void  waterBtn::doAction(event* inEvent,point* locaPt) {
 
   byte  outByte;
   
@@ -57,8 +56,12 @@ void  pumpBtn::doAction(event* inEvent,point* locaPt) {
 // *****************************************************
 
 
-selectBtn::selectBtn(int x,int y,int width,int height,int inChoice)
-  :baseButton("",x,y,width,height) {  mChoice = inChoice; }
+selectBtn::selectBtn(int x,int y,int width,int height,int inChoice,controlPanel* inPanel)
+  :baseButton("",x,y,width,height) {
+    
+    mChoice = inChoice;
+    mPanel = inPanel;
+}
 
   
 selectBtn::~selectBtn(void) {  }
@@ -72,7 +75,7 @@ void selectBtn::drawSelf(void) {
   if (selectedVal==this) {
     screen->drawRoundRect(x, y, width, height, 4, &red);
   } else {
-    screen->drawRoundRect(x, y, width, height, 4, &black);
+    screen->drawRoundRect(x, y, width, height, 4, &BGColor);
   }
 }
 
@@ -84,6 +87,25 @@ void  selectBtn::doAction(event* inEvent,point* locaPt) {
       selectedVal->setNeedRefresh();
     }
     selectedVal = this;
+    switch (mChoice) {
+      case DRY_LIMIT  :
+        mPanel->mSlider->setup(DEF_SLIDER_KNOB_W,DEF_SLIDER_LINE_H,0,100);
+        mPanel->mSlider->setValue(mPanel->mLastLimit);
+      break;
+      case W_TIME     :
+        mPanel->mSlider->setup(DEF_SLIDER_KNOB_W,DEF_SLIDER_LINE_H,0,MAX_WTIME/1000);
+        mPanel->mSlider->setValue(mPanel->mLastWTime);
+      break;
+      case S_TIME     :
+        mPanel->mSlider->setup(DEF_SLIDER_KNOB_W,DEF_SLIDER_LINE_H,0,MAX_STIME/1000);
+        mPanel->mSlider->setValue(mPanel->mLastSTime);
+      break;
+    }
+    mPanel->mSlider->select(true);
+    //mPanel->mSliderLabel->select(true);
+    mPanel->mOkBtn->select(true);
+    mPanel->mCancelBtn->select(true);
+    mPanel->mWaterBtn->select(false);
   }
 }
 
@@ -133,8 +155,12 @@ void editSlider::doAction(event* inEvent,point* locaPt) {
 // *****************************************************
 
 
-okBtn::okBtn(int x, int y,int width, int height)
-  : baseButton("Ok",x,y,width,height) { activeBColor.setColor(&green); }
+okBtn::okBtn(int x, int y,int width, int height,controlPanel* inPanel)
+  : baseButton("Ok",x,y,width,height) {
+    
+  mPanel = inPanel;
+  activeBColor.setColor(&green);
+}
 
    
 okBtn::~okBtn(void) {  }
@@ -142,7 +168,22 @@ okBtn::~okBtn(void) {  }
 
 void okBtn::doAction(event* inEvent,point* locaPt) {
 
-  
+  if (inEvent->mType==liftEvent) {
+    mPanel->mSlider->select(false);
+    mPanel->mCancelBtn->select(false);
+    select(false);
+    //mPanel->mSliderLabel->select(true);
+    mPanel->mWaterBtn->select(true);
+    if (selectedVal) {
+      switch (selectedVal->getChoice()) {
+        case DRY_LIMIT  : commandChoice = comSetDryLimit; break;
+        case W_TIME     : commandChoice = comSetWTime;    break;
+        case S_TIME     : commandChoice = comSetSTime;    break;
+      }
+      selectedVal->setNeedRefresh();
+      selectedVal = NULL;
+    }
+  }
 }
 
 
@@ -152,8 +193,12 @@ void okBtn::doAction(event* inEvent,point* locaPt) {
 // *****************************************************
 
 
-cancelBtn::cancelBtn(int x, int y,int width, int height)
-  : baseButton("Cancel",x,y,width,height) { activeBColor.setColor(&red); }
+cancelBtn::cancelBtn(int x, int y,int width, int height,controlPanel* inPanel)
+  : baseButton("Cancel",x,y,width,height) {
+
+  mPanel = inPanel;
+  activeBColor.setColor(&red);
+}
 
    
 cancelBtn::~cancelBtn(void) {  }
@@ -161,7 +206,15 @@ cancelBtn::~cancelBtn(void) {  }
 
 void cancelBtn::doAction(event* inEvent,point* locaPt) {
 
-  
+  if (inEvent->mType==liftEvent) {
+    mPanel->mSlider->select(false);
+    mPanel->mOkBtn->select(false);
+    select(false);
+    //mPanel->mSliderLabel->select(true);
+    mPanel->mWaterBtn->select(true);
+    if (selectedVal) selectedVal->setNeedRefresh();
+    selectedVal = NULL;
+  }
 }
 
 
@@ -211,7 +264,7 @@ void controlPanel::setup(void) {
     mDryLimitLabel->setColors(&labelColor,&black);
     addObj(mDryLimitLabel);
 
-    mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT);
+    mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT,this);
     addObj(mDryLimitBtn);
       
     waterTimeText(0);
@@ -220,7 +273,7 @@ void controlPanel::setup(void) {
     mWaterTimeLabel->setColors(&labelColor,&black);
     addObj(mWaterTimeLabel);
 
-    mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME);
+    mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME,this);
     addObj(mWaterTimeBtn);
     
     soakTimeText(0);
@@ -229,7 +282,7 @@ void controlPanel::setup(void) {
     mSoakTimeLabel->setColors(&labelColor,&black);
     addObj(mSoakTimeLabel);
 
-    mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME);
+    mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME,this);
     addObj(mSoakTimeBtn);
 
     traceY = traceY + 2*LINE_SPACE;
@@ -241,18 +294,22 @@ void controlPanel::setup(void) {
     mSlider = new editSlider(20,traceY,200,20);
     mSlider->setLabel(mSliderLabel);
     mSlider->setValue(50);
+    mSlider->select(false);
     addObj(mSlider);
 
     traceY = traceY + 2*LINE_SPACE;
-    mOkBtn = new okBtn(90,traceY,35,20);
+    mOkBtn = new okBtn(90,traceY,35,20,this);
+    mOkBtn->select(false);
     addObj(mOkBtn);
 
-    mCancelBtn = new cancelBtn(150,traceY,80,20);
+    mCancelBtn = new cancelBtn(150,traceY,80,20,this);
+    mCancelBtn->select(false);
     addObj(mCancelBtn);
      
     traceY = traceY + 3*LINE_SPACE;
-    pumpBtn* btn = new pumpBtn(20,traceY,80,20);
-    addObj(btn);
+    mWaterBtn = new waterBtn(20,traceY,80,20);
+    mWaterBtn->select(true);
+    addObj(mWaterBtn);
 }
 
 
@@ -278,13 +335,15 @@ void controlPanel::dryLimitText(int dryLimit) {
   char dryLimitText[5];
   
   if (!dryLimit) {
-    strcpy(dryLimitText," 0");
+    strcpy(dryLimitText,"  0");
   } else if (dryLimit<10) {
+    snprintf (dryLimitText,5,"  %d",dryLimit);
+  } else if (dryLimit<99) {
     snprintf (dryLimitText,5," %d",dryLimit);
   } else {
     snprintf (dryLimitText,5,"%d",dryLimit);
   }
-  strcpy(tempStrBuff,"Dry limit  :  ");
+  strcpy(tempStrBuff,"Dry limit  : ");
   strcat(tempStrBuff,dryLimitText);
   strcat(tempStrBuff," %");
 }
@@ -367,6 +426,7 @@ void controlPanel::checkDryLimit(void) {
   byteBuff = ourComPort.haveBuff();
   if (byteBuff==1) {
     ourComPort.readBuff(&byteBuff);
+    mLastLimit = byteBuff;
     dryLimitText(byteBuff);
     mDryLimitLabel->setValue(tempStrBuff);
     mDryLimitLabel->setNeedRefresh();
@@ -388,6 +448,7 @@ void controlPanel::checkWaterTime(void) {
   byteBuff = ourComPort.haveBuff();
   if (byteBuff==sizeof(unsigned long)) {
     ourComPort.readBuff((byte*)&longBuff);
+    mLastWTime = longBuff/1000;
     waterTimeText(longBuff);
     mWaterTimeLabel->setValue(tempStrBuff);
     mWaterTimeLabel->setNeedRefresh();
@@ -409,6 +470,7 @@ void controlPanel::checkSoakTime(void) {
   byteBuff = ourComPort.haveBuff();
   if (byteBuff==sizeof(unsigned long)) {
     ourComPort.readBuff((byte*)&longBuff);
+    mLastSTime = longBuff/1000;
     soakTimeText(longBuff);
     mSoakTimeLabel->setValue(tempStrBuff);
     mSoakTimeLabel->setNeedRefresh();
@@ -456,6 +518,64 @@ void controlPanel::doComPump(bool onOff) {
 }
 
 
+void controlPanel::doComSetDryLimit(float limit) {
+
+  byte  byteBuff[2];
+  byte  byteLimit;
+
+  if (limit<0) byteLimit = 0;
+  else if (limit>100) byteLimit = 100;
+  else byteLimit = round(limit);
+  byteBuff[0] = (byte)setDryLimit;
+  byteBuff[1] = byteLimit;
+  ourComPort.sendBuff(byteBuff,2,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(10);}
+  if (ourComPort.haveBuff()) {
+    ourComPort.dumpBuff();
+  }
+}
+
+
+void controlPanel::doComSetWTime(float wTime) { 
+
+  byte  byteBuff[sizeof(unsigned long)+1];
+  unsigned long   longTime;
+  unsigned long*  longPtr;
+  
+  if (wTime<0) wTime = 0;
+  else if (wTime>MAX_WTIME) wTime = MAX_WTIME;
+  longTime = round(wTime*1000);
+  byteBuff[0] = (byte)setWaterTime;
+  longPtr = (unsigned long*)(&(byteBuff[1]));
+  *longPtr = longTime;
+  ourComPort.sendBuff(byteBuff,sizeof(unsigned long)+1,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(10);}
+  if (ourComPort.haveBuff()) {
+    ourComPort.dumpBuff();
+  }
+}
+
+
+void controlPanel::doComSetSTime(float sTime) {
+
+  byte  byteBuff[sizeof(unsigned long)+1];
+  unsigned long   longTime;
+  unsigned long*  longPtr;
+  
+  if (sTime<0) sTime = 0;
+  else if (sTime>MAX_STIME) sTime = MAX_STIME;
+  longTime = round(sTime*1000);
+  byteBuff[0] = (byte)setSoakTime;
+  longPtr = (unsigned long*)(&(byteBuff[1]));
+  *longPtr = longTime;
+  ourComPort.sendBuff(byteBuff,sizeof(unsigned long)+1,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(10);}
+  if (ourComPort.haveBuff()) {
+    ourComPort.dumpBuff();
+  }
+}
+
+          
 void controlPanel::loop(void) {
 
   if (mReadTimer.ding()&&!selectedVal) {                        
@@ -471,14 +591,16 @@ void controlPanel::loop(void) {
     dataChoice = (dataSelect)(dataChoice + 1);
     mReadTimer.start();
   }
-  
-  /* 
+  if (commandChoice!=comIdle) Serial.println(commandChoice);
   switch (commandChoice) {
-      case comIdle    : break;
-      case comPumpOn  : doComPump(true);  break;
-      case comPumpOff : doComPump(false); break;
+    case comIdle        : break;
+    case comPumpOn      : doComPump(true);  break;
+    case comPumpOff     : doComPump(false); break;
+    case comSetDryLimit : doComSetDryLimit(mSlider->getValue()); break;
+    case comSetWTime    : doComSetWTime(mSlider->getValue()); break;
+    case comSetSTime    : doComSetSTime(mSlider->getValue()); break;
   }
-  */
+  commandChoice = comIdle;
 }
 
 

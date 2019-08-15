@@ -9,9 +9,10 @@
 
 
 baseButton::baseButton(char* inLabel,int x, int y,int width, int height)
-  : drawObj(x, y, width, height, touchLift) {
+  : switchable(x, y, width, height, touchLift) {
 
   // default button colors.
+  BGColor.setColor(LC_BLACK);
   activeBColor.setColor(LC_BLUE);
   activeBColor.blend(&white, 40);
   activeTColor.setColor(LC_WHITE);
@@ -23,13 +24,15 @@ baseButton::baseButton(char* inLabel,int x, int y,int width, int height)
   strcpy(label, inLabel);
 }
 
+
 baseButton::~baseButton(void) {
 
-    if (label) {
-        free(label);
-        label = NULL;
-    }
+  if (label) {
+    free(label);
+    label = NULL;
+  }
 }
+
 
 // The original didn't do what I expected. So I just hacked a local copy for the buttons here.
 //nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
@@ -94,23 +97,30 @@ void baseButton::drawSelf(void) {
 
   word dispWidth;
   word textWidth;
-  
-  if (clicked) {
-    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &activeBColor);
-    screen->fillRoundRect(x, y, width, height, RADIUS, &clickedBColor);
-    screen->setTextColor(&clickedTColor, &clickedBColor);
+
+  if (mOnOff) {
+    if (clicked) {
+      screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &activeBColor);
+      screen->fillRoundRect(x, y, width, height, RADIUS, &clickedBColor);
+      screen->setTextColor(&clickedTColor, &clickedBColor);
+    } else {
+      screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white); 
+      screen->fillRoundRect(x, y, width, height, RADIUS, &activeBColor);
+      screen->setTextColor(&activeTColor, &activeBColor);
+    }
+    screen->setTextSize(TEXT_SIZE);
+    screen->setTextWrap(false);
+    dispWidth = width - (2 * RADIUS);
+    textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(label)) - 1;
+    if (dispWidth > textWidth) {
+      screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 2);
+      screen->drawText(label);
+    }
   } else {
-    screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white); 
-    screen->fillRoundRect(x, y, width, height, RADIUS, &activeBColor);
-    screen->setTextColor(&activeTColor, &activeBColor);
-  }
-  screen->setTextSize(TEXT_SIZE);
-  screen->setTextWrap(false);
-  dispWidth = width - (2 * RADIUS);
-  textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(label)) - 1;
-  if (dispWidth > textWidth) {
-    screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 2);
-    screen->drawText(label);
+    rect arect;
+    arect.setRect(this);
+    arect.insetRect(-2);
+    screen->fillRect(&arect,&BGColor);
   }
 }
 
