@@ -48,17 +48,14 @@ void setup() {
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     while(true);
   }
-
   // Next is to bring the comuication hardware online.
   ourCellManager.begin(9600);             // Fire up comunications.
   if (ourCellManager.readErr()!=NO_ERR) { // Did the poor thing fire up?
     while(true);
   }
-
   if (!SD.begin(SD_CS)) {     // Bring the diskdrive online.
     while(true);
   }
-  
   addrStarter kicker;                       // Once the disk is online we can..
   kicker.begin(CONTACT_FILE_PATH,false);    // Boot our little black book. false = normal. true? Delete and reset the phonebook.
                                             // kicker should auto-destruct at the end of setup(). As it should.
