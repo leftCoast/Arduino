@@ -63,7 +63,7 @@ void setup() {
       delay(100);
     }
   }
-  Serial.println("Prime running avarage buffers");
+  Serial.println("Priming running-avarage buffers");
   for (int i=1;i<DEF_CSMOOTHER;i++) {
     doReading();
     delay(100);

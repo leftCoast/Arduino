@@ -11,6 +11,7 @@ class baseButton : public switchable, public idler {
   virtual         ~baseButton(void);
 
   virtual bool    acceptEvent(event* inEvent,point* locaPt);  // Is this event for us?
+  virtual void    setText(char* intext);
   virtual void    idle(void);
   virtual void    drawSelf(void);
 

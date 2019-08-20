@@ -31,7 +31,7 @@ switchable::~switchable(void) { }
 void switchable::select(bool onOff) {
 
   if (onOff) {                          // If we're turning on..
-    setEventSet(mSavedSet);        // We replace our saved event set.
+    setEventSet(mSavedSet);             // We replace our saved event set.
   } else {                              // Else, turning off..
     if (theTouched==this) {             // In the case that we are the touched..
       mEventSet = noEvents;             // We force drop the event set

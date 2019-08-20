@@ -176,7 +176,6 @@ void textComObj::setPlantName(void) {
     charBuff = ourParamObj.getName();
     Serial.print("Plant name is now set to ");
     Serial.println(charBuff);
-    free(charBuff);
   }
 }
 

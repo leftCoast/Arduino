@@ -11,12 +11,14 @@ class handheld : public qCSlave {
 
   virtual void  begin(void);
           void  checkComs(void);
+          void  handleReset(byte* comPtr);
+          void  handleReadState(byte* comPtr);
           void  handleReadMoisture(byte* comPtr);
           void  handleReadDryLimit(byte* comPtr);
           void  handleReadWTime(byte* comPtr);
           void  handleReadSTime(byte* comPtr);
           void  handleReadName(byte* comPtr);
-          void  handleReset(byte* comPtr);
+
           void  handleSetPump(byte* comPtr);
           void  handleSetDryLimit(byte* comPtr);
           void  handleSetWaterTime(byte* comPtr);

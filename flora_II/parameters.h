@@ -6,7 +6,7 @@
 #define DEF_DRY_LIMIT           40            // These guys are in the parameer block.
 #define DEF_WATER_TIME          10000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
-#define DEF_NAME                "LC Plant Tender"
+#define DEF_NAME                "LC Plant Minder"
 #define DEF_DRY                  335          // Wipe it dry and block it up aff the wood table.
 #define DEF_MUD                  1015         // Holding it in your hand it maxes out.
 
@@ -20,15 +20,15 @@
 
 #define NAME_BUFF_BYTES         24
 
-struct paramType {
-  int dryLimit;
-  int waterTime;
-  int soakTime;
-  int percent;
-  int period;
-  int dry;
-  int mud;
-  char name[NAME_BUFF_BYTES];
+struct paramType {                  // paramType is the TYPE of structure we save all of our parameters in. We can plunk it into EEPROM and read it right back out.
+  int dryLimit;                     // The moisture percentage reading (limit) we use to trigger when its time to water.
+  int waterTime;                    // How long we will water once the limit is reached in miliseconds.
+  int soakTime;                     // How long we will wait after watering before starting up moisture readings again. This is also in miliseconds.
+  int percent;                      // Currently ignored. What percent of time do we hold the motor power on each time we want to give it a jolt of juice. (Throttle)
+  int period;                       // Actually this, I think is used. How often do we give the motor a jolt of power to hold the speed we want. (Smoothness, [Number of cylinders])
+  int dry;                          // What capacitive reading are we calling our totally dry limit.
+  int mud;                          // What capacitive reading are we calling absolute mud. The totally wet limit.
+  char name[NAME_BUFF_BYTES];       // Although at this time you can't change it. Each plant minder can have its own name. (Later)
 };
 
 
@@ -36,7 +36,7 @@ struct paramType {
 // ******************************************
 // ******************************************
 
-class parameters {
+class parameters {                            // parameters is the onject that manages your saved info.
 
 public:
           parameters(void);
@@ -67,7 +67,7 @@ virtual   ~parameters(void);
           paramType params;
 };
 
-extern bool needReset;
-extern parameters ourParamObj;
+extern bool needReset;          
+extern parameters ourParamObj;  // Global object for managing your parameters.
 
 #endif

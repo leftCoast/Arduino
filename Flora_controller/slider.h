@@ -30,6 +30,7 @@ class slider :  public switchable {
   virtual float getValue(void);                           // Just in case you were wondering.
   virtual void  setValue(float value);                    // Great for pre-loading.
 
+          bool      mBeenReset;
           int       mLoc;
           int       mNewLoc;
           bool      mInHit;

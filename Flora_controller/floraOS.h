@@ -17,7 +17,7 @@ extern qCMaster ourComPort;
 // *********   From unit.   *********
 // ******************************************
 
-enum floraComSet    { floraReset, readName, readMoisture, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
+enum floraComSet    { floraReset, readName, readState, readMoisture, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 #define NAME_BUFF_BYTES         24
