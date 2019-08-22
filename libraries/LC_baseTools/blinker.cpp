@@ -34,26 +34,27 @@ void blinker::setLight(boolean onOff) {
 }
 
 
+// This is your on/off switch. Call with a boolean tru=on false=off.
+// The object is created in the "off" mode.
 void blinker::setBlink(boolean onOff) {
 
-  
-  if(onOff != running) {		// ignore if no change
-    if (onOff) {			// Start blinking..
-      if (!init) {                      // Not intialized?
-        hookup();                       // Set up idling.
-        pinMode(pin, OUTPUT);           // Now you are!
-        init = true;                    // Note it.
-      }
-      start();                          // Starting NOW!
-      setLight(true);                   // light on!
-      onTimer->start();                 // set the time on timer.
-      running = true;
-    } 
-    else {			         // Stop blinking..
-      setLight(false);                  // light off.
-      running = false;		        // set state.
-    }
-  }
+	if (!init) {					// Not intialized?
+		hookup();					// Set up idling.
+		pinMode(pin, OUTPUT);	// Now you are!
+		init = true;				// Note it.
+	}
+	if((onOff!=running)) {		// ignore if no change
+		if (onOff) {				// Start blinking..    
+			start();					// Starting NOW!
+			setLight(true);		// light on!
+			onTimer->start();		// set the time on timer.
+			running = true;		// Set state.
+			} 
+		else {						// Stop blinking..
+			setLight(false);		// light off.
+			running = false;		// set state.
+		}
+	}
 }
 
 
@@ -61,12 +62,12 @@ void blinker::idle(void) {
 
   if (running) {
     if(lightOn) {                     // light is on.
-      if (onTimer->ding()) {          // time to turn it off..
-        setLight(false);              // light off.
+      if (onTimer->ding()) {          // If time to turn it off..
+        setLight(false);              // turn off.
       }
     } 
     else {                           // light's off
-      if (ding()) {                  // time to turn it on!
+      if (ding()) {                  // If time to turn it on!
         setLight(true);              // on it goes.
         onTimer->start();            // set the time on timer.
         stepTime();                  // Reset timer for next on cycle.

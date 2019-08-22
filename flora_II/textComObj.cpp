@@ -3,7 +3,7 @@
 #include "pumpObj.h"
 #include "globals.h"
 
-enum commands { noCommand, resetAll, showParams, showReadings, setMudMapLimit, setDryMapLimit, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
+enum commands { noCommand, resetAll, showParams, showReadings, showGReadings, setMudMapLimit, setDryMapLimit, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
 
 
 textComObj textComs;
@@ -20,6 +20,7 @@ void textComObj::begin(void) {
   mParser.addCmd(resetAll, "reset");
   mParser.addCmd(showParams, "see");
   mParser.addCmd(showReadings, "read");
+  mParser.addCmd(showGReadings, "graph");
   mParser.addCmd(setMudMapLimit, "mud");
   mParser.addCmd(setDryMapLimit, "dry");
   mParser.addCmd(setSetPoint, "limit");
@@ -47,6 +48,7 @@ void textComObj::checkTextCom(void) {
       case resetAll       : initParams();     break;
       case showParams     : printParams();    break;
       case showReadings   : printReadings();  break;
+      case showGReadings  : printGReadings(); break;
       case setSetPoint    : setDryLimit();    break;
       case setWTime       : setWaterTime();   break;
       case setSTime       : setSoakTime();    break;
@@ -115,6 +117,31 @@ void textComObj::doPrintReadings(void) {
     }
     if (mAutoRead) readTimer.start();
 }      
+
+
+void textComObj::doPrintGReadings(void) {
+  
+    Serial.print(tempC);Serial.print(" ");
+    Serial.print(capread);Serial.print(" ");
+    Serial.println((int)moisture);
+    if (mAutoRead) readTimer.start();
+}      
+
+void textComObj::printGReadings(void) {
+
+  int   timeVal;
+  char* buff;
+  
+  timeVal = 0;
+  mAutoRead = false;
+  if (mParser.numParams()) {
+    buff = mParser.getParam();
+    timeVal = atoi (buff);
+  }
+  readTimer.setTime(timeVal);
+  readTimer.start();
+  mAutoRead = timeVal>0;
+}
 
 
 void textComObj::setDryLimit(void) {

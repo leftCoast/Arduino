@@ -18,7 +18,9 @@ class textComObj : public idler {
           void  initParams(void);
           void  printParams(void);
           void  printReadings(void);
+          void  printGReadings(void);
           void  doPrintReadings(void);
+          void  doPrintGReadings(void);
           void  setDryLimit(void);
           void  setWaterTime(void);
           void  setSoakTime(void);
