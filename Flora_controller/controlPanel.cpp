@@ -246,7 +246,7 @@ void cancelBtn::doAction(event* inEvent,point* locaPt) {
 
 #define LINE_SPACE  20
 
-enum dataSelect { dataStart, dataState, dataName, dataMoisture, dataDryLimit, dataWaterTime, dataSoakTime, dataEnd };
+enum dataSelect { dataStart, dataState, dataName, dataTemp, dataMoisture, dataDryLimit, dataWaterTime, dataSoakTime, dataEnd };
 dataSelect  dataChoice = dataStart;
 
 
@@ -289,8 +289,18 @@ void controlPanel::setup(void) {
     mStateLight = new colorRect(0,traceY+4,6,6);
     mStateLight->setColor(LC_RED);
     addObj(mStateLight);
+
+    tempText(-1);
+    traceY = traceY + LINE_SPACE;
+    mTempLabel = new label(10,traceY,220,14,tempStrBuff,2);
+    mTempLabel->setColors(&labelColor,&black);
+    addObj(mTempLabel);
+
+    mTempLight = new colorRect(0,traceY+4,6,6);
+    mTempLight->setColor(LC_RED);
+    addObj(mTempLight);
     
-    moistureText(0);
+    moistureText(-1);
     traceY = traceY + LINE_SPACE;
     mMoistureLabel = new label(10,traceY,220,14,tempStrBuff,2);
     mMoistureLabel->setColors(&labelColor,&black);
@@ -300,7 +310,7 @@ void controlPanel::setup(void) {
     mMoistureLight->setColor(LC_RED);
     addObj(mMoistureLight);
     
-    dryLimitText(0);
+    dryLimitText(-1);
     traceY = traceY + (2*LINE_SPACE);
     mDryLimitLabel = new label(10,traceY,220,14,tempStrBuff,2);
     mDryLimitLabel->setColors(&labelColor,&black);
@@ -313,7 +323,7 @@ void controlPanel::setup(void) {
     mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT,this);
     addObj(mDryLimitBtn);
       
-    waterTimeText(0);
+    waterTimeText(-1);
     traceY = traceY + LINE_SPACE;
     mWaterTimeLabel = new label(10,traceY,220,14,tempStrBuff,2);
     mWaterTimeLabel->setColors(&labelColor,&black);
@@ -326,7 +336,7 @@ void controlPanel::setup(void) {
     mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME,this);
     addObj(mWaterTimeBtn);
     
-    soakTimeText(0);
+    soakTimeText(-1);
     traceY = traceY + LINE_SPACE;
     mSoakTimeLabel = new label(10,traceY,220,14,tempStrBuff,2);
     mSoakTimeLabel->setColors(&labelColor,&black);
@@ -360,10 +370,29 @@ void controlPanel::setup(void) {
     mCancelBtn->select(false);
     addObj(mCancelBtn);
      
-    traceY = traceY + 2*LINE_SPACE;
+    traceY = traceY + LINE_SPACE + 4;
     mWaterBtn = new waterBtn(20,traceY,80,20);
     mWaterBtn->select(true);
     addObj(mWaterBtn);
+}
+
+
+void controlPanel::tempText(int temp) {
+
+  char tText[5];
+  
+  if (temp<0) {
+    strcpy(tText,"---");
+  } else if (temp<10) {
+    snprintf (tText,5,"  %d",temp);
+  } else if (temp<100) {
+    snprintf (tText,5," %d",temp);
+  } else {
+    snprintf (tText,5,"%d",temp);
+  }
+  strcpy(tempStrBuff,"Temp       : ");
+  strcat(tempStrBuff,tText);
+  strcat(tempStrBuff," C");
 }
 
 
@@ -386,7 +415,7 @@ void controlPanel::moistureText(int moisture) {
 
   char moistText[5];
   
-  if (!moisture) {
+  if (moisture<0) {
     strcpy(moistText,"---");
   } else if (moisture<10) {
     snprintf (moistText,5,"  %d",moisture);
@@ -478,13 +507,36 @@ void controlPanel::checkMoisture(void) {
   if (byteBuff==1) {
     ourComPort.readBuff(&byteBuff);
     moistureText(byteBuff);
-    mMoistureLabel->setValue(tempStrBuff);
     mMoistureLight->setColor(LC_GREEN);
-    mMoistureLabel->setNeedRefresh();
   } else {
     ourComPort.dumpBuff();
+    moistureText(-1);
     mMoistureLight->setColor(LC_RED);
   }
+  mMoistureLabel->setValue(tempStrBuff);
+}
+
+
+void controlPanel::checkTemp(void) {
+  
+  byte  byteBuff;
+
+  mTempLight->setColor(LC_WHITE); 
+  byteBuff = readTemp;
+  ourComPort.readErr();
+  ourComPort.sendBuff(&byteBuff,1,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(SLEEP_TIME);}
+  byteBuff = ourComPort.haveBuff();
+  if (byteBuff==1) {
+    ourComPort.readBuff(&byteBuff);
+    tempText(byteBuff);
+    mTempLight->setColor(LC_GREEN);
+  } else {
+    ourComPort.dumpBuff();
+    tempText(-1);
+    mTempLight->setColor(LC_RED);
+  }
+  mTempLabel->setValue(tempStrBuff);
 }
 
 
@@ -530,6 +582,8 @@ void controlPanel::checkDryLimit(void) {
     mDryLimitLabel->setNeedRefresh();
   } else {
     ourComPort.dumpBuff();
+    dryLimitText(-1);
+    mDryLimitLabel->setValue(tempStrBuff);
     mDryLimitLight->setColor(LC_RED);
   }
 }
@@ -694,12 +748,13 @@ void controlPanel::loop(void) {
   if (mReadTimer.ding()&&!selectedVal) {                        
     switch (dataChoice) {
       case dataStart      : break;
-      case dataName       : checkName();  break;
-      case dataState      : checkState();  break;
-      case dataMoisture   : checkMoisture();  break;
-      case dataDryLimit   : checkDryLimit();  break;
-      case dataWaterTime  : checkWaterTime();  break;
-      case dataSoakTime   : checkSoakTime();  break;
+      case dataName       : checkName();            break;
+      case dataState      : checkState();           break;
+      case dataMoisture   : checkMoisture();        break;
+      case dataTemp       : checkTemp();            break;
+      case dataDryLimit   : checkDryLimit();        break;
+      case dataWaterTime  : checkWaterTime();       break;
+      case dataSoakTime   : checkSoakTime();        break;
       case dataEnd        : dataChoice = dataStart; break;
     }
     dataChoice = (dataSelect)(dataChoice + 1);

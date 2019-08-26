@@ -6,7 +6,7 @@
 #define COM_BUFF_BYTES  255
 
 
-enum floraComSet    { floraReset, readName, readState, readMoisture, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
+enum floraComSet    { floraReset, readName, readState, readMoisture, readTemp, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 byte  comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
@@ -37,11 +37,12 @@ void handheld::checkComs(void) {
     switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
       case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
       case readState      : handleReadState(comPtr);      break;
+      case readTemp       : handleReadTemp(comPtr);       break;
       case readMoisture   : handleReadMoisture(comPtr);   break;
       case readDryLimit   : handleReadDryLimit(comPtr);   break;
       case readWaterTime  : handleReadWTime(comPtr);      break;
       case readSoakTime   : handleReadSTime(comPtr);      break;
-      case readName       : handleReadName(comPtr);      break;
+      case readName       : handleReadName(comPtr);       break;
       case pumpOn         :
       case pumpOff        : handleSetPump(comPtr);        break;
       case setDryLimit    : handleSetDryLimit(comPtr);    break;
@@ -72,6 +73,17 @@ void handheld::handleReadState(byte* comPtr) {
 
   stateByte = (byte)weAre;
   comPtr[0] = stateByte;
+  comPtr[1] = noErr;
+  replyComBuff(1);
+}
+
+
+void handheld::handleReadTemp(byte* comPtr) {
+
+  byte  tempByte;
+
+  tempByte = round(tempC);
+  comPtr[0] = tempByte;
   comPtr[1] = noErr;
   replyComBuff(1);
 }

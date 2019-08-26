@@ -120,6 +120,7 @@ class controlPanel : public panel {
   virtual ~controlPanel(void);
           
           void  stateText(int state);
+          void  tempText(int moisture);
           void  moistureText(int moisture);
           void  dryLimitText(int dryLimit);
           void  waterTimeText(long wTime);
@@ -127,6 +128,7 @@ class controlPanel : public panel {
   virtual void  setup(void);
 
           void  checkState(void);
+          void  checkTemp(void);
           void  checkMoisture(void);
           void  checkDryLimit(void);
           void  checkWaterTime(void);
@@ -155,6 +157,8 @@ class controlPanel : public panel {
           colorRect*  mStateLight;
           label*      mMoistureLabel;
           colorRect*  mMoistureLight;
+          label*      mTempLabel;
+          colorRect*  mTempLight;
           label*      mDryLimitLabel;
           colorRect*  mDryLimitLight;
           waterBtn*   mWaterBtn;

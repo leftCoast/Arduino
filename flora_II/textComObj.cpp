@@ -121,9 +121,10 @@ void textComObj::doPrintReadings(void) {
 
 void textComObj::doPrintGReadings(void) {
   
-    Serial.print(tempC);Serial.print(" ");
-    Serial.print(capread);Serial.print(" ");
-    Serial.println((int)moisture);
+    //Serial.print(tempC);Serial.print(" ");
+    //Serial.print(capread);Serial.print(" ");
+    Serial.print((int)moisture);
+    Serial.println();
     if (mAutoRead) readTimer.start();
 }      
 
@@ -300,6 +301,7 @@ void textComObj::setMud(void) {
 void textComObj::idle(void) {
 
   if (readTimer.ding()&&mAutoRead) {
-    doPrintReadings();
+    //doPrintReadings();
+    doPrintGReadings();
   }
 }

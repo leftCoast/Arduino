@@ -14,6 +14,7 @@ class handheld : public qCSlave {
           void  handleReset(byte* comPtr);
           void  handleReadState(byte* comPtr);
           void  handleReadMoisture(byte* comPtr);
+          void  handleReadTemp(byte* comPtr);
           void  handleReadDryLimit(byte* comPtr);
           void  handleReadWTime(byte* comPtr);
           void  handleReadSTime(byte* comPtr);
