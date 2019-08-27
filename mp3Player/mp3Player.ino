@@ -229,7 +229,7 @@ void fillList(const char* workingDir) {
   } else {
     //lastFileError = F_FOF_ERR;  // Sadly, instead of returning a NULL, it just crashes.
   }
-  ourList->resetPositions();
+  //ourList->reset();
 }
 
 
@@ -239,7 +239,7 @@ void selectAnother() {
   int           choice;
   songListItem* ourChoice;
   
-  numSongs = ourList->numObjInList();
+  numSongs = ourList->numObjects();
   Serial.print("Song count : ");Serial.println(numSongs);
   choice = random(0,numSongs-1);
   Serial.print("Our chosen index : ");Serial.println(choice);
