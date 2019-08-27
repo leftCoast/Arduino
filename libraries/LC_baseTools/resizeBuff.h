@@ -51,5 +51,7 @@ forced buffer sized to match up.
 
 
 bool resizeBuff(int numBytes,uint8_t** buff);
-
+bool resizeBuff(int numBytes,char** buff);
+bool resizeBuff(int numBytes,void** buff);
+bool resizeBuff(int numBytes,byte** buff);
 #endif

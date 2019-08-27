@@ -2,7 +2,7 @@
 #include "controlPanel.h"
 
 #include <soundCard.h>
-
+#include <debug.h>
 
 extern soundCard* player;
 extern bool           runVolume;
@@ -41,10 +41,13 @@ void songListItem::drawSelf(void) {
     } else {
       setColors(&textUHColor);
     }
+    //debugger.trace("Blank out item\n");
     screen->fillRect(x,y,width,height,&screenBColor);
     x=x+offst;
     y=y+offst;
+      //debugger.trace("Draw item\n");
       label::drawSelf();
+      //debugger.trace("Item should be drawn..\n");
     x=x-offst;
     y=y-offst;
   }

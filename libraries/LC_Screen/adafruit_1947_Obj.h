@@ -1,4 +1,4 @@
-#ifndef adafruit_1947_Obj_h
+ #ifndef adafruit_1947_Obj_h
 #define adafruit_1947_Obj_h
 
 #include <Wire.h>      			// this is needed for FT6206

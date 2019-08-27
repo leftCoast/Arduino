@@ -21,6 +21,7 @@
 #include <scrollingList.h>
 #include <pushPotGUI.h>
 #include <soundCard.h>
+#include <debug.h>
 
 #include "songList.h"
 #include "controlPanel.h"
@@ -49,8 +50,7 @@
 // interface that Julie likes. Maybe I'll used that for my
 // cell phone?
 
-
-
+           
 #define SOUND_CS    20
 #define SOUND_SDCS  21
 #define SOUND_DRQ   1
@@ -106,7 +106,13 @@ void setup() {
   } else {
     Serial.println(F("File system FAIL."));
   }
-
+  /*
+  debugger.trace("Holding.. Click return in the serial monitor.");
+  debugger.trace("\nReleased\n",false);
+  debugger.trace("Holding again with a number : ", 45);
+  debugger.trace("\nReleased again!\n",false);
+  */
+  
   player = new soundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_RST);
   player->begin();
   runVolume = false;
@@ -229,7 +235,7 @@ void fillList(const char* workingDir) {
   } else {
     //lastFileError = F_FOF_ERR;  // Sadly, instead of returning a NULL, it just crashes.
   }
-  //ourList->reset();
+  ourList->setPositions();
 }
 
 
