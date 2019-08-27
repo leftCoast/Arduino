@@ -39,8 +39,12 @@ timeObj       readTime(DEF_READ_TIME);            // Time between moisture readi
 // Then we read in the parameters and start up operation. The doReadParams() call is
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
-  
-  ourPump.setPump(false);                               // Off with the pump.
+
+  ourPump.setPump(false);                               // Off with the pump. This must be called first to lock down control of the pump.
+                                                        // Otherwise, if say.. You find you have a dead sensor and the progam locks here..
+                                                        // The pump will randomly activate. It pickes up stray currents on the line that
+                                                        // trigger the driver hardware. Once this is called, the pump contol is locked in
+                                                        // and your good to go.
   
   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
   Serial.println("Hello?");
@@ -63,7 +67,7 @@ void setup() {
       delay(100);
     }
   }
-  Serial.println("Prime running avarage buffers");
+  Serial.println("Priming running-avarage buffers");
   for (int i=1;i<DEF_CSMOOTHER;i++) {
     doReading();
     delay(100);

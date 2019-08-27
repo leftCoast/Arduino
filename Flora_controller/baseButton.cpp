@@ -1,5 +1,6 @@
 #include "baseButton.h"
 #include "floraOS.h"
+#include <resizeBuff.h>
 
 #define TEXT_SIZE     2
 #define CHAR_WIDTH    6
@@ -19,9 +20,8 @@ baseButton::baseButton(char* inLabel,int x, int y,int width, int height)
   clickedBColor.setColor(LC_WHITE);
   clickedTColor.setColor(LC_BLACK);
 
-  int numChars = strlen(inLabel) + 1;
-  label = (char*) malloc(numChars);
-  strcpy(label, inLabel);
+  label = NULL;
+  setText(inLabel);
 }
 
 
@@ -30,6 +30,15 @@ baseButton::~baseButton(void) {
   if (label) {
     free(label);
     label = NULL;
+  }
+}
+
+
+void baseButton::setText(char* inText) {
+
+  int numChars = strlen(inText) + 1;
+  if (resizeBuff(numChars,(uint8_t**)&label)) {
+    strcpy(label, inText);
   }
 }
 
@@ -85,7 +94,6 @@ bool baseButton::acceptEvent(event* inEvent,point* locaPt) {
     }
     return false;
   }
-
 
 
 // OK, lets NOT call hookup() by default. If the derived needs to

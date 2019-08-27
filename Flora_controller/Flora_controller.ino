@@ -11,7 +11,6 @@
 #include <litlOS.h>
 #include "floraOS.h"
 
-
 void setup() {
   // First bring the screen online.
   if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {

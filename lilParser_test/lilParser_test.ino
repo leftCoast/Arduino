@@ -711,11 +711,11 @@ bool setVol(void) {
       success = true;
     } else {
       lastFileError = F_RPAR_ERR;
-      //Serial.println(F("Faild to retrieve parameter."));
+      Serial.println(F("Faild to retrieve parameter."));
     }
   } else {
     lastFileError = F_MPAR_ERR;
-    //Serial.println(F("Missing parameter."));
+    Serial.println(F("Missing parameter."));
   }
   return success;
 }
@@ -726,6 +726,7 @@ bool getVol(void) {
   Serial.print("Volume : "); Serial.println(theSoundCard.getVolume());
   if (mParser.numParams()) {
     setVol();
+    Serial.print("New volume : "); Serial.println(theSoundCard.getVolume());
     Serial.print("New volume : "); Serial.println(theSoundCard.getVolume());
   }
   return true;
@@ -841,7 +842,7 @@ void loop() {
     if (command) Serial.print(cmdCursor);
   }
   if (frameTimer.ding()) {
-    setVol(potToVol.Map(analogRead(POT_ANLG)));
+    //setVol(potToVol.Map(analogRead(POT_ANLG)));
     //potOut.setValue(analogRead(POT_ANLG)); 
     frameTimer.start();
   }
@@ -865,5 +866,3 @@ void loop() {
       break;
   }
 }
-
-

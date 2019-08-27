@@ -6,7 +6,7 @@
 #define COM_BUFF_BYTES  255
 
 
-enum floraComSet    { floraReset, readName, readMoisture, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
+enum floraComSet    { floraReset, readName, readState, readMoisture, readTemp, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 byte  comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
@@ -36,11 +36,13 @@ void handheld::checkComs(void) {
     //Serial.println((byte)comPtr[0]);
     switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
       case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
+      case readState      : handleReadState(comPtr);      break;
+      case readTemp       : handleReadTemp(comPtr);       break;
       case readMoisture   : handleReadMoisture(comPtr);   break;
       case readDryLimit   : handleReadDryLimit(comPtr);   break;
       case readWaterTime  : handleReadWTime(comPtr);      break;
       case readSoakTime   : handleReadSTime(comPtr);      break;
-      case readName       : handleReadName(comPtr);      break;
+      case readName       : handleReadName(comPtr);       break;
       case pumpOn         :
       case pumpOff        : handleSetPump(comPtr);        break;
       case setDryLimit    : handleSetDryLimit(comPtr);    break;
@@ -61,6 +63,28 @@ void handheld::handleReset(byte* comPtr) {
 
   ourParamObj.floraReset();
   comPtr[0] = noErr;
+  replyComBuff(1);
+}
+
+
+void handheld::handleReadState(byte* comPtr) {
+  
+  byte  stateByte;
+
+  stateByte = (byte)weAre;
+  comPtr[0] = stateByte;
+  comPtr[1] = noErr;
+  replyComBuff(1);
+}
+
+
+void handheld::handleReadTemp(byte* comPtr) {
+
+  byte  tempByte;
+
+  tempByte = round(tempC);
+  comPtr[0] = tempByte;
+  comPtr[1] = noErr;
   replyComBuff(1);
 }
 
@@ -89,25 +113,25 @@ void handheld::handleReadDryLimit(byte* comPtr) {
 
 void handheld::handleReadWTime(byte* comPtr) {
 
-  unsigned long   waterTime;
-  unsigned long*  ulPtr;
+  long  waterTime;
+  long* lPtr;
   
   waterTime = ourParamObj.getWaterTime();   // We grab the actual value.
-  ulPtr = (unsigned long*)&(comPtr[0]);     // We set up a unsigned long pointer to point to the buffer.
-  *ulPtr = waterTime;                       // Stuff the value into that unsigned long pointer location (The buffer).
-  replyComBuff(sizeof(unsigned long));      // Send it on its way with the number of bytes we are sending.
+  lPtr = (long*)&(comPtr[0]);               // We set up a long pointer to point to the buffer.
+  *lPtr = waterTime;                        // Stuff the value into that long pointer location (The buffer).
+  replyComBuff(sizeof(long));               // Send it on its way with the number of bytes we are sending.
 }
 
 
 void handheld::handleReadSTime(byte* comPtr) {
 
-  unsigned long   soakTime;
-  unsigned long*  ulPtr;
+  long   soakTime;
+  long*  lPtr;
   
   soakTime = ourParamObj.getSoakTime();
-  ulPtr = (unsigned long*)&(comPtr[0]);
-  *ulPtr = soakTime;
-  replyComBuff(sizeof(unsigned long));
+  lPtr = (long*)&(comPtr[0]);
+  *lPtr = soakTime;
+  replyComBuff(sizeof(long));
 }
 
 
@@ -120,11 +144,9 @@ void handheld::handleReadName(byte* comPtr) {
   charPtr = (char*)&(comPtr[0]);
   strcpy(charPtr,name);
   replyComBuff(strlen(name)+1);
-  free(name);
 }
 
-//Serial.print("Recieved command # ");
-    //Serial.println((byte)comPtr[0]);
+
 void handheld::handleSetPump(byte* comPtr) {
 
   Serial.print("Recieved command # ");
@@ -155,9 +177,9 @@ void handheld::handleSetDryLimit(byte* comPtr) {
 
 void handheld::handleSetWaterTime(byte* comPtr){
 
-  unsigned long newVal;
+  long newVal;
   
-  newVal = *((unsigned long*)&(comPtr[1])); // Grab the value from the buffer.
+  newVal = *((long*)&(comPtr[1])); // Grab the value from the buffer.
   ourParamObj.setWaterTime(newVal);
   comPtr[0] = noErr;
   replyComBuff(1);
@@ -166,9 +188,9 @@ void handheld::handleSetWaterTime(byte* comPtr){
 
 void handheld::handleSetSoakTime(byte* comPtr){
 
-  unsigned long newVal;
+  long newVal;
   
-  newVal = *((unsigned long*)&(comPtr[1])); // Grab the value from the buffer.
+  newVal = *((long*)&(comPtr[1])); // Grab the value from the buffer.
   ourParamObj.setSoakTime(newVal);
   comPtr[0] = noErr;
   replyComBuff(1);

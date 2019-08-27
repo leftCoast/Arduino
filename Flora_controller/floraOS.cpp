@@ -1,6 +1,12 @@
 #include "floraOS.h"
 #include "controlPanel.h"
 
+
+
+#define COM_REPLY_TIMEOUT 250   // We'll give a 1/4 second for the unit to reply to us. Otherwise we'll say its offline.
+
+
+
 // *****************************************************
 // ******************   homeScreen   *******************
 // *****************************************************
@@ -43,6 +49,7 @@ floraOS::~floraOS(void) { }
 int floraOS::begin(void) { 
 
   ourComPort.begin(9600);
+  ourComPort.setReplyTimeout(COM_REPLY_TIMEOUT);
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
   return litlOS::begin();

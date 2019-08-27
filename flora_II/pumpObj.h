@@ -21,7 +21,12 @@ class pumpObj : public blinker {
 
     virtual void  setPWMPercent(float percent);                                       // First two are for setting up the PWM for controlling motor power/speed.
     virtual void  setPWMPeriod(float periodMs);
-    virtual void  setPump(bool onOff);                                                // Turn the pump on or off.
+    
+    virtual void  setPump(bool onOff);                                                // Turn the pump on or off. VERY IMPORTANT! This actually sets up your I/O pin. 
+                                                                                      // If you don't call this at the start of your program, the pump **WILL** run
+                                                                                      // uncontrollably.) Even if nothing is "talking" to it. Any stray current will
+                                                                                      // cause it to turn on or off. Once its called.. Your fine.
+                                                                                      
     virtual bool  pumpOn(void);                                                       // Is the pump on?
     virtual void  setPulse(float inHighPercent,float inLowPercent,float inPeriodMs);  // This is for setting up speed variance over time.
     virtual void  setSpeed(void);                                                     // Dynamic speed gets set in here.

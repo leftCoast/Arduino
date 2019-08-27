@@ -5,7 +5,6 @@
 
 bool needReset;
 
-
 paramType  params;
 
 parameters::parameters(void) { needReset = false; }
@@ -57,15 +56,8 @@ int parameters::getWaterTime(void) { return params.waterTime; }
 int parameters::getSoakTime(void) { return params.soakTime; }
 
 
-// Return a copy of the name string. YOU HAVE TO FREE IT!!
-char* parameters::getName(void) { 
-  
-  char* newCopy;
-
-  newCopy = (char*)malloc(strlen(params.name)+1);
-  strcpy(newCopy,params.name);
-  return newCopy;
-}
+// Return a pointer to the name string. DON'T FREE IT!!
+char* parameters::getName(void) { return params.name; }
 
 
 // Read the saved PWM percent on value.

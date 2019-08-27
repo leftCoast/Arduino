@@ -8,6 +8,7 @@ slider::slider(int x,int y,int width,int height)
   mOutlineColor.setColor(DEF_SLIDER_OLCOLOR);
   mKnobColor.setColor(LC_RED);
   mInHit = false;
+  mBeenReset = false;
 }
 
 
@@ -32,6 +33,8 @@ void slider::setup(int knobWidth,int dragLineHeight,float leftVal,float rightVal
   mLoc = x + width/2;                                             // Default to mid scale.
   setKnob();                                                      // Set control knob to mLoc.
   mNewLoc = -1;                                                   // No next location set, yet.
+  mBeenReset = true;                                              // Everything has changed, better clear all drawing.
+  setNeedRefresh();
 }
 
 // Internally mLoc is set to a pixel value. This moves the mKnob rect
@@ -47,7 +50,11 @@ void slider::setKnob(void) {
 // Maybe a bad idea, but for now its working.
 void slider::drawSelf(void) {
 
-  if (mOnOff) {
+  if (mOnOff) {                                       // If we're showing..
+    if (mBeenReset) {                                 // If the reset flag is set..
+        screen->fillRect(this,&mBackColor);           // It means we have no idea how things were left, so we clear everything.
+        mBeenReset = false;                           // Clear the flag.
+    }
     if (mNewLoc>0) {                                  // If we have a new location..
       screen->fillRect(&mKnob,&mBackColor);           // Blank out the knob.
       mLoc = mNewLoc;                                 // Update our location.
@@ -57,8 +64,8 @@ void slider::drawSelf(void) {
     screen->drawRect(&mDragLine,&mOutlineColor);      // Draw the drag line.
     screen->fillRoundRect(&mKnob,2,&mKnobColor);      // Fill in the knob.
     screen->drawRoundRect(&mKnob,2,&mOutlineColor);   // Finish drawing the knob.
-  } else {
-    screen->fillRect(this,&mBackColor);
+  } else {                                            // Else we are NOT showing..
+    screen->fillRect(this,&mBackColor);               // We've been called while being "off", just erase ourselves.
   }
 }
 
@@ -74,7 +81,7 @@ void slider::doAction(event* inEvent,point* locaPt) {
   switch(inEvent->mType) {              // We have an incoming event. Check the type.
     case dragBegin  :                   // A starting off a drag action.  
       hitRect.setRect(&mKnob);          // Make a hitRect the size and position of the knob.
-      hitRect.insetRect(-5);            // Expand it by 5 pixels.
+      hitRect.insetRect(-6);            // Expand it by 6 pixels.
       mInHit = hitRect.inRect(locaPt);  // Now we use this to make sure the hit was where we specified.
     break;                              // That's all we wanted to do at this point. Lets Jet!
     case dragOn     :                   // Drag on event.
