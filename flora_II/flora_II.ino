@@ -20,11 +20,9 @@
 #include "textComObj.h"
 #include "handheld.h"
 #include "globals.h"
+#include "UI.h"
 
 Adafruit_seesaw ss;                               // The moisture sensor.
-
-blinker     idleLight(13,80,2000);                // Blinker saying we're running.
-
 
 timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
 timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
@@ -48,7 +46,11 @@ void setup() {
   
   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
   Serial.println("Hello?");
-    
+
+  ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
+  Serial.print("We have a display? ");
+  Serial.println(ourDisplay.mHaveScreen);
+  
   textComs.begin();                                     // Set up parser so we can talk to the computer.
   Serial.println("text coms are up.");
   
@@ -59,26 +61,20 @@ void setup() {
   delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");                // Failed!
-    pinMode(13, OUTPUT);
-    while(1) {                                          // Lock here.
-      digitalWrite(13,HIGH);
-      delay(20);
-      digitalWrite(13,LOW);
-      delay(100);
-    }
+    ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
   }
   Serial.println("Priming running-avarage buffers");
   for (int i=1;i<DEF_CSMOOTHER;i++) {
     doReading();
     delay(100);
   }
+
   
   ourParamObj.readParams();                             // Read our saved running params.
   updateEnv();                                          // Setup what we need to setup with params.
   weAre = sitting;                                      // Our state is sitting. (Watching moisture level)
   readTime.start();                                     // Fire up the read timer. We're live!
 
-  idleLight.setBlink(true);                             // Start up our running light.
   Serial.println("Sytem ready."); 
 }
 

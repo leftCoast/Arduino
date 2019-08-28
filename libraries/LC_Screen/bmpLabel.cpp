@@ -1,7 +1,7 @@
 
 #include "bmpLabel.h"
 
-bmpLabel::bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop) 
+bmpLabel::bmpLabel(int inX,int inY,int width,int height,char* inText,bmpPipe* inBackdrop) 
   : label(inX,inY,width,height,inText) { backdrop = inBackdrop; fastDraw = true; }
 
 

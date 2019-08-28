@@ -5,3 +5,4 @@ float     tempC;                                // Temp.
 uint16_t  capread;                              // Capacitence.
 enum      weDo;
 weDo      weAre;                                // Current state.
+bool      crash = false;                        // Did the moisture sensor crash?

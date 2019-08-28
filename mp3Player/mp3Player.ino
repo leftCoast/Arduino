@@ -257,7 +257,6 @@ void selectAnother() {
   } else {
     Serial.println("Got a NULL!");
   }
-  
 }
 
 

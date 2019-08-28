@@ -2,6 +2,7 @@
 #define label_h
 
 #include "drawObj.h"
+#include "colorObj.h"
 
 #define DEF_TEXT_SIZE	1	// If not set, what size do we want?
 #define CHAR_WIDTH		6	// Actual size is 6 * text size.
@@ -26,15 +27,15 @@ class label : public drawObj {
 	public :
   				label();
   				label(char* inText);
-  				label(char* inText, word inSize);
+  				label(char* inText, int inSize);
   				label(int inLocX, int inLocY, int inWidth,int inHeight);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize);
   				label(rect* inRect,char* inText,int textSize=1);
 	virtual	~label(void);
   
-  				void 	setTextSize(word size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
-  				void 	setJustify(word inJustify);
+  				void 	setTextSize(int size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
+  				void 	setJustify(int inJustify);
   				void 	setColors(colorObj* tColor);
 				void 	setColors(colorObj* tColor, colorObj* bColor);
   				void 	setPrecision(int inPrec);
@@ -45,16 +46,16 @@ class label : public drawObj {
   				void 	setValue(char* str);
 				int	getNumChars(void);		// We want to know how long the string is..
 				void	getText(char* inBuff);	// We asked above how much you have. Hand it over.
-  				word 	getTextWidth(void);		// How wide in pixels is our text?
-  				word 	getTextHeight(void);		// How tall in pixels are the charactors?
+  				int 	getTextWidth(void);		// How wide in pixels is our text?
+  				int 	getTextHeight(void);		// How tall in pixels are the charactors?
   
 	virtual	void drawSelf(void);
 
 //private :
 	void initLabel(void);
   
-	word		textSize;
-	word		justify;
+	int		textSize;
+	int		justify;
 	colorObj	backColor;
 	colorObj textColor;
 	bool		transp;

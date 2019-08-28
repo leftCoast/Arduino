@@ -70,7 +70,7 @@ rect::rect(void) {
 rect::rect(rect* inRect) { setRect(inRect); }
 
 
-rect::rect(int inX, int inY, word inWidth,word inHeight) {
+rect::rect(int inX, int inY, int inWidth,int inHeight) {
    
    setRect(inX,inY,inWidth,inHeight);
 }
@@ -86,7 +86,7 @@ void  rect::setLocation(int inX, int inY) {
 }
 
 
-void  rect::setSize(word inWidth,word inHeight) {
+void  rect::setSize(int inWidth,int inHeight) {
 
   width = inWidth;
   height = inHeight;
@@ -104,8 +104,8 @@ void rect::setRect(point* inPt1,point* inPt2) {
 
   int locX = min(inPt1->x,inPt2->x);
   int locY = max(inPt1->y,inPt2->y);
-  word width = abs((int)inPt1->x-(int)inPt2->x);
-  word height = abs((int)inPt1->y-(int)inPt2->y);
+  int width = abs((int)inPt1->x-(int)inPt2->x);
+  int height = abs((int)inPt1->y-(int)inPt2->y);
   setLocation(locX,locY);
   setSize(width,height);
 }

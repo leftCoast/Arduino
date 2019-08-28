@@ -81,7 +81,7 @@ class lineManager : public linkList {
 class textView :  public drawObj {
 
   public:
-          textView(int inLocX, int inLocY, word inWidth,word inHeight,eventSet inEventSet=noEvents);
+          textView(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEventSet=noEvents);
   virtual ~textView(void);
 
           void        calculate(void);                            // Something changed, repaginate.

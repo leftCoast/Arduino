@@ -36,11 +36,11 @@ class rect {
 	public :
   				rect(void);
   				rect(rect* inRect);
-  				rect(int inX, int inY, word inWidth,word inHeight);
+  				rect(int inX, int inY, int inWidth,int inHeight);
 	virtual	~rect(void);
 
 	virtual	void  setLocation(int inX, int inY);
-  			  	void  setSize(word inWidth,word inHeight);
+  			  	void  setSize(int inWidth,int inHeight);
   			  	void  setRect(rect* inRect);                 					// Got a rect? Make this one the same.
   			  	void  setRect(point* inPt1,point* inPt2);							// Or two points..
   			  	void	setRect(int inX, int inY, int inWidth,int inHeight);	// Or the usual way..
@@ -57,8 +57,8 @@ class rect {
 					
 					int   x;
 					int   y;
-					word  width;
-					word  height;
+					int  width;
+					int  height;
 };
 
 #endif

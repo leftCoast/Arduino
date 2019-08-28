@@ -12,7 +12,7 @@ class colorRect : public drawObj,
 
   public:
             colorRect(rect* inRect,colorObj* inColor,int inset=0);
-            colorRect(int inLocX,int inLocY,word inWidth,word inHeight,int inset=0);
+            colorRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset=0);
     virtual ~colorRect(void);
 
     virtual void  setInset(int inset);

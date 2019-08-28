@@ -48,7 +48,7 @@ class liveText : public label,
                  public timeObj {
 
   public:
-				liveText(int x,int y, word width, word height,int framerateMs,bool loop=false);
+				liveText(int x,int y, int width, int height,int framerateMs,bool loop=false);
 	virtual	~liveText(void);
                 
 				void		addAColor(int timeMs,colorObj* color);

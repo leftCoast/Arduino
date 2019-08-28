@@ -1,6 +1,6 @@
 #include "liveText.h"
 
-liveText::liveText(int x,int y,word width,word height,int framerateMs,bool inLoop)  
+liveText::liveText(int x,int y,int width,int height,int framerateMs,bool inLoop)  
   : label(x,y,width,height),
   idler(),
   colorMultiMap(),

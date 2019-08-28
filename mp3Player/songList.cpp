@@ -109,3 +109,5 @@ void songList::doPotVal(int aVal) {
   pcnt = potToList->Map(aVal);
   setScrollValue(pcnt);
 }
+
+void songList::drawSelf(void) { /* NO DRAWING! */ }

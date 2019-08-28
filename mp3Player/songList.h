@@ -41,6 +41,7 @@ class songList :  public scrollingList,
   virtual void        reset(void);
   virtual void        offList(void);
   virtual void        doPotVal(int aVal);
+  virtual void        drawSelf(void);
 
           runningAvg* potSmoother;
           mapper*     potToList;

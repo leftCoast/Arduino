@@ -1,7 +1,7 @@
 #include "bmpDrawObj.h"
 
 
-bmpDrawObj::bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop)
+bmpDrawObj::bmpDrawObj(int x,int y,int width,int height,bmpPipe* inBackdrop)
   : drawObj(x,y,width,height) { backdrop = inBackdrop; }
 
 

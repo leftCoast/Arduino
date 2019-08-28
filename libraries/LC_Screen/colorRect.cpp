@@ -10,7 +10,7 @@ colorRect::colorRect(rect* inRect,colorObj* inColor,int inset)
 }
 	
 	
-colorRect::colorRect(int inLocX, int inLocY, word inWidth,word inHeight,int inset)
+colorRect::colorRect(int inLocX, int inLocY, int inWidth,int inHeight,int inset)
   : drawObj(inLocX,inLocY,inWidth,inHeight),
   colorObj(LC_WHITE) { setInset(inset); }
   

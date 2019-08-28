@@ -7,7 +7,7 @@
 class bmpLabel : public label {
 
 	public:
-  				bmpLabel(int inX,int inY,word width,word height,char* inText,bmpPipe* inBackdrop);
+  				bmpLabel(int inX,int inY,int width,int height,char* inText,bmpPipe* inBackdrop);
 	virtual	~bmpLabel(void);
   
   				void		setFastDraw(bool fast);

@@ -468,7 +468,7 @@ int lineManager::getNumLines(void) {
 // ********************************************************************************
 
 
-textView::textView(int inLocX, int inLocY, word inWidth, word inHeight,eventSet inEventSet)
+textView::textView(int inLocX, int inLocY, int inWidth, int inHeight,eventSet inEventSet)
   : drawObj(inLocX, inLocY, inWidth, inHeight, inEventSet) {
 
   setTextSize(DEF_TEXT_SIZE);

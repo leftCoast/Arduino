@@ -9,7 +9,7 @@ lineObj::lineObj(void) {
 }
 
 
-lineObj::lineObj(word x1,word y1,word x2,word y2,colorObj* inColor) {
+lineObj::lineObj(int x1,int y1,int x2,int y2,colorObj* inColor) {
 
 	setColor(inColor);
 	setEnds(x1,y1,x2,y2);
@@ -33,7 +33,7 @@ void lineObj::setSize(byte inSize) {
 }
 
 
-void lineObj::setEnds(word x1,word y1,word x2,word y2) {
+void lineObj::setEnds(int x1,int y1,int x2,int y2) {
 
   point point1;
   point point2;

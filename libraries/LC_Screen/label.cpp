@@ -19,7 +19,7 @@ drawObj() {
 }
 
 
-label::label(char* inText, word inSize) : 
+label::label(char* inText, int inSize) : 
 drawObj() {
 
   initLabel();
@@ -76,14 +76,14 @@ void label::initLabel(void) {
 }
 
 
-void label::setTextSize(word inSize) {
+void label::setTextSize(int inSize) {
 
   textSize = inSize;
   needRefresh = true;
 }
 
 
-void label::setJustify(word inJustify) {
+void label::setJustify(int inJustify) {
 
   justify = inJustify;
   needRefresh = true;
@@ -143,7 +143,7 @@ void label::setValue(float val) {
 
 void label::setValue(char* str) {
 
-	word numChars;
+	int numChars;
 
 	
 	
@@ -168,13 +168,13 @@ int label::getNumChars(void) { return strlen(buff); }
 void label::getText(char* inBuff) { strcpy(inBuff,buff); }
 				
 				
-word label::getTextWidth(void) {
+int label::getTextWidth(void) {
 
   return(CHAR_WIDTH*textSize*strlen(buff));
 }
 
 
-word label::getTextHeight(void) { 
+int label::getTextHeight(void) { 
 
   return(CHAR_HEIGHT*textSize); 
 }

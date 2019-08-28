@@ -16,7 +16,7 @@
 class bmpDrawObj : public drawObj {
 
 public:
-				bmpDrawObj(int x,int y,word width,word height,bmpPipe* inBackdrop);
+				bmpDrawObj(int x,int y,int width,int height,bmpPipe* inBackdrop);
 	virtual	~bmpDrawObj(void);
   
 	virtual	void		drawSelf(void);
