@@ -48,7 +48,7 @@ void textComObj::checkTextCom(void) {
       case resetAll       : initParams();     break;
       case showParams     : printParams();    break;
       case showReadings   : printReadings();  break;
-      case showGReadings  : printGReadings(); break;
+      case showGReadings  : Serial.println("Graphing's disabled."); /* printGReadings(); */ break;
       case setSetPoint    : setDryLimit();    break;
       case setWTime       : setWaterTime();   break;
       case setSTime       : setSoakTime();    break;
@@ -301,7 +301,7 @@ void textComObj::setMud(void) {
 void textComObj::idle(void) {
 
   if (readTimer.ding()&&mAutoRead) {
-    //doPrintReadings();
-    doPrintGReadings();
+    doPrintReadings();
+    //doPrintGReadings();
   }
 }

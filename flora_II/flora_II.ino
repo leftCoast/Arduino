@@ -63,19 +63,15 @@ void setup() {
     Serial.println("ERROR! no Sensor.");                // Failed!
     ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
   }
-  Serial.println("Priming running-avarage buffers");
-  for (int i=1;i<DEF_CSMOOTHER;i++) {
-    doReading();
-    delay(100);
-  }
 
-  
   ourParamObj.readParams();                             // Read our saved running params.
   updateEnv();                                          // Setup what we need to setup with params.
-  weAre = sitting;                                      // Our state is sitting. (Watching moisture level)
+  
+  weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
+  soakTime->start();                                    // And we start up the soak timer for that time.
   readTime.start();                                     // Fire up the read timer. We're live!
 
-  Serial.println("Sytem ready."); 
+  Serial.println("Sytem online!"); 
 }
 
 
