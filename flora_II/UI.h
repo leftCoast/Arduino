@@ -38,7 +38,6 @@ class UI  : public idler,
           void  sensorDeath(void);
 
           bool        mHaveScreen;
-          bool        mHaveSD;
           
           percView*   mLimit;
           percView*   mMoisture;

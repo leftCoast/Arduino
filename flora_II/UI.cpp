@@ -77,55 +77,55 @@ void  stateView::setState(weDo inState) {
 
 
 UI::UI(void) 
-  : timeObj(500) {
-
-  mHaveScreen = false;
-  mHaveSD     = false;
-}
+  : timeObj(500) { mHaveScreen = false; }
 
 
 UI::~UI(void) {  }
 
 
+// We can't tell weather we have a screen or not. So we'll look for the SD drive.
 void UI::begin(void) {
 
   hookup();
-  mHaveSD = SD.begin(OLED_SDCS);
-  mHaveScreen = initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,PORTRAIT);
+  mHaveScreen = SD.begin(OLED_SDCS);
   if (mHaveScreen) {
-     
-     mLastMoist = -1;
-     mLastLimit = -1;
-     mLastState = weAre;
+    mHaveScreen = mHaveScreen && initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,INV_LANDSCAPE);
+    if (mHaveScreen) {
+       
+       mLastMoist = -1;
+       mLastLimit = -1;
+       mLastState = weAre;
+      
+      screen->fillScreen(&black);
     
-    screen->fillScreen(&black);
+      int yPos = 0;
   
-    int yPos = 0;
-
-    mLimit = new percView(5,yPos);
-    mLimit->setPercent(mLastLimit);
-    viewList.addObj(mLimit);
-
-    mMoisture = new percView(53,yPos);
-    mMoisture->setPercent(mLastMoist);
-    viewList.addObj(mMoisture);
+      mLimit = new percView(5,yPos);
+      mLimit->setPercent(mLastLimit);
+      viewList.addObj(mLimit);
   
-    mSlash = new label(41,yPos,96,16,"/",2);
-    mSlash->setColors(&white);
-    viewList.addObj(mSlash);
-
-    yPos = yPos + 20;
-    mKey = new label(9,yPos,96,16,"Limit/Reading",1);
-    mKey->setColors(&white);
-    viewList.addObj(mKey);
-
-    yPos = yPos + 20;                      //"100/100"
-    mState = new stateView(0,yPos);
-    mState->setState(mLastState);
-    viewList.addObj(mState);
-
-    start();
-  } else {
+      mMoisture = new percView(53,yPos);
+      mMoisture->setPercent(mLastMoist);
+      viewList.addObj(mMoisture);
+    
+      mSlash = new label(41,yPos,96,16,"/",2);
+      mSlash->setColors(&white);
+      viewList.addObj(mSlash);
+  
+      yPos = yPos + 20;
+      mKey = new label(9,yPos,96,16,"Limit/Reading",1);
+      mKey->setColors(&white);
+      viewList.addObj(mKey);
+  
+      yPos = yPos + 20;                      //"100/100"
+      mState = new stateView(0,yPos);
+      mState->setState(mLastState);
+      viewList.addObj(mState);
+  
+      start();
+    } 
+  }
+  if (!mHaveScreen) {
     pinMode(13, OUTPUT);
     idleLight.setBlink(true);                             // Start up our running light. Its all we got.
   }
@@ -140,8 +140,8 @@ void UI::sensorDeath(void) {
     bomb.openPipe("/bomb9664.bmp");
     bomb.drawBitmap(0,0);
   }
+  pinMode(13, OUTPUT);
   while(crash) {
-    pinMode(13, OUTPUT);
     digitalWrite(13,HIGH);
     delay(20);
     digitalWrite(13,LOW);

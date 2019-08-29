@@ -43,7 +43,7 @@ void setup() {
                                                         // The pump will randomly activate. It pickes up stray currents on the line that
                                                         // trigger the driver hardware. Once this is called, the pump contol is locked in
                                                         // and your good to go.
-  
+                                                        
   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
   Serial.println("Hello?");
 
