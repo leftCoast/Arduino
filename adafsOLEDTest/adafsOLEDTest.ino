@@ -52,6 +52,7 @@ void setup(void) {
   Serial.print("hello!");
   display.begin();
 
+display.setRotation(3);
   Serial.println("init");
   uint16_t time = millis();
   display.fillScreen(BLACK);
