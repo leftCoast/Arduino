@@ -77,7 +77,7 @@ void Adafruit_SSD1331::begin(uint32_t freq) {
     sendCommand(SSD1331_CMD_DISPLAYOFF);  	// 0xAE
     sendCommand(SSD1331_CMD_SETREMAP); 	// 0xA0
 #if defined SSD1331_COLORORDER_RGB
-    sendCommand(0x72);				// RGB Color
+    sendCommand(0x72);				// RGB Color *** me! - 0x72 for INVERTED 0x66 for NORMAL ***
 #else
     sendCommand(0x76);				// BGR Color
 #endif

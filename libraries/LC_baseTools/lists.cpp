@@ -121,7 +121,7 @@ void linkList::unlinkObj(linkListObj* oldObj) {
   linkListObj* temp;
   
   if (oldObj) {											// They didn't hand us a NULL pointer.
-    if(theList==oldObj) {								// Were poiting at it.
+    if(theList==oldObj) {								// Were pointing at it.
       theList = oldObj->getNext();					// unlink..
     }  else {												// We ain't pointing at it..
       temp = theList;									// We're going to have to go look for it.
@@ -288,7 +288,7 @@ linkListObj* stack::peek(void) { return getFirst(); }
 
 
 // ********** queue ****************
-// Your basic queue, we own 'em. Mostly pass throughs with the usual names.
+// Your basic queue. Mostly pass throughs with the usual names.
 
 
 queue::queue(void) : linkList() { }
@@ -413,7 +413,7 @@ void dblLinkListObj::dumpTail(void) { while(dllNext) delete dllNext; }
 void dblLinkListObj::dumpHead(void) { while(dllPrev) delete dllPrev; }
 	
 
-// Dump both head & tail.
+// Dump both head & tail, leaving ourselves. All alone..
 void dblLinkListObj::dumpList(void) {
 
 		dumpHead();

@@ -33,6 +33,46 @@ runningAvg    tSmoother(DEF_TSMOOTHER);           // Running avarage for the raw
 timeObj       readTime(DEF_READ_TIME);            // Time between moisture readings.
 
 
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+
+// I Think this is how they tell if the unit is online or not. Maybe I
+// can use this as a perotic check to see if its running or not?
+
+/*
+uint8_t c = this->read8(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID);
+  if (c != SEESAW_HW_ID_CODE) {
+    return false;
+  }
+  return true;
+*/
+
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+// Flipping the screen.
+
+// Normal
+//0xA8 = 64;
+//0xA0 A[4] = 0;
+//0xA2 = 0;
+//0xA1 = 0;
+
+// Inverse
+//0xA8 = 64;
+//0xA0 A[4] = 1;
+//0xA2 = 0;
+//0xA1 = 0;
+
+
+
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+
+
+
 // Setup everything we can without a param set. Everything that is only done once.
 // Then we read in the parameters and start up operation. The doReadParams() call is
 // different in that it can be called randomly during the runtime of the machine.
@@ -58,7 +98,8 @@ void setup() {
   Serial.print("ourHandheld result (0 is good) : ");
   Serial.println(ourHandheld.readErr());
   
-  delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
+  //delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
+  
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");                // Failed!
     ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
