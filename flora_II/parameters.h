@@ -3,8 +3,8 @@
 
 #include <EEPROM.h>
 
-#define DEF_DRY_LIMIT           40            // These guys are in the parameer block.
-#define DEF_WATER_TIME          10000         // Defauly water time, 10 seconds.
+#define DEF_DRY_LIMIT           25            // These guys are in the parameer block.
+#define DEF_WATER_TIME          30000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
 #define DEF_NAME                "LC Plant Minder"
 #define DEF_DRY                  335          // Wipe it dry and block it up aff the wood table.

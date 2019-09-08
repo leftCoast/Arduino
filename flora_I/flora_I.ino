@@ -45,8 +45,9 @@ enum        weDo { sitting, watering, soaking };
 weDo        weAre;
 
 void setup() {
-
+   
   px.begin();                             // Initialize the LED.
+  setColor(&yellow);
   px.show();                              // Turn the LED off.
   
   pinMode(BUTTON_PIN, INPUT_PULLUP);      // Motor button
@@ -56,8 +57,11 @@ void setup() {
   digitalWrite(MOTOR_2_PIN, LOW);         // This direction off.
   sittingLight.setLight(false);           // Shut off the LED.
   motorPulse.setLight(false);             // Shut off the pump.
-  Serial.begin(57600);                    // Fire up serial port.
-  
+
+  Serial.begin(9600);                    // Fire up serial port.
+   Serial.println("Serial online?");
+   //Serial.flush();
+   
   if (!ss.begin(0x36)) {                  // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");  // Failed!
     while(1);                             // Lock here.

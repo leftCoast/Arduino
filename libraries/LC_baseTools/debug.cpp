@@ -16,7 +16,7 @@ void debug::trace(char* message,bool hold) {
 }
 
 
-void debug::trace(char* message,int inNum,bool hold=true) {
+void debug::trace(char* message,int inNum,bool hold) {
 
   char* buff;
   int   numChars;
