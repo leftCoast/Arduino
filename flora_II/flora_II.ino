@@ -59,7 +59,7 @@ uint8_t c = this->read8(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID);
 //0xA2 = 0;
 //0xA1 = 0;
 
-// Inverse
+// Inverse?
 //0xA8 = 64;
 //0xA0 A[4] = 1;
 //0xA2 = 0;
