@@ -958,8 +958,5 @@ void controlPanel::drawSelf(void) {
   screen->fillScreen(&black);
 }
 
-  
-void controlPanel::close(void) { }
-
 
 void controlPanel::closing(void) { }

@@ -182,7 +182,6 @@ class controlPanel : public panel {
           
   virtual void  loop(void);
   virtual void  drawSelf(void);
-  virtual void  close(void);
   virtual void  closing(void);
 
           int         mLastLimit;
