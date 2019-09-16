@@ -25,6 +25,12 @@ class handheld : public qCSlave {
           void  handleSetWaterTime(byte* comPtr);
           void  handleSetSoakTime(byte* comPtr);
           void  handleSetPulseOnOff(byte* comPtr);
+
+          void  handleGetLogState(byte* comPtr);
+          void  handleSetLogState(byte* comPtr);
+          void  handleGetLogSize(byte* comPtr);
+          void  handleGetLogBuff(byte* comPtr);
+          void  handleDeleteLogFile(byte* comPtr);
 };
 
 extern handheld ourHandheld;

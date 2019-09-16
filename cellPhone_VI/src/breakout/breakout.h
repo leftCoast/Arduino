@@ -3,6 +3,7 @@
 
 #include <label.h>
 #include <panel.h>
+#include	"../../cellOS.h"
 
 #include "paddleObj.h"
 #include "ballObj.h"
@@ -63,7 +64,7 @@
 
 class ballObj;
 
-class breakout :  public panel {
+class breakout :  public cellOSPanel {
 
 	public:
 

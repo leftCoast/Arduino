@@ -6,6 +6,7 @@
 #include <editField.h>
 #include <scrollingList.h>
 #include <panel.h>
+#include <menuBar.h>
 #include <contactList.h>
 #include <colorRect.h>
 #include <keystroke.h>
@@ -117,7 +118,7 @@ class sendTextView  : public textView,
 // *****************************************************
 
 
-class textPanel  :  public panel {
+class textPanel  :  public cellOSPanel {
 
   public:
           textPanel(void);

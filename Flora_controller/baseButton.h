@@ -3,6 +3,7 @@
 
 #include "switchable.h"
 #include "floraOS.h"
+#include <bmpPipe.h>
 
 class baseButton : public switchable, public idler {
   
@@ -22,6 +23,21 @@ class baseButton : public switchable, public idler {
                   colorObj  clickedTColor;
                   
           char*   label;
+};
+
+
+class baseIconButton :  public baseButton,
+                        public bmpPipe {
+
+  public :
+               
+                  baseIconButton(int x,int y,int width,int height,char* filePath);
+  virtual         ~baseIconButton(void);
+  
+  virtual void    setText(char* intext);
+  virtual void    drawSelf(void);
+
+          char*   mPath;
 };
 
 #endif

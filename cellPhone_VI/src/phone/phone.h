@@ -75,7 +75,7 @@ class callControl :	public phoneBtn,
 };
 
 
-class phone :	public panel {
+class phone :	public cellOSPanel {
 
 	public:
 				phone(void);

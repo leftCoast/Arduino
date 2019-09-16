@@ -1,15 +1,29 @@
-#include "panel.h"
-#include "litlOS.h"   // For nextApp
+#include  <panel.h>
+#include  <litlOS.h>   // For nextApp
 
 
 // And it all starts up again..
-panel::panel(int panelID,eventSet inEventSet)
-  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet)
-  { mPanelID = panelID; }                               // Save what "kind" of panel we are.
+panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
+  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
+  
+	mPanelID = panelID;								// Save what "kind" of panel we are.
+	mMenuBar = NULL;									// Default to NULL.
+	switch (menuBarChoice) {						// Lets see what kind of bar they wish for?
+		case noMenuBar			: break;				// None? Fine, we go now.
+		case emptyMenuBar		: 						// Now, panels are created by the O.S. during runtime.
+			mMenuBar = new menuBar(this,false);	// Meaning, everything is up and running.
+			addObj(mMenuBar);							// So, this call will be fine.
+		break;	
+		case closeBoxMenuBar	:						// Just like the one above.
+			mMenuBar = new menuBar(this);			// Default is to have the close box. (Most do)	
+			addObj(mMenuBar);
+		break;
+	}
+}
 
 
-// The world as you know it is ending..
-panel::~panel(void) {  }
+// The world as you know it, is ending..
+panel::~panel(void) { }
 
 
 // Whom ever is managing panels can assign IDs to us for

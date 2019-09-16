@@ -30,6 +30,9 @@ class textComObj : public idler {
           void  setDry(void);
           void  setMud(void);
           void  turnPump(void);
+          void  logCommand(void);
+          void  listDirectory(void);
+          
   virtual void  idle(void);
           
           lilParser mParser;

@@ -29,7 +29,7 @@ bmpPipe::~bmpPipe(void) {
 }
  
  
-boolean bmpPipe::openPipe(char* filename) {
+bool bmpPipe::openPipe(char* filename) {
 
 	rect aRect;
 	File bmpFile;
@@ -39,12 +39,12 @@ boolean bmpPipe::openPipe(char* filename) {
   	free(filePath);												// Free memory.
   	filePath=NULL;													// And flag it!
   }
-  Serial.print("Attempting to open : ");
-  Serial.println(filename);Serial.flush();
+  //Serial.print("Attempting to open : ");
+  //Serial.println(filename);Serial.flush();
   bmpFile = SD.open(filename);								// See if it works.
-  Serial.println("Lets have a look.");Serial.flush();
+  //Serial.println("Lets have a look.");Serial.flush();
   if (bmpFile) {    												// We got a file?
-    Serial.println("Got a file opened.");
+    //Serial.println("Got a file opened.");
     if (readInfo(bmpFile)) {									// Then see if we can understand it	
     	filePath = (char*) malloc(strlen(filename)+1);	// Grab storage for name;
     	if (filePath) {											// Got some?
@@ -110,9 +110,9 @@ void bmpPipe::setSourceRect(rect inRect) {
 }
 
 
-boolean bmpPipe::readInfo(File bmpFile) {
+bool bmpPipe::readInfo(File bmpFile) {
 
-    boolean   success = false;
+    bool   success = false;
     uint32_t  temp;
   
     if (bmpFile) {												// We get a file handle?
@@ -212,7 +212,7 @@ void bmpPipe::drawBitmap(int x,int y) {
 	int			srcY;
 	RGBpack*		colorBuff;
 
-	colorBuff = (RGBpack*)malloc(sizeof(RGBpack)*sourceRect.width);	// Have a shot at grabbing aline buffer.
+	//colorBuff = (RGBpack*)malloc(sizeof(RGBpack)*sourceRect.width);	// Have a shot at grabbing aline buffer.
 	if (haveInfo) {																	// We have valid bmp info.
 		bmpFile = SD.open(filePath);												// Open up the file.
 		if (bmpFile) {																	// If we opened it.
@@ -232,7 +232,7 @@ void bmpPipe::drawBitmap(int x,int y) {
 			bmpFile.close();															// Drawing is done for now. Close the file.
 		}      
 	}
-	if (colorBuff) { free(colorBuff); }											// So if we did get that buffer free it.
+	//if (colorBuff) { free(colorBuff); }											// So if we did get that buffer free it.
 }
 
 

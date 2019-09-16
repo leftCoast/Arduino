@@ -11,7 +11,9 @@
 
 
 // PulseOut wants the pin number.
-voice::voice(byte inPinNum,boolean inverse) : PulseOut(inPinNum, C4,inverse), linkListObj() {
+voice::voice(byte inPinNum,bool inverse)
+  : PulseOut(inPinNum, C4,inverse),
+  linkListObj() {
 
   playing = false;
   timedPlaying = false;
@@ -27,7 +29,7 @@ void voice::setUpSound(float periodMs) {
 
 
 // True, playes whatever note is set up. False, stops it.
-void voice::play(boolean playStop) {
+void voice::play(bool playStop) {
   playing = playStop;
   if (playing) start();
 }
@@ -225,5 +227,3 @@ boolean note::addNote(note* inNote) {
 float note::getPeriod(void) { return period; }
 
 */
-
-

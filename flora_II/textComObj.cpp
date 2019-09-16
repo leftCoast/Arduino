@@ -2,8 +2,26 @@
 #include "parameters.h"
 #include "pumpObj.h"
 #include "globals.h"
+#include "UI.h"
 
-enum commands { noCommand, resetAll, showParams, showReadings, showGReadings, setMudMapLimit, setDryMapLimit, setSetPoint, setWTime, setSTime, setName, setPump, setPercent, setPeriod };
+enum commands { noCommand, 
+                resetAll, 
+                showParams, 
+                showReadings, 
+                showGReadings, 
+                setMudMapLimit, 
+                setDryMapLimit, 
+                setSetPoint, 
+                setWTime, 
+                setSTime, 
+                setName, 
+                setPump, 
+                setPercent, 
+                setPeriod, 
+                logCom,
+
+                listDir
+                };
 
 
 textComObj textComs;
@@ -30,6 +48,9 @@ void textComObj::begin(void) {
   mParser.addCmd(setPump, "pump");
   mParser.addCmd(setPercent, "percent");
   mParser.addCmd(setPeriod, "period");
+  mParser.addCmd(logCom, "log");
+
+  mParser.addCmd(listDir, "ls");
 }
 
 
@@ -58,6 +79,8 @@ void textComObj::checkTextCom(void) {
       case setPeriod      : setPWMPeriod();   break;
       case setDryMapLimit : setDry();         break;
       case setMudMapLimit : setMud();         break;
+      case logCom         : logCommand();     break;
+      case listDir        : listDirectory();  break;
       default             : Serial.println("Sorry, have no idea what you want.");
     }
   }
@@ -81,6 +104,7 @@ void textComObj::printParams(void) {
   Serial.print("period    : ");Serial.print(ourParamObj.getPWMPeriod());Serial.println(" ms");
   Serial.print("Dry       : ");Serial.print(ourParamObj.getDry());Serial.println(" mf");
   Serial.print("Mud       : ");Serial.print(ourParamObj.getMud());Serial.println(" mf");
+  Serial.print("Run #     : ");Serial.print(ourParamObj.getRunNum());Serial.println();
   Serial.println();
 }
 
@@ -295,6 +319,59 @@ void textComObj::setMud(void) {
   }
   Serial.print("Mud limit now set to ");
   Serial.println(ourParamObj.getMud());
+}
+
+
+void textComObj::logCommand(void) {
+  
+  int   numChars;
+  char* paramBuff;
+  
+  if (mParser.numParams()) {
+    paramBuff = mParser.getParam();
+    numChars = strlen(paramBuff);
+    for (int i=0;i<numChars;i++) {
+      paramBuff[i] = toupper(paramBuff[i]);
+    }
+    if (!strcmp(paramBuff,"RESET")) { ourDisplay.deleteLog(); }
+    else if (!strcmp(paramBuff,"ON")) { ourDisplay.setLogging(true); }
+    else if (!strcmp(paramBuff,"OFF")) { ourDisplay.setLogging(false); }
+    else if (!strcmp(paramBuff,"SHOW")) { ourDisplay.showLogfile(); }
+    else { Serial.println("You can say on, off, show or reset. That's all I understand."); }
+    free(paramBuff);
+  } else {                                    // No params? Power user!
+    ourDisplay.setLogging(!ourDisplay.isLogging());
+  }
+}
+
+void textComObj::listDirectory(void) {
+
+  File  wd;
+  File  entry;
+  bool  done;
+
+  wd = SD.open("/"); // workingDir
+  if (wd) {
+    wd.rewindDirectory();
+    done = false;
+    do {
+      entry = wd.openNextFile();
+      if (entry) {
+        Serial.print(entry.name());
+        if (entry.isDirectory()) {
+          Serial.println("/");
+        } else {
+          Serial.print("\t"); Serial.println(entry.size(), DEC);
+        }
+        entry.close();
+      } else {
+        done = true;
+      }
+    } while (!done);
+    wd.close();
+  } else {
+    Serial.println(F("Fail to open file.")); // Sadly, instead of returning a NULL, it just crashes.
+  }
 }
 
 

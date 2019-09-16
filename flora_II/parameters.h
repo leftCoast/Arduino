@@ -6,9 +6,10 @@
 #define DEF_DRY_LIMIT           25            // These guys are in the parameer block.
 #define DEF_WATER_TIME          30000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
-#define DEF_NAME                "LC Plant Minder"
-#define DEF_DRY                  335          // Wipe it dry and block it up aff the wood table.
+#define DEF_NAME                "Left coast PlantBot"
+#define DEF_DRY                  335          // Wipe it dry and block it up off the wood table.
 #define DEF_MUD                  1015         // Holding it in your hand it maxes out.
+#define DEF_RUN_NUM              0            // Default to NOT logging.
 
 #define DEF_READ_TIME           500           // These guys are hard coded.
 #define DEF_CSMOOTHER           20
@@ -28,6 +29,7 @@ struct paramType {                  // paramType is the TYPE of structure we sav
   int period;                       // Actually this, I think is used. How often do we give the motor a jolt of power to hold the speed we want. (Smoothness, [Number of cylinders])
   int dry;                          // What capacitive reading are we calling our totally dry limit.
   int mud;                          // What capacitive reading are we calling absolute mud. The totally wet limit.
+  int runNum;                       // Data logger sets this to 1 if logging is turned on, 0 if turned off. If it reads a 1, it adds 1 to it.
   char name[NAME_BUFF_BYTES];       // Although at this time you can't change it. Each plant minder can have its own name. (Later)
 };
 
@@ -54,6 +56,7 @@ virtual   ~parameters(void);
           int   getPWMPeriod(void);
           int   getDry(void);
           int   getMud(void);
+          int   getRunNum(void);
           
           void  setDryLimit(int percent);
           void  setWaterTime(int waterMs);
@@ -63,7 +66,7 @@ virtual   ~parameters(void);
           void  setPWMPeriod(int periodMs);
           void  setDry(int dryCap);
           void  setMud(int mudCap);
-          
+          void  setRunNum(int runNum);
           paramType params;
 };
 

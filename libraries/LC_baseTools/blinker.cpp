@@ -21,7 +21,7 @@ blinker::~blinker(void) { delete(onTimer); }
 void blinker::setInverse(boolean inInverse) { inverse = inInverse; }
 
 
-void blinker::setLight(boolean onOff) {
+void blinker::setLight(bool onOff) {
     
     if(onOff) { // light on!
         if (inverse) digitalWrite(pin,LOW);
@@ -36,7 +36,7 @@ void blinker::setLight(boolean onOff) {
 
 // This is your on/off switch. Call with a boolean tru=on false=off.
 // The object is created in the "off" mode.
-void blinker::setBlink(boolean onOff) {
+void blinker::setBlink(bool onOff) {
 
 	if (!init) {					// Not intialized?
 		hookup();					// Set up idling.
@@ -56,6 +56,9 @@ void blinker::setBlink(boolean onOff) {
 		}
 	}
 }
+
+
+bool blinker::blinking(void) { return running; }
 
 
 void blinker::idle(void) {

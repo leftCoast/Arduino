@@ -469,7 +469,7 @@ void PNList::doAction(event* inEvent,point* locaPt) {
 
 
 contactPanel::contactPanel(void)
-  : panel(contactApp,noEvents) { mKeyboard = NULL; }
+  : cellOSPanel(contactApp) { mKeyboard = NULL; }
 
 
 contactPanel::~contactPanel(void) { if (mKeyboard) delete mKeyboard; }
@@ -484,20 +484,20 @@ void contactPanel::setup(void) {
   mPNList->fillList();                                                  // Fill it with goodies.
   addObj(mPNList);                                                      // Pass it to the a group.
 
-  menuBar* ourMenuBar = new menuBar((panel*)this);
-  addObj(ourMenuBar);
+  //menuBar* ourMenuBar = new menuBar((panel*)this);
+  //addObj(ourMenuBar);
 
   contNewBtn* ourNewButton = new contNewBtn(mPNList);
-  ourMenuBar->addObj(ourNewButton);
+  mMenuBar->addObj(ourNewButton);
 
   contTextBtn*  ourTextBtn = new contTextBtn();
-  ourMenuBar->addObj(ourTextBtn);
+  mMenuBar->addObj(ourTextBtn);
 
   contCallBtn* ourCallBtn = new contCallBtn();
-  ourMenuBar->addObj(ourCallBtn);
+  mMenuBar->addObj(ourCallBtn);
 
   contTrashBtn* ourTrashBtn = new contTrashBtn(mPNList);
-  ourMenuBar->addObj(ourTrashBtn);
+  mMenuBar->addObj(ourTrashBtn);
 }
 
 

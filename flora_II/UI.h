@@ -2,8 +2,25 @@
 #define UI_h
 
 #include <label.h>
-
+#include <blinker.h>
+#include "dataLog.h"
 #include "globals.h"
+
+
+class flasher : public drawObj,
+                public blinker {
+    public:
+                  flasher(rect* inRect,colorObj* backColor=&black);
+                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
+                     
+    virtual       ~flasher(void);
+    virtual void  setBlink(bool onOff);
+    virtual void  setLight(bool onOff);
+    virtual void  drawSelf(void);
+    
+            colorObj  mForeColor;
+            colorObj  mBackColor;
+};
 
 
 class percView : public label {
@@ -26,25 +43,25 @@ class stateView : public label {
 };
 
 
-class UI  : public idler,
-                public timeObj {
+class UI  : public dataLog,
+            public idler,
+            public timeObj {
 
   public:
                 UI(void);
   virtual       ~UI(void);
 
-          void  begin(void);
+  virtual void  begin(void);
   virtual void  idle(void);
           void  sensorDeath(void);
-
-          bool        mHaveScreen;
           
+          bool        mHaveScreen;
           percView*   mLimit;
           percView*   mMoisture;
           label*      mSlash;
           label*      mKey;
           stateView*  mState;
-
+          flasher*    mLoggingLED;
           float       mLastMoist;
           int         mLastLimit;
           weDo        mLastState;

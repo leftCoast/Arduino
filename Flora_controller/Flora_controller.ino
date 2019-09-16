@@ -1,5 +1,7 @@
 #include <adafruit_1947_Obj.h>
 #include <Adafruit_GFX.h>
+//#include <Fonts/FreeSans12pt7b.h>
+#include "Fonts/FreeSans9pt7b.h"
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -9,14 +11,30 @@
 #include <drawObj.h>
 #include <screen.h>
 #include <litlOS.h>
+#include "globals.h"
 #include "floraOS.h"
+
+#define SD_CS   4
 
 void setup() {
   // First bring the screen online.
   if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
+    Serial.println("NO SCREEN!");
+    Serial.flush();
     while(true);
   }
+  screen->fillScreen(&black);
 
+  if (!SD.begin(SD_CS)) {                   // With icons, we now MUST have an SD card.
+    Serial.println("NO SD CARD!");
+    Serial.flush();
+    screen->setCursor(10,10);
+    screen->setTextColor(&white);
+    screen->setTextSize(2);
+    screen->drawText("No SD card.");
+    while(true);
+  }
+  
   ourEventMgr.begin();                      // Kickstart our event manager.
                                             // Hardware and services are up and running.
   ourOS.begin();                            // Boot OS manager.

@@ -34,7 +34,7 @@ int statID = -1;
 
 
 toolsPanel::toolsPanel(void)
-  : panel(toolsApp,noEvents) {
+  : cellOSPanel(toolsApp) {
   
   colorObj aColor(LC_NAVY);
   mText = new textView(10,30,220,150);
@@ -52,8 +52,8 @@ toolsPanel::~toolsPanel(void) { if (fire) { delete fire; } }
 
 void toolsPanel::setup(void) {
 
-  menuBar* ourMenuBar = new menuBar((panel*)this);
-  addObj(ourMenuBar);
+  //menuBar* ourMenuBar = new menuBar((panel*)this);
+  //addObj(ourMenuBar);
 
   fire = new bmpPipe();
   fire->openPipe(FIRE_FILE_PATH);

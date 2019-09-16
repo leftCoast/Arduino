@@ -36,8 +36,24 @@ void iconButton::begin(void) {
 }
 
 
-// Check if we "haveInfo". If so, then draw.
-void iconButton::drawSelf(void) { if(haveInfo) drawBitmap(x,y); }
+// Blast out the bitmap.
+void iconButton::drawSelf(void) { drawBitmap(x,y); }
 
 
 void iconButton::doAction(void) {  }
+
+
+
+iconButton32::iconButton32(int xLoc, int yLoc,char* path)
+	: iconButton(xLoc,yLoc,path,32) {  }
+
+
+iconButton32::~iconButton32(void) {  }
+
+
+
+iconButton22::iconButton22(int xLoc, int yLoc,char* path)
+	: iconButton(xLoc,yLoc,path,22) {  }
+
+
+iconButton22::~iconButton22(void) {  }

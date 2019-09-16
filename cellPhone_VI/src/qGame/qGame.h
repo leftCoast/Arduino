@@ -31,7 +31,7 @@
 
 
 
-class qGame : public  panel {
+class qGame : public  cellOSPanel {
 
   public:
 

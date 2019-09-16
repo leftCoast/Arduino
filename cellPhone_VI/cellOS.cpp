@@ -44,13 +44,33 @@ colorObj  greenbuttonColor(LC_DARK_GREEN);
 colorObj  greenButtonHighlight(LC_GREEN);
 
 colorObj  battLineColor(LC_CHARCOAL);
-colorObj  menuBarColor(LC_RED);
+//colorObj  menuBarColor(LC_RED);
 
 cellOS  ourOS;
 
 
+
 // *****************************************************
-// *********************  formatPN  ********************
+//                      cellOSPanel
+// *****************************************************
+
+
+cellOSPanel::cellOSPanel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents)
+  : panel(panelID,menuBarChoice,inEventSet) {
+  
+  if (mMenuBar) {
+    statusIcon* aStatus = new statusIcon();
+    mMenuBar->addObj(aStatus);
+  } 
+}
+
+  
+cellOSPanel::~cellOSPanel(void) {  }
+
+
+
+// *****************************************************
+//                      formatPN
 // *****************************************************
 
 void formatPN(label* numField);
@@ -77,37 +97,6 @@ void formatPN(label* numField) {
 }
 
 
-// *****************************************************
-// *****************   std buttons  ********************
-// *****************************************************
-
-
-closeBtn::closeBtn(panel* inPanel)
-  : iconButton(CLOSE_X,CLOSE_Y,ICON_PATH_X22,22) {
-  
-  mPanel = inPanel;
-  begin();
- }
-
-closeBtn::~closeBtn(void) {  }
-
-void closeBtn::doAction(void) { mPanel->close(); }
-
-// ******
-
-newBtn::newBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_NEW22,22)  { begin(); }
-   
-newBtn::~newBtn(void) {  }
-
-// *****
-
-searchBtn::searchBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_SEARCH22,22)  { begin(); }
-    
-searchBtn::~searchBtn(void) {  }
-
-// *****
 
 contactsBtn::contactsBtn(int x,int y)
   : iconButton(x,y,ICON_PATH_CONTACT22,22)  { begin(); }
@@ -131,14 +120,6 @@ callBtn::callBtn(int x,int y)
    
 callBtn::~callBtn(void) {  }
 
-// *****
-
-
-trashBtn::trashBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_TRASH22,22)  { begin(); }
-
-trashBtn::~trashBtn(void) {  }
-
 
 
 // *****************************************************
@@ -151,7 +132,7 @@ statusIcon::statusIcon(void)
     
   mBatPct = new battPercent(0,3);
   addObj(mBatPct);
-  mRSSI = new RSSIicon(SIG_X,3);
+  mRSSI = new RSSIicon(15,3);
   addObj(mRSSI);
   hookup();
   setStatus();
@@ -180,36 +161,6 @@ void statusIcon::idle(void) {
 
 void statusIcon::drawSelf(void) { }
 
-
-
-// *****************************************************
-// ******************   menueBar  ********************
-// *****************************************************
-
-
-menuBar::menuBar(panel* inPanel,bool closeBox,bool showStatus)
-  : drawGroup(0,0,240,MENU_BAR_H) {
-    
-  closeBtn*   ourCloseBtn;
-  statusIcon* ourStatusIcon;
-  
-  mPanel = inPanel;
-  if (closeBox) {
-    ourCloseBtn = new closeBtn(mPanel);
-    addObj(ourCloseBtn);
-  }
-  if (showStatus) {
-    ourStatusIcon = new statusIcon();
-    addObj(ourStatusIcon);
-  }
-}
-
-
-menuBar::~menuBar(void) {  }
-
-
-
-void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
 
 
 
@@ -438,8 +389,8 @@ void homeScreen::setup(void) {
   if (breakoutIcon) { addObj(breakoutIcon); breakoutIcon->begin(); }
   if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
 
-  menuBar* ourMenuBar = new menuBar((panel*)this,false,true);
-  addObj(ourMenuBar);
+  statusIcon* anIcon = new statusIcon();
+  mMenuBar->addObj(anIcon);
 }
 
 
@@ -491,6 +442,7 @@ int cellOS::begin(void) {
   greenButtonHighlight.blend(&white,90);
 
   battLineColor.blend(&white,30);
+  menuBarColor.setColor(LC_RED);
   menuBarColor.blend(&black,95);
   
   // Fill in the keyboard pallette.

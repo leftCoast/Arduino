@@ -1,9 +1,10 @@
 #ifndef floraOS_h
 #define floraOS_h
 
-#include "litlOS.h"
-#include "panel.h"
-#include "quickCom.h"
+#include <litlOS.h>
+#include <panel.h>
+#include <quickCom.h>
+#include "globals.h"
 #include "baseButton.h"
 
 #define BEEP_PIN    23
@@ -17,7 +18,29 @@ extern qCMaster ourComPort;
 // *********   From unit.   *********
 // ******************************************
 
-enum floraComSet    { floraReset, readName, readState, readMoisture, readTemp, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
+enum floraComSet    {
+                      floraReset,
+                      readName,
+                      readState,
+                      readMoisture,
+                      readTemp,
+                      readDryLimit,
+                      readWaterTime,
+                      readSoakTime,
+                      pumpOn, pumpOff,
+                      setDryLimit,
+                      setWaterTime,
+                      setSoakTime,
+                      setPulseOn,
+                      setPulseOff, 
+
+                      getLogState,
+                      setLogState,
+                      getLogSize,
+                      getLogBuff,
+                      deleteLogFile,
+                      };
+                      
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 #define NAME_BUFF_BYTES         24
@@ -30,25 +53,6 @@ struct paramType {
   int period;
   char name[NAME_BUFF_BYTES];
 };
-
-
-
-// *****************************************************
-// ******************   homeScreen   *******************
-// *****************************************************
-
-
-class homeScreen : public homePanel {
-
-  public:
-          homeScreen(void);
-  virtual ~homeScreen(void);
-  
-  virtual void  setup(void);
-  virtual void  loop(void);
-  virtual void  drawSelf(void);
-};
-
 
 
 // *****************************************************

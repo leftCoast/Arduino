@@ -452,7 +452,7 @@ void callControl::checkCall(void) {
 // the interface used to start calls from other areas of the cell phone
 // program.
 phone::phone(void) 
-  : panel(phoneApp,noEvents) { mRawPN = NULL; }
+  : cellOSPanel(phoneApp) { mRawPN = NULL; }
 
 
 phone::~phone(void) { if (mRawPN) free(mRawPN); }
@@ -500,8 +500,8 @@ void phone::setup(void) {
   stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
   
-  menuBar* ourMenuBar = new menuBar((panel*)this,true,true);
-  addObj(ourMenuBar);
+  //menuBar* ourMenuBar = new menuBar((panel*)this,true,true);
+  //addObj(ourMenuBar);
 
 }
 

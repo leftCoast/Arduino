@@ -10,7 +10,7 @@
 // ******************************
 
 breakout::breakout(void)
-  : panel(breakoutApp,noEvents) {
+  : cellOSPanel(breakoutApp) {
 
   frameTimer    = new timeObj(FRAME_MS);
   paddleTimer   = new timeObj(PADDLE_MS);
@@ -63,8 +63,8 @@ void breakout::setup() {
   theBall->setBackColor(&backColor);
   addObj(theBall);
   
-  menuBar* ourMenuBar = new menuBar((panel*)this);
-  addObj(ourMenuBar);
+  //menuBar* ourMenuBar = new menuBar((panel*)this);
+  //addObj(ourMenuBar);
   
   fillBricks();
   setState(preGame);

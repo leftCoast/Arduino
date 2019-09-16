@@ -1,12 +1,37 @@
 #include "handheld.h"
 #include "parameters.h"
 #include "pumpObj.h"
+#include "UI.h"
 #include "globals.h"
 
 #define COM_BUFF_BYTES  255
 
 
-enum floraComSet    { floraReset, readName, readState, readMoisture, readTemp, readDryLimit, readWaterTime, readSoakTime, pumpOn, pumpOff, setDryLimit, setWaterTime, setSoakTime, setPulseOn, setPulseOff };
+enum floraComSet    {
+                      floraReset,
+                      readName,
+                      readState,
+                      readMoisture,
+                      readTemp,
+                      readDryLimit,
+                      readWaterTime,
+                      readSoakTime,
+                      pumpOn, pumpOff,
+                      setDryLimit,
+                      setWaterTime,
+                      setSoakTime,
+                      setPulseOn,
+                      setPulseOff, 
+
+                      getLogState,
+                      setLogState,
+                      getLogSize,
+                      getLogBuff,
+                      deleteLogFile,
+                      
+                      };
+
+                      
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 byte  comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
@@ -50,6 +75,13 @@ void handheld::checkComs(void) {
       case setSoakTime    : handleSetSoakTime(comPtr);    break;
       case setPulseOn     :
       case setPulseOff    : handleSetPulseOnOff(comPtr);  break;
+
+      case getLogState   : handleGetLogState(comPtr);     break;
+      case setLogState   : handleSetLogState(comPtr);     break;
+      case getLogSize    : handleGetLogSize(comPtr);      break;
+      case getLogBuff    : handleGetLogBuff(comPtr);      break;
+      case deleteLogFile : handleDeleteLogFile(comPtr);   break;
+      
       default :                                                   // If we can't we pass back and error. (What? I don't get it..)
         comPtr[0] = unknownCom;                                   // Stuff in "unknown command" reply byte.
         replyComBuff(1);                                          // And send that one byte on its way back to the handheld.
@@ -200,4 +232,58 @@ void handheld::handleSetSoakTime(byte* comPtr){
 void handheld::handleSetPulseOnOff(byte* comPtr) {
 
   
+}
+
+    
+void handheld::handleGetLogState(byte* comPtr) {
+
+  byte result;
+  
+  result = (byte) ourDisplay.isLogging();
+  comPtr[0] = result;
+  comPtr[1] = noErr;
+  replyComBuff(2);
+}
+
+
+void handheld::handleSetLogState(byte* comPtr) {
+
+  byte result;
+  
+  result = (byte)ourDisplay.setLogging((bool)comPtr[1]);  // Use their byte as a bool and call the function.
+  comPtr[0] = !(result==comPtr[1]);                       // Becuase no error is 0.
+  replyComBuff(1);
+}
+
+
+void handheld::handleGetLogSize(byte* comPtr) {
+
+  unsigned long   numBytes;
+  unsigned long*  longPtr;
+  
+  numBytes = ourDisplay.getFileSize();      // Grab the number
+  longPtr = (unsigned long*)comPtr;         // Get the unsigned long pointer to point at our buffer.
+  *longPtr = numBytes;                      // Write the unsigned long out to the buffer.
+  replyComBuff(sizeof(unsigned long));      // Send it on its way!
+}
+
+
+void handheld::handleGetLogBuff(byte* comPtr) {
+
+  unsigned long   fileIndex;
+  unsigned long   numBytes;
+  unsigned long*  longPtr;
+
+  longPtr = (unsigned long*)&comPtr[1];                     // Our index is stored starting at index 1.
+  fileIndex = *longPtr;                                     // read out the file index.
+  numBytes = ourDisplay.getFileBuff(fileIndex,255,comPtr);  // Call to fill the buffer.
+  replyComBuff(numBytes);                                   // Send it on its way!
+}
+
+
+void handheld::handleDeleteLogFile(byte* comPtr) {
+
+  ourDisplay.deleteLog();
+  comPtr[0] = noErr;
+  replyComBuff(1);
 }

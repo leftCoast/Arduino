@@ -1,4 +1,6 @@
 #include "controlPanel.h"
+//#include "Fonts/FreeSans12pt7b.h"
+#include "Fonts/FreeSans9pt7b.h"
 
 
 #define DRY_LIMIT     1
@@ -15,20 +17,138 @@
 #define MAX_WTIME     120000
 #define MAX_STIME     600000
 
+
+
 enum commandChoices { comIdle  ,comPumpOn, comPumpOff, comSetDryLimit, comSetWTime, comSetSTime };
 commandChoices  commandChoice = comIdle;
 
 char tempStrBuff[256];
 
 
+// *****************************************************
+//                        flasher
+// *****************************************************
+
+
+flasher::flasher(rect* inRect,colorObj* backColor)
+  : drawObj(inRect),
+  blinker() {
+
+  mBackColor.setColor(backColor);   // What is "off"?
+  mForeColor.setColor(&red);        // Reasonable default.
+}
+
+
+flasher::flasher(int inX,int inY,int inWidth,int inHeight,colorObj* backColor)
+  : drawObj(inX,inY,inWidth,inHeight),
+  blinker() {
+  
+  mBackColor.setColor(backColor);   // What is "off"?
+  mForeColor.setColor(&red);        // Reasonable default.
+}
+
+                     
+flasher::~flasher(void) { }
+
+
+// Basically a hacked version from blinker to remove the pinmode stuff.
+// This is your on/off switch. Call with a boolean tru=on false=off.
+// The object is created in the "off" mode.
+void flasher::setBlink(bool onOff) {
+  
+ if (!init) {             // Not intialized?
+    hookup();             // Set up idling.
+    init = true;          // Note it.
+  }
+  if((onOff!=running)) {  // ignore if no change
+    if (onOff) {          // Start blinking..    
+      start();            // Starting NOW!
+      setLight(true);     // light on!
+      onTimer->start();   // set the time on timer.
+      running = true;     // Set state.
+      } 
+    else {                // Stop blinking..
+      setLight(false);    // light off.
+      running = false;    // set state.
+    }
+  }
+}   
+
+    
+void flasher::setLight(bool onOff) {
+
+  lightOn = onOff;
+  setNeedRefresh();
+}
+
+
+void flasher::drawSelf(void) {
+
+  if (lightOn) {
+    screen->fillRect(x,y,width,height,&mForeColor);
+  } else {
+    screen->fillRect(x,y,width,height,&mBackColor);
+  }
+}
+
+
+
+bmpFlasher::bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp)
+  : flasher(inX,inY,width,height,&black) { 
+ 
+  mReady = false;
+  setup(onBmp,offBmp);
+}
+
+    
+bmpFlasher::bmpFlasher(rect* inRect,char* onBmp, char* offBmp)
+  : flasher(inRect,&black) { 
+  
+  mReady = false;
+  setup(onBmp,offBmp);
+}  
+
+    
+bmpFlasher::~bmpFlasher(void) {
+
+  if (mOnBmp) delete(mOnBmp);
+  if (mOffBmp) delete(mOffBmp);
+}
+
+
+void bmpFlasher::setup(char* onBmp,char* offBmp) {
+
+  rect  sourceRect(0,0,width,height);
+  mOnBmp = new bmpPipe(sourceRect);
+  mOffBmp = new bmpPipe(sourceRect);
+  if (mOnBmp&&mOffBmp) {
+    if (mOnBmp->openPipe(onBmp) && mOffBmp->openPipe(offBmp)) {
+      mReady = true;
+    }
+  }
+}
+
+
+void bmpFlasher::drawSelf(void) {
+
+  if (mReady) {
+    if (lightOn) {
+      mOnBmp->drawBitmap(x,y);
+    } else {
+      mOffBmp->drawBitmap(x,y);
+    }
+  }
+}
+
+
 
 // *****************************************************
-// ******************    waterBtn   *********************
+//                        waterBtn
 // *****************************************************
 
 
 waterBtn::waterBtn(int x, int y,int width, int height)
-  :baseButton("Pump",x,y,width,height) { 
+  :baseIconButton(x,y,width,height,"/icons/H2OOn32.bmp") { 
     
   mOnOff = true;  // True means we will turn it on.
   setTheLook();
@@ -38,15 +158,12 @@ waterBtn::waterBtn(int x, int y,int width, int height)
 waterBtn::~waterBtn(void) {  }
 
 
-
-void    waterBtn::setTheLook(void) {
-
+void waterBtn::setTheLook(void) {
+  
   if (mOnOff) {
-    setText("Water");
-    activeBColor.setColor(LC_BLUE);
+    openPipe(WATER_ON_BMP);
   } else {
-    setText("Off");
-    activeBColor.setColor(LC_RED);
+    openPipe(WATER_OFF_BMP);
   }
 }
 
@@ -54,8 +171,10 @@ void    waterBtn::setTheLook(void) {
 void  waterBtn::doAction(event* inEvent,point* locaPt) {
 
   byte  outByte;
+
   
   if (inEvent->mType==touchEvent) {
+    screen->fillRect((rect*)this,&white); // Give it a flash.
     if (mOnOff) {
       commandChoice = comPumpOn;
     } else {
@@ -74,7 +193,7 @@ void  waterBtn::doAction(event* inEvent,point* locaPt) {
 
 
 selectBtn::selectBtn(int x,int y,int width,int height,int inChoice,controlPanel* inPanel)
-  :baseButton("",x,y,width,height) {
+  :baseButton(NULL,x,y,width,height) {
     
     mChoice = inChoice;
     mPanel = inPanel;
@@ -178,10 +297,9 @@ void editSlider::doAction(event* inEvent,point* locaPt) {
 
 
 okBtn::okBtn(int x, int y,int width, int height,controlPanel* inPanel)
-  : baseButton("Ok",x,y,width,height) {
+  : baseIconButton(x,y,width,height,"/icons/check32.bmp") {
     
   mPanel = inPanel;
-  activeBColor.setColor(&green);
 }
 
    
@@ -190,7 +308,9 @@ okBtn::~okBtn(void) {  }
 
 void okBtn::doAction(event* inEvent,point* locaPt) {
 
-  if (inEvent->mType==liftEvent) {
+  if (inEvent->mType==touchEvent) {
+    screen->fillRect((rect*)this,&white); // Give it a flash.
+  } else if (inEvent->mType==liftEvent) {
     mPanel->mSlider->select(false);
     mPanel->mCancelBtn->select(false);
     select(false);
@@ -215,10 +335,9 @@ void okBtn::doAction(event* inEvent,point* locaPt) {
 
 
 cancelBtn::cancelBtn(int x, int y,int width, int height,controlPanel* inPanel)
-  : baseButton("Cancel",x,y,width,height) {
+  : baseIconButton(x,y,width,height,"/icons/x32.bmp") {
 
   mPanel = inPanel;
-  activeBColor.setColor(&red);
 }
 
    
@@ -227,7 +346,9 @@ cancelBtn::~cancelBtn(void) {  }
 
 void cancelBtn::doAction(event* inEvent,point* locaPt) {
 
-  if (inEvent->mType==liftEvent) {
+  if (inEvent->mType==touchEvent) {
+    screen->fillRect((rect*)this,&white); // Give it a flash.
+  } else if (inEvent->mType==liftEvent) {
     mPanel->mSlider->select(false);
     mPanel->mOkBtn->select(false);
     select(false);
@@ -244,9 +365,18 @@ void cancelBtn::doAction(event* inEvent,point* locaPt) {
 // *****************************************************
 
 
+
+
+
+//getLogState,
+//setLogState,
+//getLogSize,
+//getLogBuff,
+//deleteLogFile
+
 #define LINE_SPACE  20
 
-enum dataSelect { dataStart, dataState, dataName, dataTemp, dataMoisture, dataDryLimit, dataWaterTime, dataSoakTime, dataEnd };
+enum dataSelect { dataStart, dataState, dataName, dataTemp, dataMoisture, dataDryLimit, dataWaterTime, dataSoakTime, dataLogState, dataLogSize, dataEnd };
 dataSelect  dataChoice = dataStart;
 
 
@@ -272,8 +402,9 @@ void controlPanel::setup(void) {
 
     traceY = 30;
     
-    mNameLabel = new label(10,traceY,220,14,"...",2);
-    mNameLabel->setColors(&labelColor,&black);
+    mNameLabel = new fontLabel(10,traceY,220,18);
+    mNameLabel->setColors(&white,&black);
+    mNameLabel->setJustify(TEXT_CENTER);
     addObj(mNameLabel);
     
     mNameLight = new colorRect(0,traceY+4,6,6);
@@ -349,6 +480,16 @@ void controlPanel::setup(void) {
     mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME,this);
     addObj(mSoakTimeBtn);
 
+    mloggingLight = new bmpFlasher(100,traceY+23,10,10,ON_GREEN_BMP,OFF_GREEN_BMP);
+    mloggingLight->setTimes(1000, 1500);
+    mloggingLight->setBlink(false);
+    addObj(mloggingLight);
+    
+   
+    mlogfileSizeLabel = new label(115,traceY+23,100,8,"",1);
+    mlogfileSizeLabel->setColors(&labelColor,&black);
+    addObj(mlogfileSizeLabel);
+    
     traceY = traceY + 2*LINE_SPACE;
     mSliderLabel  = new label(120,traceY,100,14,"",1);
     mSliderLabel->setColors(&labelColor,&black);
@@ -362,16 +503,15 @@ void controlPanel::setup(void) {
     addObj(mSlider);
 
     traceY = traceY + 2*LINE_SPACE;
-    mOkBtn = new okBtn(90,traceY,35,20,this);
+    mOkBtn = new okBtn(125,traceY,32,32,this);
     mOkBtn->select(false);
     addObj(mOkBtn);
 
-    mCancelBtn = new cancelBtn(150,traceY,80,20,this);
+    mCancelBtn = new cancelBtn(188,traceY,32,32,this);
     mCancelBtn->select(false);
     addObj(mCancelBtn);
-     
-    traceY = traceY + LINE_SPACE + 4;
-    mWaterBtn = new waterBtn(20,traceY,80,20);
+
+    mWaterBtn = new waterBtn(20,traceY,32,32);
     mWaterBtn->select(true);
     addObj(mWaterBtn);
 }
@@ -600,8 +740,6 @@ void controlPanel::checkWaterTime(void) {
   ourComPort.sendBuff(&byteBuff,1,true);
   while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(SLEEP_TIME);}
   byteBuff = ourComPort.haveBuff();
-  Serial.println(byteBuff);
-  Serial.println(sizeof(long));
   if (byteBuff==sizeof(long)) {
     ourComPort.readBuff((byte*)&longBuff);
     mLastWTime = longBuff/1000;
@@ -663,6 +801,47 @@ void controlPanel::checkName(void) {
     ourComPort.dumpBuff();
     mNameLight->setColor(LC_RED);
   }
+}
+
+void controlPanel::checkLogState(void) {
+
+  byte  byteBuff[2];
+  bool  logState;
+  
+  logState = false;
+  byteBuff[0] = getLogState;
+  ourComPort.readErr();
+  ourComPort.sendBuff(byteBuff,1,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(SLEEP_TIME);}
+  byteBuff[0] = ourComPort.haveBuff();
+  if (byteBuff[0]==2) {
+    ourComPort.readBuff(byteBuff);
+    logState = (bool)byteBuff[0];
+  } else {
+    ourComPort.dumpBuff();
+  }
+  mloggingLight->setBlink(logState); 
+}
+
+
+void controlPanel::checkLogSize(void) {
+  
+  byte           byteBuff;
+  unsigned long  longBuff;
+
+  byteBuff = getLogSize;
+  ourComPort.readErr();
+  ourComPort.sendBuff(&byteBuff,1,true);
+  while(!ourComPort.haveBuff()&&!ourComPort.readErr()) { sleep(SLEEP_TIME);}
+  byteBuff = ourComPort.haveBuff();
+  if (byteBuff==sizeof(unsigned long)) {
+    ourComPort.readBuff((byte*)&longBuff);
+    mlogfileSizeLabel->setValue(longBuff);
+    return;
+  } else {
+    ourComPort.dumpBuff();
+  }
+  mlogfileSizeLabel->setValue("");
 }
 
 
@@ -755,6 +934,8 @@ void controlPanel::loop(void) {
       case dataDryLimit   : checkDryLimit();        break;
       case dataWaterTime  : checkWaterTime();       break;
       case dataSoakTime   : checkSoakTime();        break;
+      case dataLogState   : checkLogState();        break;
+      case dataLogSize    : checkLogSize();         break;
       case dataEnd        : dataChoice = dataStart; break;
     }
     dataChoice = (dataSelect)(dataChoice + 1);
@@ -767,6 +948,7 @@ void controlPanel::loop(void) {
     case comSetDryLimit : doComSetDryLimit(mSlider->getValue()); break;
     case comSetWTime    : doComSetWTime(mSlider->getValue()); break;
     case comSetSTime    : doComSetSTime(mSlider->getValue()); break;
+                      
   }
   commandChoice = comIdle;
 }

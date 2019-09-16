@@ -1,5 +1,5 @@
 
-#include "litlOS.h" 
+#include <litlOS.h>
 #include <screen.h>
 
 int	nextPanel = NO_PANEL_ID;   // What panel do we want showing now?
@@ -25,7 +25,7 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 
 
 homePanel::homePanel(void)
-  : panel(HOME_PANEL_ID,noEvents) { }
+  : panel(HOME_PANEL_ID,emptyMenuBar) { } // Home panels have no panel to return to.
 
 
 homePanel::~homePanel(void) {  }

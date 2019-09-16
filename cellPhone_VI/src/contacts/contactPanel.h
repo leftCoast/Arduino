@@ -180,7 +180,7 @@ class PNList : public scrollingList {
 // *****************************************************
 
 
-class contactPanel :  public panel {
+class contactPanel :  public cellOSPanel {
 
   public:
           contactPanel(void);

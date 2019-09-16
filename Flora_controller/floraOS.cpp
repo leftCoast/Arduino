@@ -1,4 +1,5 @@
 #include "floraOS.h"
+#include "homePanel.h"
 #include "controlPanel.h"
 
 
@@ -6,24 +7,6 @@
 #define COM_REPLY_TIMEOUT 250   // We'll give a 1/4 second for the unit to reply to us. Otherwise we'll say its offline.
 
 
-
-// *****************************************************
-// ******************   homeScreen   *******************
-// *****************************************************
-
-
-homeScreen::homeScreen(void) { }
-
-homeScreen::~homeScreen(void) { }
-  
-void homeScreen::setup(void) { }
-
-void homeScreen::loop(void) { }
-
-void homeScreen::drawSelf(void) {
-  
-  nextPanel = controlApp;
-}
 
 
 

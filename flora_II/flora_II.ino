@@ -87,6 +87,9 @@ void setup() {
   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
   Serial.println("Hello?");
 
+  ourParamObj.readParams();                             // Read our saved running params.
+  updateEnv();                                          // Setup what we need to setup with params.
+  
   ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
   Serial.print("We have a display? ");
   Serial.println(ourDisplay.mHaveScreen);
@@ -97,16 +100,11 @@ void setup() {
   ourHandheld.begin();                                  // Setup coms for the handheld controller.
   Serial.print("ourHandheld result (0 is good) : ");
   Serial.println(ourHandheld.readErr());
-  
-  //delay(1000);                                          // Just in case its not ready, go have a cigarette. Then we'll have a go at firing it up.
-  
+    
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");                // Failed!
     ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
   }
-
-  ourParamObj.readParams();                             // Read our saved running params.
-  updateEnv();                                          // Setup what we need to setup with params.
   
   weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
   soakTime->start();                                    // And we start up the soak timer for that time.
@@ -149,16 +147,29 @@ void doSetPump(void) {
   }
 }
 
-
 // Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
   
-  tempC = ss.getTemp();                   // Read the tempature from the sensor.
-  capread = ss.touchRead(0);              // Read the capacitive value from the sensor.
-  capread = cSmoother.addData(capread);   // Pop the capacitive value into the capacitive smoother. (Running avarage)
-  tempC = tSmoother.addData(tempC);       // Pop the tempature value into the tempature smoother. (Again, running avarage)
-  moisture = mudMapper->Map(capread);      // Map the resulting capacitive value to a percent.
-  moisture = round(moisture);             // Round it to an int.
+  tempC = ss.getTemp();                       // Read the tempature from the sensor.
+  capread = ss.touchRead(0);                  // Read the capacitive value from the sensor.
+  
+  ourDisplay.addMode(weAre);
+  ourDisplay.addRawTemp(tempC);
+  ourDisplay.addRawCap(capread);
+  
+  capread = cSmoother.addData(capread);     // Pop the capacitive value into the capacitive smoother. (Running avarage)
+  tempC = tSmoother.addData(tempC);         // Pop the tempature value into the tempature smoother. (Again, running avarage)
+  moisture = mudMapper->Map(capread);       // Map the resulting capacitive value to a percent.
+  moisture = round(moisture);               // Round it to an int.
+  
+  ourDisplay.addAveCap(capread);
+  ourDisplay.addAveTemp(tempC);
+  ourDisplay.addMoisture(moisture);
+  
+  ourDisplay.addLimit(ourParamObj.getDryLimit());
+  ourDisplay.addWaterSec(round(ourParamObj.getWaterTime()/1000.0));
+  ourDisplay.addSoakSec(round(ourParamObj.getSoakTime()/1000.0));
+  ourDisplay.saveDataRecord();
 }
 
 

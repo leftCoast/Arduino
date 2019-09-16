@@ -14,82 +14,75 @@
 #define BUTTON_PIN 12
 #define ANALOG_PIN A0
 
-#define SOUND_PIN1 5///[ '0023//5
+#define SOUND_PIN1 23///[ '0023//5
 #define SOUND_PIN2 4
 #define SOUND_PIN3 3
 
-#define NOTE_TIME 250     // How long to hold a note.
+//#define NOTE_TIME 250     // How long to hold a note.
 
-#define MIN_COUNT 1
-#define MAX_COUNT 32 // Number of notes 'till we repeat.
+#define MIN_COUNT 0
+#define MAX_COUNT 12 // Number of notes 'till we repeat.
 
 voice voice1(SOUND_PIN1,true);
-voice voice2(SOUND_PIN2,true);
-voice voice3(SOUND_PIN3,true);
+//voice voice2(SOUND_PIN2,true);
+//voice voice3(SOUND_PIN3,true);
 
-timeObj timer(NOTE_TIME);
+
+*** Look at newbeep for the tone() stuff for teensy. Also the info to change to stadard freq. values. ***
+
+
 int count;
+
+float ringTone[] =          { E5,   D5,   F4,   G4,   C5,   B5,   D4,   E4,   B5,   A5,   C4,   E4,   A5, 0 };
+int ringToneDurations[] = { 250,  250,  500,  500,  250,  250,  500,  500,  250,  250,  500,  500,  1000, 1000 };
 
 void setup() {
 
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-  count = 1;
+  count = MIN_COUNT;
 }
 
 void playNote(void) {
 
-  if (count>=1 && count <=9) { 
-    voice1.setUpSound(F5); 
-    voice2.setUpSound(D5);
-    voice3.setUpSound(A4); 
-    voice1.timedPlay(240);
-    voice2.timedPlay(240);
-    voice3.timedPlay(240);
-  }
-  if (count>=10 && count <= 16) {
-    voice1.setUpSound(E5);
-    voice2.setUpSound(C5);
-    voice3.setUpSound(A4);
-    voice1.timedPlay(240);
-    voice2.timedPlay(240);
-    voice3.timedPlay(240);
-  }
-  if (count>=17 && count <= 25) {
-    voice1.setUpSound(E5);
-    voice2.setUpSound(C5);
-    voice3.setUpSound(G4);
-    voice1.timedPlay(240);
-    voice2.timedPlay(240);
-    voice3.timedPlay(240);
-  }
-  if (count>=26 && count <= 32) {
-    voice1.setUpSound(D5);
-    voice2.setUpSound(B4);
-    voice2.setUpSound(G4);
-    voice1.timedPlay(240);
-    voice2.timedPlay(240);
-    voice3.timedPlay(240);
-  }
-  /*
-   if (count>=30 && count <= 39) {
-    voice1.setUpSound(D5);
-    voice2.setUpSound(B4);
-    voice1.timedPlay(240);
-    voice2.timedPlay(240);
-  }
-  */
+  voice1.setUpSound(ringTone[count]);
+  voice1.timedPlay((ringToneDurations[count]/2));
   count++;
-  if (count > MAX_COUNT) count = MIN_COUNT;
+  if (count > MAX_COUNT) {
+    count = MIN_COUNT;
+    delay(1000);
+  }
+}
+
+void hammer(float freq,float duration) {
+
+  float onTime;
+  
+  onTime = freq/2.0;
+  timeObj onTimer(onTime);
+  timeObj freqTime(freq);
+  timeObj durationTime(duration);
+  durationTime.start();
+  Serial.print("Freq : ");
+  Serial.print(freq);
+  Serial.print("\tonTime ");
+  Serial.print(onTime);
+  Serial.println();
+  while(!durationTime.ding()) {
+    onTimer.start();
+    freqTime.start();
+    digitalWrite(SOUND_PIN1,LOW);
+    while(!freqTime.ding()) {
+      if (onTimer.ding()) {
+        digitalWrite(SOUND_PIN1,HIGH);
+      }
+    }
+  } 
 }
 
 
 void loop() {
 
   idle();
-  if (timer.ding()) {
-    timer.stepTime();
+  if (!voice1.isPlaying()) {
     playNote();
   }
 }
-
-

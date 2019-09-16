@@ -15,12 +15,12 @@ public:
 				blinker(int inPin=defPin,float inOnMs=defOnMs, float inPeriodMs=defPeriodMs,bool inInverse=false);
 	virtual	~blinker(void);
 				
-				void	setInverse(bool inInverse);	// Toggle ground as oppoed to power.
-    			void	setLight(bool onOff);
-    			void	setBlink(bool onOff);			// Start or stop the blinking..
-	virtual	void	idle(void);							// What to do in our spare time?
-	
+				void	setInverse(bool inInverse);	// Toggle ground as opposed to power.
+	virtual	void	setLight(bool onOff);			// Virtual?! Well.. Maybe I don't want to blink an LED?
+	virtual	void	setBlink(bool onOff);			// Start or stop the blinking..
+				bool	blinking();							// We blinking or what?
 				void	setTimes(float inOnMs, float inPeriodMs);	// Want to change the blink?
+	virtual	void	idle(void);							// What to do in our spare time?
 	
 	protected:
 		bool  	init;

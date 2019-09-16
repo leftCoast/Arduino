@@ -23,6 +23,7 @@ void parameters::floraReset(void) {
   params.period     = DEF_MOTOR_PWM_PERIOD;
   params.dry        = DEF_DRY;
   params.mud        = DEF_MUD;
+  params.runNum     = DEF_RUN_NUM;
   strcpy(params.name,DEF_NAME);               // Our default name.
   saveParams();                               // Put these values out to "disk"                              
 }
@@ -74,6 +75,10 @@ int parameters::getDry(void) { return params.dry; }
 
 // Read the saved "mud" capacitance level.
 int parameters::getMud(void) { return params.mud; }
+
+
+// Read the data logging run number.
+int parameters::getRunNum(void) { return params.runNum; }
 
 
 // Save a new moisture percent value.
@@ -151,5 +156,12 @@ void parameters::setMud(int mudCap) {
   saveParams();
 }
 
+
+// Like a cookie. Data logger hands us this, we save it for them.
+void parameters::setRunNum(int runNum) {
+
+  params.runNum = runNum;
+  saveParams();
+}
 
 parameters ourParamObj;

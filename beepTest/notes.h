@@ -64,7 +64,7 @@
 // The idea behind the note is a small package that holds a "refined" note.
 // And controls a voice for a specified time.
 
-#define PULSE_ON_MS .5  // How long to wait with the power on.
+#define PULSE_ON_MS .1  // How long to wait with the power on.
 
 
 
@@ -78,10 +78,10 @@
 class voice : public PulseOut, public linkListObj {
 
   public:
-        voice(byte inPinNum,boolean invert);
+        voice(byte inPinNum,bool invert);
   
         void    setUpSound(float periodMs);         // Set up the sound we will play.
-        void    play(boolean playStop);             // True, playes whatever note is set up. False, stops it.
+        void    play(bool playStop);             // True, playes whatever note is set up. False, stops it.
         boolean isPlaying(void);                    // Are we playing? Does anyone care?
         boolean isTimedPlaying(void);               // Are we timed playing?
         void    timedPlay(float durationMs);        // Playes for this long and stops.

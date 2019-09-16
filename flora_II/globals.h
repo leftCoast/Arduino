@@ -1,6 +1,7 @@
 #ifndef globals_h
 #define globals_h
 
+#include <SD.h>
 #include <stdint.h>
 
 
@@ -10,5 +11,6 @@ extern  uint16_t  capread;
         enum      weDo{ sitting, watering, soaking };  // Possible states.
 extern  weDo      weAre;                                // Current state.
 extern  bool      crash;
+extern  File      logFile;
 
 #endif

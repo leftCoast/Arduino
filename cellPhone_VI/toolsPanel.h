@@ -13,7 +13,7 @@ class toolsPanel;
 // *****************************************************
 
 
-class toolsPanel :  public panel {
+class toolsPanel :  public cellOSPanel {
 
   public:
           toolsPanel(void);

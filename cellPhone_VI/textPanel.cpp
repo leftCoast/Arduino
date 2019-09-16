@@ -214,7 +214,7 @@ void  sendTextView::idle(void) {
 
 
 textPanel::textPanel(void)
-  : panel(textApp,noEvents) {
+  : cellOSPanel(textApp) {
   
   mKeyboard = NULL;
   msgBuff = NULL;
@@ -242,20 +242,20 @@ void textPanel::setup(void) {
       addObj(ourEditField);
     }
     
-    menuBar* ourMenuBar = new menuBar((panel*)this);
-    addObj(ourMenuBar);
+    //menuBar* ourMenuBar = new menuBar((panel*)this);
+    //addObj(ourMenuBar);
     
     contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
-    ourMenuBar->addObj(ourContactsBtn);
+    mMenuBar->addObj(ourContactsBtn);
 
     
     trashMsgBtn* ourTrashMsgBtn = new trashMsgBtn(CLOSE_X+172,CLOSE_Y,this);
-    ourMenuBar->addObj(ourTrashMsgBtn);
+    mMenuBar->addObj(ourTrashMsgBtn);
     
     nickname = new label(CLOSE_X+75,7,100,22,currentContact->mNickName,1);
     nickname->setJustify(TEXT_CENTER);
     nickname->setColors(&textColor,&menuBarColor);
-    ourMenuBar->addObj(nickname);
+    mMenuBar->addObj(nickname);
     
     buffBytes = currentContact->sizeOfMsgBlock();
     if (buffBytes) {

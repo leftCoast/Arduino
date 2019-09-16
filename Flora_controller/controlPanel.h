@@ -1,13 +1,54 @@
 #ifndef controlPanel_h
 #define controlPanel_h
 
+#include "globals.h"
 #include "label.h"
 #include "panel.h"
 #include "baseButton.h"
 #include "slider.h"
 #include <colorRect.h>
+#include <blinker.h>
+#include <bmpPipe.h>
+#include <fontLabel.h>
 
 class controlPanel;
+
+
+// *****************************************************
+//                        flasher
+// *****************************************************
+
+// Copied directly from Flora_II maybe one day it'll be a library thing.
+class flasher : public drawObj,
+                public blinker {
+    public:
+                  flasher(rect* inRect,colorObj* backColor=&black);
+                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
+                     
+    virtual       ~flasher(void);
+    virtual void  setBlink(bool onOff);
+    virtual void  setLight(bool onOff);
+    virtual void  drawSelf(void);
+    
+            colorObj  mForeColor;
+            colorObj  mBackColor;
+};
+
+
+class bmpFlasher :  public flasher {
+    
+    public:
+                  bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp);
+                  bmpFlasher(rect* inRect,char* onBmp, char* offBmp);
+    virtual       ~bmpFlasher(void);
+
+            void  setup(char* onBmp, char* offBmp);
+    virtual void  drawSelf(void);
+
+            bool      mReady;
+            bmpPipe*  mOnBmp;
+            bmpPipe*  mOffBmp;     
+};
 
 
 // *****************************************************
@@ -15,7 +56,7 @@ class controlPanel;
 // *****************************************************
 
 
-class waterBtn : public baseButton {
+class waterBtn : public baseIconButton {
 
     public:
             waterBtn(int x, int y,int width, int height);
@@ -24,10 +65,8 @@ class waterBtn : public baseButton {
             void  setTheLook();
     virtual void  doAction(event* inEvent,point* locaPt);
 
-            bool          mOnOff;
+            bool  mOnOff;
 };
-
-
 
 // *****************************************************
 // ******************   selectBtn   ********************
@@ -77,7 +116,7 @@ class editSlider :  public slider {
 // *****************************************************
 
 
-class okBtn : public baseButton {
+class okBtn : public baseIconButton {
 
     public:
                   okBtn(int x, int y,int width, int height,controlPanel* inPanel);
@@ -95,7 +134,7 @@ class okBtn : public baseButton {
 // *****************************************************
 
 
-class cancelBtn : public baseButton {
+class cancelBtn : public baseIconButton {
 
   public:
                   cancelBtn(int x, int y,int width, int height,controlPanel* inPanel);
@@ -111,7 +150,6 @@ class cancelBtn : public baseButton {
 // *****************************************************
 // ****************   controlPanel   *******************
 // *****************************************************
-
 
 class controlPanel : public panel {
 
@@ -134,9 +172,10 @@ class controlPanel : public panel {
           void  checkWaterTime(void);
           void  checkSoakTime(void);
           void  checkName(void);
+          void  checkLogState(void);
+          void  checkLogSize(void);
           
           void  doComPump(bool onOff);
-
           void  doComSetDryLimit(float limit);
           void  doComSetWTime(float wTime);
           void  doComSetSTime(float sTime);
@@ -151,7 +190,7 @@ class controlPanel : public panel {
           int         mLastSTime;
           
           timeObj     mReadTimer;
-          label*      mNameLabel;
+          fontLabel*  mNameLabel;
           colorRect*  mNameLight;
           label*      mStateLabel;
           colorRect*  mStateLight;
@@ -173,6 +212,8 @@ class controlPanel : public panel {
           editSlider* mSlider;
           okBtn*      mOkBtn;
           cancelBtn*  mCancelBtn;
+          bmpFlasher* mloggingLight;
+          label*      mlogfileSizeLabel;
 };
 
 #endif

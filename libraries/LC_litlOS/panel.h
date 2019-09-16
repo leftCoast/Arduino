@@ -9,6 +9,9 @@
 
 #include <drawObj.h>
 #include <timeObj.h>
+#include <menuBar.h>
+
+enum menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
 
 
 // These two have to go. Need to bring these out from
@@ -16,13 +19,14 @@
 #define PANEL_WIDTH   240
 #define PANEL_HEIGHT  320
 
+class menuBar;
 
 class panel : public drawGroup {
 
 	public:
-				panel(int panelID,eventSet inEventSet=noEvents);
+				panel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~panel(void);
-
+	
 				int	getPanelID();
 	virtual	void	setup(void);
 	virtual	void	loop(void);
@@ -32,7 +36,8 @@ class panel : public drawGroup {
 	virtual	void	sleep(unsigned long);
   
 				int		mPanelID;   // What panal am I?
-				timeObj	mTimer;     // We'll use it for the delay() thing.
+				menuBar*	mMenuBar;	// My menu bar, if so desired.
+				timeObj	mTimer;     // We'll use it for the sleep() thing.
 };
 
 

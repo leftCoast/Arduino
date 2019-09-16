@@ -35,10 +35,14 @@ baseButton::~baseButton(void) {
 
 
 void baseButton::setText(char* inText) {
+  
+  int numChars;
 
-  int numChars = strlen(inText) + 1;
-  if (resizeBuff(numChars,(uint8_t**)&label)) {
-    strcpy(label, inText);
+  if (inText) {
+    numChars = strlen(inText) + 1;
+    if (resizeBuff(numChars,(uint8_t**)&label)) {
+      strcpy(label, inText);
+    }
   }
 }
 
@@ -133,5 +137,42 @@ void baseButton::drawSelf(void) {
 }
 
 
-// Default action. You should call this in your derived method.
-//void  baseButton::doAction(void) { ourOS.beep(); }
+
+// ***************************************************************
+//                      baseIconButton
+// ***************************************************************
+
+
+baseIconButton::baseIconButton(int x,int y,int width,int height,char* filePath)
+  : baseButton(NULL,x,y,width,height),
+  bmpPipe() {
+
+  rect  sourceRect;
+
+  if (filePath) {
+    if (openPipe(filePath)) {
+      sourceRect.setRect(0,0,32,32);
+      setSourceRect(sourceRect);
+    }
+  }
+}
+
+ 
+baseIconButton::~baseIconButton(void) {  }
+
+ // We.. Don't do this.
+void baseIconButton::setText(char* intext) {  }
+
+
+void baseIconButton::drawSelf(void) {
+
+  if (mOnOff) {
+    if (haveInfo) {
+      drawBitmap(x,y);
+    }
+  } else {
+    rect arect;
+    arect.setRect(this);
+    screen->fillRect(&arect,&black);  // Black is hardcoded 'cause the icons are drawn for a  black background.
+  }
+}

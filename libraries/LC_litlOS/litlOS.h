@@ -2,7 +2,7 @@
 #define ltlOS_h
 
 #include <iconButton.h>
-#include "panel.h"
+#include <panel.h>
 
 // Look, just start your numbering at 2 alright?
 #define	NO_PANEL_ID		0	// You have to have this guy.

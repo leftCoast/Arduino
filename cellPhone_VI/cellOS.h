@@ -22,31 +22,18 @@
 #define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"
 //#define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TGIVE.BMP"
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
-//#define IMAGE_FILE_PATH     "/system/icons/redX22.bmp"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
-#define ICON_PATH_X22       "/system/icons/redX22.bmp"
-#define ICON_PATH_NEW22     "/system/icons/new22.bmp"
-#define ICON_PATH_SEARCH22  "/system/icons/search22.bmp"
 #define ICON_PATH_CONTACT22  "/system/icons/addr22.bmp"
 #define ICON_PATH_TEXT22    "/system/icons/text22.bmp"
 #define ICON_PATH_PHONE22   "/system/icons/call22.bmp"
-#define ICON_PATH_TRASH22   "/system/icons/trash22.bmp"
-
-
-#define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
-
-#define CLOSE_X         0
-#define CLOSE_Y         1
-#define CLOSE_W         22
-#define CLOSE_H         CLOSE_W
 
 #define STATUS_X        200
 #define STATUS_Y        2
 #define STATUS_W        40
 #define STATUS_H        22   
 
-#define SIG_X           15
+//#define SIG_X           15
 
 // Starting points, they are tweaked in setup().
 extern colorObj  backColor;
@@ -67,45 +54,27 @@ extern colorObj  greenbuttonColor;
 extern colorObj  greenButtonHighlight;
 
 extern colorObj battLineColor;
-extern colorObj menuBarColor;
 
 enum  apps { homeApp = HOME_PANEL_ID, phoneApp, textApp, contactApp, calcApp, qGameApp, toolsApp, breakoutApp };
 
 
+
 // *****************************************************
-// *****************   std buttons  ********************
+//                      cellOSPanel
 // *****************************************************
 
-// these are the little 22x22 pix buttons that do functions like make a call,
-// text someone, new document, delete current document. An entire grab bag of functons.
-
-
-class closeBtn : public iconButton {
+// We make our own panel that adds a battery & rssi thing to the end of each menu.
+class cellOSPanel : public panel {
 
   public:
-          closeBtn(panel* inPanel);
-  virtual ~closeBtn(void);
-  
-  virtual void  doAction(void);
-  
-          panel* mPanel;
+            cellOSPanel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+ virtual    ~cellOSPanel(void);
 };
 
 
-class newBtn : public iconButton {
-
-  public:
-          newBtn(int x,int y);
-  virtual ~newBtn(void);
-};
-
-
-class searchBtn : public iconButton {
-
-  public:
-          searchBtn(int x,int y);
-  virtual ~searchBtn(void);
-};
+// *****************************************************
+//                        buttons
+// *****************************************************
 
 
 class contactsBtn : public iconButton {
@@ -134,15 +103,9 @@ class callBtn : public iconButton {
 };
 
 
-class trashBtn : public iconButton {
-
-  public:
-          trashBtn(int x,int y);
-  virtual ~trashBtn(void);
-};
 
 // *****************************************************
-// ******************   statusIcon  ********************
+//                      statusIcon
 // *****************************************************
 
 
@@ -161,25 +124,6 @@ class statusIcon  : public drawGroup,
             battPercent*  mBatPct;
             RSSIicon*     mRSSI;
 };
-
-
-
-// *****************************************************
-// ******************   menueBar  ********************
-// *****************************************************
-
-
-class menuBar  : public drawGroup {
-
-  public:
-            menuBar(panel* inPanel,bool closeBox=true,bool statusIcon=true);
-    virtual ~menuBar(void);
-
-    virtual void    drawSelf(void);
-
-            panel*  mPanel;
-};
-
 
 
 // *****************************************************
