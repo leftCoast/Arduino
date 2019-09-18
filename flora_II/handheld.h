@@ -29,6 +29,8 @@ class handheld : public qCSlave {
           void  handleGetLogState(byte* comPtr);
           void  handleSetLogState(byte* comPtr);
           void  handleGetLogSize(byte* comPtr);
+          void  handleGetLogLines(byte* comPtr);
+          void  handleGetLogWLines(byte* comPtr);
           void  handleGetLogBuff(byte* comPtr);
           void  handleDeleteLogFile(byte* comPtr);
 };

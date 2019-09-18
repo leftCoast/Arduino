@@ -2,10 +2,13 @@
 #define controlPanel_h
 
 #include "globals.h"
+#include "floraOS.h"
 #include "label.h"
 #include "panel.h"
 #include "baseButton.h"
 #include "slider.h"
+#include "baseButton.h"
+#include "tools.h"
 #include <colorRect.h>
 #include <blinker.h>
 #include <bmpPipe.h>
@@ -14,59 +17,8 @@
 class controlPanel;
 
 
-// *****************************************************
-//                        flasher
-// *****************************************************
-
-// Copied directly from Flora_II maybe one day it'll be a library thing.
-class flasher : public drawObj,
-                public blinker {
-    public:
-                  flasher(rect* inRect,colorObj* backColor=&black);
-                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
-                     
-    virtual       ~flasher(void);
-    virtual void  setBlink(bool onOff);
-    virtual void  setLight(bool onOff);
-    virtual void  drawSelf(void);
-    
-            colorObj  mForeColor;
-            colorObj  mBackColor;
-};
 
 
-class bmpFlasher :  public flasher {
-    
-    public:
-                  bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp);
-                  bmpFlasher(rect* inRect,char* onBmp, char* offBmp);
-    virtual       ~bmpFlasher(void);
-
-            void  setup(char* onBmp, char* offBmp);
-    virtual void  drawSelf(void);
-
-            bool      mReady;
-            bmpPipe*  mOnBmp;
-            bmpPipe*  mOffBmp;     
-};
-
-
-// *****************************************************
-// ******************    waterBtn   ********************
-// *****************************************************
-
-
-class waterBtn : public baseIconButton {
-
-    public:
-            waterBtn(int x, int y,int width, int height);
-    virtual ~waterBtn(void);
-    
-            void  setTheLook();
-    virtual void  doAction(event* inEvent,point* locaPt);
-
-            bool  mOnOff;
-};
 
 // *****************************************************
 // ******************   selectBtn   ********************
@@ -199,7 +151,6 @@ class controlPanel : public panel {
           colorRect*  mTempLight;
           label*      mDryLimitLabel;
           colorRect*  mDryLimitLight;
-          waterBtn*   mWaterBtn;
           selectBtn*  mDryLimitBtn;
           label*      mWaterTimeLabel;
           colorRect*  mWaterTimeLight;

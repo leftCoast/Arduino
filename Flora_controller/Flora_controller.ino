@@ -1,6 +1,5 @@
 #include <adafruit_1947_Obj.h>
 #include <Adafruit_GFX.h>
-//#include <Fonts/FreeSans12pt7b.h>
 #include "Fonts/FreeSans9pt7b.h"
 
 #include <colorObj.h>

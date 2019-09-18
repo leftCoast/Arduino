@@ -3,6 +3,7 @@
 
 #include "switchable.h"
 #include "floraOS.h"
+#include "baseButton.h"
 #include <bmpPipe.h>
 
 class baseButton : public switchable, public idler {

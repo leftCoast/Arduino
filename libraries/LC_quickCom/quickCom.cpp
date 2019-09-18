@@ -52,7 +52,7 @@ bool qCMaster::sendBuff(byte* buff,byte buffLen,bool wantReply) {
 	byte	i;
 	
 	if (mState==standby && buffLen) {		// Ok, if we've nothing better going on..
-		if (resizeBuff(buffLen+1)) {			// we are abl	e to get a buffer.
+		if (resizeQBuff(buffLen+1)) {			// we are able to get a buffer.
 			mNumBytesMoved = 0;
 			mWantReply = wantReply;
 			mBuff[0] = buffLen;
@@ -92,7 +92,7 @@ void qCMaster::readBuff(byte* buff) {
 		for(i=0;i<mBuff[0];i++) {
 			buff[i] = mBuff[i+1];
 		}
-		resizeBuff(0);
+		resizeQBuff(0);
 		mState = standby;
 	} else {
 		mError = STATE_ERR;						// We didn't say there was a buffer for you.
@@ -104,7 +104,7 @@ void qCMaster::readBuff(byte* buff) {
 void qCMaster::dumpBuff(void) {
 
 	if(mState==holding) {
-		resizeBuff(0);
+		resizeQBuff(0);
 		mState = standby;
 	}
 }
@@ -139,7 +139,7 @@ void qCMaster::doSending(void) {
 		mNumBytesMoved++;
 	}
 	if (mNumBytesMoved == mBuff[0]+1) {
-		resizeBuff(0);									// Done with it.
+		resizeQBuff(0);									// Done with it.
 		if (mWantReply) {
 			start();										// Start the reply timer.
 			mState = listening;
@@ -161,7 +161,7 @@ void qCMaster::doListen(void) {
 	} else {
 		if (MASTER_PORT.available()) {				// Is there someting to read from the port?
 			numBytes = MASTER_PORT.read();			// First byte SHALL BE the number of bytes for the message.
-			if (resizeBuff(numBytes+1)) {				// Setup buffer.
+			if (resizeQBuff(numBytes+1)) {			// Setup buffer.
 				mBuff[0] = numBytes;						// Save size.
 				mNumBytesMoved = 0;						// Setup for a reading..
 				mState = recieveing;						//
@@ -194,7 +194,7 @@ void qCMaster::doReceiving(void) {
 	if (mNumBytesMoved == mBuff[0]) {
 		mState = holding;
 	} else if (ding()) {
-		resizeBuff(0);
+		resizeQBuff(0);
 		mError = TIMEOUT_ERR;
 		mState = standby;
 	}
@@ -203,7 +203,7 @@ void qCMaster::doReceiving(void) {
 
 // We're using a dynamically sized buffer. mBuff() & free(). This
 // just auto-manages all of this.
-bool qCMaster::resizeBuff(byte numBytes) {
+bool qCMaster::resizeQBuff(byte numBytes) {
 
 	if (mBuff) {
 		free(mBuff);

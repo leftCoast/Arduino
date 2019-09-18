@@ -7,6 +7,12 @@
 #define LOG_FILE  "/logFile.txt"  // Our logfile pathname.
 
 
+struct logHeader {
+  unsigned long numLines;
+  unsigned long numWetLines;
+};
+
+
 class dataLog {
 
   public:
@@ -14,13 +20,18 @@ class dataLog {
   virtual       ~dataLog(void);
 
           void          begin(bool haveSD);
+          void          readHeader(logHeader* aHeader);
+          void          writeHeader(logHeader* aHeader);
           bool          isLogging(void);
           bool          setLogging(bool onOff);
           void          deleteLog(void);
           void          saveDataRecord(void);
           void          clearFlags(void);
           void          showLogfile(void);
+          void          showLogLines(void);
           unsigned long getFileSize(void);
+          unsigned long getFileNumLines(void);
+          unsigned long getFileNumWLines(void);
           unsigned long getFileBuff(unsigned long index,unsigned long buffBytes,byte* buff);
           
           void  addMode(int mode);
@@ -34,8 +45,9 @@ class dataLog {
           void  addAveTemp(float aTemp);
           void  addMoisture(float moisture);
 
-          File      logFile;    // Our data logging file.
-          bool      mHaveSD;
+          File          logFile;    // Our data logging file.
+          bool          mHaveSD;
+          unsigned long mLineCount;
           
           int       mMode;      bool modeSet;
           int       mLimit;     bool limitSet;

@@ -12,7 +12,8 @@ void debug::trace(char* message,bool hold) {
   if (hold) {
     while(!Serial.available());
     Serial.read();
-  } 
+  }
+  Serial.println(); 
 }
 
 

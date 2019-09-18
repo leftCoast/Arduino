@@ -8,8 +8,6 @@
 
 
 
-
-
 // *****************************************************
 // ********************   floraOS   ********************
 // *****************************************************
@@ -32,7 +30,6 @@ floraOS::~floraOS(void) { }
 int floraOS::begin(void) { 
 
   ourComPort.begin(9600);
-  ourComPort.setReplyTimeout(COM_REPLY_TIMEOUT);
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
   return litlOS::begin();
@@ -77,7 +74,10 @@ void floraOS::beep(bool beepUp) {
 // Just in case we need it, here it is..
 void floraOS::idle(void) { }
 
+void floraOS::loop(void) {
+
+  litlOS::loop();           // Let our default actions run.
+  ourComPort.updateTime();  // Give our background process a kick.
+}
 
 // Globals
-
-qCMaster ourComPort;

@@ -337,7 +337,8 @@ void textComObj::logCommand(void) {
     else if (!strcmp(paramBuff,"ON")) { ourDisplay.setLogging(true); }
     else if (!strcmp(paramBuff,"OFF")) { ourDisplay.setLogging(false); }
     else if (!strcmp(paramBuff,"SHOW")) { ourDisplay.showLogfile(); }
-    else { Serial.println("You can say on, off, show or reset. That's all I understand."); }
+    else if (!strcmp(paramBuff,"LINES")) { ourDisplay.showLogLines(); }
+    else { Serial.println("You can say on, off, show, lines or reset. That's all I understand."); }
     free(paramBuff);
   } else {                                    // No params? Power user!
     ourDisplay.setLogging(!ourDisplay.isLogging());

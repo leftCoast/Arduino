@@ -54,7 +54,7 @@ class qCMaster : public idler, public timeObj {
 				void				doSending(void);
 				void				doListen(void);
 				void				doReceiving(void);
-				bool				resizeBuff(byte numBytes);
+				bool				resizeQBuff(byte numBytes);
 				
 				masterStates	mState;
 				byte				mNumBytesMoved;
