@@ -7,6 +7,270 @@
 #include <bmpPipe.h>
 #include <fontLabel.h>
 
+#define SEC_IN_HOUR 3600
+#define SEC_IN_DAY  86400
+#define SEC_IN_WEEK 604800
+
+
+void timeFormatter(unsigned long sec);
+
+// *****************************************************
+//                      onlineFText
+// *****************************************************
+
+
+class onlineFText : public fontLabel,
+                    public idler {
+  public:
+            onlineFText(int x, int y,int width, int height);
+    virtual ~onlineFText(void);
+    
+    virtual void  setState(void)=0;
+    virtual void  idle();
+    virtual void  drawSelf(void);
+    
+            bool  mOnline;
+};
+
+
+
+// *****************************************************
+//                      onlineText
+// *****************************************************
+
+
+class onlineText : public label,
+                   public idler {
+  public:
+            onlineText(int x, int y,int width, int height);
+    virtual ~onlineText(void);
+    
+    virtual void  setState(void)=0;
+    virtual void  idle();
+    
+            bool  mOnline;
+};
+
+
+// *****************************************************
+//                     stateText
+// *****************************************************
+
+
+class stateText : public onlineFText {
+
+  public:
+                stateText(int x, int y,int width, int height);
+  virtual       ~stateText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+
+          int   mStateVal;
+ };
+
+
+ 
+// *****************************************************
+//                     nameText
+// *****************************************************
+
+class nameText : public onlineFText {
+
+  public:
+                nameText(int x, int y,int width, int height);
+  virtual       ~nameText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+ };
+
+
+
+// *****************************************************
+//                     sTimeText
+// *****************************************************
+
+class sTimeText : public onlineText {
+
+  public:
+                sTimeText(int x, int y,int width, int height);
+  virtual       ~sTimeText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mSoakTime;
+};
+
+
+          
+// *****************************************************
+//                     wTimeText
+// *****************************************************
+
+
+class wTimeText : public onlineText {
+
+  public:
+                wTimeText(int x, int y,int width, int height);
+  virtual       ~wTimeText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mWaterTime;
+};
+
+
+          
+// *****************************************************
+//                     limitText
+// *****************************************************
+
+
+class limitText : public onlineText {
+
+  public:
+                limitText(int x, int y,int width, int height);
+  virtual       ~limitText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mLimit;
+};
+
+
+
+// *****************************************************
+//                   totalWaterText
+// *****************************************************
+
+
+class totalWaterText : public onlineText {
+
+  public:
+                totalWaterText(int x, int y,int width, int height);
+  virtual       ~totalWaterText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mLogWetLines;
+          float lPerSec;
+};
+
+
+
+// *****************************************************
+//                     moistureText
+// *****************************************************
+
+
+class moistureText : public onlineText {
+
+  public:
+                moistureText(int x, int y,int width, int height);
+  virtual       ~moistureText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mMoisture;
+};
+
+
+
+// *****************************************************
+//                   totalTimeText
+// *****************************************************
+
+
+class totalTimeText : public onlineText {
+
+  public:
+                totalTimeText(int x, int y,int width, int height);
+  virtual       ~totalTimeText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mLogLines;
+};
+
+
+
+// *****************************************************
+//                     tempText
+// *****************************************************
+
+
+class tempText : public onlineText {
+
+  public:
+                tempText(int x, int y,int width, int height);
+  virtual       ~tempText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mTemp;
+};
+
+
+
+// *****************************************************
+//                        flasher
+// *****************************************************
+
+
+// Copied directly from Flora_II maybe one day it'll be a library thing.
+class flasher : public drawObj,
+                public blinker {
+    public:
+                  flasher(rect* inRect,colorObj* backColor=&black);
+                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
+                     
+    virtual       ~flasher(void);
+    virtual void  setBlink(bool onOff);
+    virtual void  setLight(bool onOff);
+    virtual void  drawSelf(void);
+    
+            colorObj  mForeColor;
+            colorObj  mBackColor;
+};
+
+
+
+// *****************************************************
+//                     bmpFlasher
+// *****************************************************
+
+
+class bmpFlasher :  public flasher {
+    
+    public:
+                  bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp);
+                  bmpFlasher(rect* inRect,char* onBmp, char* offBmp);
+    virtual       ~bmpFlasher(void);
+
+            void  setup(char* onBmp, char* offBmp);
+    virtual void  drawSelf(void);
+
+            bool      mReady;
+            bmpPipe*  mOnBmp;
+            bmpPipe*  mOffBmp;     
+};
 
 // ******************************************
 //                    plantBotCom
@@ -121,89 +385,6 @@ class plantBotCom : public qCMaster {
           byte          mState;
           byte          mTemp;
           byte          mMoisture;         
-};
-
-
-// *****************************************************
-//                      onlineFText
-// *****************************************************
-
-
-class onlineFText : public fontLabel,
-                    public idler {
-  public:
-            onlineFText(int x, int y,int width, int height);
-    virtual ~onlineFText(void);
-    
-    virtual void  setState(void)=0;
-    virtual void  idle();
-    virtual void  drawSelf(void);
-    
-            bool  mOnline;
-};
-
-
-
-// *****************************************************
-//                      onlineText
-// *****************************************************
-
-
-class onlineText : public label,
-                   public idler {
-  public:
-            onlineText(int x, int y,int width, int height);
-    virtual ~onlineText(void);
-    
-    virtual void  setState(void)=0;
-    virtual void  idle();
-    
-            bool  mOnline;
-};
-
-
-
-// *****************************************************
-//                        flasher
-// *****************************************************
-
-
-// Copied directly from Flora_II maybe one day it'll be a library thing.
-class flasher : public drawObj,
-                public blinker {
-    public:
-                  flasher(rect* inRect,colorObj* backColor=&black);
-                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
-                     
-    virtual       ~flasher(void);
-    virtual void  setBlink(bool onOff);
-    virtual void  setLight(bool onOff);
-    virtual void  drawSelf(void);
-    
-            colorObj  mForeColor;
-            colorObj  mBackColor;
-};
-
-
-
-// *****************************************************
-//                     bmpFlasher
-// *****************************************************
-
-
-class bmpFlasher :  public flasher {
-    
-    public:
-                  bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp);
-                  bmpFlasher(rect* inRect,char* onBmp, char* offBmp);
-    virtual       ~bmpFlasher(void);
-
-            void  setup(char* onBmp, char* offBmp);
-    virtual void  drawSelf(void);
-
-            bool      mReady;
-            bmpPipe*  mOnBmp;
-            bmpPipe*  mOffBmp;     
 };
 
 
