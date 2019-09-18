@@ -53,6 +53,179 @@ void timeFormatter(unsigned long sec) {
   }
 }
 
+
+
+// *****************************************************
+//                     nameText
+// *****************************************************
+
+
+nameText::nameText(int x, int y,int width, int height)
+  : onlineFText(x,y,width,height) {
+
+  setTextSize(1);
+  setJustify(TEXT_CENTER);
+}
+
+  
+nameText::~nameText(void) {  }
+
+
+void nameText::setValue(void) {
+
+  if (mOnline) {
+    onlineFText::setValue(ourComPort.getName());
+  } else {
+    onlineFText::setValue("Offline");
+  }
+}
+
+
+void nameText::setState(void) { setValue(); }
+
+
+void nameText::idle() {
+
+  onlineFText::idle();
+  if (mOnline) {
+    if (strcmp(buff,ourComPort.getName())) {
+      setValue();
+    }
+  }
+}
+
+
+
+// *****************************************************
+//                     sTimeText
+// *****************************************************
+
+
+sTimeText::sTimeText(int x, int y,int width, int height)
+  : onlineText(x,y,width,height) { mSoakTime = 0; }
+
+  
+sTimeText::~sTimeText(void) {  }
+
+
+void sTimeText::setValue(void) {
+
+  if (mOnline) {
+    timeFormatter(mSoakTime);
+    onlineText::setValue(tTstring);
+  } else {
+    onlineText::setValue("--- s");
+  }
+}
+
+
+void sTimeText::setState(void) {
+
+  if (mOnline) { mSoakTime = ourComPort.getSoakTime(); }
+  setValue();
+}
+
+
+void sTimeText::idle() {
+
+  onlineText::idle();
+  if (mOnline) {
+    if (mSoakTime!=ourComPort.getSoakTime()) {
+      mSoakTime = ourComPort.getSoakTime();
+      setValue();
+    }
+  }
+}
+
+
+// *****************************************************
+//                     wTimeText
+// *****************************************************
+
+wTimeText::wTimeText(int x, int y,int width, int height)
+  : onlineText(x,y,width,height) { mWaterTime = 0; }
+
+  
+wTimeText::~wTimeText(void) {  }
+
+
+void wTimeText::setValue(void) {
+
+  if (mOnline) {
+    timeFormatter(mWaterTime);
+    onlineText::setValue(tTstring);
+  } else {
+    onlineText::setValue("--- s");
+  }
+}
+
+
+void wTimeText::setState(void) {
+
+  if (mOnline) { mWaterTime = ourComPort.getWaterTime(); }
+  setValue();
+}
+
+
+void wTimeText::idle() {
+
+  onlineText::idle();
+  if (mOnline) {
+    if (mWaterTime!=ourComPort.getWaterTime()) {
+      mWaterTime = ourComPort.getWaterTime();
+      setValue();
+    }
+  }
+}
+
+
+
+// *****************************************************
+//                     limitText
+// *****************************************************
+
+
+limitText::limitText(int x, int y,int width, int height)
+  : onlineText(x,y,width,height) { mLimit = 0; }
+
+  
+limitText::~limitText(void) {  }
+
+
+void limitText::setValue(void) {
+
+  char  limit[7];
+  
+    if (mOnline) {
+      snprintf (limit,5,"%d",mLimit);
+      strcat(limit," %");
+    } else {
+      strcpy(limit,"--- %");
+    }
+    onlineText::setValue(limit);
+}
+
+
+void limitText::setState(void) {
+
+  if (mOnline) { mLimit = ourComPort.getLimit(); }
+  setValue();
+}
+
+
+void limitText::idle() {
+
+  onlineText::idle();
+  if (mOnline) {
+    if (mLimit!=ourComPort.getLimit()) {
+      mLimit = ourComPort.getLimit();
+      setValue();
+    }
+  }
+}
+
+
+
 // *****************************************************
 //                   totalWaterText
 // *****************************************************
@@ -323,10 +496,7 @@ void homeScreen::setup(void) {
   traceY = 30;
   stepY  = LINE_SPACE;
 
-  mNameLabel = new fontLabel(10,traceY,220,18);
-  mNameLabel->setColors(&white,&black);
-  mNameLabel->setJustify(TEXT_CENTER);
-  mNameLabel->setValue("Plant bot, dummy");
+  nameText* mNameLabel = new nameText(10,traceY,220,18);
   addObj(mNameLabel);
 
   traceY = traceY + stepY;
@@ -368,16 +538,25 @@ void homeScreen::setup(void) {
   limit->begin();
   addObj(limit);
 
+  limitText*  lText = new limitText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  addObj(lText);
+  
   traceY = traceY + stepY;
   bmpObj* waterT = new bmpObj(0,traceY,LABEL_W,LABEL_H,WATER_TIME_BMP);
   waterT->begin();
   addObj(waterT);
 
+  wTimeText*  wtText = new wTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  addObj(wtText);
+  
   traceY = traceY + stepY;
   bmpObj* soakT = new bmpObj(0,traceY,LABEL_W,LABEL_H,SOAK_TIME_BMP);
   soakT->begin();
   addObj(soakT);
 
+  sTimeText*  sText = new sTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  addObj(sText);
+  
   traceY = 285;
 
   mWaterBtn = new waterBtn(44,traceY,32,32);

@@ -124,6 +124,25 @@ class plantBotCom : public qCMaster {
 };
 
 
+// *****************************************************
+//                      onlineFText
+// *****************************************************
+
+
+class onlineFText : public fontLabel,
+                    public idler {
+  public:
+            onlineFText(int x, int y,int width, int height);
+    virtual ~onlineFText(void);
+    
+    virtual void  setState(void)=0;
+    virtual void  idle();
+    virtual void  drawSelf(void);
+    
+            bool  mOnline;
+};
+
+
 
 // *****************************************************
 //                      onlineText

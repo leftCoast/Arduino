@@ -8,6 +8,41 @@
 #define SHORT_UPDATE_TIME   200 // When online, we can check this often.
 
 
+
+// *****************************************************
+//                      onlineFText
+// *****************************************************
+
+
+
+onlineFText::onlineFText(int x, int y,int width, int height)
+  : fontLabel(x,y,width,height) {
+  
+  mOnline = !ourComPort.getOnline();
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  hookup();
+  setTextSize(2);
+}
+
+  
+onlineFText::~onlineFText(void) {  }
+
+
+void onlineFText::idle() {
+  
+  if (mOnline != ourComPort.getOnline()) {
+    mOnline = ourComPort.getOnline();
+    setState();
+  }
+}
+
+void onlineFText::drawSelf(void) {
+  
+  screen->fillRect(this,&black);
+  fontLabel::drawSelf();
+}
+
 // *****************************************************
 //                      onlineText
 // *****************************************************

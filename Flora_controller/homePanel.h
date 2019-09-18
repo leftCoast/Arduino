@@ -9,6 +9,79 @@
 #include "tools.h"
 
 
+// *****************************************************
+//                     nameText
+// *****************************************************
+
+class nameText : public onlineFText {
+
+  public:
+                nameText(int x, int y,int width, int height);
+  virtual       ~nameText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+ };
+
+
+
+// *****************************************************
+//                     sTimeText
+// *****************************************************
+
+class sTimeText : public onlineText {
+
+  public:
+                sTimeText(int x, int y,int width, int height);
+  virtual       ~sTimeText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mSoakTime;
+};
+
+          
+// *****************************************************
+//                     wTimeText
+// *****************************************************
+
+
+class wTimeText : public onlineText {
+
+  public:
+                wTimeText(int x, int y,int width, int height);
+  virtual       ~wTimeText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mWaterTime;
+};
+
+          
+// *****************************************************
+//                     limitText
+// *****************************************************
+
+
+class limitText : public onlineText {
+
+  public:
+                limitText(int x, int y,int width, int height);
+  virtual       ~limitText(void);
+
+  virtual void  setValue(void);
+  virtual void  setState(void);
+  virtual void  idle();
+  
+          int   mLimit;
+};
+
+
 
 // *****************************************************
 //                   totalWaterText
