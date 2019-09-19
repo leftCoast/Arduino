@@ -59,15 +59,6 @@ void  waterBtn::doAction(event* inEvent,point* locaPt) {
 #define LIVE_X        LABEL_W+5
 #define LIVE_W        90
 
-
-#define CURR_MOIST_BMP  "/images/currM.bmp"
-#define CURR_TEMP_BMP   "/images/currT.bmp"
-#define TOTAL_WATER_BMP "/images/totalW.bmp"
-#define TOTAL_TIME_BMP  "/images/totalT.bmp"
-#define LIMIT_BMP       "/images/limit.bmp"
-#define WATER_TIME_BMP  "/images/wTime.bmp"
-#define SOAK_TIME_BMP   "/images/sTime.bmp"
-
 #define CONTROL_PANEL_BMP "/icons/edit32.bmp"
 #define DATA_PANEL_BMP    "/icons/graph32.bmp"
 #define CALC_PANEL_BMP    "/icons/calc32.bmp"

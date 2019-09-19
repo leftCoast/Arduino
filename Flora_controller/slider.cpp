@@ -46,6 +46,7 @@ void slider::setKnob(void) {
    mKnob.setLocation(mLoc-(mKnob.width/2),y); // Move mKnob to its new location taking its width into account.
 }
 
+
 // I was in a hurry and encorperated the erase with drawSelf().
 // Maybe a bad idea, but for now its working.
 void slider::drawSelf(void) {

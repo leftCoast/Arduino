@@ -3,9 +3,9 @@
 #include "debug.h"
 
 #define SLEEP_TIME          2   // When looking for an answer, rest this long before peeking.
-#define REPLY_TIMEOUT       75 // How long they get to give back a reply.
+#define REPLY_TIMEOUT       100 // How long they get to give back a reply.
 #define LONG_UPDATE_TIME    500 // When offline, only check this often.
-#define SHORT_UPDATE_TIME   100 // When online, we can check this often.
+#define SHORT_UPDATE_TIME   200 // When online, we can check this often.
 
 
 char  tTstring[100];
@@ -45,13 +45,55 @@ void timeFormatter(unsigned long sec) {
   }  else if (sec>=60) {
     minutes = sec/60;
     sec = sec-minutes*60;
-    fract = sec/60;
+    fract = sec/60.0;
     dec = fract * 10;
     snprintf(tTstring,10,"%d.%d m",minutes,dec);
   } else {
     snprintf (tTstring,5,"%d s",sec);
   }
 }
+
+
+
+// *****************************************************
+//                      percentText
+// *****************************************************
+
+
+percentText::percentText(int x, int y,int width, int height)
+  : label(x,y,width,height) { }
+
+percentText::~percentText(void) { }
+
+
+void percentText::setValue(int percent) {
+
+  char  buff[10];
+
+  snprintf (buff,10,"%d %%",percent);
+  label::setValue(buff); 
+}
+
+
+
+// *****************************************************
+//                      timeText
+// *****************************************************
+
+
+timeText::timeText(int x, int y,int width, int height)
+  : label(x,y,width,height) { }
+
+timeText::~timeText(void) { }
+
+
+void timeText::setValue(int seconds) {
+
+  debugger.trace("setValue() ",seconds,false);
+  timeFormatter(seconds);
+  label::setValue(tTstring); 
+}
+
 
 
 // *****************************************************
@@ -540,7 +582,7 @@ plantBotCom::plantBotCom(void)
   mOnline = false;
   setTime(REPLY_TIMEOUT,false); // You get this long to reply. Get with it!
   setUpdateTime();              // How oftern do we bug the bot for data updates?
-  
+  runUpdates(true);
 }
 
 
@@ -880,26 +922,31 @@ bool plantBotCom::clearLogCom(void) {  return sendCommand(clearLog); }
 
 void plantBotCom::updateTime(void) {
 
-  if (mUpdateTimer.ding()) {
-    switch(mIndex++) {
-      case 0  : mOnline = getCString(readName,mName);                     break;
-      case 1  : mOnline = getByte(readDryLimit,&mLimit);                  break;
-      case 2  : mOnline = getLong(readWaterTime,&mWaterTime);             break;
-      case 3  : mOnline = getLong(readSoakTime,&mSoakTime);               break;
-      case 4  : mOnline = getByte(readPulse,&mPulse);                     break;
-      case 5  : mOnline = getByte(readPump,&mPump);                       break;
-      case 6  : mOnline = getByte(readLogging,&mLogging);                 break;
-      case 7  : mOnline = getUnsignedLong(readLogSize,&mLogSize);         break;
-      case 8  : mOnline = getUnsignedLong(readLogLines,&mLogNumLines);    break;
-      case 9  : mOnline = getUnsignedLong(readLogWLines,&mLogNumWLines);  break;
-      case 10 : mOnline = getByte(readState,&mState);                     break;
-      case 11 : mOnline = getByte(readTemp,&mTemp);                       break;
-      case 12 : mOnline = getByte(readMoisture,&mMoisture);               break;
-      default : mIndex = 0; 
+  if (mDoingUpdates) {
+    if (mUpdateTimer.ding()) {
+      switch(mIndex++) {
+        case 0  : mOnline = getCString(readName,mName);                     break;
+        case 1  : mOnline = getByte(readDryLimit,&mLimit);                  break;
+        case 2  : mOnline = getLong(readWaterTime,&mWaterTime);             break;
+        case 3  : mOnline = getLong(readSoakTime,&mSoakTime);               break;
+        case 4  : mOnline = getByte(readPulse,&mPulse);                     break;
+        case 5  : mOnline = getByte(readPump,&mPump);                       break;
+        case 6  : mOnline = getByte(readLogging,&mLogging);                 break;
+        case 7  : mOnline = getUnsignedLong(readLogSize,&mLogSize);         break;
+        case 8  : mOnline = getUnsignedLong(readLogLines,&mLogNumLines);    break;
+        case 9  : mOnline = getUnsignedLong(readLogWLines,&mLogNumWLines);  break;
+        case 10 : mOnline = getByte(readState,&mState);                     break;
+        case 11 : mOnline = getByte(readTemp,&mTemp);                       break;
+        case 12 : mOnline = getByte(readMoisture,&mMoisture);               break;
+        default : mIndex = 0; 
+      }
+      setUpdateTime();
     }
-    setUpdateTime();
   }
 }
+
+
+void plantBotCom::runUpdates(bool stopStart) { mDoingUpdates = stopStart; }
 
 
 bool plantBotCom::getOnline(void) { return mOnline; }

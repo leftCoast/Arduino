@@ -39,7 +39,7 @@ class label : public drawObj {
   				void 	setColors(colorObj* tColor);
 				void 	setColors(colorObj* tColor, colorObj* bColor);
   				void 	setPrecision(int inPrec);
-  				void 	setValue(int val);
+	virtual	void 	setValue(int val);
   				void 	setValue(unsigned long val);
   				void 	setValue(float val);
   				void 	setValue(double val);

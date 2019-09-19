@@ -11,8 +11,54 @@
 #define SEC_IN_DAY  86400
 #define SEC_IN_WEEK 604800
 
+// Screen labels. Pictures look sooo much better than drawing them.
+#define CURR_MOIST_BMP  "/images/currM.bmp"
+#define CURR_TEMP_BMP   "/images/currT.bmp"
+#define TOTAL_WATER_BMP "/images/totalW.bmp"
+#define TOTAL_TIME_BMP  "/images/totalT.bmp"
+#define LIMIT_BMP       "/images/limit.bmp"
+#define WATER_TIME_BMP  "/images/wTime.bmp"
+#define SOAK_TIME_BMP   "/images/sTime.bmp"
+
 
 void timeFormatter(unsigned long sec);
+
+// *****************************************************
+//                      percentText
+// *****************************************************
+
+// Like int time text below. We format as a percent but its an int
+// So its just 0..100 Eg : "46 %"
+class percentText :  public label {
+
+  public:
+            percentText(int x, int y,int width, int height);
+    virtual ~percentText(void);
+    
+    virtual void  setValue(int percent);
+};
+
+
+
+
+// *****************************************************
+//                      timeText
+// *****************************************************
+
+// This is a special that does the short time format to an inputted seconds.
+// It displays time as one best fit unit. s,m,h,d,w as a number with one
+// decimal place. Not perfectly accurate, but close enough for humans.
+// For example put in 125 seconds and it'll put out "2.0 m".
+
+class timeText :  public label {
+
+  public:
+            timeText(int x, int y,int width, int height);
+    virtual ~timeText(void);
+    
+    virtual void  setValue(int seconds);
+};
+  
 
 // *****************************************************
 //                      onlineFText
@@ -278,9 +324,8 @@ class bmpFlasher :  public flasher {
 
 
 #define PLANTBOT_NAME_SIZE  24    // The name has to fit in a string this size. IE ONE LESS.
-#define READ_TIME     250         // We'll nap for this long between pestering the plant bot for background info.
-#define MAX_WTIME     120000      // Limit your water time to 2 minutes.
-#define MAX_STIME     600000      // Limit your soak time to 10 minutes.
+#define MAX_WTIME           120      // Limit your water time to 2 minutes.
+#define MAX_STIME           600      // Limit your soak time to 10 minutes.
 
 
 
@@ -359,7 +404,8 @@ class plantBotCom : public qCMaster {
           bool  setLoggingReg(bool onOff);
           bool  copyLogCom(char* filemane);
           bool  clearLogCom(void);
-          
+
+          void  runUpdates(bool stopStart);
           void  updateTime(void);           // MUST be called repeatedly by loop() NOT in idle().
           bool  getOnline(void);
           
@@ -371,6 +417,7 @@ class plantBotCom : public qCMaster {
           bool          mOnline;
           timeObj       mSleepTimer;
           timeObj       mUpdateTimer;
+          bool          mDoingUpdates;
           
           char          mName[PLANTBOT_NAME_SIZE];
           byte          mLimit;

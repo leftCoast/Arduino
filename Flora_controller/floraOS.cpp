@@ -4,10 +4,6 @@
 
 
 
-#define COM_REPLY_TIMEOUT 250   // We'll give a 1/4 second for the unit to reply to us. Otherwise we'll say its offline.
-
-
-
 // *****************************************************
 // ********************   floraOS   ********************
 // *****************************************************
@@ -47,28 +43,12 @@ panel* floraOS::createPanel(int panelID) {
   }
 }
 
-#define BEEP_LOOPS  4
-#define BEEP_CONST  500
+
 void floraOS::beep(bool beepUp) {
 
-  unsigned int dTime;
-  if (beepUp) {
-    for(int i=0;i<BEEP_LOOPS;i++) {
-      dTime = BEEP_CONST*(BEEP_LOOPS-i);
-      digitalWrite(BEEP_PIN, LOW);
-      delayMicroseconds(dTime);
-      digitalWrite(BEEP_PIN, HIGH);
-      delayMicroseconds(dTime);
-    }
-  } else {
-    for(int i=0;i<BEEP_LOOPS;i++) {
-      dTime = BEEP_CONST*BEEP_LOOPS;
-      digitalWrite(BEEP_PIN, LOW);
-      delayMicroseconds(dTime);
-      digitalWrite(BEEP_PIN, HIGH);
-      delayMicroseconds(dTime);
-    }
-  }
+	if (!beepUp) {
+		tone(BEEP_PIN, 500,35);
+	}
 }
 
 
