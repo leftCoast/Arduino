@@ -3,7 +3,7 @@
 #include "debug.h"
 
 #define SLEEP_TIME          2   // When looking for an answer, rest this long before peeking.
-#define REPLY_TIMEOUT       50 // How long they get to give back a reply.
+#define REPLY_TIMEOUT       75 // How long they get to give back a reply.
 #define LONG_UPDATE_TIME    500 // When offline, only check this often.
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 
@@ -538,8 +538,8 @@ plantBotCom::plantBotCom(void)
   
   mIndex = 0;
   mOnline = false;
-  setTime(100,false); // You get 100 ms to reply. Get with it!
-  setUpdateTime();    // How oftern do we bug the bot for data updates?
+  setTime(REPLY_TIMEOUT,false); // You get this long to reply. Get with it!
+  setUpdateTime();              // How oftern do we bug the bot for data updates?
   
 }
 

@@ -70,6 +70,7 @@ void  waterBtn::doAction(event* inEvent,point* locaPt) {
 
 #define CONTROL_PANEL_BMP "/icons/edit32.bmp"
 #define DATA_PANEL_BMP    "/icons/graph32.bmp"
+#define CALC_PANEL_BMP    "/icons/calc32.bmp"
 
 
 homeScreen::homeScreen(void) { }
@@ -149,18 +150,28 @@ void homeScreen::setup(void) {
   
   traceY = 285;
 
-  mWaterBtn = new waterBtn(44,traceY,32,32);
+  int  traceX = 0;
+  int  stepX = 60;
+  
+  mWaterBtn = new waterBtn(traceX,traceY,32,32);
   mWaterBtn->select(true);
   addObj(mWaterBtn);
- 
-  appIcon*  editbtn = new appIcon(104,traceY,controlApp,CONTROL_PANEL_BMP);
+
+  
+  traceX = traceX + stepX;
+  appIcon*  editbtn = new appIcon(traceX,traceY,controlApp,CONTROL_PANEL_BMP);
   editbtn->begin();
   addObj(editbtn);
 
-
-  appIcon*  dataLog = new appIcon(164,traceY,controlApp,DATA_PANEL_BMP);
+  traceX = traceX + stepX;
+  appIcon*  dataLog = new appIcon(traceX,traceY,controlApp,DATA_PANEL_BMP);
   dataLog->begin();
   addObj(dataLog);
+
+  traceX = traceX + stepX;
+  appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
+  calc->begin();
+  addObj(calc);
 }
 
 

@@ -42,6 +42,7 @@ panel* floraOS::createPanel(int panelID) {
   switch (panelID) {
     case homeApp      : return new homeScreen();
     case controlApp   : return new controlPanel();
+    case calcApp      : return new rpnCalc();
     default           : return NULL;
   }
 }
