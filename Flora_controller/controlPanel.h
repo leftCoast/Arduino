@@ -5,9 +5,7 @@
 #include "floraOS.h"
 #include "label.h"
 #include "panel.h"
-#include "baseButton.h"
 #include "slider.h"
-#include "baseButton.h"
 #include "tools.h"
 #include <colorRect.h>
 #include <blinker.h>

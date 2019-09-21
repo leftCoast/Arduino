@@ -1,7 +1,6 @@
 #include "bmpObj.h"
 #include "resizeBuff.h"
 
-
 bmpObj::bmpObj(int inX,int inY,int inWidth,int inHeight,char* bmpPath)
 	: drawObj(inX,inY,inWidth,inHeight),
 	bmpPipe() {

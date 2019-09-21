@@ -7,6 +7,10 @@
 #include <textView.h>
 
 
+// This is for running something like a terminal or a chat window. It links to a
+// "send message" edit field and you hit return to send the message in that field "out".
+
+
 class IOandKeys : public keyboard {
 
 	public:

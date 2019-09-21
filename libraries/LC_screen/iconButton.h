@@ -14,7 +14,7 @@
 // Well, so much for fixed size. Now its a square thing of any size.
 //
 // FINE! Now its any rectangle?! You try to make things simple for people.
-// I"ll just add some sub classes for the simple cases.
+// I'll just add some sub classes for the simple cases.
 
 
 class iconButton :	public drawObj,

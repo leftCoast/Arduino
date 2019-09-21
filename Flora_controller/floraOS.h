@@ -5,13 +5,12 @@
 #include <panel.h>
 #include <quickCom.h>
 #include "globals.h"
-#include "baseButton.h"
 #include "src/rpnCalc/rpnCalc.h"
 
 
 #define BEEP_PIN    23
 
-enum  apps { homeApp = HOME_PANEL_ID, controlApp, calcApp, nextApp };
+enum  apps { homeApp = HOME_PANEL_ID, controlApp, calcApp, loggingApp, nextApp };
 
 
 

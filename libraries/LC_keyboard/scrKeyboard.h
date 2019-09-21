@@ -7,14 +7,7 @@
 #include <idlers.h>
 
 
-#define KEY_WD  23
-#define KEY_HT  23
 
-#define COL_1   1
-#define COL_SP  1
-
-#define ROW_1   217
-#define ROW_SP  4
 
 // Keys need to know the state of the keyboard. When they get time
 // they'll check the keyboard to see what state things are in and
@@ -87,58 +80,22 @@ class controlKey : public keyboardKey, public label {
 };
 
 
-class keyboard {
+class keyboard : public drawGroup {
 
 	public:
 				keyboard(editField* inEditField);
 	virtual	~keyboard(void);
 
+	virtual	void			loadKeys(void);
 	virtual	void			handleKey(char inChar);
 	virtual	void			handleKey(keyCommands inEditCom);
 	virtual	void			handleKey(keyStates inState);
 	virtual	void			setEditField(editField* inField);
 	virtual	keyStates	getState(void);
+	virtual void    		drawSelf(void);
 			
           editField*		mEditField;
           keyStates		mState;
-          
-          inputKey*   qKey;
-          inputKey*   wKey;
-          inputKey*   eKey;
-          inputKey*   rKey;
-          inputKey*   tKey;
-          inputKey*   yKey;
-          inputKey*   uKey;
-          inputKey*   iKey;
-          inputKey*   oKey;
-          inputKey*   pKey;
-          
-          inputKey*   aKey;
-          inputKey*   sKey;
-          inputKey*   dKey;
-          inputKey*   fKey;
-          inputKey*   gKey;
-          inputKey*   hKey;
-          inputKey*   jKey;
-          inputKey*   kKey;
-          inputKey*   lKey;
-          
-          inputKey*   zKey;
-          inputKey*   xKey;
-          inputKey*   cKey;
-          inputKey*   vKey;
-          inputKey*   bKey;
-          inputKey*   nKey;
-          inputKey*   mKey;
-          
-          inputKey*   spcKey;
-          
-          controlKey* shiftKey;
-          controlKey* backSpKey;
-          controlKey* leftArrow;
-          controlKey* rightArrow;
-          controlKey* symbolKey;
-          controlKey* enterKey;
 }; 
 
 

@@ -155,7 +155,7 @@ void homeScreen::setup(void) {
   addObj(editbtn);
 
   traceX = traceX + stepX;
-  appIcon*  dataLog = new appIcon(traceX,traceY,controlApp,DATA_PANEL_BMP);
+  appIcon*  dataLog = new appIcon(traceX,traceY,loggingApp,DATA_PANEL_BMP);
   dataLog->begin();
   addObj(dataLog);
 

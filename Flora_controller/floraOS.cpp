@@ -1,7 +1,7 @@
 #include "floraOS.h"
 #include "homePanel.h"
 #include "controlPanel.h"
-
+#include "loggingPanel.h"
 
 
 // *****************************************************
@@ -39,6 +39,7 @@ panel* floraOS::createPanel(int panelID) {
     case homeApp      : return new homeScreen();
     case controlApp   : return new controlPanel();
     case calcApp      : return new rpnCalc();
+    case loggingApp   : return new loggingPanel();
     default           : return NULL;
   }
 }
