@@ -8,9 +8,11 @@
 
 
 #define KEYCAP24    "/icons/keyCap24.bmp"
-#define SHIFT24     "/icons/shift24.bmp"
-#define RET48       "/icons/ret48.bmp"
 #define CHECK24     "/icons/check24.bmp"
+#define REDX24      "/icons/x24.bmp"
+#define SHIFT24     "/icons/shift24.bmp"
+#define RETURN48    "/icons/ret48.bmp"
+
 #define DELETE24    "/icons/delete24.bmp"
 #define L_ARROW24   "/icons/lArrow24.bmp"
 #define R_ARROW24   "/icons/rArrow24.bmp"
@@ -44,11 +46,12 @@ bmpPipe keyCap; // No point in having lots and lots of the same thing.
 // *****************************************************
 
 
-bmpKeyboard::bmpKeyboard(editField* inEditField)
+bmpKeyboard::bmpKeyboard(editField* inEditField,bool modal)
   : keyboard (inEditField) {
 
   rect  sRect;
 
+  mModal = modal;
   setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);
   keyCap.openPipe(KEYCAP24);
   sRect.setRect(0, 0, KEY_WD, KEY_HT);
@@ -122,22 +125,30 @@ void bmpKeyboard::loadKeys(void) {
   bmpInputKey* spcKey  = new bmpInputKey(" ", " ", " ", col(4,1), row(4), (KEY_WD*4), KEY_HT, this);
   addObj(spcKey);
 
-  //input, shift, symbol, backspace, arrowFWD, arrowBack, enter
-
   bmpControlKey* shiftKey = new bmpControlKey("^", shift, col(1,3), row(3), KEY_WD, KEY_HT, this, SHIFT24);
-  bmpControlKey* backSpKey = new bmpControlKey("<", backspace, col(10,3), row(3), KEY_WD, KEY_HT, this, DELETE24);
-  bmpControlKey* leftArrow  = new bmpControlKey("<", arrowBack, col(3,4), row(4), KEY_WD, KEY_HT, this, L_ARROW24);
-  bmpControlKey* rightArrow  = new bmpControlKey(">", arrowFWD, col(8,4), row(4), KEY_WD, KEY_HT, this, R_ARROW24);
-  bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(1,4), row(4), KEY_WD, KEY_HT, this, SYMBOL24);
-  bmpControlKey* enterKey  = new bmpControlKey(">", enter, col(9,4), row(4), KEY_WD*2, KEY_HT, this, RET48);
-
-
   addObj(shiftKey);
+  
+  bmpControlKey* backSpKey = new bmpControlKey("<", backspace, col(10,3), row(3), KEY_WD, KEY_HT, this, DELETE24);
   addObj(backSpKey);
+  
+  bmpControlKey* leftArrow  = new bmpControlKey("<", arrowBack, col(3,4), row(4), KEY_WD, KEY_HT, this, L_ARROW24);
   addObj(leftArrow);
+  
+  bmpControlKey* rightArrow  = new bmpControlKey(">", arrowFWD, col(8,4), row(4), KEY_WD, KEY_HT, this, R_ARROW24);
   addObj(rightArrow);
+  
+  bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(1,4), row(4), KEY_WD, KEY_HT, this, SYMBOL24);
   addObj(symbolKey);
-  addObj(enterKey);
+  
+  if (mModal) {
+    bmpControlKey* cancelKey   = new bmpControlKey("x", cancel, col(9,4), row(4), KEY_WD, KEY_HT, this, REDX24);
+    addObj(cancelKey);
+    bmpControlKey* oKKey  = new bmpControlKey(">", ok, col(10,4), row(4), KEY_WD, KEY_HT, this, CHECK24);
+    addObj(oKKey);
+  } else {
+    bmpControlKey* enterKey  = new bmpControlKey(">", enter, col(9,4), row(4), KEY_WD*2, KEY_HT, this, RETURN48);
+    addObj(enterKey);
+  }
 }
 
 
@@ -203,5 +214,10 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
 
 
   void bmpControlKey::drawSelf(void) {
-    mBmpPipe.drawBitmap(x, y);
+    
+    if (clicked) {
+      screen->fillRect(this, &white);
+    } else {
+      mBmpPipe.drawBitmap(x, y);
+    }
   }

@@ -13,10 +13,14 @@
 class bmpKeyboard : public keyboard {
 
   public:
-                bmpKeyboard(editField* inEditField);
+                bmpKeyboard(editField* inEditField,bool modal=false);
   virtual       ~bmpKeyboard(void);
 
   virtual void  loadKeys(void);
+  
+  protected:
+  
+          bool  mModal;
 };
 
 

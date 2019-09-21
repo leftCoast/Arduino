@@ -66,7 +66,7 @@ void loggingPanel::setup(void) {
   kbPallette.deleteKeyHText.setColor(LC_WHITE);
   kbPallette.deleteKeyHBase.setColor(LC_GREY);
   
-  bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditField);
+  bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditField,true);
   theKeybaord->loadKeys();
   addObj(theKeybaord);
 }
