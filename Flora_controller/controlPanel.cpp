@@ -17,7 +17,7 @@
 
 char tempStrBuff[256];
 
-
+/*
 // *****************************************************
 // ******************   selectBtn   ********************
 // *****************************************************
@@ -201,7 +201,7 @@ void cancelBtn::doAction(event* inEvent,point* locaPt) {
   }
 }
 
-
+*/
      
 // *****************************************************
 // ****************   controlPanel   *******************
@@ -245,8 +245,8 @@ void controlPanel::setup(void) {
   limitText*  lText = new limitText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(lText);
 
-  mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT,this);
-  addObj(mDryLimitBtn);
+  //mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT,this);
+  //addObj(mDryLimitBtn);
   
   traceY = traceY + stepY;
   bmpObj* waterT = new bmpObj(0,traceY,LABEL_W,LABEL_H,WATER_TIME_BMP);
@@ -256,8 +256,8 @@ void controlPanel::setup(void) {
   wTimeText*  wtText = new wTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(wtText);
 
-  mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME,this);
-  addObj(mWaterTimeBtn);
+  //mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME,this);
+  //addObj(mWaterTimeBtn);
 
   traceY = traceY + stepY;
   bmpObj* soakT = new bmpObj(0,traceY,LABEL_W,LABEL_H,SOAK_TIME_BMP);
@@ -267,9 +267,9 @@ void controlPanel::setup(void) {
   sTimeText*  sText = new sTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(sText);
 
-  mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME,this);
-  addObj(mSoakTimeBtn);
-
+  //mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME,this);
+  //addObj(mSoakTimeBtn);
+/*
   traceY = traceY + 2*LINE_SPACE;
   mSliderTLabel  = new timeText(120,traceY,100,14);
   mSliderTLabel->setColors(&white,&black);
@@ -292,6 +292,7 @@ void controlPanel::setup(void) {
   mCancelBtn = new cancelBtn(188,traceY,32,32,this);
   mCancelBtn->select(false);
   addObj(mCancelBtn);
+  */
 }
 
 

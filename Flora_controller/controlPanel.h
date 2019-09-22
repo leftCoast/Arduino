@@ -19,7 +19,7 @@ class controlPanel;
 // ******************   selectBtn   ********************
 // *****************************************************
 
-
+/*
 class selectBtn : public baseButton {
 
   public:
@@ -37,63 +37,7 @@ class selectBtn : public baseButton {
 extern  selectBtn*  selectedVal;
 
 
-
-// *****************************************************
-// *****************   editSlider   ********************
-// *****************************************************
-
-
-class editSlider :  public slider {
-  
-  public:
-                editSlider(int x,int y,int width,int height);
-  virtual       ~editSlider(void);
-
-  virtual void  setLabel(label* inLabel);
-  virtual void  setText(void);
-  virtual void  select(bool onOff);
-  virtual void  doAction(event* inEvent,point* locaPt);
-
-          label*  mLabel;
-};
-
-
-// *****************************************************
-// ******************    okBtn    **********************
-// *****************************************************
-
-
-class okBtn : public baseIconButton {
-
-    public:
-                  okBtn(int x, int y,int width, int height,controlPanel* inPanel);
-    virtual       ~okBtn(void);
-
-    virtual void  doAction(event* inEvent,point* locaPt);
-
-            controlPanel* mPanel;
-};
-
-
-
-// *****************************************************
-// ****************    cancelBtn    ********************
-// *****************************************************
-
-
-class cancelBtn : public baseIconButton {
-
-  public:
-                  cancelBtn(int x, int y,int width, int height,controlPanel* inPanel);
-  virtual         ~cancelBtn(void);
-
-  virtual   void  doAction(event* inEvent,point* locaPt);
-  
-            controlPanel* mPanel;
-};
-
-
-     
+*/
 // *****************************************************
 //                    controlPanel 
 // *****************************************************
@@ -110,14 +54,9 @@ class controlPanel : public panel {
           void  doComSetSTime(float sTime);
   virtual void  drawSelf(void);
 
-          selectBtn*    mDryLimitBtn;
-          selectBtn*    mWaterTimeBtn;
-          selectBtn*    mSoakTimeBtn;
-          timeText*     mSliderTLabel;
-          percentText*  mSliderPLabel;
-          editSlider*   mSlider;
-          okBtn*        mOkBtn;
-          cancelBtn*    mCancelBtn;
+          //selectBtn*    mDryLimitBtn;
+          //selectBtn*    mWaterTimeBtn;
+          //selectBtn*    mSoakTimeBtn;
 };
 
 #endif

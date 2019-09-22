@@ -45,12 +45,7 @@ panel* floraOS::createPanel(int panelID) {
 }
 
 
-void floraOS::beep(bool beepUp) {
-
-	if (!beepUp) {
-		tone(BEEP_PIN, 500,35);
-	}
-}
+void floraOS::beep() { tone(BEEP_PIN, 500,35); }
 
 
 // Just in case we need it, here it is..

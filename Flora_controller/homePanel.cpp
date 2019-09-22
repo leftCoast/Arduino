@@ -11,10 +11,11 @@
 
 
 waterBtn::waterBtn(int x, int y,int width, int height)
-  :baseIconButton(x,y,width,height,"/icons/H2OOn32.bmp") { 
+  :bmpObj(x,y,width,height,"/icons/H2OOn32.bmp"),
+  onlineIntStateTracker(100) {
     
-  mOnOff = true;  // True means we will turn it on.
-  setTheLook();
+  setEventSet(touchLift);
+  hookup();
 }
 
   
@@ -23,28 +24,32 @@ waterBtn::~waterBtn(void) {  }
 
 void waterBtn::setTheLook(void) {
   
-  if (mOnOff) {
-    openPipe(WATER_ON_BMP);
-  } else {
+  if (mCurrentState.value && mCurrentState.online) {
     openPipe(WATER_OFF_BMP);
+  } else {
+    openPipe(WATER_ON_BMP);
   }
+  needRefresh = true;
 }
 
 
-void  waterBtn::doAction(event* inEvent,point* locaPt) {
+// Reading current state..
+void  waterBtn::readState(void) {
 
-  byte  outByte;
-
-  
-  if (inEvent->mType==touchEvent) {
-    screen->fillRect((rect*)this,&white); // Give it a flash.
-    if (ourComPort.setWaterReg(mOnOff)) {
-      mOnOff = !mOnOff;
-    }
-    setTheLook();
-  }
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getPump();
 }
 
+void  waterBtn::doAction(void) {
+  ourOS.beep();
+  screen->fillRect((rect*)this,&white);             // Give it a flash.
+  ourComPort.setWaterReg(!(mCurrentState.value));
+  mCurrentState.value = !(mCurrentState.value);     // Assume it worked.
+  setTheLook();                                     // Show it to the user.
+}
+
+
+void  waterBtn::idle(void) { if (checkState()) setTheLook(); }
 
 
 // *****************************************************
@@ -145,7 +150,7 @@ void homeScreen::setup(void) {
   int  stepX = 60;
   
   mWaterBtn = new waterBtn(traceX,traceY,32,32);
-  mWaterBtn->select(true);
+  mWaterBtn->begin();
   addObj(mWaterBtn);
 
   

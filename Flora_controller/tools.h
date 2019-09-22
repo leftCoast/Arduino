@@ -28,43 +28,102 @@ void timeFormatter(unsigned long sec);
 
 
 // *****************************************************
-//                      baseButton
+//                      stateTracker
 // *****************************************************
 
 
-class baseButton : public switchable, public idler {
-  
-  public :
-                  baseButton(char* inLabel,int x, int y,int width, int height);
-  virtual         ~baseButton(void);
+class stateTracker {
 
-  virtual bool    acceptEvent(event* inEvent,point* locaPt);  // Is this event for us?
-  virtual void    setText(char* intext);
-  virtual void    idle(void);
-  virtual void    drawSelf(void);
+  public:
+          stateTracker(float periodMs,bool looseTime=true);  // Every periodMs you can check the state of something..
+          ~stateTracker(void);
+        
+  virtual bool    checkState(void);         // This will tell you if the state of something has changed. By..         
+  virtual void    readState(void);          // Reading current state and..
+  virtual bool    compareStates(void);      // Compare with the.. Saved state.
+  virtual void    saveState(void);          // And then, saving the new state.
 
-                  colorObj  BGColor;
-                  colorObj  activeBColor;
-                  colorObj  activeTColor;
-                  colorObj  clickedBColor;
-                  colorObj  clickedTColor;
-                  
-          char*   label;
+          bool    mFirstState;
+          bool    mLooseTime;
+          timeObj mTimer;
 };
 
 
-class baseIconButton :  public baseButton,
-                        public bmpPipe {
 
-  public :
-               
-                  baseIconButton(int x,int y,int width,int height,char* filePath);
-  virtual         ~baseIconButton(void);
+// *****************************************************
+//                  onlineCStrStateTracker
+// *****************************************************
+
+
+class onlineCStrStateTracker : public stateTracker {
+
+  struct stateVar {
+    bool  online;
+    char* value;
+  };
   
-  virtual void    setText(char* intext);
-  virtual void    drawSelf(void);
+  public:
+          onlineCStrStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
+          ~onlineCStrStateTracker(void);
+        
+  virtual void    readState(void);          // Reading current state and..
+  virtual bool    compareStates(void);      // Compare with the.. Saved state.
+  virtual void    saveState(void);          // And then, saving the new state.
 
-          char*   mPath;
+          stateVar  mCurrentState;
+          stateVar  mSavedState;
+};
+
+
+
+// *****************************************************
+//                  onlineULongStateTracker
+// *****************************************************
+
+
+class onlineULongStateTracker : public stateTracker {
+
+  struct stateVar {
+    bool          online;
+    unsigned long value;
+  };
+  
+  public:
+          onlineULongStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
+          ~onlineULongStateTracker(void);
+        
+  virtual void    readState(void);          // Reading current state and..
+  virtual bool    compareStates(void);      // Compare with the.. Saved state.
+  virtual void    saveState(void);          // And then, saving the new state.
+
+          stateVar  mCurrentState;
+          stateVar  mSavedState;
+};
+
+
+
+// *****************************************************
+//                  onlineIntStateTracker
+// *****************************************************
+
+
+class onlineIntStateTracker : public stateTracker {
+
+  struct stateVar {
+    bool  online;
+    int   value;
+  };
+  
+  public:
+          onlineIntStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
+          ~onlineIntStateTracker(void);
+        
+  virtual void    readState(void);          // Reading current state and..
+  virtual bool    compareStates(void);      // Compare with the.. Saved state.
+  virtual void    saveState(void);          // And then, saving the new state.
+
+          stateVar  mCurrentState;
+          stateVar  mSavedState;
 };
 
 
@@ -83,7 +142,6 @@ class percentText :  public label {
     
     virtual void  setValue(int percent);
 };
-
 
 
 

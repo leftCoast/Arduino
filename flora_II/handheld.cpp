@@ -78,6 +78,8 @@ void handheld::checkComs(void) {
       case readWaterTime  : handleReadWTime(comPtr);      break;
       case readSoakTime   : handleReadSTime(comPtr);      break;
       case readName       : handleReadName(comPtr);       break;
+      case readPump       : handleReadPump(comPtr);       break;
+
       case pumpOn         : 
       case pumpOff        : handleSetPump(comPtr);        break;
       case setDryLimit    : handleSetDryLimit(comPtr);    break;
@@ -168,6 +170,13 @@ void handheld::handleReadName(byte* comPtr) {
   charPtr = (char*)&(comPtr[0]);
   strcpy(charPtr,name);
   replyComBuff(strlen(name)+1);
+}
+
+
+void handheld::handleReadPump(byte* comPtr) {
+
+  comPtr[0] = (byte)ourPump.pumpOn();
+  replyComBuff(1);
 }
 
 

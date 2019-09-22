@@ -9,30 +9,22 @@
 
 #define KEYCAP24    "/icons/keyCap24.bmp"
 #define CHECK24     "/icons/check24.bmp"
+#define CHECK48     "/icons/check48.bmp"
 #define REDX24      "/icons/x24.bmp"
+#define REDX48      "/icons/x48.bmp"
 #define SHIFT24     "/icons/shift24.bmp"
+#define SHIFT36     "/icons/shift36.bmp"
+#define RETURN36    "/icons/ret36.bmp"
 #define RETURN48    "/icons/ret48.bmp"
 
 #define DELETE24    "/icons/delete24.bmp"
+#define DELETE36    "/icons/delete36.bmp"
 #define L_ARROW24   "/icons/lArrow24.bmp"
 #define R_ARROW24   "/icons/rArrow24.bmp"
 #define SYMBOL24    "/icons/symb24.bmp"
+#define SYMBOL36    "/icons/symb36.bmp"
 #define SPACEB96    "/icons/spaceB96.bmp"
-
-
-
-int col(int col, int row) {
-
-  switch (row) {
-    case 1 : return KEY_WD * (col - 1);
-    case 2 : return KEY_WD * ((col-1) + 0.5);
-    case 3 : 
-      if (col==1) return 0;
-      if (col>1&&col<10) return KEY_WD * ((col-1) + 0.5);
-      return KEY_WD * 9;
-    case 4 : return KEY_WD * (col - 1);
-  }
-}
+#define SPACEB72    "/icons/spaceB72.bmp"
 
 
 int row(int row) {
@@ -58,8 +50,29 @@ bmpKeyboard::bmpKeyboard(editField* inEditField,bool modal)
   keyCap.setSourceRect(sRect);
 }
 
+
 bmpKeyboard::~bmpKeyboard(void) {  }
 
+
+// Given the colum I'm shooting for and the row I'm in.. 
+// What's the colom pixel I start on?
+int bmpKeyboard::col(int col, int row) {
+
+  switch (row) {
+    case 1 : return KEY_WD * (col - 1);
+    case 2 : return KEY_WD * ((col-1) + 0.5);
+    case 3 : 
+      if (col==1) return 0;
+      if (col>1&&col<10) return KEY_WD * ((col-1) + 0.5);
+      return KEY_WD * 9;
+    case 4 : if (mModal) {
+        return KEY_WD * (col - 1);
+      } else {
+        if (col>1) return KEY_WD * ((col-1) + 0.5);
+        return KEY_WD * (col - 1);
+      }
+  }
+}
 
 
 void bmpKeyboard::loadKeys(void) {
@@ -122,31 +135,35 @@ void bmpKeyboard::loadKeys(void) {
   addObj(nKey);
   addObj(mKey);
 
-  bmpInputKey* spcKey  = new bmpInputKey(" ", " ", " ", col(4,1), row(4), (KEY_WD*4), KEY_HT, this);
-  addObj(spcKey);
-
-  bmpControlKey* shiftKey = new bmpControlKey("^", shift, col(1,3), row(3), KEY_WD, KEY_HT, this, SHIFT24);
+  bmpControlKey* shiftKey = new bmpControlKey("^", shift, col(1,3), row(3), KEY_WD*1.5, KEY_HT, this, SHIFT36);
   addObj(shiftKey);
   
-  bmpControlKey* backSpKey = new bmpControlKey("<", backspace, col(10,3), row(3), KEY_WD, KEY_HT, this, DELETE24);
+  bmpControlKey* backSpKey = new bmpControlKey("<", backspace, col(9,3), row(3), KEY_WD*1.5, KEY_HT, this, DELETE36);
   addObj(backSpKey);
   
-  bmpControlKey* leftArrow  = new bmpControlKey("<", arrowBack, col(3,4), row(4), KEY_WD, KEY_HT, this, L_ARROW24);
-  addObj(leftArrow);
-  
-  bmpControlKey* rightArrow  = new bmpControlKey(">", arrowFWD, col(8,4), row(4), KEY_WD, KEY_HT, this, R_ARROW24);
-  addObj(rightArrow);
-  
-  bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(1,4), row(4), KEY_WD, KEY_HT, this, SYMBOL24);
-  addObj(symbolKey);
-  
   if (mModal) {
-    bmpControlKey* cancelKey   = new bmpControlKey("x", cancel, col(9,4), row(4), KEY_WD, KEY_HT, this, REDX24);
+    bmpInputKey* spcKey  = new bmpInputKey(" ", " ", " ", col(5,4), row(4), (KEY_WD*3), KEY_HT, this);
+    addObj(spcKey);
+    bmpControlKey* leftArrow  = new bmpControlKey("<", arrowBack, col(4,4), row(4), KEY_WD, KEY_HT, this, L_ARROW24);
+    addObj(leftArrow);
+    bmpControlKey* rightArrow  = new bmpControlKey(">", arrowFWD, col(8,4), row(4), KEY_WD, KEY_HT, this, R_ARROW24);
+    addObj(rightArrow);
+    bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(3,4), row(4), KEY_WD, KEY_HT, this, SYMBOL24);
+    addObj(symbolKey);
+    bmpControlKey* cancelKey   = new bmpControlKey("x", cancel, col(1,4), row(4), KEY_WD*2, KEY_HT, this, REDX48);
     addObj(cancelKey);
-    bmpControlKey* oKKey  = new bmpControlKey(">", ok, col(10,4), row(4), KEY_WD, KEY_HT, this, CHECK24);
+    bmpControlKey* oKKey  = new bmpControlKey(">", ok, col(9,4), row(4), KEY_WD*2, KEY_HT, this, CHECK48);
     addObj(oKKey);
   } else {
-    bmpControlKey* enterKey  = new bmpControlKey(">", enter, col(9,4), row(4), KEY_WD*2, KEY_HT, this, RETURN48);
+    bmpInputKey* spcKey  = new bmpInputKey(" ", " ", " ", col(4,4), row(4), (KEY_WD*3), KEY_HT, this);
+    addObj(spcKey);
+    bmpControlKey* leftArrow  = new bmpControlKey("<", arrowBack, col(3,4), row(4), KEY_WD, KEY_HT, this, L_ARROW24);
+    addObj(leftArrow);
+    bmpControlKey* rightArrow  = new bmpControlKey(">", arrowFWD, col(7,4), row(4), KEY_WD, KEY_HT, this, R_ARROW24);
+    addObj(rightArrow);
+    bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(1,4), row(4), KEY_WD*1.5, KEY_HT, this, SYMBOL36);
+    addObj(symbolKey);
+    bmpControlKey* enterKey  = new bmpControlKey(">", enter, col(9,4), row(4), KEY_WD*2, KEY_HT, this, RETURN36);
     addObj(enterKey);
   }
 }
@@ -177,7 +194,7 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
       if (buff[0]==' ') {               // Special hack for spacebar.
         rect  sRect(0,0,width,height);
         bmpPipe aPipe(sRect);
-        aPipe.openPipe(SPACEB96);
+        aPipe.openPipe(SPACEB72);
         aPipe.drawBitmap(x,y);
       } else {                          // "Normal printing
         keyCap.drawBitmap(x, y);

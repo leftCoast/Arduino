@@ -13,16 +13,19 @@
 // *****************************************************
 
 
-class waterBtn : public baseIconButton {
+class waterBtn :  public bmpObj,
+                  public onlineIntStateTracker,
+                  public idler
+                  {
 
     public:
             waterBtn(int x, int y,int width, int height);
     virtual ~waterBtn(void);
     
             void  setTheLook();
-    virtual void  doAction(event* inEvent,point* locaPt);
-
-            bool  mOnOff;
+    virtual void  readState(void);
+    virtual void  doAction(void);
+    virtual void  idle(void);
 };
 
 

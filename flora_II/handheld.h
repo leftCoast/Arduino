@@ -19,6 +19,7 @@ class handheld : public qCSlave {
           void  handleReadWTime(byte* comPtr);
           void  handleReadSTime(byte* comPtr);
           void  handleReadName(byte* comPtr);
+          void  handleReadPump(byte* comPtr);
 
           void  handleSetPump(byte* comPtr);
           void  handleSetDryLimit(byte* comPtr);

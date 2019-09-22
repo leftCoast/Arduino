@@ -37,7 +37,7 @@ void setup() {
   ourEventMgr.begin();                      // Kickstart our event manager.
                                             // Hardware and services are up and running.
   ourOS.begin();                            // Boot OS manager.
-  
+  //ourOS.beep();
 }
 
 void loop() {     // During loop..
