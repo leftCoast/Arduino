@@ -3,9 +3,11 @@
 #include "controlPanel.h"
 #include "loggingPanel.h"
 
+#define PLANTBOT_BAUD 115200
+
 
 // *****************************************************
-// ********************   floraOS   ********************
+//                        floraOS
 // *****************************************************
 
 
@@ -25,7 +27,7 @@ floraOS::~floraOS(void) { }
 // cellOS uses this to tweak its color pallette.
 int floraOS::begin(void) { 
 
-  ourComPort.begin(9600);
+  ourComPort.begin(PLANTBOT_BAUD);
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
   return litlOS::begin();
@@ -35,7 +37,8 @@ int floraOS::begin(void) {
 // Used to create our custom panels..
 panel* floraOS::createPanel(int panelID) {
 
-  switch (panelID) {
+  ourComPort.runUpdates(false);                       // We are going to be spending a LOT of time drawing and stuff. Shut off the updates.
+  switch (panelID) {                                  // The different panels can decided to update or not.
     case homeApp      : return new homeScreen();
     case controlApp   : return new controlPanel();
     case calcApp      : return new rpnCalc();

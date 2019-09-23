@@ -236,35 +236,28 @@ void controlPanel::setup(void) {
   addObj(mNameLabel);
 
 
-  
   traceY = traceY + 2 * stepY;
   bmpObj* limit = new bmpObj(0,traceY,LABEL_W,LABEL_H,LIMIT_BMP);
   limit->begin();
   addObj(limit);
 
-  limitText*  lText = new limitText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  moistureLimitText*  lText = new moistureLimitText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(lText);
-
-  //mDryLimitBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,DRY_LIMIT,this);
-  //addObj(mDryLimitBtn);
   
   traceY = traceY + stepY;
   bmpObj* waterT = new bmpObj(0,traceY,LABEL_W,LABEL_H,WATER_TIME_BMP);
   waterT->begin();
   addObj(waterT);
 
-  wTimeText*  wtText = new wTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  waterTimeText*  wtText = new waterTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(wtText);
-
-  //mWaterTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,W_TIME,this);
-  //addObj(mWaterTimeBtn);
 
   traceY = traceY + stepY;
   bmpObj* soakT = new bmpObj(0,traceY,LABEL_W,LABEL_H,SOAK_TIME_BMP);
   soakT->begin();
   addObj(soakT);
 
-  sTimeText*  sText = new sTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  soakTimeText*  sText = new soakTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(sText);
 
   //mSoakTimeBtn  = new selectBtn(SELECT_X,traceY-SELECT_YOFFS,SELECT_W,SELECT_H,S_TIME,this);

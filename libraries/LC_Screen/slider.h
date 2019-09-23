@@ -15,9 +15,9 @@
 #define DEF_SLIDER_OLCOLOR  LC_GREY
 #define DEF_SLIDER_KNBCOLOR LC_RED
 
-#include "switchable.h"
 
-class slider :  public switchable {
+
+class slider :  public drawObj {
 
   public:
                 slider(int x,int y,int width,int height);

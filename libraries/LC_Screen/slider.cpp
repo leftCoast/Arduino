@@ -1,7 +1,7 @@
 #include "slider.h"
 
 slider::slider(int x,int y,int width,int height) 
-  : switchable(x,y,width,height,dragEvents) {
+  : drawObj(x,y,width,height,dragEvents) {
 
   setup(DEF_SLIDER_KNOB_W,DEF_SLIDER_LINE_H,DEF_SLIDER_LVAL,DEF_SLIDER_RVAL); // Just some nice defaults to get going.
   mBackColor.setColor(DEF_SLIDER_BCOLOR);
@@ -51,23 +51,19 @@ void slider::setKnob(void) {
 // Maybe a bad idea, but for now its working.
 void slider::drawSelf(void) {
 
-  if (mOnOff) {                                       // If we're showing..
-    if (mBeenReset) {                                 // If the reset flag is set..
-        screen->fillRect(this,&mBackColor);           // It means we have no idea how things were left, so we clear everything.
-        mBeenReset = false;                           // Clear the flag.
-    }
-    if (mNewLoc>0) {                                  // If we have a new location..
-      screen->fillRect(&mKnob,&mBackColor);           // Blank out the knob.
-      mLoc = mNewLoc;                                 // Update our location.
-      setKnob();                                      // Update the knob rect..
-      mNewLoc = -1;                                   // Set flag that there is no more new location.
-    }
-    screen->drawRect(&mDragLine,&mOutlineColor);      // Draw the drag line.
-    screen->fillRoundRect(&mKnob,2,&mKnobColor);      // Fill in the knob.
-    screen->drawRoundRect(&mKnob,2,&mOutlineColor);   // Finish drawing the knob.
-  } else {                                            // Else we are NOT showing..
-    screen->fillRect(this,&mBackColor);               // We've been called while being "off", just erase ourselves.
+  if (mBeenReset) {                                 // If the reset flag is set..
+      screen->fillRect(this,&mBackColor);           // It means we have no idea how things were left, so we clear everything.
+      mBeenReset = false;                           // Clear the flag.
   }
+  if (mNewLoc>0) {                                  // If we have a new location..
+    screen->fillRect(&mKnob,&mBackColor);           // Blank out the knob.
+    mLoc = mNewLoc;                                 // Update our location.
+    setKnob();                                      // Update the knob rect..
+    mNewLoc = -1;                                   // Set flag that there is no more new location.
+  }
+  screen->drawRect(&mDragLine,&mOutlineColor);      // Draw the drag line.
+  screen->fillRoundRect(&mKnob,2,&mKnobColor);      // Fill in the knob.
+  screen->drawRoundRect(&mKnob,2,&mOutlineColor);   // Finish drawing the knob.
 }
 
 

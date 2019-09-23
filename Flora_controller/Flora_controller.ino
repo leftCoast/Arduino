@@ -10,7 +10,6 @@
 #include <drawObj.h>
 #include <screen.h>
 #include <litlOS.h>
-#include "globals.h"
 #include "floraOS.h"
 
 #define SD_CS   4

@@ -43,6 +43,7 @@ class homeScreen : public homePanel {
   
   virtual void  setup(void);
   virtual void  loop(void);
+  virtual void  draw(void);
   virtual void  drawSelf(void);
 
           fontLabel*  mNameLabel;

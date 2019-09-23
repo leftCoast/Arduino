@@ -4,12 +4,12 @@
 #include "floraOS.h"
 
 #define SLEEP_TIME          2   // When looking for an answer, rest this long before peeking.
-#define REPLY_TIMEOUT       100 // How long they get to give back a reply.
+#define REPLY_TIMEOUT        75 // How long they get to give back a reply.
 #define LONG_UPDATE_TIME    500 // When offline, only check this often.
-#define SHORT_UPDATE_TIME   200 // When online, we can check this often.
+#define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 
 
-char  tTstring[100];
+char  timeStrBuf[10]; // "9000 w" Is only 7 chars. It doens't do years.
 
 void timeFormatter(unsigned long sec) {
   
@@ -22,7 +22,7 @@ void timeFormatter(unsigned long sec) {
   int   dec;
   
   if (sec==0) {
-    strcpy(tTstring,"0.0 s");
+    strcpy(timeStrBuf,"0.0 s");
     return;
   }
   if (sec>=SEC_IN_WEEK) {
@@ -30,370 +30,48 @@ void timeFormatter(unsigned long sec) {
     sec = sec-weeks*SEC_IN_WEEK;
     fract = sec/(float)SEC_IN_WEEK;
     dec = fract * 10;
-    snprintf(tTstring,10,"%d.%d w",weeks,dec);
+    snprintf(timeStrBuf,10,"%d.%d w",weeks,dec);
   } else if (sec>=SEC_IN_DAY) {
     days = sec/SEC_IN_DAY;
     sec = sec-days*SEC_IN_DAY;
     fract = sec/(float)SEC_IN_DAY;
     dec = fract * 10;
-    snprintf(tTstring,10,"%d.%d d",days,dec);
+    snprintf(timeStrBuf,10,"%d.%d d",days,dec);
   }  else if (sec>=SEC_IN_HOUR) {
     hours = sec/SEC_IN_HOUR;
     sec = sec-hours*SEC_IN_HOUR;
     fract = sec/(float)SEC_IN_HOUR;
     dec = fract * 10;
-    snprintf(tTstring,10,"%d.%d h", hours,dec);
+    snprintf(timeStrBuf,10,"%d.%d h", hours,dec);
   }  else if (sec>=60) {
     minutes = sec/60;
     sec = sec-minutes*60;
     fract = sec/60.0;
     dec = fract * 10;
-    snprintf(tTstring,10,"%d.%d m",minutes,dec);
+    snprintf(timeStrBuf,10,"%d.%d m",minutes,dec);
   } else {
-    snprintf (tTstring,5,"%d s",sec);
+    snprintf (timeStrBuf,5,"%d s",sec);
   }
 }
 
 
-/*
-#define TEXT_SIZE     2
-#define CHAR_WIDTH    6
-#define BUTTON_HEIGHT 18
-#define RADIUS        3
-
-
-
-baseButton::baseButton(char* inLabel,int x, int y,int width, int height)
-  : switchable(x, y, width, height, touchLift) {
-
-  // default button colors.
-  BGColor.setColor(LC_BLACK);
-  activeBColor.setColor(LC_BLUE);
-  activeBColor.blend(&white, 40);
-  activeTColor.setColor(LC_WHITE);
-  clickedBColor.setColor(LC_WHITE);
-  clickedTColor.setColor(LC_BLACK);
-
-  label = NULL;
-  setText(inLabel);
-}
-
-
-baseButton::~baseButton(void) {
-
-  if (label) {
-    free(label);
-    label = NULL;
-  }
-}
-
-
-void baseButton::setText(char* inText) {
-  
-  int numChars;
-
-  if (inText) {
-    numChars = strlen(inText) + 1;
-    if (resizeBuff(numChars,(uint8_t**)&label)) {
-      strcpy(label, inText);
-    }
-  }
-}
-
-
-// The original didn't do what I expected. So I just hacked a local copy for the buttons here.
-//nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
-bool baseButton::acceptEvent(event* inEvent,point* locaPt) {
-
-  switch (mEventSet) {
-    case noEvents   : return false;             // noEvents, pass on..
-    case touchLift    :                         // Classic button events, clicked lets you draw clicked.
-      if (inEvent->mType==touchEvent) {         // If its a touch..
-        if (inRect(locaPt)) {                   // - and if its on us..
-          clicked   = true;                     // Might want to show we're clicked on.
-          ourOS.beep(clicked);
-          doAction(inEvent,locaPt);             // Do our stuff.
-          theTouched  = this;                   // Tell the world WE are accepting this event set.
-          needRefresh = true;                   // touchLift doesn't get a lift event. So it needs the setRefresh here.
-          return true;                          // Tell the world the event has been accepted.
-        }
-      } else if (theTouched==this && inEvent->mType==liftEvent) {   // We only want lifts if we'd accepted the touch.
-        clicked   = false;                      // And we're no longer clicked.
-        ourOS.beep(clicked);
-        doAction(inEvent,locaPt);               // Do our other stuff.
-        needRefresh = true;                     // And here.. (see above)
-        return true;                            // Again, tell the world the event has been accepted.
-      }
-      break;
-    case fullClick  :               // Things like edit fields. A click changes their state.
-      if (inEvent->mType==clickEvent) {   // If its a click event, that matches.
-        if (inRect(locaPt)) {         // and if its on us..
-          clicked   = false;          // No longer clicked by the time you see this.
-          doAction();               // Do the action.
-          return true;              // We don't set touched because this is a one shot event.
-        }
-      }
-      break;
-    case dragEvents :               // Things that move by touch.
-      if (inEvent->mType==dragBegin) {      // If, the dragging finger has started..
-        if (inRect(locaPt)) {         // and if its on us..
-          doAction(inEvent,locaPt);     // Do our stuff.
-          theTouched  = this;         // Tell the world WE are accepting this event set.
-          return true;
-        }
-      } else if (inEvent->mType==dragOn) {    // still moving,
-        doAction(inEvent,locaPt);         // Stil dragging? Keep drawing.
-        return true;                  // Event has been accepted.
-      } else if (inEvent->mType==liftEvent) { // Done dragging.
-        doAction(inEvent,locaPt);         // Do our stuff.
-        return true;                  // Again, tell the world the event has been accepted.
-      }
-      break;
-    }
-    return false;
-  }
-
-
-// OK, lets NOT call hookup() by default. If the derived needs to
-// do idle things, let them call it.
-void baseButton::idle(void) { }
-
-
-void baseButton::drawSelf(void) {
-
-  word dispWidth;
-  word textWidth;
-
-  if (mOnOff) {
-    if (clicked) {
-      screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &activeBColor);
-      screen->fillRoundRect(x, y, width, height, RADIUS, &clickedBColor);
-      screen->setTextColor(&clickedTColor, &clickedBColor);
-    } else {
-      screen->fillRoundRect(x-2, y-2, width+4, height+4, RADIUS+2, &white); 
-      screen->fillRoundRect(x, y, width, height, RADIUS, &activeBColor);
-      screen->setTextColor(&activeTColor, &activeBColor);
-    }
-    screen->setTextSize(TEXT_SIZE);
-    screen->setTextWrap(false);
-    dispWidth = width - (2 * RADIUS);
-    textWidth = (CHAR_WIDTH * TEXT_SIZE * strlen(label)) - 1;
-    if (dispWidth > textWidth) {
-      screen->setCursor(x + RADIUS + ((dispWidth - textWidth) / 2), y + 2);
-      screen->drawText(label);
-    }
-  } else {
-    rect arect;
-    arect.setRect(this);
-    arect.insetRect(-2);
-    screen->fillRect(&arect,&BGColor);
-  }
-}
-
-
-
-// ***************************************************************
-//                      baseIconButton
-// ***************************************************************
-
-
-baseIconButton::baseIconButton(int x,int y,int width,int height,char* filePath)
-  : baseButton(NULL,x,y,width,height),
-  bmpPipe() {
-
-  rect  sourceRect;
-
-  if (filePath) {
-    if (openPipe(filePath)) {
-      sourceRect.setRect(0,0,32,32);
-      setSourceRect(sourceRect);
-    }
-  }
-}
-
- 
-baseIconButton::~baseIconButton(void) {  }
-
- // We.. Don't do this.
-void baseIconButton::setText(char* intext) {  }
-
-
-void baseIconButton::drawSelf(void) {
-
-  if (mOnOff) {
-    if (haveInfo) {
-      drawBitmap(x,y);
-    }
-  } else {
-    rect arect;
-    arect.setRect(this);
-    screen->fillRect(&arect,&black);  // Black is hardcoded 'cause the icons are drawn for a  black background.
-  }
-}
-*/
-
-
 // *****************************************************
-//                  onlineCStrStateTracker
+//                      timeText
 // *****************************************************
 
 
-// Every periodMs we are going to..
-onlineCStrStateTracker::onlineCStrStateTracker(float periodMs,bool looseTime)
-  :stateTracker(periodMs,looseTime) {
+timeText::timeText(int x, int y,int width, int height)
+  : label(x,y,width,height) { }
 
-    mSavedState.online  = true;  // Forces a refresh when going online.
-    mSavedState.value   = NULL;
+timeText::~timeText(void) { }
 
-    mCurrentState.online  = true;  // A total lie, but a useful one..
-    mCurrentState.value   = NULL;
+
+void timeText::setValue(unsigned long seconds) {
+
+  timeFormatter(seconds);
+  label::setValue(timeStrBuf); 
 }
 
-
-onlineCStrStateTracker::~onlineCStrStateTracker(void) {
-
-  resizeBuff(0,&(mSavedState.value));
-  resizeBuff(0,&(mCurrentState.value));
-}
-
-
-// Reading current state and..        
-void onlineCStrStateTracker::readState(void) { /* you fill out this one..*/ }
-
-// Compare with the.. Saved state.         
-bool onlineCStrStateTracker::compareStates(void) { return mCurrentState.online==mSavedState.online && !strcmp(mCurrentState.value,mSavedState.value); }
-
-// And then, saving the new state.
-void onlineCStrStateTracker::saveState(void) { 
-
-  int numBytes;
-  
-  mSavedState.online = mCurrentState.online;
-  numBytes = strlen(mCurrentState.value)+1;
-  resizeBuff(numBytes,&(mSavedState.value));
-  strcpy(mSavedState.value,mCurrentState.value);
-}
-
-
-
-// *****************************************************
-//                  onlineULongStateTracker
-// *****************************************************
-
-
-// Every periodMs we are going to..
-onlineULongStateTracker::onlineULongStateTracker(float periodMs,bool looseTime)
-  :stateTracker(periodMs,looseTime) {
-
-    mSavedState.online  = true;  // Forces a refresh when going online.
-    mSavedState.value   = 0;
-
-    mCurrentState.online  = true;  // A total lie, but a useful one..
-    mCurrentState.value   = 0;
-}
-
-
-onlineULongStateTracker::~onlineULongStateTracker(void) {  }
-
-
-// Reading current state and..        
-void onlineULongStateTracker::readState(void) { /* you fill out this one..*/ }
-
-// Compare with the.. Saved state.         
-bool onlineULongStateTracker::compareStates(void) { return mCurrentState.online==mSavedState.online && mCurrentState.value==mSavedState.value; }
-
-// And then, saving the new state.
-void onlineULongStateTracker::saveState(void) { mSavedState = mCurrentState; }
-
-
-
-// *****************************************************
-//                  onlineIntStateTracker
-// *****************************************************
-
-
-// Every periodMs we are going to..
-onlineIntStateTracker::onlineIntStateTracker(float periodMs,bool looseTime)
-  :stateTracker(periodMs,looseTime) {
-
-    mSavedState.online  = true;  // Forces a refresh when going online.
-    mSavedState.value   = 0;
-
-    mCurrentState.online  = true;  // A total lie, but a useful one..
-    mCurrentState.value   = 0;
-}
-
-
-onlineIntStateTracker::~onlineIntStateTracker(void) {  }
-
-
-// Reading current state and..        
-void onlineIntStateTracker::readState(void) { /* you fil out this one..*/ }
-
-// Compare with the.. Saved state.         
-bool onlineIntStateTracker::compareStates(void) { return mCurrentState.online==mSavedState.online && mCurrentState.value==mSavedState.value; }
-
-// And then, saving the new state.
-void onlineIntStateTracker::saveState(void) { mSavedState = mCurrentState; }
-
-
-          
-// *****************************************************
-//                      stateTracker
-// *****************************************************
-
-
-// Every periodMs we are going to..
-stateTracker::stateTracker(float periodMs,bool looseTime) {
-
-  mLooseTime = looseTime;
-  mTimer.setTime(periodMs,true);
-  mFirstState = true;
-}
-
-
-stateTracker::~stateTracker(void) {  }
-
-
-bool stateTracker::checkState(void) {
-
-  if (mTimer.ding()) {            // If the timer has expired..
-    if (mLooseTime) {             // If we are allowing loose time..
-        mTimer.start();           // Restart the timer from now.
-    } else {                      // Else NOT allowing loose time..
-      mTimer.stepTime();          // We reset the timer from the last start time. (Picky picky!)
-    }
-    readState();
-    if (!compareStates()) {       // If we compare the states and thy are NOT the same..
-       saveState();               // We save off the new state into the saved state.
-       return true;               // Then return TRUE that the state has changed. 
-    }
-  }
-  return false;                   // In all other cases, we just return false.
-}
-
-
-// You inherit this.
-// A) Read the current state.
-// B) Save the current state to a (current state) class member variable that you create.
-void stateTracker::readState(void) { }
-
-
-// You inherit this.
-// A) Compare this current state with the saved last state.
-// B) return the result. (Just like in an if statement, TRUE means they are the SAME.)
-// 
-// mFirstState : This is a boolean set to true in the constructor. You can set it to false
-// here to show that you've successfully started to read states. It is nothing mnore than
-// a boolean for you to use as you wish. I thought it might come in handy to know that this
-// is the first time through or not.
-bool stateTracker::compareStates(void) {  }
-
-
-// You inherit this..
-// You must set up a (saved state) class member variable. In this method you overwrite your
-// saved state member variable with your current state variable.
-void stateTracker::saveState(void) { }
 
 
 // *****************************************************
@@ -403,6 +81,7 @@ void stateTracker::saveState(void) { }
 
 percentText::percentText(int x, int y,int width, int height)
   : label(x,y,width,height) { }
+
 
 percentText::~percentText(void) { }
 
@@ -418,267 +97,259 @@ void percentText::setValue(int percent) {
 
 
 // *****************************************************
-//                      timeText
+//                      onlinePercentText
 // *****************************************************
 
 
-timeText::timeText(int x, int y,int width, int height)
-  : label(x,y,width,height) { }
-
-timeText::~timeText(void) { }
-
-
-void timeText::setValue(int seconds) {
-
-  debugger.trace("setValue() ",seconds,false);
-  timeFormatter(seconds);
-  label::setValue(tTstring); 
-}
-
-
-
-// *****************************************************
-//                     stateText
-// *****************************************************
-
-
-stateText::stateText(int x, int y,int width, int height)
-  : onlineFText(x,y,width,height) {
-
-  mStateVal = 0;
-  setTextSize(1);
-  setJustify(TEXT_CENTER);
-}
+onlinePercentText::onlinePercentText(int x, int y,int width, int height)
+  : percentText(x,y,width,height) {  }
 
   
-stateText::~stateText(void) {  }
+onlinePercentText::~onlinePercentText(void) {  }
 
+    
+void onlinePercentText::setTheLook() {
 
-void stateText::setValue(void) {
-
-  if (mOnline) {
-    mStateVal = ourComPort.getState();
-    switch (mStateVal) {
-      case 0 :  onlineFText::setValue("Reading"); break;
-      case 1 :  onlineFText::setValue("Watering"); break;
-      case 2 :  onlineFText::setValue("Soaking"); break;
-    }
+  if (mCurrentState.online) {
+    percentText::setValue(mCurrentState.value);
   } else {
-    onlineFText::setValue("");
+    label::setValue("--- %");
   }
 }
 
 
-void stateText::setState(void) { setValue(); }
+void onlinePercentText::readState(void) {  }
 
 
-void stateText::idle() {
+void onlinePercentText::doAction(void) { /*setup editing*/ }
 
-  onlineFText::idle();
-  if (mOnline) {
-    if (mStateVal!=ourComPort.getState()) {
-      setValue();
-    }
-  }
-}
+
+void onlinePercentText::idle(void) { if (checkState()) setTheLook(); }                           
 
 
 
 // *****************************************************
-//                     nameText
+//                      nameText
 // *****************************************************
 
 
 nameText::nameText(int x, int y,int width, int height)
-  : onlineFText(x,y,width,height) {
+  : onlineCStrStateTracker(),
+  fontLabel(x,y,width,height) {
 
-  setTextSize(1);
+  setColors(&white,&black);
   setJustify(TEXT_CENTER);
+  setTextSize(1);
+  hookup();
 }
 
+nameText::~nameText(void) { } 
+
+
+void nameText::setTheLook() {
   
-nameText::~nameText(void) {  }
-
-
-void nameText::setValue(void) {
-
-  if (mOnline) {
-    onlineFText::setValue(ourComPort.getName());
+  if (mCurrentState.online) {
+    setValue(mCurrentState.value);
   } else {
-    onlineFText::setValue("Offline");
+    setValue("Offline");
   }
 }
 
 
-void nameText::setState(void) { setValue(); }
+void nameText::readState(void) {
 
+  int   numBytes;
 
-void nameText::idle() {
-
-  onlineFText::idle();
-  if (mOnline) {
-    if (strcmp(buff,ourComPort.getName())) {
-      setValue();
+  resizeBuff(0,&mCurrentState.value);                     // First we recycle the memory from the last string.
+  mCurrentState.online = ourComPort.getOnline();          // Lets see if we are online at all? (And save it)
+  if (mCurrentState.online) {                             // If we are online..
+    numBytes = strlen(ourComPort.getName())+1;            // Read off how long the string is.
+    if (resizeBuff(numBytes,&mCurrentState.value)) {      // If we are able to get the memory to store it..
+      strcpy(mCurrentState.value,ourComPort.getName());   // We copy in the new name.
     }
   }
 }
 
 
+void nameText::idle(void) { if (checkState()) setTheLook(); }
+
+
+void nameText::drawSelf(void) {
+
+  screen->fillRect(this,&black);  // Sadly the fancy fon't need to have their fields blanked out first.
+  fontLabel::drawSelf();
+}
+
+
 
 // *****************************************************
-//                     sTimeText
+//                      stateText
 // *****************************************************
 
 
-sTimeText::sTimeText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { mSoakTime = 0; }
+stateText::stateText(int x, int y,int width, int height)
+  : onlineIntStateTracker(),
+  fontLabel(x,y,width,height) {
 
+  setColors(&white,&black);
+  setJustify(TEXT_CENTER);
+  setTextSize(1);
+  hookup();
+}
+
+
+stateText::~stateText(void) { } 
+
+
+void stateText::setTheLook() {
   
-sTimeText::~sTimeText(void) {  }
-
-
-void sTimeText::setValue(void) {
-
-  if (mOnline) {
-    timeFormatter(mSoakTime);
-    onlineText::setValue(tTstring);
+  if (mCurrentState.online) {
+    switch (mCurrentState.value) {
+      case 0 :  setValue("Reading"); break;
+      case 1 :  setValue("Watering"); break;
+      case 2 :  setValue("Soaking"); break;
+    }
   } else {
-    onlineText::setValue("--- s");
+    setValue("");
   }
 }
 
 
-void sTimeText::setState(void) {
+void stateText::readState(void) {
 
-  if (mOnline) { mSoakTime = ourComPort.getSoakTime(); }
-  setValue();
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getState();
 }
 
 
-void sTimeText::idle() {
+void stateText::idle(void) { if (checkState()) setTheLook(); }
 
-  onlineText::idle();
-  if (mOnline) {
-    if (mSoakTime!=ourComPort.getSoakTime()) {
-      mSoakTime = ourComPort.getSoakTime();
-      setValue();
-    }
-  }
+
+void stateText::drawSelf(void) {
+
+  screen->fillRect(this,&black);  // Sadly the fancy fonts need to have their fields blanked out first.
+  fontLabel::drawSelf();
 }
 
 
+
 // *****************************************************
-//                     wTimeText
+//                      currentMoistureText
 // *****************************************************
 
-wTimeText::wTimeText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { mWaterTime = 0; }
 
+currentMoistureText::currentMoistureText(int x, int y,int width, int height)
+  : onlinePercentText(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+}
+
+currentMoistureText::~currentMoistureText(void) { } 
+
+void currentMoistureText::readState(void) {
+
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getMoisture();
+}
+
+
+
+// *****************************************************
+//                      moistureLimitText
+// *****************************************************
+
+
+moistureLimitText::moistureLimitText(int x, int y,int width, int height)
+  : onlinePercentText(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+}
+
+moistureLimitText::~moistureLimitText(void) { } 
+
+void moistureLimitText::readState(void) {
+
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getLimit();
+}
+
+
+
+// *****************************************************
+//                      currentTempText
+// *****************************************************
+
+
+currentTempText::currentTempText(int x, int y,int width, int height)
+  : onlineIntStateTracker(),
+  label(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+}
+
+currentTempText::~currentTempText(void) { } 
+
+
+void currentTempText::setTheLook() {
+
+  char  buff[10];
   
-wTimeText::~wTimeText(void) {  }
-
-
-void wTimeText::setValue(void) {
-
-  if (mOnline) {
-    timeFormatter(mWaterTime);
-    onlineText::setValue(tTstring);
+  if (mCurrentState.online) {
+    snprintf (buff,10,"%d c",mCurrentState.value);
+    setValue(buff);
   } else {
-    onlineText::setValue("--- s");
+    setValue("--- c");
   }
 }
 
 
-void wTimeText::setState(void) {
+void currentTempText::readState(void) {
 
-  if (mOnline) { mWaterTime = ourComPort.getWaterTime(); }
-  setValue();
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getTemp();
 }
 
 
-void wTimeText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mWaterTime!=ourComPort.getWaterTime()) {
-      mWaterTime = ourComPort.getWaterTime();
-      setValue();
-    }
-  }
-}
+void currentTempText::idle(void) { if (checkState()) setTheLook(); }
 
 
 
 // *****************************************************
-//                     limitText
-// *****************************************************
-
-
-limitText::limitText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { mLimit = 0; }
-
-  
-limitText::~limitText(void) {  }
-
-
-void limitText::setValue(void) {
-
-  char  limit[7];
-  
-    if (mOnline) {
-      snprintf (limit,5,"%d",mLimit);
-      strcat(limit," %");
-    } else {
-      strcpy(limit,"--- %");
-    }
-    onlineText::setValue(limit);
-}
-
-
-void limitText::setState(void) {
-
-  if (mOnline) { mLimit = ourComPort.getLimit(); }
-  setValue();
-}
-
-
-void limitText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mLimit!=ourComPort.getLimit()) {
-      mLimit = ourComPort.getLimit();
-      setValue();
-    }
-  }
-}
-
-
-
-// *****************************************************
-//                   totalWaterText
+//                      totalWaterText
 // *****************************************************
 
 
 totalWaterText::totalWaterText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) {
+  : onlineULongStateTracker(),
+  label(x,y,width,height) {
 
-  lPerSec = .01;
-  setPrecision(1);
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+  mlPerSec = .01;
 }
 
-  
-totalWaterText::~totalWaterText(void) {  }
+totalWaterText::~totalWaterText(void) { } 
 
 
-void totalWaterText::setValue(void) {
+void totalWaterText::setTheLook(void) {
 
   float res;
   char  wStr[10];
   int   prec;
   
-  if (mOnline) {
-    res = (mLogWetLines/2.0)*lPerSec;
+  if (mCurrentState.online) {
+    res = (mCurrentState.value/2.0)*mlPerSec;
     if (res>=100) {
       prec = 0;
     } else {
@@ -686,167 +357,159 @@ void totalWaterText::setValue(void) {
     }
     dtostrf(res,0,prec,wStr);
     strcat(wStr," l");
-    onlineText::setValue(wStr);
+    setValue(wStr);
   } else {
-    onlineText::setValue("--- l");
+    setValue("--- l");
   }
 }
 
 
-void totalWaterText::setState(void) {
+void totalWaterText::readState(void) {
 
-  if (mOnline) { mLogWetLines = ourComPort.getLogWLines(); }
-  setValue();
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getLogWLines();
 }
 
 
-void totalWaterText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mLogWetLines!=ourComPort.getLogWLines()) {
-      mLogWetLines = ourComPort.getLogWLines();
-      setValue();
-    }
-  }
-}
+void totalWaterText::idle(void) { if (checkState()) setTheLook(); }
 
 
 
 // *****************************************************
-//                   totalTimeText
+//                   totalLogTimeText
 // *****************************************************
 
 
-totalTimeText::totalTimeText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { }
+totalLogTimeText::totalLogTimeText(int x, int y,int width, int height)
+  : onlineULongStateTracker(),
+  timeText(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+}
 
   
-totalTimeText::~totalTimeText(void) {  }
+totalLogTimeText::~totalLogTimeText(void) {  }
 
 
-void totalTimeText::setValue(void) {
-
-  if (mOnline) {
-    timeFormatter(mLogLines/2);
-    onlineText::setValue(tTstring);
+void totalLogTimeText::setTheLook(void) {
+    
+  if (mCurrentState.online) {
+    Serial.println(mCurrentState.value);
+    timeText::setValue(mCurrentState.value/2);
   } else {
-    onlineText::setValue("--- s");
+    label::setValue("--- s");
   }
 }
 
+ 
+void totalLogTimeText::readState(void) {
 
-void totalTimeText::setState(void) {
-
-  if (mOnline) { mLogLines = ourComPort.getLogLines(); }
-  setValue();
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getLogLines();
 }
 
 
-void totalTimeText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mLogLines!=ourComPort.getLogLines()) {
-      mLogLines = ourComPort.getLogLines();
-      setValue();
-    }
-  }
-}
-
-
-// *****************************************************
-//                     moistureText
-// *****************************************************
-
-
-moistureText::moistureText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { }
-
-  
-moistureText::~moistureText(void) {  }
-
-
-void moistureText::setValue(void) {
-
-  char  moistText[7];
-  
-    if (mOnline) {
-      snprintf (moistText,5,"%d",mMoisture);
-      strcat(moistText," %");
-    } else {
-      strcpy(moistText,"--- %");
-    }
-    onlineText::setValue(moistText);
-}
-
-
-void moistureText::setState(void) {
-
-  if (mOnline) { mMoisture = ourComPort.getMoisture(); }
-  setValue();
-}
-
-
-void moistureText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mMoisture!=ourComPort.getMoisture()) {
-      mMoisture = ourComPort.getMoisture();
-      setValue();
-    }
-  }
-}
+void totalLogTimeText::idle(void) { if (checkState()) setTheLook(); }
 
 
 
 // *****************************************************
-//                     tempText
+//                   waterTimeText
 // *****************************************************
 
 
-tempText::tempText(int x, int y,int width, int height)
-  : onlineText(x,y,width,height) { }
+waterTimeText::waterTimeText(int x, int y,int width, int height)
+  : onlineIntStateTracker(),
+  timeText(x,y,width,height) {
 
-  
-tempText::~tempText(void) {  }
-
-
-void tempText::setValue(void) {
-
-  char  aStr[7];
-  
-    if (mOnline) {
-      snprintf (aStr,5,"%d",mTemp);
-      strcat(aStr," C");
-    } else {
-      strcpy(aStr,"--- C");
-    }
-    onlineText::setValue(aStr);
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
 }
 
-
-void tempText::setState(void) {
-
-  if (mOnline) { mTemp = ourComPort.getTemp(); }
-  setValue();
-}
+  
+waterTimeText::~waterTimeText(void) {  }
 
 
-void tempText::idle() {
-
-  onlineText::idle();
-  if (mOnline) {
-    if (mTemp!=ourComPort.getTemp()) {
-      mTemp = ourComPort.getTemp();
-      setValue();
-    }
+void waterTimeText::setTheLook(void) {
+    
+  if (mCurrentState.online) {
+    Serial.println(mCurrentState.value);
+    timeText::setValue(mCurrentState.value/2);
+  } else {
+    label::setValue("--- s");
   }
 }
 
+ 
+void waterTimeText::readState(void) {
+
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getWaterTime();
+}
 
 
+void waterTimeText::idle(void) { if (checkState()) setTheLook(); }
+
+
+
+// *****************************************************
+//                   soakTimeText
+// *****************************************************
+
+
+soakTimeText::soakTimeText(int x, int y,int width, int height)
+  : onlineIntStateTracker(),
+  timeText(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_RIGHT);
+  setTextSize(2);
+  hookup();
+}
+
+  
+soakTimeText::~soakTimeText(void) {  }
+
+
+void soakTimeText::setTheLook(void) {
+    
+  if (mCurrentState.online) {
+    Serial.println(mCurrentState.value);
+    timeText::setValue(mCurrentState.value/2);
+  } else {
+    label::setValue("--- s");
+  }
+}
+
+ 
+void soakTimeText::readState(void) {
+
+  mCurrentState.online = ourComPort.getOnline();
+  mCurrentState.value = ourComPort.getSoakTime();
+}
+
+
+void soakTimeText::idle(void) { if (checkState()) setTheLook(); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 // *****************************************************
 //                      onlineFText
 // *****************************************************
@@ -881,6 +544,8 @@ void onlineFText::drawSelf(void) {
   fontLabel::drawSelf();
 }
 
+
+
 // *****************************************************
 //                      onlineText
 // *****************************************************
@@ -909,7 +574,7 @@ void onlineText::idle() {
   }
 }
 
-
+*/
 
 // ******************************************
 //                    plantBotCom
@@ -1140,7 +805,7 @@ bool plantBotCom::setNameReg(char* name) {
     numBytes = strlen(name)+2;
     if (resizeBuff(numBytes,(char**)&buff)) {
       buff[0] = setName;
-      strcpy(&buff[1],name);
+      strcpy((char*)&buff[1],name);
       sendBuff(buff,numBytes,true);     // Send the one byte command and ask for ack.
       while(!haveBuff()&&!readErr()) {  // We either get something back or time out.
         sleep(SLEEP_TIME);              // Have a nap, let the UI amuse the user.
@@ -1294,125 +959,7 @@ bool plantBotCom::getOnline(void) { return mOnline; }
 
 
 
-// *****************************************************
-//                        flasher
-// *****************************************************
 
-
-flasher::flasher(rect* inRect,colorObj* backColor)
-  : drawObj(inRect),
-  blinker() {
-
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
-}
-
-
-flasher::flasher(int inX,int inY,int inWidth,int inHeight,colorObj* backColor)
-  : drawObj(inX,inY,inWidth,inHeight),
-  blinker() {
-  
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
-}
-
-                     
-flasher::~flasher(void) { }
-
-
-// Basically a hacked version from blinker to remove the pinmode stuff.
-// This is your on/off switch. Call with a boolean tru=on false=off.
-// The object is created in the "off" mode.
-void flasher::setBlink(bool onOff) {
-  
- if (!init) {             // Not intialized?
-    hookup();             // Set up idling.
-    init = true;          // Note it.
-  }
-  if((onOff!=running)) {  // ignore if no change
-    if (onOff) {          // Start blinking..    
-      start();            // Starting NOW!
-      setLight(true);     // light on!
-      onTimer->start();   // set the time on timer.
-      running = true;     // Set state.
-      } 
-    else {                // Stop blinking..
-      setLight(false);    // light off.
-      running = false;    // set state.
-    }
-  }
-}   
-
-    
-void flasher::setLight(bool onOff) {
-
-  lightOn = onOff;
-  setNeedRefresh();
-}
-
-
-void flasher::drawSelf(void) {
-
-  if (lightOn) {
-    screen->fillRect(x,y,width,height,&mForeColor);
-  } else {
-    screen->fillRect(x,y,width,height,&mBackColor);
-  }
-}
-
-
-
-// *****************************************************
-//                     bmpFlasher
-// *****************************************************
-
-
-bmpFlasher::bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp)
-  : flasher(inX,inY,width,height,&black) { 
- 
-  mReady = false;
-  setup(onBmp,offBmp);
-}
-
-    
-bmpFlasher::bmpFlasher(rect* inRect,char* onBmp, char* offBmp)
-  : flasher(inRect,&black) { 
-  
-  mReady = false;
-  setup(onBmp,offBmp);
-}  
-
-    
-bmpFlasher::~bmpFlasher(void) {
-
-  if (mOnBmp) delete(mOnBmp);
-  if (mOffBmp) delete(mOffBmp);
-}
-
-
-void bmpFlasher::setup(char* onBmp,char* offBmp) {
-
-  rect  sourceRect(0,0,width,height);
-  mOnBmp = new bmpPipe(sourceRect);
-  mOffBmp = new bmpPipe(sourceRect);
-  if (mOnBmp&&mOffBmp) {
-    if (mOnBmp->openPipe(onBmp) && mOffBmp->openPipe(offBmp)) {
-      mReady = true;
-    }
-  }
-}
-
-
-void bmpFlasher::drawSelf(void) {
-
-  if (mReady) {
-    if (lightOn) {
-      mOnBmp->drawBitmap(x,y);
-    } else {
-      mOffBmp->drawBitmap(x,y);
-    }
-  }
-}
 
 
 

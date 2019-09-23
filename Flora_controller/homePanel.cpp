@@ -1,5 +1,5 @@
 #include "homePanel.h"
-#include "switchable.h"
+//#include "switchable.h"
 #include "floraOS.h"
 #include "tools.h"
 #include "debug.h"
@@ -12,7 +12,7 @@
 
 waterBtn::waterBtn(int x, int y,int width, int height)
   :bmpObj(x,y,width,height,"/icons/H2OOn32.bmp"),
-  onlineIntStateTracker(100) {
+  onlineIntStateTracker() {
     
   setEventSet(touchLift);
   hookup();
@@ -40,12 +40,14 @@ void  waterBtn::readState(void) {
   mCurrentState.value = ourComPort.getPump();
 }
 
+
 void  waterBtn::doAction(void) {
   ourOS.beep();
-  screen->fillRect((rect*)this,&white);             // Give it a flash.
-  ourComPort.setWaterReg(!(mCurrentState.value));
-  mCurrentState.value = !(mCurrentState.value);     // Assume it worked.
-  setTheLook();                                     // Show it to the user.
+  screen->fillRect((rect*)this,&white);                 // Give it a flash.
+  if (ourComPort.setWaterReg(!(mCurrentState.value))) {
+    mCurrentState.value = !(mCurrentState.value);       // Looks like it worked.
+    setTheLook();                                       // Show it to the user.
+  }
 }
 
 
@@ -93,7 +95,8 @@ void homeScreen::setup(void) {
   currM->begin();
   addObj(currM);
 
-  moistureText* mText = new moistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  //moistureText* mText = new moistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  currentMoistureText* mText = new currentMoistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(mText);
   
   traceY = traceY + stepY;
@@ -101,7 +104,7 @@ void homeScreen::setup(void) {
   currT->begin();
   addObj(currT);
 
-  tempText* tText = new tempText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  currentTempText* tText = new currentTempText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(tText);
   
   traceY = traceY + stepY;
@@ -117,7 +120,7 @@ void homeScreen::setup(void) {
   totalT->begin();
   addObj(totalT);
 
-  totalTimeText*  ttText = new totalTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  totalLogTimeText*  ttText = new totalLogTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(ttText);
   
   traceY = traceY + 2 * stepY;
@@ -125,7 +128,7 @@ void homeScreen::setup(void) {
   limit->begin();
   addObj(limit);
 
-  limitText*  lText = new limitText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  moistureLimitText*  lText = new moistureLimitText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(lText);
   
   traceY = traceY + stepY;
@@ -133,7 +136,7 @@ void homeScreen::setup(void) {
   waterT->begin();
   addObj(waterT);
 
-  wTimeText*  wtText = new wTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  waterTimeText*  wtText = new waterTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(wtText);
   
   traceY = traceY + stepY;
@@ -141,7 +144,7 @@ void homeScreen::setup(void) {
   soakT->begin();
   addObj(soakT);
 
-  sTimeText*  sText = new sTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
+  soakTimeText*  sText = new soakTimeText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(sText);
   
   traceY = 285;
@@ -168,10 +171,18 @@ void homeScreen::setup(void) {
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();
   addObj(calc);
+ 
 }
 
 
 void homeScreen::loop(void) { }
 
 
-void homeScreen::drawSelf(void) { screen->fillScreen(&black); }
+void  homeScreen::draw(void) {
+
+   panel::draw();
+   ourComPort.runUpdates(true);
+}
+
+
+void homeScreen::drawSelf(void) { screen->fillScreen(&black); } 

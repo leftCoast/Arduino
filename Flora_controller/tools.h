@@ -6,8 +6,7 @@
 #include <blinker.h>
 #include <bmpPipe.h>
 #include <fontLabel.h>
-#include "switchable.h"
-
+#include "stateTracker.h"
 
 #define SEC_IN_HOUR 3600
 #define SEC_IN_DAY  86400
@@ -22,110 +21,35 @@
 #define WATER_TIME_BMP  "/images/wTime.bmp"
 #define SOAK_TIME_BMP   "/images/sTime.bmp"
 
-
-void timeFormatter(unsigned long sec);
+#define WATER_ON_BMP  "/icons/H2OOn32.bmp"
+#define WATER_OFF_BMP "/icons/H2OOff32.bmp"
+#define ON_GREEN_BMP  "/icons/grnLED1.bmp"
+#define OFF_GREEN_BMP "/icons/grnLED0.bmp"
 
 
 
 // *****************************************************
-//                      stateTracker
+//                      timeText
 // *****************************************************
 
+// This is a special that does the short time format to an inputted seconds.
+// It displays time as one best fit unit. s,m,h,d,w as a number with one
+// decimal place. Not perfectly accurate, but close enough for humans.
+// For example put in 125 seconds and it'll put out "2.0 m".
 
-class stateTracker {
+
+void  timeFormatter(unsigned long sec); // Its out here for anyone to use. Drop a seconds value in here..
+extern  char  timeStrBuf[];             // Read out the formated string result here. Easy Peasy!
+
+
+class timeText :  public label {
 
   public:
-          stateTracker(float periodMs,bool looseTime=true);  // Every periodMs you can check the state of something..
-          ~stateTracker(void);
-        
-  virtual bool    checkState(void);         // This will tell you if the state of something has changed. By..         
-  virtual void    readState(void);          // Reading current state and..
-  virtual bool    compareStates(void);      // Compare with the.. Saved state.
-  virtual void    saveState(void);          // And then, saving the new state.
-
-          bool    mFirstState;
-          bool    mLooseTime;
-          timeObj mTimer;
+            timeText(int x, int y,int width, int height);
+    virtual ~timeText(void);
+    
+    virtual void  setValue(unsigned long seconds);
 };
-
-
-
-// *****************************************************
-//                  onlineCStrStateTracker
-// *****************************************************
-
-
-class onlineCStrStateTracker : public stateTracker {
-
-  struct stateVar {
-    bool  online;
-    char* value;
-  };
-  
-  public:
-          onlineCStrStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
-          ~onlineCStrStateTracker(void);
-        
-  virtual void    readState(void);          // Reading current state and..
-  virtual bool    compareStates(void);      // Compare with the.. Saved state.
-  virtual void    saveState(void);          // And then, saving the new state.
-
-          stateVar  mCurrentState;
-          stateVar  mSavedState;
-};
-
-
-
-// *****************************************************
-//                  onlineULongStateTracker
-// *****************************************************
-
-
-class onlineULongStateTracker : public stateTracker {
-
-  struct stateVar {
-    bool          online;
-    unsigned long value;
-  };
-  
-  public:
-          onlineULongStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
-          ~onlineULongStateTracker(void);
-        
-  virtual void    readState(void);          // Reading current state and..
-  virtual bool    compareStates(void);      // Compare with the.. Saved state.
-  virtual void    saveState(void);          // And then, saving the new state.
-
-          stateVar  mCurrentState;
-          stateVar  mSavedState;
-};
-
-
-
-// *****************************************************
-//                  onlineIntStateTracker
-// *****************************************************
-
-
-class onlineIntStateTracker : public stateTracker {
-
-  struct stateVar {
-    bool  online;
-    int   value;
-  };
-  
-  public:
-          onlineIntStateTracker(float periodMs,bool looseTime=true);     // Every periodMs we are going to..
-          ~onlineIntStateTracker(void);
-        
-  virtual void    readState(void);          // Reading current state and..
-  virtual bool    compareStates(void);      // Compare with the.. Saved state.
-  virtual void    saveState(void);          // And then, saving the new state.
-
-          stateVar  mCurrentState;
-          stateVar  mSavedState;
-};
-
 
 
 // *****************************************************
@@ -146,23 +70,198 @@ class percentText :  public label {
 
 
 // *****************************************************
-//                      timeText
+//                      onlinePercentText
 // *****************************************************
 
-// This is a special that does the short time format to an inputted seconds.
-// It displays time as one best fit unit. s,m,h,d,w as a number with one
-// decimal place. Not perfectly accurate, but close enough for humans.
-// For example put in 125 seconds and it'll put out "2.0 m".
 
-class timeText :  public label {
+class onlinePercentText : public percentText,
+                          public onlineIntStateTracker,
+                          public  idler {
+  public:
+            onlinePercentText(int x, int y,int width, int height);
+    virtual ~onlinePercentText(void);
+    
+            void  setTheLook();
+    virtual void  readState(void);
+    virtual void  doAction(void);
+    virtual void  idle(void);                            
+};
+
+
+
+// *****************************************************
+//                     nameText
+// *****************************************************
+
+class nameText : public onlineCStrStateTracker,
+                 public fontLabel,
+                 public  idler {
 
   public:
-            timeText(int x, int y,int width, int height);
-    virtual ~timeText(void);
-    
-    virtual void  setValue(int seconds);
+                nameText(int x, int y,int width, int height);
+  virtual       ~nameText(void);
+
+            void  setTheLook();
+    virtual void  readState(void);
+    virtual void  idle(void);
+    virtual void  drawSelf(void);
+};
+
+
+
+// *****************************************************
+//                     stateText
+// *****************************************************
+
+class stateText : public onlineIntStateTracker,
+                 public fontLabel,
+                 public idler {
+
+  public:
+                stateText(int x, int y,int width, int height);
+  virtual       ~stateText(void);
+
+            void  setTheLook();
+    virtual void  readState(void);
+    virtual void  idle(void);
+    virtual void  drawSelf(void);
+};
+
+
+
+// *****************************************************
+//                      currentMoistureText
+// *****************************************************
+
+
+class currentMoistureText : public onlinePercentText {
+  
+  public:
+            currentMoistureText(int x, int y,int width, int height);
+  virtual   ~currentMoistureText(void);
+
+  virtual void  readState(void);  
+};
+
+
+
+// *****************************************************
+//                      moistureLimitText
+// *****************************************************
+
+
+class moistureLimitText : public onlinePercentText {
+  
+  public:
+            moistureLimitText(int x, int y,int width, int height);
+  virtual   ~moistureLimitText(void);
+
+  virtual void  readState(void);  
+};
+
+
+
+// *****************************************************
+//                      currentTempText
+// *****************************************************
+
+
+class currentTempText : public onlineIntStateTracker,
+                        public label,
+                        public  idler {
+  
+  public:
+            currentTempText(int x, int y,int width, int height);
+  virtual   ~currentTempText(void);
+  virtual void  setTheLook(void);
+  virtual void  readState(void);
+  virtual void  idle(void);
+};
+
+
+// *****************************************************
+//                      totalWaterText
+// *****************************************************
+
+
+class totalWaterText : public onlineULongStateTracker,
+                        public label,
+                        public  idler {
+  public:
+            totalWaterText(int x, int y,int width, int height);
+  virtual   ~totalWaterText(void);
+  virtual void  setTheLook(void);
+  virtual void  readState(void);
+  virtual void  idle(void);
+
+          float mlPerSec;
+};
+
+
+
+// *****************************************************
+//                   totalLogTimeText
+// *****************************************************
+
+
+class totalLogTimeText :  public onlineULongStateTracker,
+                          public timeText,
+                          public  idler {
+  public:
+                totalLogTimeText(int x, int y,int width, int height);
+  virtual       ~totalLogTimeText(void);
+  virtual void  setTheLook(void);
+  virtual void  readState(void);
+  virtual void  idle(void);
 };
   
+
+
+// *****************************************************
+//                   waterTimeText
+// *****************************************************
+
+
+class waterTimeText :  public onlineIntStateTracker,
+                       public timeText,
+                       public  idler {
+  public:
+                waterTimeText(int x, int y,int width, int height);
+  virtual       ~waterTimeText(void);
+  virtual void  setTheLook(void);
+  virtual void  readState(void);
+  virtual void  idle(void);
+};
+
+
+
+// *****************************************************
+//                   soakTimeText
+// *****************************************************
+
+
+class soakTimeText :  public onlineIntStateTracker,
+                       public timeText,
+                       public  idler {
+  public:
+                soakTimeText(int x, int y,int width, int height);
+  virtual       ~soakTimeText(void);
+  virtual void  setTheLook(void);
+  virtual void  readState(void);
+  virtual void  idle(void);
+};
+
+
+/*
+
+
+
+
+
+
+
+
+
 
 // *****************************************************
 //                      onlineFText
@@ -201,226 +300,7 @@ class onlineText : public label,
             bool  mOnline;
 };
 
-
-// *****************************************************
-//                     stateText
-// *****************************************************
-
-
-class stateText : public onlineFText {
-
-  public:
-                stateText(int x, int y,int width, int height);
-  virtual       ~stateText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-
-          int   mStateVal;
- };
-
-
- 
-// *****************************************************
-//                     nameText
-// *****************************************************
-
-class nameText : public onlineFText {
-
-  public:
-                nameText(int x, int y,int width, int height);
-  virtual       ~nameText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
- };
-
-
-
-// *****************************************************
-//                     sTimeText
-// *****************************************************
-
-class sTimeText : public onlineText {
-
-  public:
-                sTimeText(int x, int y,int width, int height);
-  virtual       ~sTimeText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mSoakTime;
-};
-
-
-          
-// *****************************************************
-//                     wTimeText
-// *****************************************************
-
-
-class wTimeText : public onlineText {
-
-  public:
-                wTimeText(int x, int y,int width, int height);
-  virtual       ~wTimeText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mWaterTime;
-};
-
-
-          
-// *****************************************************
-//                     limitText
-// *****************************************************
-
-
-class limitText : public onlineText {
-
-  public:
-                limitText(int x, int y,int width, int height);
-  virtual       ~limitText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mLimit;
-};
-
-
-
-// *****************************************************
-//                   totalWaterText
-// *****************************************************
-
-
-class totalWaterText : public onlineText {
-
-  public:
-                totalWaterText(int x, int y,int width, int height);
-  virtual       ~totalWaterText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mLogWetLines;
-          float lPerSec;
-};
-
-
-
-// *****************************************************
-//                     moistureText
-// *****************************************************
-
-
-class moistureText : public onlineText {
-
-  public:
-                moistureText(int x, int y,int width, int height);
-  virtual       ~moistureText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mMoisture;
-};
-
-
-
-// *****************************************************
-//                   totalTimeText
-// *****************************************************
-
-
-class totalTimeText : public onlineText {
-
-  public:
-                totalTimeText(int x, int y,int width, int height);
-  virtual       ~totalTimeText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mLogLines;
-};
-
-
-
-// *****************************************************
-//                     tempText
-// *****************************************************
-
-
-class tempText : public onlineText {
-
-  public:
-                tempText(int x, int y,int width, int height);
-  virtual       ~tempText(void);
-
-  virtual void  setValue(void);
-  virtual void  setState(void);
-  virtual void  idle();
-  
-          int   mTemp;
-};
-
-
-
-// *****************************************************
-//                        flasher
-// *****************************************************
-
-
-// Copied directly from Flora_II maybe one day it'll be a library thing.
-class flasher : public drawObj,
-                public blinker {
-    public:
-                  flasher(rect* inRect,colorObj* backColor=&black);
-                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
-                     
-    virtual       ~flasher(void);
-    virtual void  setBlink(bool onOff);
-    virtual void  setLight(bool onOff);
-    virtual void  drawSelf(void);
-    
-            colorObj  mForeColor;
-            colorObj  mBackColor;
-};
-
-
-
-// *****************************************************
-//                     bmpFlasher
-// *****************************************************
-
-
-class bmpFlasher :  public flasher {
-    
-    public:
-                  bmpFlasher(int inX,int inY, int width,int height,char* onBmp, char* offBmp);
-                  bmpFlasher(rect* inRect,char* onBmp, char* offBmp);
-    virtual       ~bmpFlasher(void);
-
-            void  setup(char* onBmp, char* offBmp);
-    virtual void  drawSelf(void);
-
-            bool      mReady;
-            bmpPipe*  mOnBmp;
-            bmpPipe*  mOffBmp;     
-};
+*/
 
 // ******************************************
 //                    plantBotCom
@@ -484,9 +364,9 @@ class plantBotCom : public qCMaster {
           bool  getCString(byte com,char* reply);
           bool  sendCommand(byte com);
           
-          char*         getName(void) ;
+          char*         getName(void);        // You get a pointer to where we stored it. You'll need to copy it out.
           int           getLimit(void);
-          int           getWaterTime(void) ;
+          int           getWaterTime(void);
           int           getSoakTime(void);
           int           getPulse(void);
           int           getPump(void);

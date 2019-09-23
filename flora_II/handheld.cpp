@@ -56,7 +56,7 @@ handheld::handheld(void) {  }
 handheld::~handheld(void) {  }
 
 
-void handheld::begin(void) { qCSlave::begin(comBuff, COM_BUFF_BYTES, 9600); }
+void handheld::begin(void) { qCSlave::begin(comBuff, COM_BUFF_BYTES, 115200); }
 
 
 // Every time though the loop() we need to see if there's a command from the handheld controller

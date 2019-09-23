@@ -4,7 +4,6 @@
 #include <litlOS.h>
 #include <panel.h>
 #include <quickCom.h>
-#include "globals.h"
 #include "src/rpnCalc/rpnCalc.h"
 
 

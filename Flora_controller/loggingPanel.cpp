@@ -4,6 +4,7 @@
 #include <bmpObj.h>
 #include "floraOS.h"
 #include "bmpKeyboard.h"
+#include "flasher.h"
 
 #define TB_X    10
 #define TB_Y    28
@@ -55,24 +56,6 @@ void loggingPanel::setup(void) {
   theTextField->setTextColors(&white,&black);
   out("Can you see this?");
   addObj(theTextField);
-
-  
-  /*
-  kbPallette.inputKeyText.setColor(LC_YELLOW);
-  kbPallette.inputKeyBase.setColor(LC_GREY);
-  kbPallette.inputKeyHText.setColor(LC_WHITE);
-  kbPallette.inputKeyHBase.setColor(LC_WHITE);
-  
-  kbPallette.contolKeyText.setColor(LC_BLUE);
-  kbPallette.contolKeyBase.setColor(LC_DARK_GREY);
-  kbPallette.contolKeyHText.setColor(LC_WHITE);
-  kbPallette.contolKeyHBase.setColor(LC_GREY);
-  
-  kbPallette.deleteKeyText.setColor(LC_RED);
-  kbPallette.deleteKeyBase.setColor(LC_DARK_GREY);
-  kbPallette.deleteKeyHText.setColor(LC_WHITE);
-  kbPallette.deleteKeyHBase.setColor(LC_GREY);
-  */
   
   bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditField,true);
   theKeybaord->loadKeys();
