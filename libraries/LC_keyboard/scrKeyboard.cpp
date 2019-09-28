@@ -267,10 +267,10 @@ void controlKey::doAction(void) {
 // ********************************************************************************
 
 
-keyboard::keyboard(editField* inEditField)
+keyboard::keyboard(editable* inEditObj)
 	: drawGroup(KBD_X,KBD_Y,KBD_W,KBD_H) {
-	
-  mEditField = inEditField;
+
+  mEditObj = inEditObj;
   mState = chars;
   
 }
@@ -365,10 +365,10 @@ void keyboard::handleKey(char inChar) {
 
 	keystroke aKeystroke;
 	
-	if (mEditField) {
+	if (mEditObj) {
 		aKeystroke.editCommand = input;
 		aKeystroke.theChar = inChar;
-		mEditField->handleKeystroke(&aKeystroke);
+		mEditObj->handleKeystroke(&aKeystroke);
 		if(mState==shifted) {
 			mState = chars;
 		}
@@ -380,15 +380,15 @@ void keyboard::handleKey(keyCommands inEditCom) {
 
 	keystroke aKeystroke;
 
-	if (mEditField) {
+	if (mEditObj) {
 		aKeystroke.editCommand = inEditCom;
 		aKeystroke.theChar = '\0';
-		mEditField->handleKeystroke(&aKeystroke);
+		mEditObj->handleKeystroke(&aKeystroke);
 	}
 }
 
 
-void keyboard::setEditField(editField* inField) { mEditField = inField; }
+void keyboard::setEditField(editable* inEditObj) { mEditObj = inEditObj; }
 
 void keyboard::handleKey(keyStates inState) { mState = inState; }
 

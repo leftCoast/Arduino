@@ -3,7 +3,7 @@
 
 #include <label.h>
 #include <keystroke.h>
-#include <editField.h>
+#include <editable.h>
 #include <idlers.h>
 
 
@@ -83,18 +83,18 @@ class controlKey : public keyboardKey, public label {
 class keyboard : public drawGroup {
 
 	public:
-				keyboard(editField* inEditField);
+				keyboard(editable* inEditObj=NULL);
 	virtual	~keyboard(void);
 
 	virtual	void			loadKeys(void);
 	virtual	void			handleKey(char inChar);
 	virtual	void			handleKey(keyCommands inEditCom);
 	virtual	void			handleKey(keyStates inState);
-	virtual	void			setEditField(editField* inField);
+	virtual	void			setEditField(editable* inLabel);
 	virtual	keyStates	getState(void);
 	virtual void    		drawSelf(void);
 			
-          editField*		mEditField;
+          editable*		mEditObj;
           keyStates		mState;
 }; 
 

@@ -6,6 +6,8 @@
 #include <blinker.h>
 #include <bmpPipe.h>
 #include <fontLabel.h>
+#include <editLabel.h>
+#include <scrKeyboard.h>
 #include "stateTracker.h"
 
 #define SEC_IN_HOUR 3600
@@ -25,6 +27,19 @@
 #define WATER_OFF_BMP "/icons/H2OOff32.bmp"
 #define ON_GREEN_BMP  "/icons/grnLED1.bmp"
 #define OFF_GREEN_BMP "/icons/grnLED0.bmp"
+
+
+// *****************************************************
+//                      stdEditField
+// *****************************************************
+
+class stdEditField :  public editLabel {
+
+  public:
+
+              stdEditField(label* parent);
+  virtual     ~stdEditField(void);
+};
 
 
 
@@ -226,11 +241,18 @@ class waterTimeText :  public onlineIntStateTracker,
                        public timeText,
                        public  idler {
   public:
-                waterTimeText(int x, int y,int width, int height);
+                waterTimeText(int x, int y,int width, int height,keyboard* inKeyboard=NULL,drawGroup* inParent=NULL);
   virtual       ~waterTimeText(void);
   virtual void  setTheLook(void);
   virtual void  readState(void);
+  virtual void  doAction(void);
+  virtual void  drawSelf(void);
   virtual void  idle(void);
+
+          keyboard*       mKeyboard;
+          drawGroup*      mParent;
+          stdEditField*   mEditField;
+          bool            mEditing;
 };
 
 
@@ -241,8 +263,8 @@ class waterTimeText :  public onlineIntStateTracker,
 
 
 class soakTimeText :  public onlineIntStateTracker,
-                       public timeText,
-                       public  idler {
+                      public timeText,
+                      public  idler {
   public:
                 soakTimeText(int x, int y,int width, int height);
   virtual       ~soakTimeText(void);
@@ -252,59 +274,24 @@ class soakTimeText :  public onlineIntStateTracker,
 };
 
 
-/*
-
-
-
-
-
-
-
-
-
 
 // *****************************************************
-//                      onlineFText
+//                   pauseUpdates
 // *****************************************************
 
 
-class onlineFText : public fontLabel,
-                    public idler {
+class pauseUpdates {
+
   public:
-            onlineFText(int x, int y,int width, int height);
-    virtual ~onlineFText(void);
-    
-    virtual void  setState(void)=0;
-    virtual void  idle();
-    virtual void  drawSelf(void);
-    
-            bool  mOnline;
+                pauseUpdates(void);
+  virtual       ~pauseUpdates(void);              
 };
 
 
 
 // *****************************************************
-//                      onlineText
-// *****************************************************
-
-
-class onlineText : public label,
-                   public idler {
-  public:
-            onlineText(int x, int y,int width, int height);
-    virtual ~onlineText(void);
-    
-    virtual void  setState(void)=0;
-    virtual void  idle();
-    
-            bool  mOnline;
-};
-
-*/
-
-// ******************************************
 //                    plantBotCom
-// ******************************************
+// *****************************************************
 
 
 #define PLANTBOT_NAME_SIZE  24    // The name has to fit in a string this size. IE ONE LESS.
@@ -394,6 +381,7 @@ class plantBotCom : public qCMaster {
           bool  getOnline(void);
           
   protected:
+  
           void  setUpdateTime(void);
           void  sleep(int ms);
           

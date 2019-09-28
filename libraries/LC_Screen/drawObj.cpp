@@ -57,8 +57,9 @@ bool drawObj::wantRefresh(void) { return needRefresh; }
 
 
 // Sometimes others know better than us that we need a refresh.
-// This allows them to make that happen.
-void drawObj::setNeedRefresh(void) { needRefresh = true; }
+// This allows them to make that happen. Sometimes they want to tell
+// us that they'll take care of the refresh stuff themselves.
+void drawObj::setNeedRefresh(bool refresh) { needRefresh = refresh; }
 
 
 void drawObj::setLocation(int inX,int inY) {
@@ -93,7 +94,7 @@ void  drawObj::drawSelf(void) {
 
 
 // We are either getting or loosing focus.
-void  drawObj::setFocus(bool setLoose) {
+void  drawObj::setThisFocus(bool setLoose) {
 
 	focus = setLoose;
 	needRefresh = true;
@@ -204,13 +205,13 @@ drawObj*	theTouched = NULL;	// Who's accepted a finger touch on the screen?
 
 void	setFocusPtr(drawObj* newFocus) {
 
-		if (newFocus!=currentFocus) {				// People are lazy. Now they don't need to check.
-			if (currentFocus) {						// Check for NULL..
-				currentFocus->setFocus(false);	// Warn them that their star is falling.
+		if (newFocus!=currentFocus) {					// People are lazy. Now they don't need to check.
+			if (currentFocus) {							// Check for NULL..
+				currentFocus->setThisFocus(false);	// Warn them that their star is falling.
 			}
-			currentFocus = newFocus;				// The up and coming..
-			if (currentFocus) {						// If we're actually passed in something.
-				currentFocus->setFocus(true);		// Tell 'em their star is rising!!
+			currentFocus = newFocus;					// The up and coming..
+			if (currentFocus) {							// If we're actually passed in something.
+				currentFocus->setThisFocus(true);	// Tell 'em their star is rising!!
 			}
 		}
 	}
@@ -332,13 +333,13 @@ drawGroup::~drawGroup() { }
 // Needs a refresh. Typically when scrolled, subObjects don't know
 // they've been moved. Why? Because their offsets move with them.
 // This sets everyone's needRefresh flag.
-void drawGroup::setGroupRefresh(void) {
+void drawGroup::setGroupRefresh(bool refresh) {
 		
 		drawObj* trace;
 
 		trace = theList();										// Make sure we're at the top.
 		while(trace) {
-			trace->setNeedRefresh();
+			trace->setNeedRefresh(refresh);
 			trace = (drawObj*)trace->dllNext;
 		} 
 	}
@@ -366,10 +367,10 @@ bool drawGroup::wantRefresh(void) { return (needRefresh || checkGroupRefresh());
 
 // Someone from the outside is hinting to us that we are
 // due for a redraw. We'd better let the kids know too..
-void drawGroup::setNeedRefresh(void) {
+void drawGroup::setNeedRefresh(bool refresh) {
 
-	drawObj::setNeedRefresh();
-	setGroupRefresh();
+	drawObj::setNeedRefresh(refresh);
+	setGroupRefresh(refresh);
 }
 
 

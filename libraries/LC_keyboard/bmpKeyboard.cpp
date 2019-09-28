@@ -1,6 +1,6 @@
 #include "bmpKeyboard.h"
 
-#include <editField.h>
+#include <editable.h>
 
 #define KEY_WD  24
 #define KEY_HT  33
@@ -38,8 +38,8 @@ bmpPipe keyCap; // No point in having lots and lots of the same thing.
 // *****************************************************
 
 
-bmpKeyboard::bmpKeyboard(editField* inEditField,bool modal)
-  : keyboard (inEditField) {
+bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
+  : keyboard (inEditObj) {
 
   rect  sRect;
 

@@ -1,6 +1,5 @@
 #include "tools.h"
 #include <resizeBuff.h>
-#include "debug.h"
 #include "floraOS.h"
 
 #define SLEEP_TIME          2   // When looking for an answer, rest this long before peeking.
@@ -9,7 +8,40 @@
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 
 
-char  timeStrBuf[10]; // "9000 w" Is only 7 chars. It doens't do years.
+// *****************************************************
+//                      stdEditField
+// *****************************************************
+
+
+stdEditField::stdEditField(label* parent)
+  : editLabel(parent) {
+    
+  setColors(&yellow,&black);  // So the user sees a difference.
+}
+  
+stdEditField::~stdEditField(void) {  }
+
+
+
+// *****************************************************
+//                      timeText
+// *****************************************************
+
+
+timeText::timeText(int x, int y,int width, int height)
+  : label(x,y,width,height) { }
+
+timeText::~timeText(void) { }
+
+
+void timeText::setValue(unsigned long seconds) {
+
+  timeFormatter(seconds);
+  label::setValue(timeStrBuf); 
+}
+
+
+char timeStrBuf[10]; // "9000 w" Is only 7 chars. It doesn't do years.
 
 void timeFormatter(unsigned long sec) {
   
@@ -52,24 +84,6 @@ void timeFormatter(unsigned long sec) {
   } else {
     snprintf (timeStrBuf,5,"%d s",sec);
   }
-}
-
-
-// *****************************************************
-//                      timeText
-// *****************************************************
-
-
-timeText::timeText(int x, int y,int width, int height)
-  : label(x,y,width,height) { }
-
-timeText::~timeText(void) { }
-
-
-void timeText::setValue(unsigned long seconds) {
-
-  timeFormatter(seconds);
-  label::setValue(timeStrBuf); 
 }
 
 
@@ -397,7 +411,6 @@ totalLogTimeText::~totalLogTimeText(void) {  }
 void totalLogTimeText::setTheLook(void) {
     
   if (mCurrentState.online) {
-    Serial.println(mCurrentState.value);
     timeText::setValue(mCurrentState.value/2);
   } else {
     label::setValue("--- s");
@@ -421,10 +434,13 @@ void totalLogTimeText::idle(void) { if (checkState()) setTheLook(); }
 // *****************************************************
 
 
-waterTimeText::waterTimeText(int x, int y,int width, int height)
+waterTimeText::waterTimeText(int x, int y,int width, int height,keyboard* inKeyboard,drawGroup* inParent)
   : onlineIntStateTracker(),
   timeText(x,y,width,height) {
 
+  mKeyboard = inKeyboard;
+  mParent = inParent;
+  mEditing = false;
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
@@ -438,7 +454,6 @@ waterTimeText::~waterTimeText(void) {  }
 void waterTimeText::setTheLook(void) {
     
   if (mCurrentState.online) {
-    Serial.println(mCurrentState.value);
     timeText::setValue(mCurrentState.value/2);
   } else {
     label::setValue("--- s");
@@ -451,6 +466,23 @@ void waterTimeText::readState(void) {
   mCurrentState.online = ourComPort.getOnline();
   mCurrentState.value = ourComPort.getWaterTime();
 }
+
+void waterTimeText::doAction(void) {
+
+  if (mParent&&mKeyboard&&!mEditing) {
+    ourOS.beep();
+    mEditField = new stdEditField(this);
+    mParent->addObj(mEditField);
+    setFocusPtr (mEditField);
+    mParent->setNeedRefresh(false);
+    mKeyboard->setEditField(mEditField);
+    mEditField->setNeedRefresh();
+    mEditing = true;
+  }
+}
+
+
+void waterTimeText::drawSelf(void) { if (!mEditing) timeText::drawSelf(); }
 
 
 void waterTimeText::idle(void) { if (checkState()) setTheLook(); }
@@ -479,7 +511,6 @@ soakTimeText::~soakTimeText(void) {  }
 void soakTimeText::setTheLook(void) {
     
   if (mCurrentState.online) {
-    Serial.println(mCurrentState.value);
     timeText::setValue(mCurrentState.value/2);
   } else {
     label::setValue("--- s");
@@ -498,87 +529,41 @@ void soakTimeText::idle(void) { if (checkState()) setTheLook(); }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/*
 // *****************************************************
-//                      onlineFText
+//                   pauseUpdates
 // *****************************************************
 
+// So simple. When you are going to do somehing invloved and long that would cause updates
+// to time out, just add "pauseUpdates x;" as your first line. Then, when your menthod or function
+// goes out of scope, the second line is automatically called and updates are turned back on.
+// Its also nestible. You can recurse in as much as you like calling pauseUpdates. Only the
+// outermost call will actually restart updates.
 
+int gPause = 0;
 
-onlineFText::onlineFText(int x, int y,int width, int height)
-  : fontLabel(x,y,width,height) {
-  
-  mOnline = !ourComPort.getOnline();
-  setColors(&white,&black);
-  setJustify(TEXT_RIGHT);
-  hookup();
-  setTextSize(2);
+pauseUpdates::pauseUpdates(void) {
+
+  ourComPort.updateTime();        // Kive it one last kick before shutting it down.
+  ourComPort.runUpdates(false);   // Shut it down.
+  gPause++;                       // Bump up our nesting index.
 }
 
-  
-onlineFText::~onlineFText(void) {  }
 
+pauseUpdates::~pauseUpdates(void) {
 
-void onlineFText::idle() {
-  
-  if (mOnline != ourComPort.getOnline()) {
-    mOnline = ourComPort.getOnline();
-    setState();
+  if (gPause>0) {                 // If our nesting index is greater than zero..
+    gPause--;                     // Bump it down by one.
   }
-}
-
-void onlineFText::drawSelf(void) {
-  
-  screen->fillRect(this,&black);
-  fontLabel::drawSelf();
-}
-
-
-
-// *****************************************************
-//                      onlineText
-// *****************************************************
-
-
-
-onlineText::onlineText(int x, int y,int width, int height)
-  : label(x,y,width,height) {
-  
-  mOnline = !ourComPort.getOnline();
-  setColors(&white,&black);
-  setJustify(TEXT_RIGHT);
-  hookup();
-  setTextSize(2);
-}
-
-  
-onlineText::~onlineText(void) {  }
-
-
-void onlineText::idle() {
-  
-  if (mOnline!= ourComPort.getOnline()) {
-    mOnline = ourComPort.getOnline();
-    setState();
+  if (!gPause) {                  // If our nesting index is zero..
+    ourComPort.runUpdates(true);  // We're at the top level, fire up updates again.
   }
-}
+}             
 
-*/
 
-// ******************************************
+
+// *****************************************************
 //                    plantBotCom
-// ******************************************
+// *****************************************************
 
 
 plantBotCom::plantBotCom(void) 

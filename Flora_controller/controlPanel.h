@@ -28,10 +28,6 @@ class controlPanel : public panel {
           void  doComSetWTime(float wTime);
           void  doComSetSTime(float sTime);
   virtual void  drawSelf(void);
-
-          //selectBtn*    mDryLimitBtn;
-          //selectBtn*    mWaterTimeBtn;
-          //selectBtn*    mSoakTimeBtn;
 };
 
 #endif

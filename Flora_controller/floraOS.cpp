@@ -36,9 +36,9 @@ int floraOS::begin(void) {
   
 // Used to create our custom panels..
 panel* floraOS::createPanel(int panelID) {
-
-  ourComPort.runUpdates(false);                       // We are going to be spending a LOT of time drawing and stuff. Shut off the updates.
-  switch (panelID) {                                  // The different panels can decided to update or not.
+  
+  pauseUpdates x;
+  switch (panelID) {
     case homeApp      : return new homeScreen();
     case controlApp   : return new controlPanel();
     case calcApp      : return new rpnCalc();

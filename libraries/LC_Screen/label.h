@@ -32,6 +32,7 @@ class label : public drawObj {
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
   				label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize);
   				label(rect* inRect,char* inText,int textSize=1);
+  				label(label* aLabel);
 	virtual	~label(void);
   
   				void 	setTextSize(int size);  // 1,2,3.. - Ends up as multiples of 8 pixals.
@@ -45,6 +46,7 @@ class label : public drawObj {
   				void 	setValue(double val);
   				void 	setValue(char* str);
 				int	getNumChars(void);		// We want to know how long the string is..
+				int	getViewChars(void);		// We want to know how many chars can we display?
 				void	getText(char* inBuff);	// We asked above how much you have. Hand it over.
   				int 	getTextWidth(void);		// How wide in pixels is our text?
   				int 	getTextHeight(void);		// How tall in pixels are the charactors?
@@ -62,7 +64,6 @@ class label : public drawObj {
 	char*    buff;
 	int      prec;      // For formatting floats.
 };
-
 
 #endif
 

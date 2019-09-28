@@ -1,8 +1,7 @@
 #include "homePanel.h"
-//#include "switchable.h"
 #include "floraOS.h"
 #include "tools.h"
-#include "debug.h"
+//#include "debug.h"
 
 
 // *****************************************************
@@ -176,13 +175,6 @@ void homeScreen::setup(void) {
 
 
 void homeScreen::loop(void) { }
-
-
-void  homeScreen::draw(void) {
-
-   panel::draw();
-   ourComPort.runUpdates(true);
-}
 
 
 void homeScreen::drawSelf(void) { screen->fillScreen(&black); } 

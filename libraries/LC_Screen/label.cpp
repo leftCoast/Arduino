@@ -4,41 +4,39 @@
 
 char  temp[TEMP_BUFF_SIZE];
 
-label::label() : 
-drawObj() {
-  initLabel();
-}
+
+label::label() : drawObj() { initLabel(); }
+
 
 // These next two actually fit our rectangle to the text.
-label::label(char* inText) : 
-drawObj() {
+label::label(char* inText)
+	: drawObj() {
 
-  initLabel();
-  setValue(inText);
-  setSize(getTextWidth(),getTextHeight());
+	initLabel();
+	setValue(inText);
+	setSize(getTextWidth(),getTextHeight());
 }
 
 
-label::label(char* inText, int inSize) : 
-drawObj() {
+label::label(char* inText, int inSize) 
+	: drawObj() {
 
-  initLabel();
-  setValue(inText);
-  setTextSize(inSize);
-  setSize(getTextWidth(),getTextHeight());
+	initLabel();
+	setValue(inText);
+	setTextSize(inSize);
+	setSize(getTextWidth(),getTextHeight());
 }
 
 
-label::label(int inLocX, int inLocY, int inWidth,int inHeight) :
-drawObj(inLocX,inLocY,inWidth,inHeight) {
-  initLabel();
-}
+label::label(int inLocX, int inLocY, int inWidth,int inHeight)
+	: drawObj(inLocX,inLocY,inWidth,inHeight) { initLabel(); }
 
 
-label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText) :
-drawObj(inLocX,inLocY,inWidth,inHeight) {
-  initLabel();
-  setValue(inText);
+label::label(int inLocX, int inLocY, int inWidth,int inHeight, char* inText)
+	: drawObj(inLocX,inLocY,inWidth,inHeight) {
+	
+	initLabel();
+	setValue(inText);
 }
 
 
@@ -60,9 +58,23 @@ label::label(rect* inRect,char* inText,int textSize)
 }
 
 
-label::~label() { 
-  resizeBuff(0,(uint8_t**)&buff); 
-}
+// We don't call initLabel() in this one. Everyting comes from the copied label.
+// So be sure we check everything.
+label::label(label* aLabel)
+	: drawObj(aLabel) {
+	
+	buff = NULL;								// Best to have this initialized!
+	setValue(aLabel->buff);
+	setTextSize(aLabel->textSize);
+	setJustify(aLabel->justify);
+	setColors(&aLabel->textColor,&aLabel->backColor);
+	transp = aLabel->transp;
+	setPrecision(aLabel->prec);
+	needRefresh = true;
+}	
+
+	
+label::~label() { resizeBuff(0,&buff); }
 
 
 void label::initLabel(void) {
@@ -145,93 +157,94 @@ void label::setValue(char* str) {
 
 	int numChars;
 
-	
-	
 	if (!str) {
-		if (resizeBuff(1,(uint8_t**)&buff)) {
+		if (resizeBuff(1,&buff)) {
 			buff[0] = '\0';
 		}
 	} else {
 		numChars = strlen(str) + 1;
-		if (resizeBuff(numChars,(uint8_t**)&buff)) {
+		if (resizeBuff(numChars,&buff)) {
 			strcpy (buff,str);
 		}
 	}
 	needRefresh = true;
 }
 
-// We want to know how long the string is..
+
+// We want to know how long the string is.. (*** REMEBER NOT COUNTING '\0' ***)
 int label::getNumChars(void) { return strlen(buff); }
 
 
-// We asked above how much you have. Hand it over.	(They better add one for the \0!)	
+// We want to know how many chars can we display?
+int label::getViewChars(void) { return width/(CHAR_WIDTH*textSize); }
+
+	
+// We asked above how much you have. Hand it over!	(They better add one for the \0!)	
 void label::getText(char* inBuff) { strcpy(inBuff,buff); }
 				
 				
-int label::getTextWidth(void) {
-
-  return(CHAR_WIDTH*textSize*strlen(buff));
-}
+int label::getTextWidth(void) { return(CHAR_WIDTH*textSize*strlen(buff)); }
 
 
-int label::getTextHeight(void) { 
-
-  return(CHAR_HEIGHT*textSize); 
-}
+int label::getTextHeight(void) { return(CHAR_HEIGHT*textSize); }
 
 
 void label::drawSelf(void) {
 
-  int numCharsDisp;  // How many we have room for?
-  int charDif;     
-	if (buff) {
-    if (transp) {
-      screen->setTextColor(&textColor);
-    } else {
-      screen->setTextColor(&textColor,&backColor);
-    }
-    screen->setTextSize(textSize);
-    screen->setTextWrap(false);
-    screen->setCursor(x,y);
-    numCharsDisp = width/(CHAR_WIDTH*textSize);
-    charDif =  numCharsDisp - strlen(buff);
-    if (charDif==0) {               //Exact amount..
-      screen->drawText(buff);
-    } else if (charDif>0) {          // Needs padding..
-      switch (justify) {
-      case TEXT_LEFT :
-        screen->drawText(buff);
-        for(int i=1;i<=charDif;i++) screen->drawText(" ");
-        break;
-      case TEXT_RIGHT :
-        for(int i=1;i<=charDif;i++) screen->drawText(" ");
-        screen->drawText(buff);
-        break;
-      case TEXT_CENTER :
-      	int leadSp = charDif/2;
-      	int trailSp = charDif-leadSp;
-        for(int i=1;i<=leadSp;i++) screen->drawText(" ");
-        screen->drawText(buff);
-        for(int i=1;i<=trailSp;i++) screen->drawText(" ");
-        break;
-      }
-		} else {                      // Needs truncation..
-    	if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {
-			  switch (justify) {
-				case TEXT_LEFT :						// 1/19/2017 : This bit has never been tested.
-					int i;
-					for(i=0;i<numCharsDisp;i++) {
-						temp[i] = buff[i];
-					}
-					temp[i] = '\0';
-					screen->drawText(temp);
+	int	charDif; 
+   int	numCharsDisp; 
+	
+	if (buff) {																			// Sanity. If we have anything to display..
+		numCharsDisp = getViewChars();											// Save off how many chars we can display.
+		if (transp) {																	// If we don't draw background bits..
+			screen->setTextColor(&textColor);									// We just set the one color as a flag for this.
+		} else {																			// Else, we DO want to draw the background bits.
+			screen->setTextColor(&textColor,&backColor);						// We set BOTH colors as a flag for both.
+		}
+		screen->setTextSize(textSize);											// Set the text size.
+		screen->setTextWrap(false);												// Turn on wrap. It just makes a mess of everything.
+		screen->setCursor(x,y);														// Move the cursor to our XY location.
+		charDif =  numCharsDisp - strlen(buff);								// Calculate the total amount of blanks we'll need.
+		if (charDif==0) {																// If its a perfect fit..
+			screen->drawText(buff);													// Just draw it out. EASY PEASY! (And we're done)
+		} else if (charDif>0) {														// Else, we'll eed some padding..
+			switch (justify) {														// Left, Right, Center will be handled differently.
+				case TEXT_LEFT :														// ** LEFT **
+					screen->drawText(buff);											// Draw the text.
+					for(int i=1;i<=charDif;i++) screen->drawText(" ");		// Add the padding.
+				  break;																	// And that's it.
+				case TEXT_RIGHT :														// ** RIGHT **
+				  for(int i=1;i<=charDif;i++) screen->drawText(" ");		// First we add the padding.
+				  screen->drawText(buff);											// Then draw the text.
+				  break;																	// And we're done.
+				case TEXT_CENTER :													// ** CENTER **
+					int leadSp = charDif/2;											// Do integer divide by 2 for the lead blank count.
+					int trailSp = charDif-leadSp;									// Subtract the lead count from the blank count for the trailing count.
+				  for(int i=1;i<=leadSp;i++) screen->drawText(" ");		// Add the lead padding.
+				  screen->drawText(buff);											// Draw the string.
+				  for(int i=1;i<=trailSp;i++) screen->drawText(" ");		// Add the trailing padding.
+				  break;																	// And again, we're done.
+				}
+		} else {                      											// Else the string needs truncation..
+			if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {								// Make sure we have enough room to maneuver.
+				switch (justify) {													// Left, Right, Center will be handled differently.
+					case TEXT_LEFT :													// ** LEFT **
+						temp[0] = '\0';												// "Clear" the temp buffer.
+						strncat(temp,buff,numCharsDisp);							// Stamp in the characters to display.
+						screen->drawText(temp);										// Draw the string.
+					break;																// And we're done.
+					case TEXT_RIGHT :													// ** RUIGHT**						
+						screen->drawText((char*)&(buff[-charDif])); 			// Just draw the text starting after the clipped portion.
 					break;
-				case TEXT_RIGHT :						// This bit has been tested, and works.
-					screen->drawText((char*)&(buff[-charDif]));  
-					break;
+					case TEXT_CENTER :												// ** CENTER **
+						int firstChar = (numCharsDisp-charDif)/2+1;			// Calculate first char to display.
+						temp[0] = '\0';												// "Clear" the temp buffer.
+						strncat(temp,&buff[firstChar],numCharsDisp);			// Stamp in the characters to display.
+						screen->drawText(temp);										// Draw the string.
+					break;																// And we're done.
 				}
 			} else {
-				screen->drawText("Overflow");
+				screen->drawText("Overflow");										// Our temp buffer is just to small!
 			}
 		}
 	}

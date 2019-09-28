@@ -26,12 +26,12 @@ class drawObj : public rect, public dblLinkListObj {
 	virtual	~drawObj();
     
    virtual	bool		wantRefresh(void);
-   virtual	void		setNeedRefresh(void);
+   virtual	void		setNeedRefresh(bool=true);
 	virtual	void		setLocation(int x,int y);
    virtual	void  	draw(void);												// Call this one. Don't inherit this one.
    virtual	void		eraseSelf(void);										// Mostly you can ignore this one. Used for animation.
    virtual 	void  	drawSelf(void);										// Inherit this one and make it yours.
-	virtual	void		setFocus(bool setLoose);							// We are either getting or loosing focus.
+	virtual	void		setThisFocus(bool setLoose);						// We are either getting or loosing focus.
 	virtual	void		setEventSet(eventSet inEventSet);				// Want to change our event set on the fly?
   	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
   	virtual	void  	doAction(void);										// Override me for action!
@@ -99,9 +99,9 @@ class drawGroup : public drawObj, public viewMgr {
 
 	virtual	bool		checkGroupRefresh(void);
 	virtual	void		setLocation(int x,int y);
-	virtual	void		setGroupRefresh(void);
+	virtual	void		setGroupRefresh(bool refresh=true);
 	virtual	bool		wantRefresh(void);
-	virtual	void		setNeedRefresh(void);
+	virtual	void		setNeedRefresh(bool refresh=true);
   	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
   	virtual	void  	addObj(drawObj* newObj);
   	virtual	void  	draw(void);

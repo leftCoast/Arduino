@@ -2,13 +2,14 @@
 
 #define out  mTextField->appendText
 
-IOandKeys::IOandKeys(editField* inEditField,textView* inTextField) 
-  : keyboard(inEditField) {
+IOandKeys::IOandKeys(editLabel* inEditField,textView* inTextField) 
+	: keyboard(inEditField) {
     
-  mTextField = inTextField;
-  mHaveBuff = false;
-  mOutBuff = NULL;
-  mNumBytes = 0;
+	mEditField = inEditField;
+	mTextField = inTextField;
+	mHaveBuff = false;
+	mOutBuff = NULL;
+	mNumBytes = 0;
 }         
 
 

@@ -1,6 +1,5 @@
 #include "loggingPanel.h"
 #include <IOandKeys.h>
-#include <editField.h>
 #include <bmpObj.h>
 #include "floraOS.h"
 #include "bmpKeyboard.h"
@@ -46,10 +45,10 @@ void loggingPanel::setup(void) {
   drawObj* editBox = new drawObj(EB_X,EB_Y,EB_W,EB_H);
   addObj(editBox);
   
-  editField*  theEditField = new editField(ET_X,ET_Y,ET_W,ET_H,"",2);
-  theEditField->setColors(&white,&black);
-  setFocusPtr(theEditField);
-  addObj(theEditField);
+  editLabel*  theEditLabel = new editLabel(ET_X,ET_Y,ET_W,ET_H,"",2);
+  theEditLabel->setColors(&white,&black);
+  theEditLabel->setJustify(TEXT_RIGHT);
+  addObj(theEditLabel);
 
   
   textView*   theTextField = new textView(TF_X,TF_Y,TF_W,TF_H);
@@ -57,9 +56,11 @@ void loggingPanel::setup(void) {
   out("Can you see this?");
   addObj(theTextField);
   
-  bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditField,true);
+  bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditLabel,true);
   theKeybaord->loadKeys();
   addObj(theKeybaord);
+  
+  theEditLabel->beginEditing();
 }
 
 
