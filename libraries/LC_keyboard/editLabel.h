@@ -36,6 +36,7 @@ class editLabel : public label,
 	virtual	void	handleArrowBackKey(void);
 	virtual	void	endEditing(void);
 	
+  	virtual	void  doAction(event* inEvent,point* locaPt);
 	virtual	void	drawSelf(void);
 	virtual	void	setInitalPointers(void);
 	virtual	void	showText(void);

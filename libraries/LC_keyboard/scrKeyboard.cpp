@@ -63,6 +63,9 @@ keyboardKey::keyboardKey(keyboard* inKeyboard) {
 keyboardKey::~keyboardKey(void) { }
 
 
+// Maybe your user interface wants **all** screen clicks to beep? This could help.
+void keyboardKey::beenClicked(void) { if (mKeyboard) mKeyboard->keyClicked(this); }
+
 
 // ********************************************************************************
 // ********************************************************************************
@@ -114,6 +117,7 @@ void inputKey::drawSelf(void) {
   
 void inputKey::doAction(void)  {
   
+  beenClicked();
   mKeyboard->handleKey(buff[0]);      // Toss out our input.
   if (mKeyboard->mState==shifted) {   // If we're in a shift state..
       mKeyboard->handleKey(chars);    // Clear it.
@@ -246,6 +250,7 @@ void controlKey::handleNumber() {
 // enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack, enter };
 void controlKey::doAction(void) {
 
+	beenClicked();
 	switch (mCom) {
 		case backspace	:  
 		case arrowFWD	:
@@ -361,6 +366,10 @@ void keyboard::loadKeys(void) {
   addObj(symbolKey);
   addObj(enterKey);
 }
+
+
+// Kind'a a general callback so you can do some universal thing when a key is clicked.
+void keyboard::keyClicked(keyboardKey* aKey) {  }
 
 
 void keyboard::handleKey(char inChar) {

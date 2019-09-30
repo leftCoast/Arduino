@@ -40,16 +40,18 @@ extern keyColors kbPallette;
 
 class keyboardKey : public idler {
 
-  public:
-          keyboardKey(keyboard* inKeyboard);
-  virtual ~keyboardKey(void);
-
-          keyboard*   mKeyboard;  // Master!
-          keyStates   mState;     // Current state I'm showing.
-          char        mChar;
-          char        mNum;
-          char        mSymbol;
-          keyCommands mCom;
+	public:
+						keyboardKey(keyboard* inKeyboard);
+	virtual			~keyboardKey(void);
+	
+	virtual	void	beenClicked(void);
+	
+				keyboard*   mKeyboard;  // Master!
+				keyStates   mState;     // Current state I'm showing.
+				char        mChar;
+				char        mNum;
+				char        mSymbol;
+				keyCommands mCom;
 };
 
 
@@ -87,12 +89,13 @@ class keyboard : public drawGroup {
 	virtual	~keyboard(void);
 
 	virtual	void			loadKeys(void);
+	virtual	void			keyClicked(keyboardKey* aKey);
 	virtual	void			handleKey(char inChar);
 	virtual	void			handleKey(keyCommands inEditCom);
 	virtual	void			handleKey(keyStates inState);
 	virtual	void			setEditField(editable* inLabel);
 	virtual	keyStates	getState(void);
-	virtual void    		drawSelf(void);
+	virtual	void    		drawSelf(void);
 			
           editable*		mEditObj;
           keyStates		mState;

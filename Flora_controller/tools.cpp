@@ -8,6 +8,21 @@
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 
 
+
+// *****************************************************
+//                      ourKeyboard
+// *****************************************************
+
+
+ourKeyboard::ourKeyboard(editable* inEditObj,bool modal)
+  :bmpKeyboard(inEditObj,modal) {  }
+ourKeyboard::~ourKeyboard(void) {  }
+
+void ourKeyboard::keyClicked(keyboardKey* aKey) { ourOS.beep(); }
+
+
+
+
 // *****************************************************
 //                      stdEditField
 // *****************************************************

@@ -1,6 +1,6 @@
 #include <editLabel.h>
 #include <resizeBuff.h>
-//#include <debug.h>
+#include <mapper.h>
 
 editLabel::editLabel()
 	: label(),
@@ -97,12 +97,29 @@ void editLabel::endEditing(void) {
 
 void editLabel::setIndex(int newIndex) {
 
+	int numChars;
+	
+	numChars = strlen(editBuff);		// Count the characters once.
+	if (newIndex>numChars) {			// If they ask for an index beyond the string..
+		index = numChars;					// They get the index just at the end.
+	} else if (newIndex<0) {			// Else if they ask for an index before the start of the string..
+		newIndex = 0;						// The get the beginning index.
+	} else {									// Else, the new size is within bounds.
+		index = newIndex;					// We update the index with what they asked for.
+	}
+	showText();								// Using this new index, display it appropriately.
+}
+
+
+/*
+void editLabel::setIndex(int newIndex) {
+
 	if (newIndex<=strlen(editBuff) && newIndex>=0) {	// If the new size is within bounds.
 		index = newIndex;											// We update the index.
 		showText();													// Using this new index, display it appropriately.
 	}
 }
-
+*/
 
 int editLabel::getIndex(void) { return index; }			// Just return it. (I wonder who'd want to see it?)
 	
@@ -169,6 +186,21 @@ void editLabel::drawSelf(void) {
 		} else {																		// Else..
 			screen->drawVLine(cursX,cursY,cursH,&backColor);			// We erase it.
 		}
+	}
+}
+
+
+void editLabel::doAction(event* inEvent,point* locaPt) {
+	
+	int		touchLoc;
+	int		deltaX;
+	int		newIndex;
+	mapper	touchMapper(0,width,0,getViewChars()); 
+	
+	if (mEditing) {
+		touchLoc = round(touchMapper.Map(locaPt->x));
+		deltaX = touchLoc - cursor;
+		setIndex(index + deltaX);
 	}
 }
 

@@ -7,7 +7,7 @@
 #include <bmpPipe.h>
 #include <fontLabel.h>
 #include <editLabel.h>
-#include <scrKeyboard.h>
+#include <bmpKeyboard.h>
 #include "stateTracker.h"
 
 #define SEC_IN_HOUR 3600
@@ -27,6 +27,22 @@
 #define WATER_OFF_BMP "/icons/H2OOff32.bmp"
 #define ON_GREEN_BMP  "/icons/grnLED1.bmp"
 #define OFF_GREEN_BMP "/icons/grnLED0.bmp"
+
+// *****************************************************
+//                      ourKeyboard
+// *****************************************************
+
+class ourKeyboard : public bmpKeyboard {
+
+  public:
+
+                ourKeyboard(editable* inEditObj,bool modal);
+  virtual       ~ourKeyboard(void);
+
+  virtual void  keyClicked(keyboardKey* aKey);
+};
+
+
 
 
 // *****************************************************

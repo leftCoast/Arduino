@@ -33,6 +33,7 @@ int row(int row) {
   return KEY_HT * (row - 1);
 }
 
+
 bmpPipe keyCap; // No point in having lots and lots of the same thing.
 
 // *****************************************************
@@ -170,7 +171,6 @@ void bmpKeyboard::loadKeys(void) {
     addObj(enterKey);
   }
 }
-
 
 
 // *****************************************************

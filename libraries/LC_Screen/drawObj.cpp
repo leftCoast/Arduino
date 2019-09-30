@@ -119,23 +119,23 @@ bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 			if (inEvent->mType==touchEvent) {		// If its a touch..
 				if (inRect(locaPt)) {					// - and if its on us..
 					clicked		= true;					// Might want to show we're clicked on.
-					doAction();								// Do those things we do.
+					doAction(inEvent,locaPt);			// Do those things we do.
 					theTouched	= this;					// Tell the world WE are accepting this event set.
 					needRefresh = true;					// touchLift doesn't get a lift event. So it needs the setRefresh here.
 					return true;							// Tell the world the event has been accepted.
 				}
 			} else if (theTouched==this 
-						&& inEvent->mType==liftEvent) {	// We only want lifts if we'd accepted the touch.
-				clicked		= false;							// And we're no longer clicked.
-				needRefresh = true;							// And here.. (see above)
-				return true;									// Again, tell the world the event has been accepted.
+				&& inEvent->mType==liftEvent) {		// We only want lifts if we'd accepted the touch.
+				clicked		= false;						// And we're no longer clicked.
+				needRefresh = true;						// And here.. (see above)
+				return true;								// Again, tell the world the event has been accepted.
 			}
 			break;
 		case fullClick 	:								// Things like edit fields. A click changes their state.
 			if (inEvent->mType==clickEvent) {		// If its a click event, that matches.
 				if (inRect(locaPt)) {					// and if its on us..
 					clicked		= false;					// No longer clicked by the time you see this.
-					doAction();								// Do the action.
+					doAction(inEvent,locaPt);			// Do the action.
 					return true;							// We don't set touched because this is a one shot event.
 				}
 			}
@@ -159,19 +159,28 @@ bool drawObj::acceptEvent(event* inEvent,point* locaPt) {
 		return false;
 	}
 
+// 										****** doAction() ******
+//
+// Choose one or the other. If you just want something like a button the simple one is best.
+// If you need the event, or local point etc. Use the one with the event & local point
+// passed in.
+//
+//											************************
 
+// *** BASIC ACTION, SIMPLE SIMPLE ***
 // Override this one to do an action.
 void drawObj::doAction(void) {
 
-	if (callback) {
-		  callback();
-	}
+	if (callback) {	// If you figure out how to setup a callback, it'll work. I can't 
+		  callback();	// remember how to do this. (I did it once.) Typically I just
+	}						// override this and make it do what I want. Or.. (See below)
 }
 
 
-// Or override this for dragging. (The event has global point, we'll
-// pass in local point in case you need it.
-void drawObj::doAction(event* inEvent,point* localPt) {  }
+// *** MORE INCVOLVED ACTION ***
+// Override this for more involved action. Like dragging. (The event has global point.
+// We'll pass in local point. You may need it.) 
+void drawObj::doAction(event* inEvent,point* localPt) { doAction(); }
 
 
 // I tested this and it worked. But for the life of me, I can no longer figure

@@ -17,6 +17,7 @@ class bmpKeyboard : public keyboard {
   virtual       ~bmpKeyboard(void);
 
   virtual void  loadKeys(void);
+  
           int   col(int col, int row);
   
   protected:

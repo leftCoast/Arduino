@@ -55,8 +55,9 @@ void loggingPanel::setup(void) {
   
   editLabel*  theEditLabel = new editLabel(ET_X,ET_Y,ET_W,ET_H,"",2);
   theEditLabel->setColors(&white,&black);
-  theEditLabel->setJustify(TEXT_CENTER);
+  theEditLabel->setJustify(TEXT_LEFT);
   theEditLabel->setValue("1234567890123");
+  theEditLabel->setEventSet(touchLift);
   addObj(theEditLabel);
 
   
@@ -65,7 +66,7 @@ void loggingPanel::setup(void) {
   //out("Can you see this?");
   //addObj(theTextField);
   
-  bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditLabel,true);
+  ourKeyboard*  theKeybaord = new ourKeyboard(theEditLabel,true);
   theKeybaord->loadKeys();
   addObj(theKeybaord);
   
