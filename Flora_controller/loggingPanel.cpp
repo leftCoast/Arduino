@@ -44,17 +44,26 @@ void loggingPanel::setup(void) {
 
   drawObj* editBox = new drawObj(EB_X,EB_Y,EB_W,EB_H);
   addObj(editBox);
+
+  /*
+  label*  theEditLabel = new label(ET_X,ET_Y,ET_W,ET_H,"",2);
+  theEditLabel->setColors(&blue,&green);
+  theEditLabel->setJustify(TEXT_CENTER);
+  theEditLabel->setValue("12345678901234");
+  addObj(theEditLabel);
+  */
   
   editLabel*  theEditLabel = new editLabel(ET_X,ET_Y,ET_W,ET_H,"",2);
   theEditLabel->setColors(&white,&black);
-  theEditLabel->setJustify(TEXT_RIGHT);
+  theEditLabel->setJustify(TEXT_CENTER);
+  theEditLabel->setValue("1234567890123");
   addObj(theEditLabel);
 
   
-  textView*   theTextField = new textView(TF_X,TF_Y,TF_W,TF_H);
-  theTextField->setTextColors(&white,&black);
-  out("Can you see this?");
-  addObj(theTextField);
+  //textView*   theTextField = new textView(TF_X,TF_Y,TF_W,TF_H);
+  //theTextField->setTextColors(&white,&black);
+  //out("Can you see this?");
+  //addObj(theTextField);
   
   bmpKeyboard*  theKeybaord = new bmpKeyboard(theEditLabel,true);
   theKeybaord->loadKeys();

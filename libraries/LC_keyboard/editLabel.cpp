@@ -1,6 +1,6 @@
 #include <editLabel.h>
 #include <resizeBuff.h>
-
+//#include <debug.h>
 
 editLabel::editLabel()
 	: label(),
@@ -250,11 +250,11 @@ void editLabel::showText(void) {
 	} else {
 		done = false;																					// We need to scroll the edit box 'till the cursor shows.
 		while(!done) {																					// We should only need one click. But.. Unforeseen forces a loop.
-			if (index-firstChar>=viewChars) firstChar++;										// The cursor is beyond the edit box, scroll right.
+			if (index-firstChar>viewChars) firstChar++;										// The cursor is beyond the edit box, scroll right.
 			else if (index<firstChar) firstChar--;												// The cursor is before the edit box, scroll left.
 			else done = true;																			// Not off either end? We're done!
-		}																									// Now we clip out a string segment for the edit box.
-		if (resizeBuff(viewChars+1,&tempBuff)) {
+		}
+		if (resizeBuff(viewChars+1,&tempBuff)) {												// Now we clip out a string segment for the edit box.
 			tempBuff[0]='\0';																			// "Clear" the temp buffer.
 			strncat(tempBuff,&editBuff[firstChar],viewChars);								// Stuff in just what we should see.
 			cursor = index - firstChar;															// Set the cursor.

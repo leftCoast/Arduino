@@ -229,15 +229,15 @@ void label::drawSelf(void) {
 			if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {								// Make sure we have enough room to maneuver.
 				switch (justify) {													// Left, Right, Center will be handled differently.
 					case TEXT_LEFT :													// ** LEFT **
-						temp[0] = '\0';												// "Clear" the temp buffer.
+						temp[0] = '\0';												// **TESTED** - "Clear" the temp buffer.
 						strncat(temp,buff,numCharsDisp);							// Stamp in the characters to display.
 						screen->drawText(temp);										// Draw the string.
 					break;																// And we're done.
-					case TEXT_RIGHT :													// ** RUIGHT**						
-						screen->drawText((char*)&(buff[-charDif])); 			// Just draw the text starting after the clipped portion.
+					case TEXT_RIGHT :													// ** RIGHT**						
+						screen->drawText((char*)&(buff[-charDif])); 			// **TESTED** - Just draw the text starting after the clipped portion.
 					break;
 					case TEXT_CENTER :												// ** CENTER **
-						int firstChar = (numCharsDisp-charDif)/2+1;			// Calculate first char to display.
+						int firstChar = -charDif/2;								// Calculate first char to display.
 						temp[0] = '\0';												// "Clear" the temp buffer.
 						strncat(temp,&buff[firstChar],numCharsDisp);			// Stamp in the characters to display.
 						screen->drawText(temp);										// Draw the string.
