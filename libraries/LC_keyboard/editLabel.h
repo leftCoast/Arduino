@@ -34,7 +34,6 @@ class editLabel : public label,
 	virtual	void	handleBackspaceKey(void);
 	virtual	void	handleArrowFWDKey(void);
 	virtual	void	handleArrowBackKey(void);
-	virtual	void	handleEnterKey(void);
 	virtual	void	endEditing(void);
 	
 	virtual	void	drawSelf(void);

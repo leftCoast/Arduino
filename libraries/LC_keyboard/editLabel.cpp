@@ -151,11 +151,8 @@ void editLabel::handleArrowBackKey(void)  {
 	setIndex(index-1);
 	showText();
 }
-
-
-void editLabel::handleEnterKey(void) { handleInputKey(); }
-
-
+	
+	
 void editLabel::drawSelf(void) {
 
 	int cursX;

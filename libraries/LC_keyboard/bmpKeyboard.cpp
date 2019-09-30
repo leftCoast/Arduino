@@ -9,8 +9,10 @@
 
 #define KEYCAP24    "/icons/keyCap24.bmp"
 #define CHECK24     "/icons/check24.bmp"
+#define CHECK36     "/icons/check36.bmp"
 #define CHECK48     "/icons/check48.bmp"
 #define REDX24      "/icons/x24.bmp"
+#define REDX36      "/icons/x36.bmp"
 #define REDX48      "/icons/x48.bmp"
 #define SHIFT24     "/icons/shift24.bmp"
 #define SHIFT36     "/icons/shift36.bmp"
@@ -66,6 +68,7 @@ int bmpKeyboard::col(int col, int row) {
       if (col>1&&col<10) return KEY_WD * ((col-1) + 0.5);
       return KEY_WD * 9;
     case 4 : if (mModal) {
+        if (col==9) return KEY_WD * ((col-1) + 0.5);
         return KEY_WD * (col - 1);
       } else {
         if (col>1) return KEY_WD * ((col-1) + 0.5);
@@ -150,9 +153,9 @@ void bmpKeyboard::loadKeys(void) {
     addObj(rightArrow);
     bmpControlKey* symbolKey   = new bmpControlKey("#", number, col(3,4), row(4), KEY_WD, KEY_HT, this, SYMBOL24);
     addObj(symbolKey);
-    bmpControlKey* cancelKey   = new bmpControlKey("x", cancel, col(1,4), row(4), KEY_WD*2, KEY_HT, this, REDX48);
+    bmpControlKey* cancelKey   = new bmpControlKey("x", cancel, col(1,4), row(4), KEY_WD*1.5, KEY_HT, this, REDX36);
     addObj(cancelKey);
-    bmpControlKey* oKKey  = new bmpControlKey(">", ok, col(9,4), row(4), KEY_WD*2, KEY_HT, this, CHECK48);
+    bmpControlKey* oKKey  = new bmpControlKey(">", ok, col(9,4), row(4), KEY_WD*1.5, KEY_HT, this, CHECK36);
     addObj(oKKey);
   } else {
     bmpInputKey* spcKey  = new bmpInputKey(" ", " ", " ", col(4,4), row(4), (KEY_WD*3), KEY_HT, this);
@@ -179,7 +182,9 @@ void bmpKeyboard::loadKeys(void) {
 bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard)
 : inputKey(inLabel, inNum, inSym, inX, inY, inWidth, inHeight, inKeyboard) {
 
-  setColors(&white);
+	colorObj	aColor(LC_YELLOW);	// Really? Tweaking it EVERY time in the constructor?
+	aColor.blend(&white,60);		// You are a hack. Fix this!
+  setColors(&aColor);
   setTextSize(2);
 }
 

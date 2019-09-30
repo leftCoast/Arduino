@@ -246,15 +246,17 @@ void controlKey::handleNumber() {
 // enum  keyCommands { input, shift, number, symbol, backspace, arrowFWD, arrowBack, enter };
 void controlKey::doAction(void) {
 
-  switch (mCom) {
-    case backspace  :  
-    case arrowFWD   :
-    case arrowBack  : 
-    case enter      : mKeyboard->handleKey(mCom); break;
-    case shift      : handleShift(); break;
-    case number     : handleNumber(); break;
-    default         : break;  // Shut up, compiler. 
-  }
+	switch (mCom) {
+		case backspace	:  
+		case arrowFWD	:
+		case arrowBack	:
+		case cancel		:
+		case ok			:
+		case enter		: mKeyboard->handleKey(mCom); break;
+		case shift		: handleShift(); break;
+		case number		: handleNumber(); break;
+		default			: break;  // Shut up, compiler. 
+	}
 }
 
 
