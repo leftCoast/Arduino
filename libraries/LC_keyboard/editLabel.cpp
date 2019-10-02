@@ -1,6 +1,7 @@
 #include <editLabel.h>
 #include <resizeBuff.h>
 #include <mapper.h>
+#include <debug.h>
 
 editLabel::editLabel()
 	: label(),
@@ -55,7 +56,7 @@ void editLabel::init(void) {
 	editBuff		= NULL;	// Buffers must all start at NULL.
 	backupBuff	= NULL;
 	tempBuff		= NULL;
-	start();					// Get the cursor blink clock running.					
+	start();					// Get the cursor blink clock running.
 }
 
 
@@ -110,16 +111,6 @@ void editLabel::setIndex(int newIndex) {
 	showText();								// Using this new index, display it appropriately.
 }
 
-
-/*
-void editLabel::setIndex(int newIndex) {
-
-	if (newIndex<=strlen(editBuff) && newIndex>=0) {	// If the new size is within bounds.
-		index = newIndex;											// We update the index.
-		showText();													// Using this new index, display it appropriately.
-	}
-}
-*/
 
 int editLabel::getIndex(void) { return index; }			// Just return it. (I wonder who'd want to see it?)
 	
@@ -179,7 +170,7 @@ void editLabel::drawSelf(void) {
 	label::drawSelf();															// Draw like we normally do.
 	if (mEditing) {																// But IF we're editing..
 		cursH = getTextHeight();												// Figure out where the cursor is.
-		cursX = x + CHAR_WIDTH*textSize*cursor;							// We put a LOT of effort into locating the cursor. Use it now.
+		cursX = x + CHAR_WIDTH*textSize*cursor - 1;						// We put a LOT of effort into locating the cursor. Use it now.
 		cursY = y;																	// Always here.
 		if(cursorOnOff) {															// If its on..
 			screen->drawVLine(cursX,cursY,cursH,&textColor);			// We draw it in.
@@ -200,7 +191,7 @@ void editLabel::doAction(event* inEvent,point* locaPt) {
 	if (mEditing) {
 		touchLoc = round(touchMapper.Map(locaPt->x));
 		deltaX = touchLoc - cursor;
-		setIndex(index + deltaX);
+		setIndex(index + deltaX-1);
 	}
 }
 

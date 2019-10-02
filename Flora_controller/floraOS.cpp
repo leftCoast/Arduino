@@ -38,6 +38,7 @@ int floraOS::begin(void) {
 panel* floraOS::createPanel(int panelID) {
   
   pauseUpdates x;
+  beep();
   switch (panelID) {
     case homeApp      : return new homeScreen();
     case controlApp   : return new controlPanel();

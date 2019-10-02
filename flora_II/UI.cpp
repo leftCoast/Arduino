@@ -66,68 +66,6 @@ const unsigned char bombBitmap [] PROGMEM = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
- // flasher so far..
- 
-flasher::flasher(rect* inRect,colorObj* backColor)
-  : drawObj(inRect),
-  blinker() {
-
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
-}
-
-
-flasher::flasher(int inX,int inY,int inWidth,int inHeight,colorObj* backColor)
-  : drawObj(inX,inY,inWidth,inHeight),
-  blinker() {
-  
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
-}
-
-                     
-flasher::~flasher(void) { }
-
-
-// Basically a hacked version fro blinker to remove the pinmode stuff.
-// This is your on/off switch. Call with a boolean tru=on false=off.
-// The object is created in the "off" mode.
-void flasher::setBlink(bool onOff) {
-  
- if (!init) {             // Not intialized?
-    hookup();             // Set up idling.
-    init = true;          // Note it.
-  }
-  if((onOff!=running)) {  // ignore if no change
-    if (onOff) {          // Start blinking..    
-      start();            // Starting NOW!
-      setLight(true);     // light on!
-      onTimer->start();   // set the time on timer.
-      running = true;     // Set state.
-      } 
-    else {                // Stop blinking..
-      setLight(false);    // light off.
-      running = false;    // set state.
-    }
-  }
-}   
-
-    
-void flasher::setLight(bool onOff) {
-
-  lightOn = onOff;
-  setNeedRefresh();
-}
-
-
-void flasher::drawSelf(void) {
-
-  if (lightOn) {
-    screen->fillRect(x,y,width,height,&mForeColor);
-  } else {
-    screen->fillRect(x,y,width,height,&mBackColor);
-  }
-}
 
  
 // Set percent vlaues from 0..100 as a 3 char int. -1 gives "---"

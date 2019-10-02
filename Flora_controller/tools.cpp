@@ -1,9 +1,8 @@
 #include "tools.h"
 #include <resizeBuff.h>
 #include "floraOS.h"
+#include <debug.h>
 
-#define SLEEP_TIME          2   // When looking for an answer, rest this long before peeking.
-#define REPLY_TIMEOUT        75 // How long they get to give back a reply.
 #define LONG_UPDATE_TIME    500 // When offline, only check this often.
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 
@@ -22,29 +21,13 @@ void ourKeyboard::keyClicked(keyboardKey* aKey) { ourOS.beep(); }
 
 
 
-
-// *****************************************************
-//                      stdEditField
-// *****************************************************
-
-
-stdEditField::stdEditField(label* parent)
-  : editLabel(parent) {
-    
-  setColors(&yellow,&black);  // So the user sees a difference.
-}
-  
-stdEditField::~stdEditField(void) {  }
-
-
-
 // *****************************************************
 //                      timeText
 // *****************************************************
 
 
 timeText::timeText(int x, int y,int width, int height)
-  : label(x,y,width,height) { }
+  : editLabel(x,y,width,height) { }
 
 timeText::~timeText(void) { }
 
@@ -109,7 +92,7 @@ void timeFormatter(unsigned long sec) {
 
 
 percentText::percentText(int x, int y,int width, int height)
-  : label(x,y,width,height) { }
+  : editLabel(x,y,width,height) { }
 
 
 percentText::~percentText(void) { }
@@ -150,10 +133,64 @@ void onlinePercentText::setTheLook() {
 void onlinePercentText::readState(void) {  }
 
 
-void onlinePercentText::doAction(void) { /*setup editing*/ }
+void onlinePercentText::idle(void) {
+  
+  percentText::idle();
+  if (checkState()) {
+    setTheLook();
+  }
+}                           
 
 
-void onlinePercentText::idle(void) { if (checkState()) setTheLook(); }                           
+
+// *****************************************************
+//                      monoNameText
+// *****************************************************
+
+
+monoNameText::monoNameText(int x, int y,int width, int height)
+  : onlineCStrStateTracker(),
+  editLabel(x,y,width,height) {
+
+  setColors(&white,&black);
+  setJustify(TEXT_CENTER);
+  setTextSize(2);
+  editLabel::hookup();
+}
+
+monoNameText::~monoNameText(void) { } 
+
+
+void monoNameText::setTheLook() {
+  
+  if (mCurrentState.online) {
+    setValue(mCurrentState.value);
+  } else {
+    setValue("Offline");
+  }
+}
+
+
+void monoNameText::readState(void) {
+
+  int   numBytes;
+
+  resizeBuff(0,&mCurrentState.value);                     // First we recycle the memory from the last string.
+  mCurrentState.online = ourComPort.getOnline();          // Lets see if we are online at all? (And save it)
+  if (mCurrentState.online) {                             // If we are online..
+    numBytes = strlen(ourComPort.getName())+1;            // Read off how long the string is.
+    if (resizeBuff(numBytes,&mCurrentState.value)) {      // If we are able to get the memory to store it..
+      strcpy(mCurrentState.value,ourComPort.getName());   // We copy in the new name.
+    }
+  }
+}
+
+
+void monoNameText::idle(void) { 
+
+  editLabel::idle();
+  if (checkState()) setTheLook();
+}
 
 
 
@@ -273,8 +310,9 @@ currentMoistureText::currentMoistureText(int x, int y,int width, int height)
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
-  hookup();
+  percentText::hookup();
 }
+
 
 currentMoistureText::~currentMoistureText(void) { } 
 
@@ -297,7 +335,7 @@ moistureLimitText::moistureLimitText(int x, int y,int width, int height)
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
-  hookup();
+  percentText::hookup();
 }
 
 moistureLimitText::~moistureLimitText(void) { } 
@@ -416,7 +454,7 @@ totalLogTimeText::totalLogTimeText(int x, int y,int width, int height)
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
-  hookup();
+  timeText::hookup();
 }
 
   
@@ -449,17 +487,14 @@ void totalLogTimeText::idle(void) { if (checkState()) setTheLook(); }
 // *****************************************************
 
 
-waterTimeText::waterTimeText(int x, int y,int width, int height,keyboard* inKeyboard,drawGroup* inParent)
+waterTimeText::waterTimeText(int x, int y,int width, int height)
   : onlineIntStateTracker(),
   timeText(x,y,width,height) {
 
-  mKeyboard = inKeyboard;
-  mParent = inParent;
-  mEditing = false;
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
-  hookup();
+  timeText::hookup();
 }
 
   
@@ -469,7 +504,7 @@ waterTimeText::~waterTimeText(void) {  }
 void waterTimeText::setTheLook(void) {
     
   if (mCurrentState.online) {
-    timeText::setValue(mCurrentState.value/2);
+    timeText::setValue(mCurrentState.value);
   } else {
     label::setValue("--- s");
   }
@@ -482,25 +517,14 @@ void waterTimeText::readState(void) {
   mCurrentState.value = ourComPort.getWaterTime();
 }
 
-void waterTimeText::doAction(void) {
 
-  if (mParent&&mKeyboard&&!mEditing) {
-    ourOS.beep();
-    mEditField = new stdEditField(this);
-    mParent->addObj(mEditField);
-    setFocusPtr (mEditField);
-    mParent->setNeedRefresh(false);
-    mKeyboard->setEditField(mEditField);
-    mEditField->setNeedRefresh();
-    mEditing = true;
+void waterTimeText::idle(void) {
+  
+  timeText::idle();
+  if (checkState()) {
+    setTheLook();
   }
 }
-
-
-void waterTimeText::drawSelf(void) { if (!mEditing) timeText::drawSelf(); }
-
-
-void waterTimeText::idle(void) { if (checkState()) setTheLook(); }
 
 
 
@@ -516,7 +540,7 @@ soakTimeText::soakTimeText(int x, int y,int width, int height)
   setColors(&white,&black);
   setJustify(TEXT_RIGHT);
   setTextSize(2);
-  hookup();
+  timeText::hookup();
 }
 
   
@@ -526,7 +550,7 @@ soakTimeText::~soakTimeText(void) {  }
 void soakTimeText::setTheLook(void) {
     
   if (mCurrentState.online) {
-    timeText::setValue(mCurrentState.value/2);
+    timeText::setValue(mCurrentState.value);
   } else {
     label::setValue("--- s");
   }
@@ -540,25 +564,30 @@ void soakTimeText::readState(void) {
 }
 
 
-void soakTimeText::idle(void) { if (checkState()) setTheLook(); }
+void soakTimeText::idle(void) {
 
+  timeText::idle();
+  if (checkState()) {
+    setTheLook();
+  }
+}
 
 
 // *****************************************************
 //                   pauseUpdates
 // *****************************************************
 
-// So simple. When you are going to do somehing invloved and long that would cause updates
-// to time out, just add "pauseUpdates x;" as your first line. Then, when your menthod or function
+// So simple. When you are going to do somehing involved and long that would cause updates
+// to time out, just add "pauseUpdates x;" as your first line. Then, when your method or function
 // goes out of scope, the second line is automatically called and updates are turned back on.
-// Its also nestible. You can recurse in as much as you like calling pauseUpdates. Only the
+// Its also nestible. You can recurse in as much as you like, calling pauseUpdates. Only the
 // outermost call will actually restart updates.
 
 int gPause = 0;
 
 pauseUpdates::pauseUpdates(void) {
 
-  ourComPort.updateTime();        // Kive it one last kick before shutting it down.
+  ourComPort.updateTime();        // Give it one last kick before shutting it down.
   ourComPort.runUpdates(false);   // Shut it down.
   gPause++;                       // Bump up our nesting index.
 }
@@ -582,11 +611,10 @@ pauseUpdates::~pauseUpdates(void) {
 
 
 plantBotCom::plantBotCom(void) 
-  : qCMaster() {
+  : commonComs() {
   
   mIndex = 0;
   mOnline = false;
-  setTime(REPLY_TIMEOUT,false); // You get this long to reply. Get with it!
   setUpdateTime();              // How oftern do we bug the bot for data updates?
   runUpdates(true);
 }
@@ -602,168 +630,6 @@ void plantBotCom::setUpdateTime(void) {
   } else {
     mUpdateTimer.setTime(LONG_UPDATE_TIME,true);
   }
-}
-
-
-void plantBotCom::sleep(int ms) {
-
-  
-
-  mSleepTimer.setTime(ms);        // Set up our timer. We have a timer just for this?
-  if (!idling) {                  // If we are not IN the idle loop.. (Don't get all reentrant here!)
-    while(!mSleepTimer.ding()) {  // While waiting for the timer to expire..
-      theIdlers.idle();           // We repeatedly call idle() to keep the ALL the background stuff running.
-    }
-  } else {                        // We ARE in the idler loop. In that case we can't just call idle() because that will lock everything up.                
-    while(!mSleepTimer.ding()) {  // So, while waiting for the timer to expire..
-      idle();                     // We repeatedly call our own idle() to keep the our background stuff running.
-    }
-  }
-}
-
-
-bool plantBotCom::getByte(byte com,byte* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff==1) {
-    readBuff(reply);
-    return true;
-  } else {
-    dumpBuff();
-  }
-  return false;
-}
-
-
-bool plantBotCom::getInt(byte com,int* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff==sizeof(int)) {
-    readBuff((byte*)reply);
-    return true;
-  } else {
-    dumpBuff();
-  }
-  return false;
-}
-
-
-bool plantBotCom::getFloat(byte com,float* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff==sizeof(float)) {
-    readBuff((byte*)reply);
-    return true;
-  } else {
-    dumpBuff();
-  }
-  return false;
-}
-
-
-bool plantBotCom::getLong(byte com,long* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff==sizeof(long)) {
-    readBuff((byte*)reply);
-    return true;
-  } else {
-    dumpBuff();
-  }
-  return false;
-}
-
-
-bool plantBotCom::getUnsignedLong(byte com,unsigned long* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff==sizeof(unsigned long)) {
-    readBuff((byte*)reply);
-    
-    return true;
-  } else {
-    dumpBuff();
-  }
-  return false;
-}
-
-
-bool plantBotCom::getCString(byte com,char* reply) {
-
-  byte  buff;
-  
-  readErr();
-  sendBuff(&com,1,true);
-  while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
-  }
-  buff = haveBuff();
-  if (buff>0) {                     // C'mon! Even an empty string has a '\0'.
-    readBuff((byte*)reply);
-    return true;
-  }
-  return false;
-}
-
-
-
-// Send a comand that we just get an err/no-err back for.
-bool plantBotCom::sendCommand(byte com) {
-
-  byte  buff;
-  
-  readErr();                        // Clear errors.
-  sendBuff(&com,1,true);            // Send the one byte command and ask for ack.
-  while(!haveBuff()&&!readErr()) {  // We either get something back or time out.
-    sleep(SLEEP_TIME);              // Have a nap, let the UI amuse the user.
-  }
-  buff = haveBuff();                // We kicked out of the loop. See if something came back.
-  if (buff) {                       // We got somethig..
-    if (buff==1) {                  // Anything other than one byte is an error.
-      readBuff(&buff);              // Read the byte..
-      if (buff==0) {                // If its a zero, this is good. It means no error.
-        return true;                // Return success, we are done.
-      }
-    } else {                        // It was not one byte
-      dumpBuff();                   // Whatever, its not what we want. Dump it.
-    }
-  }
-  return false;
 }
 
 
@@ -801,14 +667,17 @@ bool plantBotCom::setNameReg(char* name) {
   byte  res;
   
   buff = NULL;
-  if (name&&strlen(name)<PLANTBOT_NAME_SIZE) {
+  if (name) {
+    if (strlen(name)>=PLANTBOT_NAME_SIZE) {
+      name[PLANTBOT_NAME_SIZE-1]='\0';
+    }
     numBytes = strlen(name)+2;
     if (resizeBuff(numBytes,(char**)&buff)) {
       buff[0] = setName;
       strcpy((char*)&buff[1],name);
       sendBuff(buff,numBytes,true);     // Send the one byte command and ask for ack.
       while(!haveBuff()&&!readErr()) {  // We either get something back or time out.
-        sleep(SLEEP_TIME);              // Have a nap, let the UI amuse the user.
+        sleep(QCOM_SLEEP_TIME);              // Have a nap, let the UI amuse the user.
       }
       res = haveBuff();                // We kicked out of the loop. See if something came back.
       if (res) {                       // We got somethig..
@@ -838,7 +707,7 @@ bool plantBotCom::setLimitReg(int limit) {
   *intPtr = limit;
   sendBuff(com,sizeof(int)+1,true);
   while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
+    sleep(QCOM_SLEEP_TIME);
   }
   res = haveBuff();                // We kicked out of the loop. See if something came back.
   if (res) {                       // We got somethig..
@@ -871,7 +740,7 @@ bool plantBotCom::setTimeReg(floraComSet timeType,int seconds) {
   *longPtr = seconds * 1000;
   sendBuff(com,sizeof(long)+1,true);
   while(!haveBuff()&&!readErr()) {
-    sleep(SLEEP_TIME);
+    sleep(QCOM_SLEEP_TIME);
   }
   res = haveBuff();                // We kicked out of the loop. See if something came back.
   if (res) {                       // We got somethig..
@@ -956,7 +825,7 @@ void plantBotCom::runUpdates(bool stopStart) { mDoingUpdates = stopStart; }
 
 
 bool plantBotCom::getOnline(void) { return mOnline; }
-
+void plantBotCom::setOnline(bool online) { mOnline = online; }
 
 
 

@@ -17,6 +17,16 @@ void debug::trace(char* message,bool hold) {
 }
 
 
+//void debug::tracex(char* message,bool hold) { trace(message,hold); }
+
+
+void debug::trace(char* message,char* inStr,bool hold) {
+
+	Serial.print(message);
+	trace(inStr,hold);
+}
+
+	
 void debug::trace(char* message,int inNum,bool hold) {
 
   char* buff;

@@ -94,7 +94,6 @@ void homeScreen::setup(void) {
   currM->begin();
   addObj(currM);
 
-  //moistureText* mText = new moistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
   currentMoistureText* mText = new currentMoistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(mText);
   

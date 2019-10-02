@@ -9,7 +9,6 @@
 
 enum floraComSet  {
                   floraReset,
-                      
                   readName,
                   setName,
                   readDryLimit,
@@ -82,6 +81,7 @@ void handheld::checkComs(void) {
 
       case pumpOn         : 
       case pumpOff        : handleSetPump(comPtr);        break;
+      case setName        : handleSetName(comPtr);        break;
       case setDryLimit    : handleSetDryLimit(comPtr);    break;
       case setWaterTime   : handleSetWaterTime(comPtr);   break;
       case setSoakTime    : handleSetSoakTime(comPtr);    break;
@@ -170,6 +170,14 @@ void handheld::handleReadName(byte* comPtr) {
   charPtr = (char*)&(comPtr[0]);
   strcpy(charPtr,name);
   replyComBuff(strlen(name)+1);
+}
+
+
+void handheld::handleSetName(byte* comPtr) {
+
+  ourParamObj.setName(&comPtr[1]);
+  comPtr[0] = noErr;
+  replyComBuff(1);
 }
 
 

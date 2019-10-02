@@ -20,19 +20,20 @@ stateTracker::~stateTracker(void) {  }
 
 bool stateTracker::checkState(void) {
 
-  if (mTimer.ding()) {            // If the timer has expired..
-    if (mLooseTime) {             // If we are allowing loose time..
-        mTimer.start();           // Restart the timer from now.
-    } else {                      // Else NOT allowing loose time..
-      mTimer.stepTime();          // We reset the timer from the last start time. (Picky picky!)
+  if (mTimer.ding()) {            			// If the timer has expired..
+    if (mLooseTime) {             			// If we are allowing loose time..
+        mTimer.start();           			// Restart the timer from now.
+    } else {                      			// Else NOT allowing loose time..
+      mTimer.stepTime();          			// We reset the timer from the last start time. (Picky picky!)
     }
     readState();
-    if (!compareStates()) {       // If we compare the states and thy are NOT the same..
-       saveState();               // We save off the new state into the saved state.
-       return true;               // Then return TRUE that the state has changed. 
+    if (!compareStates()||mFirstState) {	// If we compare the states and thy are NOT the same.. (Or its the first pass.)
+       saveState();               			// We save off the new state into the saved state.
+       mFirstState = false;					// Clear the first state thing.
+       return true;               			// Then return TRUE that the state has changed. 
     }
   }
-  return false;                   // In all other cases, we just return false.
+  return false;                   			// In all other cases, we just return false.
 }
 
 
@@ -45,17 +46,13 @@ void stateTracker::readState(void) { }
 // You inherit this.
 // A) Compare this current state with the saved last state.
 // B) return the result. (Just like in an if statement, TRUE means they are the SAME.)
-// 
-// mFirstState : This is a boolean set to true in the constructor. You can set it to false
-// here to show that you've successfully started to read states. It is nothing mnore than
-// a boolean for you to use as you wish. I thought it might come in handy to know that this
-// is the first time through or not.
 bool stateTracker::compareStates(void) {  }
 
 
 // You inherit this..
 // You must set up a (saved state) class member variable. In this method you overwrite your
 // saved state member variable with your current state variable.
+// Want to know if this is the first call to your saveState() Method? Check mFirstState to see.
 void stateTracker::saveState(void) { }
 
 

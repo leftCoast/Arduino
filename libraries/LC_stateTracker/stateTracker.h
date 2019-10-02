@@ -11,7 +11,7 @@
 // a stateTracker is the bases of.
 //
 // Now, typically, something like this is getting its state information from another remote system. So its all
-// about chckeing if the remote system is online, and then getting the new values. In fact, this is so common I've
+// about checking if the remote system is online, and then getting the new values. In fact, this is so common I've
 // included some nice general purpose classes as starting points/examples for whomever, including myself, uses this.
 //
 // onlineIntStateTracker - For tracking an int value.

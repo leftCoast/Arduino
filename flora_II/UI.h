@@ -2,26 +2,9 @@
 #define UI_h
 
 #include <label.h>
-#include <blinker.h>
+#include <flasher.h>
 #include "dataLog.h"
 #include "globals.h"
-
-
-class flasher : public drawObj,
-                public blinker {
-    public:
-                  flasher(rect* inRect,colorObj* backColor=&black);
-                  flasher(int inLocX,int inLocY,int inWidth,int inHeight,colorObj* backColor=&black);
-                     
-    virtual       ~flasher(void);
-    virtual void  setBlink(bool onOff);
-    virtual void  setLight(bool onOff);
-    virtual void  drawSelf(void);
-    
-            colorObj  mForeColor;
-            colorObj  mBackColor;
-};
-
 
 class percView : public label {
 

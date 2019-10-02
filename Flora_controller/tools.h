@@ -1,7 +1,7 @@
 #ifndef tools_h
 #define tools_h
 
-#include <quickCom.h>
+#include <commonComs.h>
 #include <drawObj.h>
 #include <blinker.h>
 #include <bmpPipe.h>
@@ -28,6 +28,8 @@
 #define ON_GREEN_BMP  "/icons/grnLED1.bmp"
 #define OFF_GREEN_BMP "/icons/grnLED0.bmp"
 
+
+
 // *****************************************************
 //                      ourKeyboard
 // *****************************************************
@@ -40,21 +42,6 @@ class ourKeyboard : public bmpKeyboard {
   virtual       ~ourKeyboard(void);
 
   virtual void  keyClicked(keyboardKey* aKey);
-};
-
-
-
-
-// *****************************************************
-//                      stdEditField
-// *****************************************************
-
-class stdEditField :  public editLabel {
-
-  public:
-
-              stdEditField(label* parent);
-  virtual     ~stdEditField(void);
 };
 
 
@@ -73,7 +60,7 @@ void  timeFormatter(unsigned long sec); // Its out here for anyone to use. Drop 
 extern  char  timeStrBuf[];             // Read out the formated string result here. Easy Peasy!
 
 
-class timeText :  public label {
+class timeText :  public editLabel {
 
   public:
             timeText(int x, int y,int width, int height);
@@ -89,7 +76,7 @@ class timeText :  public label {
 
 // Like int time text below. We format as a percent but its an int
 // So its just 0..100 Eg : "46 %"
-class percentText :  public label {
+class percentText :  public editLabel {
 
   public:
             percentText(int x, int y,int width, int height);
@@ -114,10 +101,26 @@ class onlinePercentText : public percentText,
     
             void  setTheLook();
     virtual void  readState(void);
-    virtual void  doAction(void);
     virtual void  idle(void);                            
 };
 
+
+// *****************************************************
+//                     monoNameText
+// *****************************************************
+
+class monoNameText :  public onlineCStrStateTracker,
+                      public editLabel,
+                      public idler {
+
+  public:
+                monoNameText(int x, int y,int width, int height);
+  virtual       ~monoNameText(void);
+
+            void  setTheLook();
+    virtual void  readState(void);
+    virtual void  idle(void);
+};
 
 
 // *****************************************************
@@ -257,18 +260,14 @@ class waterTimeText :  public onlineIntStateTracker,
                        public timeText,
                        public  idler {
   public:
-                waterTimeText(int x, int y,int width, int height,keyboard* inKeyboard=NULL,drawGroup* inParent=NULL);
+                waterTimeText(int x, int y,int width, int height);
   virtual       ~waterTimeText(void);
   virtual void  setTheLook(void);
   virtual void  readState(void);
-  virtual void  doAction(void);
-  virtual void  drawSelf(void);
   virtual void  idle(void);
 
           keyboard*       mKeyboard;
           drawGroup*      mParent;
-          stdEditField*   mEditField;
-          bool            mEditing;
 };
 
 
@@ -350,22 +349,17 @@ enum floraComSet  {
                   readMoisture
                   };
  
-enum floraReplySet  { noErr, unknownCom, badParam }; // Notice we only look for noErr and just toss the rest out? LAZY!
+enum floraReplySet  { noErr, unknownCom, badParam };
 
+// Notice that in the code here, we only look for noErr and just toss the rest out? LAZY! Actually, a lot of
+// stuff we just check that we get the right amount of buyes back. Ask for a byte and get one. Ask for an int,
+// we get exactly that? We call it good. 
 
-class plantBotCom : public qCMaster {
+class plantBotCom : public commonComs {
 
   public:
                 plantBotCom(void);
   virtual       ~plantBotCom(void);
-
-          bool  getByte(byte com,byte* reply);
-          bool  getInt(byte com,int* reply);
-          bool  getFloat(byte com,float* reply);
-          bool  getLong(byte com,long* reply);
-          bool  getUnsignedLong(byte com,unsigned long* reply);
-          bool  getCString(byte com,char* reply);
-          bool  sendCommand(byte com);
           
           char*         getName(void);        // You get a pointer to where we stored it. You'll need to copy it out.
           int           getLimit(void);
@@ -395,15 +389,14 @@ class plantBotCom : public qCMaster {
           void  runUpdates(bool stopStart);
           void  updateTime(void);           // MUST be called repeatedly by loop() NOT in idle().
           bool  getOnline(void);
+          void  setOnline(bool online);
           
   protected:
   
           void  setUpdateTime(void);
-          void  sleep(int ms);
           
           int           mIndex;
           bool          mOnline;
-          timeObj       mSleepTimer;
           timeObj       mUpdateTimer;
           bool          mDoingUpdates;
           
