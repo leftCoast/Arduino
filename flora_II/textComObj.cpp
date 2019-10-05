@@ -90,6 +90,7 @@ void textComObj::checkTextCom(void) {
 void textComObj::initParams(void) {
 
   ourParamObj.floraReset();
+  ourDisplay.deleteLog();
   Serial.println("Params set to defaults.");
 }
 

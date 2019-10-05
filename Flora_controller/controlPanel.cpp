@@ -66,10 +66,10 @@ void controlPanel::setup(void) {
   editSTime*  sText = new editSTime(LIVE_X,traceY,LIVE_W,LABEL_H,mKeyboard);
   addObj(sText);
 
-  traceY = traceY + 2*stepY;
-  mMessage = new liveText(0,traceY,240,LABEL_H,100);
+
+  mMessage = new liveText(30,9,210,10,100);
   mMessage->setColors(&yellow,&black);
-  mMessage->setJustify(TEXT_CENTER);
+  mMessage->setJustify(TEXT_LEFT);
   mMessage->addAColor(0,&yellow);
   mMessage->addAColor(3000,&yellow);
   mMessage->addAColor(4000,&black);
@@ -126,7 +126,7 @@ void editName::doAction(event* inEvent,point* locaPt) {
     editLabel::doAction(inEvent,locaPt);
   } else {
     if (ourComPort.getOnline() && mKeyboard->mEditObj==NULL) {
-      ourPanel->msg("Names can only be up to 23 chars long.");
+      ourPanel->msg("Enter name for this plantBot.");
       ourOS.beep();
       mKeyboard->setEditField(this);
       setColors(&yellow,&black);
@@ -173,7 +173,7 @@ void editLimit::endEditing(void) {
   setRect(x,y,width+(2 * CHAR_WIDTH * textSize),height);
   setColors(&white,&black);
   moistureLimitText::endEditing();
-  ourComPort.setOnline(false);
+  setTheLook();
 }
 
   
@@ -234,7 +234,7 @@ void editWTime::endEditing(void) {
   setRect(x,y,width+(2 * CHAR_WIDTH * textSize),height);
   setColors(&white,&black);
   waterTimeText::endEditing();
-  ourComPort.setOnline(false);
+  setTheLook();
 }
 
   
@@ -296,7 +296,7 @@ void editSTime::endEditing(void) {
   setRect(x,y,width+(2 * CHAR_WIDTH * textSize),height);
   setColors(&white,&black);
   soakTimeText::endEditing();
-  ourComPort.setOnline(false);
+  setTheLook();
 }
 
 

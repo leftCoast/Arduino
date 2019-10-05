@@ -4,11 +4,12 @@
 #include "UI.h"
 #include "globals.h"
 
-#define COM_BUFF_BYTES  255 // Can be no larger than 255! (one byte)
+#define COM_BUFF_BYTES  255 // Can be no larger than 255!
 
 
 enum floraComSet  {
                   floraReset,
+                  
                   readName,
                   setName,
                   readDryLimit,
@@ -41,7 +42,7 @@ enum floraComSet  {
                   };
 
                       
-enum floraReplySet  { noErr, unknownCom, badParam };
+enum floraReplySet  { noErr, unknownCom, badParam, unknownErr };
 
 byte  comBuff[COM_BUFF_BYTES];              // Buffer for comunication.
 
@@ -247,12 +248,20 @@ void handheld::handleGetLogState(byte* comPtr) {
 
 void handheld::handleSetLogState(byte* comPtr) {
 
-  if (comPtr[0]==loggingOn) {       
+  bool  success;
+  
+  if (comPtr[0]==loggingOn) {             // The first byte tells us on or off.    
     ourDisplay.setLogging(true);
-  } else {
+    success = ourDisplay.isLogging();
+  } else if (comPtr[0]==loggingOff) {
     ourDisplay.setLogging(false);
+    success = !ourDisplay.isLogging();
   }
-  comPtr[0] = noErr;
+  if (success)  {
+    comPtr[0] = 0;
+  } else {
+    comPtr[0] = unknownErr;
+  }
   replyComBuff(1);
 }
 
@@ -288,13 +297,18 @@ void handheld::handleGetLogWLines(byte* comPtr) {
 void handheld::handleGetLogBuff(byte* comPtr) {
 
   unsigned long   fileIndex;
-  unsigned long   numBytes;
+  unsigned long   replyBytes;
   unsigned long*  longPtr;
+  byte            maxBytes;
 
-  longPtr = (unsigned long*)&comPtr[1];                     // Our index is stored starting at index 1.
-  fileIndex = *longPtr;                                     // read out the file index.
-  numBytes = ourDisplay.getFileBuff(fileIndex,255,comPtr);  // Call to fill the buffer.
-  replyComBuff(numBytes);                                   // Send it on its way!
+  maxBytes = comPtr[1];
+  longPtr = (unsigned long*)&comPtr[2];                             // Our index is stored starting at index 1.
+  fileIndex = *longPtr;                                             // read out the file index.
+  Serial.print("maxBytes ");Serial.println(maxBytes);
+  Serial.print("fileIndex ");Serial.println(fileIndex);
+  replyBytes = ourDisplay.getFileBuff(fileIndex,maxBytes,comPtr);   // Call to fill the buffer.
+  Serial.print("reply bytes ");Serial.println(replyBytes);
+  replyComBuff(replyBytes);                                         // Send it on its way!
 }
 
 

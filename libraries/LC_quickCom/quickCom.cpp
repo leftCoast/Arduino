@@ -39,7 +39,7 @@ void qCMaster::setReplyTimeout(int timeOutMS) { setTime(timeOutMS,false); }
 byte qCMaster::readErr(void) {
 	
 	byte temp;
-
+if (mError) {Serial.print("Error : ");Serial.println(mError);}
 	temp = mError;
 	mError = NO_ERR;
 	return temp;
@@ -245,7 +245,7 @@ qCSlave::~qCSlave(void) { }
 // reply you write it onto this same buffer. This is to save as much RAM footprint
 // as possible for -little- processors.
 //
-// NOTE : The most bytes that can be sent is 256. So don't go overboard on buffer
+// NOTE : The most bytes that can be sent is 255. So don't go overboard on buffer
 // size.
 void qCSlave::begin(byte* buff,byte numBytes,int baud) {
 

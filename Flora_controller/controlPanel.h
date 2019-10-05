@@ -12,27 +12,6 @@
 #include <liveText.h>
 
 
-// *****************************************************
-//                    controlPanel 
-// *****************************************************
-
-
-class controlPanel : public panel {
-
-  public:
-          controlPanel(void);
-  virtual ~controlPanel(void);
-          
-  virtual void  setup(void);
-          void  doComSetDryLimit(float limit);
-          void  doComSetWTime(float wTime);
-          void  doComSetSTime(float sTime);
-          void  msg(char* text);
-  virtual void  drawSelf(void);
-
-          ourKeyboard*  mKeyboard;
-          liveText*     mMessage;
-};
 
 // *****************************************************
 //                    editName 
@@ -110,6 +89,30 @@ class editSTime : public soakTimeText {
   virtual void  idle(void);
   
           keyboard* mKeyboard;
+};
+
+
+
+// *****************************************************
+//                    controlPanel 
+// *****************************************************
+
+
+class controlPanel : public panel {
+
+  public:
+          controlPanel(void);
+  virtual ~controlPanel(void);
+          
+  virtual void  setup(void);
+          void  doComSetDryLimit(float limit);
+          void  doComSetWTime(float wTime);
+          void  doComSetSTime(float sTime);
+          void  msg(char* text);
+  virtual void  drawSelf(void);
+
+          ourKeyboard*  mKeyboard;
+          liveText*     mMessage;
 };
 
 

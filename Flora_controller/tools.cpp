@@ -573,6 +573,7 @@ void soakTimeText::idle(void) {
 }
 
 
+
 // *****************************************************
 //                   pauseUpdates
 // *****************************************************
@@ -617,6 +618,8 @@ plantBotCom::plantBotCom(void)
   mOnline = false;
   setUpdateTime();              // How oftern do we bug the bot for data updates?
   runUpdates(true);
+  mLocalPath = NULL;
+  mRunning = false;
 }
 
 
@@ -787,12 +790,83 @@ bool plantBotCom::setLoggingReg(bool onOff) {
 }
 
 
-bool plantBotCom::copyLogCom(char* filemane) {
-  // readLogBuff but not yet..
+bool plantBotCom::getLogBuff(void) {
+
+  byte            com[          sizeof(byte) + sizeof(byte) + sizeof(unsigned long  )]; 
+  int             numComBytes = sizeof(byte) + sizeof(byte) + sizeof(unsigned long  ); // Count up bytes we're sending.
+  unsigned long*  ULptr;
+  File            localFile;
+  byte            numRepBytes;
+ 
+  numRepBytes = 254;                                    // As far as I can tell 254 is the max you can do..
+  com[0] = readLogBuff;                                 // Stuff in our command.
+  com[1] = numRepBytes;                                 // Stuff in the buffer size.
+  ULptr = (unsigned long*)&(com[2]);                    // Point to the next byte as an unsigned long
+  *ULptr = mFileIndex;                                  // Using the pointer stuff in the unsigned long index.
+  readErr();                                            // Clear errors.
+  sendBuff(com,numComBytes,true);                       // Send the command and ask for ack.
+  while(!haveBuff() && !readErr()) {                    // We either get something back or time out.
+    sleep(QCOM_SLEEP_TIME);                             // Have a nap, let the UI amuse the user.
+  }
+  numRepBytes = haveBuff();                             // We kicked out. See if there's any bytes to grab.
+  if (numRepBytes) {                                    // If there were..
+    readBuff(mDataBuff);                                // Save the data.
+    Serial.print((char*)mDataBuff);
+    localFile = SD.open(mLocalPath,FILE_WRITE);         // Pop open our file, if possible.
+    if (localFile) {                                    // Ok, we got the local file. So far everything is good.
+        localFile.write(mDataBuff,numRepBytes);         // Dump in the bytes.
+        localFile.close();                              // Close our file.
+        mFileIndex = mFileIndex + numRepBytes;          // Bring the remote file index up to date.
+      }
+      mRunning = numRepBytes==254;                      // We got a full buffer? Then we'll have another go at it.
+  }
+  return true;                                          // There is no check for not being online here so we assume we are online.
+}
+  
+
+bool plantBotCom::startLogCopyCom(char* filemane) {
+
+  File  localFile;
+  bool  success;
+
+  success = false;                                          // Lets assume this isn't going to work.
+  if (getOnline()) {                                        // We're online right?
+    if (!mRunning) {                                        // We're not already doing a transfer now are we?
+      if (filemane) {                                       // Sanity third! They actually sent us something, right?
+        if (resizeBuff(strlen(filemane)+1,&mLocalPath)) {   // Can we get the RAM to store the pathname?
+          strcpy(mLocalPath,filemane);                      // OK ok, we can. So lets save the path for later.
+          localFile = SD.open(mLocalPath,FILE_WRITE);       // Try to open/create a logfile.
+          if (localFile) {                                  // Ok, we got the local file. So far everything is good.                        
+            localFile.close();                              // Close the file.
+            SD.remove(mLocalPath);                          // And delete it. Makes sure we clear it out.
+            mFileIndex = 0;                                 // Zero out our index.
+            mRunning = true;                                // Flag that we're running.
+            success = true;                                 // Look! It worked!
+          } else {                                          // Not able to open the file?
+            resizeBuff(0,&mLocalPath);                      // Dump the path buffer. Its a bust.
+          }
+        }
+      }
+    }
+  }
+  return success;
 }
 
 
-bool plantBotCom::clearLogCom(void) {  return sendCommand(clearLog); }
+bool plantBotCom::logCopyComActive(void) { return mRunning;}
+
+
+int plantBotCom::logCopyPercent(void) { return round(((float)mFileIndex/(float)getLogSize())*100.0); }
+
+
+bool plantBotCom::clearLogCom(void) {
+
+  if (!mRunning) {
+    return sendCommand(clearLog);
+  } else {
+    return false;
+  }
+}
 
 
 void plantBotCom::updateTime(void) {
@@ -813,6 +887,7 @@ void plantBotCom::updateTime(void) {
         case 10 : mOnline = getByte(readState,&mState);                     break;
         case 11 : mOnline = getByte(readTemp,&mTemp);                       break;
         case 12 : mOnline = getByte(readMoisture,&mMoisture);               break;
+        case 13 : if (mRunning) { mOnline = getLogBuff(); }       
         default : mIndex = 0; 
       }
       setUpdateTime();

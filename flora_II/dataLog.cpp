@@ -78,12 +78,17 @@ bool dataLog::setLogging(bool onOff) {
 
 void dataLog::deleteLog(void) {
 
+  bool  wasLogging;
+  
   if (!mHaveSD) return;                         // Sanity, no hardware? Bail.
-  logFile = SD.open(LOG_FILE, FILE_WRITE);
-  if (logFile) {
-    logFile.close();
-    SD.remove(LOG_FILE);
+  wasLogging = isLogging();                     // Save off weather we were doing the log thing or not.
+  setLogging(false);                            // In any case shut it down.
+  logFile = SD.open(LOG_FILE, FILE_WRITE);      // Can we open the file?
+  if (logFile) {                                // If we could open the file..
+    logFile.close();                            // Close it.
+    SD.remove(LOG_FILE);                        // And delete it.
   }
+  if (wasLogging) setLogging(true);             // If we were logging before, fire it back up.
 }
 
 
@@ -262,20 +267,24 @@ unsigned long dataLog::getFileNumWLines(void) {
 unsigned long dataLog::getFileBuff(unsigned long index,unsigned long buffBytes,byte* buff) {
 
   unsigned long numBytes;
-
-  numBytes = 0;
-  if (mHaveSD) {
-    logFile = SD.open(LOG_FILE, FILE_READ);  // Attempt opening the log file.
-    if (logFile) {
-      while(index<logFile.size()&&numBytes<buffBytes) {
-        buff[index] = logFile.read();
-        index++;
-        numBytes++;
+  unsigned long fileSize;
+  
+  index = index + sizeof(logHeader);                    // Quietly move their index past our stuff.
+  numBytes = 0;                                         // Nothing written yet.
+  if (mHaveSD) {                                        // Check for SD Drive,
+    logFile = SD.open(LOG_FILE, FILE_READ);             // Attempt opening the log file.
+    if (logFile) {                                      // If we got it..
+      fileSize = logFile.size();                        // Save off the size in bytes, we'll read this a lot.
+      logFile.seek(index);                              // Set our starting point.
+      while(index<fileSize && numBytes<buffBytes) {     // While we have bytes and room for them..
+        buff[numBytes] = logFile.read();                // Read a byte, copy to the buffer.
+        index++;                                        // Bump up our file index.
+        numBytes++;                                     // Bump up the number of bytes we've read.
       }
-      logFile.close();
-      return numBytes;
+      logFile.close();                                  // All done, close the file.
+      return numBytes;                                  // return how many bytes we wrote out.
     }
   }
-  return 0;
+  return 0;                                             // If anything went wrong, return zip.
 }
  

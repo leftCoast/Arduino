@@ -28,7 +28,14 @@
 #define ON_GREEN_BMP  "/icons/grnLED1.bmp"
 #define OFF_GREEN_BMP "/icons/grnLED0.bmp"
 
+#define CUT32_BMP "/icons/Cut32.bmp"
+#define COPY32_BMP "/icons/Copy32.bmp"
+#define PASTE32_BMP "/icons/Paste32.bmp"
 
+#define ENABLE_LOG_BMP  "/images/enableDL.bmp"
+#define COPY_LOG_BMP    "/images/copyDL.bmp"
+#define DELETE_LOG_BMP  "/images/deleteDL.bmp"
+#define FILE_NAME_BMP   "/images/fName.bmp"
 
 // *****************************************************
 //                      ourKeyboard
@@ -291,6 +298,31 @@ class soakTimeText :  public onlineIntStateTracker,
 
 
 // *****************************************************
+//                   fileCopyObj
+// *****************************************************
+
+
+class fileCopyObj : public idler {
+
+  public:
+                fileCopyObj(void);
+  virtual       ~fileCopyObj(void);
+
+  virtual bool  startTransfer(char* localPath);
+  virtual bool  doingTransfer(void);
+  virtual int   percentComplete(void);
+  virtual void  idle(void);
+
+          unsigned long mTotalBytes;
+          unsigned long mIndex;
+          char*         mLocalPath;
+          byte          mDataBuff[255];
+          bool          mRunning;
+};
+
+
+
+// *****************************************************
 //                   pauseUpdates
 // *****************************************************
 
@@ -383,7 +415,10 @@ class plantBotCom : public commonComs {
           bool  setWaterReg(bool onOff);
           bool  setPulseReg(bool onOff);
           bool  setLoggingReg(bool onOff);
-          bool  copyLogCom(char* filemane);
+          bool  startLogCopyCom(char* filemane);
+          bool  getLogBuff(void);
+          bool  logCopyComActive(void);
+          int   logCopyPercent(void);
           bool  clearLogCom(void);
 
           void  runUpdates(bool stopStart);
@@ -399,7 +434,7 @@ class plantBotCom : public commonComs {
           bool          mOnline;
           timeObj       mUpdateTimer;
           bool          mDoingUpdates;
-          
+
           char          mName[PLANTBOT_NAME_SIZE];
           byte          mLimit;
           long          mWaterTime;
@@ -412,7 +447,12 @@ class plantBotCom : public commonComs {
           unsigned long mLogNumWLines;
           byte          mState;
           byte          mTemp;
-          byte          mMoisture;         
+          byte          mMoisture; 
+
+          unsigned long mFileIndex;
+          char*         mLocalPath;
+          byte          mDataBuff[255];
+          bool          mRunning;
 };
 
 

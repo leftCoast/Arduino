@@ -15,7 +15,6 @@
 // *****************************************************
 
 
-// Copied directly from Flora_II maybe one day it'll be a library thing.
 class flasher : public drawObj,
                 public blinker {
     public:
