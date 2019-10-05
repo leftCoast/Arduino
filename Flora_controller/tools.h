@@ -427,7 +427,7 @@ class plantBotCom : public commonComs {
           void  setOnline(bool online);
           
   protected:
-  
+          bool  runFileTransfer(void);
           void  setUpdateTime(void);
           
           int           mIndex;

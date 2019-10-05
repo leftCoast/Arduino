@@ -5,7 +5,7 @@
 
 #define LONG_UPDATE_TIME    500 // When offline, only check this often.
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
-
+#define NUM_FILEBUFFS       8   // When doing a file transfer, how many filer buffer to get before releasing to other things.
 
 
 // *****************************************************
@@ -869,6 +869,19 @@ bool plantBotCom::clearLogCom(void) {
 }
 
 
+bool plantBotCom::runFileTransfer(void) {
+
+  int numBuffs;
+
+  if (!mRunning) return mOnline;            // Not running? Do nothing change nothing.
+  numBuffs = NUM_FILEBUFFS;                 // Set up how many we can grab before we get booted.
+  while(mRunning && numBuffs) {             // Make hay while the sun shines. Grab file buffers.
+    getLogBuff();                           // The acutal grabe itself.
+  }
+  return getByte(readMoisture,&mMoisture);  // Easy to get, most dynamic variable. Gives an online check.
+}
+
+
 void plantBotCom::updateTime(void) {
 
   if (mDoingUpdates) {
@@ -887,7 +900,7 @@ void plantBotCom::updateTime(void) {
         case 10 : mOnline = getByte(readState,&mState);                     break;
         case 11 : mOnline = getByte(readTemp,&mTemp);                       break;
         case 12 : mOnline = getByte(readMoisture,&mMoisture);               break;
-        case 13 : if (mRunning) { mOnline = getLogBuff(); }       
+        case 13 : mOnline = runFileTransfer();                              break;     
         default : mIndex = 0; 
       }
       setUpdateTime();
