@@ -56,16 +56,21 @@ class copyLogBtn :  public iconButton,
             copyLogBtn(int x, int y,ourKeyboard* akeyboard,panel* ourPanel);
     virtual ~copyLogBtn(void);
 
+    virtual void  begin(void);
     virtual void  startFileTransfer(void);
     virtual void  deleteEditor(void);
     virtual void  doAction(void);
+    virtual void  setLabel(void);
     virtual void  idle(void);
 
             transferState mXferState;
+            bool          mCancel;
             editLabel*    mEditLabel;
             ourKeyboard*  mKeyboard;
+            bmpObj*       mCopyLabel;
             panel*        mPanel;
-            timeObj       uiTimer;
+            timeObj       uiTimer;  // Don't use up all everyone's time redrawing. Let the file transfer run.
+            timeObj       igcTimer; // Ignore click timer. First click after trasfer may be opposite of what you think. 
 };
 
 

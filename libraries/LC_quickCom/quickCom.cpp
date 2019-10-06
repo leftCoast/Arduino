@@ -36,12 +36,12 @@ void qCMaster::setReplyTimeout(int timeOutMS) { setTime(timeOutMS,false); }
 
 
 // Read, return and clear the last error.
-byte qCMaster::readErr(void) {
+byte qCMaster::readErr(bool clearErr) {
 	
 	byte temp;
-if (mError) {Serial.print("Error : ");Serial.println(mError);}
+
 	temp = mError;
-	mError = NO_ERR;
+	if (clearErr) mError = NO_ERR;
 	return temp;
 }
 

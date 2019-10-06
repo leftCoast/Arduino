@@ -3,7 +3,7 @@
 #include "controlPanel.h"
 #include "loggingPanel.h"
 
-#define PLANTBOT_BAUD 115200
+#define PLANTBOT_BAUD 500000 //115200
 
 
 // *****************************************************

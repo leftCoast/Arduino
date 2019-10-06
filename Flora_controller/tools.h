@@ -23,6 +23,13 @@
 #define WATER_TIME_BMP  "/images/wTime.bmp"
 #define SOAK_TIME_BMP   "/images/sTime.bmp"
 
+#define ENABLE_LOG_BMP  "/images/enableDL.bmp"
+#define COPY_LOG_BMP    "/images/copyDL.bmp"
+#define CANCEL_DL_BMP   "/images/cancelDL.bmp"
+#define DELETE_LOG_BMP  "/images/deleteDL.bmp"
+#define FILE_NAME_BMP   "/images/fName.bmp"
+
+// Icons.
 #define WATER_ON_BMP  "/icons/H2OOn32.bmp"
 #define WATER_OFF_BMP "/icons/H2OOff32.bmp"
 #define ON_GREEN_BMP  "/icons/grnLED1.bmp"
@@ -31,11 +38,9 @@
 #define CUT32_BMP "/icons/Cut32.bmp"
 #define COPY32_BMP "/icons/Copy32.bmp"
 #define PASTE32_BMP "/icons/Paste32.bmp"
+#define TRASH32_BMP "/icons/trashC32.bmp"
 
-#define ENABLE_LOG_BMP  "/images/enableDL.bmp"
-#define COPY_LOG_BMP    "/images/copyDL.bmp"
-#define DELETE_LOG_BMP  "/images/deleteDL.bmp"
-#define FILE_NAME_BMP   "/images/fName.bmp"
+
 
 // *****************************************************
 //                      ourKeyboard
@@ -416,6 +421,7 @@ class plantBotCom : public commonComs {
           bool  setPulseReg(bool onOff);
           bool  setLoggingReg(bool onOff);
           bool  startLogCopyCom(char* filemane);
+          void  cancelLogCopyCom(void);
           bool  getLogBuff(void);
           bool  logCopyComActive(void);
           int   logCopyPercent(void);

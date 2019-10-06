@@ -63,7 +63,7 @@ void editLabel::init(void) {
 void editLabel::beginEditing(void) {
 
 	int numBytes;
-	Serial.println("editLabel::beginEditing()");
+
 	hookup();												// Code's running, good time to call this.
 	numBytes = strlen(buff)+1;							// Lets see what we have to start with.
 	if (resizeBuff(numBytes,&backupBuff)) {		// We'll see if we can allocate enough to work with.
@@ -76,7 +76,6 @@ void editLabel::beginEditing(void) {
 				setInitalPointers();						// Setup initial edit index, cursor, firstChar.
 				cursorOnOff = true;						// Lest see that cursor right off!
 				showText();									// Now that we are "editing" lets show it.
-				Serial.println("editLabel::beginEditing() seems fine");
 			}
 		}
 	}
@@ -85,7 +84,6 @@ void editLabel::beginEditing(void) {
 
 void editLabel::endEditing(void) {
 	
-	Serial.println("editLabel::endEditing()");
 	editable::endEditing();			// Shut off the editor.
 	resizeBuff(0,&tempBuff);		// Done with this, recycle; (Should already be NULL anyway.)
 	if (mSuccess) {					// If editing was a success..

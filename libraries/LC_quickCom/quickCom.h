@@ -44,7 +44,7 @@ class qCMaster : public idler, public timeObj {
 	
 				void				begin(int baud);												// Get the baud rate and fire up the connection.
 				void				setReplyTimeout(int timeOutMS);							// How long we'll wait for a reply to complete from the command.
-				byte				readErr(void);													// What's wrong? 			
+				byte				readErr(bool clearErr=true);								// What's wrong? 			
 				bool				sendBuff(byte* buff,byte buffLen,bool wantReply);	// Send out a command buffer.
 				byte				haveBuff(void);												// We have a got back complete buffer, how big?
 				void				readBuff(byte* buff);										// Copy the data we got back into here.

@@ -3,9 +3,9 @@
 #include "floraOS.h"
 #include <debug.h>
 
-#define LONG_UPDATE_TIME    500 // When offline, only check this often.
+#define LONG_UPDATE_TIME    100//500 // When offline, only check this often.
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
-#define NUM_FILEBUFFS       8   // When doing a file transfer, how many filer buffer to get before releasing to other things.
+#define NUM_FILEBUFFS       10  // When doing a file transfer, how many filer buffer to get before releasing to other things.
 
 
 // *****************************************************
@@ -804,23 +804,27 @@ bool plantBotCom::getLogBuff(void) {
   ULptr = (unsigned long*)&(com[2]);                    // Point to the next byte as an unsigned long
   *ULptr = mFileIndex;                                  // Using the pointer stuff in the unsigned long index.
   readErr();                                            // Clear errors.
+  //unsigned long x = millis();
   sendBuff(com,numComBytes,true);                       // Send the command and ask for ack.
-  while(!haveBuff() && !readErr()) {                    // We either get something back or time out.
+  while(!haveBuff() && !readErr(false)) {               // We either get something back or time out.
     sleep(QCOM_SLEEP_TIME);                             // Have a nap, let the UI amuse the user.
   }
-  numRepBytes = haveBuff();                             // We kicked out. See if there's any bytes to grab.
-  if (numRepBytes) {                                    // If there were..
-    readBuff(mDataBuff);                                // Save the data.
-    Serial.print((char*)mDataBuff);
-    localFile = SD.open(mLocalPath,FILE_WRITE);         // Pop open our file, if possible.
-    if (localFile) {                                    // Ok, we got the local file. So far everything is good.
-        localFile.write(mDataBuff,numRepBytes);         // Dump in the bytes.
-        localFile.close();                              // Close our file.
-        mFileIndex = mFileIndex + numRepBytes;          // Bring the remote file index up to date.
-      }
-      mRunning = numRepBytes==254;                      // We got a full buffer? Then we'll have another go at it.
+  //Serial.print("Grab buff time : ");Serial.println(millis()-x);
+  if (readErr()==NO_ERR) {                              // If there was no error..
+    numRepBytes = haveBuff();                             // We kicked out. See if there's any bytes to grab.
+    if (numRepBytes) {                                    // If there were..
+      readBuff(mDataBuff);                                // Save the data.
+      //Serial.print((char*)mDataBuff);
+      localFile = SD.open(mLocalPath,FILE_WRITE);         // Pop open our file, if possible.
+      if (localFile) {                                    // Ok, we got the local file. So far everything is good.
+          localFile.write(mDataBuff,numRepBytes);         // Dump in the bytes.
+          localFile.close();                              // Close our file.
+          mFileIndex = mFileIndex + numRepBytes;          // Bring the remote file index up to date.
+        }
+        mRunning = mRunning && numRepBytes==254;          // We got a full buffer? Then we (might) have another go at it. (Cancel may have been called)
+    }
   }
-  return true;                                          // There is no check for not being online here so we assume we are online.
+  return numRepBytes>0;                                 // There is no check for being online. So if we got bytes, its good.
 }
   
 
@@ -853,6 +857,9 @@ bool plantBotCom::startLogCopyCom(char* filemane) {
 }
 
 
+void plantBotCom::cancelLogCopyCom(void) { mRunning = false; }
+
+
 bool plantBotCom::logCopyComActive(void) { return mRunning;}
 
 
@@ -872,13 +879,15 @@ bool plantBotCom::clearLogCom(void) {
 bool plantBotCom::runFileTransfer(void) {
 
   int numBuffs;
-
-  if (!mRunning) return mOnline;            // Not running? Do nothing change nothing.
-  numBuffs = NUM_FILEBUFFS;                 // Set up how many we can grab before we get booted.
-  while(mRunning && numBuffs) {             // Make hay while the sun shines. Grab file buffers.
-    getLogBuff();                           // The acutal grabe itself.
+  
+  if (!mRunning) return mOnline;                  // Not running? Do nothing change nothing.
+  unsigned long x = millis();
+  numBuffs = NUM_FILEBUFFS;                       // Set up how many we can grab before we get booted.
+  while(mRunning && numBuffs && getLogBuff()) {   // Make hay while the sun shines. Grab file buffers.
+    numBuffs--;
   }
-  return getByte(readMoisture,&mMoisture);  // Easy to get, most dynamic variable. Gives an online check.
+  
+  //Serial.print("Transfer time : ");Serial.println(millis()-x);
 }
 
 

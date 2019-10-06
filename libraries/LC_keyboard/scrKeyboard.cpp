@@ -399,7 +399,7 @@ void keyboard::handleKey(keyCommands inEditCom) {
 }
 
 
-void keyboard::setEditField(editable* inEditObj) { Serial.print("Attaching : ");Serial.println((int)inEditObj);mEditObj = inEditObj; }
+void keyboard::setEditField(editable* inEditObj) { mEditObj = inEditObj; }
 
 void keyboard::handleKey(keyStates inState) { mState = inState; }
 

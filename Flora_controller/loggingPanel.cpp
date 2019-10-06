@@ -86,7 +86,7 @@ void  enableLogBtn::idle(void) {
 
 
 deleteLogBtn::deleteLogBtn(int x, int y)
-  : iconButton(x,y,CUT32_BMP) {  }
+  : iconButton(x,y,TRASH32_BMP) {  }
 
   
 deleteLogBtn::~deleteLogBtn(void) {  }
@@ -113,6 +113,8 @@ copyLogBtn::copyLogBtn(int x, int y,ourKeyboard* akeyboard,panel* ourPanel)
   
   mPanel      = ourPanel;
   mEditLabel  = NULL;
+  mCopyLabel  = NULL;
+  mCancel     = false;
   mKeyboard   = akeyboard;
   if (ourComPort.logCopyComActive()) {
     mXferState = xferRunning;
@@ -121,25 +123,30 @@ copyLogBtn::copyLogBtn(int x, int y,ourKeyboard* akeyboard,panel* ourPanel)
   }
   uiTimer.setTime(1000);
   uiTimer.start();
+  igcTimer.setTime(500);
+  igcTimer.start();
   hookup();
 }
 
   
-copyLogBtn::~copyLogBtn(void) { deleteEditor(); }
+copyLogBtn::~copyLogBtn(void) { }
     
+
+void copyLogBtn::begin(void) {
+
+  iconButton::begin();
+  setLabel();
+}
+
 
 void copyLogBtn::startFileTransfer(void) {
 
   logPanel->msg("Enter filename, click Ok to start.");
-  if (mEditLabel) {
-    mKeyboard->setEditField(NULL);
-    delete(mEditLabel);
-    mEditLabel = NULL;
-  }
+  deleteEditor();
   mEditLabel = new editLabel(ET_X+2,ET_Y+6,ET_W,ET_H,"",1);
   mEditLabel->setColors(&yellow,&black);
   mEditLabel->setJustify(TEXT_LEFT);
-  mEditLabel->setEventSet(touchLift);
+  mEditLabel->setEventSet(fullClick);
   mEditLabel->setValue("logfile.txt");
   mPanel->addObj(mEditLabel);
   mPanel->setNeedRefresh(false);
@@ -152,10 +159,10 @@ void copyLogBtn::startFileTransfer(void) {
 void copyLogBtn::deleteEditor() {
 
   if (mEditLabel) { 
+    mKeyboard->setEditField(NULL);
     screen->fillRect(mEditLabel,&black);
     delete(mEditLabel);
     mEditLabel = NULL;
-    mKeyboard->setEditField(NULL);
   }
 }
 
@@ -163,11 +170,39 @@ void copyLogBtn::deleteEditor() {
 void copyLogBtn::doAction(void) {
   
   ourOS.beep();
-  if (mXferState == xferIdle && ourComPort.getOnline() && !ourComPort.logCopyComActive()) {
-    startFileTransfer(); 
+  if (mXferState == xferRunning) {
+    ourComPort.cancelLogCopyCom();
+    mCancel = true;
+  } else if ( mXferState == xferIdle
+              && ourComPort.getOnline()
+              && !ourComPort.logCopyComActive()) {
+    if(igcTimer.ding()) {
+      startFileTransfer();
+    } 
   } else {
     logPanel->msg("Can't start for some reason.");
   }
+}
+
+
+void copyLogBtn::setLabel(void) {
+    
+  if (mCopyLabel) {
+    delete(mCopyLabel);
+    mCopyLabel = NULL;
+  }
+  if (mXferState == xferRunning) {
+    openPipe(CUT32_BMP);
+    mCopyLabel = new bmpObj(0,y+7,LABEL_W,LABEL_H,CANCEL_DL_BMP);
+  } else {
+    openPipe(COPY32_BMP);
+    mCopyLabel = new bmpObj(0,y+7,LABEL_W,LABEL_H,COPY_LOG_BMP);
+  }
+  mCopyLabel->begin();
+  mPanel->addObj(mCopyLabel);
+  mPanel->setNeedRefresh(false);
+  setNeedRefresh();
+  mCopyLabel->setNeedRefresh();
 }
 
 
@@ -184,6 +219,7 @@ void copyLogBtn::idle() {
           if (ourComPort.startLogCopyCom(mEditLabel->buff)) {
             logPanel->msg("Transfer started.");
             mXferState = xferRunning;
+            setLabel();
           } else {
             logPanel->msg("Transfer failed to start.");
             mXferState = xferIdle;
@@ -210,9 +246,16 @@ void copyLogBtn::idle() {
           }
           logPanel->msg(strBuff);
         } else {
-          logPanel->msg("Transfer complete.");
+          if (mCancel) {
+            logPanel->msg("Transfer canceled.");
+            mCancel = false;
+          } else {
+            logPanel->msg("Transfer complete.");
+          }
           deleteEditor();
+          igcTimer.start();
           mXferState = xferIdle;
+          setLabel();
         }
       }
     break;
@@ -273,11 +316,6 @@ void loggingPanel::setup(void) {
   copyLogBtn* copyLogfile = new copyLogBtn(154,traceY,theKeybaord,this);
   copyLogfile->begin();
   addObj(copyLogfile);
-
-  // COPY LOGFILE LABEL
-  bmpObj* copyLbl = new bmpObj(0,traceY+7,LABEL_W,LABEL_H,COPY_LOG_BMP);
-  copyLbl->begin();
-  addObj(copyLbl);
 
   // DELETE LOGFILE BUTTON
   traceY = traceY + stepY;

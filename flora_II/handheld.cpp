@@ -5,7 +5,7 @@
 #include "globals.h"
 
 #define COM_BUFF_BYTES  255 // Can be no larger than 255!
-
+#define SLAVE_BAUD  500000 //115200
 
 enum floraComSet  {
                   floraReset,
@@ -56,7 +56,7 @@ handheld::handheld(void) {  }
 handheld::~handheld(void) {  }
 
 
-void handheld::begin(void) { qCSlave::begin(comBuff, COM_BUFF_BYTES, 115200); }
+void handheld::begin(void) { qCSlave::begin(comBuff, COM_BUFF_BYTES, SLAVE_BAUD); }
 
 
 // Every time though the loop() we need to see if there's a command from the handheld controller
