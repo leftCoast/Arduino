@@ -138,9 +138,10 @@ void UI::begin(void) {
 
       mColorMap = new colorMultiMap();
       mWetColor.setColor(LC_BLUE);
+      mWetColor.blend(&green,40);
       mDryColor.setColor(LC_YELLOW);
-      mDryColor.blend(&red,20);
-      mDryColor.blend(&white,20);
+      mDryColor.blend(&red,40);
+      mDryColor.blend(&white,40);
       
       int yPos = 0;
 
@@ -180,12 +181,24 @@ void UI::begin(void) {
 }
 
 
-void UI::setColorMap(int percent) {
-
+void UI::setColorMap(int limit) {
+  
   mColorMap->clearMap();
-  mColorMap->addColor(100,&mWetColor);
-  mColorMap->addColor(percent,&white);
-  mColorMap->addColor(0,&mDryColor);
+  if (limit>=100) {
+    mColorMap->addColor(100,&white);
+    mColorMap->addColor(0,&mDryColor); 
+  } else if (limit==0) {
+    mColorMap->addColor(100,&mWetColor);
+    mColorMap->addColor(0,&white);
+  } else if (limit>10) {
+    mColorMap->addColor(100,&mWetColor);
+    mColorMap->addColor(limit-10,&mDryColor);
+    mColorMap->addColor(limit,&white);
+  } else {
+    mColorMap->addColor(100,&mWetColor);
+    mColorMap->addColor(0,&mDryColor);
+    mColorMap->addColor(limit,&white);
+  }
 }
 
 
@@ -209,24 +222,29 @@ void UI::sensorDeath(void) {
 
 void UI::idle(void) {
 
+  bool  refresh;
+
+  
   if (mHaveScreen && ding()) {
-    if (moisture!=mLastMoist) {
-      setColorMap(mLastLimit);
+    refresh = false;
+    if (ourParamObj.getDryLimit()!=mLastLimit) {
+      mLimit->setPercent(ourParamObj.getDryLimit());
+      mLastLimit = ourParamObj.getDryLimit();
+      refresh = true;
+    }
+    if (moisture!=mLastMoist||refresh) {
+      setColorMap(ourParamObj.getDryLimit());
       mMoisture->setColors(&(mColorMap->Map(moisture)),&black);
       mMoisture->setPercent(moisture);
       mLastMoist = moisture;
-    }
-    if (ourParamObj.getDryLimit()!=mLastLimit) {
-      mLimit->setPercent(ourParamObj.getDryLimit());
-      mLastMoist = ourParamObj.getDryLimit();
     }
     if (weAre!=mLastState) {
       mState->setState(weAre);
       mLastState = weAre;
     }
-    if (isLogging()==mLoggingInd->holding) {        // If they match,
-      mLoggingInd->logging(isLogging());        // fix it.
-    }                                           // Otherwise, leave it alone!
+    if (isLogging()==mLoggingInd->holding) {  // If they match,
+      mLoggingInd->logging(isLogging());      // fix it.
+    }                                         // Otherwise, leave it alone!
     start();
   }
 };

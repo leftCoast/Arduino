@@ -48,7 +48,7 @@ class UI  : public dataLog,
   virtual       ~UI(void);
 
   virtual void  begin(void);
-          void  setColorMap(int percent);
+          void  setColorMap(int limit);
   virtual void  idle(void);
           void  sensorDeath(void);
           
