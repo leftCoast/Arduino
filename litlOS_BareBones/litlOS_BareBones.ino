@@ -30,7 +30,7 @@ void setup() {
     while(true);
   }
 
-  // Need to fire p the SD card reader?
+  // Need to fire up the SD card reader?
   // Good place to do that. Along with other
   // fun pieces of hardware you'll need to
   // make life meaningfull.

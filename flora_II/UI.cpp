@@ -222,8 +222,8 @@ void UI::sensorDeath(void) {
 
 void UI::idle(void) {
 
-  bool  refresh;
-
+  bool      refresh;
+  colorObj  aColor;
   
   if (mHaveScreen && ding()) {
     refresh = false;
@@ -234,7 +234,8 @@ void UI::idle(void) {
     }
     if (moisture!=mLastMoist||refresh) {
       setColorMap(ourParamObj.getDryLimit());
-      mMoisture->setColors(&(mColorMap->Map(moisture)),&black);
+      aColor = mColorMap->Map(moisture);
+      mMoisture->setColors(&aColor,&black);
       mMoisture->setPercent(moisture);
       mLastMoist = moisture;
     }

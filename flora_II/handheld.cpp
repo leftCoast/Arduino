@@ -176,7 +176,7 @@ void handheld::handleReadName(byte* comPtr) {
 
 void handheld::handleSetName(byte* comPtr) {
 
-  ourParamObj.setName(&comPtr[1]);
+  ourParamObj.setName((char*)&comPtr[1]);
   comPtr[0] = noErr;
   replyComBuff(1);
 }
