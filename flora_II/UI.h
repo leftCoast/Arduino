@@ -5,6 +5,9 @@
 #include <flasher.h>
 #include "dataLog.h"
 #include "globals.h"
+#include <liveText.h>
+#include <colorObj.h>
+
 
 class percView : public label {
 
@@ -26,6 +29,16 @@ class stateView : public label {
 };
 
 
+class logInd :  public liveText {
+
+  public:
+                logInd(int x,int y);
+  virtual       ~logInd(void);
+
+          void  logging(bool onOff);
+};
+
+
 class UI  : public dataLog,
             public idler,
             public timeObj {
@@ -35,19 +48,23 @@ class UI  : public dataLog,
   virtual       ~UI(void);
 
   virtual void  begin(void);
+          void  setColorMap(int percent);
   virtual void  idle(void);
           void  sensorDeath(void);
           
-          bool        mHaveScreen;
-          percView*   mLimit;
-          percView*   mMoisture;
-          label*      mSlash;
-          label*      mKey;
-          stateView*  mState;
-          flasher*    mLoggingLED;
-          float       mLastMoist;
-          int         mLastLimit;
-          weDo        mLastState;
+          bool            mHaveScreen;
+          percView*       mLimit;
+          percView*       mMoisture;
+          label*          mSlash;
+          label*          mKey;
+          stateView*      mState;
+          logInd*         mLoggingInd;
+          float           mLastMoist;
+          int             mLastLimit;
+          weDo            mLastState;
+          colorObj        mWetColor;
+          colorObj        mDryColor;
+          colorMultiMap*  mColorMap;
 };
 
 

@@ -249,7 +249,8 @@ void handheld::handleGetLogState(byte* comPtr) {
 void handheld::handleSetLogState(byte* comPtr) {
 
   bool  success;
-  
+
+  success = false;
   if (comPtr[0]==loggingOn) {             // The first byte tells us on or off.    
     ourDisplay.setLogging(true);
     success = ourDisplay.isLogging();

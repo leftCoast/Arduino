@@ -4,6 +4,7 @@
 #include <colorObj.h>
 #include <blinker.h>
 #include "parameters.h"
+#include <liveText.h>
 
 #define OLED_CS     10
 #define OLED_RST    6
@@ -71,14 +72,52 @@ void  stateView::setState(weDo inState) {
 // *****************************************************
 
 
+logInd::logInd(int x,int y)
+  :liveText(x,y,96,8) {
+
+  setTextSize(1);
+  setValue("Logging");
+  transp = true;
+  setJustify(TEXT_CENTER);
+  hold();
+  addAColor(0,&black);
+  addAColor(250,&red);
+  addAColor(1000,&red);
+  addAColor(1050,&black);
+  addAColor(1500,&black);
+  loop = true;
+}
+
+                
+logInd::~logInd(void) {  }
+
+
+void logInd::logging(bool onOff) {
+  
+  if (onOff) {
+    release();
+    loop = true;
+  } else {
+    loop = false;
+  }
+}
+
+          
+// *****************************************************
+
+
 // Our output. If we have a screen, we use it. If not? We can flash the light.
 
 
 UI::UI(void) 
-  : timeObj(500) { mHaveScreen = false; }
+  : timeObj(500) {
+    
+  mHaveScreen = false;
+  mColorMap = NULL;
+}
 
 
-UI::~UI(void) {  }
+UI::~UI(void) { if (mColorMap) delete(mColorMap); }
 
 
 // We can't tell weather we have a screen or not. So we'll look for the SD drive.
@@ -96,30 +135,36 @@ void UI::begin(void) {
        mLastState = weAre;
       
       screen->fillScreen(&black);
-    
+
+      mColorMap = new colorMultiMap();
+      mWetColor.setColor(LC_BLUE);
+      mDryColor.setColor(LC_YELLOW);
+      mDryColor.blend(&red,20);
+      mDryColor.blend(&white,20);
+      
       int yPos = 0;
-  
-      mLimit = new percView(5,yPos);
+
+      mMoisture = new percView(5,yPos);
+      mMoisture->setPercent(mLastMoist);
+      viewList.addObj(mMoisture);
+      
+      mLimit = new percView(53,yPos);
       mLimit->setPercent(mLastLimit);
       viewList.addObj(mLimit);
   
-      mMoisture = new percView(53,yPos);
-      mMoisture->setPercent(mLastMoist);
-      viewList.addObj(mMoisture);
-    
       mSlash = new label(41,yPos,96,16,"/",2);
       mSlash->setColors(&white);
       viewList.addObj(mSlash);
   
       yPos = yPos + 20;
-      mKey = new label(9,yPos,96,16,"Limit/Reading",1);
+      mKey = new label(9,yPos,96,16,"Reading/Limit",1);
       mKey->setColors(&white);
       viewList.addObj(mKey);
 
-      mLoggingLED = new flasher(0,yPos+1,5,5);
-      viewList.addObj(mLoggingLED);
-      mLoggingLED->setBlink(false);
-      
+      mLoggingInd = new logInd(0,yPos+10);
+      viewList.addObj(mLoggingInd);
+      mLoggingInd->logging(false);
+
       yPos = yPos + 20;                      //"100/100"
       mState = new stateView(0,yPos);
       mState->setState(mLastState);
@@ -132,6 +177,15 @@ void UI::begin(void) {
     pinMode(13, OUTPUT);
     idleLight.setBlink(true);                             // Start up our running light. Its all we got.
   }
+}
+
+
+void UI::setColorMap(int percent) {
+
+  mColorMap->clearMap();
+  mColorMap->addColor(100,&mWetColor);
+  mColorMap->addColor(percent,&white);
+  mColorMap->addColor(0,&mDryColor);
 }
 
 
@@ -157,6 +211,8 @@ void UI::idle(void) {
 
   if (mHaveScreen && ding()) {
     if (moisture!=mLastMoist) {
+      setColorMap(mLastLimit);
+      mMoisture->setColors(&(mColorMap->Map(moisture)),&black);
       mMoisture->setPercent(moisture);
       mLastMoist = moisture;
     }
@@ -168,9 +224,9 @@ void UI::idle(void) {
       mState->setState(weAre);
       mLastState = weAre;
     }
-    if (isLogging()!=mLoggingLED->blinking()) {        // If it don't match,
-      mLoggingLED->setBlink(isLogging());             // fix it.
-    }                                                 // Otherwise, leave it alone!
+    if (isLogging()==mLoggingInd->holding) {        // If they match,
+      mLoggingInd->logging(isLogging());        // fix it.
+    }                                           // Otherwise, leave it alone!
     start();
   }
 };

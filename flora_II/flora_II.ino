@@ -38,7 +38,7 @@ timeObj       readTime(DEF_READ_TIME);            // Time between moisture readi
 // ********************************************************************
 
 // I Think this is how they tell if the unit is online or not. Maybe I
-// can use this as a perotic check to see if its running or not?
+// can use this as a periotic check to see if its running or not?
 
 /*
 uint8_t c = this->read8(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID);
@@ -183,7 +183,7 @@ void loop() {
   textComs.checkTextCom();                            // Check to see if theres a guy at the computer looking to talk to us.
   ourHandheld.checkComs();                            // Now we bop off and check to see if anything has come in from a handheld controller.
   
-  if (readTime.ding()) {                              // If its tiome to do a reading..
+  if (readTime.ding()) {                              // If its time to do a reading..
     doReading();                                      // Well, do it.
     readTime.stepTime();                              // Reset the timer for the next reading.
   }

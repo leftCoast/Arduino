@@ -45,7 +45,7 @@ void parameters::saveParams(void) {
 }
 
 
-// Read the saved moisture value.
+// Read the saved limit value.
 int parameters::getDryLimit(void) { return params.dryLimit; }
 
 
@@ -81,7 +81,7 @@ int parameters::getMud(void) { return params.mud; }
 int parameters::getRunNum(void) { return params.runNum; }
 
 
-// Save a new moisture percent value.
+// Save a new limit percent value.
 void parameters::setDryLimit(int percent) {
 
   if (percent<0) percent = 0;

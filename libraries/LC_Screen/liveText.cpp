@@ -29,7 +29,6 @@ void  liveText::addAColor(int timeMs,colorObj* color) {
 
     if (timeMs>maxTime) {
       maxTime = timeMs;
-      lastColor = *color;
     }
     colorMultiMap::addColor(timeMs,color);
   }
