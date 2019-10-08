@@ -12,7 +12,6 @@ class idler : public linkListObj {
   				void	hookup(void);
 	virtual	void	idle(void);
 
-//protected:
 				bool	hookedIn;
 };
 
