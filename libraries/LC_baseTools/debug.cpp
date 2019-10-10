@@ -42,4 +42,4 @@ void debug::trace(char* message,int inNum,bool hold) {
 }
 
 
-debug debugger;
+debug db;

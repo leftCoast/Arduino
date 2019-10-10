@@ -95,7 +95,7 @@ void controlPanel::reset(void) { }
 
 void controlPanel::offList(void) {
 
-  setFocus(NULL);
+  setFocusPtr(NULL);
   setControlPtr(ourList);
   if (randomPlay) {
     showItem(mOnItem);

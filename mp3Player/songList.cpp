@@ -97,7 +97,7 @@ void  songList::reset(void) { }
 
 void songList::offList(void) {
 
-  setFocus(NULL);
+  setFocusPtr(NULL);
   setControlPtr(ourController);
 }
 
