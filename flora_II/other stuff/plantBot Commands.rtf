@@ -1,0 +1,56 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww17460\viewh14440\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs36 \cf0 PlantBot USB port text commands
+\b0 \
+\
+1) Fire up Arduino App. Use the Mac if you don\'92t have it.\
+2) Plug in plant bot.\
+3) Under Tools menu find Port command.\
+4) Choose the one that has Teensy in the name.\
+5) Same Tools menu above port select serial monitor.\
+\
+Type away!\
+\
+\
+reset	- Everything back to factory defaults. Must be run on new PlantBots.\
+\
+see		- Shows the parameters it\'92s storing in EEPROM.\
+\
+read	- Show the readings its seeing from the outside world. Or, followed by number (milliseconds) it will 		  repeat itself endlessly. Followed by nothing will stop it from repeating.\
+\
+graph	- Not connected. Was a crude graphing thing. Data logging now has that job.\
+\
+mud		- This followed by a number sets the \'93wet\'94 capacitive limit for doing calculations.\
+\
+dry		- This followed by a number sets the \'93dry\'94 capacitive limit for doing calculations.\
+\
+limit		- This followed by a number (0..100) sets the cutoff limit to water at.\
+\
+wtime	- This followed by a number (milliseconds) sets the time to spend watering.\
+\
+stime	- This followed by a number (milliseconds) sets the time to spend soaking after watering.\
+\
+name	- This followed by anything sets the name of the PlantBot.\
+\
+pump	- This followed by either on or off turns the pump on or off.\
+\
+percent	- This followed by (0..100) sets the low power setting for the pump.\
+\
+period	- This followed by (millisecond) sets the period for the PWM that runs the motor.\
+\
+ls		- Gives current file directory listing.\
+\
+log		- Followed by\'85\
+			reset	- deletes the log file.\
+			on		- Turns logging on.\
+			off		- Turns logging off.\
+			show	- Copies the log file to the monitor.\
+			lines	- returns the number of data lines in the log file.\
+\
+\
+\
+}
