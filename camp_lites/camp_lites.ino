@@ -146,8 +146,8 @@ void sparkles::cleanUp(void) {
       index++;
       if (aSparkle) {                         // Sanity! Check for null.
         if (aSparkle->ding()) {
-          unlinkObj((linkListObj*)aSparkle);
-          delete aSparkle;                    // We take care of memory we allocated.
+          unlinkObj((linkListObj*)aSparkle);  // Single linked list. One must unlink first, then delete.
+          delete aSparkle;                    // We take care of the memory we allocate.
           done = true;                        // Only kill one. Make 'em sweat.
         }
       } else {
