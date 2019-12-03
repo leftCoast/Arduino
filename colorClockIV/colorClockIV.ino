@@ -10,7 +10,7 @@ void setup() {
   if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
     while (1);
   }
-  screen->fillScreen(&cyan); 
+  ourOS.begin();
 }
 
 void loop() {     // During loop..

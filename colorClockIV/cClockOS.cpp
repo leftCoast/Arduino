@@ -7,6 +7,51 @@ mechButton  ourClicker(POT_BTN);
 cClockOS    ourOS;
 boolean     haveClock = false;
 
+// *****************************************************
+//                      randCRect
+// *****************************************************
+
+
+
+randCRect::randCRect(rect* inRect,colorObj* inColor,int inset)
+  : colorRect(inRect,inColor,inset) { mPercent = 50; }
+
+  
+randCRect::randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset)
+  : colorRect(inLocX,inLocY,inWidth,inHeight,inset) { mPercent = 50; }
+
+  
+randCRect::~randCRect(void) {  }
+
+
+void  randCRect::setPercent(int percent) {
+
+  if (percent<0) percent = 0;
+  if (percent>100) percent = 100;
+  mPercent = percent;
+  setNeedRefresh();
+}
+
+
+void  randCRect::drawSelf(void) {
+  
+  for (int i=0;i<width;i++) {
+    for (int j=0;j<height;j++) {
+      if (random(0,99)<mPercent) {
+        screen->drawPixel(i,j,this);
+      } else {
+        screen->drawPixel(i,j,&black);
+      }
+    }
+  }
+}
+
+
+
+  
+// *****************************************************
+//                      homeClkPanel
+// *****************************************************
 
 
 homeClkPanel::homeClkPanel(void) : homePanel() {  }
@@ -16,8 +61,9 @@ homeClkPanel::~homeClkPanel(void) {  }
 
 
 void homeClkPanel::setup() {
-  
-  screen->fillScreen(&green);
+
+  mBacground = new randCRect(0,0,128,128,&green);
+  addObj(mBacground);
   colors[0].setColor(LC_RED);
   colors[1].setColor(LC_ORANGE);
   colors[2].setColor(LC_YELLOW);
@@ -43,18 +89,22 @@ void homeClkPanel::setup() {
   shade->setColors(&black);
   addObj(shade);
 
-  dimmer = new mapper(0,1024,0,100);
+  dimmer = new mapper(3,1020,0,100);
 
-  smoother = new runningAvg(20);
+  smoother = new runningAvg(3);
+  
+  mTBackground = new colorRect(73,107,128-75,13);
+  mTBackground->setColor(&black);
+  addObj(mTBackground);
+  //mTBackground->setNeedRefresh(false);
   
   timeDisp = new label(75,110,128-75,12);
-  timeDisp->setJustify(TEXT_LEFT);
+  timeDisp->setJustify(TEXT_CENTER);
   timeDisp->setColors(&white);
   addObj(timeDisp);
+  //timeDisp->setNeedRefresh(false);
   
   showTime = false;
-
-  drawClock();
 
   mParser.addCmd(help,"?");
   mParser.addCmd(setHour,"hour");
@@ -69,8 +119,8 @@ void homeClkPanel::drawClock(void) {
   int       index;
   colorObj  aColor;
   char      timeStr[10];
-  DateTime  now;
   
+  DateTime  now;
   if (haveClock) now = rtc.now();
   index = now.hour();
   if (index>12) {
@@ -82,16 +132,25 @@ void homeClkPanel::drawClock(void) {
   } else {
     aColor.setColor(&black);
   }
-  aColor.blend(&black,dimPercent);
-  screen->fillScreen(&aColor);
+  mBacground->setColor(&aColor);
+  mBacground->setPercent(100-dimPercent);
   num->setValue(now.hour());
+  aColor.setColor(&white);
+  aColor.blend(&black,.7 * dimPercent);
+  num->setColors(&aColor);
   shade->setValue(now.hour());
+  
+  aColor.setColor(&white);
+  aColor.blend(&black,.7 * dimPercent);
+  timeDisp->setColors(&aColor);
   
   if (showTime) {
     snprintf (timeStr,TEMP_BUFF_SIZE,"%d:%d",now.hour(),now.minute());
     timeDisp->setValue(timeStr);
+    mTBackground->setNeedRefresh();
   } else {
     timeDisp->setValue(""); 
+    mTBackground->setNeedRefresh(false);
   }
   drawtime = now;
 }
@@ -103,7 +162,7 @@ void homeClkPanel::checkScreen(void) {
   int       newPercent;
   bool      needDraw;
   DateTime  now;
-  
+    
   needDraw = false;
   if (haveClock) now = rtc.now();
   
@@ -116,6 +175,7 @@ void homeClkPanel::checkScreen(void) {
     needDraw = true;
   }
   rawData = smoother->addData(analogRead(A0));
+  randomSeed(analogRead(A0));
   newPercent = round(dimmer->Map(rawData));
   if (newPercent>dimPercent+PERC_WINDOW ||newPercent<dimPercent-PERC_WINDOW) {
     dimPercent = newPercent;

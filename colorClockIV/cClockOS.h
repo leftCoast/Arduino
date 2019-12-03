@@ -17,10 +17,28 @@
 #include "lilParser.h"
 #include "fontLabel.h"
 #include "litlOS.h"
-
+#include "colorRect.h"
 
 
 enum  apps { homeApp = HOME_PANEL_ID, colorEditApp };
+
+// *****************************************************
+//                      randCRect
+// *****************************************************
+
+
+class randCRect : public colorRect {
+
+  public:
+          randCRect(rect* inRect,colorObj* inColor,int inset=0);
+          randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset=0);
+  virtual ~randCRect(void);
+
+  virtual void  setPercent(int percent);
+  virtual void  drawSelf(void);
+
+          int   mPercent;
+};
 
 
           
@@ -48,6 +66,8 @@ class homeClkPanel : public homePanel {
           void        doSee(void);
           void        checkParse(void);
                 
+          randCRect*  mBacground;
+          colorRect*  mTBackground;
           lilParser   mParser;
           colorObj    colors[12];
           fontLabel*  num;
