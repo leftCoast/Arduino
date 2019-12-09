@@ -109,10 +109,12 @@ int lilParser::getParamSize(void) {
 }
 
 
+// Returns the next param in the param string. Passes it back as a char* buffer that
+// you MUST free when you are done with it.
 char* lilParser::getParam(void) {
 	
 	char*	buff;
-  int 	index;
+	int 	index;
 	
 	buff = NULL;
 	if (currentCmd) {																					// Had successful parse.

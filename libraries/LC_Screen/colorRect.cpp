@@ -1,6 +1,12 @@
 #include "colorRect.h"
 
 
+colorRect::colorRect(void)
+	: drawObj(),colorObj() {
+	
+	setInset(0);
+}
+
 
 colorRect::colorRect(rect* inRect,colorObj* inColor,int inset)
 	: drawObj(inRect),colorObj() {

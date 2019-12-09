@@ -1,11 +1,14 @@
 #include "cClockOS.h"
-
-
+#include "cEditPanel.h"
+#include <EEPROM.h>
 
 RTC_DS3231  rtc;
 mechButton  ourClicker(POT_BTN);
 cClockOS    ourOS;
 boolean     haveClock = false;
+colorObj    colors[24];
+
+
 
 // *****************************************************
 //                      randCRect
@@ -24,7 +27,7 @@ randCRect::randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset)
 randCRect::~randCRect(void) {  }
 
 
-void  randCRect::setPercent(int percent) {
+void  randCRect::setPercent(float percent) {
 
   if (percent<0) percent = 0;
   if (percent>100) percent = 100;
@@ -37,7 +40,7 @@ void  randCRect::drawSelf(void) {
   
   for (int i=0;i<width;i++) {
     for (int j=0;j<height;j++) {
-      if (random(0,99)<mPercent) {
+      if (random(0,990)/10.0<mPercent) {
         screen->drawPixel(i,j,this);
       } else {
         screen->drawPixel(i,j,&black);
@@ -45,7 +48,6 @@ void  randCRect::drawSelf(void) {
     }
   }
 }
-
 
 
   
@@ -64,53 +66,36 @@ void homeClkPanel::setup() {
 
   mBacground = new randCRect(0,0,128,128,&green);
   addObj(mBacground);
-  colors[0].setColor(LC_RED);
-  colors[1].setColor(LC_ORANGE);
-  colors[2].setColor(LC_YELLOW);
-  colors[3].setColor(LC_GREEN);
-  colors[4].setColor(LC_BLUE);
-  colors[5].setColor(LC_PURPLE);
-  colors[6].setColor(LC_PINK);
-  colors[7].setColor(LC_ORANGE);
-  colors[8].setColor(LC_YELLOW);
-  colors[9].setColor(LC_GREEN);
-  colors[10].setColor(LC_LIGHT_BLUE);
-  colors[11].setColor(LC_LAVENDER);
-
-  num = new fontLabel(0, 70, 80, 108);
-  num->setTextSize(4);
-  num->setJustify(TEXT_RIGHT);
-  num->setColors(&white);
-  addObj(num);
-
+  
   shade = new fontLabel(0+LABEL_OFFSET, 70+LABEL_OFFSET, 80, 108);
   shade->setTextSize(4);
   shade->setJustify(TEXT_RIGHT);
   shade->setColors(&black);
   addObj(shade);
-
+  
   dimmer = new mapper(3,1020,0,100);
 
   smoother = new runningAvg(3);
   
-  mTBackground = new colorRect(73,107,128-75,13);
+  mTBackground = new colorRect(100+73,107,128-75,13);
   mTBackground->setColor(&black);
   addObj(mTBackground);
-  //mTBackground->setNeedRefresh(false);
   
-  timeDisp = new label(75,110,128-75,12);
+  timeDisp = new label(100+75,110,128-75,12);
   timeDisp->setJustify(TEXT_CENTER);
   timeDisp->setColors(&white);
   addObj(timeDisp);
-  //timeDisp->setNeedRefresh(false);
-  
+
   showTime = false;
+  
+  drawClock();
 
   mParser.addCmd(help,"?");
   mParser.addCmd(setHour,"hour");
   mParser.addCmd(setMin,"minute");
   mParser.addCmd(setSec,"sec");
-  mParser.addCmd(see,"see");
+  mParser.addCmd(reset,"reset");
+  mParser.addCmd(cEdit,"cedit");
 }
 
 
@@ -123,21 +108,13 @@ void homeClkPanel::drawClock(void) {
   DateTime  now;
   if (haveClock) now = rtc.now();
   index = now.hour();
-  if (index>12) {
-    index = index - 12;
-  }
-  index--;
-  if(index>=0&&index<12) {
+  if(index>=0&&index<24) {
     aColor.setColor(&(colors[index]));
   } else {
     aColor.setColor(&black);
   }
   mBacground->setColor(&aColor);
   mBacground->setPercent(100-dimPercent);
-  num->setValue(now.hour());
-  aColor.setColor(&white);
-  aColor.blend(&black,.7 * dimPercent);
-  num->setColors(&aColor);
   shade->setValue(now.hour());
   
   aColor.setColor(&white);
@@ -148,9 +125,6 @@ void homeClkPanel::drawClock(void) {
     snprintf (timeStr,TEMP_BUFF_SIZE,"%d:%d",now.hour(),now.minute());
     timeDisp->setValue(timeStr);
     mTBackground->setNeedRefresh();
-  } else {
-    timeDisp->setValue(""); 
-    mTBackground->setNeedRefresh(false);
   }
   drawtime = now;
 }
@@ -159,7 +133,7 @@ void homeClkPanel::drawClock(void) {
 void homeClkPanel::checkScreen(void) {
   
   float     rawData;
-  int       newPercent;
+  float     newPercent;
   bool      needDraw;
   DateTime  now;
     
@@ -176,7 +150,7 @@ void homeClkPanel::checkScreen(void) {
   }
   rawData = smoother->addData(analogRead(A0));
   randomSeed(analogRead(A0));
-  newPercent = round(dimmer->Map(rawData));
+  newPercent = dimmer->Map(rawData);
   if (newPercent>dimPercent+PERC_WINDOW ||newPercent<dimPercent-PERC_WINDOW) {
     dimPercent = newPercent;
     needDraw = true;
@@ -184,7 +158,15 @@ void homeClkPanel::checkScreen(void) {
 
   if (ourClicker.clicked()) {
     while(ourClicker.clicked());
-    showTime = ! showTime;
+    showTime = !showTime;
+    if (showTime) {
+      timeDisp->x = timeDisp->x-100;
+      mTBackground->x = mTBackground->x-100;
+    } else {
+      timeDisp->x = timeDisp->x+100;
+      mTBackground->x = mTBackground->x+100;
+      //mTBackground->setNeedRefresh();
+    }
     needDraw = true;
   }
 
@@ -241,12 +223,35 @@ void homeClkPanel::doSetSec() {
 }
 
 
-void homeClkPanel::doSee() {
+void homeClkPanel::doReset() {
 
-  
+  DateTime  now;
+
+  colors[0].setColor(LC_RED);
+  colors[1].setColor(LC_ORANGE);
+  colors[2].setColor(LC_YELLOW);
+  colors[3].setColor(LC_GREEN);
+  colors[4].setColor(LC_BLUE);
+  colors[5].setColor(100,100,0);
+  colors[6].setColor(LC_RED);
+  colors[7].setColor(LC_ORANGE);
+  colors[8].setColor(LC_YELLOW);
+  colors[9].setColor(LC_GREEN);
+  colors[10].setColor(LC_BLUE);
+  colors[11].setColor(100,100,0);   // Brown.
+  for(int i=0;i<12;i++) {
+    colors[12+i].setColor(&(colors[i]));
+  }
+  ourOS.saveParams();
+   
+  if (haveClock) {
+    now = rtc.now();
+    mBacground->setColor(&(colors[now.hour()]));
+    setNeedRefresh();
+  }
 }
 
-  
+
 void homeClkPanel::checkParse(void) {
 
   char  inChar;
@@ -260,16 +265,18 @@ void homeClkPanel::checkParse(void) {
       case noCommand      : break;
       case help           : 
         Serial.println("Commands:");
-        Serial.println("   hour followed by a number 0..23.");
-        Serial.println("   minute followed by a number 0..59.");
-        Serial.println("   sec followed by a number 0..59.");
-        Serial.println("   see followed by a number 1..12.");
+        Serial.println("   hour followed by a number 0..23. Sets the hour.");
+        Serial.println("   minute followed by a number 0..59. Sets the minutes.");
+        Serial.println("   sec followed by a number 0..59. Sets the seconds.");
+        Serial.println("   cedit takes you to the color editor.");
+        Serial.println("   reset will reset all colors to defaults.");
       break;
-      case setHour : doSetHour(); break;
-      case setMin : doSetMin(); break;
-      case setSec : doSetSec(); break;
-      case see    : doSee(); break;
-      default     : 
+      case setHour  : doSetHour(); break;
+      case setMin   : doSetMin(); break;
+      case setSec   : doSetSec(); break;
+      case cEdit    : nextPanel = colorEditApp; break;
+      case reset    : doReset();  break;
+      default       : 
         Serial.println("I really don't know what your looking for.");
         Serial.println("Try typing ? for a list of commands.");
       break;
@@ -301,14 +308,38 @@ cClockOS::cClockOS(void) : litlOS() { }
 cClockOS::~cClockOS(void) {  }
 
 
-cClockOS::begin(void) {
+int cClockOS::begin(void) {
 
   haveClock = rtc.begin();
   Wire.beginTransmission(0x68);   // address DS3231
   Wire.write(0x0E);               // select register
   Wire.write(0b00011100);         // write register bitmap, bit 7 is /EOSC
   Wire.endTransmission();
-  litlOS::begin();
+
+  readParams();
+  
+  return litlOS::begin();
+}
+
+void cClockOS::readParams(void) {
+
+  RGBpack paramBlock[24];
+  
+  EEPROM.get(0,paramBlock);
+  for (int i=0;i<24;i++) {
+    colors[i].setColor(&(paramBlock[i]));
+  }
+}
+
+
+void cClockOS::saveParams(void)  {
+  
+  RGBpack paramBlock[24];
+
+  for (int i=0;i<24;i++) {
+    paramBlock[i] = colors[i].packColor();
+  }
+  EEPROM.put(0,paramBlock);
 }
 
 
@@ -316,7 +347,7 @@ panel* cClockOS::createPanel(int panelID) {
 
   switch (panelID) {
     case homeApp      : return new homeClkPanel(); 
-    case colorEditApp : return new homeClkPanel();//editPanel();
+    case colorEditApp : return new cEditPanel();
     default           : return new homeClkPanel();
   }
 }

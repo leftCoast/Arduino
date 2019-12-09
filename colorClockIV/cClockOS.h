@@ -7,7 +7,7 @@
 #define OLED_RST      6
 #define POT_BTN       4
 #define LABEL_OFFSET  1
-#define PERC_WINDOW   3
+#define PERC_WINDOW   1
 
 #include "Wire.h"
 #include "RTClib.h"
@@ -34,10 +34,10 @@ class randCRect : public colorRect {
           randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset=0);
   virtual ~randCRect(void);
 
-  virtual void  setPercent(int percent);
+  virtual void  setPercent(float percent);
   virtual void  drawSelf(void);
 
-          int   mPercent;
+          float   mPercent;
 };
 
 
@@ -50,7 +50,7 @@ class randCRect : public colorRect {
 class homeClkPanel : public homePanel {
 
   public:
-          enum        mainComs { noCommand, help, setHour, setMin, setSec, see };
+          enum        mainComs { noCommand, help, setHour, setMin, setSec, reset, cEdit };
           
           homeClkPanel(void);
   virtual ~homeClkPanel(void);
@@ -63,14 +63,12 @@ class homeClkPanel : public homePanel {
           void        doSetHour(void);
           void        doSetMin(void);
           void        doSetSec(void);
-          void        doSee(void);
+          void        doReset(void);
           void        checkParse(void);
                 
           randCRect*  mBacground;
           colorRect*  mTBackground;
           lilParser   mParser;
-          colorObj    colors[12];
-          fontLabel*  num;
           fontLabel*  shade;
           label*      timeDisp;
           mapper*     dimmer;
@@ -90,6 +88,8 @@ class cClockOS : public litlOS {
   virtual ~cClockOS(void);
 
   virtual int     begin(void);
+          void    readParams(void);
+          void    saveParams(void);
   virtual panel*  createPanel(int panelID);
 };
 
@@ -98,5 +98,6 @@ extern RTC_DS3231   rtc;
 extern mechButton   ourClicker;
 extern cClockOS     ourOS;
 extern boolean      haveClock;
+extern colorObj     colors[];
 
 #endif
