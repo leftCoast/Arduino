@@ -7,7 +7,7 @@
 #define OLED_RST      6
 #define POT_BTN       4
 #define LABEL_OFFSET  1
-#define PERC_WINDOW   1
+#define PERC_WINDOW   .5
 
 #include "Wire.h"
 #include "RTClib.h"
@@ -18,7 +18,7 @@
 #include "fontLabel.h"
 #include "litlOS.h"
 #include "colorRect.h"
-
+#include "multiMap.h"
 
 enum  apps { homeApp = HOME_PANEL_ID, colorEditApp };
 
@@ -71,7 +71,7 @@ class homeClkPanel : public homePanel {
           lilParser   mParser;
           fontLabel*  shade;
           label*      timeDisp;
-          mapper*     dimmer;
+          multiMap*   dimmer;
           runningAvg* smoother;
           int         dimPercent;
           DateTime    drawtime;

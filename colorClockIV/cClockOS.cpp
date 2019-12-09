@@ -40,10 +40,10 @@ void  randCRect::drawSelf(void) {
   
   for (int i=0;i<width;i++) {
     for (int j=0;j<height;j++) {
-      if (random(0,990)/10.0<mPercent) {
-        screen->drawPixel(i,j,this);
+      if ((random(0,10000)/100.0)<mPercent&&(random(0,10000)/100.0)<mPercent) {
+        screen->drawPixel(j,i,this);
       } else {
-        screen->drawPixel(i,j,&black);
+        screen->drawPixel(j,i,&black);
       }
     }
   }
@@ -56,10 +56,18 @@ void  randCRect::drawSelf(void) {
 // *****************************************************
 
 
-homeClkPanel::homeClkPanel(void) : homePanel() {  }
+homeClkPanel::homeClkPanel(void) : homePanel() {
+
+  dimmer    = NULL;
+  smoother  = NULL;
+}
 
 
-homeClkPanel::~homeClkPanel(void) {  }
+homeClkPanel::~homeClkPanel(void) { 
+  
+  if (dimmer) delete dimmer;
+  if (smoother) delete smoother;
+}
 
 
 void homeClkPanel::setup() {
@@ -73,9 +81,13 @@ void homeClkPanel::setup() {
   shade->setColors(&black);
   addObj(shade);
   
-  dimmer = new mapper(3,1020,0,100);
-
-  smoother = new runningAvg(3);
+  //dimmer = new mapper(3,1020,0,100);
+  dimmer = new multiMap();
+  dimmer->addPoint(0,0);
+  dimmer->addPoint(510,1);
+  dimmer->addPoint(1020,100);
+  
+  smoother = new runningAvg(4);
   
   mTBackground = new colorRect(100+73,107,128-75,13);
   mTBackground->setColor(&black);
