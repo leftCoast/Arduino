@@ -11,6 +11,32 @@ colorObj    colors[24];
 
 
 // *****************************************************
+//                      nWindow
+// *****************************************************
+
+
+nWindow::nWindow(float range, float baseVal) {
+  
+  mRange = range;
+  setBase(baseVal);
+}
+
+
+nWindow::~nWindow(void) {  }
+
+
+void nWindow::setBase(float baseVal) {
+
+    mMin = baseVal - mRange;
+    mMax = baseVal + mRange;
+}
+
+
+bool nWindow::inRange(float val) { return (val>=mMin && val<=mMax); }
+
+
+
+// *****************************************************
 //                      randCRect
 // *****************************************************
 
@@ -60,6 +86,7 @@ homeClkPanel::homeClkPanel(void) : homePanel() {
 
   dimmer    = NULL;
   smoother  = NULL;
+  wind      = NULL;
 }
 
 
@@ -67,12 +94,17 @@ homeClkPanel::~homeClkPanel(void) {
   
   if (dimmer) delete dimmer;
   if (smoother) delete smoother;
+  if (wind) delete wind;
 }
 
 
 void homeClkPanel::setup() {
 
-  mBacground = new randCRect(0,0,128,128,&green);
+  randomSeed(analogRead(A1));                         // A1 is unwired port for noise.
+  wind = new nWindow(2);
+  wind->setBase(analogRead(A0));
+  
+  mBacground = new randCRect(0,0,128,128,&black);
   addObj(mBacground);
   
   shade = new fontLabel(0+LABEL_OFFSET, 70+LABEL_OFFSET, 80, 108);
@@ -81,7 +113,6 @@ void homeClkPanel::setup() {
   shade->setColors(&black);
   addObj(shade);
   
-  //dimmer = new mapper(3,1020,0,100);
   dimmer = new multiMap();
   dimmer->addPoint(0,0);
   dimmer->addPoint(510,1);
@@ -145,7 +176,6 @@ void homeClkPanel::drawClock(void) {
 void homeClkPanel::checkScreen(void) {
   
   float     rawData;
-  float     newPercent;
   bool      needDraw;
   DateTime  now;
     
@@ -160,12 +190,11 @@ void homeClkPanel::checkScreen(void) {
   if (now.hour()!=drawtime.hour()) {
     needDraw = true;
   }
-  rawData = smoother->addData(analogRead(A0));
-  randomSeed(analogRead(A0));
-  newPercent = dimmer->Map(rawData);
-  if (newPercent>dimPercent+PERC_WINDOW ||newPercent<dimPercent-PERC_WINDOW) {
-    dimPercent = newPercent;
-    needDraw = true;
+  rawData = smoother->addData(analogRead(A0));    // Toss the reading into the smoother.
+  if (!wind->inRange(rawData)) {                  // If the pot value outside the +/- range..
+    wind->setBase(rawData);                       // We move the base value to the new reading.
+    dimPercent = dimmer->Map(rawData);            // Calculate the new dimming value.            
+    needDraw = true;                              // We need a redraw.
   }
 
   if (ourClicker.clicked()) {
@@ -177,7 +206,6 @@ void homeClkPanel::checkScreen(void) {
     } else {
       timeDisp->x = timeDisp->x+100;
       mTBackground->x = mTBackground->x+100;
-      //mTBackground->setNeedRefresh();
     }
     needDraw = true;
   }

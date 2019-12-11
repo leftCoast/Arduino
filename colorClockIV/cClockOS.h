@@ -7,7 +7,7 @@
 #define OLED_RST      6
 #define POT_BTN       4
 #define LABEL_OFFSET  1
-#define PERC_WINDOW   .5
+#define PERC_nWindow   .5
 
 #include "Wire.h"
 #include "RTClib.h"
@@ -21,6 +21,29 @@
 #include "multiMap.h"
 
 enum  apps { homeApp = HOME_PANEL_ID, colorEditApp };
+
+// *****************************************************
+//                      nWindow
+// *****************************************************
+
+
+// Given a +/- range of a base value, pass back if a given
+// value falls into this range. (inclusive)
+class nWindow {
+
+  public:
+          nWindow(float range, float baseVal=0);
+  virtual ~nWindow(void);
+
+          void  setBase(float baseVal);
+          bool  inRange(float val);
+
+          float mRange;
+          float mMin;
+          float mMax;
+};
+
+
 
 // *****************************************************
 //                      randCRect
@@ -76,7 +99,7 @@ class homeClkPanel : public homePanel {
           int         dimPercent;
           DateTime    drawtime;
           bool        showTime;
-
+          nWindow*    wind;
 };
 
 
