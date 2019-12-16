@@ -66,7 +66,6 @@ void cEditPanel::drawSelf(void) { screen->fillScreen(&black); }
 
 void cEditPanel::doGetColor(void) {
 
-  //byte  newVal;
   char* paramBuff;
   int   hourVal;
   
@@ -87,7 +86,6 @@ void cEditPanel::doGetColor(void) {
 
 void cEditPanel::doSetColor(void) {
 
-  //byte  newVal;
   char* paramBuff;
   int   hourVal;
   int   redVal;
