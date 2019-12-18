@@ -38,9 +38,13 @@ void adafruit_1431_Obj::setCursor(int x,int y)        																{ theOLED-
 void adafruit_1431_Obj::drawText(char* inText)            															{ theOLED->print(inText); }
 void adafruit_1431_Obj::fillScreen(colorObj* inColor)     															{ theOLED->fillScreen(inColor->getColor16()); }
 void adafruit_1431_Obj::fillRect(int x,int y,int width,int height,colorObj* inColor)						{ theOLED->fillRect(gX(x),gY(y), width, height,inColor->getColor16()); }
+void adafruit_1431_Obj::fillRect(rect* aRect,colorObj* inColor)													{ theOLED->fillRect(gX(aRect->x),gY(aRect->y), aRect->width, aRect->height,inColor->getColor16()); }
 void adafruit_1431_Obj::drawRect(int x,int y,int width,int height,colorObj* inColor)						{ theOLED->drawRect(gX(x),gY(y), width, height,inColor->getColor16()); }
+void adafruit_1431_Obj::drawRect(rect* aRect,colorObj* inColor)													{ theOLED->drawRect(gX(aRect->x),gY(aRect->y), aRect->width, aRect->height,inColor->getColor16()); }
 void adafruit_1431_Obj::fillRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor)	{ theOLED->fillRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
+void adafruit_1431_Obj::fillRoundRect(rect* aRect,int radius,colorObj* inColor)								{ theOLED->fillRoundRect(gX(aRect->x),gY(aRect->y),aRect->width,aRect->height,radius,inColor->getColor16()); }
 void adafruit_1431_Obj::drawRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor)	{ theOLED->drawRoundRect(gX(x),gY(y),width,height,radius,inColor->getColor16()); }
+void adafruit_1431_Obj::drawRoundRect(rect* aRect,int radius,colorObj* inColor)								{ theOLED->drawRoundRect(gX(aRect->x),gY(aRect->y),aRect->width,aRect->height,radius,inColor->getColor16()); }
 void adafruit_1431_Obj::drawCircle(int x,int y,int diam, colorObj* inColor) 									{ drawRoundRect(gX(x),gY(y),diam,diam,diam/2,inColor); }
 void adafruit_1431_Obj::fillCircle(int x,int y,int diam, colorObj* inColor) 									{ fillRoundRect(gX(x),gY(y),diam,diam,diam/2,inColor); }
 void adafruit_1431_Obj::drawVLine(int x,int y,int height,colorObj* inColor) 									{ theOLED->drawFastVLine(gX(x),gY(y),height,inColor->getColor16()); }

@@ -27,9 +27,13 @@ class adafruit_1431_Obj : public displayObj {
   virtual 	void	drawText(char* inText);
   virtual 	void	fillScreen(colorObj* inColor);
   virtual 	void	fillRect(int x,int y,int width,int height,colorObj* inColor);
+  virtual 	void	fillRect(rect* aRect,colorObj* inColor);
   virtual 	void	drawRect(int x,int y,int width,int height,colorObj* inColor);
+  virtual 	void	drawRect(rect* aRect,colorObj* inColor);
   virtual 	void	fillRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor);
+  virtual 	void	fillRoundRect(rect* aRect,int radius,colorObj* inColor);
   virtual 	void	drawRoundRect(int x,int y,int width,int height,int radius,colorObj* inColor);
+  virtual 	void	drawRoundRect(rect* aRect,int radius,colorObj* inColor);
   virtual 	void	drawCircle(int x,int y,int diam, colorObj* inColor);
   virtual 	void	fillCircle(int x,int y,int diam, colorObj* inColor);
   virtual 	void	drawVLine(int x,int y,int height,colorObj* inColor);

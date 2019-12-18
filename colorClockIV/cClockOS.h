@@ -6,8 +6,6 @@
 #define OLED_CS       10
 #define OLED_RST      6
 #define POT_BTN       4
-#define LABEL_OFFSET  1
-#define PERC_nWindow   .5
 
 #include "Wire.h"
 #include "RTClib.h"
@@ -21,6 +19,32 @@
 #include "multiMap.h"
 
 enum  apps { homeApp = HOME_PANEL_ID, colorEditApp };
+
+
+
+// *****************************************************
+//                      litleClk
+// *****************************************************
+
+
+class litleClk :  public drawGroup {
+
+  public:
+          litleClk::litleClk(int x,int y);
+  virtual ~litleClk(void);
+
+  virtual void  drawSelf(void);
+          void  setTime(int hour,int minute);
+          void  setTColor(colorObj* aColor);
+          void  setDisplay(bool trueFalse);
+          bool  getDisplay(void);
+  private:
+          colorObj    mBackColor;
+          label*      mText;
+          bool        mShowing;
+};
+
+
 
 // *****************************************************
 //                      nWindow
@@ -46,16 +70,16 @@ class nWindow {
 
 
 // *****************************************************
-//                      randCRect
+//                      clockRect
 // *****************************************************
 
 
-class randCRect : public colorRect {
+class clockRect : public colorRect {
 
   public:
-          randCRect(rect* inRect,colorObj* inColor,int inset=0);
-          randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset=0);
-  virtual ~randCRect(void);
+          clockRect(rect* inRect,colorObj* inColor,int inset=0);
+          clockRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset=0);
+  virtual ~clockRect(void);
 
   virtual void  setPercent(float percent);
   virtual void  drawSelf(void);
@@ -81,7 +105,7 @@ class homeClkPanel : public homePanel {
   virtual void        setup(void);
   virtual void        loop(void);
   virtual void        drawSelf(void);
-          void        drawClock(void);
+          void        checkDimmer(void);
           void        checkScreen(void);
           void        doSetHour(void);
           void        doSetMin(void);
@@ -89,11 +113,10 @@ class homeClkPanel : public homePanel {
           void        doReset(void);
           void        checkParse(void);
                 
-          randCRect*  mBacground;
-          colorRect*  mTBackground;
+          clockRect*  mBacground;
+          litleClk*   mLittleClk;
           lilParser   mParser;
           fontLabel*  shade;
-          label*      timeDisp;
           multiMap*   dimmer;
           runningAvg* smoother;
           int         dimPercent;

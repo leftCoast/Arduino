@@ -8,6 +8,58 @@ cClockOS    ourOS;
 boolean     haveClock = false;
 colorObj    colors[24];
 
+// *****************************************************
+//                      litleClk
+// *****************************************************
+
+
+litleClk::litleClk(int x,int y) 
+  : drawGroup(x,y,45,12) {
+
+ 
+  mBackColor.setColor(&black);
+  
+  mText = new label(1,2,45,12);
+  mText->setJustify(TEXT_CENTER);
+  mText->setColors(&white);
+  addObj(mText);
+  mShowing = true;
+}
+
+
+litleClk::~litleClk(void) {  }
+
+
+void litleClk::drawSelf(void) { screen->fillRect(this,&mBackColor); }
+
+
+
+void litleClk::setTColor(colorObj* aColor) { mText->setColors(aColor); }
+
+
+void litleClk::setTime(int hour,int minute) {
+
+  char  timeStr[TEMP_BUFF_SIZE];
+  
+  snprintf (timeStr,TEMP_BUFF_SIZE,"%d:%d",hour,minute);
+  mText->setValue(timeStr);
+}
+
+
+void litleClk::setDisplay(bool trueFalse) {
+  
+  mShowing = trueFalse;
+  if (mShowing) {
+    x = x - 128;
+    y = y - 128;
+  } else {
+    x = x + 128;
+    y = y + 128;
+  }
+}
+
+bool litleClk::getDisplay(void) { return mShowing; }
+
 
 
 // *****************************************************
@@ -37,23 +89,23 @@ bool nWindow::inRange(float val) { return (val>=mMin && val<=mMax); }
 
 
 // *****************************************************
-//                      randCRect
+//                      clockRect
 // *****************************************************
 
 
 
-randCRect::randCRect(rect* inRect,colorObj* inColor,int inset)
+clockRect::clockRect(rect* inRect,colorObj* inColor,int inset)
   : colorRect(inRect,inColor,inset) { mPercent = 50; }
 
   
-randCRect::randCRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset)
+clockRect::clockRect(int inLocX,int inLocY,int inWidth,int inHeight,int inset)
   : colorRect(inLocX,inLocY,inWidth,inHeight,inset) { mPercent = 50; }
 
   
-randCRect::~randCRect(void) {  }
+clockRect::~clockRect(void) {  }
 
 
-void  randCRect::setPercent(float percent) {
+void  clockRect::setPercent(float percent) {
 
   if (percent<0) percent = 0;
   if (percent>100) percent = 100;
@@ -62,8 +114,16 @@ void  randCRect::setPercent(float percent) {
 }
 
 
-void  randCRect::drawSelf(void) {
+void  clockRect::drawSelf(void) {
   
+  char text[20];
+  int rad;
+  mapper radius(0,100,1,181);
+
+  rad = round(radius.Map(mPercent));
+  screen->fillScreen(&black);
+  screen->fillCircle(64-rad/2,64-rad/2,rad,this);
+  /*
   for (int i=0;i<width;i++) {
     for (int j=0;j<height;j++) {
       if ((random(0,10000)/100.0)<mPercent&&(random(0,10000)/100.0)<mPercent) {
@@ -73,6 +133,7 @@ void  randCRect::drawSelf(void) {
       }
     }
   }
+  */
 }
 
 
@@ -101,37 +162,24 @@ homeClkPanel::~homeClkPanel(void) {
 void homeClkPanel::setup() {
 
   randomSeed(analogRead(A1));                         // A1 is unwired port for noise.
-  wind = new nWindow(2);
-  wind->setBase(analogRead(A0));
   
-  mBacground = new randCRect(0,0,128,128,&black);
+  //kicker.start();
+  mBacground = new clockRect(0,0,128,128,&black);
   addObj(mBacground);
-  
-  shade = new fontLabel(0+LABEL_OFFSET, 70+LABEL_OFFSET, 80, 108);
-  shade->setTextSize(4);
-  shade->setJustify(TEXT_RIGHT);
-  shade->setColors(&black);
-  addObj(shade);
+
+  mLittleClk = new litleClk(75,108);
+  addObj(mLittleClk);
+  mLittleClk->setDisplay(false);
   
   dimmer = new multiMap();
   dimmer->addPoint(0,0);
-  dimmer->addPoint(510,1);
-  dimmer->addPoint(1020,100);
+  dimmer->addPoint(1023,100);
+  smoother = new runningAvg(2);
   
-  smoother = new runningAvg(4);
+  wind = new nWindow(2);
+  wind->setBase(-100);                // Given a bogus initial resading it'll update first thing through.
   
-  mTBackground = new colorRect(100+73,107,128-75,13);
-  mTBackground->setColor(&black);
-  addObj(mTBackground);
   
-  timeDisp = new label(100+75,110,128-75,12);
-  timeDisp->setJustify(TEXT_CENTER);
-  timeDisp->setColors(&white);
-  addObj(timeDisp);
-
-  showTime = false;
-  
-  drawClock();
 
   mParser.addCmd(help,"?");
   mParser.addCmd(setHour,"hour");
@@ -142,79 +190,50 @@ void homeClkPanel::setup() {
 }
 
 
-void homeClkPanel::drawClock(void) {
-  
-  int       index;
+void homeClkPanel::checkDimmer(void) {
+
+  float     rawData;
   colorObj  aColor;
-  char      timeStr[10];
   
-  DateTime  now;
-  if (haveClock) now = rtc.now();
-  index = now.hour();
-  if(index>=0&&index<24) {
-    aColor.setColor(&(colors[index]));
-  } else {
-    aColor.setColor(&black);
+  rawData = smoother->addData(analogRead(A0));    // Toss the reading into the smoother.
+  if (!wind->inRange(rawData)) {                  // If the pot value outside the +/- range..
+    wind->setBase(rawData);                       // We move the base value to the new reading.
+    dimPercent = dimmer->Map(rawData);            // Calculate the new dimming value.            
+    mBacground->setPercent(100-dimPercent);
+    aColor.setColor(&white);
+    aColor.blend(&black,.7 * dimPercent);
+    mLittleClk->setTColor(&aColor);
+    mLittleClk->setNeedRefresh();
   }
-  mBacground->setColor(&aColor);
-  mBacground->setPercent(100-dimPercent);
-  shade->setValue(now.hour());
-  
-  aColor.setColor(&white);
-  aColor.blend(&black,.7 * dimPercent);
-  timeDisp->setColors(&aColor);
-  
-  if (showTime) {
-    snprintf (timeStr,TEMP_BUFF_SIZE,"%d:%d",now.hour(),now.minute());
-    timeDisp->setValue(timeStr);
-    mTBackground->setNeedRefresh();
+  if (ourClicker.clicked()) {
+    while(ourClicker.clicked());
+    mLittleClk->setDisplay(!mLittleClk->getDisplay());
+    this->setNeedRefresh();
   }
-  drawtime = now;
 }
 
 
 void homeClkPanel::checkScreen(void) {
   
-  float     rawData;
-  bool      needDraw;
   DateTime  now;
+  int       index;
+  
+  //if (haveClock) {
+    now = rtc.now();
     
-  needDraw = false;
-  if (haveClock) now = rtc.now();
-  
-  if (now.hour()>23) {                  // A quick hack for when there is no clock to read.
-    DateTime newHour(now.year(),now.month(),now.day(),23,now.minute(),now.second());
-    now = newHour;
-  }
-  
-  if (now.hour()!=drawtime.hour()) {
-    needDraw = true;
-  }
-  rawData = smoother->addData(analogRead(A0));    // Toss the reading into the smoother.
-  if (!wind->inRange(rawData)) {                  // If the pot value outside the +/- range..
-    wind->setBase(rawData);                       // We move the base value to the new reading.
-    dimPercent = dimmer->Map(rawData);            // Calculate the new dimming value.            
-    needDraw = true;                              // We need a redraw.
-  }
-
-  if (ourClicker.clicked()) {
-    while(ourClicker.clicked());
-    showTime = !showTime;
-    if (showTime) {
-      timeDisp->x = timeDisp->x-100;
-      mTBackground->x = mTBackground->x-100;
-    } else {
-      timeDisp->x = timeDisp->x+100;
-      mTBackground->x = mTBackground->x+100;
+    if((now.minute()!=drawtime.minute())||(now.hour()!=drawtime.hour())) {  // If times have changed..
+      mLittleClk->setTime(now.hour(),now.minute());
+      if (now.hour()!=drawtime.hour()) {
+        index = now.hour();
+        if(index>=0&&index<24) {
+          mBacground->setColor(&(colors[index]));
+        } else {
+          mBacground->setColor(&green);
+        }
+      }
+      drawtime = now;
     }
-    needDraw = true;
-  }
-
-  if (showTime && now.minute()!=drawtime.minute()) {
-    needDraw = true;
-  }
-
-  if (needDraw) drawClock();
+  //}
 }
 
 
@@ -285,6 +304,12 @@ void homeClkPanel::doReset() {
   ourOS.saveParams();
    
   if (haveClock) {
+
+    Wire.beginTransmission(0x68);   // address DS3231
+    Wire.write(0x0E);               // select register
+    Wire.write(0b00011100);         // write register bitmap, bit 7 is /EOSC
+    Wire.endTransmission();
+  
     now = rtc.now();
     mBacground->setColor(&(colors[now.hour()]));
     setNeedRefresh();
@@ -331,8 +356,9 @@ void homeClkPanel::drawSelf(void) {  }
 
 void homeClkPanel::loop(void) {
 
+  checkDimmer();
   checkScreen();
-  checkParse();
+  checkParse(); 
 }
 
 
@@ -351,13 +377,7 @@ cClockOS::~cClockOS(void) {  }
 int cClockOS::begin(void) {
 
   haveClock = rtc.begin();
-  Wire.beginTransmission(0x68);   // address DS3231
-  Wire.write(0x0E);               // select register
-  Wire.write(0b00011100);         // write register bitmap, bit 7 is /EOSC
-  Wire.endTransmission();
-
   readParams();
-  
   return litlOS::begin();
 }
 
