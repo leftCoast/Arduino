@@ -148,6 +148,7 @@ homeClkPanel::homeClkPanel(void) : homePanel() {
   dimmer    = NULL;
   smoother  = NULL;
   wind      = NULL;
+  initPanel = true;
 }
 
 
@@ -176,17 +177,17 @@ void homeClkPanel::setup() {
   dimmer->addPoint(1023,100);
   smoother = new runningAvg(2);
   
-  wind = new nWindow(2);
-  wind->setBase(-100);                // Given a bogus initial resading it'll update first thing through.
+  wind = new nWindow(4);
+  wind->setBase(-100);                // Given a bogus initial reading it'll update first thing through.
   
-  
-
   mParser.addCmd(help,"?");
   mParser.addCmd(setHour,"hour");
   mParser.addCmd(setMin,"minute");
   mParser.addCmd(setSec,"sec");
   mParser.addCmd(reset,"reset");
   mParser.addCmd(cEdit,"cedit");
+  mParser.addCmd(gColor,"gcolor");
+  mParser.addCmd(sColor,"scolor");
 }
 
 
@@ -218,12 +219,12 @@ void homeClkPanel::checkScreen(void) {
   DateTime  now;
   int       index;
   
-  //if (haveClock) {
+  if (haveClock) {
     now = rtc.now();
     
-    if((now.minute()!=drawtime.minute())||(now.hour()!=drawtime.hour())) {  // If times have changed..
+    if((now.minute()!=drawtime.minute())||(now.hour()!=drawtime.hour())||initPanel) {  // If times have changed..
       mLittleClk->setTime(now.hour(),now.minute());
-      if (now.hour()!=drawtime.hour()) {
+      if (now.hour()!=drawtime.hour()||initPanel) {
         index = now.hour();
         if(index>=0&&index<24) {
           mBacground->setColor(&(colors[index]));
@@ -232,8 +233,10 @@ void homeClkPanel::checkScreen(void) {
         }
       }
       drawtime = now;
+      
     }
-  //}
+  }
+  initPanel = false;
 }
 
 
@@ -317,6 +320,66 @@ void homeClkPanel::doReset() {
 }
 
 
+void homeClkPanel::doGetColor(void) {
+
+  int   hourVal;
+  char* paramBuff;
+  
+  if (mParser.numParams()==1) {
+    paramBuff = mParser.getParam();
+    hourVal = atoi (paramBuff);
+    free(paramBuff);
+  } else {
+    hourVal = drawtime.hour();
+  }
+  if (hourVal>=0&&hourVal<24) {
+    Serial.print("Hour ");Serial.print(hourVal);Serial.print(" RGB Value : ");
+    Serial.print(colors[hourVal].getRed());
+    Serial.print(" ");Serial.print(colors[hourVal].getGreen());
+    Serial.print(" ");Serial.println(colors[hourVal].getBlue());
+  } else {
+    Serial.print("Hour is out of bounds : ");Serial.println(hourVal);
+  }
+}
+
+
+void homeClkPanel::doSetColor(void) {
+
+  char* paramBuff;
+  int   hourVal;
+  int   redVal;
+  int   greenVal;
+  int   blueVal;
+  
+  if (mParser.numParams()==4) {
+    
+    paramBuff = mParser.getParam();
+    hourVal = atoi (paramBuff);
+    free(paramBuff);
+    if (hourVal>=0 && hourVal<24) {
+      paramBuff = mParser.getParam();
+      redVal = atoi (paramBuff);
+      free(paramBuff);
+  
+      paramBuff = mParser.getParam();
+      greenVal = atoi (paramBuff);
+      free(paramBuff);
+  
+      paramBuff = mParser.getParam();
+      blueVal = atoi (paramBuff);
+      free(paramBuff);
+      colors[hourVal].setColor(redVal,greenVal,blueVal);
+      ourOS.saveParams();
+      if (hourVal==drawtime.hour()) {
+        mBacground->setColor(&(colors[hourVal]));
+      }
+    } else {
+      Serial.println("No, values between 0..23 please.");
+    }
+  }
+}
+
+
 void homeClkPanel::checkParse(void) {
 
   char  inChar;
@@ -335,12 +398,16 @@ void homeClkPanel::checkParse(void) {
         Serial.println("   sec followed by a number 0..59. Sets the seconds.");
         Serial.println("   cedit takes you to the color editor.");
         Serial.println("   reset will reset all colors to defaults.");
+        Serial.println("   gcolor reads back the current hour's color.");
+        Serial.println("   scolor followed by 3 numbers R,G,B sets the current hour's color.");
       break;
-      case setHour  : doSetHour(); break;
-      case setMin   : doSetMin(); break;
-      case setSec   : doSetSec(); break;
+      case setHour  : doSetHour();    break;
+      case setMin   : doSetMin();     break;
+      case setSec   : doSetSec();     break;
       case cEdit    : nextPanel = colorEditApp; break;
-      case reset    : doReset();  break;
+      case reset    : doReset();      break;
+      case gColor   : doGetColor();   break;
+      case sColor   : doSetColor();   break;
       default       : 
         Serial.println("I really don't know what your looking for.");
         Serial.println("Try typing ? for a list of commands.");
@@ -377,6 +444,12 @@ cClockOS::~cClockOS(void) {  }
 int cClockOS::begin(void) {
 
   haveClock = rtc.begin();
+  if (haveClock) {                  // If we have the clock, make sure it runs on battery when unplugged.
+    Wire.beginTransmission(0x68);   // address DS3231
+    Wire.write(0x0E);               // select register
+    Wire.write(0b00011100);         // write register bitmap, bit 7 is /EOSC
+    Wire.endTransmission();
+  }
   readParams();
   return litlOS::begin();
 }

@@ -97,7 +97,7 @@ class clockRect : public colorRect {
 class homeClkPanel : public homePanel {
 
   public:
-          enum        mainComs { noCommand, help, setHour, setMin, setSec, reset, cEdit };
+          enum        mainComs { noCommand, help, setHour, setMin, setSec, reset, cEdit, gColor,sColor };
           
           homeClkPanel(void);
   virtual ~homeClkPanel(void);
@@ -111,6 +111,8 @@ class homeClkPanel : public homePanel {
           void        doSetMin(void);
           void        doSetSec(void);
           void        doReset(void);
+          void        doGetColor(void);
+          void        doSetColor(void);
           void        checkParse(void);
                 
           clockRect*  mBacground;
@@ -122,6 +124,7 @@ class homeClkPanel : public homePanel {
           int         dimPercent;
           DateTime    drawtime;
           bool        showTime;
+          bool        initPanel;
           nWindow*    wind;
 };
 
