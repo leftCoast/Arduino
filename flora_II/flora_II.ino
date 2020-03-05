@@ -1,4 +1,4 @@
-#include <Adafruit_seesaw.h>
+//#include <Adafruit_seesaw.h>
 
 #include <blinker.h>
 #include <colorObj.h>
@@ -22,7 +22,8 @@
 #include "globals.h"
 #include "UI.h"
 
-Adafruit_seesaw ss;                               // The moisture sensor.
+#define   ANALOG_PIN  A4
+//Adafruit_seesaw ss;                               // The moisture sensor.
 
 timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
 timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
@@ -100,11 +101,13 @@ void setup() {
   ourHandheld.begin();                                  // Setup coms for the handheld controller.
   Serial.print("ourHandheld result (0 is good) : ");
   Serial.println(ourHandheld.readErr());
-    
+
+  /*
   if (!ss.begin(0x36)) {                                // Start up moisture sensor.
     Serial.println("ERROR! no Sensor.");                // Failed!
     ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
   }
+  */
   
   weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
   soakTime->start();                                    // And we start up the soak timer for that time.
@@ -149,16 +152,20 @@ void doSetPump(void) {
 
 // Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
-  
+
+  /*
   tempC = ss.getTemp();                       // Read the tempature from the sensor.
   capread = ss.touchRead(0);                  // Read the capacitive value from the sensor.
+  */
+  tempC = 0;
+  capread = analogRead(ANALOG_PIN);
   
   ourDisplay.addMode(weAre);
   ourDisplay.addRawTemp(tempC);
   ourDisplay.addRawCap(capread);
   
   capread = cSmoother.addData(capread);     // Pop the capacitive value into the capacitive smoother. (Running avarage)
-  tempC = tSmoother.addData(tempC);         // Pop the tempature value into the tempature smoother. (Again, running avarage)
+  ///tempC = tSmoother.addData(tempC);         // Pop the tempature value into the tempature smoother. (Again, running avarage)
   moisture = mudMapper->Map(capread);       // Map the resulting capacitive value to a percent.
   moisture = round(moisture);               // Round it to an int.
   
