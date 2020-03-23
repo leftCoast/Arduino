@@ -21,7 +21,7 @@ This is your basic building block. The most common constructor is defaulted so a
 ***
 chainPixels
 ***
-Chain pixels along with its sibling class pixelGroup create a fully auto running group of neopixel devices. The user crates classes inheriting pixel group and uses this subclass to program the group’s behavior. Then the different groups are added to the chain pixel object in the order that they are physically wired. From their the chain pixel object creates the Adafruit class and manages the entire thing in the background.
+Chain pixels along with its sibling class pixelGroup create a fully auto running group of neopixel devices. The user creates classes inheriting pixel group and uses this subclass to program the group’s behavior. Then the different groups are added to the chain pixel object in the order that they are physically wired. Their the chain pixel object creates the Adafruit class and manages the entire thing in the background.
 
 This was originally developed for running lights on our quadcopters. Different light bards had different functions, some shared functions. For example some quads would have lights on the motor pods so you wanted the same thing in multiple places. Some needed information from the pilot so thy would watch the incoming R/C receiver channels. Without this way to break up the sections, the code would have been daunting.
 
