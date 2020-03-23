@@ -1,6 +1,6 @@
 LC_NeoPixel
 
-This toolset is for working with NeoPixels. it extends the Adafruit Neopixel library to use out colorObj class. This makes doing programmed patterns and blends much easer. Also allows colors to pas between NeoPixels & color screens.
+This toolset is for working with NeoPixels. it extends the Adafruit Neopixel library to use our colorObj class. This makes doing programmed patterns and blends much easer. Also allows colors to pas between NeoPixels & color screens.
 
 Also included in this package is chainPixels. This allows the user to daisy chain a set of different newPixel devices (rings, sticks, singles, strings) and be able to program each independently, disregarding indexing issues. Not only that, but all the devices are run in the background so as to not clutter up your main sketch. This is also a great tool for having multiple instances of the same neopixel class. 
 
