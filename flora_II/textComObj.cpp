@@ -4,29 +4,33 @@
 #include "globals.h"
 #include "UI.h"
 
-enum commands { noCommand, 
-                resetAll, 
-                showParams, 
-                showReadings, 
-                showGReadings, 
-                setMudMapLimit, 
-                setDryMapLimit, 
-                setSetPoint, 
-                setWTime, 
-                setSTime, 
-                setName, 
-                setPump, 
-                setPercent, 
-                setPeriod, 
+enum commands { noCommand,
+                resetAll,
+                showParams,
+                showReadings,
+                showGReadings,
+                setMudMapLimit,
+                setDryMapLimit,
+                setSetPoint,
+                setWTime,
+                setSTime,
+                setName,
+                setPump,
+                setPercent,
+                setPeriod,
                 logCom,
 
                 listDir
-                };
+              };
 
 
 textComObj textComs;
 
-textComObj::textComObj(void) { mAutoRead = false; }
+textComObj::textComObj(void) {
+
+  mAutoRead = false;
+  mHandheld = false;
+}
 
 
 textComObj::~textComObj(void) { }
@@ -42,7 +46,7 @@ void textComObj::begin(void) {
   mParser.addCmd(setMudMapLimit, "mud");
   mParser.addCmd(setDryMapLimit, "dry");
   mParser.addCmd(setSetPoint, "limit");
-  mParser.addCmd(setWTime, "wtime"); 
+  mParser.addCmd(setWTime, "wtime");
   mParser.addCmd(setSTime, "stime");
   mParser.addCmd(setName, "name");
   mParser.addCmd(setPump, "pump");
@@ -54,22 +58,91 @@ void textComObj::begin(void) {
 }
 
 
-          
-void textComObj::checkTextCom(void) {
+void textComObj::textOut(char aChar) {
 
-  char  inChar;
+  if (!mHandheld) {
+    Serial.print(aChar);
+  } else {
+    Serial1.print(aChar);
+  }
+}
+
+
+void textComObj::textOut(char* buff) {
+
+  if (!mHandheld) {
+    Serial.print(buff);
+  } else {
+    Serial1.print(buff);
+  }
+}
+
+/*
+void textComObj::textOut(int val,int format) {
+
+  if (!mHandheld) {
+    Serial.print(val,format);
+  } else {
+    Serial1.print(val,format);
+  }
+}
+*/
+
+void textComObj::textOut(uint32_t val,int format) {
+
+  if (!mHandheld) {
+    Serial.print(val,format);
+  } else {
+    Serial1.print(val,format);
+  }
+}
+
+
+void textComObj::textOutln(uint32_t val,int format) {
+
+  if (!mHandheld) {
+    Serial.println(val,format);
+  } else {
+    Serial1.println(val,format);
+  }
+}
+
+
+void textComObj::textOutln(char* buff) {
+
+  if (!mHandheld) {
+    if (buff) {
+      Serial.println(buff);
+    } else {
+      Serial.println();
+    }
+  } else {
+    if (buff) {
+      Serial1.println(buff);
+    } else {
+      Serial1.println();
+    }
+  }
+}
+
+
+void textComObj::checkTextCom(char inChar) {
+
   int   command;
-  
-  if (Serial.available()) {
-    inChar = Serial.read();
-    Serial.print(inChar);
+
+  if (mHandheld || Serial.available()) {
+    if (!mHandheld) {
+      inChar = Serial.read();
+    }
+    textOut(inChar);
+    //Serial.print(inChar);
     command = mParser.addChar(inChar);
-    switch (command) {                       
+    switch (command) {
       case noCommand      : break;
       case resetAll       : initParams();     break;
       case showParams     : printParams();    break;
       case showReadings   : printReadings();  break;
-      case showGReadings  : Serial.println("Graphing's disabled."); /* printGReadings(); */ break;
+      case showGReadings  : textOutln("Graphing's disabled."); /* printGReadings(); */ break;
       case setSetPoint    : setDryLimit();    break;
       case setWTime       : setWaterTime();   break;
       case setSTime       : setSoakTime();    break;
@@ -81,9 +154,24 @@ void textComObj::checkTextCom(void) {
       case setMudMapLimit : setMud();         break;
       case logCom         : logCommand();     break;
       case listDir        : listDirectory();  break;
-      default             : Serial.println("Sorry, have no idea what you want.");
+      default             : textOutln("Sorry, have no idea what you want.");
     }
   }
+}
+
+
+void textComObj::handleTextCom(char* buff) {
+  
+  int i;
+
+  i = 0;
+  mHandheld = true;
+  while (buff[i] != '\0') {
+    checkTextCom(buff[i]);
+    i++;
+  }
+  checkTextCom('\n');
+  mHandheld = false;
 }
 
 
@@ -91,22 +179,22 @@ void textComObj::initParams(void) {
 
   ourParamObj.floraReset();
   ourDisplay.deleteLog();
-  Serial.println("Params set to defaults.");
+  textOutln("Params set to defaults.");
 }
 
-          
+
 void textComObj::printParams(void) {
 
-  Serial.print("Parameters for : ");Serial.println(ourParamObj.getName());
-  Serial.print("dryLimit  : ");Serial.print(ourParamObj.getDryLimit());Serial.println(" %");
-  Serial.print("waterTime : ");Serial.print(ourParamObj.getWaterTime());Serial.println(" ms");
-  Serial.print("soakTime  : ");Serial.print(ourParamObj.getSoakTime());Serial.println(" ms");
-  Serial.print("percent   : ");Serial.print(ourParamObj.getPWMPercent());Serial.println(" %");
-  Serial.print("period    : ");Serial.print(ourParamObj.getPWMPeriod());Serial.println(" ms");
-  Serial.print("Dry       : ");Serial.print(ourParamObj.getDry());Serial.println(" mf");
-  Serial.print("Mud       : ");Serial.print(ourParamObj.getMud());Serial.println(" mf");
-  Serial.print("Run #     : ");Serial.print(ourParamObj.getRunNum());Serial.println();
-  Serial.println();
+  textOut("Parameters for : "); textOutln(ourParamObj.getName());
+  textOut("dryLimit  : "); textOut(ourParamObj.getDryLimit()); textOutln(" %");
+  textOut("waterTime : "); textOut(ourParamObj.getWaterTime()); textOutln(" ms");
+  textOut("soakTime  : "); textOut(ourParamObj.getSoakTime()); textOutln(" ms");
+  textOut("percent   : "); textOut(ourParamObj.getPWMPercent()); textOutln(" %");
+  textOut("period    : "); textOut(ourParamObj.getPWMPeriod()); textOutln(" ms");
+  textOut("Dry       : "); textOut(ourParamObj.getDry()); textOutln(" mf");
+  textOut("Mud       : "); textOut(ourParamObj.getMud()); textOutln(" mf");
+  textOut("Run #     : "); textOut(ourParamObj.getRunNum()); textOutln();
+  textOutln();
 }
 
 
@@ -114,7 +202,7 @@ void textComObj::printReadings(void) {
 
   int   timeVal;
   char* buff;
-  
+
   timeVal = 0;
   mAutoRead = false;
   if (mParser.numParams()) {
@@ -124,40 +212,40 @@ void textComObj::printReadings(void) {
   }
   readTimer.setTime(timeVal);
   readTimer.start();
-  mAutoRead = timeVal>0;
+  mAutoRead = timeVal > 0;
   doPrintReadings();
 }
 
 
 void textComObj::doPrintReadings(void) {
-  
-    Serial.print("Temperature : ");Serial.print(tempC);Serial.println(" *C");
-    Serial.print("Capacitive  : ");Serial.print(capread);Serial.println(" mf");
-    Serial.print("Moisture    : ");Serial.print((int)moisture);Serial.println(" %");
-    Serial.print("And we are  : ");
-    switch (weAre) {
-      case sitting  : Serial.println("sitting");  break;
-      case watering : Serial.println("watering"); break;
-      case soaking  : Serial.println("soaking");  break;
-    }
-    if (mAutoRead) readTimer.start();
-}      
+
+  textOut("Temperature : "); textOut(tempC); textOutln(" *C");
+  textOut("Capacitive  : "); textOut(capread); textOutln(" mf");
+  textOut("Moisture    : "); textOut((int)moisture); textOutln(" %");
+  textOut("And we are  : ");
+  switch (weAre) {
+    case sitting  : textOutln("sitting");  break;
+    case watering : textOutln("watering"); break;
+    case soaking  : textOutln("soaking");  break;
+  }
+  if (mAutoRead) readTimer.start();
+}
 
 
 void textComObj::doPrintGReadings(void) {
-  
-    //Serial.print(tempC);Serial.print(" ");
-    //Serial.print(capread);Serial.print(" ");
-    Serial.print((int)moisture);
-    Serial.println();
-    if (mAutoRead) readTimer.start();
-}      
+
+  //textOut(tempC);textOut(" ");
+  //textOut(capread);textOut(" ");
+  textOut((int)moisture);
+  textOutln();
+  if (mAutoRead) readTimer.start();
+}
 
 void textComObj::printGReadings(void) {
 
   int   timeVal;
   char* buff;
-  
+
   timeVal = 0;
   mAutoRead = false;
   if (mParser.numParams()) {
@@ -166,7 +254,7 @@ void textComObj::printGReadings(void) {
   }
   readTimer.setTime(timeVal);
   readTimer.start();
-  mAutoRead = timeVal>0;
+  mAutoRead = timeVal > 0;
 }
 
 
@@ -174,14 +262,14 @@ void textComObj::setDryLimit(void) {
 
   int   newVal;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setDryLimit(newVal);
-    Serial.print("Moisture set point now set to ");
-    Serial.println(ourParamObj.getDryLimit());
+    textOut("Moisture set point now set to ");
+    textOutln(ourParamObj.getDryLimit());
   }
 }
 
@@ -190,14 +278,14 @@ void textComObj::setWaterTime(void) {
 
   int   newVal;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     newVal = atoi(paramBuff);
     free(paramBuff);
     ourParamObj.setWaterTime(newVal);
-    Serial.print("Watering tmie now set to ");
-    Serial.println(ourParamObj.getWaterTime());
+    textOut("Watering tmie now set to ");
+    textOutln(ourParamObj.getWaterTime());
   }
 }
 
@@ -206,14 +294,14 @@ void textComObj::setSoakTime(void) {
 
   int   newVal;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setSoakTime(newVal);
-    Serial.print("Soak time now set to ");
-    Serial.println(ourParamObj.getSoakTime());
+    textOut("Soak time now set to ");
+    textOutln(ourParamObj.getSoakTime());
   }
 }
 
@@ -221,14 +309,14 @@ void textComObj::setSoakTime(void) {
 void textComObj::setPlantName(void) {
 
   char* charBuff;
-  
+
   if (mParser.numParams()) {
     charBuff = mParser.getParamBuff();
     ourParamObj.setName(charBuff);
     free(charBuff);
     charBuff = ourParamObj.getName();
-    Serial.print("Plant name is now set to ");
-    Serial.println(charBuff);
+    textOut("Plant name is now set to ");
+    textOutln(charBuff);
   }
 }
 
@@ -237,14 +325,14 @@ void textComObj::setPWMPercent(void) {
 
   int   newVal;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setPWMPercent(newVal);
-    Serial.print("Percent now set to ");
-    Serial.println(ourParamObj.getPWMPercent());
+    textOut("Percent now set to ");
+    textOutln(ourParamObj.getPWMPercent());
   }
 }
 
@@ -253,16 +341,16 @@ void textComObj::setPWMPeriod(void) {
 
   int   newVal;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
-    Serial.print("Param buff :");Serial.println(paramBuff);
+    textOut("Param buff :"); textOutln(paramBuff);
     newVal = atoi (paramBuff);
-    Serial.print("newVal :");Serial.println(newVal);
+    textOut("newVal :"); textOutln(newVal);
     free(paramBuff);
     ourParamObj.setPWMPeriod(newVal);
-    Serial.print("Period now set to ");
-    Serial.println(ourParamObj.getPWMPeriod());
+    textOut("Period now set to ");
+    textOutln(ourParamObj.getPWMPeriod());
   }
 }
 
@@ -271,15 +359,15 @@ void textComObj::turnPump(void) {
 
   int numChars;
   char* paramBuff;
-  
+
   pumpCom = false;
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     numChars = strlen(paramBuff);
-    for (int i=0;i<numChars;i++) {
+    for (int i = 0; i < numChars; i++) {
       paramBuff[i] = toupper(paramBuff[i]);
     }
-    if (!strcmp(paramBuff,"ON")) {
+    if (!strcmp(paramBuff, "ON")) {
       pumpCom = true;
     }
     free(paramBuff);
@@ -291,7 +379,7 @@ void textComObj::setDry(void) {
 
   char* buff;
   int   dryVal;
-  
+
   if (mParser.numParams()) {
     buff = mParser.getParam();
     dryVal = atoi(buff);
@@ -300,8 +388,8 @@ void textComObj::setDry(void) {
   } else {
     ourParamObj.setDry(capread);
   }
-  Serial.print("Dry limit now set to ");
-  Serial.println(ourParamObj.getDry());
+  textOut("Dry limit now set to ");
+  textOutln(ourParamObj.getDry());
 }
 
 
@@ -309,7 +397,7 @@ void textComObj::setMud(void) {
 
   char* buff;
   int   mudVal;
-  
+
   if (mParser.numParams()) {
     buff = mParser.getParam();
     mudVal = atoi(buff);
@@ -318,28 +406,40 @@ void textComObj::setMud(void) {
   } else {
     ourParamObj.setMud(capread);
   }
-  Serial.print("Mud limit now set to ");
-  Serial.println(ourParamObj.getMud());
+  textOut("Mud limit now set to ");
+  textOutln(ourParamObj.getMud());
 }
 
 
 void textComObj::logCommand(void) {
-  
+
   int   numChars;
   char* paramBuff;
-  
+
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
     numChars = strlen(paramBuff);
-    for (int i=0;i<numChars;i++) {
+    for (int i = 0; i < numChars; i++) {
       paramBuff[i] = toupper(paramBuff[i]);
     }
-    if (!strcmp(paramBuff,"RESET")) { ourDisplay.deleteLog(); }
-    else if (!strcmp(paramBuff,"ON")) { ourDisplay.setLogging(true); }
-    else if (!strcmp(paramBuff,"OFF")) { ourDisplay.setLogging(false); }
-    else if (!strcmp(paramBuff,"SHOW")) { ourDisplay.showLogfile(); }
-    else if (!strcmp(paramBuff,"LINES")) { ourDisplay.showLogLines(); }
-    else { Serial.println("You can say on, off, show, lines or reset. That's all I understand."); }
+    if (!strcmp(paramBuff, "RESET")) {
+      ourDisplay.deleteLog();
+    }
+    else if (!strcmp(paramBuff, "ON")) {
+      ourDisplay.setLogging(true);
+    }
+    else if (!strcmp(paramBuff, "OFF")) {
+      ourDisplay.setLogging(false);
+    }
+    else if (!strcmp(paramBuff, "SHOW")) {
+      ourDisplay.showLogfile();
+    }
+    else if (!strcmp(paramBuff, "LINES")) {
+      ourDisplay.showLogLines();
+    }
+    else {
+      textOutln("You can say on, off, show, lines or reset. That's all I understand.");
+    }
     free(paramBuff);
   } else {                                    // No params? Power user!
     ourDisplay.setLogging(!ourDisplay.isLogging());
@@ -359,11 +459,11 @@ void textComObj::listDirectory(void) {
     do {
       entry = wd.openNextFile();
       if (entry) {
-        Serial.print(entry.name());
+        textOut(entry.name());
         if (entry.isDirectory()) {
-          Serial.println("/");
+          textOutln("/");
         } else {
-          Serial.print("\t"); Serial.println(entry.size(), DEC);
+          textOut("\t"); textOutln(entry.size(), DEC);
         }
         entry.close();
       } else {
@@ -372,14 +472,14 @@ void textComObj::listDirectory(void) {
     } while (!done);
     wd.close();
   } else {
-    Serial.println(F("Fail to open file.")); // Sadly, instead of returning a NULL, it just crashes.
+    textOutln("Fail to open file."); // Sadly, instead of returning a NULL, it just crashes.
   }
 }
 
 
 void textComObj::idle(void) {
 
-  if (readTimer.ding()&&mAutoRead) {
+  if (readTimer.ding() && mAutoRead) {
     doPrintReadings();
     //doPrintGReadings();
   }

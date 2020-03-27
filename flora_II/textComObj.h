@@ -11,8 +11,14 @@ class textComObj : public idler {
           textComObj(void);
   virtual ~textComObj(void);
 
-          void begin(void);
-          void checkTextCom(void);
+          void  begin(void);
+          void  textOut(char aChar);
+          void  textOut(char* buff);
+          void  textOut(uint32_t val,int format);
+          void  textOutln(uint32_t val,int format);
+          void  textOutln(char* buff=NULL);
+          void  checkTextCom(char inChar='\0');
+          void  handleTextCom(char* buff);
 
   protected:
           void  initParams(void);
@@ -37,6 +43,7 @@ class textComObj : public idler {
           
           lilParser mParser;
           bool      mAutoRead;
+          bool      mHandheld;
           timeObj   readTimer;
 };
 

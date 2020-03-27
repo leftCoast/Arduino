@@ -95,7 +95,7 @@ void deleteLogBtn::doAction(void) {
   
   ourOS.beep();
   if (ourComPort.clearLogCom()) {
-    logPanel->msg("Logfile delted.");
+    logPanel->msg("Logfile deleted.");
   } else {
     logPanel->msg("Unable to delete logfile.");
   }

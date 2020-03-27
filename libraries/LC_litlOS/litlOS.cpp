@@ -97,6 +97,8 @@ void litlOS::launchPanel(void) {
 			viewList.addObj(mPanel);					// Hook it up to the global viewList to allow drawing etc.
 			mPanel->setup();								// Give it its setup() call. (Just like back home!)
 			mPanel->hookup();								// Hookup idle stuff as well.
+		} else {
+			nextPanel = HOME_PANEL_ID;					// If we could not create a panel, send 'em home.
 		}
 	}
 }

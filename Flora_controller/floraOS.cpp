@@ -2,6 +2,7 @@
 #include "homePanel.h"
 #include "controlPanel.h"
 #include "loggingPanel.h"
+#include "sTerm.h"
 
 #define PLANTBOT_BAUD 500000 //115200
 
@@ -44,6 +45,7 @@ panel* floraOS::createPanel(int panelID) {
     case controlApp   : return new controlPanel();
     case calcApp      : return new rpnCalc();
     case loggingApp   : return new loggingPanel();
+    case sTermApp     : return new sTermPanel();
     default           : return NULL;
   }
 }

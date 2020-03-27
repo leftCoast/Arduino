@@ -70,6 +70,8 @@ bool qCMaster::sendBuff(byte* buff,byte buffLen,bool wantReply) {
 	return false;
 }
 
+bool qCMaster::isSending(void) { return mState == sending; }
+
 
 // We have something to share with the class? This can be called anytime.
 // Don't set error flags if called at "the wrong time". IE: No STATE_ERRs.
@@ -286,6 +288,14 @@ byte qCSlave::haveBuff(void) {
 		return mBuff[0];
 	}
 	return 0;
+}
+
+void  qCSlave::slaveReset(void) {
+
+	
+	readErr();
+	SLAVE_PORT.flush();
+	mState = listening;
 }
 
 

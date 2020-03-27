@@ -144,7 +144,7 @@ void dataLog::saveDataRecord(void) {
 }
 
 
-// Alll these are pretty much the same. Set a value, set the flag that its been set.         
+// All these are pretty much the same. Set a value, set the flag that its been set.         
 void dataLog::addMode(int mode) { mMode = mode; modeSet = true; }
 void dataLog::addLimit(int limit) { mLimit = limit; limitSet = true; }
 void dataLog::addWaterSec(int wTime) { mWTime = wTime; wTimeSet = true; }

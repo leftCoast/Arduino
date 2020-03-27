@@ -620,6 +620,7 @@ plantBotCom::plantBotCom(void)
   runUpdates(true);
   mLocalPath = NULL;
   mRunning = false;
+  mDisabled = false;
 }
 
 
@@ -893,7 +894,7 @@ bool plantBotCom::runFileTransfer(void) {
 
 void plantBotCom::updateTime(void) {
 
-  if (mDoingUpdates) {
+  if (mDoingUpdates && !mDisabled) {
     if (mUpdateTimer.ding()) {
       switch(mIndex++) {
         case 0  : mOnline = getCString(readName,mName);                     break;
@@ -906,7 +907,7 @@ void plantBotCom::updateTime(void) {
         case 7  : mOnline = getUnsignedLong(readLogSize,&mLogSize);         break;
         case 8  : mOnline = getUnsignedLong(readLogLines,&mLogNumLines);    break;
         case 9  : mOnline = getUnsignedLong(readLogWLines,&mLogNumWLines);  break;
-        case 10 : mOnline = getByte(readState,&mState);                     break;
+        case 10 : mOnline = getByte(readState,&mPlantState);                break;
         case 11 : mOnline = getByte(readTemp,&mTemp);                       break;
         case 12 : mOnline = getByte(readMoisture,&mMoisture);               break;
         case 13 : mOnline = runFileTransfer();                              break;     
@@ -919,14 +920,8 @@ void plantBotCom::updateTime(void) {
 
 
 void plantBotCom::runUpdates(bool stopStart) { mDoingUpdates = stopStart; }
-
-
 bool plantBotCom::getOnline(void) { return mOnline; }
 void plantBotCom::setOnline(bool online) { mOnline = online; }
-
-
-
-
-
+void plantBotCom::disableBG(bool yesNo) { mDisabled = yesNo; }
 
 plantBotCom ourComPort;

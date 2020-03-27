@@ -7,11 +7,11 @@
 #define DEF_WATER_TIME          30000         // Defauly water time, 10 seconds.
 #define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
 #define DEF_NAME                "Left coast PlantBot"
-#define DEF_DRY                  335          // Wipe it dry and block it up off the wood table.
-#define DEF_MUD                  1015         // Holding it in your hand it maxes out.
+#define DEF_DRY                  871  //335          // Wipe it dry and block it up off the wood table.
+#define DEF_MUD                  481  //1015         // DUnk in glass of water to Max it out.
 #define DEF_RUN_NUM              0            // Default to NOT logging.
 
-#define DEF_READ_TIME           500           // These guys are hard coded.
+#define DEF_READ_TIME           500           // These guys are hard coded. How often do we read and/or log.
 #define DEF_CSMOOTHER           20
 #define DEF_TSMOOTHER           20
 
@@ -30,7 +30,7 @@ struct paramType {                  // paramType is the TYPE of structure we sav
   int dry;                          // What capacitive reading are we calling our totally dry limit.
   int mud;                          // What capacitive reading are we calling absolute mud. The totally wet limit.
   int runNum;                       // Data logger sets this to 1 if logging is turned on, 0 if turned off. If it reads a 1, it adds 1 to it.
-  char name[NAME_BUFF_BYTES];       // Although at this time you can't change it. Each plant minder can have its own name. (Later)
+  char name[NAME_BUFF_BYTES];       // Each plant minder can have its own name. (Later)
 };
 
 

@@ -49,7 +49,6 @@
 class ourKeyboard : public bmpKeyboard {
 
   public:
-
                 ourKeyboard(editable* inEditObj,bool modal);
   virtual       ~ourKeyboard(void);
 
@@ -383,13 +382,15 @@ enum floraComSet  {
              
                   readState,
                   readTemp,
-                  readMoisture
+                  readMoisture,
+
+                  textCom
                   };
  
 enum floraReplySet  { noErr, unknownCom, badParam };
 
 // Notice that in the code here, we only look for noErr and just toss the rest out? LAZY! Actually, a lot of
-// stuff we just check that we get the right amount of buyes back. Ask for a byte and get one. Ask for an int,
+// stuff we just check that we get the right amount of bytes back. Ask for a byte and get one. Ask for an int,
 // we get exactly that? We call it good. 
 
 class plantBotCom : public commonComs {
@@ -431,6 +432,7 @@ class plantBotCom : public commonComs {
           void  updateTime(void);           // MUST be called repeatedly by loop() NOT in idle().
           bool  getOnline(void);
           void  setOnline(bool online);
+          void  disableBG(bool yesNo);
           
   protected:
           bool  runFileTransfer(void);
@@ -440,6 +442,7 @@ class plantBotCom : public commonComs {
           bool          mOnline;
           timeObj       mUpdateTimer;
           bool          mDoingUpdates;
+          bool          mDisabled;      // Basically, shut down 'till further notice. Others want the line.
 
           char          mName[PLANTBOT_NAME_SIZE];
           byte          mLimit;
@@ -451,7 +454,7 @@ class plantBotCom : public commonComs {
           unsigned long mLogSize;
           unsigned long mLogNumLines;
           unsigned long mLogNumWLines;
-          byte          mState;
+          byte          mPlantState;
           byte          mTemp;
           byte          mMoisture; 
 

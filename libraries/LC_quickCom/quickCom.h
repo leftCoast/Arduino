@@ -46,6 +46,7 @@ class qCMaster : public idler, public timeObj {
 				void				setReplyTimeout(int timeOutMS);							// How long we'll wait for a reply to complete from the command.
 				byte				readErr(bool clearErr=true);								// What's wrong? 			
 				bool				sendBuff(byte* buff,byte buffLen,bool wantReply);	// Send out a command buffer.
+				bool				isSending(void);												// Typically use haveBuff() to see when done. This is for blind sending.
 				byte				haveBuff(void);												// We have a got back complete buffer, how big?
 				void				readBuff(byte* buff);										// Copy the data we got back into here.
 				void				dumpBuff(void);												// For some reason we can't use it.
@@ -77,6 +78,7 @@ class qCSlave : public idler, public timeObj {
 				void				setComTimeout(int timeOutMS=1000);	// How long we will wait for command to complete.
 				byte				readErr(void);								// Something broken?
 				byte				haveBuff(void);							// We received a buffer, how big?
+				void				slaveReset(void);							// Call this if there is to be no reply.
 				byte*				getComBuff(void);							// Hand back a pointer to the start of the com buffer.
 				void				replyComBuff(byte buffLen);			// Com buffer has been loaded with data, send it back.
 

@@ -3,6 +3,7 @@
 #include "pumpObj.h"
 #include "UI.h"
 #include "globals.h"
+#include "textComObj.h"
 
 #define COM_BUFF_BYTES  255 // Can be no larger than 255!
 #define SLAVE_BAUD  500000 //115200
@@ -38,7 +39,9 @@ enum floraComSet  {
              
                   readState,
                   readTemp,
-                  readMoisture
+                  readMoisture,
+
+                  textCom
                   };
 
                       
@@ -97,7 +100,9 @@ void handheld::checkComs(void) {
       case readLogWLines  : handleGetLogWLines(comPtr);   break;
       case readLogBuff    : handleGetLogBuff(comPtr);     break;
       case clearLog       : handleDeleteLogFile(comPtr);  break;
-      default :                                                   // If we can't we pass back and error. (What? I don't get it..)
+
+      case textCom        : handleTextCom(comPtr);        break;
+      default :                                                   // If we can't, we pass back and error. (What? I don't get it..)
         comPtr[0] = unknownCom;                                   // Stuff in "unknown command" reply byte.
         replyComBuff(1);                                          // And send that one byte on its way back to the handheld.
       break;
@@ -286,6 +291,7 @@ void handheld::handleGetLogLines(byte* comPtr) {
   replyComBuff(sizeof(unsigned long));      // Send it on its way!
 }
 
+
 void handheld::handleGetLogWLines(byte* comPtr) {
 
   unsigned long*  longPtr;
@@ -294,6 +300,7 @@ void handheld::handleGetLogWLines(byte* comPtr) {
   *longPtr = ourDisplay.getFileNumWLines(); // Write the unsigned long out to the buffer.
   replyComBuff(sizeof(unsigned long));      // Send it on its way!
 }
+
 
 void handheld::handleGetLogBuff(byte* comPtr) {
 
@@ -318,4 +325,15 @@ void handheld::handleDeleteLogFile(byte* comPtr) {
   ourDisplay.deleteLog();
   comPtr[0] = noErr;
   replyComBuff(1);
+}
+
+
+// This one is different. Its basically saying we got a command string, let
+// TextComObj deal with it. When it's done, we'll pretend it just didn't
+// happen and go on with our lives. Everything, including the master on the 
+// other end must block 'till this is complete. (Its a bit of a hack, I know.)
+void handheld::handleTextCom(byte* comPtr) {
+
+  textComs.handleTextCom(&(comPtr[1]));   // Deal with passing on the text, getting reply sent.
+  slaveReset();                           // Not sending a reply here so we call the reset method to go back to listenting.    
 }

@@ -28,7 +28,6 @@ void IOandKeys::handleKey(keyCommands inEditCom) {
       mEditField->setValue("");             // Clear the editField.
       mHaveBuff = true;
     }
-
   } else {
     keyboard::handleKey(inEditCom);         // Or, do the default suff.
   }

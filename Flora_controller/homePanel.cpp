@@ -68,7 +68,7 @@ void  waterBtn::idle(void) { if (checkState()) setTheLook(); }
 #define CONTROL_PANEL_BMP "/icons/edit32.bmp"
 #define DATA_PANEL_BMP    "/icons/graph32.bmp"
 #define CALC_PANEL_BMP    "/icons/calc32.bmp"
-
+#define STERM_PANEL_BMP   "/icons/term32.bmp"
 
 homeScreen::homeScreen(void) { }
 
@@ -148,7 +148,7 @@ void homeScreen::setup(void) {
   traceY = 285;
 
   int  traceX = 0;
-  int  stepX = 60;
+  int  stepX = 52;
   
   mWaterBtn = new waterBtn(traceX,traceY,32,32);
   mWaterBtn->begin();
@@ -166,10 +166,14 @@ void homeScreen::setup(void) {
   addObj(dataLog);
 
   traceX = traceX + stepX;
+  appIcon*  term = new appIcon(traceX,traceY,sTermApp,STERM_PANEL_BMP);
+  term->begin();
+  addObj(term);
+
+  traceX = traceX + stepX;
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();
   addObj(calc);
- 
 }
 
 

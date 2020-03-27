@@ -91,7 +91,7 @@ class textView :  public drawObj {
           void        setScroll(scrollCom choice,int inNum=0);    // Better look at the scrolling command list.
   virtual void        setText(char* text);                        // Replace our text buff with a copy of this.
   virtual void        appendText(char* text);                     // Add this to the end of our text.
-  virtual void			 appendText(int inVal);								//I know, its an integer. Make it text.
+  virtual void			 appendText(int inVal);								// I know, its an integer. Make it text.
   virtual void			 appendText(char inChar);
   virtual void        insertText(int index,char* text);           // Stick a NULL terminated substring in at this index.
   virtual void        deleteText(int startIndex,int numChars);    // Remove some text from middle, beginning? End?

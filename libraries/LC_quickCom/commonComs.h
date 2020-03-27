@@ -25,7 +25,7 @@ class commonComs :  public qCMaster {
   virtual bool  getCString(byte com,char* reply);
   virtual bool  sendCommand(byte com);
 
-  protected:
+  //protected:
           void  sleep(int ms);
           
           timeObj       mSleepTimer;

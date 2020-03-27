@@ -35,6 +35,8 @@ class handheld : public qCSlave {
           void  handleGetLogWLines(byte* comPtr);
           void  handleGetLogBuff(byte* comPtr);
           void  handleDeleteLogFile(byte* comPtr);
+
+          void  handleTextCom(byte* comPtr);
 };
 
 extern handheld ourHandheld;

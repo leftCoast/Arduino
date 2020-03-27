@@ -191,7 +191,7 @@ void lineManager::appendText(char* text) {
           free(mTextBuff);                        // loose our old text buffer.
           mTextBuff = buff;                       // Point to this shiny new one.
         } else {                                  // Wait, we have no buffer at all?
-          strcpy(buff, text);                     // No wrries mate! We do this kind of thing all the time!
+          strcpy(buff, text);                     // No worries mate! We do this kind of thing all the time!
           mTextBuff = buff;                       // And there you go, your own text buffer. We won't tell anyone.
         }
       }
