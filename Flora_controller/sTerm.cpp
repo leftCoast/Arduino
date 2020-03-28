@@ -160,6 +160,7 @@ void sTermPanel::loop(void) {
       buff[index++] = Serial1.read();
     }
     buff[index] = '\0';
+    Serial.println(strlen(buff));
     ourScreen->appendText(buff);
   }
 }

@@ -29,7 +29,7 @@ textComObj textComs;
 textComObj::textComObj(void) {
 
   mAutoRead = false;
-  mHandheld = false;
+  ourPort   = &Serial;
 }
 
 
@@ -58,91 +58,29 @@ void textComObj::begin(void) {
 }
 
 
-void textComObj::textOut(char aChar) {
-
-  if (!mHandheld) {
-    Serial.print(aChar);
-  } else {
-    Serial1.print(aChar);
-  }
-}
-
-
-void textComObj::textOut(char* buff) {
-
-  if (!mHandheld) {
-    Serial.print(buff);
-  } else {
-    Serial1.print(buff);
-  }
-}
-
-/*
-void textComObj::textOut(int val,int format) {
-
-  if (!mHandheld) {
-    Serial.print(val,format);
-  } else {
-    Serial1.print(val,format);
-  }
-}
-*/
-
-void textComObj::textOut(uint32_t val,int format) {
-
-  if (!mHandheld) {
-    Serial.print(val,format);
-  } else {
-    Serial1.print(val,format);
-  }
-}
-
-
-void textComObj::textOutln(uint32_t val,int format) {
-
-  if (!mHandheld) {
-    Serial.println(val,format);
-  } else {
-    Serial1.println(val,format);
-  }
-}
-
-
-void textComObj::textOutln(char* buff) {
-
-  if (!mHandheld) {
-    if (buff) {
-      Serial.println(buff);
-    } else {
-      Serial.println();
-    }
-  } else {
-    if (buff) {
-      Serial1.println(buff);
-    } else {
-      Serial1.println();
-    }
-  }
-}
-
-
+// This is where the raw data comes in, is parsed and we take action. BUT, there is a hack.
+// Normally we run Serial to comumicate from the development computer. We read in the text
+// Char by char. I wanted to be able to use the handheld and it runs through Serial1. And
+// its doing all sorts of background things we don't know about. So the hack is, when the
+// handheld sends a text command, it is sent to this objects handleTextCom() method. This
+// method flips to the serial1 port and calls this method repeatedly pusing in the text
+// char by char. So depending on who is in charge the method of grabbing chars is different.
 void textComObj::checkTextCom(char inChar) {
 
   int   command;
 
-  if (mHandheld || Serial.available()) {
-    if (!mHandheld) {
-      inChar = Serial.read();
+  if (ourPort == &Serial1 || Serial.available()) {  // Ok, little weird. If we are pointing at serial1 or normal serial has some data..
+    if (ourPort == &Serial) {                       // We know there's something going on. If we are NOT looking at Serial1..
+      inChar = Serial.read();                       // Read out a data charactor.
+      ourPort->print(inChar);                       // If using development machine, echo the charactor.
     }
-    textOut(inChar);
-    //Serial.print(inChar);
     command = mParser.addChar(inChar);
     switch (command) {
       case noCommand      : break;
       case resetAll       : initParams();     break;
       case showParams     : printParams();    break;
       case showReadings   : printReadings();  break;
-      case showGReadings  : textOutln("Graphing's disabled."); /* printGReadings(); */ break;
+      case showGReadings  : ourPort->println("Graphing's disabled."); /* printGReadings(); */ break;
       case setSetPoint    : setDryLimit();    break;
       case setWTime       : setWaterTime();   break;
       case setSTime       : setSoakTime();    break;
@@ -154,7 +92,7 @@ void textComObj::checkTextCom(char inChar) {
       case setMudMapLimit : setMud();         break;
       case logCom         : logCommand();     break;
       case listDir        : listDirectory();  break;
-      default             : textOutln("Sorry, have no idea what you want.");
+      default             : ourPort->println("Sorry, have no idea what you want.");
     }
   }
 }
@@ -163,15 +101,17 @@ void textComObj::checkTextCom(char inChar) {
 void textComObj::handleTextCom(char* buff) {
   
   int i;
-
-  i = 0;
-  mHandheld = true;
-  while (buff[i] != '\0') {
-    checkTextCom(buff[i]);
+  Print*  savedPort;
+  
+  i = 0;                        // Starting at first char..
+  savedPort = ourPort;          // Save of the serial port we're using now.
+  ourPort = &Serial1;           // Switch to port Serial1.
+  while (buff[i] != '\0') {     // Loop through the string.
+    checkTextCom(buff[i]);      // Jamming all the chars into the parser.
     i++;
   }
-  checkTextCom('\n');
-  mHandheld = false;
+  checkTextCom('\n');           // Top it all off with a newline. (Gets it cooking.)
+  ourPort = savedPort;          // All done! Replace the port pointer.
 }
 
 
@@ -179,22 +119,22 @@ void textComObj::initParams(void) {
 
   ourParamObj.floraReset();
   ourDisplay.deleteLog();
-  textOutln("Params set to defaults.");
+  ourPort->println("Params set to defaults.");
 }
 
 
 void textComObj::printParams(void) {
 
-  textOut("Parameters for : "); textOutln(ourParamObj.getName());
-  textOut("dryLimit  : "); textOut(ourParamObj.getDryLimit()); textOutln(" %");
-  textOut("waterTime : "); textOut(ourParamObj.getWaterTime()); textOutln(" ms");
-  textOut("soakTime  : "); textOut(ourParamObj.getSoakTime()); textOutln(" ms");
-  textOut("percent   : "); textOut(ourParamObj.getPWMPercent()); textOutln(" %");
-  textOut("period    : "); textOut(ourParamObj.getPWMPeriod()); textOutln(" ms");
-  textOut("Dry       : "); textOut(ourParamObj.getDry()); textOutln(" mf");
-  textOut("Mud       : "); textOut(ourParamObj.getMud()); textOutln(" mf");
-  textOut("Run #     : "); textOut(ourParamObj.getRunNum()); textOutln();
-  textOutln();
+  ourPort->print("Parameters for : "); ourPort->println(ourParamObj.getName());
+  ourPort->print("dryLimit  : "); ourPort->print(ourParamObj.getDryLimit()); ourPort->println(" %");
+  ourPort->print("waterTime : "); ourPort->print(ourParamObj.getWaterTime()); ourPort->println(" ms");
+  ourPort->print("soakTime  : "); ourPort->print(ourParamObj.getSoakTime()); ourPort->println(" ms");
+  ourPort->print("percent   : "); ourPort->print(ourParamObj.getPWMPercent()); ourPort->println(" %");
+  ourPort->print("period    : "); ourPort->print(ourParamObj.getPWMPeriod()); ourPort->println(" ms");
+  ourPort->print("Dry       : "); ourPort->print(ourParamObj.getDry()); ourPort->println(" mf");
+  ourPort->print("Mud       : "); ourPort->print(ourParamObj.getMud()); ourPort->println(" mf");
+  ourPort->print("Run #     : "); ourPort->print(ourParamObj.getRunNum()); ourPort->println();
+  ourPort->println();
 }
 
 
@@ -219,14 +159,14 @@ void textComObj::printReadings(void) {
 
 void textComObj::doPrintReadings(void) {
 
-  textOut("Temperature : "); textOut(tempC); textOutln(" *C");
-  textOut("Capacitive  : "); textOut(capread); textOutln(" mf");
-  textOut("Moisture    : "); textOut((int)moisture); textOutln(" %");
-  textOut("And we are  : ");
+  ourPort->print("Temperature : "); ourPort->print(tempC); ourPort->println(" *C");
+  ourPort->print("Capacitive  : "); ourPort->print(capread); ourPort->println(" mf");
+  ourPort->print("Moisture    : "); ourPort->print((int)moisture); ourPort->println(" %");
+  ourPort->print("And we are  : ");
   switch (weAre) {
-    case sitting  : textOutln("sitting");  break;
-    case watering : textOutln("watering"); break;
-    case soaking  : textOutln("soaking");  break;
+    case sitting  : ourPort->println("sitting");  break;
+    case watering : ourPort->println("watering"); break;
+    case soaking  : ourPort->println("soaking");  break;
   }
   if (mAutoRead) readTimer.start();
 }
@@ -234,10 +174,10 @@ void textComObj::doPrintReadings(void) {
 
 void textComObj::doPrintGReadings(void) {
 
-  //textOut(tempC);textOut(" ");
-  //textOut(capread);textOut(" ");
-  textOut((int)moisture);
-  textOutln();
+  //ourPort->print(tempC);ourPort->print(" ");
+  //ourPort->print(capread);ourPort->print(" ");
+  ourPort->print((int)moisture);
+  ourPort->println();
   if (mAutoRead) readTimer.start();
 }
 
@@ -268,8 +208,8 @@ void textComObj::setDryLimit(void) {
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setDryLimit(newVal);
-    textOut("Moisture set point now set to ");
-    textOutln(ourParamObj.getDryLimit());
+    ourPort->print("Moisture set point now set to ");
+    ourPort->println(ourParamObj.getDryLimit());
   }
 }
 
@@ -284,8 +224,8 @@ void textComObj::setWaterTime(void) {
     newVal = atoi(paramBuff);
     free(paramBuff);
     ourParamObj.setWaterTime(newVal);
-    textOut("Watering tmie now set to ");
-    textOutln(ourParamObj.getWaterTime());
+    ourPort->print("Watering tmie now set to ");
+    ourPort->println(ourParamObj.getWaterTime());
   }
 }
 
@@ -300,8 +240,8 @@ void textComObj::setSoakTime(void) {
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setSoakTime(newVal);
-    textOut("Soak time now set to ");
-    textOutln(ourParamObj.getSoakTime());
+    ourPort->print("Soak time now set to ");
+    ourPort->println(ourParamObj.getSoakTime());
   }
 }
 
@@ -315,8 +255,8 @@ void textComObj::setPlantName(void) {
     ourParamObj.setName(charBuff);
     free(charBuff);
     charBuff = ourParamObj.getName();
-    textOut("Plant name is now set to ");
-    textOutln(charBuff);
+    ourPort->print("Plant name is now set to ");
+    ourPort->println(charBuff);
   }
 }
 
@@ -331,8 +271,8 @@ void textComObj::setPWMPercent(void) {
     newVal = atoi (paramBuff);
     free(paramBuff);
     ourParamObj.setPWMPercent(newVal);
-    textOut("Percent now set to ");
-    textOutln(ourParamObj.getPWMPercent());
+    ourPort->print("Percent now set to ");
+    ourPort->println(ourParamObj.getPWMPercent());
   }
 }
 
@@ -344,13 +284,13 @@ void textComObj::setPWMPeriod(void) {
 
   if (mParser.numParams()) {
     paramBuff = mParser.getParam();
-    textOut("Param buff :"); textOutln(paramBuff);
+    ourPort->print("Param buff :"); ourPort->println(paramBuff);
     newVal = atoi (paramBuff);
-    textOut("newVal :"); textOutln(newVal);
+    ourPort->print("newVal :"); ourPort->println(newVal);
     free(paramBuff);
     ourParamObj.setPWMPeriod(newVal);
-    textOut("Period now set to ");
-    textOutln(ourParamObj.getPWMPeriod());
+    ourPort->print("Period now set to ");
+    ourPort->println(ourParamObj.getPWMPeriod());
   }
 }
 
@@ -388,8 +328,8 @@ void textComObj::setDry(void) {
   } else {
     ourParamObj.setDry(capread);
   }
-  textOut("Dry limit now set to ");
-  textOutln(ourParamObj.getDry());
+  ourPort->print("Dry limit now set to ");
+  ourPort->println(ourParamObj.getDry());
 }
 
 
@@ -406,8 +346,8 @@ void textComObj::setMud(void) {
   } else {
     ourParamObj.setMud(capread);
   }
-  textOut("Mud limit now set to ");
-  textOutln(ourParamObj.getMud());
+  ourPort->print("Mud limit now set to ");
+  ourPort->println(ourParamObj.getMud());
 }
 
 
@@ -438,7 +378,7 @@ void textComObj::logCommand(void) {
       ourDisplay.showLogLines();
     }
     else {
-      textOutln("You can say on, off, show, lines or reset. That's all I understand.");
+      ourPort->println("You can say on, off, show, lines or reset. That's all I understand.");
     }
     free(paramBuff);
   } else {                                    // No params? Power user!
@@ -459,11 +399,11 @@ void textComObj::listDirectory(void) {
     do {
       entry = wd.openNextFile();
       if (entry) {
-        textOut(entry.name());
+        ourPort->print(entry.name());
         if (entry.isDirectory()) {
-          textOutln("/");
+          ourPort->println("/");
         } else {
-          textOut("\t"); textOutln(entry.size(), DEC);
+          ourPort->print("\t"); ourPort->println(entry.size(), DEC);
         }
         entry.close();
       } else {
@@ -472,7 +412,7 @@ void textComObj::listDirectory(void) {
     } while (!done);
     wd.close();
   } else {
-    textOutln("Fail to open file."); // Sadly, instead of returning a NULL, it just crashes.
+    ourPort->println("Fail to open file."); // Sadly, instead of returning a NULL, it just crashes.
   }
 }
 

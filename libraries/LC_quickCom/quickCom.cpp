@@ -294,7 +294,6 @@ void  qCSlave::slaveReset(void) {
 
 	
 	readErr();
-	SLAVE_PORT.flush();
 	mState = listening;
 }
 

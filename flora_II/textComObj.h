@@ -43,8 +43,8 @@ class textComObj : public idler {
           
           lilParser mParser;
           bool      mAutoRead;
-          bool      mHandheld;
           timeObj   readTimer;
+          Print*    ourPort;
 };
 
 extern textComObj textComs;
