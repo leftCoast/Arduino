@@ -111,7 +111,8 @@ void textComObj::handleTextCom(char* buff) {
     i++;
   }
   checkTextCom('\n');           // Top it all off with a newline. (Gets it cooking.)
-  ourPort = savedPort;          // All done! Replace the port pointer.
+  ourPort->print('\0');         // Flag we're done to the recieve end.
+  ourPort = savedPort;          // Replace the port pointer. Job complete!
 }
 
 

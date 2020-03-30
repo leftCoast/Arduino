@@ -46,6 +46,7 @@ sKeyboard::sKeyboard(editLabel* inEditLabel,textView* inTextView,bool modal)
   
 sKeyboard::~sKeyboard(void) {  }
 
+
 // Time to send a text command.
 void sKeyboard::handleMessage(char* msgBuff) {
 
@@ -156,10 +157,12 @@ void sTermPanel::loop(void) {
 
   index = 0;
   if (Serial1.available()) {
-    while(Serial1.available()) {
-      buff[index++] = Serial1.read();
-    }
-    buff[index] = '\0';
+    do {
+      if (Serial1.available()) {
+        buff[index++] = Serial1.read();
+        Serial.println(index);
+      }
+    } while(buff[index-1] != '\0');
     Serial.println(strlen(buff));
     ourScreen->appendText(buff);
   }

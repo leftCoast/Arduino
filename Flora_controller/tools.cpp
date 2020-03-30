@@ -657,7 +657,7 @@ unsigned long plantBotCom::getLogLines(void)   { return mLogNumLines; }
 
 unsigned long plantBotCom::getLogWLines(void)   { return mLogNumWLines; }
 
-int plantBotCom::getState(void)               { return mState; }
+int plantBotCom::getState(void)               { return mPlantState; }
 
 int plantBotCom::getTemp(void)                { return mTemp; }
 
