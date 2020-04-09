@@ -50,7 +50,7 @@ void bmpLabel::fasterDraw(void) {
 	temp.x = screen->gX(temp.x);		// Convert to global.
 	temp.y = screen->gY(temp.y);
 	backdrop->setSourceRect(temp);
-	backdrop->drawBitmap(x,y);			// Draw in local.
+	backdrop->drawImage(x,y);			// Draw in local.
 	label::drawSelf();
 }
 

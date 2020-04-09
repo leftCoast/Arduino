@@ -114,9 +114,9 @@ void bmpFlasher::drawSelf(void) {
 
   if (mReady) {
     if (lightOn) {
-      mOnBmp->drawBitmap(x,y);
+      mOnBmp->drawImage(x,y);
     } else {
-      mOffBmp->drawBitmap(x,y);
+      mOffBmp->drawImage(x,y);
     }
   }
 }

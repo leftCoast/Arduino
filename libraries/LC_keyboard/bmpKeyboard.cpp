@@ -1,6 +1,8 @@
 #include "bmpKeyboard.h"
 
 #include <editable.h>
+#include <bitmap.h>
+#include <offscreen.h>
 
 #define KEY_WD  24
 #define KEY_HT  33
@@ -34,7 +36,9 @@ int row(int row) {
 }
 
 
-bmpPipe keyCap; // No point in having lots and lots of the same thing.
+bmpPipe	keyCap; 			// No point in having lots and lots of the same thing.
+bitmap	keyBMap;
+colorObj	keyTextColor;	// Setup the text color once.
 
 // *****************************************************
 //                       bmpKeyboard
@@ -44,13 +48,21 @@ bmpPipe keyCap; // No point in having lots and lots of the same thing.
 bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
   : keyboard (inEditObj) {
 
-  rect  sRect;
-
-  mModal = modal;
-  setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);
-  keyCap.openPipe(KEYCAP24);
-  sRect.setRect(0, 0, KEY_WD, KEY_HT);
-  keyCap.setSourceRect(sRect);
+  	rect			sRect;
+	offscreen	vPort; 
+	
+	keyTextColor.setColor(LC_YELLOW);
+	keyTextColor.blend(&white,60);
+	mModal = modal;
+	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);
+	keyCap.openPipe(KEYCAP24);
+	sRect.setRect(0, 0, KEY_WD, KEY_HT);
+	keyCap.setSourceRect(sRect);
+	if (keyBMap.setSize(KEY_WD,KEY_HT)) {
+		vPort.beginDraw(&keyBMap);
+		keyCap.drawImage(0,0); 
+		vPort.endDraw();
+	}
 }
 
 
@@ -182,10 +194,11 @@ void bmpKeyboard::loadKeys(void) {
 bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard)
 : inputKey(inLabel, inNum, inSym, inX, inY, inWidth, inHeight, inKeyboard) {
 
-	colorObj	aColor(LC_YELLOW);	// Really? Tweaking it EVERY time in the constructor?
-	aColor.blend(&white,60);		// You are a hack. Fix this!
-  setColors(&aColor);
-  setTextSize(2);
+	//colorObj	aColor(LC_YELLOW);	// Really? Tweaking it EVERY time in the constructor?
+	//aColor.blend(&white,60);		// You are a hack. Fix this!
+	//setColors(&aColor);
+	setColors(&keyTextColor);		// This one is set up once in the keyboard's constructor.
+	setTextSize(2);
 }
 
   bmpInputKey::~bmpInputKey(void) {  }
@@ -200,9 +213,10 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
         rect  sRect(0,0,width,height);
         bmpPipe aPipe(sRect);
         aPipe.openPipe(SPACEB72);
-        aPipe.drawBitmap(x,y);
+        aPipe.drawImage(x,y);
       } else {                          // "Normal printing
-        keyCap.drawBitmap(x, y);
+        //keyCap.drawImage(x, y);
+        screen->blit(x,y,&keyBMap);
         x = x + 7;
         y = y + 9;
         label::drawSelf();
@@ -240,6 +254,6 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
     if (clicked) {
       screen->fillRect(this, &white);
     } else {
-      mBmpPipe.drawBitmap(x, y);
+      mBmpPipe.drawImage(x, y);
     }
   }

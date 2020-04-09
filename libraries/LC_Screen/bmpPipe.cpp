@@ -5,17 +5,18 @@
 
 bmpPipe::bmpPipe(void) { 
   
-  filePath = NULL;
-  haveInfo = false;
-  haveSourceRect = false;
+  filePath			= NULL;
+  haveInfo			= false;
+  haveSourceRect	= false;
 }
 
 
 bmpPipe::bmpPipe(rect sourceRect) { 
 
-  filePath = NULL;
-  haveInfo = false;
-  haveSourceRect = false;
+  filePath			= NULL;
+  haveInfo			= false;
+  haveSourceRect	= false;
+  
   setSourceRect(sourceRect);
 }
 
@@ -103,10 +104,11 @@ File bmpPipe::getFile(void) {
 }
 
 
+// When we
 void bmpPipe::setSourceRect(rect inRect) { 
   
-  sourceRect = inRect;
-  haveSourceRect = true;
+	sourceRect = inRect;
+	haveSourceRect = true;
 }
 
 
@@ -157,36 +159,6 @@ void bmpPipe::drawLine(File bmpFile,int x,int y) {
 	}
 }
 
-// If we were able to allocate a line buffer for the colors, try it line at a time.
-// OK it works but ITS SLOWER!! ##(*$%$*%&^#!! It is faster if using transactions.
-// Not enough to worry about the complication though.
-void bmpPipe::drawLine(File bmpFile,int x,int y,RGBpack* colorBuff) {
-
-	int		trace;
-	int		endTrace;
-	int		i;
-	uint8_t	readBuf[COLOR_BUF_SIZE];
-	colorObj	aColor;
-	
-	i = 0;															// Initialise i. Our index into the buffer.
-	endTrace = x+sourceRect.width;
-	for (trace=x;trace<endTrace; trace++) {				// Ok, trace does x..x+width.
-		bmpFile.read(readBuf,pixBytes);                 // Grab a pixel.
-      colorBuff[i].r = readBuf[2];
-      colorBuff[i].g = readBuf[1];
-      colorBuff[i].b = readBuf[0];
-		i++;
-	}
-	i = 0;
-	screen->startWrite();															// Reset i.
-   for (trace=x;trace<endTrace; trace++) {				// Ok, trace does x..x+width.
-   	aColor.setColor(&(colorBuff[i]));
-   	screen->drawPixel(trace,y,&aColor);					// Spat it out to the screen.
-   	i++;
-	}
-	screen->endWrite();
-}
-
 
 unsigned long bmpPipe::filePtr(int x,int y) {
 
@@ -202,41 +174,31 @@ unsigned long bmpPipe::filePtr(int x,int y) {
 	return index;														// Tell the world.
 }
 
- 
-// Had to comment out all the color buff stuff. 
-void bmpPipe::drawBitmap(int x,int y) {
+
+// Draw the image to the current screen. Used to be called drawBitmap. But that
+// was a bad choice for a name.
+void bmpPipe::drawImage(int x,int y) {
   
 	File			bmpFile;
 	int			trace;
 	int			endY;
 	int			srcY;
-	RGBpack*		colorBuff;
 
-	//colorBuff = (RGBpack*)malloc(sizeof(RGBpack)*sourceRect.width);	// Have a shot at grabbing aline buffer.
-	if (haveInfo) {																	// We have valid bmp info.
-		bmpFile = SD.open(filePath);												// Open up the file.
-		if (bmpFile) {																	// If we opened it.
-			endY = y+sourceRect.height;											// Start calculating endpoints and things.
+	if (haveInfo) {											// We have valid bmp info.
+		bmpFile = SD.open(filePath);						// Open up the file.
+		if (bmpFile) {											// If we opened it.
+			endY = y+sourceRect.height;					// Start calculating endpoints and things.
 			srcY = sourceRect.y;
-			for (trace=y; trace<endY;trace++) {									// Ready to pull data through to the screen.
-				bmpFile.seek(filePtr(x,srcY++));									// Position the file pointer to the line of pixels we want.
-				drawLine(bmpFile,x,trace);											// Standard old pixel by pixel draw. (Least it works.)
-				/*
-				if (colorBuff) {														// Now, if we were able to allocate a buffer, we'll use it.
-					drawLine(bmpFile,x,trace,colorBuff);						// Fancy buffered line draw.
-				} else {																	// Ir if not..
-					drawLine(bmpFile,x,trace);										// Standard old pixel by pixel draw. (Least it works.)
-				}
-				*/
+			for (trace=y; trace<endY;trace++) {		// Ready to pull data through to the screen.
+				bmpFile.seek(filePtr(x,srcY++));		// Position the file pointer to the line of pixels we want.
+				drawLine(bmpFile,x,trace);				// Standard old pixel by pixel draw. (Least it works.)
 			}
-			bmpFile.close();															// Drawing is done for now. Close the file.
+			bmpFile.close();									// Drawing is done for now. Close the file.
 		}      
 	}
-	//if (colorBuff) { free(colorBuff); }											// So if we did get that buffer free it.
 }
 
-
-
+/*
 void bmpPipe::showPipe(void) {
 
   Serial.print("Src rect x,y,w,h : ");Serial.print(sourceRect.x);Serial.print(", ");Serial.print(sourceRect.y);
@@ -250,4 +212,4 @@ void bmpPipe::showPipe(void) {
   Serial.print("Pix Bytes        : ");Serial.println(pixBytes);
   Serial.print("Bytes per Row    : ");Serial.println(bytesPerRow);
 }
-
+*/

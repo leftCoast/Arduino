@@ -37,7 +37,7 @@ void iconButton::begin(void) {
 
 
 // Blast out the bitmap.
-void iconButton::drawSelf(void) { drawBitmap(x,y); }
+void iconButton::drawSelf(void) { drawImage(x,y); }
 
 
 void iconButton::doAction(void) {  }

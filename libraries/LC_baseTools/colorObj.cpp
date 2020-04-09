@@ -160,8 +160,11 @@ void colorObj::setColor(word color16) {
 
   default :
     red = highByte(color16);
+    red = red & 0b11111000;
     green = lowByte(color16>>5);
-    blue = lowByte(color16)<<3;
+    green = green << 2;
+    blue = lowByte(color16);
+    blue = blue << 3;
   }
   //Serial.print("color16 : ");Serial.println(color16,BIN);
   //printRGB();

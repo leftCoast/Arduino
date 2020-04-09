@@ -76,6 +76,27 @@ void displayObj::drawPixel(int locX,int locY,colorObj* pColor) { }
 void displayObj::drawPixelInvert(int x,int y) { }
 void displayObj::frameRectInvert(int x,int y,int width,int height) { }
 
+void displayObj::blit(int locX,int locY,bitmap* inBitmap) {
+
+	int		width;
+	int		height;
+	colorObj	aColor;
+	
+	if (inBitmap) {
+		width = inBitmap->getWidth();
+		height = inBitmap->getHeight();
+		startWrite();
+		for(int y=0;y<height;y++) {
+			for(int x=0;x<width;x++) {
+				aColor = inBitmap->getColor(x,y);
+				drawPixel(x+locX,y+locY,&aColor);
+			}
+		}
+		endWrite();
+	}
+}
+
+
 point   displayObj::getPoint(void) {
   
   point defPnt;

@@ -208,7 +208,7 @@ void UI::sensorDeath(void) {
   if (mHaveScreen) {
     bmpPipe bomb(rect(0,0,96,64));
     bomb.openPipe("/bomb9664.bmp");
-    bomb.drawBitmap(0,0);
+    bomb.drawImage(0,0);
   }
   pinMode(13, OUTPUT);
   while(crash) {

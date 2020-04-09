@@ -35,4 +35,4 @@ bool	bmpObj::begin(void) {
 }
 
 
-void	bmpObj::drawSelf(void) { drawBitmap(x,y); }
+void	bmpObj::drawSelf(void) { drawImage(x,y); }

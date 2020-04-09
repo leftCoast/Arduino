@@ -14,11 +14,11 @@ void bmpDrawObj::drawSelf(void) {
 
   rect   temp;
       
-  temp = (rect) *this;                            // Get our local rectangle.
-  temp.x = screen->gX(temp.x);                    // Convert to global.
+  temp = (rect) *this;						// Get our local rectangle.
+  temp.x = screen->gX(temp.x);			// Convert to global.
   temp.y = screen->gY(temp.y);
-  backdrop->setSourceRect(temp);                  // Set the copy rect in global.
-  backdrop->drawBitmap(x,y);                      // Draw in local.
+  backdrop->setSourceRect(temp);			// Set the copy rect in global.
+  backdrop->drawImage(x,y);				// Draw in local.
 }
 
 

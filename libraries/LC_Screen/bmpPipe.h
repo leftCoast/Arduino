@@ -13,7 +13,7 @@
 #include <SD.h>
 #include <drawObj.h>
 #include "screen.h"
-
+#include "bitmap.h"
 
 class bmpPipe {
 
@@ -24,12 +24,11 @@ class bmpPipe {
 
 				bool   			openPipe(char* fileName);
 				void      		setSourceRect(rect inRect);
-	virtual	void      		drawBitmap(int x,int y);
+	virtual	void      		drawImage(int x,int y);
 				File				getFile(void);
 	virtual	void				drawLine(File bmpFile,int x,int y);
-				void				drawLine(File bmpFile,int x,int y,RGBpack* colorBuff);
 				unsigned long	filePtr(int x,int y);
-      		void      		showPipe(void);
+      		//void      		showPipe(void);
     
 	protected:
     			uint16_t  		read16(File f);
@@ -46,6 +45,7 @@ class bmpPipe {
     			int				imageDepth;
     			int				pixBytes;
     			int				bytesPerRow;
+    			
 };
 
 #endif

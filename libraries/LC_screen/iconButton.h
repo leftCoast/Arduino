@@ -4,9 +4,6 @@
 #include <drawObj.h>
 #include <bmpPipe.h>
 
-// 9/19 - Doing my own icons now. (So there's suddenly s lot of them!) I think I'll take 
-// this piece of code and twist it into a multi purpose, icon based, UI thing.
-
 
 // Make a button with a 32x32 pixel icon stored in a .bmp file.
 // Seeing its expecting a 32x32 pixel file we can simplify a bunch.
@@ -15,6 +12,10 @@
 //
 // FINE! Now its any rectangle?! You try to make things simple for people.
 // I'll just add some sub classes for the simple cases.
+//
+// 9/19 - Doing my own icons now. (So there's suddenly s lot of them!) I think I'll take 
+// this piece of code and twist it into a multi purpose, icon based, UI thing.
+
 
 
 class iconButton :	public drawObj,

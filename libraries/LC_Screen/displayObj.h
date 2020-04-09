@@ -5,6 +5,7 @@
 #include <gfxfont.h>
 #include <colorObj.h>
 #include <baseGraphics.h>
+#include <bitmap.h>
 
 // This is going to by our base display object. Similar to adafruit's GFX object.
 // The plan is to inherit this for whatever glue code each piece of 
@@ -53,7 +54,8 @@ class displayObj {
 	virtual	void	drawLine(int locX,int locY,int locX2,int locY2,colorObj* inColor);
 	virtual	void	drawLine(point* startPt,point* endPt,colorObj* inColor);
 	virtual	void	drawPixel(int locX,int locY,colorObj* pColor);
-    
+   virtual	void	blit(int locX,int locY,bitmap* inBitmap);
+   
 	virtual	void	drawPixelInvert(int x,int y);
 	virtual	void	frameRectInvert(int x,int y,int width,int height);
 

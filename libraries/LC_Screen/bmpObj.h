@@ -7,8 +7,8 @@
 
 // Years later after so much messing about.
 //
-// This is to be the BASE CLASS for bitmap drawing objects. Its a rect location on the
-// screen that can spat a bitmap to itself. It just a draw object mixed with a bmpPipe.
+// This is to be the BASE CLASS for bitmap file drawing objects. Its a rect location on
+// the screen that can spat a bitmap to itself. It just a draw object mixed with a bmpPipe.
 // Want to do a picture, a button or an icon? Start with this. (Or just draw a bitmap)
 //
 // Basically this is the glue that hooks a bmpPipe to a drawObj.
