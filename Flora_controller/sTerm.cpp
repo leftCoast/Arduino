@@ -2,7 +2,7 @@
 #include "colorRect.h"
 #include "sTerm.h"
 #include "floraOS.h"
-
+#include  "idlers.h"
 
 #define TV_INSET  3
 
@@ -31,6 +31,109 @@
 #define ET_H      10
 
 
+
+// *****************************************************
+//                      ringBuff
+// *****************************************************
+
+
+ringBuff::ringBuff(int inNumBytes) {
+
+  head    = 0;
+  tail    = 0;
+  isFull  = false;
+  buff    = NULL;
+  while(inNumBytes && !resizeBuff(inNumBytes,&buff)) {  // While inNumBytes>0 and resizing the bufer fails..
+    inNumBytes/2;                                       // Try for 1/2 the number of bytes?
+  }
+  numBytes = inNumBytes;                                // Note how many bytes we ended up with.
+}
+
+
+ringBuff::~ringBuff(void) { resizeBuff(0,&buff); }
+
+
+// Inctment on index. Hop over to zero if we go past the end.
+void ringBuff::inc(int* index) {
+
+  *index = *index + 1;
+  if (*index>=numBytes) {
+    *index = 0;
+  }
+}
+
+
+// If  not full, add a charactor and update the state.
+void ringBuff::addChar(char inChar) {
+
+  if (!full()) {
+    buff[tail] = inChar;
+    inc(&tail);
+    isFull = tail==head;
+  }
+}
+
+
+// Pass back what we got, unless we got nothin' then pass back a /0.
+// Don't change anything.
+char ringBuff::peekTail(void) {
+
+  if (empty()) return '/0';
+  return buff[tail-1];
+}
+    
+
+    
+// If not empty, read the last charactor, update the state
+// and return the read charactor. Otherwize return a null
+// charactor.
+char ringBuff::readChar(void) {
+
+  char  theChar;
+
+  if (!empty()) {
+    theChar = buff[head];
+    inc(&head);
+    isFull = false;
+    return theChar;
+  } else {
+    return '\0';
+  }
+}
+
+
+// Return the numnber of charactors stored in the buffer.
+int ringBuff::numChars(void) {
+
+  if (empty()) {                      // If its empty..
+    return 0;                         // Well, that would be zero.
+  } else if (full()) {                // If its full..
+    return numBytes;                  // Return the number of bytes we store.
+  } else if (head<tail) {             // Head less that tail.
+    return tail - head;               // Data is between them, return the difference.
+  } else {                            // And lastly.. Head is greater than tail..
+    return numBytes - (head - tail);  // Kinda' opposite. Data is between them on the other side. 
+  }
+}
+
+
+// Return whethere the buffer is empty or not.
+bool ringBuff::empty(void) { return ((head==tail)&&!isFull); }
+
+
+// Return if the buffer is full or not.
+bool ringBuff::full(void) { return isFull; }
+
+
+// Just clear the data NOT release RAM.
+void  ringBuff::clear(void) {
+
+  head = 0;
+  tail = 0;
+}
+
+
+
 // *****************************************************
 //                      sKeyboard
 // *****************************************************
@@ -39,15 +142,17 @@
 sKeyboard::sKeyboard(editLabel* inEditLabel,textView* inTextView,bool modal)
   : ourKeyboard(inEditLabel,modal) { 
 
-  mEditLabel = inEditLabel; // The didplay we live in will kill these two off.
-  mTextView = inTextView;   // So don't delete them.
+  mEditLabel  = inEditLabel; // The display we live in will kill these two off.
+  mTextView   = inTextView;   // So don't delete them.
 }
 
   
 sKeyboard::~sKeyboard(void) {  }
 
 
-// Time to send a text command.
+// Time to send a text command. The text, as it comes from the edit field has no \n.
+// This works out well in that the recoeving end, knowing the message is complete
+// can give us some time to get ready before adding the \n to fire off a response.
 void sKeyboard::handleMessage(char* msgBuff) {
 
   byte  numChars;
@@ -64,12 +169,13 @@ void sKeyboard::handleMessage(char* msgBuff) {
       while(ourComPort.isSending()) {                     // We'll spin 'till its at least shipped off.
         ourComPort.sleep(QCOM_SLEEP_TIME);                // Have a nap, let the UI amuse the user.
       }
+      resizeBuff(0,&outBuff);                             // Recycle the outBuff.
       mTextView->appendText(msgBuff);                     // Echo to our own screen.
       mTextView->appendText('\n');                        // With a EOL char.
-      return true;                        
+      return true;                                        // Completed successfully, exit.                      
     }                                          
   }
-  mTextView->appendText("Sending failure");               // Tell Mrs user we're not happy.
+  mTextView->appendText("Not enough RAM for message buffer.");  // Tell Mrs user we're not happy.
   mTextView->appendText('\n');
 }
 
@@ -91,6 +197,28 @@ void sKeyboard::handleKey(keyCommands inEditCom) {
 }
 
 
+// *****************************************************
+//                      sTermUpdater
+// *****************************************************
+
+sTermUpdater::sTermUpdater(sTermPanel* inPanel) {
+
+  mPanel = inPanel;
+  hookup();
+}
+
+
+sTermUpdater::~sTermUpdater(void) {  }
+
+
+void sTermUpdater::idle(void) {
+
+  while(!mPanel->mReplyBuff->empty()) {                             // While the reply buffer is not empty..
+    mPanel->ourScreen->appendText(mPanel->mReplyBuff->readChar());  // Add each char to the screen.
+  }
+}
+
+
 
 // *****************************************************
 //                      sTermPanel
@@ -99,13 +227,17 @@ void sKeyboard::handleKey(keyCommands inEditCom) {
 
 sTermPanel::sTermPanel(void)
   : panel(sTermApp) {
-
-  mTextBuff = NULL;
-  mBuffBytes = 0;
+  
+  mReplyBuff = new ringBuff(1000);
+  mUpdater = new sTermUpdater(this);
 }
 
 
-sTermPanel::~sTermPanel(void) { }
+sTermPanel::~sTermPanel(void) {
+  
+  if (mReplyBuff) delete mReplyBuff;
+  if (mUpdater) delete mUpdater;
+}
 
           
 void sTermPanel::setup(void) {
@@ -152,19 +284,16 @@ void sTermPanel::drawSelf(void) { screen->fillScreen(&black); }
 
 void sTermPanel::loop(void) {
 
-  int   index;
-  char  buff[255];
+  timeObj timer(10);
 
-  index = 0;
   if (Serial1.available()) {
-    do {
-      if (Serial1.available()) {
-        buff[index++] = Serial1.read();
-        Serial.println(index);
+    timer.start();
+    while (!mReplyBuff->full()&&!timer.ding()) {    
+      while (Serial1.available()) {
+        mReplyBuff->addChar(Serial1.read());
+        timer.start();
       }
-    } while(buff[index-1] != '\0');
-    Serial.println(strlen(buff));
-    ourScreen->appendText(buff);
+    }
   }
 }
 

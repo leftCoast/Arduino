@@ -1,6 +1,8 @@
-#include <adafruit_1947_Obj.h>
 #include <Adafruit_GFX.h>
+#include <adafruit_1947_Obj.h>
 #include "Fonts/FreeSans9pt7b.h"
+//#include "Fonts/Serif12.h"
+
 
 #include <colorObj.h>
 #include <idlers.h>
@@ -11,6 +13,7 @@
 #include <screen.h>
 #include <litlOS.h>
 #include "floraOS.h"
+
 
 #define SD_CS   4
 

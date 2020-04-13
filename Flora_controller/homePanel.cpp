@@ -96,7 +96,8 @@ void homeScreen::setup(void) {
 
   currentMoistureText* mText = new currentMoistureText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(mText);
-  
+
+  /*
   traceY = traceY + stepY;
   bmpObj* currT = new bmpObj(0,traceY,LABEL_W,LABEL_H,CURR_TEMP_BMP);
   currT->begin();
@@ -104,6 +105,7 @@ void homeScreen::setup(void) {
 
   currentTempText* tText = new currentTempText(LIVE_X,traceY,LIVE_W,LABEL_H);
   addObj(tText);
+  */
   
   traceY = traceY + stepY;
   bmpObj* totalW = new bmpObj(0,traceY,LABEL_W,LABEL_H,TOTAL_WATER_BMP);

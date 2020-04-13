@@ -24,7 +24,8 @@ eventType		mType;
 	float				mPixalPerSec;
 	
 	float				mAngle;
-	
+
+/*	
 void printEvent(event* anEvent) {
 
 	
@@ -63,7 +64,7 @@ void printEvent(event* anEvent) {
 	
 	Serial.print(F("mAngle        : "));Serial.println(anEvent->mAngle);
 };
-
+*/
 
 
 eventObj::eventObj(event* inEvent) { mEvent = inEvent; }

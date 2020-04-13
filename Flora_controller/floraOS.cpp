@@ -4,7 +4,7 @@
 #include "loggingPanel.h"
 #include "sTerm.h"
 
-#define PLANTBOT_BAUD 500000 //115200
+#define PLANTBOT_BAUD  9600 //115200 //500000
 
 
 // *****************************************************

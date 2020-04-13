@@ -36,8 +36,8 @@ int row(int row) {
 }
 
 
-bmpPipe	keyCap; 			// No point in having lots and lots of the same thing.
-bitmap	keyBMap;
+ 			
+bitmap	keyBMap;			// No point in having lots and lots of the same thing.
 colorObj	keyTextColor;	// Setup the text color once.
 
 // *****************************************************
@@ -50,6 +50,7 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 
   	rect			sRect;
 	offscreen	vPort; 
+	bmpPipe		keyCap;
 	
 	keyTextColor.setColor(LC_YELLOW);
 	keyTextColor.blend(&white,60);
@@ -66,7 +67,7 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 }
 
 
-bmpKeyboard::~bmpKeyboard(void) {  }
+bmpKeyboard::~bmpKeyboard(void) { keyBMap.clearMap(); }
 
 
 // Given the colum I'm shooting for and the row I'm in.. 
@@ -215,7 +216,6 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
         aPipe.openPipe(SPACEB72);
         aPipe.drawImage(x,y);
       } else {                          // "Normal printing
-        //keyCap.drawImage(x, y);
         screen->blit(x,y,&keyBMap);
         x = x + 7;
         y = y + 9;
@@ -231,7 +231,6 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
   // *****************************************************
   //                       bmpControlKey
   // *****************************************************
-
 
 
 

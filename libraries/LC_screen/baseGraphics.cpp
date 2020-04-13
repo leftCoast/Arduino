@@ -6,6 +6,7 @@
 #define DEF_SIZE_X 16
 #define DEF_SIZE_Y 16
 
+/*
 void printPoint(point* inPt,char* name) {
 
 	Serial.print(name);
@@ -13,7 +14,7 @@ void printPoint(point* inPt,char* name) {
 	Serial.print(F(", "));
 	Serial.println(inPt->y);
 }
-
+*/
 	
 int	xDistance(point ptA,point ptB) { return ptB.x - ptA.x; }
 
@@ -49,6 +50,7 @@ float	angle(point ptA,point ptB) {
 }
 
 
+/*
 // HANDY for tracing issues through the drawing code.
 void rect::printRect(char* label) {
 
@@ -58,6 +60,7 @@ void rect::printRect(char* label) {
 	Serial.print(F("w:"));Serial.print(width);Serial.print(F(" "));
 	Serial.print(F("h:"));Serial.println(height);
 }
+*/
 
 
 rect::rect(void) {

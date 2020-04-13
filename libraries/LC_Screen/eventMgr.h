@@ -48,7 +48,7 @@ struct event {
 	float				mAngle;
 };
 
-void printEvent(event* anEvent);
+//void printEvent(event* anEvent);
 
 
 // ***************************************************

@@ -6,7 +6,7 @@
 #include "textComObj.h"
 
 #define COM_BUFF_BYTES  255 // Can be no larger than 255!
-#define SLAVE_BAUD  500000 //115200
+#define SLAVE_BAUD  9600 //115200 //500000
 
 enum floraComSet  {
                   floraReset,

@@ -41,6 +41,7 @@ adafruit_1947_Obj::~adafruit_1947_Obj(void) {
 bool adafruit_1947_Obj::dispObjBegin(void) { 
 
   theTFT = new Adafruit_ILI9341(cs,LC_DC,rst);
+  //theTFT = new ILI9341_t3(cs,LC_DC,rst);
   if (theTFT!=NULL) {
     cTS = new Adafruit_FT6206();
     if (cTS!=NULL) {
@@ -69,6 +70,7 @@ void adafruit_1947_Obj::setTextColor(colorObj* tColor,colorObj* bColor) 								
 void adafruit_1947_Obj::setTextSize(byte inSize)																		{ theTFT->setTextSize(inSize); }
 void adafruit_1947_Obj::setTextWrap(boolean wrap)																		{ theTFT->setTextWrap(wrap); }
 void adafruit_1947_Obj::setFont(const GFXfont* font)																	{ theTFT->setFont(font); }
+//void adafruit_1947_Obj::setFont(const GFXfont* font)																{ theTFT->setFontAdafruit(); }
 void adafruit_1947_Obj::setCursor(int x,int y)																			{ theTFT->setCursor(gX(x),gY(y)); }
 void adafruit_1947_Obj::drawText(char* inText)																			{ theTFT->print(inText); }
 void adafruit_1947_Obj::fillScreen(colorObj* inColor)																	{ theTFT->fillScreen(inColor->getColor16()); }

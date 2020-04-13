@@ -101,8 +101,8 @@ void textComObj::checkTextCom(char inChar) {
 void textComObj::handleTextCom(char* buff) {
   
   int i;
-  Print*  savedPort;
   
+  Print*  savedPort;
   i = 0;                        // Starting at first char..
   savedPort = ourPort;          // Save of the serial port we're using now.
   ourPort = &Serial1;           // Switch to port Serial1.
@@ -110,8 +110,8 @@ void textComObj::handleTextCom(char* buff) {
     checkTextCom(buff[i]);      // Jamming all the chars into the parser.
     i++;
   }
+  delay(50);                    // Need the delay so the handheld can get ready (Even at 9600 baud. Sad)
   checkTextCom('\n');           // Top it all off with a newline. (Gets it cooking.)
-  ourPort->print('\0');         // Flag we're done to the recieve end.
   ourPort = savedPort;          // Replace the port pointer. Job complete!
 }
 
@@ -127,14 +127,14 @@ void textComObj::initParams(void) {
 void textComObj::printParams(void) {
 
   ourPort->print("Parameters for : "); ourPort->println(ourParamObj.getName());
-  ourPort->print("dryLimit  : "); ourPort->print(ourParamObj.getDryLimit()); ourPort->println(" %");
-  ourPort->print("waterTime : "); ourPort->print(ourParamObj.getWaterTime()); ourPort->println(" ms");
-  ourPort->print("soakTime  : "); ourPort->print(ourParamObj.getSoakTime()); ourPort->println(" ms");
-  ourPort->print("percent   : "); ourPort->print(ourParamObj.getPWMPercent()); ourPort->println(" %");
-  ourPort->print("period    : "); ourPort->print(ourParamObj.getPWMPeriod()); ourPort->println(" ms");
-  ourPort->print("Dry       : "); ourPort->print(ourParamObj.getDry()); ourPort->println(" mf");
-  ourPort->print("Mud       : "); ourPort->print(ourParamObj.getMud()); ourPort->println(" mf");
-  ourPort->print("Run #     : "); ourPort->print(ourParamObj.getRunNum()); ourPort->println();
+  ourPort->print("dryLimit    : "); ourPort->print(ourParamObj.getDryLimit()); ourPort->println(" %");
+  ourPort->print("waterTime   : "); ourPort->print(ourParamObj.getWaterTime()); ourPort->println(" ms");
+  ourPort->print("soakTime    : "); ourPort->print(ourParamObj.getSoakTime()); ourPort->println(" ms");
+  ourPort->print("PWM percent : "); ourPort->print(ourParamObj.getPWMPercent()); ourPort->println(" %");
+  ourPort->print("PWM period  : "); ourPort->print(ourParamObj.getPWMPeriod()); ourPort->println(" ms");
+  ourPort->print("Dry         : "); ourPort->print(ourParamObj.getDry()); ourPort->println(" mf");
+  ourPort->print("Mud         : "); ourPort->print(ourParamObj.getMud()); ourPort->println(" mf");
+  ourPort->print("Run #       : "); ourPort->print(ourParamObj.getRunNum()); ourPort->println();
   ourPort->println();
 }
 
@@ -169,6 +169,7 @@ void textComObj::doPrintReadings(void) {
     case watering : ourPort->println("watering"); break;
     case soaking  : ourPort->println("soaking");  break;
   }
+  ourPort->println();
   if (mAutoRead) readTimer.start();
 }
 

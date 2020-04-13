@@ -2,10 +2,41 @@
 #define sTerm_h
 
 #include <panel.h>
+#include <idlers.h>
 #include <litlOS.h> 
 #include <bmpObj.h>
 #include <textView.h>
 #include "tools.h"
+
+
+class sTermPanel;
+
+// *****************************************************
+//                      ringBuff
+// *****************************************************
+
+
+class ringBuff {
+
+  public:
+            ringBuff(int inNumBytes);
+            ~ringBuff(void);
+
+            void  inc(int* index);
+            void  addChar(char inChar);
+            char  peekTail(void);
+            char  readChar(void);
+            int   numChars(void);
+            bool  empty(void);
+            bool  full(void);
+            void  clear(void);
+            
+            char* buff;
+            int   numBytes;
+            int   head;
+            int   tail;
+            bool  isFull;           
+};
 
 
 
@@ -29,13 +60,27 @@ class sKeyboard : public ourKeyboard {
 };
 
 
+// *****************************************************
+//                      sTermUpdater
+// *****************************************************
+
+class sTermUpdater : public idler {
+
+  public:
+            sTermUpdater(sTermPanel* inPanel);
+  virtual   ~sTermUpdater(void);
+
+  virtual  void  idle(void);
+
+            sTermPanel* mPanel;
+};
 
 // *****************************************************
 //                      sTermPanel
 // *****************************************************
 
 
-class sTermPanel : public panel {
+class sTermPanel :  public panel {
 
   public:
           sTermPanel(void);
@@ -46,9 +91,9 @@ class sTermPanel : public panel {
   virtual void  loop(void);
   virtual void  closing(void);
   
-          textView* ourScreen;
-          char*     mTextBuff;
-          int       mBuffBytes;
+          textView*     ourScreen;
+          ringBuff*     mReplyBuff;
+          sTermUpdater* mUpdater;
 };
 
 #endif
