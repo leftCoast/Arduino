@@ -28,6 +28,8 @@ bool adafruit_1431_Obj::dispObjBegin(void) {
   return false;
 }
 
+int  adafruit_1431_Obj::width(void)																							{ return theOLED->width(); }
+int  adafruit_1431_Obj::height(void)																						{ return theOLED->height(); }
 void adafruit_1431_Obj::setRotation(byte inRotation)      															{ theOLED->setRotation(inRotation); }
 void adafruit_1431_Obj::setTextColor(colorObj* inColor)   															{ theOLED->setTextColor(inColor->getColor16()); }
 void adafruit_1431_Obj::setTextColor(colorObj* tColor,colorObj* bColor)											{ theOLED->setTextColor(tColor->getColor16(),bColor->getColor16()); }

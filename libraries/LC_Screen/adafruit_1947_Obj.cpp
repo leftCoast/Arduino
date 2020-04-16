@@ -62,6 +62,8 @@ bool adafruit_1947_Obj::dispObjBegin(void) {
   return false;
 }
 
+int adafruit_1947_Obj::width(void)																							{ return theTFT->width(); }
+int adafruit_1947_Obj::height(void)																							{ return theTFT->height(); }
 void adafruit_1947_Obj::startWrite(void)																					{ theTFT->startWrite(); }
 void adafruit_1947_Obj::endWrite(void)																						{ theTFT->endWrite(); }
 void adafruit_1947_Obj::setRotation(byte inRotation)																	{ theTFT->setRotation(inRotation); }

@@ -5,14 +5,16 @@
 #include <blinker.h>
 #include "parameters.h"
 #include <liveText.h>
+#include <offscreen.h>
 
 #define OLED_CS     10
 #define OLED_RST    6
 #define OLED_SDCS   4
 
-UI      ourDisplay;
-blinker idleLight(13,80,2000);
- 
+UI        ourDisplay;
+blinker   idleLight(13,80,2000);
+offscreen ourBlitPort;
+
 // Set percent vlaues from 0..100 as a 3 char int. -1 gives "---"
 
 percView::percView(int x,int y)
@@ -50,8 +52,23 @@ void percView::setPercent(float percent) {
 
 
 stateView::stateView(int x,int y) 
-  : label(x,y,96-x,8,"Startup",2) {
-  setColors(&white,&black);
+  : label(x,y,96-x,18,"Startup",2) {
+
+  mPerc = 0;
+  setColors(&white);
+  setJustify(TEXT_CENTER);
+  
+  mBMap.setSize(width,height);
+ 
+  mReadColor.setColor(LC_CHARCOAL);
+  
+  mWaterColor.setColor(&blue);
+  mWaterColor.blend(&black,20);
+  mWaterColor.blend(&green,40);
+  
+  mSoakColor.setColor(&yellow);
+  mSoakColor.blend(&black,40);
+  mSoakColor.blend(&red,20);
 }
 
 
@@ -65,8 +82,43 @@ void  stateView::setState(weDo inState) {
     case watering   : setValue("Watering"); break;
     case soaking    : setValue("Soaking"); break;
   }
+  mState = inState;
 }
 
+
+void stateView::drawSelf(void) {
+
+  ourBlitPort.beginDraw(&mBMap,screen->gX(x),screen->gY(y));
+  switch(mState) {
+    case sitting    : 
+      screen->fillRect(this,&mReadColor);
+      x = x+width/16;
+      y = y+1;
+      label::drawSelf();
+      x = x-96/16;
+      y = y-1;
+    break;
+    case watering   : 
+      screen->fillRect(this,&mWaterColor);
+      y = y+1;
+      label::drawSelf();
+      y = y-1;
+    break;
+    case soaking    :
+      rect  aRect(this);
+
+      aRect.insetRect(3);
+      screen->fillRect(this,&mSoakColor);
+      x = x+width/16;
+      y = y+1;
+      label::drawSelf();
+      x = x-96/16;
+      y = y-1;
+    break;
+  }
+  ourBlitPort.endDraw();
+  screen->blit(x,y,&mBMap);
+}
 
 
 // *****************************************************
@@ -135,7 +187,7 @@ void UI::begin(void) {
        mLastState = weAre;
       
       screen->fillScreen(&black);
-
+      //screen->drawRect(0,0,96,screen->height(),&white);
       mColorMap = new colorMultiMap();
       mWetColor.setColor(LC_BLUE);
       mWetColor.blend(&green,40);

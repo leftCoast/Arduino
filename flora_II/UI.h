@@ -7,7 +7,7 @@
 #include "globals.h"
 #include <liveText.h>
 #include <colorObj.h>
-
+#include <bitmap.h>
 
 class percView : public label {
 
@@ -24,8 +24,17 @@ class stateView : public label {
   public:
                 stateView(int x,int y);
   virtual       ~stateView(void);
-
+  
           void  setState(weDo inState);
+          void  percentDone(int inPerc);
+  virtual void  drawSelf(void);
+
+          weDo      mState;
+          int       mPerc;
+          colorObj  mReadColor;
+          colorObj  mWaterColor;
+          colorObj  mSoakColor;
+          bitmap    mBMap;
 };
 
 

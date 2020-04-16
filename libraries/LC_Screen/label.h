@@ -9,8 +9,8 @@
 #define CHAR_HEIGHT		8	// Actual size is 8 * text size.
 #define DEF_PRECISION	2	// Number of digits past decimal point.
 
-#define MAX_PREC			 12				// #chars - 3 '-','0','.'. The calculator can disp 16.
-#define TEMP_BUFF_SIZE 41 + MAX_PREC	// Temp buff for doing text formatting and things.
+#define MAX_PREC			12					// #chars - 3 '-','0','.'. The calculator can disp 16.
+#define TEMP_BUFF_SIZE	41 + MAX_PREC	// Temp buff for doing text formatting and things.
 						  							// Think about what you'll need here. Its important!
 						  							// float can get to 3.4xx E+38 add '-', '.' & \0 
 						  							// gives 41 chars.

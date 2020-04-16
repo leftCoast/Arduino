@@ -111,7 +111,11 @@ void label::setColors(colorObj* tColor, colorObj* bColor) {
 }
 
 
-void label::setColors(colorObj* tColor) { setColors(tColor,&backColor); transp = true; }
+void label::setColors(colorObj* tColor) {
+
+	setColors(tColor,&backColor);
+	transp = true;
+}
   
 
 void label::setPrecision(int inPrec) {
@@ -202,12 +206,12 @@ void label::drawSelf(void) {
 			screen->setTextColor(&textColor,&backColor);						// We set BOTH colors as a flag for both.
 		}
 		screen->setTextSize(textSize);											// Set the text size.
-		screen->setTextWrap(false);												// Turn on wrap. It just makes a mess of everything.
+		screen->setTextWrap(false);												// Turn off wrap. It just makes a mess of everything.
 		screen->setCursor(x,y);														// Move the cursor to our XY location.
 		charDif =  numCharsDisp - strlen(buff);								// Calculate the total amount of blanks we'll need.
 		if (charDif==0) {																// If its a perfect fit..
 			screen->drawText(buff);													// Just draw it out. EASY PEASY! (And we're done)
-		} else if (charDif>0) {														// Else, we'll eed some padding..
+		} else if (charDif>0) {														// Else, we'll need some padding..
 			switch (justify) {														// Left, Right, Center will be handled differently.
 				case TEXT_LEFT :														// ** LEFT **
 					screen->drawText(buff);											// Draw the text.
@@ -229,12 +233,12 @@ void label::drawSelf(void) {
 			if (numCharsDisp<(TEMP_BUFF_SIZE-1)) {								// Make sure we have enough room to maneuver.
 				switch (justify) {													// Left, Right, Center will be handled differently.
 					case TEXT_LEFT :													// ** LEFT **
-						temp[0] = '\0';												// **TESTED** - "Clear" the temp buffer.
+						temp[0] = '\0';												// Clear the temp buffer.
 						strncat(temp,buff,numCharsDisp);							// Stamp in the characters to display.
 						screen->drawText(temp);										// Draw the string.
 					break;																// And we're done.
 					case TEXT_RIGHT :													// ** RIGHT**						
-						screen->drawText((char*)&(buff[-charDif])); 			// **TESTED** - Just draw the text starting after the clipped portion.
+						screen->drawText((char*)&(buff[-charDif])); 			// Just draw the text starting after the clipped portion.
 					break;
 					case TEXT_CENTER :												// ** CENTER **
 						int firstChar = -charDif/2;								// Calculate first char to display.

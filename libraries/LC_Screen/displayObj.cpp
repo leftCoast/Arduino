@@ -43,8 +43,10 @@ point	displayObj::lP(point gP) {
 	return aPt;
 }
 
-void displayObj::startWrite(void) {  }
-void displayObj::endWrite(void) {  }
+int  displayObj::width(void) {  }
+int  displayObj::height(void) {  }
+//void displayObj::startWrite(void) {  }
+//void displayObj::endWrite(void) {  }
 bool displayObj::dispObjBegin(void) { return false; }
 void displayObj::setRotation(byte inRotation) { }
 void displayObj::setTextColor(colorObj* inColor) { }
@@ -54,7 +56,8 @@ void displayObj::setTextWrap(bool inWrap) { }
 void displayObj::setFont(const GFXfont* font) { }
 void displayObj::setCursor(int inX,int inY) { }
 void displayObj::drawText(char* inText) { }
-void displayObj::fillScreen(colorObj* inColor) { }
+void displayObj::drawChar(int x,int y,char inChar,colorObj* fColor,colorObj* bColor,int size) { }
+void displayObj::fillScreen(colorObj* inColor) {  }
 void displayObj::fillRect(int locX,int locY,int width,int height,colorObj* inColor) { }
 void displayObj::fillRect(rect* inRect,colorObj* inColor) { }
 void displayObj::drawRect(int locX,int locY,int width,int  height,colorObj* inColor) { }
@@ -85,14 +88,12 @@ void displayObj::blit(int locX,int locY,bitmap* inBitmap) {
 	if (inBitmap) {
 		width = inBitmap->getWidth();
 		height = inBitmap->getHeight();
-		startWrite();
 		for(int y=0;y<height;y++) {
 			for(int x=0;x<width;x++) {
 				aColor = inBitmap->getColor(x,y);
 				drawPixel(x+locX,y+locY,&aColor);
 			}
 		}
-		endWrite();
 	}
 }
 

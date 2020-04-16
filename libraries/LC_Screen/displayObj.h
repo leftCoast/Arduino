@@ -24,9 +24,11 @@ class displayObj {
 				int	gY(int y);
 				point	lP(point gP);
 					
+	virtual	int	width(void);
+	virtual	int	height(void);
 	virtual	bool	dispObjBegin(void);
-  	virtual	void	startWrite(void);
-  	virtual	void	endWrite(void);
+  	//virtual	void	startWrite(void);
+  //	virtual	void	endWrite(void);
 	virtual	void	setRotation(byte inRotation);
 	virtual	void	setTextColor(colorObj* tColor);
 	virtual	void	setTextColor(colorObj* tColor,colorObj* bColor);
@@ -35,6 +37,7 @@ class displayObj {
 	virtual	void	setFont(const GFXfont* font);
 	virtual	void	setCursor(int inX,int inY);
 	virtual	void	drawText(char* inText);
+	virtual	void  drawChar(int x,int y,char inChar,colorObj* fColor,colorObj* bColor,int size);
 	virtual	void	fillScreen(colorObj* inColor);
 	virtual	void	fillRect(int locX,int locY,int width,int height, colorObj* inColor);
 	virtual	void	fillRect(rect* inRect,colorObj* inColor);
