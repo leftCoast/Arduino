@@ -14,10 +14,9 @@ class mapDisplay :  public Adafruit_GFX {
           
             bool  dispObjBegin(void);
     virtual void  drawPixel(int16_t x, int16_t y, uint16_t color);
-    virtual void  writePixel(int16_t x, int16_t y, uint16_t color);
-            void  setFColor(colorObj* inColor);
-            void  setBColor(colorObj* inColor);
-            void  setTransp(bool transp);
+            //void  setFColor(colorObj* inColor);
+            //void  setBColor(colorObj* inColor);
+            //void  setTransp(bool transp);
 
   protected :
   				int		offsetX;

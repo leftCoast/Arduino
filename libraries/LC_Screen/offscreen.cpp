@@ -7,9 +7,12 @@
 // ***************************************************************
 
 // Constructor is only used by the offscreen class and it'll do the
-// sanity checking before calling.
+// sanity checking before calling. Setting up the GFX object width
+// & height are actually asking, max width & max height. So you need
+// to add in the offsets as well. This seems to only be checked when
+// drawing text.
 mapDisplay::mapDisplay(bitmap* inMap,int ofsX,int ofsY)  
-  : Adafruit_GFX((int16_t)inMap->getWidth(),(int16_t)inMap->getHeight()) {
+  : Adafruit_GFX((int16_t)inMap->getWidth()+ofsX,(int16_t)inMap->getHeight()+ofsY) {
 
   mBitmap = inMap;
   offsetX = ofsX;
@@ -30,15 +33,7 @@ void mapDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
 	mBitmap->setColor(x-offsetX,y-offsetY,&aColor);
 }
 
-
-void mapDisplay::writePixel(int16_t x, int16_t y, uint16_t color){
-
-	colorObj  aColor(color);
-	//Serial.print("write : ");Serial.print(x);Serial.print(", ");Serial.print(y);Serial.print(" ");Serial.println(color,BIN);
-	mBitmap->setColor(x-offsetX,y-offsetY,&aColor);
-}
-
-
+/*
 void mapDisplay::setFColor(colorObj* inColor) { mFColor.setColor(inColor); }
 
 
@@ -46,7 +41,7 @@ void mapDisplay::setBColor(colorObj* inColor) { mBColor.setColor(inColor); }
 
 
 void mapDisplay::setTransp(bool transp) { mTransp = transp; }          
-
+*/
 
 
 // ***************************************************************

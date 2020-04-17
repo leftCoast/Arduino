@@ -1076,13 +1076,13 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
   uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y) {
 
     if(!gfxFont) { // 'Classic' built-in font
-
+	
         if((x >= _width)            || // Clip right
            (y >= _height)           || // Clip bottom
            ((x + 6 * size_x - 1) < 0) || // Clip left
            ((y + 8 * size_y - 1) < 0))   // Clip top
-            return;
-
+           return;
+			
         if(!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
 
         startWrite();

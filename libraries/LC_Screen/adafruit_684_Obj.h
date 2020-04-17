@@ -40,7 +40,7 @@ class adafruit_684_Obj : public displayObj {
 	virtual 	void	drawHLine(int x,int y,int width,colorObj* inColor);
 	virtual 	void	drawLine(int x,int y,int x2,int y2,colorObj* inColor);
 	virtual 	void	drawPixel(int x,int y,colorObj* pColor);
-	//virtual	void	blit(int locX,int locY,bitmap* inBitmap);
+	 //virtual	void	blit(int locX,int locY,bitmap* inBitmap);
 
   private:
           Adafruit_SSD1331* theOLED;

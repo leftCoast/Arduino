@@ -1,6 +1,5 @@
 #include <Adafruit_GFX.h>
 #include <gfxfont.h>
-#include <Adafruit_ILI9341.h>
 #include <adafruit_1947_Obj.h>  // ADAFRUIT_1947
 #include <SD.h>
 
@@ -20,7 +19,8 @@
 #include <lineObj.h>
 #include <screen.h>
 #include <textView.h>
-#include <editField.h>
+//#include <editField.h>
+#include <editLabel.h>
 #include <IOandKeys.h>
 #include <panel.h>
 #include <blockFile.h>
@@ -58,7 +58,7 @@ class qGame : public  cellOSPanel {
   virtual void  loop();
 
           textView*   theTextView;        // The text window.
-          editField*  theEditField;       // The text edit field.
+          editLabel*  theEditField;       // The text edit field.
           colorRect*	 theEditBase;			// Background of text edit window.
           IOandKeys*  ourKeyboard;        // Just like it sounds, our texting keyboard.
 

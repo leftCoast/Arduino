@@ -1,4 +1,3 @@
-//#include <Adafruit_seesaw.h>
 
 #include <blinker.h>
 #include <colorObj.h>  
@@ -198,21 +197,21 @@ void loop() {
   switch (weAre) {                                    // OK, state stuff. Depending on our current state..
     case sitting :                                    // Sitting = watching moisture wating to start watering.
       if (moisture < ourParamObj.getDryLimit()) {     // If its too dry? Time to water..
-        Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
+        //Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
         waterTime->start();                           // Start up the watering timer.
         weAre = watering;                             // Set state that we are in watering mode.
       }
       break;                                           // All done, jet!
     case watering :                                  // Watering = running the pump and watering plants.
       if (waterTime->ding()) {                        // If our time for watering has expired...
-        Serial.println("Soaking");                    // Tell the world what's up next. (And again, if they are listening)
+        //Serial.println("Soaking");                    // Tell the world what's up next. (And again, if they are listening)
         soakTime->start();                            // Start up the soaking timer.
         weAre = soaking;                              // Set state that we are in soaking mode.
       }
       break;                                           // That's it for now.
     case soaking :                                   // soaking = waiting for the water to soak through the soil to the sensor.
       if (soakTime->ding()) {                         // If soak time has expired..
-        Serial.println("Back sitting.");              // Tell the world what's up next.
+        //Serial.println("Back sitting.");              // Tell the world what's up next.
         weAre = sitting;                              // Set state that we are in sitting mode.
       }
       break;                                           // All done, lets bolt!

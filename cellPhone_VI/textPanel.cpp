@@ -116,7 +116,7 @@ void msgList::drawSelf(void) {  }
 
 
 msgEditField::msgEditField(textPanel* inPanel)
-  : editField(1,1,1,1,"",1) { mPanel = inPanel; }
+  : editLabel(1,1,1,1,"",1) { mPanel = inPanel; }
 
   
 msgEditField::~msgEditField(void) {  }
@@ -142,7 +142,7 @@ void msgEditField::handleKeystroke(keystroke* aKeystroke) {
       return;                                             // Enter handled, time to go.
     }
   }
-  editField::handleKeystroke(aKeystroke);                 // In every other case we let the inherited do its thing.
+  editLabel::handleKeystroke(aKeystroke);                 // In every other case we let the inherited do its thing.
 }
 
 

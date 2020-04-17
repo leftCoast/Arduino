@@ -11,6 +11,7 @@
 #include <colorRect.h>
 #include <keystroke.h>
 #include <scrKeyboard.h>
+#include <editLabel.h>
 #include <litlOS.h>
 #include "panel.h"
 #include "src/cellListener/cellListener.h"
@@ -137,7 +138,7 @@ class statusIcon  : public drawGroup,
 class cellEditField :  public drawGroup {
 
   public:
-          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard,editField* inEditField=NULL);
+          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard,editLabel* inEditField=NULL);
   virtual ~cellEditField(void);
 
   virtual void      drawSelf(void);
@@ -150,7 +151,7 @@ class cellEditField :  public drawGroup {
           
 
           keyboard*   mKeyboard;            // They'll pass this in. DON'T delete it!
-          editField*  mEditField;           // Our editing field.
+          editLabel*  mEditField;           // Our editing field.
           colorRect*  mEditBase;            // Our editing field's base.     
 };
 

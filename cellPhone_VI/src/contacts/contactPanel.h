@@ -3,7 +3,8 @@
 
 #include <drawObj.h>
 #include <label.h>
-#include <editField.h>
+//#include <editField.h>
+#include <editLabel.h>
 #include <scrollingList.h>
 #include <panel.h>
 #include <contactList.h>

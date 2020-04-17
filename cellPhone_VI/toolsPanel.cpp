@@ -123,7 +123,7 @@ void toolsPanel::loop(void) {
     rect sRect(frame*FIRE_FRAME_W,0,FIRE_FRAME_W,FIRE_IMG_H);
     fire->setSourceRect(sRect);
     //analogWrite(SCREEN_PIN,0);
-    fire->drawBitmap(FIRE_RECT_X,FIRE_RECT_Y);
+    fire->drawImage(FIRE_RECT_X,FIRE_RECT_Y);
     //analogWrite(SCREEN_PIN,255);
     fireTimer.start();
     frame++;

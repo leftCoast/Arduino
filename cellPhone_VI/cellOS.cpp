@@ -169,7 +169,7 @@ void statusIcon::drawSelf(void) { }
 // *****************************************************
 
 
-cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard,editField* inEditField)
+cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard,editLabel* inEditField)
   : drawGroup(inRect) {
   
   mKeyboard = inKeyboard;
@@ -192,9 +192,9 @@ cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard,edi
     mEditField->setRect(&tRect);
     mEditField->setValue(inText);
   } else {
-    mEditField = new editField(&tRect,inText,1);
+    mEditField = new editLabel(&tRect,inText,1);
   }
-  mEditField->setParent(this);
+  //mEditField->setParent(this); I fear that this may be importnat? But its no longer available.
   mEditField->setColors(&textColor,&backColor);
   addObj(mEditField);
   setEventSet(fullClick);
@@ -218,13 +218,13 @@ void cellEditField::setFocus(bool setLoose) {
     if (mKeyboard) {
       mKeyboard->setEditField(mEditField);
     }
-    currentFocus = mEditField;    // We manually switch focus to mEditField..
-    mEditField->setFocus(true);   // mEditField will call this with "false" when it looses focus.
+    currentFocus = mEditField;      // We manually switch focus to mEditField..
+    mEditField->setThisFocus(true); // mEditField will call this with "false" when it looses focus.
   } else {
     mEditField->setColors(&textColor,&backColor);
     mEditBase->setColor(&backColor);
     if (mKeyboard) {
-      if (mKeyboard->mEditField==mEditField) {
+      if (mKeyboard->mEditObj==mEditField) {
         mKeyboard->setEditField(NULL);
       }
     }
@@ -342,7 +342,7 @@ void roundedIconBtn::drawBitmap(int x,int y) {
 
   xLoc = x;
   yLoc = y;
-  bmpPipe::drawBitmap(x,y);
+  bmpPipe::drawImage(x,y);
 }
 
           
@@ -401,7 +401,7 @@ void homeScreen::drawSelf(void) {
   colorObj aColor(LC_WHITE);
   screen->fillScreen(&aColor);
   screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
-  mBackImage->drawBitmap(BMP_AX,BMP_AY);
+  mBackImage->drawImage(BMP_AX,BMP_AY);
   screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&black);
 }
 

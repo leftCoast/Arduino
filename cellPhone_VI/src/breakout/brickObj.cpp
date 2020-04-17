@@ -68,6 +68,6 @@ void brickObj::reset(void) {  drawObj::setLocation(homeX,homeY); }
 void brickObj::drawSelf(void) {
   
   if (x>0 && y>0) {
-    drawBitmap(x,y);
+    drawImage(x,y);
   } 
 }

@@ -13,7 +13,8 @@
 #include <lineObj.h>
 #include <screen.h>
 #include <textView.h>
-#include <editField.h>
+//#include <editField.h>
+#include <editLabel.h>
 #include <IOandKeys.h>
 #include <blockFile.h>
 #include <fileBuff.h>
@@ -152,7 +153,7 @@ void qGame::setupScreen(void) {
   theEditBase->setColor(&editFieldBColor);
   addObj(theEditBase);
   
-  theEditField  = new editField(ET_X,ET_Y,ET_W,ET_H,"",1);
+  theEditField  = new editLabel(ET_X,ET_Y,ET_W,ET_H,"",1);
   theEditField->setColors(&textSelectColor,&editFieldBColor);
   setFocusPtr(theEditField);
   addObj(theEditField);

@@ -3,7 +3,7 @@
 
 #include <drawObj.h>
 #include <label.h>
-#include <editField.h>
+#include <editLabel.h>
 #include <scrollingList.h>
 #include <panel.h>
 #include <menuBar.h>
@@ -81,7 +81,7 @@ class msgList : public scrollingList {
 // *****************************************************
 
 
-class msgEditField  : public editField {
+class msgEditField  : public editLabel {
 
   public:
           msgEditField(textPanel* inPanel);
