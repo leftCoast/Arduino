@@ -15,30 +15,30 @@
 #define SEC_IN_WEEK 604800
 
 // Screen labels. Pictures look sooo much better than drawing them.
-#define CURR_MOIST_BMP  "/images/currM.bmp"
-#define CURR_TEMP_BMP   "/images/currT.bmp"
-#define TOTAL_WATER_BMP "/images/totalW.bmp"
-#define TOTAL_TIME_BMP  "/images/totalT.bmp"
-#define LIMIT_BMP       "/images/limit.bmp"
-#define WATER_TIME_BMP  "/images/wTime.bmp"
-#define SOAK_TIME_BMP   "/images/sTime.bmp"
+#define CURR_MOIST_BMP  "/system/images/plantBot/currM.bmp"
+#define CURR_TEMP_BMP   "/system/images/plantBot//currT.bmp"
+#define TOTAL_WATER_BMP "/system/images/plantBot/totalW.bmp"
+#define TOTAL_TIME_BMP  "/system/images/plantBot/totalT.bmp"
+#define LIMIT_BMP       "/system/images/plantBot/limit.bmp"
+#define WATER_TIME_BMP  "/system/images/plantBot/wTime.bmp"
+#define SOAK_TIME_BMP   "/system/images/plantBot/sTime.bmp"
 
-#define ENABLE_LOG_BMP  "/images/enableDL.bmp"
-#define COPY_LOG_BMP    "/images/copyDL.bmp"
-#define CANCEL_DL_BMP   "/images/cancelDL.bmp"
-#define DELETE_LOG_BMP  "/images/deleteDL.bmp"
-#define FILE_NAME_BMP   "/images/fName.bmp"
+#define ENABLE_LOG_BMP  "/system/images/plantBot/enableDL.bmp"
+#define COPY_LOG_BMP    "/system/images/plantBot/copyDL.bmp"
+#define CANCEL_DL_BMP   "/system/images/plantBot/cancelDL.bmp"
+#define DELETE_LOG_BMP  "/system/images/plantBot/deleteDL.bmp"
+#define FILE_NAME_BMP   "/system/images/plantBot/fName.bmp"
 
 // Icons.
-#define WATER_ON_BMP  "/icons/H2OOn32.bmp"
-#define WATER_OFF_BMP "/icons/H2OOff32.bmp"
-#define ON_GREEN_BMP  "/icons/grnLED1.bmp"
-#define OFF_GREEN_BMP "/icons/grnLED0.bmp"
+#define WATER_ON_BMP  "/system/icons/plantBot/H2OOn32.bmp"
+#define WATER_OFF_BMP "/system/icons/plantBot/H2OOff32.bmp"
+#define ON_GREEN_BMP  "/system/icons/plantBot/grnLED1.bmp"
+#define OFF_GREEN_BMP "/system/icons/plantBot/grnLED0.bmp"
 
-#define CUT32_BMP "/icons/Cut32.bmp"
-#define COPY32_BMP "/icons/Copy32.bmp"
-#define PASTE32_BMP "/icons/Paste32.bmp"
-#define TRASH32_BMP "/icons/trashC32.bmp"
+#define CUT32_BMP "/system/icons/standard/Cut32.bmp"
+#define COPY32_BMP "/system/icons/standard/Copy32.bmp"
+#define PASTE32_BMP "/system/icons/standard/Paste32.bmp"
+#define TRASH32_BMP "/system/icons/standard/trashC32.bmp"
 
 
 

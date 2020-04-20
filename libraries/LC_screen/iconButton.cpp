@@ -29,10 +29,14 @@ void iconButton::begin(void) {
 	if (mPath) {
 		openPipe(mPath);				// Open up the bitmap file and save everyone.
 		if(haveInfo) {					// Did all this work?
+			//Serial.print("Got pipe : ");Serial.println(mPath);
 			free(mPath);				// If so, we don't need our copy of the path.
 			mPath = NULL;
+			return;
 		}
 	}
+	//Serial.print("No Pipe : [");Serial.print(mPath);Serial.println("]");
+	//showPipe();
 }
 
 

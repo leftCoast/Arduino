@@ -3,7 +3,7 @@
 //  Mr Snorts
 //
 //  Created by Jim Lee on 5/12/15.
-//  Copyright (c) 2015 ___THEMADHOUSE___. All rights reserved.
+//  Copyright (c) 2015 ___LEEFTCOAST___. All rights reserved.
 //
 
 #ifndef Mr_Snorts_calculator_h

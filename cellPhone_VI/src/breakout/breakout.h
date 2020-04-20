@@ -58,9 +58,9 @@
 #define HILIGHT_PRCT  40
 #define SHADOW_PRCT   60
 
-#define GREEN_BAR     "/system/icons/grnBar.bmp"
-#define PURPLE_BAR    "/system/icons/purpBar.bmp"
-#define RED_BAR       "/system/icons/redBar.bmp"
+#define GREEN_BAR     "/system/icons/breakout/grnBar.bmp"
+#define PURPLE_BAR    "/system/icons/breakout/purpBar.bmp"
+#define RED_BAR       "/system/icons/breakout/redBar.bmp"
 
 class ballObj;
 

@@ -24,8 +24,6 @@
 #define   ANALOG_PIN  A4
 //Adafruit_seesaw ss;                               // The moisture sensor.
 
-timeObj*      waterTime = NULL;                   // Time length to water when plant shows dry. (ms)
-timeObj*      soakTime = NULL;                    // Time to wait after watering before going back to watching mosture level.
 mapper*       mudMapper = NULL;                   // Mapper from raw capacitive reading to percent.
 
 runningAvg    cSmoother(DEF_CSMOOTHER);           // Running avarage for the raw capacitive readings.

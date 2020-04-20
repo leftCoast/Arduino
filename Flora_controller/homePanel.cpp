@@ -65,10 +65,10 @@ void  waterBtn::idle(void) { if (checkState()) setTheLook(); }
 #define LIVE_X        LABEL_W+5
 #define LIVE_W        90
 
-#define CONTROL_PANEL_BMP "/icons/edit32.bmp"
-#define DATA_PANEL_BMP    "/icons/graph32.bmp"
-#define CALC_PANEL_BMP    "/icons/calc32.bmp"
-#define STERM_PANEL_BMP   "/icons/term32.bmp"
+#define CONTROL_PANEL_BMP "/system/icons/standard/edit32.bmp"
+#define DATA_PANEL_BMP    "/system/icons/plantBot/graph32.bmp"
+#define CALC_PANEL_BMP    "/system/icons/RPNCalc/calc32.bmp"
+#define STERM_PANEL_BMP   "/system/icons/sTerm/term32.bmp"
 
 homeScreen::homeScreen(void) { }
 

@@ -13,9 +13,8 @@
 #include <lineObj.h>
 #include <screen.h>
 #include <textView.h>
-//#include <editField.h>
 #include <editLabel.h>
-#include <IOandKeys.h>
+//#include <IOandKeys.h>
 #include <blockFile.h>
 #include <fileBuff.h>
 
@@ -25,18 +24,18 @@
 
 
 #define TB_X    10
-#define TB_Y    28
+#define TB_Y    29
 #define TB_W    220
-#define TB_H    148
+#define TB_H    128
 
-#define TF_INSET  3
+#define TF_INSET  4
 #define TF_X      TB_X+TF_INSET
 #define TF_Y      TB_Y+TF_INSET
 #define TF_W      TB_W-(2*TF_INSET)
 #define TF_H      TB_H-(2*TF_INSET)
 
 #define EB_X    TB_X
-#define EB_Y    TB_Y+TB_H+18
+#define EB_Y    TB_Y+TB_H+10
 #define EB_W    TB_W
 #define EB_H    16
 
@@ -46,8 +45,45 @@
 #define ET_W      EB_W-(2*ET_INSET)
 #define ET_H      10
 
-#define BATT_X    200
-#define BATT_Y    3
+
+
+
+
+
+ourEditField::ourEditField(int x,int y,int w,int h,char* inMsg,int textSize,char* outMsg)
+	: editLabel(x,y,w,h,inMsg,textSize) {
+	
+	mOutMsg			= outMsg;
+	mExitOnEnter	= true;
+	haveMsg			= false;
+}
+
+
+ourEditField::~ourEditField(void) {  }
+
+				
+void ourEditField::handleEnterKey(void) {
+	
+	editLabel::handleEnterKey();
+	if (mSuccess) {
+		Serial.println("Success!");
+		strcpy(mOutMsg,buff);
+		haveMsg = true;
+		setValue("");
+		beginEditing();
+	}
+}
+
+
+bool ourEditField::sentMsg(void) {
+
+	bool	temp;
+	
+	temp		= haveMsg;
+	haveMsg	= false;
+	return temp;
+}
+	
 
 #define FILENAME  "/objects.que"
 
@@ -59,11 +95,6 @@ qGame::qGame(void)
 
 qGame::~qGame(void) {
 
-  //if (theTextBase) delete theTextBase;
-  if (theTextView) delete theTextView;
-  if (theEditBase) delete theEditBase;
-  if (theEditField) delete theEditField;
-  if (ourKeyboard) delete ourKeyboard;
   if (theFile) delete theFile;
   if (lastNode) delete lastNode;
   if (currentNode) delete currentNode;
@@ -74,7 +105,6 @@ qGame::~qGame(void) {
 
 void qGame::setup() {
 
-  
   lastNode = NULL;
   currentNode = NULL;
   objNode = NULL;
@@ -142,26 +172,28 @@ void qGame::setupParser(void) {
 void qGame::setupScreen(void) {
   
   screen->fillScreen(&backColor);
-  
-  menuBar* ourMenuBar = new menuBar((panel*)this);
-  addObj(ourMenuBar);
-  
+
   theTextView   = new textView(TF_X,TF_Y,TF_W,TF_H);
+  theTextView->setTextColors(&textColor,&backColor);
   addObj(theTextView);
   
   theEditBase   = new colorRect(EB_X,EB_Y,EB_W,EB_H);
   theEditBase->setColor(&editFieldBColor);
   addObj(theEditBase);
   
-  theEditField  = new editLabel(ET_X,ET_Y,ET_W,ET_H,"",1);
+  theEditField  = new ourEditField(ET_X,ET_Y,ET_W,ET_H,"",1,inBuff);
   theEditField->setColors(&textSelectColor,&editFieldBColor);
-  setFocusPtr(theEditField);
+  theEditField->setJustify(TEXT_LEFT);
+  theEditField->setEventSet(fullClick);
+  theEditField->beginEditing();
   addObj(theEditField);
 
-  ourKeyboard   = new IOandKeys(theEditField,theTextView);
-  theTextView->setTextColors(&textColor,&backColor);
+	ourKeyboard   = new bmpKeyboard(theEditField,false);
+	ourKeyboard->loadKeys();
+	addObj(ourKeyboard);
 
-  screen->fillRect(TF_X,EB_Y-16,TF_W,2,&red);
+  screen->fillRect(TF_X,EB_Y-10,TF_W,2,&red);
+  
 }
 
 
@@ -349,12 +381,12 @@ void qGame::loop() {
   int   numChars;
   int   command;
 
-  numChars = ourKeyboard->haveBuff();     // We got new string to parse?
-  if (numChars) {                         // Grab byte count.
-    ourKeyboard->getBuff(inBuff,200);     // Grab the string itself..
-    numChars = strlen(inBuff);
+
+  if (theEditField->sentMsg()) {                        
+    numChars = strlen(inBuff);				 // Grab byte count.
     inBuff[numChars++] = '\n';
     inBuff[numChars] = '\0';
+    out(inBuff);
     cIndex = 0;                            // reset index to the start.
   }
   if (cIndex<strlen(inBuff)) {             // Pretend its coming in from the serisl port.

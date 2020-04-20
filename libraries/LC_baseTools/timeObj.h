@@ -20,6 +20,7 @@ class timeObj {
   	virtual	void 				stepTime(void);                    			// Restart the timer from last end time.
   				bool				ding(void);											// Timer has expired.
   				unsigned long	getTime(void);										// How long does this go for?
+  				float				getFraction(void);								// Fuel gauge. What fraction of time is left.
     
 protected:
   				unsigned long	waitTime;

@@ -25,9 +25,9 @@ void IOandKeys::handleKey(keyCommands inEditCom) {
     numChars++;
     if (resizeOutBuff(numChars)) {          // If we got the room..
       mEditField->getText(mOutBuff);        // Grab the message from the edit field.
-      mEditField->setValue("");             // Clear the editField.
+      mEditField->setValue("HEY");             // Clear the editField.
       mHaveBuff = true;
-    }
+    } 
   } else {
     keyboard::handleKey(inEditCom);         // Or, do the default suff.
   }

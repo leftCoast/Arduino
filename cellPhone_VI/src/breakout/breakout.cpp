@@ -15,7 +15,7 @@ breakout::breakout(void)
   frameTimer    = new timeObj(FRAME_MS);
   paddleTimer   = new timeObj(PADDLE_MS);
   textTimer     = new timeObj(TEXT_MS);
-  oldLoc        = -1;
+  oldLoc        = -10;
   brickIndex    = 0;        // It was originally written to run once.
 }
 
@@ -63,8 +63,6 @@ void breakout::setup() {
   theBall->setBackColor(&backColor);
   addObj(theBall);
   
-  //menuBar* ourMenuBar = new menuBar((panel*)this);
-  //addObj(ourMenuBar);
   
   fillBricks();
   setState(preGame);
@@ -215,7 +213,7 @@ void breakout::loop(void) {
   switch(gameState) {
     case preGame :
         if (screen->touched()) {
-          delay(500);
+          sleep(500);
           setState(inPLay);
           doBall();
         }

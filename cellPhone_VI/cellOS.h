@@ -25,9 +25,9 @@
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
-#define ICON_PATH_CONTACT22  "/system/icons/addr22.bmp"
-#define ICON_PATH_TEXT22    "/system/icons/text22.bmp"
-#define ICON_PATH_PHONE22   "/system/icons/call22.bmp"
+#define ICON_PATH_CONTACT22  "/system/icons/cellphone/cont22.bmp"
+#define ICON_PATH_TEXT22    "/system/icons/cellphone/msg22.bmp"
+#define ICON_PATH_PHONE22   "/system/icons/cellphone/phone22.bmp"
 
 #define STATUS_X        200
 #define STATUS_Y        2
@@ -172,8 +172,8 @@ class roundedIconBtn : public appIcon {
   
           void  drawPixel(int x,int y,colorObj* pixel);
   virtual void  drawLine(File bmpFile,int x,int y);
-  virtual void  drawBitmap(int x,int y);
-
+  virtual void  drawImage(int x,int y);
+  
           int xLoc;
           int yLoc;
 };

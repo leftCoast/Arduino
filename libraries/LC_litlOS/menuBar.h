@@ -7,12 +7,12 @@
 
 #define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
 
-#define ICON_NAME_X22			"x22.bmp"
-#define ICON_NAME_NEW22			"cross22.bmp"
-#define ICON_NAME_SEARCH22		"search22.bmp"
-#define ICON_NAME_TRASH22		"trashC22.bmp"
+#define ICON_NAME_X22			"/system/icons/standard/x22.bmp"
+#define ICON_NAME_NEW22			"/system/icons/standard/cross22.bmp"
+#define ICON_NAME_SEARCH22		"/system/icons/standard/search22.bmp"
+#define ICON_NAME_TRASH22		"/system/icons/standard/trashC22.bmp"
 
-#define PATH_BUFF_CHARS			64
+#define PATH_BUFF_CHARS			128
 	
 #define CLOSE_X         0
 #define CLOSE_Y         1
@@ -20,12 +20,6 @@
 #define CLOSE_H         22
 
 extern colorObj	menuBarColor;
-
-// Write your path to your icon folder to this buffer.
-// Default it is set to "/icons/". You have
-// PATH_BUFF_CHARS to do it in.
-extern char iconPath[];
-
 
 	
 // *****************************************************

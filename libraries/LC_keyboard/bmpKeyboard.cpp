@@ -3,42 +3,39 @@
 #include <editable.h>
 #include <bitmap.h>
 #include <offscreen.h>
+#include <resizeBuff.h>
 
 #define KEY_WD  24
 #define KEY_HT  33
 
 
 
-#define KEYCAP24    "/icons/keyCap24.bmp"
-#define CHECK24     "/icons/check24.bmp"
-#define CHECK36     "/icons/check36.bmp"
-#define CHECK48     "/icons/check48.bmp"
-#define REDX24      "/icons/x24.bmp"
-#define REDX36      "/icons/x36.bmp"
-#define REDX48      "/icons/x48.bmp"
-#define SHIFT24     "/icons/shift24.bmp"
-#define SHIFT36     "/icons/shift36.bmp"
-#define RETURN36    "/icons/ret36.bmp"
-#define RETURN48    "/icons/ret48.bmp"
+#define KEYCAP24    "/system/icons/keyboard/keyCap24.bmp"
+#define CHECK24     "/system/icons/keyboard/check24.bmp"
+#define CHECK36     "/system/icons/keyboard/check36.bmp"
+#define CHECK48     "/system/icons/keyboard/check48.bmp"
+#define REDX24      "/system/icons/keyboard/x24.bmp"
+#define REDX36      "/system/icons/keyboard/x36.bmp"
+#define REDX48      "/system/icons/keyboard/x48.bmp"
+#define SHIFT24     "/system/icons/keyboard/shift24.bmp"
+#define SHIFT36     "/system/icons/keyboard/shift36.bmp"
+#define RETURN36    "/system/icons/keyboard/ret36.bmp"
+#define RETURN48    "/system/icons/keyboard/ret48.bmp"
 
-#define DELETE24    "/icons/delete24.bmp"
-#define DELETE36    "/icons/delete36.bmp"
-#define L_ARROW24   "/icons/lArrow24.bmp"
-#define R_ARROW24   "/icons/rArrow24.bmp"
-#define SYMBOL24    "/icons/symb24.bmp"
-#define SYMBOL36    "/icons/symb36.bmp"
-#define SPACEB96    "/icons/spaceB96.bmp"
-#define SPACEB72    "/icons/spaceB72.bmp"
+#define DELETE24    "/system/icons/keyboard/delete24.bmp"
+#define DELETE36    "/system/icons/keyboard/delete36.bmp"
+#define L_ARROW24   "/system/icons/keyboard/lArrow24.bmp"
+#define R_ARROW24   "/system/icons/keyboard/rArrow24.bmp"
+#define SYMBOL24    "/system/icons/keyboard/symb24.bmp"
+#define SYMBOL36    "/system/icons/keyboard/symb36.bmp"
+#define SPACEB96    "/system/icons/keyboard/spaceB96.bmp"
+#define SPACEB72    "/system/icons/keyboard/spaceB72.bmp"
 
 
 int row(int row) {
   return KEY_HT * (row - 1);
 }
 
-
- 			
-bitmap	keyBMap;			// No point in having lots and lots of the same thing.
-colorObj	keyTextColor;	// Setup the text color once.
 
 // *****************************************************
 //                       bmpKeyboard
@@ -52,22 +49,23 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 	offscreen	vPort; 
 	bmpPipe		keyCap;
 	
-	keyTextColor.setColor(LC_YELLOW);
-	keyTextColor.blend(&white,60);
-	mModal = modal;
-	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);
-	keyCap.openPipe(KEYCAP24);
-	sRect.setRect(0, 0, KEY_WD, KEY_HT);
-	keyCap.setSourceRect(sRect);
-	if (keyBMap.setSize(KEY_WD,KEY_HT)) {
-		vPort.beginDraw(&keyBMap);
-		keyCap.drawImage(0,0); 
-		vPort.endDraw();
+	mKeyTextColor.setColor(LC_YELLOW);							// Set up key text color.
+	mKeyTextColor.blend(&white,60);								// Little adjustment here..
+	mModal = modal;													// Not if we are modal or not.
+	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);			// Set our rectangle.
+	
+	if (mKeyBMap.setSize(KEY_WD,KEY_HT)) {						// If we can allocate the RAM for the icon's bitmap..
+		sRect.setRect(0, 0, KEY_WD, KEY_HT);					// Setup dimensions of the key icon.
+		keyCap.setSourceRect(sRect);								// Point the bitmap pope to the bits in the file.
+		keyCap.openPipe(KEYCAP24);									// Open up and see if we can read the bitmap file.
+		vPort.beginDraw(&mKeyBMap);								// Set up to offscreen drawing to the bitmap.
+		keyCap.drawImage(0,0); 										// Draw to it..
+		vPort.endDraw();												// Restore normal drawing.
 	}
 }
 
 
-bmpKeyboard::~bmpKeyboard(void) { keyBMap.clearMap(); }
+bmpKeyboard::~bmpKeyboard(void) { mKeyBMap.clearMap(); }
 
 
 // Given the colum I'm shooting for and the row I'm in.. 
@@ -90,6 +88,11 @@ int bmpKeyboard::col(int col, int row) {
       }
   }
 }
+
+
+bitmap* bmpKeyboard::getKeyMap(void) { return &mKeyBMap; }
+
+colorObj* bmpKeyboard::getKeyTextColor(void) { return &mKeyTextColor; }
 
 
 void bmpKeyboard::loadKeys(void) {
@@ -195,36 +198,34 @@ void bmpKeyboard::loadKeys(void) {
 bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard)
 : inputKey(inLabel, inNum, inSym, inX, inY, inWidth, inHeight, inKeyboard) {
 
-	//colorObj	aColor(LC_YELLOW);	// Really? Tweaking it EVERY time in the constructor?
-	//aColor.blend(&white,60);		// You are a hack. Fix this!
-	//setColors(&aColor);
-	setColors(&keyTextColor);		// This one is set up once in the keyboard's constructor.
+	mKeyBMap = inKeyboard->getKeyMap();			// The keyboard has the bitmap background.
+	setColors(inKeyboard->getKeyTextColor());	// And our favorite text color..
 	setTextSize(2);
 }
 
-  bmpInputKey::~bmpInputKey(void) {  }
+bmpInputKey::~bmpInputKey(void) {  }
 
 
-  void bmpInputKey::drawSelf(void) {
-
-    if (clicked) {
-      screen->fillRect(this, &white);
-    } else {
-      if (buff[0]==' ') {               // Special hack for spacebar.
-        rect  sRect(0,0,width,height);
-        bmpPipe aPipe(sRect);
-        aPipe.openPipe(SPACEB72);
-        aPipe.drawImage(x,y);
-      } else {                          // "Normal printing
-        screen->blit(x,y,&keyBMap);
-        x = x + 7;
-        y = y + 9;
-        label::drawSelf();
-        x = x - 7;
-        y = y - 9;
-      }
-    }
-  }
+void bmpInputKey::drawSelf(void) {
+			
+	if (clicked) {
+		screen->fillRect(this, &white);
+	} else {
+		if (buff[0]==' ') {               // Special hack for spacebar.
+			rect  sRect(0,0,width,height);
+			bmpPipe aPipe(&sRect);
+			aPipe.openPipe(SPACEB72);
+			aPipe.drawImage(x,y);
+		} else {                          // "Normal printing
+			screen->blit(x,y,mKeyBMap);
+			x = x + 7;
+			y = y + 9;
+			label::drawSelf();
+			x = x - 7;
+			y = y - 9;
+		}
+	}
+}
 
 
 
@@ -234,14 +235,14 @@ bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int i
 
 
 
-  bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard * inKeyboard, char* bmpPath)
-    : controlKey(inLabel, inCom, inX, inY, inWidth, inHeight, inKeyboard) {
+bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard * inKeyboard, char* bmpName)
+	: controlKey(inLabel, inCom, inX, inY, inWidth, inHeight, inKeyboard) {
 
-    rect  sRect;
+	rect  sRect;
 
-    sRect.setRect(0, 0, width, height);
-    mBmpPipe.setSourceRect(sRect);
-    mBmpPipe.openPipe(bmpPath);
+	mBmpPipe.openPipe(bmpName);
+	sRect.setRect(0, 0, width, height);
+	mBmpPipe.setSourceRect(sRect);
   }
 
 

@@ -34,22 +34,9 @@ void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
 // 							std buttons
 // *****************************************************
 
-char iconPath[PATH_BUFF_CHARS] = "/icons/";
-
-char* iconPathBuff = NULL;
-
-
-char*	getPath(char* choice) {
-
-	resizeBuff(strlen(iconPath)+strlen(choice)+1,&iconPathBuff);
-	strcpy(iconPathBuff,iconPath);
-	strcat(iconPathBuff,choice);
-	return iconPathBuff;
-}
-
 
 closeBtn::closeBtn(panel* inPanel)
-  : iconButton(CLOSE_X,CLOSE_Y,getPath(ICON_NAME_X22),22) {
+  : iconButton(CLOSE_X,CLOSE_Y,ICON_NAME_X22,22) {
   
   mPanel = inPanel;
   begin();
@@ -67,7 +54,7 @@ void closeBtn::doAction(void) { mPanel->close(); }
 
 
 newBtn::newBtn(int x,int y)
-  : iconButton(x,y,getPath(ICON_NAME_NEW22),22)  { begin(); }
+  : iconButton(x,y,ICON_NAME_NEW22,22)  { begin(); }
 
    
 newBtn::~newBtn(void) {  }
@@ -78,7 +65,7 @@ newBtn::~newBtn(void) {  }
 
 
 searchBtn::searchBtn(int x,int y)
-  : iconButton(x,y,getPath(ICON_NAME_SEARCH22),22)  { begin(); }
+  : iconButton(x,y,ICON_NAME_SEARCH22,22)  { begin(); }
  
     
 searchBtn::~searchBtn(void) {  }
@@ -89,7 +76,7 @@ searchBtn::~searchBtn(void) {  }
 
 
 trashBtn::trashBtn(int x,int y)
-  : iconButton(x,y,getPath(ICON_NAME_TRASH22),22)  { begin(); }
+  : iconButton(x,y,ICON_NAME_TRASH22,22)  { begin(); }
 
 
 trashBtn::~trashBtn(void) {  }

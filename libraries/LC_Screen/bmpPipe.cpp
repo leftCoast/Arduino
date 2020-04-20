@@ -11,13 +11,13 @@ bmpPipe::bmpPipe(void) {
 }
 
 
-bmpPipe::bmpPipe(rect sourceRect) { 
+bmpPipe::bmpPipe(rect* sourceRect) { 
 
   filePath			= NULL;
   haveInfo			= false;
   haveSourceRect	= false;
   
-  setSourceRect(sourceRect);
+  setSourceRect(*sourceRect);
 }
 
 
@@ -42,6 +42,7 @@ bool bmpPipe::openPipe(char* filename) {
   }
   //Serial.print("Attempting to open : ");
   //Serial.println(filename);Serial.flush();
+  //Serial.print("Does it exist? ");Serial.println(SD.exists(filename));Serial.flush();
   bmpFile = SD.open(filename);								// See if it works.
   //Serial.println("Lets have a look.");Serial.flush();
   if (bmpFile) {    												// We got a file?
@@ -183,24 +184,38 @@ void bmpPipe::drawImage(int x,int y) {
 	int			trace;
 	int			endY;
 	int			srcY;
+	rect			defRect;
 
-	if (haveInfo) {											// We have valid bmp info.
-		bmpFile = SD.open(filePath);						// Open up the file.
-		if (bmpFile) {											// If we opened it.
-			endY = y+sourceRect.height;					// Start calculating endpoints and things.
+	if (haveInfo) {										// If we have valid bmp info..
+		bmpFile = SD.open(filePath);					// Open up the file.
+		if (bmpFile) {										// If we opened it.
+			endY = y+sourceRect.height;				// Start calculating endpoints and things.
 			srcY = sourceRect.y;
 			for (trace=y; trace<endY;trace++) {		// Ready to pull data through to the screen.
 				bmpFile.seek(filePtr(x,srcY++));		// Position the file pointer to the line of pixels we want.
 				drawLine(bmpFile,x,trace);				// Standard old pixel by pixel draw. (Least it works.)
 			}
-			bmpFile.close();									// Drawing is done for now. Close the file.
+			bmpFile.close();								// Drawing is done for now. Close the file.
 		}      
+	} else {													// Else we don't have info for this..
+		if (haveSourceRect) {
+			defRect.setRect(x,y,sourceRect.width,sourceRect.height);
+		} else {
+			defRect.setRect(x,y,32,32);
+		}
+		screen->fillRect(&defRect,&white);
+		screen->drawRect(&defRect,&red);
+		screen->drawLine(&defRect.getCorner(topLeftPt),&defRect.getCorner(bottomRightPt),&red);
+		screen->drawLine(&defRect.getCorner(topRightPt),&defRect.getCorner(bottomLeftPt),&red);
 	}
 }
 
-/*
+
+#ifdef DEBUGGING
+
 void bmpPipe::showPipe(void) {
 
+  Serial.print("Filepath         : ");Serial.println(filePath);
   Serial.print("Src rect x,y,w,h : ");Serial.print(sourceRect.x);Serial.print(", ");Serial.print(sourceRect.y);
   Serial.print(", ");Serial.print(sourceRect.width);Serial.print(", ");Serial.println(sourceRect.height);
   Serial.print("Have src rect    : ");Serial.println(haveSourceRect);
@@ -212,4 +227,5 @@ void bmpPipe::showPipe(void) {
   Serial.print("Pix Bytes        : ");Serial.println(pixBytes);
   Serial.print("Bytes per Row    : ");Serial.println(bytesPerRow);
 }
-*/
+
+#endif

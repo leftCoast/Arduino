@@ -5,7 +5,12 @@ paddleObj::paddleObj(int x, int y, int width,int height)
 
 paddleObj::~paddleObj(void) {  }
 
-void paddleObj::eraseSelf(void) { screen->fillRect(lastX,lastY,width,height,this); }
+void paddleObj::eraseSelf(void) { 
+	
+	if (lastX>0&&lastY>0) {
+		screen->fillRect(lastX,lastY,width,height,this);
+	}
+}
 
 void paddleObj::drawSelf(void) { screen->fillRect(x,y, width, height, &white); }
 

@@ -19,8 +19,8 @@
 #define LABEL_H       18
 #define SHORT_LABEL_W 72
 
-#define GREEN_ON_32_BMP   "/icons/grnOn32.bmp"
-#define GREEN_OFF_32_BMP  "/icons/grnOff32.bmp"
+#define GREEN_ON_32_BMP   "/system/icons/plantBot/grnOn32.bmp"
+#define GREEN_OFF_32_BMP  "/system/icons/plantBot/grnOff32.bmp"
 
 loggingPanel* logPanel;
 

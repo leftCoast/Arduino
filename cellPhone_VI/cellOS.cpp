@@ -338,7 +338,7 @@ void roundedIconBtn::drawLine(File bmpFile,int x,int y) {
 }
 
 
-void roundedIconBtn::drawBitmap(int x,int y) {
+void roundedIconBtn::drawImage(int x,int y) {
 
   xLoc = x;
   yLoc = y;
@@ -356,23 +356,37 @@ homeScreen::homeScreen(void)
   rect  imageRect;
 
   imageRect.setRect(0,0,BMP_AW,BMP_AH);
-  mBackImage = new bmpPipe(imageRect);
+  mBackImage = new bmpPipe(&imageRect);
   mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;
-  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/call.bmp");
-  iconX=iconX+HP_ICON_XSTEP;
-  textIcon = new appIcon(iconX,HP_ICON_Y,textApp,"/system/icons/text.bmp");
-  iconX=iconX+HP_ICON_XSTEP;
-  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,"/system/icons/addr.bmp");
-  iconX=iconX+HP_ICON_XSTEP;
-  calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,"/system/icons/calc.bmp");
-  iconX=iconX+HP_ICON_XSTEP;
-  toolsIcon = new appIcon(iconX,HP_ICON_Y,toolsApp,"/system/icons/tools.bmp");
 
+  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/cPhone/phone32.bmp");
+  if (phoneIcon) phoneIcon->begin();
+  
+  iconX=iconX+HP_ICON_XSTEP;
+  textIcon = new appIcon(iconX,HP_ICON_Y,textApp,"/system/icons/cPhone/msg32.bmp");
+  if (textIcon) textIcon->begin();
+  
+  iconX=iconX+HP_ICON_XSTEP;
+  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,"/system/icons/cPhone/cont32.bmp");
+  if (contactIcon) contactIcon->begin();
+  
+  iconX=iconX+HP_ICON_XSTEP;
+  calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,"/system/icons/rpnCalc/calc32.bmp");
+  if (calcIcon) calcIcon->begin();
+  
+  iconX=iconX+HP_ICON_XSTEP;
+  toolsIcon = new appIcon(iconX,HP_ICON_Y,toolsApp,"/system/icons/standard/pref32.bmp");
+  if (toolsIcon) toolsIcon->begin();
+  
   iconX = APP_ICON_X;
-  qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,"/system/icons/qGame.bmp");
+  qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,"/system/icons/qGame/qGame.bmp");
+  if (qGameIcon) qGameIcon->begin();
+  
   iconX=iconX+APP_ICON_XSTEP;
-  breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,"/system/icons/breakout.bmp");
+  breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,"/system/icons/breakout/breakout.bmp");
+  if (breakoutIcon) breakoutIcon->begin();
+  
 }
 
 // Nothing to do. The icons will be automatically dumped and deleted.
@@ -381,14 +395,13 @@ homeScreen::~homeScreen(void) { if (mBackImage) delete mBackImage; }
 
 void homeScreen::setup(void) { 
 
-  if (calcIcon)     { addObj(calcIcon);     calcIcon->begin(); }
-  if (textIcon)     { addObj(textIcon);     textIcon->begin(); }
-  if (contactIcon)  { addObj(contactIcon);  contactIcon->begin(); }
-  if (qGameIcon)    { addObj(qGameIcon);    qGameIcon->begin(); }
-  if (toolsIcon)    { addObj(toolsIcon);    toolsIcon->begin(); }
-  if (breakoutIcon) { addObj(breakoutIcon); breakoutIcon->begin(); }
-  if (phoneIcon)    { addObj(phoneIcon);    phoneIcon->begin(); }
-
+  if (calcIcon)     { addObj(calcIcon); }
+  if (textIcon)     { addObj(textIcon); }
+  if (contactIcon)  { addObj(contactIcon); }
+  if (qGameIcon)    { addObj(qGameIcon); }
+  if (toolsIcon)    { addObj(toolsIcon); }
+  if (breakoutIcon) { addObj(breakoutIcon); }
+  if (phoneIcon)    { addObj(phoneIcon); }
   statusIcon* anIcon = new statusIcon();
   mMenuBar->addObj(anIcon);
 }
@@ -398,9 +411,7 @@ void homeScreen::loop(void) {  }
 
 
 void homeScreen::drawSelf(void) { 
-  colorObj aColor(LC_WHITE);
-  screen->fillScreen(&aColor);
-  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+  screen->fillScreen(&white);
   mBackImage->drawImage(BMP_AX,BMP_AY);
   screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&black);
 }
@@ -506,7 +517,7 @@ void cellOS::launchPanel(void) {
 
 
 void cellOS::hideRedraw() {
-
+return;
   for(int i=RAMPDN_START;i<RAMPDN_END;i=i+STEPTIME) {
     analogWrite(SCREEN_PIN,screenMap.Map(i));
     delay(STEPTIME);

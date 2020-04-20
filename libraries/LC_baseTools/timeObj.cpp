@@ -79,3 +79,17 @@ bool timeObj::ding(void) {
 
 unsigned long timeObj::getTime(void) { return waitTime; }
 
+
+// Fuel gauge. What fraction of time is left.
+float timeObj::getFraction(void) {
+	
+	unsigned long remaining;
+	
+	if (config==zero) return 0;
+	if (ding()) return 0;
+	remaining = endTime - micros();
+	return((remaining/1000.0)/(waitTime/1000.0));
+}								
+
+
+

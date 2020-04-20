@@ -4,6 +4,10 @@
 #include "Arduino.h"
 
 
+//#define DEBUGGGING
+
+#ifdef DEBUGGGING
+
 class debug {
 
   public :
@@ -16,5 +20,7 @@ class debug {
 };
 
 extern debug db;
+
+#endif //DEBUGGGING
 
 #endif

@@ -60,7 +60,7 @@ stateView::stateView(int x,int y)
   
   mBMap.setSize(width,height);
  
-  mReadColor.setColor(LC_CHARCOAL);
+  mReadColor.setColor(&black);
   
   mWaterColor.setColor(&blue);
   mWaterColor.blend(&black,20);
@@ -88,6 +88,9 @@ void  stateView::setState(weDo inState) {
 
 void stateView::drawSelf(void) {
 
+  float timeFraction;
+  rect  colorRect(this);
+  
   ourBlitPort.beginDraw(&mBMap,screen->gX(x),screen->gY(y));
   switch(mState) {
     case sitting    : 
@@ -99,16 +102,19 @@ void stateView::drawSelf(void) {
       y = y-1;
     break;
     case watering   : 
-      screen->fillRect(this,&mWaterColor);
+      screen->fillRect(&colorRect,&black);
+      timeFraction = waterTime->getFraction();
+      colorRect.width = colorRect.width - (colorRect.width * timeFraction);
+      screen->fillRect(&colorRect,&mWaterColor);
       y = y+1;
       label::drawSelf();
       y = y-1;
     break;
     case soaking    :
-      rect  aRect(this);
-
-      aRect.insetRect(3);
-      screen->fillRect(this,&mSoakColor);
+      screen->fillRect(&colorRect,&black);
+      timeFraction = soakTime->getFraction();
+      colorRect.width = colorRect.width - (colorRect.width * timeFraction);
+      screen->fillRect(&colorRect,&mSoakColor);
       x = x+width/16;
       y = y+1;
       label::drawSelf();
@@ -258,7 +264,7 @@ void UI::sensorDeath(void) {
 
   crash = true;
   if (mHaveScreen) {
-    bmpPipe bomb(rect(0,0,96,64));
+    bmpPipe bomb(&(rect(0,0,96,64)));
     bomb.openPipe("/bomb9664.bmp");
     bomb.drawImage(0,0);
   }
@@ -278,6 +284,9 @@ void UI::idle(void) {
   colorObj  aColor;
   
   if (mHaveScreen && ding()) {
+    if (weAre!=sitting) {
+      mState->setNeedRefresh();
+    }
     refresh = false;
     if (ourParamObj.getDryLimit()!=mLastLimit) {
       mLimit->setPercent(ourParamObj.getDryLimit());

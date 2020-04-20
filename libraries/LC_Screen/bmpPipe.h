@@ -19,7 +19,7 @@ class bmpPipe {
 
 	public:
 				bmpPipe(void);
-				bmpPipe(rect sourceRect);
+				bmpPipe(rect* sourceRect);
 	virtual	~bmpPipe(void);
 
 				bool   			openPipe(char* fileName);
@@ -28,7 +28,11 @@ class bmpPipe {
 				File				getFile(void);
 	virtual	void				drawLine(File bmpFile,int x,int y);
 				unsigned long	filePtr(int x,int y);
-      		//void      		showPipe(void);
+				
+#ifdef DEBUGGGING    		
+      		void      		showPipe(void);
+#endif //DEBUGGGING
+    
     
 	protected:
     			uint16_t  		read16(File f);
@@ -44,8 +48,7 @@ class bmpPipe {
     			int     			imageHeight;
     			int				imageDepth;
     			int				pixBytes;
-    			int				bytesPerRow;
-    			
+    			int				bytesPerRow;		
 };
 
 #endif

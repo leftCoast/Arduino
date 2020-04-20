@@ -191,7 +191,12 @@ void ballObj::setLocation(int inX, int inY) {
 }
 
 
-void ballObj::eraseSelf(void){ screen->fillRoundRect(lastX,lastY,width,height,width/3,this); }
+void ballObj::eraseSelf(void){ 
+
+	if (lastX>0 && lastY>0) {
+		screen->fillRoundRect(lastX,lastY,width,height,width/3,this);
+	}
+}
 
 
 void ballObj::drawSelf(void) {

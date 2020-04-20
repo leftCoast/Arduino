@@ -3,7 +3,7 @@
 
 #include <scrKeyboard.h>
 #include <bmpObj.h>
-
+#include <bitmap.h>
 
 // *****************************************************
 //                       bmpKeybaard
@@ -12,17 +12,20 @@
 
 class bmpKeyboard : public keyboard {
 
-  public:
-                bmpKeyboard(editable* inEditObj,bool modal=false);
-  virtual       ~bmpKeyboard(void);
+	public:
+				bmpKeyboard(editable* inEditObj,bool modal=false);
+	virtual	~bmpKeyboard(void);
 
-  virtual void  loadKeys(void);
-  
-          int   col(int col, int row);
+	virtual	void	loadKeys(void);
+  				
+				int			col(int col, int row);
+				bitmap*		getKeyMap(void);
+				colorObj*	getKeyTextColor(void);
   
   protected:
-  
-          bool    mModal;
+          bool    	mModal;
+          bitmap		mKeyBMap;
+          colorObj	mKeyTextColor;
 };
 
 
@@ -34,11 +37,13 @@ class bmpKeyboard : public keyboard {
 
 class bmpInputKey :  public inputKey {
 
-  public:
-          bmpInputKey(char* inLabel,char* inNum,char* inSym,int inX,int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard);
-  virtual ~bmpInputKey(void);
+	public:
+				bmpInputKey(char* inLabel,char* inNum,char* inSym,int inX,int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard);
+	virtual	~bmpInputKey(void);
 
-  virtual void    drawSelf(void);
+	virtual	void	drawSelf(void);
+  
+				bitmap*		mKeyBMap;
 };
 
 

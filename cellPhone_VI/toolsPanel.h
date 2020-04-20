@@ -27,11 +27,6 @@ class toolsPanel :  public cellOSPanel {
 
           timeObj     statusTimer;
           textView*   mText;
-
-          bmpPipe*    fire;
-          int         frame;
-          timeObj     fireTimer;
-          
 };
 
 #endif

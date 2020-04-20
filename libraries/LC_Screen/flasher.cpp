@@ -100,8 +100,8 @@ bmpFlasher::~bmpFlasher(void) {
 void bmpFlasher::setup(char* onBmp,char* offBmp) {
 
   rect  sourceRect(0,0,width,height);
-  mOnBmp = new bmpPipe(sourceRect);
-  mOffBmp = new bmpPipe(sourceRect);
+  mOnBmp = new bmpPipe(&sourceRect);
+  mOffBmp = new bmpPipe(&sourceRect);
   if (mOnBmp&&mOffBmp) {
     if (mOnBmp->openPipe(onBmp) && mOffBmp->openPipe(offBmp)) {
       mReady = true;
