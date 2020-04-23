@@ -69,14 +69,6 @@ void setup() {
     Serial.println("Can't bring diskdrive online.");
     while(true);
   }
-
-  /*
-  // Find the icons for the keyboards.
-  if (!setKbdIconPath("/system/icons/keyboard/")) {
-    Serial.println("Can't set keyboard icon path.");
-    while(true);
-  }
-  */
   
   addrStarter kicker;                       // Once the disk is online we can..
   kicker.begin(CONTACT_FILE_PATH,false);    // Boot our little black book. false = normal. true? Delete and reset the phonebook.

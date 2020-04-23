@@ -236,7 +236,7 @@ void textPanel::setup(void) {
     
     msgEditField* ourMsgEditField = new msgEditField(this);
     aRect.setRect(ET_X,ET_Y,ET_W,ET_H);
-    cellEditField* ourEditField  = new cellEditField(&aRect,"",mKeyboard,ourMsgEditField);
+    cellEditField* ourEditField  = new cellEditField(&aRect,"",mKeyboard);
     if (ourEditField) { 
       setFocusPtr(ourEditField);
       addObj(ourEditField);

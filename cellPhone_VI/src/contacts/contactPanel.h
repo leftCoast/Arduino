@@ -3,7 +3,6 @@
 
 #include <drawObj.h>
 #include <label.h>
-//#include <editField.h>
 #include <editLabel.h>
 #include <scrollingList.h>
 #include <panel.h>
@@ -11,6 +10,7 @@
 #include <colorRect.h>
 #include <keystroke.h>
 #include <scrKeyboard.h>
+#include <bmpKeyboard.h>
 #include	"../../cellOS.h"
 
 extern contactList* ourBlackBook;
@@ -183,17 +183,18 @@ class PNList : public scrollingList {
 
 class contactPanel :  public cellOSPanel {
 
-  public:
-          contactPanel(void);
-  virtual ~contactPanel(void);
-           
-  virtual void    setup(void);
-  virtual void    loop(void);
-  virtual void    drawSelf(void);
-  virtual void    closing(void);
+  	public:
+				contactPanel(void);
+	virtual	~contactPanel(void);
+	  
+	virtual	void	setup(void);
+	virtual	void	loop(void);
+	virtual	void	drawSelf(void);
+	virtual	void	closing(void);
 
-          PNList*   mPNList;
-          keyboard* mKeyboard;
+          	PNList*			mPNList;
+          	//bmpKeyboard*	mKeyboard;
+          	keyboard*		mKeyboard;
 };
 
 

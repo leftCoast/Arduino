@@ -33,6 +33,7 @@ class drawObj : public rect, public dblLinkListObj {
    virtual 	void  	drawSelf(void);										// Inherit this one and make it yours.
 	virtual	void		setThisFocus(bool setLoose);						// We are either getting or loosing focus.
 	virtual	void		setEventSet(eventSet inEventSet);				// Want to change our event set on the fly?
+	virtual	eventSet	getEventSet(void);									// Want to see what this guys even set is?
   	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
   	virtual	void  	doAction(void);										// Override me for action!
   	virtual	void  	doAction(event* inEvent,point* locaPt);		//	Special for them that drag around.

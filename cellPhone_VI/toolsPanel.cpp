@@ -16,16 +16,6 @@
 #define outln   mText->appendText("\n")
 
 
-#define FIRE_IMG_W      488
-#define FIRE_IMG_H      96
-#define FIRE_FRAME_W    64
-#define FIRE_RECT_X     100
-#define FIRE_RECT_Y     200
-#define FIRE_RECT_W     64
-#define FIRE_RECT_H     FIRE_IMG_H
-#define FIRE_FILE_PATH  "/SYSTEM/IMAGES/FIRE.BMP"
-
-
 int statID = -1;
 
 // *****************************************************
@@ -34,23 +24,19 @@ int statID = -1;
 
 
 toolsPanel::toolsPanel(void)
-  : cellOSPanel(toolsApp) {
+  : cellOSPanel(toolsApp) { }
+
+
+toolsPanel::~toolsPanel(void) { }
+
+
+void toolsPanel::setup(void) {
 
   colorObj aColor(LC_NAVY);
   mText = new textView(10,30,220,150);
   mText->setTextColors(&white,&aColor);
   addObj(mText);
-  statusTimer.setTime(1500);
-}
-
-
-toolsPanel::~toolsPanel(void) { }
-
-void toolsPanel::setup(void) {
-
-  //menuBar* ourMenuBar = new menuBar((panel*)this);
-  //addObj(ourMenuBar);
-  
+  statusTimer.setTime(1500); 
 }
 
 

@@ -235,7 +235,7 @@ PNEditField::PNEditField (rect* inRect,char* inText,keyboard* inKeyboard,PNListI
 PNEditField::~PNEditField(void) {  }
 
 
-void PNEditField::drawSelf(void) { /*screen->drawRect(this,&white);*/ }
+void PNEditField::drawSelf(void) { screen->drawRect(this,&white); }
  
 
 // If we get focus, we need to tell the list item that we started editing.
@@ -308,7 +308,7 @@ void PNListItem::draw(void) {
 }
 
 
-void PNListItem::drawSelf(void) { /*screen->drawRect(this,&green);*/ }
+void PNListItem::drawSelf(void) { screen->drawRect(this,&green); }
 
 
 // globals used for texting, calling & deleting.
@@ -387,7 +387,7 @@ PNList::PNList(int x,int y,int width,int height,keyboard* inKeyboard)
 PNList::~PNList(void) {  }
 
 
-void PNList::drawSelf(void) {  screen->fillRect(this,&backColor); }
+void PNList::drawSelf(void) {}//{  screen->fillRect(this,&backColor); }
 
 
 void PNList::addContact(contact* contactPtr,bool showContact) {
@@ -478,14 +478,14 @@ contactPanel::~contactPanel(void) { if (mKeyboard) delete mKeyboard; }
 void contactPanel::setup(void) {
 
   
-  mKeyboard = new keyboard(NULL);
+  //mKeyboard = new bmpKeyboard(NULL,true);
+  mKeyboard = new keyboard();
+  mKeyboard->loadKeys();
+  addObj(mKeyboard);
   
   mPNList = new PNList(PNLIST_X,PNLIST_Y,PNLIST_W,PNLIST_H,mKeyboard);  // Whip up the list of contacts.
   mPNList->fillList();                                                  // Fill it with goodies.
   addObj(mPNList);                                                      // Pass it to the a group.
-
-  //menuBar* ourMenuBar = new menuBar((panel*)this);
-  //addObj(ourMenuBar);
 
   contNewBtn* ourNewButton = new contNewBtn(mPNList);
   mMenuBar->addObj(ourNewButton);
@@ -506,8 +506,8 @@ void contactPanel::loop(void) {  }
 
 void contactPanel::drawSelf(void) {
 
-  screen->fillScreen(&backColor);
-  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+  //screen->fillScreen(&backColor);
+  screen->fillScreen(&white);
 }
 
 

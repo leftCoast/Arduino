@@ -1,4 +1,4 @@
-#ifndef sTerm_h
+ #ifndef sTerm_h
 #define sTerm_h
 
 #include <panel.h>
@@ -7,38 +7,9 @@
 #include <bmpObj.h>
 #include <textView.h>
 #include "tools.h"
-
+#include "textBuff.h"
 
 class sTermPanel;
-
-// *****************************************************
-//                      ringBuff
-// *****************************************************
-
-
-class ringBuff {
-
-  public:
-            ringBuff(int inNumBytes);
-            ~ringBuff(void);
-
-            void  inc(int* index);
-            void  addChar(char inChar);
-            char  peekTail(void);
-            char  readChar(void);
-            int   numChars(void);
-            bool  empty(void);
-            bool  full(void);
-            void  clear(void);
-            
-            char* buff;
-            int   numBytes;
-            int   head;
-            int   tail;
-            bool  isFull;           
-};
-
-
 
 // *****************************************************
 //                      sKeyboard
@@ -92,7 +63,7 @@ class sTermPanel :  public panel {
   virtual void  closing(void);
   
           textView*     ourScreen;
-          ringBuff*     mReplyBuff;
+          textBuff*     mReplyBuff;
           sTermUpdater* mUpdater;
 };
 

@@ -44,7 +44,7 @@ drawObj::drawObj(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEve
 drawObj::~drawObj() {
 
 		if (currentFocus == this) {	// We were great..
-			currentFocus = NULL;			// And how the great have fallen.
+			currentFocus = NULL;			// And how the great have fallen. (But do it quiet like. We don't want a setFocus call right now!)
 		}
 		if (theTouched == this) {		// We were the movers and shakers..
 			theTouched = NULL;			// But, its all over now.
@@ -108,6 +108,10 @@ void drawObj::setEventSet(eventSet inEventSet) {
 		mEventSet = inEventSet;
 	}
 }
+
+
+// There may be cases when something needs to see what our even set is.
+eventSet drawObj::getEventSet(void) { return mEventSet; }
 
 
 //nullEvent, touchEvent, liftEvent, dragBegin, dragOn, clickEvent
@@ -201,6 +205,15 @@ void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 // way to show the user you have focus. This can be set by
 // anyone by calling setFocusPtr(); Pass in a NULL for no
 // focus.
+//
+// This focus stuff is purely optional. By default it does
+// nothing. But, if you have a layout that has a choice of
+// things the user can interact with? You can write code
+// that uses it to keep track of what the user is
+// interacting with. The important part is that that only
+// one thing at a time can have focus. So when object A) gets
+// a click and grabs focus, object B) is told that its
+// loosing focus. Kinda' handy.
 //
 // theTouched : This is a pointer to who just accepted the
 // last screen touch. This way its touchOver() method can

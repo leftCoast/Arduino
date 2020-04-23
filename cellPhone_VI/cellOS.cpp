@@ -169,44 +169,32 @@ void statusIcon::drawSelf(void) { }
 // *****************************************************
 
 
-cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard,editLabel* inEditField)
-  : drawGroup(inRect) {
+cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
+	: drawGroup(inRect,fullClick) {
   
-  mKeyboard = inKeyboard;
-  rect  bRect;
-  rect  tRect;
-
-  bRect.x = 0;
-  bRect.y = 0;
-  bRect.width = inRect->width;
-  bRect.height = inRect->height;
-
-  tRect = bRect;
-  tRect.insetRect(CELL_EITEM_INSET);
-
-  mEditBase = new colorRect(&bRect,&backColor);
-  mEditBase->setColor(&backColor);
-  addObj(mEditBase);
-  if (inEditField) {
-    mEditField = inEditField;
-    mEditField->setRect(&tRect);
-    mEditField->setValue(inText);
-  } else {
-    mEditField = new editLabel(&tRect,inText,1);
-  }
-  //mEditField->setParent(this); I fear that this may be importnat? But its no longer available.
-  mEditField->setColors(&textColor,&backColor);
-  addObj(mEditField);
-  setEventSet(fullClick);
+	rect  tRect;
+	
+	mKeyboard = inKeyboard;
+	mEditBase = new colorRect(inRect,&yellow/*&backColor*/);
+	addObj(mEditBase);
+	tRect = *inRect;
+	tRect.x = 0;
+	tRect.y = 0;
+	tRect.insetRect(CELL_EITEM_INSET);
+	mEditField = new editLabel(&tRect,inText,1);
+	mEditField->setColors(&textColor,&backColor);	
+	addObj(mEditField);
+	setEventSet(fullClick);
 }
 
 
 cellEditField::~cellEditField(void) {  }
 
 
-void cellEditField::drawSelf(void) { screen->drawRect(this,&white); }
+void cellEditField::drawSelf(void) { screen->drawRect(this,&blue); }
  
 
+/*
 // If we get focus, we pass it on to the edit field. When the edit field
 // looses focus, it will tell us by calling this this method. SO we don't
 // "unset" the edit field's focus, we only set it.
@@ -219,7 +207,7 @@ void cellEditField::setFocus(bool setLoose) {
       mKeyboard->setEditField(mEditField);
     }
     currentFocus = mEditField;      // We manually switch focus to mEditField..
-    mEditField->setThisFocus(true); // mEditField will call this with "false" when it looses focus.
+    mEditField->setFocus(true); 		// mEditField will call this with "false" when it looses focus.
   } else {
     mEditField->setColors(&textColor,&backColor);
     mEditBase->setColor(&backColor);
@@ -229,6 +217,22 @@ void cellEditField::setFocus(bool setLoose) {
       }
     }
   }
+}
+*/
+
+
+void cellEditField::setFocus(bool setLoose) {
+  
+	if (setLoose) {
+		mEditField->setColors(&textSelectColor,&editFieldBColor);
+		mEditBase->setColor(&editFieldBColor);
+		mKeyboard->setEditField(mEditField);
+		mEditField->beginEditing();
+	} else {
+		mEditField->setColors(&textColor,&backColor);
+    	mEditBase->setColor(&backColor);
+      mKeyboard->setEditField(NULL);
+	}
 }
 
 

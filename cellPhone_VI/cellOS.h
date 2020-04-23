@@ -25,9 +25,9 @@
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
-#define ICON_PATH_CONTACT22  "/system/icons/cellphone/cont22.bmp"
-#define ICON_PATH_TEXT22    "/system/icons/cellphone/msg22.bmp"
-#define ICON_PATH_PHONE22   "/system/icons/cellphone/phone22.bmp"
+#define ICON_PATH_CONTACT22  "/system/icons/cPhone/cont22.bmp"
+#define ICON_PATH_TEXT22    "/system/icons/cPhone/msg22.bmp"
+#define ICON_PATH_PHONE22   "/system/icons/cPhone/phone22.bmp"
 
 #define STATUS_X        200
 #define STATUS_Y        2
@@ -138,7 +138,7 @@ class statusIcon  : public drawGroup,
 class cellEditField :  public drawGroup {
 
   public:
-          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard,editLabel* inEditField=NULL);
+          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard);
   virtual ~cellEditField(void);
 
   virtual void      drawSelf(void);
