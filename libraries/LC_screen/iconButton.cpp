@@ -8,7 +8,7 @@ iconButton::iconButton(int xLoc,int yLoc,char* path,int pix)
 	rect	source(0,0,pix,pix);
 	int	numChars;
 	
-	setSourceRect(source);					// Take bits from here.
+	setSourceRect(&source);					// Take bits from here.
 	numChars = strlen(path);				// Save off the path.
 	mPath = (char*)malloc(numChars+1);
 	if (mPath) {

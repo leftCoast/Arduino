@@ -16,7 +16,7 @@
 
 // Screen labels. Pictures look sooo much better than drawing them.
 #define CURR_MOIST_BMP  "/system/images/plantBot/currM.bmp"
-#define CURR_TEMP_BMP   "/system/images/plantBot//currT.bmp"
+#define CURR_TEMP_BMP   "/system/images/plantBot/currT.bmp"
 #define TOTAL_WATER_BMP "/system/images/plantBot/totalW.bmp"
 #define TOTAL_TIME_BMP  "/system/images/plantBot/totalT.bmp"
 #define LIMIT_BMP       "/system/images/plantBot/limit.bmp"

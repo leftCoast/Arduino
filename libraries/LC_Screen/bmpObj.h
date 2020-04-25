@@ -17,7 +17,7 @@ class bmpObj :	public drawObj,
 					public bmpPipe {
 
 	public:
-				bmpObj(int inX,int inY,int inwidth,int inHeight,char* bmpPath);
+				bmpObj(int inX,int inY,int inwidth,int inHeight,char* bmpPath=NULL);
 	virtual	~bmpObj(void);
 	
 	virtual	bool	begin(void);		// Some stuff must wait 'till our hardware is up and running. like SD cards.

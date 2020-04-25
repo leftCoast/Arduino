@@ -56,7 +56,7 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 	
 	if (mKeyBMap.setSize(KEY_WD,KEY_HT)) {						// If we can allocate the RAM for the icon's bitmap..
 		sRect.setRect(0, 0, KEY_WD, KEY_HT);					// Setup dimensions of the key icon.
-		keyCap.setSourceRect(sRect);								// Point the bitmap pope to the bits in the file.
+		keyCap.setSourceRect(&sRect);								// Point the bitmap pope to the bits in the file.
 		keyCap.openPipe(KEYCAP24);									// Open up and see if we can read the bitmap file.
 		vPort.beginDraw(&mKeyBMap);								// Set up to offscreen drawing to the bitmap.
 		keyCap.drawImage(0,0); 										// Draw to it..
@@ -242,7 +242,7 @@ bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY,
 
 	mBmpPipe.openPipe(bmpName);
 	sRect.setRect(0, 0, width, height);
-	mBmpPipe.setSourceRect(sRect);
+	mBmpPipe.setSourceRect(&sRect);
   }
 
 

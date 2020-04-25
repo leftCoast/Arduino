@@ -1,4 +1,5 @@
 #include "bmpPipe.h"
+#include <resizeBuff.h>
 #include <colorObj.h>
 
 #define COLOR_BUF_SIZE  4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
@@ -16,18 +17,11 @@ bmpPipe::bmpPipe(rect* sourceRect) {
   filePath			= NULL;
   haveInfo			= false;
   haveSourceRect	= false;
-  
-  setSourceRect(*sourceRect);
+  setSourceRect(sourceRect);
 }
 
 
-bmpPipe::~bmpPipe(void) { 
-  
-	if (filePath) {		// If we have a path, loose it.
-  		free(filePath);	// Free memory.
-  		filePath=NULL;		// And flag it!
-	}
-}
+bmpPipe::~bmpPipe(void) { if (filePath) resizeBuff(0,&filePath); }	// If we have a path, loose it.
  
  
 bool bmpPipe::openPipe(char* filename) {
@@ -35,35 +29,26 @@ bool bmpPipe::openPipe(char* filename) {
 	rect aRect;
 	File bmpFile;
 
-  haveInfo = false;												// Ok, assume failure..									
-  if (filePath) {													// If we have a path, loose it.
-  	free(filePath);												// Free memory.
-  	filePath=NULL;													// And flag it!
-  }
-  //Serial.print("Attempting to open : ");
-  //Serial.println(filename);Serial.flush();
-  //Serial.print("Does it exist? ");Serial.println(SD.exists(filename));Serial.flush();
-  bmpFile = SD.open(filename);								// See if it works.
-  //Serial.println("Lets have a look.");Serial.flush();
-  if (bmpFile) {    												// We got a file?
-    //Serial.println("Got a file opened.");
-    if (readInfo(bmpFile)) {									// Then see if we can understand it	
-    	filePath = (char*) malloc(strlen(filename)+1);	// Grab storage for name;
-    	if (filePath) {											// Got some?
-    		strcpy(filePath,filename);							// Save it off.
-    		haveInfo = true;										// success!
-    	}
-    	if (haveInfo && !haveSourceRect) {  				// If we can..
-      	aRect.x = 0;                      				// Default the source to the image.
-      	aRect.y = 0;
+	haveInfo = false;														// Ok, assume failure..									
+	if (filePath) resizeBuff(0,&filePath);							// If we have a path, loose it.
+	bmpFile = SD.open(filename);										// See if it works.
+	if (bmpFile) {    													// We got a file?
+		if (readInfo(bmpFile)) {										// Then see if we can understand it	
+    		if (resizeBuff(strlen(filename)+1,&filePath)) {		// If we can grab storage for name.
+    			strcpy(filePath,filename);								// Save it off.
+    			haveInfo = true;											// success!
+    		}
+		if (haveInfo && !haveSourceRect) {  						// If we can..
+			aRect.x = 0;                      						// Default the source to the image.
+			aRect.y = 0;
       	aRect.width = imageWidth;
       	aRect.height = imageHeight;
-      	setSourceRect(aRect);
-    	}
-    }
-    bmpFile.close();												// Done, thanks!
-  }
-  return haveInfo;                     					// Tell the caller if it worked.
+			setSourceRect(&aRect);
+		}
+	}
+		bmpFile.close();												// Done, thanks!
+	}
+	return haveInfo;                     					// Tell the caller if it worked.
 }
 
 
@@ -106,9 +91,9 @@ File bmpPipe::getFile(void) {
 
 
 // When we
-void bmpPipe::setSourceRect(rect inRect) { 
+void bmpPipe::setSourceRect(rect* inRect) { 
   
-	sourceRect = inRect;
+	sourceRect = *inRect;
 	haveSourceRect = true;
 }
 

@@ -4,7 +4,7 @@
 // We want to use bitmaps from SC cards for all sorts of drawing.
 // So the idea behind this class is take care of everything about
 // getting bitmaps to the screen. Where to get them, how big they
-// are, where they should go. Should they be stored in RAM? Etc.
+// are, where they should go. Etc.
 //
 // For now we expect the correct or only SC card reader to be
 // running. We also won't do any scaling of bitmaps. Just grab 
@@ -13,7 +13,7 @@
 #include <SD.h>
 #include <drawObj.h>
 #include "screen.h"
-#include "bitmap.h"
+//#include "bitmap.h"
 
 class bmpPipe {
 
@@ -23,7 +23,7 @@ class bmpPipe {
 	virtual	~bmpPipe(void);
 
 				bool   			openPipe(char* fileName);
-				void      		setSourceRect(rect inRect);
+				void      		setSourceRect(rect* inRect);
 	virtual	void      		drawImage(int x,int y);
 				File				getFile(void);
 	virtual	void				drawLine(File bmpFile,int x,int y);

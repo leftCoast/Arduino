@@ -27,7 +27,7 @@ void bmpLabel::smoothDraw(void) {
   		temp = (rect) *this;											// Get our local rectangle.
   		temp.x = screen->gX(temp.x);								// Convert to global.
 			temp.y = screen->gY(temp.y);
-    	backdrop->setSourceRect(temp);							// Reading background is global.                                                                                     
+    	backdrop->setSourceRect(&temp);							// Reading background is global.                                                                                     
   		endY = y+height;
   		srcY = temp.y;													// Anything for background global.
   		for (trace=y; trace<endY;trace++) {						// Drawing y, local.
@@ -49,7 +49,7 @@ void bmpLabel::fasterDraw(void) {
 	temp = (rect) *this;					// Get our local rectangle.
 	temp.x = screen->gX(temp.x);		// Convert to global.
 	temp.y = screen->gY(temp.y);
-	backdrop->setSourceRect(temp);
+	backdrop->setSourceRect(&temp);
 	backdrop->drawImage(x,y);			// Draw in local.
 	label::drawSelf();
 }

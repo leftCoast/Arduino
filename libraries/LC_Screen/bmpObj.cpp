@@ -8,7 +8,7 @@ bmpObj::bmpObj(int inX,int inY,int inWidth,int inHeight,char* bmpPath)
 	rect	sourceRect;
 	
 	sourceRect.setRect(0,0,inWidth,inHeight);			// Default source is top left of bitmap, our size.
-	setSourceRect(sourceRect);								// Set that up.
+	setSourceRect(&sourceRect);							// Set that up.
 	mPath = NULL;												// Init to NULL for resizeBuff().
 	if (bmpPath) {												// IF we got a path..
 		if (resizeBuff(strlen(bmpPath)+1,&mPath)) {	// If we can get the RAM..
