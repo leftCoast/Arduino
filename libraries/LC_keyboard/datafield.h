@@ -5,13 +5,13 @@
 #include <scrKeyboard.h>
 #include <editLabel.h>
 
-// The idea of a datafield is an editing field that can a) Have a background drawObject
-// and b) optionally live on a panel/screen with multiple other datafields sharing a
+// The idea of a datafield is an editing field that can A) Have a background drawObject
+// and B) Optionally live on a panel/screen with multiple other datafields sharing a
 // single keyboard. And of course, doing all the correct editing things.
 //
 // Sharing the keyboard with other datafields uses the focus functionality given to us by
 // drawObj. Thie idea is that when we gain or loose focus, we can do the "right thing"
-// with our sub objects to show we are in focus and editing, or not.
+// managing our given editing field, turning it on/off.
 
 
 

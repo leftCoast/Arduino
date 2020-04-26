@@ -11,7 +11,7 @@ datafield::datafield(int x,int y,int w,int h)
 }
 
 
-//We didn't allocate anything. So, nothing to do here.
+//We didn't actually allocate anything. So, nothing to do here.
 datafield::~datafield(void) { }
 
 
@@ -28,24 +28,22 @@ void datafield::begin(keyboard* inKeyboard,editLabel* inEditLabel,drawObj* backg
 }
 	
 
-// We should only get a click when we arre NOT editing. Hence, on clicks we set the focus
-// pointer to us to fire off the editing sequence.	
+// We should only get a click when we arre NOT editing. Hence, on clicks, we set the focus
+// pointer to us. This will fire off the editing sequence.	
 void datafield::doAction(void) { setFocusPtr(this); }
 
 
-// And here's the focus pointer call we need to start or end editing sequences. What the
-// editing field does at the beginning or the end is up to it. Who knows what kind of
-// field we will be given?
+// And here's the focus pointer call we need to start or end editing sequences.
 void  datafield::setThisFocus(bool setLoose) {
 
 	drawObj::setThisFocus(setLoose);
 	if (mKeyboard && mEditField) {					// Sanity. Did they give us links we can use?
 		if (setLoose) {									// If we get focus?
-			setEventSet(noEvents);						// Pass clicks to the editing field.
+			setEventSet(noEvents);						// Mask ourselves to pass clicks to the editing field.
 			mKeyboard->setEditField(mEditField);	// Swap keyboard's subject to our editing field.
 			mEditField->beginEditing();				// Give our editing field a kick to get it going.
-			mEditField->setEventSet(mEditEvents);	// Restore the edit field's events.
-		} else {
+			mEditField->setEventSet(mEditEvents);	// Restore the editing field's events.
+		} else {												// Ok, we are loosing focus. Either someone else is getting it, or we let it go in idle().
 			mEditField->setEventSet(noEvents);		// Shut off its events again.
 			if (mEditField->getEditing()) {			// If our editing session is still running..
 				mEditField->handleOkKey();				// In this case the user clicked elsewhere. This is seen as "OK".
@@ -56,6 +54,10 @@ void  datafield::setThisFocus(bool setLoose) {
 }
 
 
+// If the user clicks OK or cancel, we actually don't see it here. So, during idle time we
+// check to see if the thing has shut down on us. If so, we quietly set the focus pointer
+// to NULL, triggering everyone to do their stopping editing things. We shut off its event,
+// turn on ours. Who knows what everyone else is doing?
 void datafield::idle(void) {
 
 	drawGroup::idle();							// If any of the parents need this..

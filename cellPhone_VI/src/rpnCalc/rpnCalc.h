@@ -7,8 +7,20 @@
 #include <calculator.h>
 #include <panel.h>
 #include <litlOS.h>
-#include "anime.h"
+
+
+// **********************************************************************
+// 						THIS HAS TO POINT TO YOUR OS
+// 		Your OS has to have calcApp defined in its apps enum.
+// **********************************************************************
 #include	"../../cellOS.h"
+// **********************************************************************
+// **********************************************************************
+//  								Then this line :
+//					"case calcApp : return new rpnCalc();"
+// Goes into your "createPanel(int panelID)" method to load this panel.
+// **********************************************************************
+
 
 
 class rpnCalc : public panel {
@@ -23,11 +35,9 @@ class rpnCalc : public panel {
 
           label*          XReg;
           lineObj*        aLine;
-          //lineObj*        aLine2;
-          //lineObj*        aLine3;
-          //lineObj*        aLine4;
+          lineObj*        aLine2;
+          lineObj*        aLine3;
           degRadButton*   degRad;
-          //anime*          theSprit;
           calcButton*     btn1;
           calcButton*     btn2;
           calcButton*     btn3;
@@ -59,8 +69,6 @@ class rpnCalc : public panel {
           calcButton*     btnASin;
           calcButton*     btnACos;
           secondfxButton* btnATan;
-
-          closeButton*     goAway;
 };
 
 

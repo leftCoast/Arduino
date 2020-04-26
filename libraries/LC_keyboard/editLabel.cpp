@@ -167,9 +167,11 @@ void editLabel::drawSelf(void) {
 	int cursY;
 	int cursH;
 	
-	label::drawSelf();															// Draw like we normally do.
+	
 	if (mEditing) {																// But IF we're editing..
 		cursH = getTextHeight();												// Figure out where the cursor is.
+		screen->drawVLine(x-1,y,cursH,&backColor);							// Just in case its there. Normal drawing can't erase the cursor.
+		label::drawSelf();														// Draw like we normally do.
 		cursX = x + CHAR_WIDTH*textSize*cursor - 1;						// We put a LOT of effort into locating the cursor. Use it now.
 		cursY = y;																	// Always here.
 		if(cursorOnOff) {															// If its on..
@@ -177,6 +179,8 @@ void editLabel::drawSelf(void) {
 		} else {																		// Else..
 			screen->drawVLine(cursX,cursY,cursH,&backColor);			// We erase it.
 		}
+	} else {																			// Else, not editing..
+		label::drawSelf();														// Draw like we normally do.
 	}
 }
 

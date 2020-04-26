@@ -4,7 +4,7 @@
 #include <cellManager.h>
 #include <resizeBuff.h>
 #include <textView.h>
-
+#include <debug.h>
 
 #define TW_X    10
 #define TW_Y    MENU_BAR_H + 5
@@ -115,34 +115,32 @@ void msgList::drawSelf(void) {  }
 // *****************************************************
 
 
-msgEditField::msgEditField(textPanel* inPanel)
-  : editLabel(1,1,1,1,"",1) { mPanel = inPanel; }
+msgEditField::msgEditField(rect* inRect,keyboard* inKeyboard,textPanel* inPanel)
+  : cellEditField(inRect,"",inKeyboard) { mPanel = inPanel; }
 
   
 msgEditField::~msgEditField(void) {  }
 
-  
-void msgEditField::handleKeystroke(keystroke* aKeystroke) {
-  
-  int   numBytes;
-  char* msgBuff;
 
-  if (aKeystroke->theChar=='\0') {
-    if (aKeystroke->editCommand==enter) {                 // We are going to handle ANY click on enter.
-      if (mPanel->mPNSet) {                               // If we've not been able to set the phone number, don't bother.
-        msgBuff = NULL;                                   // Init msgBuff
-        numBytes = getNumChars() + 1;                     // How big is this new message?
-        if (resizeBuff(numBytes,(uint8_t**)&msgBuff)) {   // If we got the room..
-          getText(msgBuff);                               // Grab our message.
-          setValue("");                                   // Clear the message.
-          mPanel->addMsg(msgBuff,true,true);              // Send in our message.
-          resizeBuff(0,(uint8_t**)&msgBuff);              // Recycle reuse..
-        }
-      }
-      return;                                             // Enter handled, time to go.
-    }
-  }
-  editLabel::handleKeystroke(aKeystroke);                 // In every other case we let the inherited do its thing.
+void msgEditField::idle(void) {
+ 
+ 	int   numBytes;
+	char* msgBuff;
+	
+	if (!mEditField->getEditing()) {									// If we ain't editing.
+		if (mPanel->mPNSet) {											// If we've not been able to set the phone number, don't bother.
+	  		msgBuff = NULL;												// Init msgBuff
+	  		numBytes = mEditField->getNumChars() + 1;				// How big is this new message?
+	  		if (resizeBuff(numBytes,(uint8_t**)&msgBuff)) {		// If we got the room..
+		 		mEditField->getText(msgBuff);							// Grab our message.
+		 		mEditField->setValue("");								// Clear the message.
+		 		mPanel->addMsg(msgBuff,true,true);					// Send in our message.
+		 		resizeBuff(0,(uint8_t**)&msgBuff);					// Recycle reuse..
+	  		}
+			mEditField->beginEditing();								// And we start up again.
+		}
+	}
+	cellEditField::idle();												// We took care of it, but let 'em have fun too.
 }
 
 
@@ -226,24 +224,23 @@ textPanel::~textPanel(void) { if (mKeyboard) delete mKeyboard; }
            
 void textPanel::setup(void) {
 
-  rect  aRect;
+	rect  aRect;
     
-  if (currentContact) {
-    mMsgList = new msgList();
-    addObj(mMsgList);
+	if (currentContact) {
+		mMsgList = new msgList();
+		addObj(mMsgList);
     
-    mKeyboard = new keyboard(NULL);
+		mKeyboard = new keyboard();
+		mKeyboard->loadKeys();
+		addObj(mKeyboard);
+		
+		aRect.setRect(ET_X,ET_Y,ET_W,ET_H);
+		msgEditField* ourMsgEditField = new msgEditField(&aRect,mKeyboard,this);
+		addObj(ourMsgEditField);
+		setFocusPtr(ourMsgEditField);
     
-    msgEditField* ourMsgEditField = new msgEditField(this);
-    aRect.setRect(ET_X,ET_Y,ET_W,ET_H);
-    cellEditField* ourEditField  = new cellEditField(&aRect,"",mKeyboard);
-    if (ourEditField) { 
-      setFocusPtr(ourEditField);
-      addObj(ourEditField);
-    }
+   
     
-    //menuBar* ourMenuBar = new menuBar((panel*)this);
-    //addObj(ourMenuBar);
     
     contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
     mMenuBar->addObj(ourContactsBtn);
@@ -374,12 +371,7 @@ void textPanel::loop(void) {
 }
 
 
-void textPanel::drawSelf(void) {
-
-  rect  userRect(0,24,240,320-24);
-
-  screen->fillRect(&userRect,&backColor);
-}
+void textPanel::drawSelf(void) { screen->fillScreen(&backColor); }
 
 
 void textPanel::closing(void) { }

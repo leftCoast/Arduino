@@ -164,95 +164,10 @@ void statusIcon::drawSelf(void) { }
 
 
 
-/*
 // *****************************************************
-// ******************  cellEditField  ******************
+// ****************   cellEditField  *******************
 // *****************************************************
 
-
-cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
-	: drawGroup(inRect,fullClick) {
-  
-	rect  tRect;
-	
-	mKeyboard = inKeyboard;
-	mEditBase = new colorRect(inRect,&backColor);
-	addObj(mEditBase);
-	tRect = *inRect;
-	tRect.x = 0;
-	tRect.y = 0;
-	tRect.insetRect(CELL_EITEM_INSET);
-	mEditField = new editLabel(&tRect,inText,1);
-	mEditField->setColors(&textColor,&backColor);	
-	addObj(mEditField);
-	setEventSet(fullClick);
-}
-
-
-cellEditField::~cellEditField(void) {  }
-
-
-void cellEditField::drawSelf(void) { screen->drawRect(this,&blue); }
- 
-
-//
-// If we get focus, we pass it on to the edit field. When the edit field
-// looses focus, it will tell us by calling this this method. SO we don't
-// "unset" the edit field's focus, we only set it.
-void cellEditField::setFocus(bool setLoose) {
-  
-  if (setLoose) {
-    mEditField->setColors(&textSelectColor,&editFieldBColor);
-    mEditBase->setColor(&editFieldBColor);
-    if (mKeyboard) {
-      mKeyboard->setEditField(mEditField);
-    }
-    currentFocus = mEditField;      // We manually switch focus to mEditField..
-    mEditField->setFocus(true); 		// mEditField will call this with "false" when it looses focus.
-  } else {
-    mEditField->setColors(&textColor,&backColor);
-    mEditBase->setColor(&backColor);
-    if (mKeyboard) {
-      if (mKeyboard->mEditObj==mEditField) {
-        mKeyboard->setEditField(NULL);
-      }
-    }
-  }
-}
-//
-
-
-void cellEditField::setFocus(bool setLoose) {
-  
-	if (setLoose) {
-		mEditField->setColors(&textSelectColor,&editFieldBColor);
-		mEditBase->setColor(&editFieldBColor);
-		mKeyboard->setEditField(mEditField);
-		mEditField->beginEditing();
-	} else {
-		mEditField->setColors(&textColor,&backColor);
-    	mEditBase->setColor(&backColor);
-      mKeyboard->setEditField(NULL);
-	}
-}
-
-
-void cellEditField::doAction(void) { setFocusPtr(this); }
-
-
-// Not including the \0. You may need to add one.
-int cellEditField::getNumChars(void) { return mEditField->getNumChars(); }
-
-
-void cellEditField::formatAsPN(void) { formatPN(mEditField); }
-
-
-// You better have added the (1) for the \0.
-void cellEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
-
-
-void  cellEditField::setText(char* inText) { mEditField->setValue(inText); }
-*/
 
 cellEditField::cellEditField(rect* inRect,char* inText,keyboard* inKeyboard) 
   : datafield(inRect->x,inRect->y,inRect->width,inRect->height) { 
@@ -567,7 +482,7 @@ void cellOS::launchPanel(void) {
 
 
 void cellOS::hideRedraw() {
-return;
+
   for(int i=RAMPDN_START;i<RAMPDN_END;i=i+STEPTIME) {
     analogWrite(SCREEN_PIN,screenMap.Map(i));
     delay(STEPTIME);
@@ -578,6 +493,7 @@ return;
   mEndTime = RAMPUP_END;
   mScreenTimer.start();
 }
+
 
 void cellOS::bringUp() {
   

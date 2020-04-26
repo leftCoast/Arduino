@@ -11,63 +11,53 @@
 #include <screen.h>
 #include <adafruit_1947_Obj.h>
 
-#include <Adafruit_FT6206.h>
-#include <Adafruit_ILI9341.h>
-#include <Adafruit_GFX.h>
+//#include <Adafruit_FT6206.h>
+//#include <Adafruit_ILI9341.h>
+//#include <Adafruit_GFX.h>
 
 #include <calculator.h>
-#include "anime.h"
 #include "calcButton.h"
 
 #define  BACK_COLOR (&black)
 #define  DISP_COLOR (&red)
-#define  DISP_Y     4
+#define  DISP_Y     28
 #define  TEXT_SIZE  2
 
 #define  LINE_X1     22
-#define  LINE_X2     207
-#define  LINE_Y      DISP_Y + 21
+#define  LINE_X2     146
+#define  LINE_Y      DISP_Y + 22
 
-#define  LINE2_X1     125
-#define  LINE2_X2     207
-#define  LINE2_Y      DISP_Y + 24
+#define  LINE2_X1     LINE_X1
+#define  LINE2_X2     LINE_X2
+#define  LINE2_Y      LINE_Y + 2
 
-#define  LINE3_X1     156
-#define  LINE3_X2     207
-#define  LINE3_Y      DISP_Y + 27
+#define  LINE3_X1     LINE_X1
+#define  LINE3_X2     LINE_X2
+#define  LINE3_Y      LINE2_Y + 2
             
-//#define DEG_RAD_X       LINE_X1
-#define DEG_RAD_X       LINE3_X1
-#define DEG_RAD_Y       LINE_Y + 6
+#define DEG_RAD_X       156
+#define DEG_RAD_Y       LINE_Y - 2
 #define DEG_RAD_WIDTH   50
 #define DEG_RAD_HEIGHT  15
-
-#define SPRIT_X         DEG_RAD_X + 134
-#define SPRIT_Y         LINE3_Y + 3
-#define SPRIT_WIDTH     51
-#define SPRIT_HEIGHT    8
-#define SPRIT_TIME      25
-
-#define  LINE4_Y        SPRIT_Y + SPRIT_HEIGHT + 2
 
 #define BTN_WIDTH1  30
 #define BTN_WIDTH2  50
 #define BTN_WIDTH3  80
 
-#define BTN_ROWA_1    60
-#define BTN_ROWA_2    90
-#define BTN_ROWA_3    120
-#define BTN_ROWA_4    150
+#define BTN_ROWA_1    64
+#define BTN_ROWA_2    94
+#define BTN_ROWA_3    124
+#define BTN_ROWA_4    154
 
 #define BTN_COLA_1    25
 #define BTN_COLA_2    90
 #define BTN_COLA_3    155
 
-#define BTN_ROW_1    180
-#define BTN_ROW_2    210
-#define BTN_ROW_3    240
-#define BTN_ROW_4    270
-#define BTN_ROW_5    300
+#define BTN_ROW_1    182
+#define BTN_ROW_2    212
+#define BTN_ROW_3    242
+#define BTN_ROW_4    272
+#define BTN_ROW_5    302
 
 #define BTN_COL_1    25
 #define BTN_COL_2    75
@@ -85,14 +75,16 @@ extern      bool            gSecondFx;
 
           
 rpnCalc::rpnCalc(void)
-  : panel(calcApp,noMenuBar) {
+  : panel(calcApp) {
           
   degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
          
   XReg = new label(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0");
   
-  aLine = new lineObj(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);  
-  
+  aLine = new lineObj(LINE_X1,LINE_Y,LINE_X2,LINE_Y,DISP_COLOR);
+  aLine2 = new lineObj(LINE2_X1,LINE2_Y,LINE2_X2,LINE2_Y,DISP_COLOR);  
+  aLine3 = new lineObj(LINE3_X1,LINE3_Y,LINE3_X2,LINE3_Y,DISP_COLOR);  
+    
   btn1 = new calcButton("1", BTN_COL_2, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
   btn2 = new calcButton("2", BTN_COL_3, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
   btn3 = new calcButton("3", BTN_COL_4, BTN_ROW_4, BTN_WIDTH1, NUMBER_BTN);
@@ -133,8 +125,6 @@ rpnCalc::rpnCalc(void)
   btnASin = new calcButton("Ln","e^x",BTN_COLA_1, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
   btnACos = new calcButton("log","t^x",BTN_COLA_2, BTN_ROWA_1, BTN_WIDTH2, FX_BTN);
   btnATan = new secondfxButton("2f",BTN_COLA_3, BTN_ROWA_1, BTN_WIDTH2, EDIT_BTN);
-
-  goAway = new closeButton(CLOSE_X,CLOSE_Y,CLOSE_W,CLOSE_H,this);
   
   gSecondFx = false;
 }
@@ -147,6 +137,7 @@ rpnCalc::~rpnCalc(void) {
   if(XReg) delete XReg;
   
   if(aLine) delete aLine;
+  if(aLine2) delete aLine2;
   
   if(btn1) delete btn1;
   if(btn2) delete btn2;
@@ -188,8 +179,6 @@ rpnCalc::~rpnCalc(void) {
   if(btnASin) delete btnASin;
   if(btnACos) delete btnACos;
  if(btnATan) delete btnATan;
-
- if(goAway) delete goAway;
 }
 
 
@@ -214,6 +203,10 @@ void rpnCalc::loadScreen(void) {
 
   aLine->setColor(DISP_COLOR);
   addObj(aLine);
+  aLine2->setColor(DISP_COLOR);
+  addObj(aLine2);
+  aLine3->setColor(DISP_COLOR);
+  addObj(aLine3);
   
   degRad->setColors(DISP_COLOR, &white, BACK_COLOR);
   addObj(degRad);
@@ -256,8 +249,6 @@ void rpnCalc::loadScreen(void) {
   addObj(btnASin);
   addObj(btnACos);
   addObj(btnATan);
-
-  addObj(goAway);
   
   screen->drawRect(BTN_COL_1-3,DISP_Y-3,((BTN_COL_4+BTN_WIDTH1)-BTN_COL_1)+5,22,DISP_COLOR);
  }

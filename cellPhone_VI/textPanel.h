@@ -81,15 +81,15 @@ class msgList : public scrollingList {
 // *****************************************************
 
 
-class msgEditField  : public editLabel {
+class msgEditField  : public cellEditField {
 
-  public:
-          msgEditField(textPanel* inPanel);
-  virtual ~msgEditField(void);
+	public:
+				msgEditField(rect* inRect,keyboard* inKeyboard,textPanel* inPanel);
+	virtual	~msgEditField(void);
   
-  virtual void  handleKeystroke(keystroke* aKeystroke);
+	virtual	void	idle(void);
   
-          textPanel*  mPanel;
+				textPanel*  mPanel;
 };
 
 
