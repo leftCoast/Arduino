@@ -10,15 +10,17 @@
 #include "contactPanel.h"
 #include "../../textPanel.h"
 
+#include <debug.h>
+
 #define PNLIST_X        10
-#define PNLIST_Y        30
+#define PNLIST_Y        24 //28
 #define PNLIST_W        220
 
 
 #define PN_ITEM_X1      0
 #define PN_ITEM_Y       0   // Doesn't really matter, it scrolls.
 #define PN_ITEM_W       PNLIST_W
-#define PN_ITEM_H       42
+#define PN_ITEM_H       40 //42
 #define PN_ITEM_LX      30
 #define PN_ITEM_LX2     PNLIST_W - PN_ITEM_LX
 #define PN_ITEM_LY      PN_ITEM_H - 2
@@ -235,22 +237,19 @@ PNEditField::PNEditField (rect* inRect,char* inText,keyboard* inKeyboard,PNListI
 PNEditField::~PNEditField(void) {  }
 
 
-void PNEditField::drawSelf(void) { screen->drawRect(this,&white); }
- 
-
-// If we get focus, we need to tell the list item that we started editing.
-void PNEditField::setFocus(bool setLoose) {
-  
-  if (setLoose) {
-    mOurListItem->startedEdit();
-  }
-  cellEditField::setFocus(setLoose);
-  if (!setLoose) {
-    mOurListItem->finishEdit(this);
-  }
+void PNEditField::setThisFocus(bool setLoose) {
+	
+	cellEditField::setThisFocus(setLoose);		// Parents can do their thing..
+	if (setLoose) {
+		mOurListItem->startedEdit();
+	} else {
+		mOurListItem->finishEdit(this);
+	}
 }
 
 
+void PNEditField::drawSelf(void) { }
+ 
 
 // *****************************************************
 // *******************  PNListItem  ********************
@@ -308,7 +307,7 @@ void PNListItem::draw(void) {
 }
 
 
-void PNListItem::drawSelf(void) { screen->drawRect(this,&green); }
+void PNListItem::drawSelf(void) { }
 
 
 // globals used for texting, calling & deleting.
@@ -387,7 +386,7 @@ PNList::PNList(int x,int y,int width,int height,keyboard* inKeyboard)
 PNList::~PNList(void) {  }
 
 
-void PNList::drawSelf(void) {}//{  screen->fillRect(this,&backColor); }
+void PNList::drawSelf(void) { }
 
 
 void PNList::addContact(contact* contactPtr,bool showContact) {
@@ -477,9 +476,8 @@ contactPanel::~contactPanel(void) { if (mKeyboard) delete mKeyboard; }
 
 void contactPanel::setup(void) {
 
-  
-  //mKeyboard = new bmpKeyboard(NULL,true);
-  mKeyboard = new keyboard();
+  //mKeyboard = new keyboard();
+  mKeyboard = new bmpKeyboard(NULL,true);
   mKeyboard->loadKeys();
   addObj(mKeyboard);
   
@@ -506,8 +504,7 @@ void contactPanel::loop(void) {  }
 
 void contactPanel::drawSelf(void) {
 
-  //screen->fillScreen(&backColor);
-  screen->fillScreen(&white);
+  screen->fillScreen(&backColor);
 }
 
 

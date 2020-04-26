@@ -1,3 +1,5 @@
+#define DEBUGGGING
+#include <debug.h>
    
 #include <Adafruit_GFX.h> 
 #include <gfxfont.h>
@@ -36,7 +38,7 @@
 
 
 void setup() {
-
+ 
   /*
   byte numS = 47;
   byte numN = 256;

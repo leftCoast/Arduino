@@ -1,5 +1,5 @@
 #include "datafield.h"
-
+#include "debug.h"
 
 // Minimum constructor. The thought is that this may be created as a global. So lets not
 // make that an impossibility.
@@ -24,6 +24,7 @@ void datafield::begin(keyboard* inKeyboard,editLabel* inEditLabel,drawObj* backg
 	mEditEvents = mEditField->getEventSet();	// Save off the edit field's event set.
 	mEditField->setEventSet(noEvents);			// Shut off its events 'till we need them on.
 	addObj(mEditField);								// Toss the editor into our list.
+	hookup();
 }
 	
 
@@ -37,6 +38,7 @@ void datafield::doAction(void) { setFocusPtr(this); }
 // field we will be given?
 void  datafield::setThisFocus(bool setLoose) {
 
+	drawObj::setThisFocus(setLoose);
 	if (mKeyboard && mEditField) {					// Sanity. Did they give us links we can use?
 		if (setLoose) {									// If we get focus?
 			setEventSet(noEvents);						// Pass clicks to the editing field.
@@ -45,8 +47,21 @@ void  datafield::setThisFocus(bool setLoose) {
 			mEditField->setEventSet(mEditEvents);	// Restore the edit field's events.
 		} else {
 			mEditField->setEventSet(noEvents);		// Shut off its events again.
-			mEditField->endEditing();					// Tell our editing field that its editing session is done.
+			if (mEditField->getEditing()) {			// If our editing session is still running..
+				mEditField->handleOkKey();				// In this case the user clicked elsewhere. This is seen as "OK".
+			}
 			setEventSet(fullClick);						// Go back to catching clicks. So we can be restarted.						
+		}
+	}
+}
+
+
+void datafield::idle(void) {
+
+	drawGroup::idle();							// If any of the parents need this..
+	if (haveFocus()) {							// If we have focus..
+		if (!mEditField->getEditing()) {		// And, if our editor is no longer editing..
+			setFocusPtr(NULL);					// Editor must have terminated. So, set focus to NULL.
 		}
 	}
 }

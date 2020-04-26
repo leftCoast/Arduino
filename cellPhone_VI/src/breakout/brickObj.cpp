@@ -49,7 +49,7 @@ void brickObj::setColor(char* path) {
   
   ourSource.setRect(0,0,width,height);
   openPipe(path);
-  setSourceRect(ourSource);
+  setSourceRect(&ourSource);
 }
 
 

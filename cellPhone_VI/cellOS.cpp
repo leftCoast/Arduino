@@ -6,6 +6,7 @@
 #include <cellCommon.h>
 #include <cellManager.h>
 #include <colorObj.h>
+#include <debug.h>
 
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/qGame/qGame.h"
@@ -163,7 +164,7 @@ void statusIcon::drawSelf(void) { }
 
 
 
-
+/*
 // *****************************************************
 // ******************  cellEditField  ******************
 // *****************************************************
@@ -175,7 +176,7 @@ cellEditField::cellEditField (rect* inRect,char* inText,keyboard* inKeyboard)
 	rect  tRect;
 	
 	mKeyboard = inKeyboard;
-	mEditBase = new colorRect(inRect,&yellow/*&backColor*/);
+	mEditBase = new colorRect(inRect,&backColor);
 	addObj(mEditBase);
 	tRect = *inRect;
 	tRect.x = 0;
@@ -194,7 +195,7 @@ cellEditField::~cellEditField(void) {  }
 void cellEditField::drawSelf(void) { screen->drawRect(this,&blue); }
  
 
-/*
+//
 // If we get focus, we pass it on to the edit field. When the edit field
 // looses focus, it will tell us by calling this this method. SO we don't
 // "unset" the edit field's focus, we only set it.
@@ -218,7 +219,7 @@ void cellEditField::setFocus(bool setLoose) {
     }
   }
 }
-*/
+//
 
 
 void cellEditField::setFocus(bool setLoose) {
@@ -251,8 +252,53 @@ void cellEditField::getText(char* inBuff) { mEditField->getText(inBuff); }
 
 
 void  cellEditField::setText(char* inText) { mEditField->setValue(inText); }
+*/
+
+cellEditField::cellEditField(rect* inRect,char* inText,keyboard* inKeyboard) 
+  : datafield(inRect->x,inRect->y,inRect->width,inRect->height) { 
+
+  editLabel*  editField;
+  rect        aRect;
+
+  aRect = *inRect;
+  aRect.x = 0;
+  aRect.y = 0;
+  mEditBase = new colorRect(&aRect,&backColor);
+  aRect.insetRect(CELL_EITEM_INSET);
+  editField = new editLabel(&aRect,inText,1);
+  editField->setExitOnEnter(true);
+  editField->setColors(&textColor,&backColor); 
+  begin(inKeyboard,editField,mEditBase);
+}
 
 
+cellEditField::~cellEditField(void) { }
+
+  
+void cellEditField::drawSelf(void) { screen->drawRect(this,&blue); }
+
+
+void cellEditField::setThisFocus(bool setLoose) { 
+
+  datafield::setThisFocus(setLoose);
+  if (setLoose) {
+    mEditField->setColors(&textSelectColor,&editFieldBColor);
+    mEditBase->setColor(&editFieldBColor);
+  } else {
+    mEditField->setColors(&textColor,&backColor);
+    mEditBase->setColor(&backColor);
+  }
+}
+
+
+void cellEditField::formatAsPN(void) { formatPN(mEditField); }
+
+
+// Not counting the traqiling null. '\0'
+int cellEditField::getNumChars(void) { return mEditField->getNumChars(); }
+
+
+void cellEditField::getText(char* buff) { return mEditField->getText(buff); }
 
 // *****************************************************
 // ******************   homeScreen  ********************

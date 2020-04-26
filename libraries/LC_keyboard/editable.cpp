@@ -78,3 +78,16 @@ void editable::handleOkKey(void) {
 void editable::endEditing(void) { mEditing = false; }
 
 
+char editable::getCurrentChar(void) {return mCurrentChar; }
+
+
+bool editable::getEditing(void) {return mEditing; }
+
+
+bool editable::getSuccess(void) {return mSuccess; }
+
+
+bool editable::getExitOnEnter(void) {return mExitOnEnter; }
+				
+				
+				

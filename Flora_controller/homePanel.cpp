@@ -10,7 +10,7 @@
 
 
 waterBtn::waterBtn(int x, int y,int width, int height)
-  :bmpObj(x,y,width,height/*,"WATER_OFF_BMP"*/),
+  :bmpObj(x,y,width,height),
   onlineIntStateTracker() {
     
   setEventSet(touchLift);

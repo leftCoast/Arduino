@@ -6,7 +6,9 @@
 
 //#define DEBUGGGING
 
-#ifdef DEBUGGGING
+//#ifdef DEBUGGGING
+
+
 
 class debug {
 
@@ -20,7 +22,8 @@ class debug {
 };
 
 extern debug db;
+#define ST db.trace(__func__,false);
 
-#endif //DEBUGGGING
+//#endif //DEBUGGGING
 
 #endif

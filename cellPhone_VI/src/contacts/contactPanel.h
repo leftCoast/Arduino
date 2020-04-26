@@ -117,10 +117,10 @@ class PNEditField :  public cellEditField {
           PNEditField (rect* inRect,char* inText,keyboard* inKeyboard,PNListItem* ourListItem);
   virtual ~PNEditField(void);
 
-  virtual void        drawSelf(void);
-  virtual void        setFocus(bool setLoose);
-
-          PNListItem* mOurListItem;
+  virtual void	drawSelf(void);
+  virtual void	setThisFocus(bool setLoose);
+  
+  		    PNListItem* mOurListItem;
 };
 
 
@@ -193,8 +193,8 @@ class contactPanel :  public cellOSPanel {
 	virtual	void	closing(void);
 
           	PNList*			mPNList;
-          	//bmpKeyboard*	mKeyboard;
-          	keyboard*		mKeyboard;
+          	bmpKeyboard*	mKeyboard;
+          	//keyboard*		mKeyboard;
 };
 
 

@@ -11,7 +11,7 @@
 #include <colorRect.h>
 #include <keystroke.h>
 #include <scrKeyboard.h>
-#include <editLabel.h>
+#include <datafield.h>
 #include <litlOS.h>
 #include "panel.h"
 #include "src/cellListener/cellListener.h"
@@ -20,8 +20,7 @@
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
 
-#define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"
-//#define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TGIVE.BMP"
+#define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"  //"/SYSTEM/IMAGES/TGIVE.BMP"
 #define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
 #define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
 
@@ -126,7 +125,30 @@ class statusIcon  : public drawGroup,
             RSSIicon*     mRSSI;
 };
 
+// *****************************************************
+// ******************  cellEditField  ******************
+// *****************************************************
 
+// NOTE!! This, as currently written, can not be created in your constructor. It
+// won't be able to get its initial drawing commands there. Set it to NULL in your
+// constructor then create it as the first thing in your setup().
+
+class cellEditField :  public datafield {
+
+  public:
+          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard);
+  virtual ~cellEditField(void);
+
+  virtual void  drawSelf(void);
+  virtual void  setThisFocus(bool setLoose);
+          void  formatAsPN(void);
+          int   getNumChars(void);
+          void  getText(char* buff);
+          
+          colorRect*  mEditBase;
+};
+
+/*
 // *****************************************************
 // ******************  cellEditField  ******************
 // *****************************************************
@@ -154,7 +176,7 @@ class cellEditField :  public drawGroup {
           editLabel*  mEditField;           // Our editing field.
           colorRect*  mEditBase;            // Our editing field's base.     
 };
-
+*/
 
 
 // *****************************************************

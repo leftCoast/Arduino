@@ -43,7 +43,7 @@ editLabel::editLabel(label* aLabel)
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::~editLabel(void) {
+editLabel::~editLabel(void) { 
 	
 	resizeBuff(0,&editBuff);
 	resizeBuff(0,&backupBuff);
@@ -51,7 +51,7 @@ editLabel::~editLabel(void) {
 }
 
 
-void editLabel::init(void) {
+void editLabel::init(void) { 
 	
 	editBuff		= NULL;	// Buffers must all start at NULL.
 	backupBuff	= NULL;
@@ -60,7 +60,7 @@ void editLabel::init(void) {
 }
 
 
-void editLabel::beginEditing(void) {
+void editLabel::beginEditing(void) { 
 
 	int numBytes;
 
@@ -82,7 +82,7 @@ void editLabel::beginEditing(void) {
 }
 
 
-void editLabel::endEditing(void) {
+void editLabel::endEditing(void) { 
 	
 	editable::endEditing();			// Shut off the editor.
 	resizeBuff(0,&tempBuff);		// Done with this, recycle; (Should already be NULL anyway.)
@@ -96,7 +96,7 @@ void editLabel::endEditing(void) {
 }
 
 
-void editLabel::setIndex(int newIndex) {
+void editLabel::setIndex(int newIndex) { 
 
 	int numChars;
 	
@@ -115,7 +115,7 @@ void editLabel::setIndex(int newIndex) {
 int editLabel::getIndex(void) { return index; }			// Just return it. (I wonder who'd want to see it?)
 	
 
-void editLabel::handleInputKey(void) {
+void editLabel::handleInputKey(void) { 
 
 	int numBytes;
 	
@@ -134,7 +134,7 @@ void editLabel::handleInputKey(void) {
 }
 
 
-void editLabel::handleBackspaceKey(void) {
+void editLabel::handleBackspaceKey(void) { 
 	
 	int numBytes;
 	
@@ -147,21 +147,21 @@ void editLabel::handleBackspaceKey(void) {
 }
 
 
-void editLabel::handleArrowFWDKey(void) {
+void editLabel::handleArrowFWDKey(void) { 
 
 	setIndex(index+1);
 	showText();
 }
 
 
-void editLabel::handleArrowBackKey(void)  {
+void editLabel::handleArrowBackKey(void)  { 
 
 	setIndex(index-1);
 	showText();
 }
 	
 	
-void editLabel::drawSelf(void) {
+void editLabel::drawSelf(void) { 
 
 	int cursX;
 	int cursY;
@@ -181,7 +181,7 @@ void editLabel::drawSelf(void) {
 }
 
 
-void editLabel::doAction(event* inEvent,point* locaPt) {
+void editLabel::doAction(event* inEvent,point* locaPt) { 
 	
 	int		touchLoc;
 	int		deltaX;
@@ -197,7 +197,7 @@ void editLabel::doAction(event* inEvent,point* locaPt) {
 
 
 // Just starting to edit. set up initial conditions.
-void editLabel::setInitalPointers(void) {
+void editLabel::setInitalPointers(void) { 
 	
 	int numChars;
 	int viewChars;
@@ -247,7 +247,7 @@ void editLabel::setInitalPointers(void) {
 
 			
 // Display it appropriately. Oh boy..
-void editLabel::showText(void) {
+void editLabel::showText(void) { 
 
 	int numChars;
 	int viewChars;

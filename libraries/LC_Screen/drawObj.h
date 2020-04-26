@@ -32,6 +32,7 @@ class drawObj : public rect, public dblLinkListObj {
    virtual	void		eraseSelf(void);										// Mostly you can ignore this one. Used for animation.
    virtual 	void  	drawSelf(void);										// Inherit this one and make it yours.
 	virtual	void		setThisFocus(bool setLoose);						// We are either getting or loosing focus.
+	virtual	bool		haveFocus(void);										// Do we have focus or not?
 	virtual	void		setEventSet(eventSet inEventSet);				// Want to change our event set on the fly?
 	virtual	eventSet	getEventSet(void);									// Want to see what this guys even set is?
   	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?

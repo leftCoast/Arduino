@@ -100,6 +100,9 @@ void  drawObj::setThisFocus(bool setLoose) {
 	needRefresh = true;
 }
 	
+// Well, do we have focus or not?
+bool  drawObj::haveFocus(void) { return focus; }
+
 				
 // The ability to control this may be handy..
 void drawObj::setEventSet(eventSet inEventSet) {

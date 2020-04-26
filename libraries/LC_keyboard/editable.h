@@ -22,6 +22,10 @@ class editable {
 	virtual	void	handleOkKey(void);
 	virtual	void	endEditing(void);
 	
+				char	getCurrentChar(void);
+				bool	getEditing(void);
+				bool	getSuccess(void);
+				bool	getExitOnEnter(void);
 	
 				char	mCurrentChar;
 				bool	mEditing;
