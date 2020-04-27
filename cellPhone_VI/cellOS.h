@@ -28,6 +28,24 @@
 #define ICON_PATH_TEXT22    "/system/icons/cPhone/msg22.bmp"
 #define ICON_PATH_PHONE22   "/system/icons/cPhone/phone22.bmp"
 
+#define ICON_PATH_ZERO40	"/system/icons/cPhone/zero40.bmp"
+#define ICON_PATH_ONE40		"/system/icons/cPhone/one40.bmp"
+#define ICON_PATH_TWO40		"/system/icons/cPhone/two40.bmp"
+#define ICON_PATH_THREE40	"/system/icons/cPhone/three40.bmp"
+#define ICON_PATH_FOUR40	"/system/icons/cPhone/four40.bmp"
+#define ICON_PATH_FIVE40	"/system/icons/cPhone/five40.bmp"
+#define ICON_PATH_SIX40		"/system/icons/cPhone/six40.bmp"
+#define ICON_PATH_SEVEN40	"/system/icons/cPhone/seven40.bmp"
+#define ICON_PATH_EIGHT40	"/system/icons/cPhone/eight40.bmp"
+#define ICON_PATH_NINE40	"/system/icons/cPhone/nine40.bmp"
+#define ICON_PATH_DELETE40	"/system/icons/cPhone/delete40.bmp"
+#define ICON_PATH_STAR40	"/system/icons/cPhone/star40.bmp"
+#define ICON_PATH_HASH40	"/system/icons/cPhone/hash40.bmp"
+#define ICON_PATH_PICKUP90	"/system/icons/cPhone/pickup90.bmp"
+#define ICON_PATH_HANGUP90	"/system/icons/cPhone/hangup90.bmp"
+#define ICON_PATH_GDOTS90	"/system/icons/cPhone/gdots90.bmp"
+#define ICON_PATH_RDOTS90	"/system/icons/cPhone/rdots90.bmp"
+
 #define STATUS_X        200
 #define STATUS_Y        2
 #define STATUS_W        40

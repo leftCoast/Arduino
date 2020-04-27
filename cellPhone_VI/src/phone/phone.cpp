@@ -11,27 +11,28 @@
 
 #define STAT_TIME   2500  // ms between checks on status.
 
+
 #define KEY_W       40
-#define KEY_H       30
+#define KEY_H       40 //30
 
 #define ROW_GAP     50
 
 #define KEY_R0      30
-#define KEY_R1      KEY_R0 + ROW_GAP
+#define KEY_R1      KEY_R0 + ROW_GAP - 10
 #define KEY_R2      KEY_R1 + ROW_GAP
 #define KEY_R3      KEY_R2 + ROW_GAP
 #define KEY_R4      KEY_R3 + ROW_GAP
 #define KEY_R5      KEY_R4 + ROW_GAP
 
-#define COL_GAP     70
+#define COL_GAP     50 //70
 
-#define KEY_C1      30
+#define KEY_C1      50 //30
 #define KEY_C2      KEY_C1 + COL_GAP
 #define KEY_C3      KEY_C2 + COL_GAP
 
-#define EB_X    KEY_C1
-#define EB_Y    KEY_R0
-#define EB_W    KEY_W+COL_GAP+20
+#define EB_X    KEY_C1 - 20
+#define EB_Y    KEY_R0 + 5
+#define EB_W    (KEY_W*3)+(COL_GAP-KEY_W)*2+40
 #define EB_H    16
 
 #define ET_INSET  3                     
@@ -78,6 +79,36 @@ phoneBtn::phoneBtn(int x,int y,char inKey,phone* inPhone)
 phoneBtn::~phoneBtn(void) {  }
 
 
+void phoneBtn::drawSelf(void) {
+
+	bmpPipe	aPipe;
+	rect		aRect;
+	
+	aRect.setRect(0,0,40,40);
+	aPipe.setSourceRect(&aRect);
+	switch(mKeystroke[0]) {
+		case '0' :   aPipe.openPipe(ICON_PATH_ZERO40); break;
+		case '1' :   aPipe.openPipe(ICON_PATH_ONE40); break;
+		case '2' :   aPipe.openPipe(ICON_PATH_TWO40); break;
+		case '3' :   aPipe.openPipe(ICON_PATH_THREE40); break;
+		case '4' :   aPipe.openPipe(ICON_PATH_FOUR40); break;
+		case '5' :   aPipe.openPipe(ICON_PATH_FIVE40); break;
+		case '6' :   aPipe.openPipe(ICON_PATH_SIX40); break;
+		case '7' :   aPipe.openPipe(ICON_PATH_SEVEN40); break;
+		case '8' :   aPipe.openPipe(ICON_PATH_EIGHT40); break;
+		case '9' :   aPipe.openPipe(ICON_PATH_NINE40); break;
+		case 'D' :   aPipe.openPipe(ICON_PATH_DELETE40); break;
+		case '*' :   aPipe.openPipe(ICON_PATH_STAR40); break;
+		case '#' :   aPipe.openPipe(ICON_PATH_HASH40); break;
+	}
+	if (!clicked) {
+		aPipe.drawImage(x,y);
+	} else {
+		screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColorHit);  // Gives a cool highlight.
+	}
+}
+
+/*
 // Its amazing how much code it takes just to "draw" a button. Is it active?
 // Clicked? Inactive? Is it a character? A symbol? Its all here for all our
 // standard phone buttons.
@@ -122,7 +153,7 @@ void phoneBtn::drawSelf(void) {
     screen->drawText(mKeystroke);
   }
 }
-
+*/
 
 // Button got a click? send its saved keystroke character to our phone
 // object.
@@ -157,6 +188,70 @@ callControl::~callControl(void) {
 }
 
 
+// Not only is there a bunch of drawing code for this fancy button, we also
+// mix in calls to the message text about what's going on in the world of
+// cell phone hardware.
+void callControl::drawSelf(void) {
+
+	contact*	aContact;
+	char		PNBuff[CID_BYTES];
+	PNLabel	formatter(1,1,1,1,1);
+	bmpPipe	aPipe;
+	rect		aRect;
+	
+	hookup();
+	aRect.setRect(0,0,width,height);
+	aPipe.setSourceRect(&aRect);
+	switch(mState) {
+		case wakeUp			:
+		case isIdle       :
+			if (!clicked) {
+				aPipe.openPipe(ICON_PATH_PICKUP90);
+				aPipe.drawImage(x,y);
+			} else {
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenButtonHighlight);
+			}
+		break;
+		case hasIncoming  :
+			if (!clicked) {
+				aPipe.openPipe(ICON_PATH_PICKUP90);
+				aPipe.drawImage(x,y);
+			} else {
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenButtonHighlight);
+			}
+			if (statusReg.callerID[0]=='\0') {
+				mPhone->out("Unknown caller.");
+			} else {
+				strcpy(PNBuff,statusReg.callerID);
+				aContact = ourBlackBook->findByPN(PNBuff);
+				if (aContact) {
+					mPhone->out(aContact->mNickName);
+				} else {
+					 formatter.setValue(PNBuff);
+					 mPhone->out(formatter.buff);
+				}
+			}
+		break;
+		case connecting	:
+			aPipe.openPipe(ICON_PATH_GDOTS90);
+			aPipe.drawImage(x,y);
+		break;
+		case hangingUp		:
+			aPipe.openPipe(ICON_PATH_RDOTS90);
+			aPipe.drawImage(x,y);
+		case isConnected  :
+			if (!clicked) {
+				aPipe.openPipe(ICON_PATH_HANGUP90);
+				aPipe.drawImage(x,y);
+			} else {
+				screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonHighlight);
+			}
+		break;   
+	}
+}
+
+
+/*
 // Not only is there a bunch of drawing code for this fancy button, we also
 // mix in calls to the message text about what's going on in the world of
 // cell phone hardware.
@@ -235,7 +330,7 @@ void callControl::drawSelf(void) {
 		break;   
 	}
 }
-
+*/
 
 // Our actions. We have three states we can effect. idle, ringning or talking.
 // When we get a click, its time to change state. All three methods will
@@ -464,7 +559,7 @@ phone::~phone(void) { if (mRawPN) free(mRawPN); }
 // things like buttons, controls & labels.
 void phone::setup(void) {
 
-  pBtndel   = new phoneBtn(KEY_C3,KEY_R0,'D',this);
+  pBtndel   = new phoneBtn(KEY_C3,KEY_R5,'D',this);
   
   pBtn7     = new phoneBtn(KEY_C1,KEY_R1,'7',this);
   pBtn8     = new phoneBtn(KEY_C2,KEY_R1,'8',this);
