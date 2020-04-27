@@ -10,7 +10,8 @@
 #include <contactList.h>
 #include <colorRect.h>
 #include <keystroke.h>
-#include <IOandKeys.h>
+//#include <IOandKeys.h>
+#include <bmpKeyboard.h>
 #include <scrollingList.h>
 
 
@@ -134,13 +135,14 @@ class textPanel  :  public cellOSPanel {
   virtual void      drawSelf(void);
   virtual void      closing(void);
 
-          keyboard* mKeyboard;
-          label*    nickname;
-          msgList*  mMsgList;
-          char*     msgBuff;
-          int       buffBytes;
-          int       mCmdID;
-          bool      mPNSet;
+          //keyboard* mKeyboard;
+          bmpKeyboard*	mKeyboard;
+          label*			nickname;
+          msgList*		mMsgList;
+          char*			msgBuff;
+          int				buffBytes;
+          int				mCmdID;
+          bool				mPNSet;
 };
 
 

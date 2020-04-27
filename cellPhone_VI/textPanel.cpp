@@ -7,12 +7,12 @@
 #include <debug.h>
 
 #define TW_X    10
-#define TW_Y    MENU_BAR_H + 5
+#define TW_Y    MENU_BAR_H + 2
 #define TW_W    240 - (2*TW_X)
-#define TW_H    160
+#define TW_H    140 //160
 
 #define ET_X    TW_X
-#define ET_Y    195
+#define ET_Y    170 //195
 #define ET_W    TW_W
 #define ET_H    15
 
@@ -106,7 +106,7 @@ msgList::msgList(void)
 msgList::~msgList(void) { }
 
 
-void msgList::drawSelf(void) {  }
+void msgList::drawSelf(void) { }
 
 
 
@@ -230,7 +230,7 @@ void textPanel::setup(void) {
 		mMsgList = new msgList();
 		addObj(mMsgList);
     
-		mKeyboard = new keyboard();
+		mKeyboard = new bmpKeyboard(NULL);
 		mKeyboard->loadKeys();
 		addObj(mKeyboard);
 		
