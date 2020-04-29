@@ -29,19 +29,9 @@ bool mapDisplay::dispObjBegin(void) { return true; }
 void mapDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 	colorObj  aColor(color);
-	//Serial.print("draw : ");Serial.print(x);Serial.print(", ");Serial.print(y);Serial.print(" ");Serial.println(color,BIN);
 	mBitmap->setColor(x-offsetX,y-offsetY,&aColor);
 }
 
-/*
-void mapDisplay::setFColor(colorObj* inColor) { mFColor.setColor(inColor); }
-
-
-void mapDisplay::setBColor(colorObj* inColor) { mBColor.setColor(inColor); }
-
-
-void mapDisplay::setTransp(bool transp) { mTransp = transp; }          
-*/
 
 
 // ***************************************************************
@@ -66,7 +56,7 @@ offscreen::~offscreen(void) {
 
 // Accept a bitmap, sanity check eveerything. If everything
 // is good, set up for drawing to it.
-void offscreen::beginDraw(bitmap* inMap,int inOffsetX=0,int inOffsetY=0) {
+void offscreen::beginDraw(bitmap* inMap,int inOffsetX,int inOffsetY) {
 
   if (mDrawing) {                        			 					// We already drawing? Someone forgot to shut down?
     endDraw();                            							// Shut it down.

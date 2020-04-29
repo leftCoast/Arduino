@@ -22,6 +22,33 @@ bitmap::bitmap(int width,int height) {
 }
 
 
+// Create ourselves as a clone of another bitmap. Just like all bitmaps, if it doesn't
+// work? We still have all the check methods working. So you can tell if it didn't make it.
+bitmap::bitmap(bitmap* aBitmap) {
+
+	byte* theirMap;
+	byte* ourMap;
+	int	numBytes;
+	
+	mWidth    = 0;																		// Start off with the standard defaults.
+	mHeight   = 0;
+	mBitmap   = NULL;
+	mHaveMap  = false;
+	if (aBitmap) {																		// Sanity, did they even pass in a bitmap?
+		if (aBitmap->getHasMap()) {												// Cool, lets see if it has a bitmap?
+			if (setSize(aBitmap->getWidth(),aBitmap->getHeight())) {		// Ok, lets see if we can allocate one for us?
+				ourMap = (byte*)mBitmap;											// Everything seems fine, point at our map as if its just as array og bytes.
+				theirMap = (byte*)aBitmap->getBitmapAddr();					// Point at their map as if its just an array of bytes. Because, really they are.
+				numBytes  = mWidth * mHeight * sizeof(RGBpack);				// Calculate the number of bytes in our map buffer.
+				for(int i=0;i<numBytes;i++) {										// For every byte..
+					ourMap[i] = theirMap[i];										// Copy theirs into ours.
+				}
+			}
+		}
+	}
+}
+
+		
 bitmap::~bitmap(void) { resizeBuff(0,(byte**)&mBitmap); }
 
 
@@ -34,7 +61,7 @@ bool bitmap::setSize(int width,int height) {
   
   mWidth    = width;
   mHeight   = height;
-  numBytes  = width * height * sizeof(RGBpack);
+  numBytes  = mWidth * mHeight * sizeof(RGBpack);
   mHaveMap  = resizeBuff(numBytes,(byte**)&mBitmap);
   return mHaveMap;   
 }
@@ -109,3 +136,9 @@ RGBpack  bitmap::getColorPack(int x,int y) {
   aCPack = mBitmap[index];
   return aCPack;
 }
+
+
+// This one is kinda' scary. We hand off the address to your bitmap buffer. I mean, I
+// don't even like valet parking.
+RGBpack* bitmap::getBitmapAddr(void) { return mBitmap; }
+

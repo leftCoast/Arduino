@@ -8,6 +8,7 @@ class bitmap {
 	public :
 				bitmap(void);
 				bitmap(int width,int height);
+				bitmap(bitmap* aBitmap);
 	virtual	~bitmap(void);
 
 				bool			setSize(int width,int height);
@@ -19,7 +20,8 @@ class bitmap {
 				void			setColor(int x,int y,RGBpack* aColor);
 				colorObj		getColor(int x,int y);
 				RGBpack		getColorPack(int x,int y);
-
+				RGBpack*		getBitmapAddr(void);
+				
   protected:
       int			mWidth;
       int			mHeight;

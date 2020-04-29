@@ -207,6 +207,54 @@ bmpInputKey::~bmpInputKey(void) {  }
 
 
 void bmpInputKey::drawSelf(void) {
+	
+	bitmap ourBMap(mKeyBMap);
+	rect			sRect;
+	offscreen	vPort; 
+	colorObj		aPixel;
+	point			center;
+	point			current;
+	float			dist;
+	mapper		distMapper(4,12,100,0);
+		
+	if (buff[0]==' ') {               // Special hack for spacebar.
+		if (clicked) {
+			screen->fillRect(this, &white);
+		} else {
+			rect  sRect(0,0,width,height);
+			bmpPipe aPipe(&sRect);
+			aPipe.openPipe(SPACEB72);
+			aPipe.drawImage(x,y);
+		}
+	} else {                          // "Normal printing
+		center.x = width/2;
+		center.y = height/2;
+		vPort.beginDraw(&ourBMap,x,y);
+		x = x + 7;
+		y = y + 9;
+		label::drawSelf();
+		x = x - 7;
+		y = y - 9;
+		if (clicked) {
+			for(int i=0;i<width;i++) {
+				for(int j=0;j<height;j++) {
+					aPixel = ourBMap.getColor(i,j);
+					current.x = i;
+					current.y = j;
+					dist = distance(center,current);
+					aPixel.blend(&white,distMapper.Map(dist));
+					ourBMap.setColor(i,j,&aPixel);
+				}
+			}
+		}
+		vPort.endDraw();
+		screen->blit(x,y,&ourBMap);
+	}
+}
+
+
+/*
+void bmpInputKey::drawSelf(void) {
 			
 	if (clicked) {
 		screen->fillRect(this, &white);
@@ -226,7 +274,7 @@ void bmpInputKey::drawSelf(void) {
 		}
 	}
 }
-
+*/
 
 
   // *****************************************************
