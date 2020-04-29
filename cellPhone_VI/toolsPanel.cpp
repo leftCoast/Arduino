@@ -78,6 +78,7 @@ void  toolsPanel::showStatus(void) {
     out(" Caller ID  : ");out(statusReg.callerID);out("\n");
     out(" Stat No.   : ");out(statusReg.statNum);out("\n");
     out(" In queue   : ");out(ourCellManager.getCount());out("\n");
+    out(" Read time  : ");out(statusMS);out("ms\n");
     /*
     out("DEBUGGING\n");
     out("Raw SMS    : [");out(SMSRaw);out("]\n");

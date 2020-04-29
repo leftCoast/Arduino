@@ -1,16 +1,16 @@
 #include <cellManager.h>
 #include <cellCommon.h>
 
-#define COM_TIMEOUT 30000
-#define STATUS_TIME   750
+#define COM_TIMEOUT 	30000
+#define STATUS_TIME	1250
 #define ID_MAX       2000
 
 #define out Serial.print
 #define outln Serial.println()
 
-cellManager ourCellManager;
-cellStatus  statusReg;
-
+cellManager	ourCellManager;
+cellStatus	statusReg;
+int			statusMS;
 
 // *****************************************************
 // ******************  cellCommand *********************
@@ -29,6 +29,7 @@ cellCommand::cellCommand(void)
   numReplyBytes   = 0;
   replyData       = NULL;
   comState        = com_standby;
+  startMS			= millis();
 };
 
 
@@ -98,11 +99,12 @@ cellManager::cellManager(void)
   : qCMaster(),
   linkList() {
 
-  mNextID         = 0;      // Start up the counter.
-  mCurrentCommand = NULL;   // No current command.
-  mStatusID       = -1;     // Flag for no status cooking.
+  mNextID				= 0;      // Start up the counter.
+  mCurrentCommand		= NULL;   // No current command.
+  mStatusID				= -1;     // Flag for no status cooking.
   mStatusTimer.setTime(STATUS_TIME);
   clearStatus();
+  mPatchedCallStat	= false;
 }
 
 
@@ -329,16 +331,27 @@ void cellManager::checkForReply(cellCommand* aCom) {
 
   byte  numBytes;
   
-  if (mState==holding) {                      // You've got mail!
-    numBytes = haveBuff();                    // See how big it is..
-    if (aCom->setReplySize(numBytes)) {       // Tell the command to grab RAM.
-      readBuff((uint8_t*)(aCom->replyData));  // If it got the RAM stuff the reply data in there.
-      aCom->comState = com_holding;           // Flag that its holding a reply.
-      mCurrentCommand = NULL;                 // We're done with this guy.
-    }                                         // If we can't get the RAM? Try again later.
+  if (mState==holding) {                      		// You've got mail!
+    numBytes = haveBuff();                    		// See how big it is..
+    if (aCom->setReplySize(numBytes)) {       		// Tell the command to grab RAM.
+      readBuff((uint8_t*)(aCom->replyData));  		// If it got the RAM stuff the reply data in there.
+      aCom->comState = com_holding;           		// Flag that its holding a reply.
+      mCurrentCommand = NULL;                 		// We're done with this guy.
+    }                                         		// If we can't get the RAM? Try again later.
   }
 }
 
+
+void cellManager::getStatusTime(int commandID) {
+
+	cellCommand*  trace;
+  
+	trace = findByID(commandID); 
+	if (trace) {
+		statusMS = millis() - trace->startMS;
+	}
+}
+	
 
 // A little side job here. We are entrusted with
 // keeping the status block updated. This also gives
@@ -346,30 +359,37 @@ void cellManager::checkForReply(cellCommand* aCom) {
 void cellManager::doStatus(void) {
 
 	byte  numBytes;
-
-	if (mStatusID==-1) {                              // We need to fire one off?
-		mStatusID = sendCommand(getStatus,true);       // Well, that was easy.
-	} else {                                          // We have a current one to work with?
-		switch(progress(mStatusID)) {                   // See what its up to..
-			case com_standby  : break;                    // Its on the list.
-			case com_working  : break;                    // Its cooking now!
-			case com_holding  :                           // Ha! Got a reply!
-				numBytes = numReplyBytes(mStatusID);        // Reply size in bytes.
-				if (numBytes) {                             // Non zero means we got a reply.
-					if (numBytes==sizeof(cellStatus)) {       // We got the right byte count?
-						readReply(mStatusID,(byte*)&statusReg); // Stuff the data into the struct.
+	int	tempStat;
+	
+	if (mStatusID==-1) {                              			// We need to fire one off?
+		mStatusID = sendCommand(getStatus,true);       			// Well, that was easy.
+	} else {                                          			// We have a current one to work with?
+		switch(progress(mStatusID)) {                   		// See what its up to..
+			case com_standby  : break;                    		// Its on the list.
+			case com_working  : break;                    		// Its cooking now!
+			case com_holding  :                           		// Ha! Got a reply!
+				tempStat = statusReg.callStat;						// Just in case we patched the status, save this one.
+				numBytes = numReplyBytes(mStatusID);        		// Reply size in bytes.
+				if (numBytes) {                             		// Non zero means we got a reply.
+					if (numBytes==sizeof(cellStatus)) {       	// We got the right byte count?
+						readReply(mStatusID,(byte*)&statusReg);	// Stuff the data into the struct.
+						if (mPatchedCallStat) {							// So, if we actually did update the stat between times..
+							statusReg.callStat = tempStat;			// Patch this new, but actually older, status with the updated value;
+						}
 					}
-					mStatusID = -1;                           // Flag no command working.
+					getStatusTime(mStatusID);
+					mStatusID = -1;                           	// Flag no command working.
 				}
+				mPatchedCallStat = false;								// In any case we only pass by one. Clear the flag.
       	break;                              
-			case com_complete :                           // Its already been read but not dumped out.
-			case com_missing  :                           // Its already been deletd.
+			case com_complete :                           		// Its already been read but not dumped out.
+			case com_missing  :                           		// Its already been deletd.
 				clearStatus();
-				mStatusID = -1;                             // Flag no command working.
+				mStatusID = -1;                             		// Flag no command working.
 			break;
 		}
 	}
-	mStatusTimer.start();                     			// Set our timer to start the next one.
+	mStatusTimer.start();                     					// Set our timer to start the next one.
 }
 
 
@@ -390,6 +410,16 @@ void	cellManager::clearStatus(void) {
 }
 
 
+// Status can last a LONG time in cuputer-land. (Typically around a second.) If we see a
+// change in status, we can patch it so as not to mess up the UI when it reads old data.
+void cellManager::patchStatCallStat(int newCallStat) {
+
+	statusReg.callStat = newCallStat;
+	mPatchedCallStat = true;
+}
+
+
+/*
 // This sends it out the serial port. Good for debugging.
 void cellManager::showCellStatus(void) {
   
@@ -418,7 +448,7 @@ void cellManager::showCellStatus(void) {
   out(F("------------------------------------"));outln;
   out(F("------------------------------------"));outln; 
 }
-
+*/
 
 // And here's what we do over and over in the background idle() loop.
 void cellManager::idle(void) {

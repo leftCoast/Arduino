@@ -20,31 +20,39 @@
 // If we'd like to have an overall look. Or at least a default look.
 #define SCREEN_PIN    25
 
-#define SYS_FILE_PATH       "/SYSTEM/SYSTEM.PRF"  //"/SYSTEM/IMAGES/TGIVE.BMP"
-#define IMAGE_FILE_PATH     "/SYSTEM/IMAGES/TEAMRKT.BMP"
-#define CONTACT_FILE_PATH   "/SYSTEM/CONTACTS"
+#define SYS_FILE_PATH			"/SYSTEM/SYSTEM.PRF"  //"/SYSTEM/IMAGES/TGIVE.BMP"
+#define IMAGE_FILE_PATH			"/SYSTEM/IMAGES/TEAMRKT.BMP"
+#define CONTACT_FILE_PATH		"/SYSTEM/CONTACTS"
 
-#define ICON_PATH_CONTACT22  "/system/icons/cPhone/cont22.bmp"
-#define ICON_PATH_TEXT22    "/system/icons/cPhone/msg22.bmp"
-#define ICON_PATH_PHONE22   "/system/icons/cPhone/phone22.bmp"
+#define ICON_PHONE32		"/system/icons/cPhone/phone32.bmp"
+#define ICON_MSG32			"/system/icons/cPhone/msg32.bmp"
+#define ICON_CONT32		"/system/icons/cPhone/cont32.bmp"
+#define ICON_CALC32		"/system/icons/rpnCalc/calc32.bmp"
+#define ICON_PREF32		"/system/icons/standard/pref32.bmp"
+#define ICON_QGAME32		"/system/icons/qGame/qGame.bmp"
+#define ICON_BREAKOUT32	"/system/icons/breakout/breakout.bmp"
 
-#define ICON_PATH_ZERO40	"/system/icons/cPhone/zero40.bmp"
-#define ICON_PATH_ONE40		"/system/icons/cPhone/one40.bmp"
-#define ICON_PATH_TWO40		"/system/icons/cPhone/two40.bmp"
-#define ICON_PATH_THREE40	"/system/icons/cPhone/three40.bmp"
-#define ICON_PATH_FOUR40	"/system/icons/cPhone/four40.bmp"
-#define ICON_PATH_FIVE40	"/system/icons/cPhone/five40.bmp"
-#define ICON_PATH_SIX40		"/system/icons/cPhone/six40.bmp"
-#define ICON_PATH_SEVEN40	"/system/icons/cPhone/seven40.bmp"
-#define ICON_PATH_EIGHT40	"/system/icons/cPhone/eight40.bmp"
-#define ICON_PATH_NINE40	"/system/icons/cPhone/nine40.bmp"
-#define ICON_PATH_DELETE40	"/system/icons/cPhone/delete40.bmp"
-#define ICON_PATH_STAR40	"/system/icons/cPhone/star40.bmp"
-#define ICON_PATH_HASH40	"/system/icons/cPhone/hash40.bmp"
-#define ICON_PATH_PICKUP90	"/system/icons/cPhone/pickup90.bmp"
-#define ICON_PATH_HANGUP90	"/system/icons/cPhone/hangup90.bmp"
-#define ICON_PATH_GDOTS90	"/system/icons/cPhone/gdots90.bmp"
-#define ICON_PATH_RDOTS90	"/system/icons/cPhone/rdots90.bmp"
+#define ICON_CONTACT22	"/system/icons/cPhone/cont22.bmp"
+#define ICON_TEXT22		"/system/icons/cPhone/msg22.bmp"
+#define ICON_PHONE22		"/system/icons/cPhone/phone22.bmp"
+
+#define ICON_ZERO40		"/system/icons/cPhone/zero40.bmp"
+#define ICON_ONE40			"/system/icons/cPhone/one40.bmp"
+#define ICON_TWO40			"/system/icons/cPhone/two40.bmp"
+#define ICON_THREE40		"/system/icons/cPhone/three40.bmp"
+#define ICON_FOUR40		"/system/icons/cPhone/four40.bmp"
+#define ICON_FIVE40		"/system/icons/cPhone/five40.bmp"
+#define ICON_SIX40			"/system/icons/cPhone/six40.bmp"
+#define ICON_SEVEN40		"/system/icons/cPhone/seven40.bmp"
+#define ICON_EIGHT40		"/system/icons/cPhone/eight40.bmp"
+#define ICON_NINE40		"/system/icons/cPhone/nine40.bmp"
+#define ICON_DELETE40		"/system/icons/cPhone/delete40.bmp"
+#define ICON_STAR40		"/system/icons/cPhone/star40.bmp"
+#define ICON_HASH40		"/system/icons/cPhone/hash40.bmp"
+#define ICON_PICKUP90		"/system/icons/cPhone/pickup90.bmp"
+#define ICON_HANGUP90		"/system/icons/cPhone/hangup90.bmp"
+#define ICON_GDOTS90		"/system/icons/cPhone/gdots90.bmp"
+#define ICON_RDOTS90		"/system/icons/cPhone/rdots90.bmp"
 
 #define STATUS_X        200
 #define STATUS_Y        2
@@ -165,36 +173,6 @@ class cellEditField :  public datafield {
           
           colorRect*  mEditBase;
 };
-
-/*
-// *****************************************************
-// ******************  cellEditField  ******************
-// *****************************************************
-
-// NOTE!! This, as currently written, can not be created in your constructor. It
-// won't be able to get its initial drawing commands there. Set it to NULL in your
-// constructor then create it as the first thing in your setup().
-
-class cellEditField :  public drawGroup {
-
-  public:
-          cellEditField (rect* inRect,char* defText,keyboard* inKeyboard);
-  virtual ~cellEditField(void);
-
-  virtual void      drawSelf(void);
-  virtual void      setFocus(bool setLoose);
-  virtual void      doAction(void);
-          int       getNumChars(void);      // Not including the \0. You may need to add one.
-          void      formatAsPN(void);
-          void      getText(char* inBuff);  // You better have added the (1) for the \0.
-          void      setText(char* inText);
-          
-
-          keyboard*   mKeyboard;            // They'll pass this in. DON'T delete it!
-          editLabel*  mEditField;           // Our editing field.
-          colorRect*  mEditBase;            // Our editing field's base.     
-};
-*/
 
 
 // *****************************************************

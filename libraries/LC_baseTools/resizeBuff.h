@@ -44,8 +44,8 @@ And it always works.
 NOTE : Why a pointer to uint8_t?
 Originally this was setup at char* because it started with c strings. Then
 It started being used for binary data blocks. Then binary data blocks crossing
-over serial to other processors.. Word size stuff bit me in the foot. uint8_t 
-forced buffer sized to match up.
+over serial to other processors.. Word size stuff bit me in the.. Foot. uint8_t 
+forced buffer sizes to match up.
 
 */
 

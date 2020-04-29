@@ -219,11 +219,12 @@ void doStatus(byte* buff) {
 
 
 void doPickUp(byte* buff) {
-
+ 
   if (fona.pickUp()) {
-    buff[0] = 0;                   // We'll pass a 0 for no error. (We got the call.)
+    buff[0] = 0;        // We'll pass a 0 for no error. (We got the call.)
   } else {
-    buff[0] = 1;                   // We'll pass a 1 for error. (We missed the call.)
+    buff[0] = 1;        // We'll pass a 1 for error. (We missed the call.)
+    aBlink();           // We'll also flash the red light to show the error's origin.
   }
   ourComObj.replyComBuff(1);
 }
@@ -239,6 +240,32 @@ void doCall(byte* buff) {
   ourComObj.replyComBuff(1);
 }
 
+/*
+void doCall(byte* buff) {
+
+  timeObj callTimer(500);
+
+  callTimer.start();                          // Start our time out timer.
+  while (!callTimer.ding()) {                 // While we have time..
+    if (fona.getCallStatus() == 4) {          // If its connected..
+      buff[0] = 0;                            // Stamp in "no error".
+      ourComObj.replyComBuff(1);              // Send the successful result.
+      return;                                 // We're out of here!
+    }
+    if (fona.getCallStatus() != 4) {          // If the status is not connected..
+      if (fona.callPhone((char*)&buff[1])) {  // Send connect command.
+        buff[0] = 0;                          // Stamp in "no error".
+        ourComObj.replyComBuff(1);            // Send back the result.
+        return;                               // And we're done.
+      } else {                                // Else we got an error returned..
+        delay(100);                           // What the heck, try letting it settle out a bit.
+      }
+    }
+  }
+  buff[0] = 1;                                // Blast! We timed out.
+  ourComObj.replyComBuff(1);                  // Send back the error.
+}
+*/
 
 void doHangUp(byte* buff) {
 

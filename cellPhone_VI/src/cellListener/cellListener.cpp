@@ -42,19 +42,19 @@ void cellListener::begin(int answerPanelID) {
 
 void cellListener::idle(void) {
 	
-	if (!callIncoming) {													// If we've not seen an incoming call yet..
-		if (statusReg.callStat == CS_ringingIn) {					// Oh! A call's coming in!
-			callIncoming = true;										// Tell the world we have a call.
-			nextPanel = answerID;									// Call up the telephone App.
+	if (!callIncoming) {										// If we've not seen an incoming call..
+		if (statusReg.callStat == CS_ringingIn) {		// Oh! A call's coming in!
+			callIncoming = true;								// Tell the world we have a call.
+			nextPanel = answerID;							// Call up the telephone App.
 		}
 	}  else {
-		if(statusReg.callStat != CS_ringingIn) {
-			callIncoming = false;
+		if(statusReg.callStat != CS_ringingIn) {		// If no longer ringing but callIncoming is still set..
+			callIncoming = false;							// Clear callIncoming.
 		}
 	}
-	if (statusReg.numSMSs>0) {
-		doSMS();
-	} else {
+	if (statusReg.numSMSs>0) {								// A second, unrelated responsibility. If we got incoming messages?
+		doSMS();													// We deal with them.
+	} else {														// 
 		mSMSIndex = 1;											// No messages? Restart our next search at 1.
 	}
 }
@@ -71,7 +71,7 @@ void cellListener::doSMS(void) {
 		mSMSID = ourCellManager.sendCommand(getSMS,(char*)indexBuff,true);	// Send off the new query.
 		mSMSIndex++;																			// Bump the index.	
 		if (mSMSIndex>30) mSMSIndex=1;													// Keep in inbounds.
-	} else {                                          								// We have a current one to work with?
+	} else {                                          								// We have a current command cooking?
 		switch(ourCellManager.progress(mSMSID)) {                   			// See what its up to..
 			case com_standby  : break;                    							// Its on the list.
 			case com_working  : break;                    							// Its cooking now!
@@ -95,7 +95,7 @@ void cellListener::doSMS(void) {
 	}
 }
 
-
+// Decoding the incoming raw data  [error byte][phone number string]['\0'][text message string]['\0']
 void cellListener::decodeSMS(void) {
 
 	byte		index;

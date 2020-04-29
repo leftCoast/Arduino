@@ -87,19 +87,19 @@ void phoneBtn::drawSelf(void) {
 	aRect.setRect(0,0,40,40);
 	aPipe.setSourceRect(&aRect);
 	switch(mKeystroke[0]) {
-		case '0' :   aPipe.openPipe(ICON_PATH_ZERO40); break;
-		case '1' :   aPipe.openPipe(ICON_PATH_ONE40); break;
-		case '2' :   aPipe.openPipe(ICON_PATH_TWO40); break;
-		case '3' :   aPipe.openPipe(ICON_PATH_THREE40); break;
-		case '4' :   aPipe.openPipe(ICON_PATH_FOUR40); break;
-		case '5' :   aPipe.openPipe(ICON_PATH_FIVE40); break;
-		case '6' :   aPipe.openPipe(ICON_PATH_SIX40); break;
-		case '7' :   aPipe.openPipe(ICON_PATH_SEVEN40); break;
-		case '8' :   aPipe.openPipe(ICON_PATH_EIGHT40); break;
-		case '9' :   aPipe.openPipe(ICON_PATH_NINE40); break;
-		case 'D' :   aPipe.openPipe(ICON_PATH_DELETE40); break;
-		case '*' :   aPipe.openPipe(ICON_PATH_STAR40); break;
-		case '#' :   aPipe.openPipe(ICON_PATH_HASH40); break;
+		case '0' :   aPipe.openPipe(ICON_ZERO40); break;
+		case '1' :   aPipe.openPipe(ICON_ONE40); break;
+		case '2' :   aPipe.openPipe(ICON_TWO40); break;
+		case '3' :   aPipe.openPipe(ICON_THREE40); break;
+		case '4' :   aPipe.openPipe(ICON_FOUR40); break;
+		case '5' :   aPipe.openPipe(ICON_FIVE40); break;
+		case '6' :   aPipe.openPipe(ICON_SIX40); break;
+		case '7' :   aPipe.openPipe(ICON_SEVEN40); break;
+		case '8' :   aPipe.openPipe(ICON_EIGHT40); break;
+		case '9' :   aPipe.openPipe(ICON_NINE40); break;
+		case 'D' :   aPipe.openPipe(ICON_DELETE40); break;
+		case '*' :   aPipe.openPipe(ICON_STAR40); break;
+		case '#' :   aPipe.openPipe(ICON_HASH40); break;
 	}
 	if (!clicked) {
 		aPipe.drawImage(x,y);
@@ -108,52 +108,6 @@ void phoneBtn::drawSelf(void) {
 	}
 }
 
-/*
-// Its amazing how much code it takes just to "draw" a button. Is it active?
-// Clicked? Inactive? Is it a character? A symbol? Its all here for all our
-// standard phone buttons.
-void phoneBtn::drawSelf(void) {
-
-  int         inset = 5;                      // All the hand tweaking to
-  int         arrowX1 = x+inset+3;            // setup the delete key arrow.
-  int         arrowY1 = y+inset-1;            // After all that, Julie insists it
-  int         arrowX2 = width-(2*(inset+3));  // Looks like an empty Batt. icon.
-  int         arrowY2 = height-(2*inset);
-  rect        arrowRect(arrowX1,arrowY1,arrowX2,arrowY2);
-  drawDelete  arrow(&arrowRect);
-
-    
-  if (mKeystroke[0]=='X') {
-    if (clicked) {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-      screen->setTextColor(&redButtonColor);
-    } else {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
-      screen->setTextColor(&black);
-    }
-  } else {
-    if (clicked) {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);
-      screen->setTextColor(&white);
-      arrow.setColors(&redButtonColor,&lightbButtonColorHit);
-    } else {
-      screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&lightbButtonColorHit);  // Gives a cool highlight.
-      screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
-      screen->setTextColor(&textSelectColor);
-      arrow.setColors(&redButtonColor,&lightbButtonColor);
-    }
-  }
-  if (mKeystroke[0]=='D') {
-    arrow.stamp();
-  } else {
-    screen->setTextSize(TEXT_SIZE);
-    screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-    screen->drawText(mKeystroke);
-  }
-}
-*/
 
 // Button got a click? send its saved keystroke character to our phone
 // object.
@@ -206,7 +160,7 @@ void callControl::drawSelf(void) {
 		case wakeUp			:
 		case isIdle       :
 			if (!clicked) {
-				aPipe.openPipe(ICON_PATH_PICKUP90);
+				aPipe.openPipe(ICON_PICKUP90);
 				aPipe.drawImage(x,y);
 			} else {
 				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenButtonHighlight);
@@ -214,7 +168,7 @@ void callControl::drawSelf(void) {
 		break;
 		case hasIncoming  :
 			if (!clicked) {
-				aPipe.openPipe(ICON_PATH_PICKUP90);
+				aPipe.openPipe(ICON_PICKUP90);
 				aPipe.drawImage(x,y);
 			} else {
 				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenButtonHighlight);
@@ -233,15 +187,15 @@ void callControl::drawSelf(void) {
 			}
 		break;
 		case connecting	:
-			aPipe.openPipe(ICON_PATH_GDOTS90);
+			aPipe.openPipe(ICON_GDOTS90);
 			aPipe.drawImage(x,y);
 		break;
 		case hangingUp		:
-			aPipe.openPipe(ICON_PATH_RDOTS90);
+			aPipe.openPipe(ICON_RDOTS90);
 			aPipe.drawImage(x,y);
 		case isConnected  :
 			if (!clicked) {
-				aPipe.openPipe(ICON_PATH_HANGUP90);
+				aPipe.openPipe(ICON_HANGUP90);
 				aPipe.drawImage(x,y);
 			} else {
 				screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonHighlight);
@@ -250,87 +204,6 @@ void callControl::drawSelf(void) {
 	}
 }
 
-
-/*
-// Not only is there a bunch of drawing code for this fancy button, we also
-// mix in calls to the message text about what's going on in the world of
-// cell phone hardware.
-void callControl::drawSelf(void) {
-
-	contact*	aContact;
-	char		PNBuff[CID_BYTES];
-	PNLabel formatter(1,1,1,1,1);
-	
-	hookup();
-	screen->setTextSize(TEXT_SIZE);
-	switch(mState) {
-		case wakeUp			:
-		case isIdle       :
-			if (clicked) {
-				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&backColor);
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&lightbButtonColor);
-				screen->setTextColor(&green);
-			} else {
-				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
-				screen->setTextColor(&white);
-			}
-			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-			screen->drawText("Call");
-		break;
-		case hasIncoming  :
-			if (clicked) {
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-				screen->setTextColor(&green);
-			} else {
-				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
-				screen->setTextColor(&white);
-			}
-			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-			screen->drawText("Answer");
-			if (statusReg.callerID[0]=='\0') {
-				mPhone->out("Unknown caller.");
-			} else {
-				strcpy(PNBuff,statusReg.callerID);
-				aContact = ourBlackBook->findByPN(PNBuff);
-				if (aContact) {
-					mPhone->out(aContact->mNickName);
-				} else {
-					 formatter.setValue(PNBuff);
-					 mPhone->out(formatter.buff);
-				}
-			}
-		break;
-		case connecting	:
-			screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&greenButtonHighlight);
-			screen->fillRoundRect(x,y,width,height,KEY_RAD,&greenbuttonColor);
-			screen->setTextColor(&white);
-			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-			screen->drawText("...");
-		break;
-		case hangingUp		:
-			screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
-			screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
-			screen->setTextColor(&white);
-			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-			screen->drawText("...");
-		case isConnected  :
-			if (clicked) {
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&backColor);
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&black);
-				screen->setTextColor(&redButtonColor);
-			} else {
-				screen->fillRoundRect(x+1,y,width,height,KEY_RAD,&redButtonHighlight);
-				screen->fillRoundRect(x,y,width,height,KEY_RAD,&redButtonColor);
-				screen->setTextColor(&white);
-			}
-			screen->setCursor(x+(KEY_W-CHAR_WIDTH)/2, y + ((height-TEXT_HEIGHT)/2));
-			screen->drawText("Hangup");
-		break;   
-	}
-}
-*/
 
 // Our actions. We have three states we can effect. idle, ringning or talking.
 // When we get a click, its time to change state. All three methods will
@@ -396,7 +269,7 @@ void callControl::idle() {
 		case 2  : mPhone->out("Unknown"); break;
 		case 3  : mPhone->out("Ringing In"); break;
 		case 4  : mPhone->out("Ringing Out"); break;
-		default : mPhone->out("Unknown II"); break; 
+		default : mPhone->out(statusReg.callStat); break; 
 	}
 	*/
   	//mPhone->out(statusReg.statNum);
@@ -434,7 +307,7 @@ void callControl::idle() {
 			}
 		break;
 		case	connecting		:											// A connection attempt is in process.
-			checkCall();													// We do the checking inhere.
+			checkCall();													// We do the checking in here.
 		break;
 		case	hangingUp		:											// Trying to hang up the phone.
 			checkHangup();													// Again, we check the progress in here.
@@ -468,6 +341,7 @@ void callControl::checkHangup(void) {
 				ourCellManager.readReply(mHangupID,&reply);			// Grab the byte.
 				if (reply==0) {												// Is it a zero?
 					mPhone->out("Disconnectd.");							// Tell the world!
+					ourCellManager.patchStatCallStat(0);				// Status can last awhile, patch it with the new info.
 					mState = isIdle;											// Set the state.
 				} else {
 					mPhone->out("Hangup error.");							// Troubles somewhere.
@@ -483,7 +357,7 @@ void callControl::checkHangup(void) {
 			setNeedRefresh();													// Show whatever changed.
 		break;
 		case com_complete :													// We missed something?													
-			mState = isConnected;												// Assume failure.
+			mState = isConnected;											// Assume failure.
 			setNeedRefresh();													// Show new state.
 		case com_missing  :                                   	// Possibly timed out or we already got it.
 			mPhone->out("No response.");									// Just so we know.
@@ -512,6 +386,7 @@ void callControl::checkCall(void) {
 				ourCellManager.readReply(mCallingID,&reply);			// Grab the byte.
 				if (reply==0) {												// Is it a zero?
 					mPhone->out("Connected.");								// Tell the world!
+					ourCellManager.patchStatCallStat(4);				// Status can last awhile, patch it with the new info.
 					mState = isConnected;									// Set the state.
 				} else {
 					mPhone->out("Connection failed.");					// Troubles somewhere.
@@ -594,10 +469,6 @@ void phone::setup(void) {
   stateDisplay->hold();
   stateDisplay->setColors(&textColor,&backColor);  // Sets the transp variable to false;
   addObj(stateDisplay);
-  
-  //menuBar* ourMenuBar = new menuBar((panel*)this,true,true);
-  //addObj(ourMenuBar);
-
 }
 
 
@@ -612,7 +483,7 @@ void phone::loop(void) { }
 void phone::drawSelf(void) {
 
   screen->fillScreen(&backColor);
-  screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
+  //screen->fillRect(0,0,width,MENU_BAR_H,&menuBarColor);
 }
 
 
@@ -639,9 +510,6 @@ void phone::keystroke(char inKey) {
     case 'D'   :
       deleteChar();
       numDisplay->setValue(mRawPN);
-    break;
-    case 'X'   : 
-      // This case no longer exists.
     break;
   }  
 }

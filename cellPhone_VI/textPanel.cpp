@@ -239,36 +239,32 @@ void textPanel::setup(void) {
 		addObj(ourMsgEditField);
 		setFocusPtr(ourMsgEditField);
     
-   
-    
-    
-    contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
-    mMenuBar->addObj(ourContactsBtn);
+		contactsBtn* ourContactsBtn = new contactsBtn(CLOSE_X+40,CLOSE_Y);
+		mMenuBar->addObj(ourContactsBtn);
 
-    
-    trashMsgBtn* ourTrashMsgBtn = new trashMsgBtn(CLOSE_X+172,CLOSE_Y,this);
-    mMenuBar->addObj(ourTrashMsgBtn);
-    
-    nickname = new label(CLOSE_X+75,7,100,22,currentContact->mNickName,1);
-    nickname->setJustify(TEXT_CENTER);
-    nickname->setColors(&textColor,&menuBarColor);
-    mMenuBar->addObj(nickname);
-    
-    buffBytes = currentContact->sizeOfMsgBlock();
-    if (buffBytes) {
-      if (resizeBuff(buffBytes,(uint8_t**)&msgBuff)) {
-        if (currentContact->readMsgBlock(msgBuff,buffBytes)) {
-          fillMsgList();
-        }
-        resizeBuff(0,(uint8_t**)&msgBuff);
-        buffBytes = 0;
-      }
-    }
-    mPNSet = false;
-    mCmdID = ourCellManager.sendCommand(setCurrentPN,currentContact->mPN,true);
-  } else {
-    nextPanel = contactApp;
-  }
+		trashMsgBtn* ourTrashMsgBtn = new trashMsgBtn(CLOSE_X+172,CLOSE_Y,this);
+		mMenuBar->addObj(ourTrashMsgBtn);
+
+		nickname = new label(CLOSE_X+75,7,100,22,currentContact->mNickName,1);
+		nickname->setJustify(TEXT_CENTER);
+		nickname->setColors(&textColor,&menuBarColor);
+		mMenuBar->addObj(nickname);
+
+		buffBytes = currentContact->sizeOfMsgBlock();
+		if (buffBytes) {
+			if (resizeBuff(buffBytes,(uint8_t**)&msgBuff)) {
+				if (currentContact->readMsgBlock(msgBuff,buffBytes)) {
+					fillMsgList();
+				}
+				resizeBuff(0,(uint8_t**)&msgBuff);
+				buffBytes = 0;
+			}
+		}
+		mPNSet = false;
+		mCmdID = ourCellManager.sendCommand(setCurrentPN,currentContact->mPN,true);
+	} else {
+		nextPanel = contactApp;
+	}
 }
 
 

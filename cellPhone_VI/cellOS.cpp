@@ -100,7 +100,7 @@ void formatPN(label* numField) {
 
 
 contactsBtn::contactsBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_CONTACT22,22)  { begin(); }
+  : iconButton(x,y,ICON_CONTACT22,22)  { begin(); }
   
 contactsBtn::~contactsBtn(void) { }
 
@@ -109,14 +109,14 @@ void contactsBtn::doAction(void) { nextPanel = contactApp; }
 // *****
 
 textBtn::textBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_TEXT22,22)  { begin(); }
+  : iconButton(x,y,ICON_TEXT22,22)  { begin(); }
     
 textBtn::~textBtn(void) {  }
 
 // *****
 
 callBtn::callBtn(int x,int y)
-  : iconButton(x,y,ICON_PATH_PHONE22,22)  { begin(); }
+  : iconButton(x,y,ICON_PHONE22,22)  { begin(); }
 
    
 callBtn::~callBtn(void) {  }
@@ -325,31 +325,31 @@ homeScreen::homeScreen(void)
   mBackImage->openPipe(IMAGE_FILE_PATH);
   iconX = HP_ICON_X;
 
-  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,"/system/icons/cPhone/phone32.bmp");
+  phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,ICON_PHONE32);
   if (phoneIcon) phoneIcon->begin();
   
   iconX=iconX+HP_ICON_XSTEP;
-  textIcon = new appIcon(iconX,HP_ICON_Y,textApp,"/system/icons/cPhone/msg32.bmp");
+  textIcon = new appIcon(iconX,HP_ICON_Y,textApp,ICON_MSG32);
   if (textIcon) textIcon->begin();
   
   iconX=iconX+HP_ICON_XSTEP;
-  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,"/system/icons/cPhone/cont32.bmp");
+  contactIcon = new appIcon(iconX,HP_ICON_Y,contactApp,ICON_CONT32);
   if (contactIcon) contactIcon->begin();
   
   iconX=iconX+HP_ICON_XSTEP;
-  calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,"/system/icons/rpnCalc/calc32.bmp");
+  calcIcon = new appIcon(iconX,HP_ICON_Y,calcApp,ICON_CALC32);
   if (calcIcon) calcIcon->begin();
   
   iconX=iconX+HP_ICON_XSTEP;
-  toolsIcon = new appIcon(iconX,HP_ICON_Y,toolsApp,"/system/icons/standard/pref32.bmp");
+  toolsIcon = new appIcon(iconX,HP_ICON_Y,toolsApp,ICON_PREF32);
   if (toolsIcon) toolsIcon->begin();
   
   iconX = APP_ICON_X;
-  qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,"/system/icons/qGame/qGame.bmp");
+  qGameIcon = new roundedIconBtn(iconX,APP_ICON_Y,qGameApp,ICON_QGAME32);
   if (qGameIcon) qGameIcon->begin();
   
   iconX=iconX+APP_ICON_XSTEP;
-  breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,"/system/icons/breakout/breakout.bmp");
+  breakoutIcon = new roundedIconBtn(iconX,APP_ICON_Y,breakoutApp,ICON_BREAKOUT32);
   if (breakoutIcon) breakoutIcon->begin();
   
 }

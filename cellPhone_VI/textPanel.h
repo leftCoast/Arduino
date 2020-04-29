@@ -136,13 +136,13 @@ class textPanel  :  public cellOSPanel {
   virtual void      closing(void);
 
           //keyboard* mKeyboard;
-          bmpKeyboard*	mKeyboard;
-          label*			nickname;
-          msgList*		mMsgList;
-          char*			msgBuff;
-          int				buffBytes;
-          int				mCmdID;
-          bool				mPNSet;
+          bmpKeyboard*  mKeyboard;
+          label*        nickname;
+          msgList*      mMsgList;
+          char*         msgBuff;
+          int           buffBytes;
+          int           mCmdID;
+          bool          mPNSet;
 };
 
 
