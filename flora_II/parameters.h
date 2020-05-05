@@ -38,7 +38,7 @@ struct paramType {                  // paramType is the TYPE of structure we sav
 // ******************************************
 // ******************************************
 
-class parameters {                            // parameters is the onject that manages your saved info.
+class parameters {                            // parameters is the object that manages your saved info.
 
 public:
           parameters(void);

@@ -190,8 +190,10 @@ void drawObj::doAction(void) {
 void drawObj::doAction(event* inEvent,point* localPt) { doAction(); }
 
 
-// I tested this and it worked. But for the life of me, I can no longer figure
-// out how it make it work anymore.
+// Define a void function, for example : void myCallback(void){...} 
+// Then, just call this method with your callback's name.
+// myDrawObj.setCallback(myCallback);   
+// Simple as that.
 void drawObj::setCallback(void (*funct)(void)) { callback = funct; }
 
 

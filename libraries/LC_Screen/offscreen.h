@@ -10,7 +10,7 @@ class mapDisplay :  public Adafruit_GFX {
   
   public :
             mapDisplay(bitmap* inMap,int ofsX,int ofsY);
-            ~mapDisplay(void);
+    virtual ~mapDisplay(void);
           
             bool  dispObjBegin(void);
     virtual void  drawPixel(int16_t x, int16_t y, uint16_t color);

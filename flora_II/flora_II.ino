@@ -76,7 +76,8 @@ timeObj       readTime(DEF_READ_TIME);            // Time between moisture readi
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
 
-  ourPump.setPump(false);                               // Off with the pump. This must be called first to lock down control of the pump.
+  ourPump.setPump(false);
+  // Off with the pump. This must be called first to lock down control of the pump.
   // Otherwise, if say.. You find you have a dead sensor and the progam locks here..
   // The pump will randomly activate. It pickes up stray currents on the line that
   // trigger the driver hardware. Once this is called, the pump contol is locked in

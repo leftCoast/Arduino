@@ -38,7 +38,7 @@ class drawObj : public rect, public dblLinkListObj {
   	virtual	bool		acceptEvent(event* inEvent,point* locaPt);	// Is this event for us?
   	virtual	void  	doAction(void);										// Override me for action!
   	virtual	void  	doAction(event* inEvent,point* locaPt);		//	Special for them that drag around.
-          	void		setCallback(void(*funct)(void));					// Or use a callback? Forgot how to use this.
+          	void		setCallback(void(*funct)(void));					// Or use a callback.
   
 protected:
   bool		needRefresh;

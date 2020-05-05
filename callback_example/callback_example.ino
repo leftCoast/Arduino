@@ -1,6 +1,4 @@
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
-#include <Adafruit_ILI9341.h>
+
 
 #include <colorObj.h>           // Base color handler. Works for Our NeoPixle stuff too.
 #include <idlers.h>             // idlers get their own private time to do things. DON'T BLOCK.
@@ -14,6 +12,8 @@
 #include <drawObj.h>            // The base drawing object. Inheit this for making your own things for the screen. Also the refresh and drawing management is in here.
 #include <label.h>              // A simple label object for the screen.
 #include <screen.h>             // The screen ties it all together. This is who connects the hardware drivers to the drawing enviroment.
+
+
 
 
 // ******* Example : Make an outomatic blinker ********
@@ -64,9 +64,9 @@ void  scrBlinker::drawSelf(void) {
 
   hookup();           
   if (liteOn) {
-    screen->fillCircle(locX,locY,height,&onColor);
+    screen->fillCircle(x,y,height,&onColor);
   } else {
-    screen->fillCircle(locX,locY,height,&offColor);
+    screen->fillCircle(x,y,height,&offColor);
   }
 }
 
@@ -77,7 +77,7 @@ void  scrBlinker::drawSelf(void) {
 label message("A Label",2);   // A label is all about just getting text and numbers to the screen. 
 drawObj button;               // drawObj can be used as a crude button. Best to inherit them to make more interesting things.
 scrBlinker blinker(250);      // An example of inheriting some goodies for an automatic blinker.
-scrBlinker blinker2;
+scrBlinker blinker2(500);
 
 int clickCount = 0;           // Something for the button to change.
 
@@ -89,23 +89,27 @@ void setup() {
     colorObj  liteOffColor;
     
    // Initalize the screen hardware.
-   //Serial.begin(9600);
-   if (!initScreen(ADAFRUIT_1947,INV_PORTRAIT)) {
-     //Serial.println(F("Screen failed, halting program."));
+   Serial.begin(9600);
+   if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
+     Serial.println(F("Screen failed, halting program."));
      while(true);                  //  kill the program.
    }
-
+   Serial.println("Got screen.");
+   Serial.flush();
    // Set up the screen background.
    backColor.setColor(&blue);
    backColor.blend(&green,50);
    screen->fillScreen(&backColor);
-
+   Serial.println("Screen filled");
+   Serial.flush();
+   
    // Set up our label.
    message.setColors(&white,&backColor);
    viewList.addObj(&message);
 
    // Now for the button.
-   button.clickable(true);
+   //button.clickable(true);
+   button.setEventSet(fullClick);
    button.setSize(45,30);
    button.setLocation(100,100);
    button.setCallback(callback);
@@ -124,12 +128,15 @@ void setup() {
    // And another..
    blinker2.setSize(10,10);
    blinker2.setLocation(215,16);
+   blinker2.setColors(&green,&backColor);
    viewList.addObj(&blinker2);
+   
+   ourEventMgr.begin();
 }
 
 
 // The callback for the button.
-void callback(void) { 
+void callback(void) {
   message.setValue(++clickCount);
 }
 
