@@ -160,7 +160,7 @@ void textComObj::printReadings(void) {
 
 void textComObj::doPrintReadings(void) {
 
-  ourPort->print("Temperature : "); ourPort->print(tempC); ourPort->println(" *C");
+  //ourPort->print("Temperature : "); ourPort->print(tempC); ourPort->println(" *C");
   ourPort->print("Capacitive  : "); ourPort->print(capread); ourPort->println(" mf");
   ourPort->print("Moisture    : "); ourPort->print((int)moisture); ourPort->println(" %");
   ourPort->print("And we are  : ");

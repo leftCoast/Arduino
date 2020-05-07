@@ -3,23 +3,23 @@
 
  #include <EEPROM.h>
 
-#define DEF_DRY_LIMIT           25            // These guys are in the parameer block.
-#define DEF_WATER_TIME          30000         // Defauly water time, 10 seconds.
-#define DEF_SOAK_TIME           120000        // Default soak time, 120 seconds.
-#define DEF_NAME                "Left coast PlantBot"
-#define DEF_DRY                  871  //335          // Wipe it dry and block it up off the wood table.
-#define DEF_MUD                  481  //1015         // DUnk in glass of water to Max it out.
-#define DEF_RUN_NUM              0            // Default to NOT logging.
+#define DEF_DRY_LIMIT   40          // Default moisture limit 40%.
+#define DEF_WATER_TIME  40000       // Default water time, 40 seconds.
+#define DEF_SOAK_TIME   120000      // Default soak time, 120 seconds.
+#define DEF_NAME        "Left coast PlantBot"
+#define DEF_DRY         987         // Wipe it dry and block it up off the wood table.
+#define DEF_MUD         573         // Dunk in glass of water to Max it out.
+#define DEF_RUN_NUM     0           // Default to NOT logging.
 
-#define DEF_READ_TIME           500           // These guys are hard coded. How often do we read and/or log.
-#define DEF_CSMOOTHER           20
-#define DEF_TSMOOTHER           20
+#define DEF_READ_TIME   500         // These guys are hard coded. How often do we read and/or log.
+#define DEF_CSMOOTHER   20
+#define DEF_TSMOOTHER   20
 
 // ******************************************
 // *********   COPY TO CONTROLLER   *********
 // ******************************************
 
-#define NAME_BUFF_BYTES         24
+#define NAME_BUFF_BYTES 24
 
 struct paramType {                  // paramType is the TYPE of structure we save all of our parameters in. We can plunk it into EEPROM and read it right back out.
   int dryLimit;                     // The moisture percentage reading (limit) we use to trigger when its time to water.

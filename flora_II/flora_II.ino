@@ -20,9 +20,17 @@
 #include "handheld.h"
 #include "globals.h"
 #include "UI.h"
+//#include "tapSensor.h"
+
+/* Sensor test
+#define SENSOR_PIN 15
+tapSensor aSensor(SENSOR_PIN,5,5);
+timeObj  writeTimer;
+*/
+
 
 #define   ANALOG_PIN  A4
-//Adafruit_seesaw ss;                               // The moisture sensor.
+
 
 mapper*       mudMapper = NULL;                   // Mapper from raw capacitive reading to percent.
 
@@ -30,21 +38,6 @@ runningAvg    cSmoother(DEF_CSMOOTHER);           // Running avarage for the raw
 runningAvg    tSmoother(DEF_TSMOOTHER);           // Running avarage for the raw tempature readings.
 timeObj       readTime(DEF_READ_TIME);            // Time between moisture readings.
 
-
-// ********************************************************************
-// ********************************************************************
-// ********************************************************************
-
-// I Think this is how they tell if the unit is online or not. Maybe I
-// can use this as a periotic check to see if its running or not?
-
-/*
-  uint8_t c = this->read8(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID);
-  if (c != SEESAW_HW_ID_CODE) {
-    return false;
-  }
-  return true;
-*/
 
 // ********************************************************************
 // ********************************************************************
@@ -84,34 +77,32 @@ void setup() {
   // and your good to go.
 
   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
-  Serial.println("Hello?");
+  //Serial.println("Hello?");
 
   ourParamObj.readParams();                             // Read our saved running params.
   updateEnv();                                          // Setup what we need to setup with params.
 
   ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
-  Serial.print("We have a display? ");
-  Serial.println(ourDisplay.mHaveScreen);
+  //Serial.print("We have a display? ");
+  //Serial.println(ourDisplay.mHaveScreen);
 
   textComs.begin();                                     // Set up parser so we can talk to the computer.
-  Serial.println("text coms are up.");
+  //Serial.println("text coms are up.");
 
   ourHandheld.begin();                                  // Setup coms for the handheld controller.
-  Serial.print("ourHandheld result (0 is good) : ");
-  Serial.println(ourHandheld.readErr());
+  //Serial.print("ourHandheld result (0 is good) : ");
+  //Serial.println(ourHandheld.readErr());
 
-  /*
-    if (!ss.begin(0x36)) {                                // Start up moisture sensor.
-    Serial.println("ERROR! no Sensor.");                // Failed!
-    ourDisplay.sensorDeath();                           // This will lock everything up and just blink. (Game over!)
-    }
-  */
-
+   /* Sensor test
+   aSensor.begin();
+   writeTimer.start();
+   */
+   
   weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
   soakTime->start();                                    // And we start up the soak timer for that time.
   readTime.start();                                     // Fire up the read timer. We're live!
 
-  Serial.println("Sytem online!");
+  //Serial.println("Sytem online!");
 }
 
 
@@ -151,10 +142,6 @@ void doSetPump(void) {
 // Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
 
-  /*
-    tempC = ss.getTemp();                       // Read the tempature from the sensor.
-    capread = ss.touchRead(0);                  // Read the capacitive value from the sensor.
-  */
   tempC = 0;
   capread = analogRead(ANALOG_PIN);
 
@@ -163,7 +150,6 @@ void doReading(void) {
   ourDisplay.addRawCap(capread);
 
   capread = cSmoother.addData(capread);     // Pop the capacitive value into the capacitive smoother. (Running avarage)
-  ///tempC = tSmoother.addData(tempC);         // Pop the tempature value into the tempature smoother. (Again, running avarage)
   moisture = mudMapper->Map(capread);       // Map the resulting capacitive value to a percent.
   moisture = round(moisture);               // Round it to an int.
 
@@ -182,6 +168,18 @@ void doReading(void) {
 void loop() {
 
   idle();                                             // Calling idle() first is always a good idea. Just in case there are idlers that need it.
+   /* Sensor test
+   if (writeTimer.ding()) {
+      Serial.println(aSensor.getTapVal()*100);
+      writeTimer.start();
+      Serial.print(0);
+      Serial.print(" 1 ");
+      Serial.print(" 1.5 ");
+      Serial.print(" 2 ");
+   }
+   */
+  
+  
   if (needReset) {                                    // If our params have changed..
     updateEnv();                                      // Update all the things they effect.
   }

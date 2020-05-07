@@ -4,6 +4,7 @@
 tapSensor::tapSensor(int sensorPin,float sumTime,int numData) {
   
 	mTapSum		= 0;
+	mReadings	= 0;
 	mSensorPin	= sensorPin;
 	mTapTimer	= new timeObj(sumTime);
 	mSmoother	= new runningAvg(numData);
@@ -30,13 +31,18 @@ void tapSensor::begin(void) {
 // Idle time, time to get to work!
 void tapSensor::idle(void) {
   
+  float	tapRatio;
+  
   if (!digitalRead(mSensorPin)) {		// If we have a tap..
     while (!digitalRead(mSensorPin));	// Hold 'till clear.
     mTapSum++;									// Add the tap to the sum.
   }
+  mReadings++;									// either way, we took a reading.
   if (mTapTimer->ding()) {					// If its time to add the sum to the running average..
-    mSmoother->addData(mTapSum);			// Add the sum.
+    tapRatio = (float)mTapSum/(float)mReadings;		// Calculate the ratio.
+    mSmoother->addData(tapRatio);		// Add the ratio.
     mTapSum = 0;								// Clear it for the next batch.
+    mReadings = 0;							// Clear it for the next batch.
     mTapTimer->stepTime();					// Restart the tap timer.
   }
 }

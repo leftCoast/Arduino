@@ -3,24 +3,21 @@
 #define SENSOR_PIN 15
 
 tapSensor aSensor(SENSOR_PIN);
-timeObj  writeTimer(250);
+timeObj  writeTimer(20);
+
 void setup() {
    
-   //aSensor.begin();
-   pinMode(SENSOR_PIN, INPUT);         // Setup as input.
-   digitalWrite(SENSOR_PIN, HIGH);
+   aSensor.begin();
    writeTimer.start();
 }
 
 void loop() {
-   if (!digitalRead(SENSOR_PIN)) {
-      Serial.println("got a low");
-   }
-   /*
+
    idle();
    if (writeTimer.ding()) {
+      Serial.print(0);
+      Serial.print(" 100 ");
       Serial.println(aSensor.getTapVal());
       writeTimer.start();
    }
-   */
 }
