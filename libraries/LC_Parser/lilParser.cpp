@@ -123,11 +123,11 @@ char* lilParser::getParam(void) {
   		index = 0;																						// Ready to write in the chars..
     	if (paramBuff[paramIndex] != '\0') {                                  		// Not looking at empty buffer.
       	while (paramBuff[paramIndex] != '\0' && paramBuff[paramIndex] != EOL) { // Loop through to the next param.
-        	buff[index++] = paramBuff[paramIndex++];                          		// Filling the user buff.
+        		buff[index++] = paramBuff[paramIndex++];										// Filling the user buff.
       	}
       	buff[index] = '\0';                                                 		// Cap off the new buff.
       	if (paramBuff[paramIndex] == EOL) {                                 		// If EOL kicked us out.
-        	paramIndex++;                                                     		// Hop over it.
+        		paramIndex++;																			// Hop over it.
       	}
     	}
   	}
