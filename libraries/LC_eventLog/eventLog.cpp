@@ -7,13 +7,13 @@
 // timer.
 void gStartTimer(void) {
 
-	gTimer(1000).start();
+	gTimer.start();
 	gStarted = true;
 }
 
 
 
-timeObj*	gTimer(1000);			// A global second timer, so that all logfiles will have a single
+timeObj*	gTimer(EVENTLOG_MS);	// A global second timer, so that all logfiles will have a single
 int		gSec		= 0;			// Time index. Like the click of a movie clapperboard.
 bool		gStarted	= false;		// Has anyone called gStartTimer() yet?
 
@@ -32,7 +32,7 @@ eventLog::~eventLog(void) { if (mPath) resizeBuff(0,&mPath); }
 
 // Program is up and running.Here's where we see if all this might work. Valid file path.
 // Check to see if the SD drive is running. Also fires up the second timer for everyone.
-bool eventLog::begin(char* path,int series) {
+bool eventLog::begin(char* path) {
 
 	File	logFile;
 	
@@ -52,8 +52,68 @@ bool eventLog::begin(char* path,int series) {
 }
 
 
-// If we are ready, we can change lokking state.
-void eventLog::setLogging(bool offOn) { if (mReady) mLogging = onnOff; }
+// So much work for such a small thing..
+// Open the file, if we have one, and figure out what the last series number was in it.
+// Then return our best guess.
+int eventLog::findSeries(void) {
+
+	unsigned long	index;
+	unsigned long	lastTab;
+	char*				numBuff;
+	int				series;
+	
+	lastTab = 0;												// Ain't seen one yet.
+	numBuff = NULL;											// We always init addresses to NULL.
+	series = 0;													// Unless we find differently.
+	if (mReady) {												// If the file stuff has been checked out..
+		logFile = SD.open(mPath, FILE_WRITE);  		// Lets try to open/create the logfile.
+		if (logFile) {											// If we got a logFile..
+			index = logFile.size();							// Point at the last byte. (+1)
+			if (!index) {										// If we're pointing at byte 0..
+				return series;									// Empty file, return series = 0.	
+			}		
+			index--;												// Bump back index. (Starting at last byte now)
+			logFile.seek(index);								// Point at the data.
+			if (logFile.peek()!='\n') {					// If we didn't find an EOL.. (Should have.)
+				index++;											// Put the index back to last byte (+1)
+			}
+			do {													// Start looping..
+				index--;											// Bump back index. (Starting at last non-EOL byte now)
+				logFile.seek(index);							// Point at the data.
+				if (logFile.peek()=='\t') {				// If we run across a tab..
+					lastTab = index;							// We track the last tab we saw.
+				}	
+			} while(index && logFile.peek()!='\n');	// If not at the start and not pointing at an EOL. (Loop again)
+			if (logFile.peek()=='\n') {					// If we found an EOL..
+				index++;											// Pop back past it. Went too far.
+				logFile.seek(index);							// Point at the data.
+			}
+			if (lastTab) {										// If we saw a tab..
+				numBytes = lastTab - index;				// Calculate the length of the number.
+				if (resizeBuff(numBytes+1,&numBuff)) {	// If we can allocate the buffer..
+					logFile.read(numBuff,numBytes);		// Grab the number.
+					numBuff[numBytes] = '\0';				// Stuff in the terminating null char.
+					series = atoi(numBuff);					// Read the number out of the text.
+					resizeBuff(0,&numBuff);					// Recycle the text buffer.
+				}
+			}
+			logFile.close();									// Close the logfile.
+		}
+	}
+	return series;												// Pass back what we found as the series number.
+}
+
+
+// If we are ready, we can change logging state. each time we shut down, series increments.
+void eventLog::setLogging(bool onOff) {
+
+	if (mReady) {
+		if (onOff) {
+			mSeries  = findSeries() + 1;
+		}
+		mLogging = onOff;
+	}
+}
 
 
 // If we are ready, we pass back logging state. Otherwise? We pass back false.
