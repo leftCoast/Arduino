@@ -1,15 +1,30 @@
-#include "adafruit_1947_Obj.h"
+
 #include "SD.h"
+
+// **********************************************************************
+// These are just for my hardware. You will need to replace them to match
+// your hardware setup.
+
+#include "adafruit_1947_Obj.h"
 #include "screen.h"
+// **********************************************************************
+
+
+// **********************************************************************
+// For the eventLog to compile, you will also need the LC_baseTools
+// library from the Left coast repository. Go find it.
+
 #include "eventLog.h"
+// **********************************************************************
 
-#define SD_CS     4
-#define MAX_BYTES 200
 
-char  dataBuff[MAX_BYTES+1];
-int   i = 0;
+#define SD_CS     4           // My chip select choice was 4, that's prett typical, but yours may be different.
+#define MAX_BYTES 200         // A good size for a text buffer.
 
-eventLog ourEventLog;
+char  dataBuff[MAX_BYTES+1];  // Text  uffer to store the stuff Mrs user will type in.
+int   i = 0;                  // Pointer for keeping track of inputted text.
+
+eventLog ourEventLog;         // The eventlog object. Remeber this was for testing eventLog?
 
 void setup() {
    
@@ -18,7 +33,8 @@ void setup() {
    // **********************************************************************
    // If there is any hardware sharing the SPI bus, it needs to be initiated.
    // In my case there is an Adafruit display that the SD card reader is
-   // attached to.
+   // attached to. Your's will probably be different. So this should be
+   // replaced with however your hardware is initilized.
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
     Serial.println("NO SCREEN!");
     Serial.flush();
@@ -43,6 +59,9 @@ void setup() {
    Serial.println("Type ? for list of commands.");
 }
 
+
+// Before doing the logging thing, lets check to see if its actually a command
+// first. IF so, handle the command. If not? We can let them log it.
 bool checkCommand(void) {
 
    File  logFile;
