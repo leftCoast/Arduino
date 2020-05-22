@@ -1,10 +1,10 @@
- #ifndef adafruit_1947_Obj_h
+#ifndef adafruit_1947_Obj_h
 #define adafruit_1947_Obj_h
 
 #include <Wire.h>      			// this is needed for FT6206
 #include <Adafruit_GFX.h>
-//#include <Adafruit_ILI9341.h>
-#include <ILI9341_t3.h>
+#include <Adafruit_ILI9341.h>
+//#include <ILI9341_t3.h>
 #include <Adafruit_FT6206.h>
 #include <LC_SPI.h>
 #include <baseGraphics.h>
@@ -65,8 +65,8 @@ class adafruit_1947_Obj : public displayObj {
   
 	private:
 				Adafruit_FT6206*	cTS;
-				//Adafruit_ILI9341*	theTFT;
-				ILI9341_t3*			theTFT;
+				Adafruit_ILI9341*	theTFT;
+				//ILI9341_t3*			theTFT;
 				byte					cs;
 				byte					rst;
 				bool					lastTouch;

@@ -36,39 +36,44 @@
 #define SD_CS   4
 
 
+void bootError(char* errStr) {
+   
+   screen->fillScreen(&black);   // Fill the screen black.
+   screen->setCursor(10,10);     // Move cursor to the top left.
+   screen->setTextColor(&white); // Drawing in white..
+   screen->setTextSize(2);       // Big enought to notice.
+   screen->drawText(errStr);     // Draw the error message.
+   analogWrite(SCREEN_PIN,0);    // Bring up the screen.
+   while(1);                     // Lock down.
+}
+
 
 void setup() {
  
-  /*
-  byte numS = 47;
-  byte numN = 256;
-
-  Serial.print("Time : ");Serial.println((byte)(numN - numS));
-  
-  timeObj testTimer(1000);
-  testTimer.start();
-  while(!testTimer.ding()) {
-  Serial.println((testTimer.getFraction()*100));
-  }
-  */
-  analogWrite(SCREEN_PIN,0);    // Turn off backlight.
-  
-  // First, bring the screen online.
+  // Turn off backlight.
+  analogWrite(SCREEN_PIN,0); 
+                                    
+  // Give it a bit for the hardware to power up.
+  delay(100); 
+                                                   
+  // Now, bring the screen online.
   if (!initScreen(ADAFRUIT_1947,TFT_CS,TFT_RST,PORTRAIT)) {
     Serial.println("Can't bring the display online.");
     while(true);
   }
   
-  // Next is to bring the comuication hardware online.
+  // Next is to bring the FONA hardware online.
   ourCellManager.begin(9600);             // Fire up comunications.
   if (ourCellManager.readErr()!=NO_ERR) { // Did the poor thing fire up?
     Serial.println("Can't bring FONA comunication online.");
+    bootError("No FONA Coms.");
     while(true);
   }
 
   // Bring the diskdrive online.
   if (!SD.begin(SD_CS)) {
     Serial.println("Can't bring diskdrive online.");
+    bootError("No SD Card.");
     while(true);
   }
   

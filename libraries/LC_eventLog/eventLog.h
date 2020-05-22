@@ -33,7 +33,8 @@ As of..
 
 */
 
-
+#include "Arduino.h"
+#include "SD.h"
 #include "timeObj.h"
 #include	"idlers.h"
 
@@ -47,14 +48,14 @@ class eventLog	:	public idler {
 				eventLog(void);
 	virtual	~eventLog(void);
 	
-	virtual	bool	begin(char* path,int series=0);
+	virtual	bool	begin(char* path);
 	virtual	int	findSeries(void);
 	virtual	void	setLogging(bool offOn);
 	virtual	bool	getLogging(void);
-	virtual	void	addEvent(char* eventTxt);
+	virtual	bool	addEvent(char* eventTxt);
 	virtual	void	deleteFile(void);
 	virtual	void	idle(void);
-	
+				const char*	getPath(void);
 	private:
 				char*		mPath;
 				int		mSeries;

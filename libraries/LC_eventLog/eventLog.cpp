@@ -3,6 +3,12 @@
 
 
 
+timeObj	gTimer(EVENTLOG_MS);	// A global second timer, so that all logfiles will have a single
+int		gSec		= 0;			// Time index. Like the click of a movie clapperboard.
+bool		gStarted	= false;		// Has anyone called gStartTimer() yet?
+
+
+
 // First successful call of begin() calls this. It sets up the globals and starts the
 // timer.
 void gStartTimer(void) {
@@ -10,12 +16,6 @@ void gStartTimer(void) {
 	gTimer.start();
 	gStarted = true;
 }
-
-
-
-timeObj*	gTimer(EVENTLOG_MS);	// A global second timer, so that all logfiles will have a single
-int		gSec		= 0;			// Time index. Like the click of a movie clapperboard.
-bool		gStarted	= false;		// Has anyone called gStartTimer() yet?
 
 
 eventLog::eventLog(void) {
@@ -45,7 +45,8 @@ bool eventLog::begin(char* path) {
 				logFile.close();                    // Close the file.
 				hookup();									// Hookup to the idler's list.
 				if (!gStarted) gStartTimer();			// First one to begin, fires off the initializer function.
-        		mReady = true;               			// Flag we're up and running.
+        		mReady = true;  							// Flag we're up and running.
+        	}             			
 		}
 	}
 	return mReady;											// And tell the world!
@@ -60,16 +61,19 @@ int eventLog::findSeries(void) {
 	unsigned long	index;
 	unsigned long	lastTab;
 	char*				numBuff;
+	int				numBytes;
 	int				series;
+	File				logFile;
 	
 	lastTab = 0;												// Ain't seen one yet.
 	numBuff = NULL;											// We always init addresses to NULL.
 	series = 0;													// Unless we find differently.
 	if (mReady) {												// If the file stuff has been checked out..
-		logFile = SD.open(mPath, FILE_WRITE);  		// Lets try to open/create the logfile.
+		logFile = SD.open(mPath, FILE_READ);  			// Lets try to open the logfile.
 		if (logFile) {											// If we got a logFile..
 			index = logFile.size();							// Point at the last byte. (+1)
 			if (!index) {										// If we're pointing at byte 0..
+				logFile.close();								// Close the logfile.
 				return series;									// Empty file, return series = 0.	
 			}		
 			index--;												// Bump back index. (Starting at last byte now)
@@ -130,19 +134,29 @@ bool eventLog::getLogging(void) {
 // Add a bit of data. This will start it with a series number then seconds index. All data
 // is separated by tabs and it should to readable text. Events ends with an EOL character.
 // If you want a header, it would be best in inherit this and add that first if the filesize is 0.
-void eventLog::addEvent(char* eventTxt) {
+bool eventLog::addEvent(char* eventTxt) {
 	
 	File	logFile;
+	bool	success;
 	
-	if (getLogging()) {
+	success = false;												// Not been a success yet.
+	if (getLogging()) {											// If we -are- logging..
 		logFile = SD.open(mPath, FILE_WRITE);  			// Lets try to open/create the logfile.
 		if (logFile) {												// If we had success..
+			
+			Serial.print(mSeries);Serial.print('\t');	// First we print out the series number.
+			Serial.print(gSec);Serial.print('\t');		// Next the number of seconds in this series.
+			Serial.println(eventTxt);	
+			
+			
 			logFile.print(mSeries);logFile.print('\t');	// First we print out the series number.
 			logFile.print(gSec);logFile.print('\t');		// Next the number of seconds in this series.
 			logFile.println(eventTxt);							// And whatever their data ends up being.
+			logFile.close();          							// Close the file. (Always leave files closed!)
+			success = true;
 		}
-		logFile.close();          								// Close the file. (Always leave files closed!)
 	}
+	return success;
 }
 			
 
@@ -166,12 +180,15 @@ void eventLog::deleteFile(void) {
 	}
 }
 		
+// Things want to use the filepath. Let 'em have a look.
+const char* eventLog::getPath(void) { return mPath; }
+
 
 // Idle time, everyone checks the timer.
 void eventLog::idle(void) {
 
-	if (gStartTimer.ding()) {		// If the timer has expired..
-		gSec++;							// Bump the timer.
-		gTimer.stepTime();			// restart the timer.
+	if (gTimer.ding()) {		// If the timer has expired..
+		gSec++;					// Bump the timer.
+		gTimer.stepTime();	// restart the timer.
 	}
 }
