@@ -1,75 +1,50 @@
 #include "pumpObj.h"
 #include <timeObj.h>
 
-bool    pumpCom;
+
 pumpObj ourPump(MOTOR_1_PIN,DEF_MOTOR_PWM_PERCENT,DEF_MOTOR_PWM_PERIOD);
 
 
 pumpObj::pumpObj(int inPin,float inPWMPercent,float inPWMPeriodMs)
-  : blinker(inPin) {
-    
-  if (inPWMPercent<0) inPWMPercent = 0;
-  if (inPWMPercent>100) inPWMPercent = 100;
-  mPWMPercent = inPWMPercent;
-  setPWMPeriod(inPWMPeriodMs);
-  setPWMPercent(inPWMPercent);
+  : squareWave(inPWMPeriodMs,inPWMPeriodMs*(inPWMPercent/100)) {
+
+  mInit = false;
+  mPin = inPin;
   //setPulse(DEF_MOTOR_PWM_PERCENT,DEF_MOTOR_PWM_PERCENT,2000); // Default it just run wide open.
   setPulse(100,35,1500);
   mSpeedTimer.setTime(DELTA_SPEED_TIME,false);
-  pumpCom = false;
 }
 
     
 pumpObj::~pumpObj(void) { }
 
 
-void pumpObj::setPWMPercent(float percent) {
-
-  float periodMs;
-  float onMs;
-
-  if (percent<0) percent = 0;
-  if (percent>100) percent = 100;
-  periodMs = getTime()/1000;
-  onMs = (percent/100)*periodMs;
-  setTimes(onMs,periodMs);
-  mPWMPercent = percent;
-}
-
-
-void pumpObj::setPWMPeriod(float periodMs) {
-
-  float onMs;
-  
-  onMs = (mPWMPercent/100)*periodMs;
-  setTimes(onMs,periodMs);
-}
-
-
 void pumpObj::setPump(bool onOff) {
 
-  if (onOff) {
-    mSpeedTimer.start();
-    mSpeedFrame = 0;
-    setSpeed();
+  if (onOff) {                // If theyt want the pump on..
+   if (!mInit) {              // If not initialzed..
+      pinMode(mPin, OUTPUT);  // Now you are!
+      mInit = true;           // Flag it!
+   }
+    mSpeedTimer.start();      // Start up the timer!
+    mSpeedFrame = 0;          // Reset the speed profile.
+    setSpeed();               // Set the speed.
   }
-  setBlink(onOff);
+  setOnOff(onOff);            // Turn the pump on or off.
  }
 
 
-bool pumpObj::pumpOn(void) { return running; }
+bool pumpObj::pumpOn(void) { return mRunning; }
 
-
+                              //100                  35              1500
 void pumpObj::setPulse(float inHighPercent,float inLowPercent,float inPeriodMs) {
 
-  mHigh   = inHighPercent;
-  mLow    = inLowPercent;
-  mPeroid = inPeriodMs;
+  mPeriod = inPeriodMs;
   mSpeedPlot.clearMap();
-  mSpeedPlot.addPoint(0,mHigh);
-  mSpeedPlot.addPoint(mPeroid/2.0,mHigh);
-  mSpeedPlot.addPoint((mPeroid/2.0)+1,mLow);
-  mSpeedPlot.addPoint(mPeroid,mLow);
+  mSpeedPlot.addPoint(0,inHighPercent);
+  mSpeedPlot.addPoint(inPeriodMs/2.0,inHighPercent);
+  mSpeedPlot.addPoint((inPeriodMs/2.0)+1,inLowPercent);
+  mSpeedPlot.addPoint(inPeriodMs,inLowPercent);
   mSpeedFrame = 0;
 }
 
@@ -77,11 +52,17 @@ void pumpObj::setPulse(float inHighPercent,float inLowPercent,float inPeriodMs) 
 void pumpObj::setSpeed(void) {
   
   if (mSpeedTimer.ding()||mSpeedFrame==0) {
-    if (mSpeedFrame>mPeroid) {
+    if (mSpeedFrame>mPeriod) {
       mSpeedFrame = 0;
     }
-    setPWMPercent(mSpeedPlot.Map(mSpeedFrame));
+    setPercent(mSpeedPlot.Map(mSpeedFrame));
     mSpeedFrame = mSpeedFrame + DELTA_SPEED_TIME;
     if (mSpeedTimer.ding()) mSpeedTimer.stepTime();
   }
 }
+
+
+void pumpObj::pulseOn(void) { digitalWrite(mPin,HIGH); }
+
+
+void pumpObj::pulseOff(void) { digitalWrite(mPin,LOW); }

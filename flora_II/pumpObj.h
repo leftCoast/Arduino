@@ -1,7 +1,7 @@
 #ifndef pumpObj_h
 #define pumpObj_h
 
-#include "blinker.h"
+#include "squareWave.h"
 #include "multiMap.h"
 
 // First block here is saved in the parameters.
@@ -13,34 +13,27 @@
 #define DELTA_SPEED_TIME        250     // How often do we plan on changing throttle settings, ms. (Also hard coded for now)
 
 
-class pumpObj : public blinker {
+class pumpObj : public squareWave {
 
-  public :
+   public :
             pumpObj(int inPin,float inPWMPercent,float inPWMPeriodMs);
-    virtual ~pumpObj(void);
+   virtual  ~pumpObj(void);
 
-    virtual void  setPWMPercent(float percent);                                       // First two are for setting up the PWM for controlling motor power/speed.
-    virtual void  setPWMPeriod(float periodMs);
-    
-    virtual void  setPump(bool onOff);                                                // Turn the pump on or off. VERY IMPORTANT! This actually sets up your I/O pin. 
-                                                                                      // If you don't call this at the start of your program, the pump **WILL** run
-                                                                                      // uncontrollably.) Even if nothing is "talking" to it. Any stray current will
-                                                                                      // cause it to turn on or off. Once its called.. Your fine.
-                                                                                      
-    virtual bool  pumpOn(void);                                                       // Is the pump on?
-    virtual void  setPulse(float inHighPercent,float inLowPercent,float inPeriodMs);  // This is for setting up speed variance over time.
-    virtual void  setSpeed(void);                                                     // Dynamic speed gets set in here.
-    
-            float     mPWMPercent;                                                    // The PWM Stuff is all about high freq. motor speed control.
-            float     mHigh;                                                          // These are low freq. numbers for speed variance over time.
-            float     mLow;
-            float     mPeroid;
-            multiMap  mSpeedPlot;
-            timeObj   mSpeedTimer;
-            int       mSpeedFrame;
+   virtual  void  setPump(bool onOff);                                                 // Turn the pump on or off. VERY IMPORTANT! TURN OFF PUMP at the start of your program! 
+   virtual  bool  pumpOn(void);                                                        // Is the pump on?
+   virtual  void  setPulse(float inHighPercent,float inLowPercent,float inPeriodMs);   // This is for setting up speed variance over time.
+   virtual  void  setSpeed(void);                                                      // Dynamic speed gets set in here.
+   virtual  void  pulseOn(void);                                                       // What to do when pulse goes high.
+   virtual  void  pulseOff(void);                                                      // What to do when pulse goes low.
+
+            bool     mInit;
+            int      mPin;
+            multiMap mSpeedPlot;
+            timeObj  mSpeedTimer;
+            int      mSpeedFrame;
+            int      mPeriod;
 };
 
-extern bool    pumpCom; // Are we being told to turn the pump on by someone?
 extern pumpObj ourPump;
 
 #endif

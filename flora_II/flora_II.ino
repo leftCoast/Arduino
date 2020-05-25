@@ -32,11 +32,11 @@ timeObj  writeTimer;
 #define   ANALOG_PIN  A4
 
 
-mapper*       mudMapper = NULL;                   // Mapper from raw capacitive reading to percent.
+mapper*       mudMapper = NULL;        // Mapper from raw capacitive reading to percent.
 
-runningAvg    cSmoother(DEF_CSMOOTHER);           // Running avarage for the raw capacitive readings.
-runningAvg    tSmoother(DEF_TSMOOTHER);           // Running avarage for the raw tempature readings.
-timeObj       readTime(DEF_READ_TIME);            // Time between moisture readings.
+runningAvg  cSmoother(DEF_CSMOOTHER);  // Running avarage for the raw capacitive readings.
+runningAvg  tSmoother(DEF_TSMOOTHER);  // Running avarage for the raw tempature readings.
+timeObj     readTime(DEF_READ_TIME);   // Time between moisture readings.
 
 
 // ********************************************************************
@@ -69,38 +69,38 @@ timeObj       readTime(DEF_READ_TIME);            // Time between moisture readi
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
 
-  ourPump.setPump(false);
-  // Off with the pump. This must be called first to lock down control of the pump.
-  // Otherwise, if say.. You find you have a dead sensor and the progam locks here..
-  // The pump will randomly activate. It pickes up stray currents on the line that
-  // trigger the driver hardware. Once this is called, the pump contol is locked in
-  // and your good to go.
-
-  Serial.begin(57600);                                  // Fire up serial port. (Debugging)
-  //Serial.println("Hello?");
-
-  ourParamObj.readParams();                             // Read our saved running params.
-  updateEnv();                                          // Setup what we need to setup with params.
-
-  ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
-  //Serial.print("We have a display? ");
-  //Serial.println(ourDisplay.mHaveScreen);
-
-  textComs.begin();                                     // Set up parser so we can talk to the computer.
-  //Serial.println("text coms are up.");
-
-  ourHandheld.begin();                                  // Setup coms for the handheld controller.
-  //Serial.print("ourHandheld result (0 is good) : ");
-  //Serial.println(ourHandheld.readErr());
-
-   /* Sensor test
-   aSensor.begin();
-   writeTimer.start();
-   */
    
-  weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
-  soakTime->start();                                    // And we start up the soak timer for that time.
-  readTime.start();                                     // Fire up the read timer. We're live!
+   ourPump.setPump(false);
+   // Off with the pump. This must be called first to lock down control of the pump.
+   // Otherwise, if say.. You find you have a dead sensor and the progam locks here..
+   // The pump will randomly activate. It pickes up stray currents on the line that
+   // trigger the driver hardware. Once this is called, the pump contol is locked in
+   // and your good to go.
+   
+   // No one is turning on the pump right now..
+   pumpCom = false;
+   
+   Serial.begin(57600);                                  // Fire up serial port. (Debugging)
+   
+   mudMapper = NULL;
+   ourParamObj.readParams();                             // Read our saved running params.
+   updateEnv();                                          // Setup what we need to setup with params.
+   
+   ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
+   //Serial.print("We have a display? ");
+   //Serial.println(ourDisplay.mHaveScreen);
+   
+   textComs.begin();                                     // Set up parser so we can talk to the computer.
+   //Serial.println("text coms are up.");
+   
+   ourHandheld.begin();                                  // Setup coms for the handheld controller.
+   //Serial.print("ourHandheld result (0 is good) : ");
+   //Serial.println(ourHandheld.readErr());
+
+   
+   weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
+   soakTime->start();                                    // And we start up the soak timer for that time.
+   readTime.start();                                     // Fire up the read timer. We're live!
 
   //Serial.println("Sytem online!");
 }
@@ -117,8 +117,8 @@ void updateEnv(void) {
   soakTime    = new timeObj(ourParamObj.getSoakTime());                         // Create an object for tracking soak time.
   mudMapper   = new mapper(ourParamObj.getDry(), ourParamObj.getMud(), 0, 100); // Create the mapper to calculate moiture percent.
 
-  ourPump.setPWMPercent(ourParamObj.getPWMPercent());
-  ourPump.setPWMPeriod(ourParamObj.getPWMPeriod());
+  ourPump.setPercent(ourParamObj.getPWMPercent());
+  ourPump.setPeriod(ourParamObj.getPWMPeriod());
   needReset = false;
 }
 
