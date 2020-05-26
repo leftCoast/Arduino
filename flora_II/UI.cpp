@@ -234,7 +234,7 @@ void UI::begin(void) {
   }
   if (!mHaveScreen) {
     pinMode(13, OUTPUT);
-    idleLight.setBlink(true);                             // Start up our running light. Its all we got.
+    idleLight.setOnOff(true);                             // Start up our running light. Its all we got.
   }
 }
 

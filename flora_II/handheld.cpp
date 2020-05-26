@@ -334,6 +334,6 @@ void handheld::handleDeleteLogFile(byte* comPtr) {
 // other end must block 'till this is complete. (Its a bit of a hack, I know.)
 void handheld::handleTextCom(byte* comPtr) {
 
-  textComs.handleTextCom(&(comPtr[1]));   // Deal with passing on the text, getting reply sent.
-  slaveReset();                           // Not sending a reply here so we call the reset method to go back to listenting.    
+  textComs.handleTextCom((char*)&(comPtr[1]));  // Deal with passing on the text, getting reply sent.
+  slaveReset();                                 // Not sending a reply here so we call the reset method to go back to listenting.    
 }

@@ -1,5 +1,8 @@
 #include "flasher.h"
 
+#define	DEF_FLASH_PERIOD	1000
+#define	DEF_FLASH_PULSE	500
+
 
 // *****************************************************
 //                        flasher
@@ -7,60 +10,51 @@
 
 
 flasher::flasher(rect* inRect,colorObj* backColor)
-  : drawObj(inRect),
-  blinker() {
+  : drawObj(inRect), 
+  squareWave() {
 
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
+	mFlash = false;						// State of the flash, light on or light off.
+	setPeriod(DEF_FLASH_PERIOD);		// Setup default period.
+	setPulse(DEF_FLASH_PULSE);			// Setup default pulse.
+	mBackColor.setColor(backColor);	// What is "off"?
+	mForeColor.setColor(&red);			// Reasonable default.
 }
 
 
 flasher::flasher(int inX,int inY,int inWidth,int inHeight,colorObj* backColor)
-  : drawObj(inX,inY,inWidth,inHeight),
-  blinker() {
+  : drawObj(inX,inY,inWidth,inHeight), 
+  squareWave() {
   
-  mBackColor.setColor(backColor);   // What is "off"?
-  mForeColor.setColor(&red);        // Reasonable default.
+	mFlash = false;						// State of the flash, light on or light off.
+	setPeriod(DEF_FLASH_PERIOD);		// Setup default period.
+	setPulse(DEF_FLASH_PULSE);			// Setup default pulse.
+	mBackColor.setColor(backColor);	// What is "off"?
+	mForeColor.setColor(&red);			// Reasonable default.
 }
 
                      
 flasher::~flasher(void) { }
 
 
-// Basically a hacked version from blinker to remove the pinmode stuff.
-// This is your on/off switch. Call with a boolean true=on false=off.
-// The object is created in the "off" mode.
-void flasher::setBlink(bool onOff) {
-  
- if (!init) {             // Not intialized?
-    hookup();             // Set up idling.
-    init = true;          // Note it.
-  }
-  if((onOff!=running)) {  // ignore if no change
-    if (onOff) {          // Start blinking..    
-      start();            // Starting NOW!
-      setLight(true);     // light on!
-      onTimer->start();   // set the time on timer.
-      running = true;     // Set state.
-      } 
-    else {                // Stop blinking..
-      setLight(false);    // light off.
-      running = false;    // set state.
-    }
-  }
-}   
-
-    
-void flasher::setLight(bool onOff) {
-
-  lightOn = onOff;
-  setNeedRefresh();
+// What to do when pulse goes high.
+void flasher::pulseOn(void) {
+	
+	mFlash = true;
+	setNeedRefresh();
 }
 
 
+// What to do when pulse goes low.                                                      
+void flasher::pulseOff(void) {
+
+	mFlash = false;
+	setNeedRefresh();
+}                                                      
+   
+   
 void flasher::drawSelf(void) {
 
-  if (lightOn) {
+  if (mFlash) {
     screen->fillRect(x,y,width,height,&mForeColor);
   } else {
     screen->fillRect(x,y,width,height,&mBackColor);
@@ -113,7 +107,7 @@ void bmpFlasher::setup(char* onBmp,char* offBmp) {
 void bmpFlasher::drawSelf(void) {
 
   if (mReady) {
-    if (lightOn) {
+    if (mFlash) {
       mOnBmp->drawImage(x,y);
     } else {
       mOffBmp->drawImage(x,y);

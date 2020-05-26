@@ -34,7 +34,7 @@ void pumpObj::setPump(bool onOff) {
  }
 
 
-bool pumpObj::pumpOn(void) { return mRunning; }
+bool pumpObj::pumpOn(void) { return running(); }
 
                               //100                  35              1500
 void pumpObj::setPulse(float inHighPercent,float inLowPercent,float inPeriodMs) {

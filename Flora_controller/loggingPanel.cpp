@@ -43,17 +43,17 @@ enableLogBtn::~enableLogBtn(void) {  }
 
 void enableLogBtn::setTheLook(void) {
 
-  if (mCurrentState.value && mCurrentState.online) {
-    setBlink(true);
-  } else {
-     setBlink(false);
-  }
+   if (mCurrentState.value && mCurrentState.online) {
+      setOnOff(true);
+   } else {
+      setOnOff(false);
+   }
+   setNeedRefresh();
 }
 
 
 // Reading current state..
 void  enableLogBtn::readState(void) {
-
   mCurrentState.online = ourComPort.getOnline();
   mCurrentState.value = ourComPort.getLogging();
 }
@@ -62,16 +62,15 @@ void  enableLogBtn::readState(void) {
 void  enableLogBtn::doAction(void) {
   
   ourOS.beep();
-  screen->fillRect((rect*)this,&white);                 // Give it a flash.
+  screen->fillCircle(x,y,width,&white);                 // Give it a flash.
   if (ourComPort.setLoggingReg(!(mCurrentState.value))) {
     mCurrentState.value = !(mCurrentState.value);       // Looks like it worked.
-    setTheLook();                                       // Show it to the user.
   }
 }
 
 
 void  enableLogBtn::idle(void) { 
-  
+ 
   bmpFlasher::idle();
   if (checkState()) {
     setTheLook(); 
@@ -297,8 +296,9 @@ void loggingPanel::setup(void) {
 
   // LOGGING ON / OFF BUTTON
   enableLogBtn* loggingButton = new enableLogBtn(154,traceY,32,32);
-  loggingButton->setTimes(500,1000);  
-  loggingButton->setBlink(false);
+  loggingButton->setPeriod(1000);
+  loggingButton->setPulse(500); 
+  loggingButton->setOnOff(false);
   addObj(loggingButton);
 
   // LOGGING ON / OFF LABEL

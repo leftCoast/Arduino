@@ -1,5 +1,6 @@
 #include "squareWave.h"
-
+#include "blinker.h"
+/*
 class xblinker : public squareWave {
 
    public:
@@ -22,15 +23,19 @@ void xblinker::pulseOn(void) { digitalWrite(13,true); }
 void xblinker::pulseOff(void) { digitalWrite(13,false); }
 
 xblinker ourxblinker;
-
+*/
+blinker aBLinker;
 
 void setup() {
 
+   aBLinker.setOnOff(true);
+   /*
    pinMode(13,OUTPUT);
    ourxblinker.setPeriod(5000);
    ourxblinker.setPulse(40);
    ourxblinker.setPercent(50);
    ourxblinker.setOnOff(true);
+   */
 }
 
 
