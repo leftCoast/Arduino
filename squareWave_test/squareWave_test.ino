@@ -1,44 +1,56 @@
 #include "squareWave.h"
-#include "blinker.h"
-/*
-class xblinker : public squareWave {
+#include "timeObj.h"
+
+int signal;
+
+class testWave :  public squareWave {
 
    public:
-            xblinker(void);
-   virtual  ~xblinker(void);
-   virtual  void  pulseOn(void);
-   virtual  void  pulseOff(void);
+   virtual void pulseOn(void);
+   virtual void pulseOff(void);
 };
 
 
-xblinker::xblinker(void)
-: squareWave() { }
+void testWave::pulseOn(void) { signal = 1; }
+void testWave::pulseOff(void) { signal = 0; }
 
-
-xblinker::~xblinker(void) {  }
-
-
-void xblinker::pulseOn(void) { digitalWrite(13,true); }
-
-void xblinker::pulseOff(void) { digitalWrite(13,false); }
-
-xblinker ourxblinker;
-*/
-blinker aBLinker;
+testWave ourSquareWave;
+char     inBuff[100];
+int      i;
+timeObj  outTimer(10);
 
 void setup() {
 
-   aBLinker.setOnOff(true);
-   /*
-   pinMode(13,OUTPUT);
-   ourxblinker.setPeriod(5000);
-   ourxblinker.setPulse(40);
-   ourxblinker.setPercent(50);
-   ourxblinker.setOnOff(true);
-   */
+   signal   = 0;
+   i        =0;
+   ourSquareWave.setPeriod(1000);
+   ourSquareWave.setPulse(250);
+   ourSquareWave.setOnOff(true);
+   outTimer.start();
 }
 
 
 void loop() {
+
+   char  aChar;
+   int   newVal;
+   
    idle();
+   if (Serial.available()) {
+      aChar = Serial.read();                       
+      if (aChar=='\n') {
+         inBuff[i] = '\0';
+         i = 0;
+         newVal = atoi(inBuff);
+         ourSquareWave.setPulse(newVal);
+         Serial.print("Set pulse to : ");
+         Serial.println(newVal);
+      } else {
+         inBuff[i++] = aChar;
+      }
+   }
+   if (outTimer.ding()) {
+      Serial.println(signal);
+      outTimer.start();
+   }
 }
