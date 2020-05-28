@@ -143,12 +143,6 @@ bool eventLog::addEvent(char* eventTxt) {
 	if (getLogging()) {											// If we -are- logging..
 		logFile = SD.open(mPath, FILE_WRITE);  			// Lets try to open/create the logfile.
 		if (logFile) {												// If we had success..
-			
-			Serial.print(mSeries);Serial.print('\t');	// First we print out the series number.
-			Serial.print(gSec);Serial.print('\t');		// Next the number of seconds in this series.
-			Serial.println(eventTxt);	
-			
-			
 			logFile.print(mSeries);logFile.print('\t');	// First we print out the series number.
 			logFile.print(gSec);logFile.print('\t');		// Next the number of seconds in this series.
 			logFile.println(eventTxt);							// And whatever their data ends up being.
@@ -179,6 +173,7 @@ void eventLog::deleteFile(void) {
 		setLogging(true);								// Fire it back up.
 	}
 }
+	
 		
 // Things want to use the filepath. Let 'em have a look.
 const char* eventLog::getPath(void) { return mPath; }
