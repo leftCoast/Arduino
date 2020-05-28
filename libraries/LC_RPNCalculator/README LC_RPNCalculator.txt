@@ -34,4 +34,3 @@ bool calculator::getDegrees(void)  <— These three are different ways to deal w
 
 There’s more there but this’ll get you going. Look in the source to see how it works.
 
-
