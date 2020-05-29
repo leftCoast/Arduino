@@ -6,3 +6,4 @@ libraries/SD/.DS_Store
 libraries/LC_baseTools
 libraries/LC_lilParser
 libraries/LC_quickCom
+libraries/LC_blockFile
