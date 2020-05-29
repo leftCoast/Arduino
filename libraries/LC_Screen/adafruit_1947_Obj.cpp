@@ -45,8 +45,8 @@ bool adafruit_1947_Obj::dispObjBegin(void) {
   if (theTFT!=NULL) {
     cTS = new Adafruit_FT6206();
     if (cTS!=NULL) {
-    	theTFT->begin();	// Doesn't have fail mode here.
-    	if (cTS->begin(40)) {	// 40 comes from example code.
+    	theTFT->begin();										// Doesn't have fail mode here.
+    	if (cTS->begin(40)) {								// 40 comes from example code.
     		return true;
     	}
     }
