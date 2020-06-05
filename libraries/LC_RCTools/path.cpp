@@ -1,6 +1,6 @@
 #include "path.h"
 #include "mapper.h"
-
+/*
 mapper percentToAngle(0,100,0,90);
 
 basePath::basePath() {
@@ -70,7 +70,4 @@ float	basePath::mapPos(float x) {
 }
 	
 	
-	
-	
-	speed ^D/^T
-	position F(t) = 			
+*/

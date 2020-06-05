@@ -3,6 +3,7 @@
 #include "idlers.h"
 #include "colorRect.h"
 #include "runningAvg.h"
+#include "servo.h"
 
 #define OLED_CS   10
 #define SD_CS     4
@@ -15,6 +16,7 @@ mapper      percentMap(1023,0,0,100);
 runningAvg  smoother(20);
 colorMapper swatchMapper;
 colorRect   swatch(10,10,10,10);
+servo       aServo(SERVO_PIN);
 
 void setup() {
    if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
@@ -39,6 +41,7 @@ void loop() {
   percent = smoother.addData(percent);
   aColor = swatchMapper.Map(percent);
   swatch.setColor(&aColor);
+  aServo.setServo(percent);
   if (!digitalRead(POT_BTN)) {
       screen->fillScreen(&aColor);
   }

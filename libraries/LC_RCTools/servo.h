@@ -1,10 +1,20 @@
-#include "PulseOut.h"
-#include "mapper.h"
+#ifndef servo_h
+#define servo_h
 
-class servo : public PulseOut {
+#include "squareWave.h"
+
+class servo : public squareWave {
+
 	public:
-				servo (int inpin);
+				servo (int inPin);
 	virtual	~servo(void);
      
 				void	setServo(float val); 
+	virtual	void	pulseOn(void);
+	virtual	void	pulseOff(void);
+	
+				bool	init;
+				int	mPin;
 };
+
+#endif
