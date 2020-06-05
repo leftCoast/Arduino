@@ -2,7 +2,7 @@
 #include "mapper.h"
 
 
-static mapper servoMapper(0, 100, .6, 3.2);   // +/- 0-100 percent, 1 - 2 ms
+static mapper servoMapper(0, 100, 1, 2);   // +/- 0-100 percent, 1 - 2 ms
 
 servo::servo(int inPin)
 	:squareWave() { 
