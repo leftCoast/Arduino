@@ -15,3 +15,10 @@ libraries/LC_eventLog
 libraries/LC_Adafruit_684
 libraries/LC_Adafruit_1431
 libraries/LC_Adafruit_1947
+libraries/LC_bmpFileTools
+libraries/LC_GUIbase
+libraries/LC_GUIItems
+libraries/LC_offscreen
+libraries/LC_RCTools
+libraries/LC_SPI
+libraries/LC_textView
