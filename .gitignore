@@ -9,3 +9,4 @@ libraries/LC_quickCom
 libraries/LC_blockFile
 libraries/LC_neoPixel
 libraries/SdFat
+libraries/EnableInterrupt
