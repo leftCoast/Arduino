@@ -11,3 +11,4 @@ libraries/LC_neoPixel
 libraries/SdFat
 libraries/EnableInterrupt
 libraries/RTClib
+libraries/LC_eventLog
