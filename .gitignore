@@ -12,3 +12,6 @@ libraries/SdFat
 libraries/EnableInterrupt
 libraries/RTClib
 libraries/LC_eventLog
+libraries/LC_Adafruit_684
+libraries/LC_Adafruit_1431
+libraries/LC_Adafruit_1947
