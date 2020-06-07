@@ -21,4 +21,4 @@ libraries/LC_GUIItems
 libraries/LC_offscreen
 libraries/LC_RCTools
 libraries/LC_SPI
-libraries/LC_textView
+libraries/LC_GUITextTools
