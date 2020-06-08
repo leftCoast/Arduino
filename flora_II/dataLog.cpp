@@ -173,33 +173,33 @@ void dataLog::clearFlags(void) {
 }
 
 // Print the log file to the monitor.
-void dataLog::showLogfile(void) {
+void dataLog::showLogfile(Print* ourPort) {
 
   if (mHaveSD) {
     logFile = SD.open(LOG_FILE, FILE_READ);                    // Attempt opening the log file.
       if (logFile) {
         if (logFile.size()==0) {                                  // Check the size to see if this is a new file.
-          Serial.println("Nothing to show.");
+          ourPort->println("Nothing to show.");
         } else {
           unsigned long i = sizeof(logHeader);
           while(i<logFile.size()) {
             logFile.seek(i);
-            Serial.print((char)logFile.read());
+            ourPort->print((char)logFile.read());
             i++;
           }
         }
         logFile.close();
       } else {
-        Serial.println("Not able to open the file.");
+        ourPort->println("Not able to open the file.");
       }
   } else {
-    Serial.println("Not seeig any SD drive.");
+    ourPort->println("Not seeig any SD drive.");
   }
 }
 
 
 // Print the log file size to the monitor.
-void dataLog::showLogLines(void) {
+void dataLog::showLogLines(Print* ourPort) {
 
   logHeader aHeader;
   int count;
@@ -209,12 +209,12 @@ void dataLog::showLogLines(void) {
         readHeader(&aHeader);
         logFile.close();
         count = aHeader.numLines;
-        Serial.print("total lines : ");Serial.println(count);
+        ourPort->print("total lines : ");ourPort->println(count);
       } else {
-        Serial.println("Can't open log file.");
+        ourPort->println("Can't open log file.");
       }
   } else {
-    Serial.println("Not seeig any SD drive.");
+    ourPort->println("Not seeig any SD drive.");
   }
 }
 

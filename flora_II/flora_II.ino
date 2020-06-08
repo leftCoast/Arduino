@@ -6,7 +6,6 @@
 #include <mapper.h>
 #include <mechButton.h>
 #include <multiMap.h>
-#include <PulseOut.h>
 #include <resizeBuff.h>
 #include <runningAvg.h>
 #include <timeObj.h>
@@ -22,11 +21,6 @@
 #include "UI.h"
 //#include "tapSensor.h"
 
-/* Sensor test
-#define SENSOR_PIN 15
-tapSensor aSensor(SENSOR_PIN,5,5);
-timeObj  writeTimer;
-*/
 
 
 #define   ANALOG_PIN  A4

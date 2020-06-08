@@ -77,21 +77,21 @@ void textComObj::checkTextCom(char inChar) {
     command = mParser.addChar(inChar);
     switch (command) {
       case noCommand      : break;
-      case resetAll       : initParams();     break;
-      case showParams     : printParams();    break;
-      case showReadings   : printReadings();  break;
+      case resetAll       : initParams();    break;
+      case showParams     : printParams();   break;
+      case showReadings   : printReadings(); break;
       case showGReadings  : ourPort->println("Graphing's disabled."); /* printGReadings(); */ break;
-      case setSetPoint    : setDryLimit();    break;
-      case setWTime       : setWaterTime();   break;
-      case setSTime       : setSoakTime();    break;
-      case setName        : setPlantName();   break;
-      case setPump        : turnPump();       break;
-      case setPercent     : setPWMPercent();  break;
-      case setPeriod      : setPWMPeriod();   break;
-      case setDryMapLimit : setDry();         break;
-      case setMudMapLimit : setMud();         break;
-      case logCom         : logCommand();     break;
-      case listDir        : listDirectory();  break;
+      case setSetPoint    : setDryLimit();   break;
+      case setWTime       : setWaterTime();  break;
+      case setSTime       : setSoakTime();   break;
+      case setName        : setPlantName();  break;
+      case setPump        : turnPump();      break;
+      case setPercent     : setPWMPercent(); break;
+      case setPeriod      : setPWMPeriod();  break;
+      case setDryMapLimit : setDry();        break;
+      case setMudMapLimit : setMud();        break;
+      case logCom         : logCommand();    break;
+      case listDir        : listDirectory(); break;
       default             : ourPort->println("Sorry, have no idea what you want.");
     }
   }
@@ -366,6 +366,7 @@ void textComObj::logCommand(void) {
     }
     if (!strcmp(paramBuff, "RESET")) {
       ourDisplay.deleteLog();
+      ourPort->println("Logfile deleted.");
     }
     else if (!strcmp(paramBuff, "ON")) {
       ourDisplay.setLogging(true);
@@ -374,10 +375,10 @@ void textComObj::logCommand(void) {
       ourDisplay.setLogging(false);
     }
     else if (!strcmp(paramBuff, "SHOW")) {
-      ourDisplay.showLogfile();
+      ourDisplay.showLogfile(ourPort);
     }
     else if (!strcmp(paramBuff, "LINES")) {
-      ourDisplay.showLogLines();
+      ourDisplay.showLogLines(ourPort);
     }
     else {
       ourPort->println("You can say on, off, show, lines or reset. That's all I understand.");

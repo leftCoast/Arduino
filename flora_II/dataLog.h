@@ -27,8 +27,8 @@ class dataLog {
           void          deleteLog(void);
           void          saveDataRecord(void);
           void          clearFlags(void);
-          void          showLogfile(void);
-          void          showLogLines(void);
+          void          showLogfile(Print* ourPort);
+          void          showLogLines(Print* ourPort);
           unsigned long getFileSize(void);
           unsigned long getFileNumLines(void);
           unsigned long getFileNumWLines(void);
