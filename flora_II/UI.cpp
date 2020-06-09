@@ -185,7 +185,7 @@ void UI::begin(void) {
   mHaveScreen = SD.begin(OLED_SDCS);
   dataLog::begin(mHaveScreen);  // Hardware's been checked. Fire the logger up.
   if (mHaveScreen) {
-    mHaveScreen = mHaveScreen && initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,INV_LANDSCAPE);
+    mHaveScreen = mHaveScreen && initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,0);
     if (mHaveScreen) {
        
        mLastMoist = -1;
