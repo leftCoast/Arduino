@@ -409,7 +409,7 @@ contact* contactList::findByPN(char* phoneNum) {
 						resizeBuff(0,(uint8_t**)&strBuff);		// Recycle the string buffer.
 						return trace;									// Return the contact pointer.
 					}
-					trace = (contact*)trace->next;				// Or we just move on. Nothing to see here.
+					trace = (contact*)trace->getNext();			// Or we just move on. Nothing to see here
 				}
 			}
 			resizeBuff(0,(uint8_t**)&strBuff);					// Recycle the string buffer.
@@ -455,14 +455,14 @@ bool contactList::saveSubFileBuffs(void) {
 
 	contact*        trace;
 
-	trace = (contact*)getFirst();			// Grab the first contact on our list.
-	while(trace) {								// While we have contacts..
-		if (trace->mChanged) {				// If they have been edited (or new).
-			trace->saveToFile();				// Save them to disk.
+	trace = (contact*)getFirst();				// Grab the first contact on our list.
+	while(trace) {									// While we have contacts..
+		if (trace->mChanged) {					// If they have been edited (or new).
+			trace->saveToFile();					// Save them to disk.
 		}
-		trace = (contact*)trace->next;	// Grab another contact. Or a NULL if we ran out.
+		trace = (contact*)trace->getNext();	// Grab another contact. Or a NULL if we ran out.
 	}  
-	return true;								// Easy peasy, return true;
+	return true;									// Easy peasy, return true;
 }
 
 
@@ -476,13 +476,13 @@ void contactList::writeToBuff(char* buffPtr,unsigned long maxBytes) {
 	int             index;
 	unsigned long*  longPtr;
 
-	index = 0;                          // Starting at zero, usually a good plan.
-	longPtr = (unsigned long*)buffPtr;  // If we are a pointer to X, we index by X. So they say.
-	trace = (contact*)getFirst();       // Grab the first contact on our list.
-	while(trace) {                      // While we have contacts..
-		longPtr[index] = trace->mID;      // Stuff their little IDs into the buffer. At point "index".
-		index++;                          // Bump up index by one.
-		trace = (contact*)trace->next;    // Grab another contact. Or a NULL if we ran out.
+	index = 0;                          	// Starting at zero, usually a good plan.
+	longPtr = (unsigned long*)buffPtr;  	// If we are a pointer to X, we index by X. So they say.
+	trace = (contact*)getFirst();       	// Grab the first contact on our list.
+	while(trace) {                      	// While we have contacts..
+		longPtr[index] = trace->mID;      	// Stuff their little IDs into the buffer. At point "index".
+		index++;                          	// Bump up index by one.
+		trace = (contact*)trace->getNext();	// Grab another contact. Or a NULL if we ran out.
 	}
 	  
 }

@@ -30,23 +30,25 @@ void bootError(char* errStr) {
 
 
 void setup() {
-  // First bring the screen online.
-  if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
-    Serial.println("NO SCREEN!");
-    Serial.flush();
-    while(true);
-  }
-  screen->fillScreen(&black);
+   
+   // First bring the screen online.
+   if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
+      Serial.println("NO SCREEN!");
+      Serial.flush();
+      while(true);
+   }
+   screen->fillScreen(&black);
 
-  if (!SD.begin(SD_CS)) {                   // With icons, we now MUST have an SD card.
-    Serial.println("NO SD CARD!");
-    Serial.flush();
-    bootError("No SD card.");
-  }
-  
-  ourEventMgr.begin();                      // Kickstart our event manager.
-                                            // Hardware and services are up and running.
-  ourOS.begin();                            // Boot OS manager.
+   if (!SD.begin(SD_CS)) {                   // With icons, we now MUST have an SD card.
+      Serial.println("NO SD CARD!");
+      Serial.flush();
+      bootError("No SD card.");
+   }
+
+   ourEventMgr.begin();                      // Kickstart our event manager.
+   
+   // Hardware and services are up and running.
+   ourOS.begin();                           // Boot OS manager.
 }
 
 void loop() {     // During loop..
