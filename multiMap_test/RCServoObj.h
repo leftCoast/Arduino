@@ -9,8 +9,8 @@
 
 
 
-#define   DEF_SEC_PER_60_DEG .16    //.16 seconds / 60deg. Avarage speed spec. used for RC servos. (Smaller value is faster)
-#define   DEF_SWING_DEG       180   // Typical servo rotates 180 degrees lock to lock.
+#define   DEF_SEC_PER_60_DEG .10    //.16 seconds / 60deg. Avarage speed spec. used for RC servos. (Smaller value is faster)
+#define   DEF_SWING_DEG       90   // Typical servo rotates 180 degrees lock to lock.
 
 // Formula for maximum servo velocity : Percent swing / milisecond = 60 / (SecPer60 * SwingDeg * 10)
 // You don't really need to know this to use the code. Its just here for those that need to go under the hood to fix things.
@@ -40,6 +40,7 @@ class RCServoObj :   public linkListObj,
             void  move(double newPos);
             void  controlledMove(double newPos,double inVmax=100,double inAccel=50);
             void  controlledDegreeMove(double newPosDeg,double inVmax=100,double inAccel=50);
+            bool  moving(void);
             
             void  startPulse(void);
             void  endPulse(void);
@@ -55,6 +56,7 @@ class RCServoObj :   public linkListObj,
             bool           mControlledMove;
             double         mNextPos;
             double         mEndPos;
+            double         mStartPos;
             double         mLastPos;
             baseTrapMove   mTrapMove;
             unsigned long  mTotalTime;

@@ -1,30 +1,44 @@
+
 #include "multiMap.h"
+#include "lists.h"
+#include "timeObj.h"
+#include "squareWave.h"
+#include "baseTrapMove.h"
+#include "RCServoObj.h"
 
-#define STEP   1
 
-multiMap aFunction;
-float indexx;
+#include <Servo.h>
+
+RCServoObj aServo(2);
+timeObj timer(1500);
+
+//Servo myservo;
 
 void setup() {
 
-   indexx = 0;
+   Serial.begin(57600);
+   Serial.println("Hello..");
+   //myservo.attach(2);
+   //myservo.write(5);
    
-   aFunction.addPoint(0,0);
-   aFunction.addPoint(10,25);
-   aFunction.addPoint(100,25);
-   aFunction.addPoint(110,0);
-   Serial.println(aFunction.Map(5));Serial.flush();
+   
+   aServo.move(0);
+   timer.start();
+   while(!timer.ding()) idle();
+   
 }
 
 void loop() {
-   float Fx;
-   float integral;
-   delay(25);
-   Fx = aFunction.Map(indexx);
-   integral = aFunction.integrate(0,indexx);
-   Serial.print(Fx);Serial.print(" ");
-   Serial.println(integral/100);Serial.flush();
-   indexx = indexx+STEP;
-   if (indexx>110) indexx = 0;
-   
+
+   idle();
+   aServo.controlledMove(0,100,.01);
+   while(aServo.moving()) idle();
+   aServo.controlledMove(100,100,.01);
+   while(aServo.moving()) idle();
+
+   aServo.controlledDegreeMove(45,100,.150);
+   while(aServo.moving()) idle();
+   aServo.controlledDegreeMove(90,100,.150);
+   while(aServo.moving()) idle();
+  delay(1000);
 }

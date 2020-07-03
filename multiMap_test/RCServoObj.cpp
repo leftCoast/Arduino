@@ -1,9 +1,10 @@
+
 #include "RCServoObj.h"
 
-#define STEP_TIME 20    // ms per servo step. dt for all the calculations.
+#define STEP_TIME 10    // ms per servo step. dt for all the calculations.
 
 
-mapper      posMapper(0,100,1,2);      // 0..100% mapps to 1..2ms
+mapper      posMapper(0,100,2,1);      // 0..100% mapps to 1..2ms
 mapper      accelMapper(0,100,0,90);   // 0..100% mapps to 0..90deg. Slope of acceleration in degrees.
 servoType   defServoType;              // Default servo type. A good choice if you have no special specs. you want to use.
 
@@ -77,17 +78,22 @@ void RCServoObj::controlledMove(double newPos,double inVMax,double inAccel) {
    double   vMax;
    double   rampAngle;
    
-   if (mEndPos == -1 || inAccel >= 100) {             // If we have not moved yet, *or* we want 100% acceleration..
+   //Serial.print("controlledMove  mEndPos : ");Serial.print(mEndPos);Serial.print("   newPos : ");Serial.print(newPos);Serial.print("   inVMax : ");Serial.print(inVMax);Serial.print("   inAccel : ");Serial.println(inAccel);
+   if ( mEndPos == -1 
+      || inAccel >= 100 
+      || newPos-mLastPos==0 ) {                       // If we have not moved yet, *or* we want 100% acceleration *or* we are asking for 0 distance move..
       move(newPos);                                   // We use a "blind jump" for this first position.
    } else if (inAccel > 0) {                          // Else, we "think" we know where we are *and* if we have a positive acceleration..
+      mStartPos         = mLastPos;                   // Save our starting location, because math.
       mEndPos           = newPos;                     // newPos is what we are shooting for as our end position. Positions are given and saved as 0..100% of possible position.
-      totalDist         = abs(mEndPos-mLastPos);      // Total distance traveled. Also known as, area under velocity curve.
+      mNextPos          = mLastPos;                   // Initialize our next position to be where we are now.
+      totalDist         = abs(newPos-mLastPos);       // Total distance to travel. Also known as.. Area under velocity curve.
       rampAngle         = accelMapper.map(inAccel);   // User puts in a value of 0..100% accelereation. This maps it to a ramp ange on the velocity curve.
       vMax              = mServoType->mapVel(inVMax); // vMax calculated as the percentge of the possible max velocity.
-      mForward          = mEndPos > mLastPos;         // Moving forward, or not.
+      mForward          = newPos > mLastPos;          // Moving forward, or not.
       mControlledMove   = true;                       // And this is going to be a controlled move.
       mTrapMove.setupMove(totalDist,vMax,rampAngle);  // Setup the math machine.
-      mTotalTime = 0;                                 // Start our internal time keeper.
+      mTotalTime        = 0;                          // Start our internal time keeper.
    }
 }
 
@@ -102,11 +108,14 @@ void RCServoObj::controlledDegreeMove(double newPosDeg,double inVmax,double inAc
 
 // Set our timer and turn the pulse to the servo on.
 void RCServoObj::startPulse(void) {
-
    setTime(posMapper.map(mNextPos),true); // Calculate our target position for this pulse, and start timer.
    digitalWrite(mPin,HIGH);               // Flick the pin nto high state.
    mLastPos = mNextPos;                   // Update our last commanded position.
 }
+
+
+// Return if we are doing a controlled moove.
+bool RCServoObj::moving(void) { return mControlledMove; }
 
 
 // Turn the pulse off.
@@ -116,9 +125,23 @@ void RCServoObj::endPulse(void) { digitalWrite(mPin,LOW); }
 // Calculate our next move position. Update the move time clock.
 void RCServoObj::calcNextPos(void) {
 
-   if (mControlledMove) {                                   // If we are doing a controlled move..
-      mNextPos = mTrapMove.position(mTotalTime,mForward);   // We calculate our next position.
-      mTotalTime = mTotalTime + STEP_TIME;                  // Update our internal time keeper.
+   float delta;
+   
+   if (mControlledMove) {                                                     // If we are doing a controlled move..
+      if (mTotalTime>mTrapMove.T) {                                          // If our run time is >= total calulated time..
+         mNextPos = mEndPos;                                                  // eliminwte any accumulated error, send to the user commanded position.
+         mControlledMove = false;                                             // This controlled move is complete.
+      } else {                                                               // Else, we are still working on a controlled move.
+         delta = mNextPos;
+         if (mForward) {                                                      // If we are moving forward..
+            mNextPos = mStartPos + mTrapMove.position(mTotalTime,mForward);   // We calculate our next position
+         } else {                                                             // Else, we're moving backwards..
+            mNextPos = mStartPos - mTrapMove.position(mTotalTime,mForward);   // We calculate our next position 
+         }
+         mTotalTime = mTotalTime + STEP_TIME;                                 // Update our internal time keeper.
+         //Serial.print(mNextPos-delta);Serial.print("  ");
+      }
+      //Serial.println(mNextPos);
    }
 }
 
@@ -228,6 +251,4 @@ void servoController::calcMoves(void) {
    }
 }
 
-
-
-extern servoController servoControl;
+servoController servoControl;
