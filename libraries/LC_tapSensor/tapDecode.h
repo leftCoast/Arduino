@@ -3,7 +3,7 @@
 
 #include "tapSensor.h"
 #include "lists.h"
-
+/*
 
 class tapRule :	public linkListObj {
 
@@ -35,4 +35,6 @@ class tapDecode :	public tapSensor,
 	
 				tapRule*	index;
 };
-					
+	
+*/				
+#endif

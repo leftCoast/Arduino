@@ -8,6 +8,7 @@
 #include <liveText.h>
 #include <colorObj.h>
 #include <bitmap.h>
+#include "tapSensor.h"
 
 class percView : public label {
 
@@ -61,19 +62,20 @@ class UI  : public dataLog,
   virtual void  idle(void);
           void  sensorDeath(void);
           
-          bool            mHaveScreen;
-          percView*       mLimit;
-          percView*       mMoisture;
-          label*          mSlash;
-          label*          mKey;
-          stateView*      mState;
-          logInd*         mLoggingInd;
-          float           mLastMoist;
-          int             mLastLimit;
-          weDo            mLastState;
-          colorObj        mWetColor;
-          colorObj        mDryColor;
-          colorMultiMap*  mColorMap;
+          bool             mHaveScreen;
+          percView*        mLimit;
+          percView*        mMoisture;
+          label*           mSlash;
+          label*           mKey;
+          stateView*       mState;
+          logInd*          mLoggingInd;
+          float            mLastMoist;
+          int              mLastLimit;
+          weDo             mLastState;
+          colorObj         mWetColor;
+          colorObj         mDryColor;
+          colorMultiMap*   mColorMap;
+          tapSensor*       mTSensor;
 };
 
 

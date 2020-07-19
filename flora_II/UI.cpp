@@ -6,10 +6,20 @@
 #include "parameters.h"
 #include <liveText.h>
 #include <offscreen.h>
+#include "sleepTools.h"
 
-#define OLED_CS     10
-#define OLED_RST    6
-#define OLED_SDCS   4
+
+
+#define OLED_CS      10
+#define OLED_RST     6
+#define OLED_SDCS    4
+#define TAP_PIN      15
+#define TAP_SUMTIME  20
+#define TAP_NUMDATA  3
+#define TAP_VAL      10
+#define AWAKE_MS     8000
+#define DIMMING_MS   3000
+
 
 UI        ourDisplay;
 blinker   idleLight(13,80,2000);
@@ -168,74 +178,81 @@ void logInd::logging(bool onOff) {
 
 
 UI::UI(void) 
-  : timeObj(500) {
+  : timeObj(250) {
     
   mHaveScreen = false;
   mColorMap = NULL;
+  mTSensor = NULL;
 }
 
 
-UI::~UI(void) { if (mColorMap) delete(mColorMap); }
+UI::~UI(void) {
+   if (mColorMap) delete(mColorMap);
+   if (mTSensor) delete(mTSensor);
+}
 
 
 // We can't tell weather we have a screen or not. So we'll look for the SD drive.
 void UI::begin(void) {
 
-  hookup();
-  mHaveScreen = SD.begin(OLED_SDCS);
-  dataLog::begin(mHaveScreen);  // Hardware's been checked. Fire the logger up.
-  if (mHaveScreen) {
-    mHaveScreen = mHaveScreen && initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,0);
-    if (mHaveScreen) {
-       
-       mLastMoist = -1;
-       mLastLimit = -1;
-       mLastState = weAre;
+   hookup();
+   mHaveScreen = SD.begin(OLED_SDCS);
+   dataLog::begin(mHaveScreen);  // Hardware's been checked. Fire the logger up.
+   if (mHaveScreen) {
+      mHaveScreen = initScreen(ADAFRUIT_684,OLED_CS,OLED_RST,0);
+      if (mHaveScreen) {
+         mTSensor = new tapSensor(TAP_PIN,TAP_SUMTIME,TAP_NUMDATA);
+         if (mTSensor) {
+            mTSensor->begin();
+            ourSleepMgr.setupSleep(AWAKE_MS,DIMMING_MS);
+         }
+         mLastMoist = -1;
+         mLastLimit = -1;
+         mLastState = weAre;
       
-      screen->fillScreen(&black);
-      //screen->drawRect(0,0,96,screen->height(),&white);
-      mColorMap = new colorMultiMap();
-      mWetColor.setColor(LC_BLUE);
-      mWetColor.blend(&green,40);
-      mDryColor.setColor(LC_YELLOW);
-      mDryColor.blend(&red,40);
-      mDryColor.blend(&white,40);
+         screen->fillScreen(&black);
+         mColorMap = new colorMultiMap();
+         mWetColor.setColor(LC_BLUE);
+         mWetColor.blend(&green,40);
+         mDryColor.setColor(LC_YELLOW);
+         mDryColor.blend(&red,40);
+         mDryColor.blend(&white,40);
       
-      int yPos = 0;
+         int yPos = 0;
 
-      mMoisture = new percView(5,yPos);
-      mMoisture->setPercent(mLastMoist);
-      viewList.addObj(mMoisture);
+         mMoisture = new percView(5,yPos);
+         mMoisture->setPercent(mLastMoist);
+         viewList.addObj(mMoisture);
       
-      mLimit = new percView(53,yPos);
-      mLimit->setPercent(mLastLimit);
-      viewList.addObj(mLimit);
+         mLimit = new percView(53,yPos);
+         mLimit->setPercent(mLastLimit);
+         viewList.addObj(mLimit);
   
-      mSlash = new label(41,yPos,96,16,"/",2);
-      mSlash->setColors(&white);
-      viewList.addObj(mSlash);
-  
-      yPos = yPos + 20;
-      mKey = new label(9,yPos,96,16,"Reading/Limit",1);
-      mKey->setColors(&white);
-      viewList.addObj(mKey);
-
-      mLoggingInd = new logInd(0,yPos+10);
-      viewList.addObj(mLoggingInd);
-      mLoggingInd->logging(false);
-
-      yPos = yPos + 20;                      //"100/100"
-      mState = new stateView(0,yPos);
-      mState->setState(mLastState);
-      viewList.addObj(mState);
-
-      start();
-    } 
-  }
-  if (!mHaveScreen) {
-    pinMode(13, OUTPUT);
-    idleLight.setOnOff(true);                             // Start up our running light. Its all we got.
-  }
+         mSlash = new label(41,yPos,96,16,"/",2);
+         mSlash->setColors(&white);
+         viewList.addObj(mSlash);
+         
+         yPos = yPos + 20;
+         mKey = new label(9,yPos,96,16,"Reading/Limit",1);
+         mKey->setColors(&white);
+         viewList.addObj(mKey);
+         
+         mLoggingInd = new logInd(0,yPos+10);
+         viewList.addObj(mLoggingInd);
+         mLoggingInd->logging(false);
+         
+         yPos = yPos + 20;                      //"100/100"
+         mState = new stateView(0,yPos);
+         mState->setState(mLastState);
+         viewList.addObj(mState);
+         
+         start();
+      } 
+   }
+   if (!mHaveScreen) {
+      pinMode(13, OUTPUT);
+      idleLight.setOnOff(true);                             // Start up our running light. Its all we got.
+   }
 }
 
 
@@ -282,31 +299,47 @@ void UI::idle(void) {
 
   bool      refresh;
   colorObj  aColor;
-  
-  if (mHaveScreen && ding()) {
-    if (weAre!=sitting) {
-      mState->setNeedRefresh();
-    }
-    refresh = false;
-    if (ourParamObj.getDryLimit()!=mLastLimit) {
-      mLimit->setPercent(ourParamObj.getDryLimit());
-      mLastLimit = ourParamObj.getDryLimit();
-      refresh = true;
-    }
-    if (moisture!=mLastMoist||refresh) {
-      setColorMap(ourParamObj.getDryLimit());
-      aColor = mColorMap->Map(moisture);
-      mMoisture->setColors(&aColor,&black);
-      mMoisture->setPercent(moisture);
-      mLastMoist = moisture;
-    }
-    if (weAre!=mLastState) {
-      mState->setState(weAre);
-      mLastState = weAre;
-    }
-    if (isLogging()==mLoggingInd->holding) {  // If they match,
-      mLoggingInd->logging(isLogging());      // fix it.
-    }                                         // Otherwise, leave it alone!
-    start();
-  }
+   
+   if (mTSensor) {                                          // If we have a tap sensor..
+      if (mTSensor->getTapVal()>=TAP_VAL) {                 // If we sense a tap..
+         ourSleepMgr.wakeup();                              // We need to wake up.
+      }
+   }
+   if (mHaveScreen && ding()) {                             // If we have a screen and its time to check stuff..
+      if (ourSleepMgr.checkSleep()!=percBlack) {            // If we need to change the dimming value of the display..
+         percBlack = ourSleepMgr.checkSleep();              // Set the new diming value.
+         mMoisture->setNeedRefresh();                       // This is SUCH the sad hack. We need to redraw everthing. 
+         mLimit->setNeedRefresh();                          // This is first time coding a screen saver and there is
+         mSlash->setNeedRefresh();                          // no "draw all" method. So we hadrcode for now.
+         mKey->setNeedRefresh();                            //
+         mLoggingInd->setNeedRefresh();                     //
+         mState->setNeedRefresh();                          //
+      }
+      if (percBlack!=100) {                                 // If the screen is not off..
+         if (weAre!=sitting) {                              // If we are not sitting.. (IE Watering or Soaking)
+            mState->setNeedRefresh();                       // We need to draw the state view, showing the progress bar.
+         }
+         refresh = false;                                   // Default to no refresh on these next guys.
+         if (ourParamObj.getDryLimit()!=mLastLimit) {       // If the user changed the dry limit while we weren't looking..
+            mLimit->setPercent(ourParamObj.getDryLimit());  // Set the display limit to match the new value.
+            mLastLimit = ourParamObj.getDryLimit();         // Save the new value for later checking.
+            refresh = true;                                 // And we're going to do some refreshing of the screen.
+         }
+         if (moisture!=mLastMoist||refresh) {               // If the moisture has changed, or we need to refresh anyway..
+            setColorMap(ourParamObj.getDryLimit());         // Reset the color map to reflect the new dry limit.
+            aColor = mColorMap->Map(moisture);              // Map our a color for the new moisture value.
+            mMoisture->setColors(&aColor,&black);           // Set up the text colors for the drawing.
+            mMoisture->setPercent(moisture);                // Draw the new percentage value.
+            mLastMoist = moisture;                          // Save off the new percentage value for chekcing later on.
+         }
+      }
+      if (weAre!=mLastState) {                              // If we have changed state..
+         mState->setState(weAre);                           // Change the state text.
+         mLastState = weAre;                                // Save off the new state for checking later on.
+      }
+      if (isLogging()==mLoggingInd->holding) {              // If they match.. (Sadly don't know what I'm doing here.)
+         mLoggingInd->logging(isLogging());                 // fix it.
+      }                                                     // Otherwise, leave it alone!
+      start();
+   }
 };

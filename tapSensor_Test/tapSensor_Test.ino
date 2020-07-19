@@ -3,7 +3,7 @@
 #define SENSOR_PIN 15
 
 tapSensor aSensor(SENSOR_PIN);
-timeObj  writeTimer(20);
+timeObj  writeTimer(40);
 
 void setup() {
    
@@ -17,7 +17,11 @@ void loop() {
    if (writeTimer.ding()) {
       Serial.print(0);
       Serial.print(" 100 ");
-      Serial.println(aSensor.getTapVal());
+      if (aSensor.getTapVal()>10) {
+         Serial.println(50);
+      } else {
+         Serial.println(5);
+      }
       writeTimer.start();
    }
 }
