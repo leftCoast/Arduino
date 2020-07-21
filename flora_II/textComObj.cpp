@@ -35,6 +35,7 @@ textComObj::textComObj(void) {
 
 textComObj::~textComObj(void) { }
 
+
 // Link command bytes to text sstrings that can be typed.
 void textComObj::begin(void) {
 

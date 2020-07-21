@@ -115,9 +115,7 @@ void dataLog::saveDataRecord(void) {
           logFile.print("Water s");  logFile.print('\t');
           logFile.print("Soak s");   logFile.print('\t');
           logFile.print("Raw Cap");    logFile.print('\t');
-          logFile.print("Raw Tmp");   logFile.print('\t'); 
           logFile.print("Ave Cap");    logFile.print('\t');     
-          logFile.print("Ave Tmp");   logFile.print('\t');
           logFile.print("Moisture");    logFile.println();
         }
         logFile.print(ourParamObj.getRunNum()); logFile.print('\t');   // Create the data line. Un-updated values are set as a blank char.
@@ -126,9 +124,7 @@ void dataLog::saveDataRecord(void) {
         if (wTimeSet) { logFile.print(mWTime); } else { logFile.print(" "); } logFile.print('\t');
         if (sTimeSet) { logFile.print(mSTime); } else { logFile.print(" "); } logFile.print('\t');
         if (rCapSet) { logFile.print(mRCap); } else { logFile.print(" "); } logFile.print('\t');
-        if (rTempSet) { logFile.print(mRTemp); } else { logFile.print(" "); } logFile.print('\t'); 
         if (aCapSet) { logFile.print(mACap); } else { logFile.print(" "); } logFile.print('\t');     
-        if (aTempSet) { logFile.print(mATtemp); } else { logFile.print(" "); } logFile.print('\t');
         if (moistureSet) { logFile.print(mMoisture); } else { logFile.print(" "); } logFile.println();
         aHeader.numLines++;
         if (mMode==watering) { aHeader.numWetLines++; }
@@ -151,9 +147,7 @@ void dataLog::addWaterSec(int wTime) { mWTime = wTime; wTimeSet = true; }
 void dataLog::addSoakSec(int sTime) { mSTime = sTime; sTimeSet = true; }
               
 void dataLog::addRawCap(uint16_t rCap) { mRCap = rCap; rCapSet = true; }
-void dataLog::addRawTemp(float rTemp) { mRTemp = rTemp; rTempSet = true; }
 void dataLog::addAveCap(uint16_t aCap) { mACap = aCap; aCapSet = true; }
-void dataLog::addAveTemp(float aTemp) { mATtemp = aTemp; aTempSet = true; }
 void dataLog::addMoisture(float moisture) { mMoisture = moisture; moistureSet = true; }
 
 

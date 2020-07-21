@@ -58,20 +58,20 @@ float sleepMgr::checkSleep(void) {
                sleepState = rampDown;                          // And note we are ramping down.
                return 100 * (1-rampDownTimer->getFraction());  // rampDown fraction left.
             }
-            return 0;                                          // We are still awake, still on.
+            return 0;                                          // We are still awake, no dimming at all.
          case rampDown :                                       // Check our ramp down state..
             if (rampDownTimer->ding()) {                       // If the ramp down timer has expired..
                sleepState = sleeping;                          // We are in the sleeping state.
-               return 100;                                     // Sleeping would be zero.
+               return 100;                                     // Sleeping would be 100% darken.
             }
             return 100 * (1-rampDownTimer->getFraction());     // rampDown fraction left.
-         case sleeping : return 100;                           // Sleeping would be zero.
+         case sleeping : return 100;                           // Sleeping would be 100% darken.
       }
    } else {                                                    // Else we DON'T have both timers..
       sleepState     = awake;                                  // In this case, we are awake.
-      return 0;                                                // Therefor return 1.
+      return 0;                                                // Therefor, no dimming at all.
    }
-   return 0;                                                   // No way we can get here but.. 1 is default.
+   return 0;                                                   // No way we can get here but.. 0 is default.
 }
    
 

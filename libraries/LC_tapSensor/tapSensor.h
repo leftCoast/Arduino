@@ -65,7 +65,7 @@ class tapSensor : public idler {
 	protected:
 	
 		int			mTapSum;
-		int			mReadings;
+		//int			mReadings;
 		int			mSensorPin;
 		timeObj*		mTapTimer;
 		runningAvg*	mSmoother;

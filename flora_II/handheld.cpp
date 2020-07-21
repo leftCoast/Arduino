@@ -38,7 +38,7 @@ enum floraComSet  {
                   readLogBuff,
              
                   readState,
-                  readTemp,
+                  readTemp,         // Leave this here to keep synk with the handheld. (For now)
                   readMoisture,
 
                   textCom
@@ -68,10 +68,8 @@ void handheld::checkComs(void) {
 
   byte*     comPtr;
 
-  if (haveBuff()) {                                     // If we have a complete command..
-    comPtr = getComBuff();                              // Point at the command character.
-    //Serial.print("Recieved command # ");
-    //Serial.println((byte)comPtr[0]);
+  if (haveBuff()) {                                               // If we have a complete command..
+    comPtr = getComBuff();                                        // Point at the command character.
     switch (comPtr[0]) {                                          // First byte is our command. (Agreed on between us and the handheld.)
       case floraReset     : handleReset(comPtr);          break;  // The things we can do.. We do.
       case readState      : handleReadState(comPtr);      break;
@@ -102,7 +100,7 @@ void handheld::checkComs(void) {
       case clearLog       : handleDeleteLogFile(comPtr);  break;
 
       case textCom        : handleTextCom(comPtr);        break;
-      default :                                                   // If we can't, we pass back and error. (What? I don't get it..)
+      default :                                                   // If we can't, we pass back an error. (What? I don't get it..)
         comPtr[0] = unknownCom;                                   // Stuff in "unknown command" reply byte.
         replyComBuff(1);                                          // And send that one byte on its way back to the handheld.
       break;
@@ -128,7 +126,7 @@ void handheld::handleReadState(byte* comPtr) {
 
 void handheld::handleReadTemp(byte* comPtr) {
 
-  comPtr[0] = (byte)round(tempC);
+  comPtr[0] = '\0';  // There is no longer a temp to read.
   replyComBuff(1);
 }
 
@@ -238,10 +236,10 @@ void handheld::handleSetSoakTime(byte* comPtr){
 }
 
 
-void handheld::handleSetPulseOnOff(byte* comPtr) {
-
-  
-}
+// This is for pulseing the water for a sprinkler or just
+// flooding it out a pipe. But.. Never got around to all
+// that now did I? It always pulese for now.
+void handheld::handleSetPulseOnOff(byte* comPtr) { }
 
     
 void handheld::handleGetLogState(byte* comPtr) {
@@ -256,19 +254,19 @@ void handheld::handleSetLogState(byte* comPtr) {
   bool  success;
 
   success = false;
-  if (comPtr[0]==loggingOn) {             // The first byte tells us on or off.    
-    ourDisplay.setLogging(true);
-    success = ourDisplay.isLogging();
-  } else if (comPtr[0]==loggingOff) {
-    ourDisplay.setLogging(false);
-    success = !ourDisplay.isLogging();
+  if (comPtr[0]==loggingOn) {             // If the first byte says to turn on logging..    
+    ourDisplay.setLogging(true);          // Fire up logging.
+    success = ourDisplay.isLogging();     // See if it took.
+  } else if (comPtr[0]==loggingOff) {     // Else, if the first byte says to turn logging off..
+    ourDisplay.setLogging(false);         // SHut down logging.
+    success = !ourDisplay.isLogging();    // See if it took.
   }
-  if (success)  {
-    comPtr[0] = 0;
-  } else {
-    comPtr[0] = unknownErr;
+  if (success)  {                         // If it did what they wanted..
+    comPtr[0] = 0;                        // Set up to reply 0 for no error.
+  } else {                                // Else, it didn't do what they wanted..
+    comPtr[0] = unknownErr;               // Set up to reply an error.
   }
-  replyComBuff(1);
+  replyComBuff(1);                        // And back goes the reply.
 }
 
 
@@ -277,7 +275,7 @@ void handheld::handleGetLogSize(byte* comPtr) {
   unsigned long*  longPtr;
   
   longPtr = (unsigned long*)comPtr;         // Get the unsigned long pointer to point at our buffer.
-  *longPtr = ourDisplay.getFileSize();      // Write the unsigned long out to the buffer.
+  *longPtr = ourDisplay.getFileSize();      // Write the unsigned long out to the buffer. (This gets byte order right and stuff.)
   replyComBuff(sizeof(unsigned long));      // Send it on its way!
 }
 
@@ -287,7 +285,7 @@ void handheld::handleGetLogLines(byte* comPtr) {
   unsigned long*  longPtr;
   
   longPtr = (unsigned long*)comPtr;         // Get the unsigned long pointer to point at our buffer.
-  *longPtr = ourDisplay.getFileNumLines();  // Write the unsigned long out to the buffer.
+  *longPtr = ourDisplay.getFileNumLines();  // Write the unsigned long out to the buffer. (Again, this gets byte order right and stuff.)
   replyComBuff(sizeof(unsigned long));      // Send it on its way!
 }
 

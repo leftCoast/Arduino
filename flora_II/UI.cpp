@@ -100,7 +100,7 @@ void stateView::drawSelf(void) {
 
   float timeFraction;
   rect  colorRect(this);
-  
+
   ourBlitPort.beginDraw(&mBMap,screen->gX(x),screen->gY(y));
   switch(mState) {
     case sitting    : 
@@ -209,7 +209,7 @@ void UI::begin(void) {
          mLastMoist = -1;
          mLastLimit = -1;
          mLastState = weAre;
-      
+     
          screen->fillScreen(&black);
          mColorMap = new colorMultiMap();
          mWetColor.setColor(LC_BLUE);
@@ -279,11 +279,14 @@ void UI::setColorMap(int limit) {
 
 void UI::sensorDeath(void) {
 
-  crash = true;
-  if (mHaveScreen) {
-    bmpPipe bomb(&(rect(0,0,96,64)));
-    bomb.openPipe("/bomb9664.bmp");
-    bomb.drawImage(0,0);
+   rect  bombRect;
+   
+   crash = true;
+   if (mHaveScreen) {
+      bombRect.setRect(0,0,96,64);
+      bmpPipe bomb(&bombRect);
+      bomb.openPipe("/bomb9664.bmp");
+      bomb.drawImage(0,0);
   }
   pinMode(13, OUTPUT);
   while(crash) {
@@ -315,23 +318,21 @@ void UI::idle(void) {
          mLoggingInd->setNeedRefresh();                     //
          mState->setNeedRefresh();                          //
       }
-      if (percBlack!=100) {                                 // If the screen is not off..
-         if (weAre!=sitting) {                              // If we are not sitting.. (IE Watering or Soaking)
-            mState->setNeedRefresh();                       // We need to draw the state view, showing the progress bar.
-         }
-         refresh = false;                                   // Default to no refresh on these next guys.
-         if (ourParamObj.getDryLimit()!=mLastLimit) {       // If the user changed the dry limit while we weren't looking..
-            mLimit->setPercent(ourParamObj.getDryLimit());  // Set the display limit to match the new value.
-            mLastLimit = ourParamObj.getDryLimit();         // Save the new value for later checking.
-            refresh = true;                                 // And we're going to do some refreshing of the screen.
-         }
-         if (moisture!=mLastMoist||refresh) {               // If the moisture has changed, or we need to refresh anyway..
-            setColorMap(ourParamObj.getDryLimit());         // Reset the color map to reflect the new dry limit.
-            aColor = mColorMap->Map(moisture);              // Map our a color for the new moisture value.
-            mMoisture->setColors(&aColor,&black);           // Set up the text colors for the drawing.
-            mMoisture->setPercent(moisture);                // Draw the new percentage value.
-            mLastMoist = moisture;                          // Save off the new percentage value for chekcing later on.
-         }
+      if (weAre!=sitting) {                              // If we are not sitting.. (IE Watering or Soaking)
+         mState->setNeedRefresh();                       // We need to draw the state view, showing the progress bar.
+      }
+      refresh = false;                                   // Default to no refresh on these next guys.
+      if (ourParamObj.getDryLimit()!=mLastLimit) {       // If the user changed the dry limit while we weren't looking..
+         mLimit->setPercent(ourParamObj.getDryLimit());  // Set the display limit to match the new value.
+         mLastLimit = ourParamObj.getDryLimit();         // Save the new value for later checking.
+         refresh = true;                                 // And we're going to do some refreshing of the screen.
+      }
+      if (moisture!=mLastMoist||refresh) {               // If the moisture has changed, or we need to refresh anyway..
+         setColorMap(ourParamObj.getDryLimit());         // Reset the color map to reflect the new dry limit.
+         aColor = mColorMap->Map(moisture);              // Map our a color for the new moisture value.
+         mMoisture->setColors(&aColor,&black);           // Set up the text colors for the drawing.
+         mMoisture->setPercent(moisture);                // Draw the new percentage value.
+         mLastMoist = moisture;                          // Save off the new percentage value for chekcing later on.
       }
       if (weAre!=mLastState) {                              // If we have changed state..
          mState->setState(weAre);                           // Change the state text.

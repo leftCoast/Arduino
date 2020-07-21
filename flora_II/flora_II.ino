@@ -19,7 +19,6 @@
 #include "handheld.h"
 #include "globals.h"
 #include "UI.h"
-//#include "tapSensor.h"
 
 
 
@@ -29,7 +28,6 @@
 mapper*       mudMapper = NULL;        // Mapper from raw capacitive reading to percent.
 
 runningAvg  cSmoother(DEF_CSMOOTHER);  // Running avarage for the raw capacitive readings.
-runningAvg  tSmoother(DEF_TSMOOTHER);  // Running avarage for the raw tempature readings.
 timeObj     readTime(DEF_READ_TIME);   // Time between moisture readings.
 
 
@@ -63,7 +61,6 @@ timeObj     readTime(DEF_READ_TIME);   // Time between moisture readings.
 // different in that it can be called randomly during the runtime of the machine.
 void setup() {
 
-   
    ourPump.setPump(false);
    // Off with the pump. This must be called first to lock down control of the pump.
    // Otherwise, if say.. You find you have a dead sensor and the progam locks here..
@@ -71,49 +68,35 @@ void setup() {
    // trigger the driver hardware. Once this is called, the pump contol is locked in
    // and your good to go.
    
-   // No one is turning on the pump right now..
-   pumpCom = false;
-   
+   pumpCom = false;                                      // The user is NOT telling us to turn on the pump right now.
    Serial.begin(57600);                                  // Fire up serial port. (Debugging)
-   
-   mudMapper = NULL;
+   waterTime = NULL;                                     // Time length to water when plant shows dry. (ms)
+   soakTime = NULL;                                      // Time to wait after watering before going back to watching mosture level.
+   mudMapper = NULL;                                     // Mapping cap reading to percent moisture.
    ourParamObj.readParams();                             // Read our saved running params.
    updateEnv();                                          // Setup what we need to setup with params.
-   
-   ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
-   //Serial.print("We have a display? ");
-   //Serial.println(ourDisplay.mHaveScreen);
-   
-   textComs.begin();                                     // Set up parser so we can talk to the computer.
-   //Serial.println("text coms are up.");
-   
-   ourHandheld.begin();                                  // Setup coms for the handheld controller.
-   //Serial.print("ourHandheld result (0 is good) : ");
-   //Serial.println(ourHandheld.readErr());
-
-   
-   weAre = soaking;                                      // Our state is soaking. This gives things time to settle out.
-   soakTime->start();                                    // And we start up the soak timer for that time.
+   weAre = soaking;                                      // We are going to be in soak to start. BUT, this is only for the UI to see during begin().
    readTime.start();                                     // Fire up the read timer. We're live!
-
-  //Serial.println("Sytem online!");
+   ourDisplay.begin();                                   // Fire up our "human interface". (fancy!)
+   textComs.begin();                                     // Set up parser so we can talk to the computer.   
+   ourHandheld.begin();                                  // Setup coms for the handheld controller.
 }
 
 
 // We have a fresh load of parameters. Initialze the machine with them
 void updateEnv(void) {
-
-  if (waterTime) delete(waterTime);                                             // These three are for freeing memeory from the
-  if (soakTime) delete(soakTime);                                               // Last set of parameters. We'll need to build up
-  if (soakTime) delete(soakTime);                                               // a new set for doing all the math, timing n stuff.
-
-  waterTime   = new timeObj(ourParamObj.getWaterTime());                        // Create an object for tracking watering time.
-  soakTime    = new timeObj(ourParamObj.getSoakTime());                         // Create an object for tracking soak time.
-  mudMapper   = new mapper(ourParamObj.getDry(), ourParamObj.getMud(), 0, 100); // Create the mapper to calculate moiture percent.
-
-  ourPump.setPercent(ourParamObj.getPWMPercent());
-  ourPump.setPeriod(ourParamObj.getPWMPeriod());
-  needReset = false;
+      
+  if (waterTime) delete(waterTime);                                              // These three are for freeing memeory from the
+  if (soakTime) delete(soakTime);                                                // Last set of parameters. We'll need to build up
+  if (mudMapper) delete(mudMapper);                                              // a new set for doing all the math, timing n stuff.
+  waterTime   = new timeObj(ourParamObj.getWaterTime());                         // Create an object for tracking watering time.
+  soakTime    = new timeObj(ourParamObj.getSoakTime());                          // Create an object for tracking soak time.
+  mudMapper   = new mapper(ourParamObj.getDry(), ourParamObj.getMud(), 0, 100);  // Create the mapper to calculate moiture percent.
+  ourPump.setPercent(ourParamObj.getPWMPercent());                               // How much power to run through the pump.
+  ourPump.setPeriod(ourParamObj.getPWMPeriod());                                 // How smooth the pump's power switching is.
+  needReset = false;                                                             // Note that we have fresh parameters.
+  weAre = soaking;                                                               // Everything has changed? We go into soak to let things settle.
+  soakTime->start();                                                             // Fire off the soak timer.
 }
 
 
@@ -121,26 +104,25 @@ void updateEnv(void) {
 // Here's where we look at everything and do just that.
 void doSetPump(void) {
 
-  if (pumpCom || weAre == watering) { // Currently two things tell us to water. pumpCom from the controller and our state.
-    if (!ourPump.pumpOn()) {        // We want the pump on and its not on now?
-      ourPump.setPump(true);        // Turn on the pump.
+  if (pumpCom || weAre == watering) {  // Currently two things tell us to water. pumpCom from the controller and our state.
+    if (!ourPump.pumpOn()) {           // We want the pump on and its not on now?
+      ourPump.setPump(true);           // Turn on the pump.
     }
-  } else {                          // We want the pump off?
-    ourPump.setPump(false);         // Off with the pump.
+  } else {                             // We want the pump off?
+    ourPump.setPump(false);            // Off with the pump.
   }
-  if (ourPump.pumpOn()) {
-    ourPump.setSpeed();
+  if (ourPump.pumpOn()) {              // So after all that, if the pump is on..
+    ourPump.setSpeed();                // We set its speed.
   }
 }
+
 
 // Get the info from the sensor and refine it to the point we can use it.
 void doReading(void) {
 
-  tempC = 0;
   capread = analogRead(ANALOG_PIN);
 
   ourDisplay.addMode(weAre);
-  ourDisplay.addRawTemp(tempC);
   ourDisplay.addRawCap(capread);
 
   capread = cSmoother.addData(capread);     // Pop the capacitive value into the capacitive smoother. (Running avarage)
@@ -148,7 +130,6 @@ void doReading(void) {
   moisture = round(moisture);               // Round it to an int.
 
   ourDisplay.addAveCap(capread);
-  ourDisplay.addAveTemp(tempC);
   ourDisplay.addMoisture(moisture);
 
   ourDisplay.addLimit(ourParamObj.getDryLimit());
@@ -162,17 +143,6 @@ void doReading(void) {
 void loop() {
 
   idle();                                             // Calling idle() first is always a good idea. Just in case there are idlers that need it.
-   /* Sensor test
-   if (writeTimer.ding()) {
-      Serial.println(aSensor.getTapVal()*100);
-      writeTimer.start();
-      Serial.print(0);
-      Serial.print(" 1 ");
-      Serial.print(" 1.5 ");
-      Serial.print(" 2 ");
-   }
-   */
-  
   
   if (needReset) {                                    // If our params have changed..
     updateEnv();                                      // Update all the things they effect.
@@ -188,24 +158,21 @@ void loop() {
   switch (weAre) {                                    // OK, state stuff. Depending on our current state..
     case sitting :                                    // Sitting = watching moisture wating to start watering.
       if (moisture < ourParamObj.getDryLimit()) {     // If its too dry? Time to water..
-        //Serial.println("Watering");                   // Tell the world what's up next. (Again, if they are listening)
         waterTime->start();                           // Start up the watering timer.
         weAre = watering;                             // Set state that we are in watering mode.
       }
-      break;                                           // All done, jet!
-    case watering :                                  // Watering = running the pump and watering plants.
+      break;                                          // All done, jet!
+    case watering :                                   // Watering = running the pump and watering plants.
       if (waterTime->ding()) {                        // If our time for watering has expired...
-        //Serial.println("Soaking");                    // Tell the world what's up next. (And again, if they are listening)
         soakTime->start();                            // Start up the soaking timer.
         weAre = soaking;                              // Set state that we are in soaking mode.
       }
-      break;                                           // That's it for now.
-    case soaking :                                   // soaking = waiting for the water to soak through the soil to the sensor.
+      break;                                          // That's it for now.
+    case soaking :                                    // soaking = waiting for the water to soak through the soil to the sensor.
       if (soakTime->ding()) {                         // If soak time has expired..
-        //Serial.println("Back sitting.");              // Tell the world what's up next.
         weAre = sitting;                              // Set state that we are in sitting mode.
       }
-      break;                                           // All done, lets bolt!
+      break;                                          // All done, lets bolt!
   }
   doSetPump();                                        // Now that commands and state have been checked, decide if the pump goes on or off.
 }

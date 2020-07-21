@@ -40,9 +40,7 @@ class dataLog {
           void  addSoakSec(int wSoak);
               
           void  addRawCap(uint16_t rCap);
-          void  addRawTemp(float rTemp);
           void  addAveCap(uint16_t aCap);
-          void  addAveTemp(float aTemp);
           void  addMoisture(float moisture);
 
           File          logFile;    // Our data logging file.

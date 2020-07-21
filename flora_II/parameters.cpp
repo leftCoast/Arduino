@@ -39,7 +39,7 @@ void parameters::readParams(void) {
 
 // Stuff this set back into storage.
 void parameters::saveParams(void) {
-  
+
   EEPROM.put(0,params);
   needReset = true;     // Only time you save params is if something changed. So..
 }
