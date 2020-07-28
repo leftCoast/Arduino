@@ -63,6 +63,7 @@ class callControl :	public phoneBtn,
 	virtual	void  drawSelf(void);
 	virtual	void  doAction(void);
 				bool	haveService(void);
+				bool	connected(void);
 	virtual	void  idle();
 				void  checkCall(void);
 				void  checkHangup(void);
@@ -91,31 +92,31 @@ class phone :	public cellOSPanel {
 				void	out(char* message);
 				void	out(int message);
           
-				char*			mRawPN;
+				char*				mRawPN;
 
-				phoneBtn*	pBtndel;
+				phoneBtn*		pBtndel;
  
-				phoneBtn*	pBtn7;
-				phoneBtn*	pBtn8;
-				phoneBtn*	pBtn9;
+				phoneBtn*		pBtn7;
+				phoneBtn*		pBtn8;
+				phoneBtn*		pBtn9;
  
-				phoneBtn*	pBtn4;
-				phoneBtn*	pBtn5;
-				phoneBtn*	pBtn6;
+				phoneBtn*		pBtn4;
+				phoneBtn*		pBtn5;
+				phoneBtn*		pBtn6;
  
-				phoneBtn*	pBtn1;
-				phoneBtn*	pBtn2;
-				phoneBtn*	pBtn3;
+				phoneBtn*		pBtn1;
+				phoneBtn*		pBtn2;
+				phoneBtn*		pBtn3;
  
-				phoneBtn*	pBtn0;
-				phoneBtn*	pBtnStar;
-				phoneBtn*	pBtnHash;
+				phoneBtn*		pBtn0;
+				phoneBtn*		pBtnStar;
+				phoneBtn*		pBtnHash;
  
-				phoneBtn*	pBtnCall;
+				callControl*	pBtnCall;
 
-				colorRect*	theEditBase;     // Background of the PNLabel.
-				PNLabel*		numDisplay;
-				liveText*	stateDisplay;
+				colorRect*		theEditBase;     // Background of the PNLabel.
+				PNLabel*			numDisplay;
+				liveText*		stateDisplay;
 				};
 
 #endif

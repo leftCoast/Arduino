@@ -247,10 +247,15 @@ void callControl::doAction(void) {
 }
 
 
+// Is there cell service available at the moment?
 bool callControl::haveService(void) {
 
 	return statusReg.networkStat==NS_registeredHome || statusReg.networkStat==NS_registeredRoaming;
 }
+
+
+// Do we have an active connection to someone right now?
+bool callControl::connected(void) { return mState==isConnected; }
 
 
 // callControl also manages the phone status in the background. It can initiate a
@@ -490,28 +495,36 @@ void phone::drawSelf(void) {
 // Fielding keystrokes. We built all the buttons and gave them keystrokes.
 // This is where we respond to these as the user clicks on stuff.
 void phone::keystroke(char inKey) {
-
-  switch(inKey) {
-    case '0'   :
-    case '1'   :
-    case '2'   :
-    case '3'   :
-    case '4'   :
-    case '5'   :
-    case '6'   :
-    case '7'   :
-    case '8'   :
-    case '9'   : 
-    case '*'   :
-    case '#'   :
-      addChar(inKey);
-      numDisplay->setValue(mRawPN);
-    break;
-    case 'D'   :
-      deleteChar();
-      numDisplay->setValue(mRawPN);
-    break;
-  }  
+	
+	char outStr[2];
+	
+	switch(inKey) {
+		case '0'   :
+		case '1'   :
+		case '2'   :
+		case '3'   :
+		case '4'   :
+		case '5'   :
+		case '6'   :
+		case '7'   :
+		case '8'   :
+		case '9'   : 
+		case '*'   :
+		case '#'   :															// If inKey is any of the  possible keypad numbers..
+		if (pBtnCall->connected()) {										// If we are connected.. (We want to make the noise!)
+			outStr[0] = inKey;												// Stuff in the keystroke char.
+			outStr[1] = '\0';													// End of string.
+			ourCellManager.sendCommand(touchTone,outStr,false);	// Send it on its way, no reply wanted.
+		} else {																	// Else, not connected..
+			addChar(inKey);													// Add this keystroke to the number buffer.
+			numDisplay->setValue(mRawPN);									// Show it to the user.
+		}
+		break;
+		case 'D'   :															// Oh! Delete a char?
+			deleteChar();														// Do the delete.
+			numDisplay->setValue(mRawPN);									// Show the edited number string.
+		break;
+	}  
 }
 
 
