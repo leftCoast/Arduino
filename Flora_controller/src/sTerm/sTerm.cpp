@@ -1,7 +1,7 @@
 #include "resizeBuff.h"
 #include "colorRect.h"
 #include "sTerm.h"
-#include "floraOS.h"
+#include "../../floraOS.h"
 #include  "idlers.h"
 
 

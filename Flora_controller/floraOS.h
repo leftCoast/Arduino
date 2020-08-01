@@ -9,7 +9,7 @@
 
 #define BEEP_PIN    23
 
-enum  apps { homeApp = HOME_PANEL_ID, controlApp, calcApp, loggingApp, sTermApp, nextApp };
+enum  apps { homeApp = HOME_PANEL_ID, controlApp, calcApp, loggingApp, sTermApp, breakoutApp, nextApp };
 
 
 

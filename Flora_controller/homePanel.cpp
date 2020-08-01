@@ -66,10 +66,11 @@ void  waterBtn::idle(void) { if (checkState()) setTheLook(); }
 #define LIVE_X        LABEL_W+5
 #define LIVE_W        90
 
-#define CONTROL_PANEL_BMP "/system/icons/standard/edit32.bmp"
-#define DATA_PANEL_BMP    "/system/icons/plantBot/graph32.bmp"
-#define CALC_PANEL_BMP    "/system/icons/RPNCalc/calc32.bmp"
-#define STERM_PANEL_BMP   "/system/icons/sTerm/term32.bmp"
+#define CONTROL_PANEL_BMP     "/system/icons/standard/edit32.bmp"
+#define DATA_PANEL_BMP        "/system/icons/plantBot/graph32.bmp"
+#define CALC_PANEL_BMP        "/system/icons/RPNCalc/calc32.bmp"
+#define STERM_PANEL_BMP       "/system/icons/sTerm/term32.bmp"
+#define BREAKOUT_PANEL_BMP    "/system/icons/breakout/breakout.bmp"
 
 homeScreen::homeScreen(void) { }
 
@@ -177,6 +178,10 @@ void homeScreen::setup(void) {
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();
   addObj(calc);
+
+  appIcon*  breakOut = new appIcon(traceX,traceY-40,breakoutApp,BREAKOUT_PANEL_BMP);
+  breakOut->begin();
+  addObj(breakOut);
 }
 
 

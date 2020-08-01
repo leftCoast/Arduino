@@ -6,7 +6,7 @@
 #include <litlOS.h> 
 #include <bmpObj.h>
 #include <textView.h>
-#include "tools.h"
+#include "../../tools.h"
 #include "textBuff.h"
 
 class sTermPanel;

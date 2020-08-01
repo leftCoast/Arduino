@@ -1,8 +1,10 @@
+
 #include "floraOS.h"
 #include "homePanel.h"
 #include "controlPanel.h"
 #include "loggingPanel.h"
-#include "sTerm.h"
+#include "src/sTerm/sTerm.h"
+#include "src/breakout/breakout.h"
 
 #define PLANTBOT_BAUD  9600 //115200 //500000
 
@@ -38,16 +40,27 @@ int floraOS::begin(void) {
 // Used to create our custom panels..
 panel* floraOS::createPanel(int panelID) {
   
-  pauseUpdates x;
-  beep();
-  switch (panelID) {
-    case homeApp      : return new homeScreen();
-    case controlApp   : return new controlPanel();
-    case calcApp      : return new rpnCalc();
-    case loggingApp   : return new loggingPanel();
-    case sTermApp     : return new sTermPanel();
-    default           : return NULL;
-  }
+	pauseUpdates x;
+	beep();
+	switch (panelID) {
+		case homeApp		: 
+		   ourComPort.disableBG(false);
+		   return new homeScreen();
+		case controlApp   : 
+		   ourComPort.disableBG(false);
+		   return new controlPanel();
+		case calcApp      : return new rpnCalc();
+		case loggingApp   : 
+         ourComPort.disableBG(false);
+		   return new loggingPanel();
+		case sTermApp		:
+		   ourComPort.disableBG(false);
+		   return new sTermPanel();
+		case breakoutApp	: 
+         ourComPort.disableBG(true);
+		   return new breakout();
+		default           : return NULL;
+	}
 }
 
 

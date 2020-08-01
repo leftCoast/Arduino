@@ -3,7 +3,7 @@
 #include "floraOS.h"
 #include <debug.h>
 
-#define LONG_UPDATE_TIME    100//500 // When offline, only check this often.
+#define LONG_UPDATE_TIME    200//500 // When offline, only check this often.
 #define SHORT_UPDATE_TIME   100 // When online, we can check this often.
 #define NUM_FILEBUFFS       10  // When doing a file transfer, how many filer buffer to get before releasing to other things.
 
@@ -616,7 +616,7 @@ plantBotCom::plantBotCom(void)
   
   mIndex = 0;
   mOnline = false;
-  setUpdateTime();              // How oftern do we bug the bot for data updates?
+  setUpdateTime();              // How often do we bug the bot for data updates?
   runUpdates(true);
   mLocalPath = NULL;
   mRunning = false;

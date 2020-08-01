@@ -14,7 +14,7 @@
 // commands. This is because, who knows how long each command will take? So we queue
 // them up and deal with them during idle time. Some need responses, some do not.
 //
-// All commands get a a unique ID number, they hold their own state (cellComStates), and
+// All commands get a unique ID number, they hold their own state (cellComStates), and
 // a set lifespan. If a command sits in the queue for too long, its timed out and
 // deleted. The section of the code that originated the command may ask for a command by
 // ID. A possible valid response is that the command is not found. Why? Probably because
