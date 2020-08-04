@@ -1,6 +1,6 @@
 #include "toneObj.h"
 #include "Arduino.h"
-
+#include "debug.h"
 
 
 // ***************************************************************************************
@@ -25,7 +25,7 @@ void toneObj::play(int inHz,int inMs) {
 }
 
 
-bool toneObj::isPlaying(void) { return !ding(); }
+bool toneObj::isPlaying(void) { ST return !ding(); }
 				
 
 

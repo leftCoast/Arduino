@@ -107,10 +107,10 @@ class toneObj : public	timeObj {
 
 	public:
 				toneObj(int inPin);
-				~toneObj(void);
+	virtual	~toneObj(void);
 				
-				void	play(int inHz,int inMs);
-				bool	isPlaying(void);
+	virtual	void	play(int inHz,int inMs);
+	virtual	bool	isPlaying(void);
 				
 				int	mPin;
 };
