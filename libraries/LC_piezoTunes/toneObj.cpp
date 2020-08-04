@@ -8,7 +8,11 @@
 // ***************************************************************************************
 
 
-toneObj::toneObj(int inPin) { mPin = inPin; }
+toneObj::toneObj(int inPin) {
+
+	mPin = inPin;
+	setTime(.01,true);	// A bit of a hack. Currently timeObj has three states, preset, running and expired. This forces expired.
+}
 
 
 toneObj::~toneObj(void) {  }
@@ -25,7 +29,7 @@ void toneObj::play(int inHz,int inMs) {
 }
 
 
-bool toneObj::isPlaying(void) { ST return !ding(); }
+bool toneObj::isPlaying(void) { return !ding(); }
 				
 
 
