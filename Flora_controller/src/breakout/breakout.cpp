@@ -141,7 +141,6 @@ breakout::breakout(void)
   textTimer     = new timeObj(TEXT_MS);
   oldLoc        = -10;
   brickIndex    = 0;        // It was originally written to run once.
-  soundWinner();
 }
 
 
