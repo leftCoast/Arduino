@@ -181,16 +181,17 @@ void sTermPanel::setup(void) {
 void sTermPanel::drawSelf(void) { screen->fillScreen(&black); } 
 
 
+
 void sTermPanel::loop(void) {
 
   timeObj timer(10);
 
-  if (Serial1.available()) {
-    timer.start();
-    while (!mReplyBuff->full()&&!timer.ding()) {    
-      while (Serial1.available()) {
-        mReplyBuff->addChar(Serial1.read());
-        timer.start();
+  if (Serial1.available()) {								// If we have an incoming char..
+    timer.start();											// Start our timer.
+    while (!mReplyBuff->full()&&!timer.ding()) {	// While our buffer is NOT full and the timer is not expired..   
+      while (Serial1.available()) {						// While we have something to grab from the serial port..
+        mReplyBuff->addChar(Serial1.read());			// Grab a char from the serial port and stuff it into our buffer.
+        timer.start();										// We got one, reset the timer.
       }
     }
   }
