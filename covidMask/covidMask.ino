@@ -35,14 +35,14 @@ void setup() {
   delay(500);
   }
   */
-  bioColorMapper.addColor(960,&red);
-  bioColorMapper.addColor(948,&blue);
+  bioColorMapper.addColor(948,&red);
+  bioColorMapper.addColor(947,&blue);
 }
 
 void loop() {
   
   colorObj  bioColor;
-  int       vacVal;
+  float       vacVal;
   
   vacVal = analogRead(A5);
   vacVal = smoother.addData(vacVal);
@@ -50,4 +50,5 @@ void loop() {
   bioColor = bioColorMapper.Map(vacVal);
   bioRing.setAll(&bioColor);
   bioRing.show();
+  delay(100);
 }
