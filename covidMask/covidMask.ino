@@ -35,16 +35,19 @@ void setup() {
   delay(500);
   }
   */
-  bioColorMapper.addColor(948,&red);
-  bioColorMapper.addColor(947,&blue);
+  bioColorMapper.addColor(738.5,&red);
+  bioColorMapper.addColor(738.,&blue);
+  Serial.println("ready");
+  delay500);\\
 }
+
 
 void loop() {
   
   colorObj  bioColor;
   float       vacVal;
   
-  vacVal = analogRead(A5);
+  vacVal = analogRead(A12);
   vacVal = smoother.addData(vacVal);
   Serial.println(vacVal);
   bioColor = bioColorMapper.Map(vacVal);
