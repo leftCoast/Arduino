@@ -1,23 +1,23 @@
-#include <chainPixels.h>
+
 #include <neoPixel.h>
 
-#include <blinker.h>
+
 #include <colorObj.h>
-#include <debug.h>
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
-#include <mechButton.h>
 #include <multiMap.h>
 #include <resizeBuff.h>
 #include <runningAvg.h>
-#include <squareWave.h>
-#include <textBuff.h>
 #include <timeObj.h>
+
+#define RED_VAL   738.3
+#define BLUE_VAL  737.8
+
 
 neoPixel      bioRing(12,2);
 colorMultiMap bioColorMapper;
-runningAvg    smoother(20);
+runningAvg    smoother(40);
 
 void setup() {
 
@@ -35,10 +35,10 @@ void setup() {
   delay(500);
   }
   */
-  bioColorMapper.addColor(738.5,&red);
-  bioColorMapper.addColor(738.,&blue);
-  Serial.println("ready");
-  delay500);\\
+  bioColorMapper.addColor(RED_VAL,&red);
+  bioColorMapper.addColor(BLUE_VAL,&blue);
+  //Serial.println("ready");
+  //delay(500);
 }
 
 
@@ -49,7 +49,9 @@ void loop() {
   
   vacVal = analogRead(A12);
   vacVal = smoother.addData(vacVal);
-  Serial.println(vacVal);
+  Serial.print(RED_VAL);Serial.print(",");
+  Serial.print(vacVal);Serial.print(",");
+  Serial.println(BLUE_VAL);
   bioColor = bioColorMapper.Map(vacVal);
   bioRing.setAll(&bioColor);
   bioRing.show();
