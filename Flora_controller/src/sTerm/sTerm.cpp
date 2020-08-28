@@ -50,7 +50,7 @@ sKeyboard::~sKeyboard(void) {  }
 
 
 // Time to send a text command. The text, as it comes from the edit field has no \n.
-// This works out well in that the recoeving end, knowing the message is complete
+// This works out well in that the receiving end, knowing the message is complete
 // can give us some time to get ready before adding the \n to fire off a response.
 void sKeyboard::handleMessage(char* msgBuff) {
 
