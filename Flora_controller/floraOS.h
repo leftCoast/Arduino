@@ -4,12 +4,13 @@
 #include <litlOS.h>
 #include <panel.h>
 #include <quickCom.h>
-#include "src/rpnCalc/rpnCalc.h"
+//#include "src/rpnCalc/rpnCalc.h"
 
 
 #define BEEP_PIN    23
-
-enum  apps { homeApp = HOME_PANEL_ID, controlApp, calcApp, loggingApp, sTermApp, breakoutApp, nextApp };
+//sTermApp
+//calcApp
+enum  apps { homeApp = HOME_PANEL_ID, controlApp, loggingApp, starTrekApp, breakoutApp, nextApp };
 
 
 

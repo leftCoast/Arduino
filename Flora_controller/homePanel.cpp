@@ -71,6 +71,7 @@ void  waterBtn::idle(void) { if (checkState()) setTheLook(); }
 #define CALC_PANEL_BMP        "/system/icons/RPNCalc/calc32.bmp"
 #define STERM_PANEL_BMP       "/system/icons/sTerm/term32.bmp"
 #define BREAKOUT_PANEL_BMP    "/system/icons/breakout/breakout.bmp"
+#define STAR_TREK_PANEL_BMP   "/system/icons/starTrek/sTrek32.bmp"
 
 homeScreen::homeScreen(void) { }
 
@@ -168,7 +169,7 @@ void homeScreen::setup(void) {
   appIcon*  dataLog = new appIcon(traceX,traceY,loggingApp,DATA_PANEL_BMP);
   dataLog->begin();
   addObj(dataLog);
-
+/*
   traceX = traceX + stepX;
   appIcon*  term = new appIcon(traceX,traceY,sTermApp,STERM_PANEL_BMP);
   term->begin();
@@ -178,10 +179,17 @@ void homeScreen::setup(void) {
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();
   addObj(calc);
-
-  appIcon*  breakOut = new appIcon(traceX,traceY-40,breakoutApp,BREAKOUT_PANEL_BMP);
+*/
+  traceY = traceY - 40;
+  appIcon*  breakOut = new appIcon(traceX,traceY,breakoutApp,BREAKOUT_PANEL_BMP);
   breakOut->begin();
   addObj(breakOut);
+
+  traceX = traceX - stepX;
+  appIcon*  starTrek = new appIcon(traceX,traceY,starTrekApp,STAR_TREK_PANEL_BMP);
+  starTrek->begin();
+  addObj(starTrek);
+  
 }
 
 

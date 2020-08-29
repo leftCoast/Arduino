@@ -1,5 +1,5 @@
- #ifndef sTerm_h
-#define sTerm_h
+#ifndef starTrek_h
+#define starTrek_h
 
 #include <panel.h>
 #include <idlers.h>
@@ -9,19 +9,19 @@
 #include "../../tools.h"
 #include "textBuff.h"
 
-class sTermPanel;
+class starTrekPanel;
 
 // *****************************************************
-//                      sKeyboard
+//                      starTrekKeyboard
 // *****************************************************
 
 
-class sKeyboard : public ourKeyboard {
+class starTrekKeyboard : public ourKeyboard {
 
   public:
 
-                sKeyboard(editLabel* inEditLabel,textView* inTextView,bool modal);
-  virtual       ~sKeyboard(void);
+                starTrekKeyboard(editLabel* inEditLabel,textView* inTextView,bool modal);
+  virtual       ~starTrekKeyboard(void);
 
   virtual void  handleMessage(char* buff);
   virtual void  handleKey(keyCommands inEditCom);
@@ -32,39 +32,38 @@ class sKeyboard : public ourKeyboard {
 
 
 // *****************************************************
-//                      sTermUpdater
+//                      starTrekUpdater
 // *****************************************************
 
-class sTermUpdater : public idler {
+class starTrekUpdater : public idler {
 
   public:
-            sTermUpdater(sTermPanel* inPanel);
-  virtual   ~sTermUpdater(void);
+            starTrekUpdater(starTrekPanel* inPanel);
+  virtual   ~starTrekUpdater(void);
 
   virtual  void  idle(void);
 
-            sTermPanel* mPanel;
+            starTrekPanel* mPanel;
 };
 
 // *****************************************************
-//                      sTermPanel
+//                      starTrekPanel
 // *****************************************************
 
 
-class sTermPanel :  public panel {
+class starTrekPanel :  public panel {
 
   public:
-          sTermPanel(void);
-  virtual ~sTermPanel(void);
+          starTrekPanel(void);
+  virtual ~starTrekPanel(void);
           
   virtual void  setup(void);
   virtual void  drawSelf(void);
   virtual void  loop(void);
   virtual void  closing(void);
   
-          textView*     ourScreen;
-          textBuff*     mReplyBuff;
-          sTermUpdater* mUpdater;
+          textView*     	ourScreen;
+          starTrekUpdater*	mUpdater;
 };
 
 #endif
