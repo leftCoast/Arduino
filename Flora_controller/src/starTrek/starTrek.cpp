@@ -5,7 +5,7 @@
 #include  "idlers.h"
 #include "sst.h"
 
-#define TV_INSET  3
+#define TV_INSET 1
 
 // Screen back ground
 #define SBG_X     5
@@ -32,7 +32,7 @@
 #define ET_H      10
 
 #define COMBUFF_BYTES	80
-#define REPLYBUFF_BYTES	500
+#define REPLYBUFF_BYTES	750
 
 extern void doMakeMoves(void);
 
@@ -49,24 +49,38 @@ textView* ourTextView;
 
 // Block 'till we get a char. I guess this is the waiting room.
 int getch() {
-	Serial.println("in getch()"); 
-  while (trekComBuffer->empty()) ourOS.mPanel->sleep(10);
+
+	char theChar;
+	
+	//ourOS.mPanel->sleep(10);
+	while (trekComBuffer->empty()) ourOS.mPanel->sleep(10);
+	return (int)trekComBuffer->readChar();
 }
 
 
 // And where it all goes out.. Well for now, we'll stuff it in here.
-void proutn(char *s) { 
-
-	Serial.println(s);
-	trekReplyBuffer->addStr(s);
-}
+void proutn(char* s) { trekReplyBuffer->addStr(s); }
 
 
-void proutCh(char c) {
+// Sometimes they jjust want a char sent out.
+void proutCh(char c) { trekReplyBuffer->addChar(c); }
+
+
+// Ok, they want this string to be printed s-l-o-w-l-y This'll do that.
+void prouts(char* s) {
+
+	timeObj	charDelay(500);
+	int		i;
 	
-	Serial.println(c);
-	trekReplyBuffer->addChar(c);
+	i = 0;
+	while(s[i]!='\0') {
+		trekReplyBuffer->addChar(s[i]);
+		i++;
+		charDelay.start();
+		while (!charDelay.ding()) ourOS.mPanel->sleep(10);
+	}
 }
+	
 
 // *****************************************************
 //                      starTrekKeyboard
@@ -89,10 +103,8 @@ starTrekKeyboard::~starTrekKeyboard(void) {  }
 // can give us some time to get ready before adding the \n to fire off a response.
 void starTrekKeyboard::handleMessage(char* msgBuff) {
  	
- 	Serial.println("in handleMessage()");
- 	Serial.println(msgBuff); 
 	trekComBuffer->addStr(msgBuff,false);
-	trekComBuffer->addStr("\n");
+	trekComBuffer->addChar('\n');
 	mTextView->appendText(msgBuff);                     // Echo to our own screen.
 	mTextView->appendText('\n');                        // With a EOL char.
 }
@@ -153,7 +165,7 @@ starTrekPanel::~starTrekPanel(void) { if (mUpdater) delete mUpdater; }
 
           
 void starTrekPanel::setup(void) {
-Serial.println("in setup");
+
 	colorObj    			screenColor(LC_DARK_GREEN);
 	colorRect*  			aRect;
 	starTrekKeyboard*	theKeybaord;
@@ -190,6 +202,7 @@ Serial.println("in setup");
   
 	trekComBuffer = new textBuff(COMBUFF_BYTES);
 	trekReplyBuffer = new textBuff(REPLYBUFF_BYTES);
+	trekComBuffer->addStr("r s n xxx\n");
 	prelim();
 	fromcommandline = 0;
 }
@@ -199,14 +212,13 @@ void starTrekPanel::drawSelf(void) { screen->fillScreen(&black); }
 
 
 void starTrekPanel::loop(void) {
-Serial.println("in loop() calling setupsst()");
+
 	 setupsst();
 
 	 if (alldone) {
 		score(0);
 		alldone = 0;
 	 } else {
-Serial.println("calling makemoves()");Serial.flush();
 	 	doMakeMoves();
 	 }
 	 skip(2);
