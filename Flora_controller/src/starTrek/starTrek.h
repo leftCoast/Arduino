@@ -46,6 +46,24 @@ class starTrekUpdater : public idler {
             starTrekPanel* mPanel;
 };
 
+
+// *****************************************************
+//                      starTrekText
+// *****************************************************
+
+
+class starTrekText :	public textView {
+
+	public:
+          	starTrekText(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEventSet=noEvents);
+	virtual	~starTrekText(void);
+  
+  	virtual	void	appendText(char* text);
+	virtual	void	appendText(char aChar);
+};
+
+
+
 // *****************************************************
 //                      starTrekPanel
 // *****************************************************
@@ -62,7 +80,7 @@ class starTrekPanel :  public panel {
   virtual void  loop(void);
   virtual void  closing(void);
   
-          textView*     	ourScreen;
+          starTrekText*    ourScreen;
           starTrekUpdater*	mUpdater;
 };
 

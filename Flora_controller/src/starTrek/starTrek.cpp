@@ -31,6 +31,8 @@
 #define ET_W      ETBG_W - TV_INSET - TV_INSET
 #define ET_H      10
 
+#define MAX_LINES	32					// How many lines of text before we start choppin' 'em.
+
 #define COMBUFF_BYTES	80
 #define REPLYBUFF_BYTES	750
 
@@ -44,7 +46,7 @@ textBuff*	trekReplyBuffer;
 
 
 // Our screen that we'll send text to.
-textView* ourTextView;
+starTrekText* ourTextView;
 
 
 // Block 'till we get a char. I guess this is the waiting room.
@@ -52,7 +54,6 @@ int getch() {
 
 	char theChar;
 	
-	//ourOS.mPanel->sleep(10);
 	while (trekComBuffer->empty()) ourOS.mPanel->sleep(10);
 	return (int)trekComBuffer->readChar();
 }
@@ -63,13 +64,13 @@ void proutn(char* s) { trekReplyBuffer->addStr(s); }
 
 
 // Sometimes they jjust want a char sent out.
-void proutCh(char c) { trekReplyBuffer->addChar(c); }
+void proutCh(char c) {  trekReplyBuffer->addChar(c); }
 
 
 // Ok, they want this string to be printed s-l-o-w-l-y This'll do that.
 void prouts(char* s) {
 
-	timeObj	charDelay(500);
+	timeObj	charDelay(250);
 	int		i;
 	
 	i = 0;
@@ -153,6 +154,40 @@ void starTrekUpdater::idle(void) {
 
 
 // *****************************************************
+//                      starTrekText
+// *****************************************************
+
+
+starTrekText::starTrekText(int inLocX, int inLocY, int inWidth,int inHeight,eventSet inEventSet)
+	: textView(inLocX,inLocY,inWidth,inHeight,inEventSet) {  }
+
+
+starTrekText::~starTrekText(void) {  }
+
+
+void	starTrekText::appendText(char* text) {
+	
+	if (mManager.getNumLines()>MAX_LINES) {
+		deleteText(0,strlen(text));
+	}
+	textView::appendText(text);
+}
+
+
+void	starTrekText::appendText(char aChar) {
+	
+	if (mManager.getNumLines()>MAX_LINES) {
+		deleteText(0,1);
+	}
+	textView::appendText(aChar);
+}
+
+	
+
+
+
+
+// *****************************************************
 //                      starTrekPanel
 // *****************************************************
 
@@ -176,7 +211,7 @@ void starTrekPanel::setup(void) {
 	addObj(aRect);
 
 	// screen
-	ourScreen = new textView(TV_X,TV_Y,TV_W,TV_H);
+	ourScreen = new starTrekText(TV_X,TV_Y,TV_W,TV_H);
 	ourScreen->setTextSize(1);
 	ourScreen->setTextColors(&green,&screenColor);
 	addObj(ourScreen);
@@ -242,7 +277,7 @@ void starTrekPanel::closing(void) {
   
   skip(1);
   prout((char*)"May the Great Bird of the Galaxy roost upon your home planet.");
-  sleep(2000);
+  sleep(4000);
   if (mUpdater) {
     delete mUpdater;
     mUpdater = NULL;
