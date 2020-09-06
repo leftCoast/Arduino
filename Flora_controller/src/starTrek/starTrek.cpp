@@ -2,7 +2,7 @@
 #include "colorRect.h"
 #include "starTrek.h"
 #include "../../floraOS.h"
-#include  "idlers.h"
+#include "idlers.h"
 #include "sst.h"
 
 #define TV_INSET 1
@@ -33,6 +33,7 @@
 
 #define MAX_LINES	32					// How many lines of text before we start choppin' 'em.
 
+/*
 #define COMBUFF_BYTES	80
 #define REPLYBUFF_BYTES	750
 
@@ -97,7 +98,7 @@ int min(int a, int b) {
 	if (a < b) return a;
 	return b;
 }
-
+*/
 // *****************************************************
 //                      starTrekKeyboard
 // *****************************************************
@@ -250,11 +251,7 @@ void starTrekPanel::setup(void) {
 	theKeybaord->loadKeys();
 	addObj(theKeybaord);
   
-	trekComBuffer = new textBuff(COMBUFF_BYTES);
-	trekReplyBuffer = new textBuff(REPLYBUFF_BYTES);
-	trekComBuffer->addStr("r s n xxx");
-	prelim();
-	fromcommandline = 0;
+	arduinoTrekSetup();
 }
 
 
@@ -263,26 +260,14 @@ void starTrekPanel::drawSelf(void) { screen->fillScreen(&black); }
 
 void starTrekPanel::loop(void) {
 
-	 setupsst();
-
-	 if (alldone) {
-		score(0);
-		alldone = 0;
-	 } else {
-	 	doMakeMoves();
-	 }
-	 skip(2);
-	 stars();
-	 skip(1);
-	 if (tourn && alldone) {
-		prout((char*)"Do you want your score recorded?");
-		if (ja()) {
-			chew2();
-			freeze(FALSE);
-		}
-	 }
-	 prout((char*)"Do you want to play again?");
-	 if (!ja()) close();
+	arduinoTrekLoop();
+	prout((char*)"Do you want to play again?");
+	if (!ja()) {
+		skip(1);
+  		prout((char*)"May the Great Bird of the Galaxy roost upon your home planet.");
+  		sleep(4000);
+		close();
+	}
 }
  
 
@@ -290,9 +275,6 @@ void starTrekPanel::loop(void) {
 // We are being closed down.
 void starTrekPanel::closing(void) {
   
-  skip(1);
-  prout((char*)"May the Great Bird of the Galaxy roost upon your home planet.");
-  sleep(4000);
   if (mUpdater) {
     delete mUpdater;
     mUpdater = NULL;

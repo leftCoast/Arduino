@@ -8,6 +8,7 @@
 #include <textView.h>
 #include "../../tools.h"
 #include "textBuff.h"
+#include "arduinoTrek.h"
 
 class starTrekPanel;
 
