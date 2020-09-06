@@ -252,7 +252,7 @@ void starTrekPanel::setup(void) {
   
 	trekComBuffer = new textBuff(COMBUFF_BYTES);
 	trekReplyBuffer = new textBuff(REPLYBUFF_BYTES);
-	//trekComBuffer->addStr("r s n xxx \n m 1 1 \n m a 9 2\n");
+	trekComBuffer->addStr("r s n xxx");
 	prelim();
 	fromcommandline = 0;
 }
