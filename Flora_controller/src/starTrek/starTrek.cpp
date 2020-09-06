@@ -70,7 +70,7 @@ void proutCh(char c) {  trekReplyBuffer->addChar(c); }
 // Ok, they want this string to be printed s-l-o-w-l-y This'll do that.
 void prouts(char* s) {
 
-	timeObj	charDelay(250);
+	timeObj	charDelay(125);
 	int		i;
 	
 	i = 0;
@@ -82,6 +82,21 @@ void prouts(char* s) {
 	}
 }
 	
+// So we can from the command line.
+void close(void) {
+	Serial.println("Calling close()");
+	ourOS.mPanel->close();
+}
+
+// For debugging.
+void out(char* str) { Serial.print(str);Serial.flush(); }
+void outln(char* str) { Serial.println(str);Serial.flush(); }
+
+// It wants this.
+int min(int a, int b) {
+	if (a < b) return a;
+	return b;
+}
 
 // *****************************************************
 //                      starTrekKeyboard
@@ -237,7 +252,7 @@ void starTrekPanel::setup(void) {
   
 	trekComBuffer = new textBuff(COMBUFF_BYTES);
 	trekReplyBuffer = new textBuff(REPLYBUFF_BYTES);
-	trekComBuffer->addStr("r s n xxx\n");
+	//trekComBuffer->addStr("r s n xxx \n m 1 1 \n m a 9 2\n");
 	prelim();
 	fromcommandline = 0;
 }
