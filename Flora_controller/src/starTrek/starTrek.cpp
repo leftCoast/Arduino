@@ -33,72 +33,7 @@
 
 #define MAX_LINES	32					// How many lines of text before we start choppin' 'em.
 
-/*
-#define COMBUFF_BYTES	80
-#define REPLYBUFF_BYTES	750
 
-extern void doMakeMoves(void);
-
-// Our output buffer that the ported code will see.
-textBuff*	trekComBuffer;
-
-// Their reply buffer.
-textBuff*	trekReplyBuffer;
-
-
-// Our screen that we'll send text to.
-starTrekText* ourTextView;
-
-
-// Block 'till we get a char. I guess this is the waiting room.
-int getch() {
-
-	char theChar;
-	
-	while (trekComBuffer->empty()) ourOS.mPanel->sleep(10);
-	return (int)trekComBuffer->readChar();
-}
-
-
-// And where it all goes out.. Well for now, we'll stuff it in here.
-void proutn(char* s) { trekReplyBuffer->addStr(s); }
-
-
-// Sometimes they jjust want a char sent out.
-void proutCh(char c) {  trekReplyBuffer->addChar(c); }
-
-
-// Ok, they want this string to be printed s-l-o-w-l-y This'll do that.
-void prouts(char* s) {
-
-	timeObj	charDelay(125);
-	int		i;
-	
-	i = 0;
-	while(s[i]!='\0') {
-		trekReplyBuffer->addChar(s[i]);
-		i++;
-		charDelay.start();
-		while (!charDelay.ding()) ourOS.mPanel->sleep(10);
-	}
-}
-	
-// So we can from the command line.
-void close(void) {
-	Serial.println("Calling close()");
-	ourOS.mPanel->close();
-}
-
-// For debugging.
-void out(char* str) { Serial.print(str);Serial.flush(); }
-void outln(char* str) { Serial.println(str);Serial.flush(); }
-
-// It wants this.
-int min(int a, int b) {
-	if (a < b) return a;
-	return b;
-}
-*/
 // *****************************************************
 //                      starTrekKeyboard
 // *****************************************************
@@ -122,8 +57,10 @@ void starTrekKeyboard::handleMessage(char* msgBuff) {
  	
 	trekComBuffer->addStr(msgBuff,false);
 	trekComBuffer->addChar('\n');
-	mTextView->appendText(msgBuff);                     // Echo to our own screen.
-	mTextView->appendText('\n');                        // With a EOL char.
+	trekReplyBuffer->addStr(msgBuff,false);
+	trekReplyBuffer->addChar('\n');
+	//mTextView->appendText(msgBuff);                     // Echo to our own screen.
+	//mTextView->appendText('\n');                        // With a EOL char.
 }
 
 
@@ -132,15 +69,19 @@ void starTrekKeyboard::handleKey(keyCommands inEditCom) {
 
   int   numChars;
   
-  if (inEditCom == enter) {           // Got the return key.
-    mEditLabel->mSuccess = true;
-    mEditLabel->endEditing();
-    handleMessage(mEditLabel->buff);  //Do what the user wants with the message.
-    mEditLabel->setValue("");         // Clear the editField.
-    mEditLabel->beginEditing();
-  } else {
-    keyboard::handleKey(inEditCom); // Or, do the default suff.
-  }
+	if (inEditCom == enter) {           // Got the return key.
+		mEditLabel->mSuccess = true;
+		mEditLabel->endEditing();
+		handleMessage(mEditLabel->buff);  // Do what the user wants with the message.
+		mEditLabel->setValue("");         // Clear the editField.
+		mEditLabel->beginEditing();
+	} else if (inEditCom == arrowFWD) {
+		Serial.println();
+		Serial.println("TEXT");
+		Serial.print(mTextView->seeText());
+	} else {
+		keyboard::handleKey(inEditCom); // Or, do the default suff.
+	}
 }
 
 
@@ -152,7 +93,9 @@ void starTrekKeyboard::handleKey(keyCommands inEditCom) {
 
 starTrekUpdater::starTrekUpdater(starTrekPanel* inPanel) {
 
-  mPanel = inPanel;
+  mPanel		= inPanel;
+  mParsing	= false;
+  mParser.addCmd(clearScr,"[2J");
   hookup();
 }
 
@@ -160,11 +103,50 @@ starTrekUpdater::starTrekUpdater(starTrekPanel* inPanel) {
 starTrekUpdater::~starTrekUpdater(void) {  }
 
 
+// Parse escape sequence chars. This is a little different because they use a set of
+// chars as the terminator, not white space. So, we run the chars through 'till we see an
+// end char. Run the end char through. Then, stuff in an EOL to terminate the parsing.
+void starTrekUpdater::parseChar(char aChar) {
+	
+	int   command;
+
+	command = mParser.addChar(aChar);								// Try parsing what we have. (It won't work, but keeps track.)
+	if (aChar >= 0x40 && aChar <= 0x7E && aChar!= '[') {		// If its in the terminating set.. (But not '[')
+		command = mParser.addChar(EOL);								// We need to fool the parser. So send the end char.
+	}
+	switch (command) {													// Check the results.
+		case noCSI 		: break;											// Nothing to report, move along.
+		case clearScr  :													// Found the clear screen sequence.
+			//Serial.print("-");
+			mPanel->ourScreen->setText("");							// Clear the screen.
+			//Serial.print("=");
+			mParsing = false;												// No longer in control sequence.
+		break;																// our work is done. Lets go!
+		default        : 
+			mPanel->ourScreen->appendText(aChar);					// Oh well, pass it on to the screen. False alarm.
+			mParsing = false;												// No longer in control sequence.	
+		break;	
+	}
+}
+
+
 void starTrekUpdater::idle(void) {
 
-  while(!trekReplyBuffer->empty()) {                             // While the reply buffer is not empty..
-    mPanel->ourScreen->appendText(trekReplyBuffer->readChar());  // Add each char to the screen.
-  }
+	char	aChar;
+	
+	while(!trekReplyBuffer->empty()) {				// While the reply buffer is not empty..
+		aChar = trekReplyBuffer->readChar();		// We grab the next char out of the buffer.
+		if (mParsing) {									// If we are parsing..
+			//Serial.print(aChar);
+			parseChar(aChar);								// We pass the char to the parser.
+		} else if (aChar=='\e') {						// Else, not parsing, but found a control char..
+			//Serial.print("+");
+			mParsing = true;								// Start parsing. (Don't pass on the control char.)
+		} else {												// Else, not parsing and not a control char..
+			//Serial.print(aChar);
+			mPanel->ourScreen->appendText(aChar);  // Finally, pass this char to the screen.
+		}
+	}
 }
 
 

@@ -6,6 +6,7 @@
 #include <litlOS.h> 
 #include <bmpObj.h>
 #include <textView.h>
+#include <lilParser.h>
 #include "../../tools.h"
 #include "textBuff.h"
 #include "arduinoTrek.h"
@@ -39,12 +40,17 @@ class starTrekKeyboard : public ourKeyboard {
 class starTrekUpdater : public idler {
 
   public:
-            starTrekUpdater(starTrekPanel* inPanel);
+				enum CSI { noCSI, clearScr };
+  
+				starTrekUpdater(starTrekPanel* inPanel);
   virtual   ~starTrekUpdater(void);
 
-  virtual  void  idle(void);
+				void	parseChar(char aChar);
+  virtual	void  idle(void);
 
             starTrekPanel* mPanel;
+            lilParser   	mParser;
+            bool				mParsing;
 };
 
 
