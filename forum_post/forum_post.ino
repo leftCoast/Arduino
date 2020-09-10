@@ -1,69 +1,85 @@
-#include <blinker.h>
-#include <colorObj.h>
-#include <debug.h>
 #include <idlers.h>
 #include <lists.h>
-#include <mapper.h>
-#include <mechButton.h>
-#include <multiMap.h>
-#include <resizeBuff.h>
-#include <runningAvg.h>
-#include <squareWave.h>
-#include <textBuff.h>
 #include <timeObj.h>
 
 
-class timeoutBlinker :  public blinker,
-                        public timeObj {
-   public:
-                  timeoutBlinker(int pin,float timeOutMs,float blinkOnMs,float periodMs);
-         virtual  ~timeoutBlinker(void);
+// **************************************
+//            CHASE CLASS
+// **************************************
 
-         virtual  void  setOnOff(bool onOff);  
-         virtual  void  idle(void);        
+
+int ledList[] = {2,3,5,7,8,9,A1,A2};
+
+// The deivation of the class.
+class chaseBlinker :  public idler {
+   
+   public:
+                  chaseBlinker(void);
+         virtual  ~chaseBlinker(void);
+
+                  void  begin(float timeOnMs = 100);
+         virtual  void  idle(void); 
+
+                  int      index;
+                  bool     beenSetup;
+                  timeObj  onTimer;
 };
 
+// Constructor. Not much to do here.
+chaseBlinker::chaseBlinker(void) { beenSetup = false;  }
 
-timeoutBlinker::timeoutBlinker(int pin,float timeOutMs,float blinkOnMs,float periodMs)
-   : blinker(pin,blinkOnMs,periodMs),
-   timeObj(timeOutMs) {  }
 
-   
-timeoutBlinker::~timeoutBlinker(void) {  }
+// Destructor, also not much to do.
+chaseBlinker::~chaseBlinker(void) {  }
 
-void timeoutBlinker::setOnOff(bool onOff) {
 
-   if (onOff) start();
-   blinker::setOnOff(onOff);
-}
+// Initialzer to be called in your setup() funtion.
+// You can set the times differently here as well.
+void chaseBlinker::begin(float timeOnMs) {
 
-void  timeoutBlinker::idle(void) {
-
-   if (blinking()) {
-      if (ding()) {
-         setOnOff(false);
+   hookup();
+   if (!beenSetup) {
+      for (int i=0;i<8;i++) {
+         pinMode(ledList[i], OUTPUT);
       }
+      beenSetup = true;
    }
-   blinker::idle();    
+   onTimer.setTime(timeOnMs);
+   index = 0;
 }
 
 
-timeoutBlinker ourBlinker(13,5000,20,100);
+// Idle is where you check the timer to see if its time to do somwthing.
+// If so, we do that something (swap LEDS) and reset the timer.
+void  chaseBlinker::idle(void) {
+
+   if (onTimer.ding()) {                  // If our timer has expired..
+      digitalWrite(ledList[index], LOW);  // Turn off the current LED.
+      index++;                            // Increment the counter to the next LED.
+      if (index>=8) {                     // If we overshot..
+         index = 0;                       // We reset to zero.
+      }
+      digitalWrite(ledList[index], HIGH); // Counter has been incremented, turn on the next LED.
+      onTimer.start();                    // Restart the timer for this LED.
+   }
+}
+
+
+
+// **************************************
+//         PROGRAM STARTS HERE
+// **************************************
+
+chaseBlinker   ourChaser;
 
 void setup(void) {
 
-   pinMode(15, INPUT_PULLUP);
+   ourChaser.begin();
 }
 
 
 void loop(void) {
 
    idle();
-   if (!digitalRead(15)) {
-      while(!digitalRead(15));
-      if (ourBlinker.blinking()) {
-         ourBlinker.setOnOff(false);
-         else
-         ourBlinker.setOnOff(true);
-   }
+   // Do your stuff, DON"T call delay.
 }
