@@ -106,11 +106,11 @@ void litlOS::launchPanel(void) {
 
 // Tell the current panel its loop time.
 void litlOS::loop(void) {
-
-  if(!mPanel && nextPanel!=NO_PANEL_ID) {				// If have no panel and we want one.
-    launchPanel();										// Launch a new panel.
-  } else if(nextPanel!=mPanel->getPanelID()) {	// Else, if we just want a change of panels.
-    launchPanel();                              // Launch the new panel.
-  }
-  if (mPanel) { mPanel->loop(); }               // As always, if there is a panel, let it have some loop time.
- }
+	
+	if(!mPanel && nextPanel!=(unsigned int)mPanel) {	// If have no panel and we want one.
+		launchPanel();												// Launch a new panel.
+	} else if(nextPanel!=mPanel->getPanelID()) {			// Else, if we just want a change of panels.
+		launchPanel();												// Launch the new panel.
+	}
+	if (mPanel) { mPanel->loop(); }							// As always, if there is a panel, let it have some loop time.
+}
