@@ -1,10 +1,12 @@
 #include "homePanel.h"
 #include "handheldOS.h"
-#include "label.h"
+#include "liveText.h"
+
 
 // *****************************************************
 //                      homeScreen
 // *****************************************************
+
 
 #define STARTREK_X   55
 #define STARTREK_Y   140
@@ -18,6 +20,7 @@
 #define BREAKOUT_PANEL_BMP    "/system/icons/breakout/breakout.bmp"
 #define STAR_TREK_PANEL_BMP   "/system/icons/starTrek/sTrek32.bmp"
 
+
 homeScreen::homeScreen(void)
    : homePanel() { }
 
@@ -26,6 +29,7 @@ homeScreen::~homeScreen(void) { }
 void homeScreen::setup(void) {
    
    rect imageRect;
+   colorObj aColor;
    
    imageRect.setRect(0,0,240,300);
    mBackImage = new bmpPipe(&imageRect);
@@ -43,9 +47,18 @@ void homeScreen::setup(void) {
    calc->begin();
    addObj(calc);
 
-   label*   header = new label(0,6,240,8,"Left Coast classic code machine",1);
+   liveText*   header = new liveText(0,6,240,8,50,true);
+   header->setValue("Left Coast classic code machine");
+   header->setTextSize(1);
    header->setColors(&yellow);
    header->setJustify(TEXT_CENTER);
+   aColor.setColor(&yellow);
+   aColor.blend(&black,75);
+   header->addAColor(0,&aColor);
+   header->addAColor(1500,&aColor);
+   aColor.setColor(&yellow);
+   aColor.blend(&white,50);
+   header->addAColor(750,&aColor);
    addObj(header);
 }
 
