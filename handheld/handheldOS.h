@@ -24,11 +24,20 @@ class handheldOS : public litlOS {
   
   virtual int     begin(void);              // The global world is online, do hookups.
   virtual panel*  createPanel(int panelID);
+  virtual void    launchPanel(void);        // Dispose of current and launch a newly created panel.
           void    beep(void);
+          void    hideRedraw(void);
+          void    bringUp(void);
   virtual void    idle(void);               // If we need to do something in the background, here we are.
-  //virtual void    loop(void);               // If we need to do something in the foreground, here we are.
+
+          bool        mDimScreen;
+          int         mNowTime;
+          int         mEndTime;
+          multiMap    screenMap;
+          timeObj     mScreenTimer;
 };
 
 extern handheldOS  ourOS;
+
 
 #endif

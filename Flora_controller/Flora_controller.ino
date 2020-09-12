@@ -32,10 +32,11 @@ void bootError(char* errStr) {
 void setup() {
    
    // First bring the screen online.
+   
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {
       Serial.println("NO SCREEN!");
       Serial.flush();
-      while(true);
+      //while(true);
    }
    screen->fillScreen(&black);
 
