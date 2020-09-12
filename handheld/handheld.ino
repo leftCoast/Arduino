@@ -20,7 +20,7 @@ void bootError(char* errStr) {
    screen->setTextColor(&white); // Drawing in white..
    screen->setTextSize(2);       // Big enought to notice.
    screen->drawText(errStr);     // Draw the error message.
-   //analogWrite(SCREEN_PIN,0);  // Bring up the screen.
+   analogWrite(SCREEN_PIN,0);   // Bring up the screen.
    while(1);                     // Lock down.
 }
 
@@ -31,6 +31,7 @@ void setup() {
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // If we can't get the screen running..
       Serial.println("NO SCREEN!");                               // Send an error out the serial port.
       Serial.flush();                                             // Make sure it goes out!
+      ourOS.beep();
       while(true);                                                // Lock processor here forever.
    }
    screen->fillScreen(&black);                                    // Looks like we have a screen, fill it with black.
