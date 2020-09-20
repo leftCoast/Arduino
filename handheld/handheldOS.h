@@ -7,7 +7,7 @@
 #define SCREEN_PIN   25
 #define BEEP_PIN     23
 
-enum  apps { homeApp = HOME_PANEL_ID, starTrekApp, breakoutApp, calcApp, nextApp };
+enum  apps { homeApp = HOME_PANEL_ID, starTrekApp, breakoutApp, calcApp, rgnTestApp, nextApp };
 
 
 

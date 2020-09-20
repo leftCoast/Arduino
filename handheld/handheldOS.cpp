@@ -52,6 +52,7 @@ panel* handheldOS::createPanel(int panelID) {
       case calcApp      : return new rpnCalc();
       case starTrekApp  : return new starTrekPanel();
       case breakoutApp  : return new breakout();
+      case rgnTestApp   : return new regionTest();
       default           : return NULL;
    }
 }

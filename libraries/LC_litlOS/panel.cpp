@@ -52,7 +52,7 @@ void panel::close(void) { nextPanel = HOME_PANEL_ID; }
 // deleted.
 void panel::closing(void) {  }
 
-
+/*
 // DELAY!! OMG! Here's an idea on how to finally kill this beast.
 // Just hold in a loop calling idle() 'til it's done.
 //
@@ -68,3 +68,4 @@ void panel::sleep(unsigned long ms) {
 		}
 	}
 }
+*/

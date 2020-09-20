@@ -33,7 +33,7 @@ class panel : public drawGroup {
 	virtual	void	drawSelf(void);
 	virtual	void	close(void);
 	virtual	void	closing(void);
-	virtual	void	sleep(unsigned long);
+	//virtual	void	sleep(unsigned long);
   
 				int		mPanelID;   // What panal am I?
 				menuBar*	mMenuBar;	// My menu bar, if so desired.
