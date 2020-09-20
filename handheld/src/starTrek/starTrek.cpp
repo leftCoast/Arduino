@@ -74,11 +74,12 @@ void starTrekKeyboard::handleKey(keyCommands inEditCom) {
 	if (inEditCom == enter) {           // Got the return key.
 		mEditLabel->mSuccess = true;
 		mEditLabel->endEditing();
-		handleMessage(mEditLabel->buff);  // Do what the user wants with the message.
-		mEditLabel->setValue("");         // Clear the editField.
+		handleMessage(mEditLabel->buff);	// Do what the user wants with the message.
+		mEditLabel->setValue("");			// Clear the editField.
 		mEditLabel->beginEditing();
+		bmpKeyboard::handleKey(chars);	// Set the keyboard back to chars.
 	} else {
-		keyboard::handleKey(inEditCom); // Or, do the default suff.
+		keyboard::handleKey(inEditCom);	// Or, do the default suff.
 	}
 }
 
