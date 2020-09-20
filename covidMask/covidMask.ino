@@ -10,16 +10,31 @@
 #include <timeObj.h>
 #include <blinker.h>
 
-#define RED_VAL   739.0
-#define BLUE_VAL  738.45
+#define RED_VAL   743.5
+#define BLUE_VAL  742
 #define DARK_PERC 50
 
 neoPixel      bioRing(12,6);
 colorMultiMap bioColorMapper;
 runningAvg    smoother(20);
 colorObj      tColor;
-//blinker       aBlinker;
 
+ /*
+void setup() {
+  bioRing.begin();
+  bioRing.setAll(&red);
+  bioRing.show();
+}
+
+void loop(void) {
+  delay(250);
+  bioRing.setAll(&red);
+  bioRing.show();
+  delay(250);
+  bioRing.setAll(&green);
+  bioRing.show();
+ }
+*/
 void setup() {
 
   //Serial.begin(9600);
@@ -46,11 +61,7 @@ void loop() {
   //idle();
   vacVal = analogRead(A12);
   vacVal = smoother.addData(vacVal);
-  /*
-  Serial.print(RED_VAL);Serial.print(",");
-  Serial.print(vacVal);Serial.print(",");
-  Serial.println(BLUE_VAL);
-  */
+  Serial.println(vacVal);
   bioColor = bioColorMapper.Map(vacVal);
   bioRing.setAll(&bioColor);
   bioRing.show();
