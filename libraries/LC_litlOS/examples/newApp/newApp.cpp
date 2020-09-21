@@ -1,9 +1,9 @@
 #include  "appName.h"
 
 
-// And it all starts up again..
+// We create our appName object and pass newAppID into the panel constructor.
 appName::appName()
-  : panel() { }
+  : panel(newAppID) { }
 
 
 // The world as you know it, is ending..

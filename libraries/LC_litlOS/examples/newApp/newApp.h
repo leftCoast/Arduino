@@ -24,12 +24,14 @@
 //  name. The application's ID name is placed in your OS's apps enum.
 // 
 //  Substitute your application name for appName.
-//  Substitute your application ID name for newApp.
+//  Substitute your application ID name for newAppID.
 //  Once this is done, save this under your new application name as its
 //  .h file. 
-//  Lastly, go to newApp.cpp and change the names there just as you did
+//
+//  Lastly, go to appName.cpp and change the names there just as you did
 //  here. Then save that file under your new application name as its
 //  .cpp file.
+//
 // **********************************************************************
 
 
@@ -48,7 +50,7 @@
 // 
 //  num  apps { homeApp = HOME_PANEL_ID,
 //
-//  You need to add newApp to this list.
+//  You need to add newAppID to this list.
 // **********************************************************************
 
 
@@ -63,7 +65,7 @@
 //
 //  And in your OS's createPanel(int panelID) method, add the line..
 //
-//					"case newApp : return new appName();"
+//					"case newAppID : return new appName();"
 //
 // **********************************************************************
 

@@ -7,7 +7,7 @@
 
 #define TV_INSET 1
 
-// Screen back ground
+// Screen background
 #define SBG_X     5
 #define SBG_Y     26
 #define SBG_W     240-10
@@ -19,7 +19,7 @@
 #define TV_W    SBG_W - TV_INSET - TV_INSET
 #define TV_H    SBG_H - TV_INSET - TV_INSET
 
-// edit text back ground
+// edit text background
 #define ETBG_X    SBG_X
 #define ETBG_Y    SBG_Y + SBG_H + 5
 #define ETBG_W    SBG_W

@@ -8,6 +8,7 @@
 #define	NO_PANEL_ID		0	// You have to have this guy.
 #define	HOME_PANEL_ID	1
 
+#define	DEF_APP_ICON	"/system/icons/standard/app32.bmp"
 
 // The user will expect icons to click on for panel swapping.
 // You can use this. Give it a panel ID and a full path to a
@@ -17,7 +18,7 @@
 class appIcon : public iconButton {
   
   public:
-          appIcon(int xLoc,int yLoc,int message,char* path,int pix=32);	// Path to .bmp icon dwg.
+          appIcon(int xLoc,int yLoc,int message,char* path=DEF_APP_ICON,int pix=32);	// Path to .bmp icon dwg.
   virtual ~appIcon(void);
   
   virtual void  doAction(void);
