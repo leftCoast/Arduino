@@ -35,7 +35,7 @@ void setup() {
       Serial.flush();                                             // Make sure it goes out!
       while(true);                                                // Lock processor here forever.
    }
-   screen->fillScreen(&black);                                    // Looks like we have a screen, fill it with black.
+   //screen->fillScreen(&black);                                    // Looks like we have a screen, fill it with black.
    if (!SD.begin(SD_CS)) {                                        // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
       Serial.flush();                                             // Make sure it goes out!

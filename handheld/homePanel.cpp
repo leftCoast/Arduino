@@ -19,7 +19,7 @@
 #define CALC_PANEL_BMP        "/system/icons/RPNCalc/calc32.bmp"
 #define BREAKOUT_PANEL_BMP    "/system/icons/breakout/breakout.bmp"
 #define STAR_TREK_PANEL_BMP   "/system/icons/starTrek/sTrek32.bmp"
-
+#define REGION_TEST_PANEL_BMP	"/system/icons/rgnTest/test32.bmp"
 
 homeScreen::homeScreen(void)
    : homePanel() { }
@@ -42,12 +42,16 @@ void homeScreen::setup(void) {
    appIcon*  breakOut = new appIcon(BREAKOUT_X,BREAKOUT_Y,breakoutApp,BREAKOUT_PANEL_BMP);
    breakOut->begin();
    addObj(breakOut);
+   
+   appIcon*  rgnTest = new appIcon(BREAKOUT_X + 128,BREAKOUT_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
+   rgnTest->begin();
+   addObj(rgnTest);
 
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    calc->begin();
    addObj(calc);
 
-   liveText*   header = new liveText(0,6,240,8,50,true);
+   liveText*   header = new liveText(0,7,240,8,50,true);
    header->setValue("Left Coast classic code machine");
    header->setTextSize(1);
    header->setColors(&yellow);

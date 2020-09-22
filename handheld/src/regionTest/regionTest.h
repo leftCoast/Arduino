@@ -3,7 +3,7 @@
 
 #include "panel.h"
 #include "litlOS.h"
-
+#include "region.h"
 
 
 
@@ -39,10 +39,13 @@ class regionTest	: public panel {
 					regionTest(void);
 	virtual		~regionTest(void);
 	
-	virtual void  setup(void);
-	virtual void  loop(void);
-	virtual void  drawSelf(void);
-	virtual void  closing(void);
+	virtual void  		setup(void);
+	virtual void  		loop(void);
+	virtual void  		drawSelf(void);
+	virtual void  		closing(void);
+	
+				colorObj	backColor;
+				region*	mRegion;
 };
 
 #endif
