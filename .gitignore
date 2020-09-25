@@ -25,3 +25,4 @@ libraries/LC_GUITextTools
 libraries/AnimatedGIF
 libraries/starTrekArduino/
 forum_post/forum_post.ino
+libraries/LC_comPlayer
