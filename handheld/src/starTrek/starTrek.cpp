@@ -231,7 +231,7 @@ void starTrekPanel::setup(void) {
 	theKeybaord->loadKeys();
 	addObj(theKeybaord);
   
-	arduinoTrekSetup("r\n");
+	arduinoTrekSetup("");
 }
 
 
