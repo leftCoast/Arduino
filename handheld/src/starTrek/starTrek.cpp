@@ -201,6 +201,9 @@ void starTrekPanel::setup(void) {
 	colorRect*  			aRect;
 	starTrekKeyboard*	theKeybaord;
 
+	// For now, we are going to trust that the SD drive is all set up and running.
+	SDDriveReady = true;
+
 	// screen background.
 	aRect = new colorRect(SBG_X,SBG_Y,SBG_W,SBG_H);
 	aRect->setColor(&screenColor);
@@ -230,7 +233,7 @@ void starTrekPanel::setup(void) {
 	theKeybaord = new starTrekKeyboard(anEditLabel,ourScreen,false);
 	theKeybaord->loadKeys();
 	addObj(theKeybaord);
-  
+  	
 	arduinoTrekSetup("");
 }
 
