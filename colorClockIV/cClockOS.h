@@ -82,6 +82,7 @@ class clockRect : public colorRect {
   virtual ~clockRect(void);
 
   virtual void  setPercent(float percent);
+          void  setPixel(void);             // Hacked the neoPixel in here.
   virtual void  drawSelf(void);
 
           float   mPercent;

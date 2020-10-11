@@ -1,4 +1,5 @@
 
+#include <neoPixel.h>
 #include "screen.h"
 #include "cClockOS.h"
 

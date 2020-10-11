@@ -1,12 +1,14 @@
 #include "cClockOS.h"
 #include "cEditPanel.h"
 #include <EEPROM.h>
+#include <neoPixel.h>
 
 RTC_DS3231  rtc;
 mechButton  ourClicker(POT_BTN);
 cClockOS    ourOS;
 boolean     haveClock = false;
 colorObj    colors[24];
+neoPixel    theNeoPixel(1,3);
 
 // *****************************************************
 //                      litleClk
@@ -113,6 +115,20 @@ void  clockRect::setPercent(float percent) {
   setNeedRefresh();
 }
 
+void  clockRect::setPixel(void) {
+  
+  colorObj  aColor;
+  mapper    dimer(0,100,10,255);
+  float     brightness;
+
+  brightness = dimer.map(mPercent);
+  aColor.setColor(this);
+  //aColor.blend(&black,100-percent);
+  theNeoPixel.setBrightness(brightness);
+  theNeoPixel.setPixelColor(0,&aColor);
+  theNeoPixel.show();
+}
+
 
 void  clockRect::drawSelf(void) {
   
@@ -123,6 +139,7 @@ void  clockRect::drawSelf(void) {
   rad = round(radius.Map(mPercent));
   screen->fillScreen(&black);
   screen->fillCircle(64-rad/2,64-rad/2,rad,this);
+  setPixel();
   /*
   for (int i=0;i<width;i++) {
     for (int j=0;j<height;j++) {
@@ -206,8 +223,8 @@ void homeClkPanel::checkDimmer(void) {
     mLittleClk->setTColor(&aColor);
     mLittleClk->setNeedRefresh();
   }
-  if (ourClicker.clicked()) {
-    while(ourClicker.clicked());
+  if (!ourClicker.trueFalse()) {
+    while(!ourClicker.trueFalse());
     mLittleClk->setDisplay(!mLittleClk->getDisplay());
     this->setNeedRefresh();
   }
@@ -352,7 +369,6 @@ void homeClkPanel::doSetColor(void) {
   int   blueVal;
   
   if (mParser.numParams()==4) {
-    
     paramBuff = mParser.getParam();
     hourVal = atoi (paramBuff);
     free(paramBuff);
@@ -399,7 +415,7 @@ void homeClkPanel::checkParse(void) {
         Serial.println("   cedit takes you to the color editor.");
         Serial.println("   reset will reset all colors to defaults.");
         Serial.println("   gcolor reads back the current hour's color.");
-        Serial.println("   scolor followed by 3 numbers R,G,B sets the current hour's color.");
+        Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
       break;
       case setHour  : doSetHour();    break;
       case setMin   : doSetMin();     break;
@@ -451,6 +467,7 @@ int cClockOS::begin(void) {
     Wire.endTransmission();
   }
   readParams();
+  theNeoPixel.begin();              //Fire up the NeoPixel.
   return litlOS::begin();
 }
 

@@ -2,6 +2,7 @@
 .DS_Store
 .DS_Store
 libraries/Adafruit*
+libraries/arduino_146782
 libraries/SD/.DS_Store
 libraries/LC_baseTools
 libraries/LC_lilParser
