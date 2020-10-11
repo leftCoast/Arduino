@@ -1,10 +1,7 @@
 #include "SDTools.h"
 #include <resizeBuff.h>
 
-#define	BUFF_BYTES	80			// How many bytes to allocate for the name buff.
-
-
-char  nameBuff[BUFF_BYTES];  // Use it as you please. Its shared between all.
+pathStr	workingDir;
 
 
 // Groups like Apple will fill the SD drive with all sorts of junk we do't need
@@ -72,6 +69,25 @@ int strItem::getStrlen(void) { return strlen(mStr); }
 pathStr::pathStr(void)
 	: linkList() {  }
 
+
+pathStr::pathStr(pathStr* inPathStr)
+	: linkList() {
+	
+	strItem*	trace;
+	strItem*	newObj;
+		
+	if (inPathStr) {
+		trace = (strItem*)inPathStr->getFirst();		// Starting at beginning.
+		while(trace) {											// While we have a valid pointer..
+			newObj = new strItem(trace);					// Create a clone object.
+			addToEnd(newObj);									// Add the clone to ourselves, building from the tail end.
+			trace = (strItem*)trace->getNext();			// And hop to the next node in their list.
+		}
+	}
+}
+		
+		
+
 pathStr::~pathStr(void) {  }
    
    
@@ -108,10 +124,15 @@ void pathStr::getPath(char* path) {
 }
 
 
-char* pathStr::getPath(void) {
+char* pathStr::getPathItemName(int index) {
 
-	getPath(&nameBuff[0]);
-	return nameBuff;
+	strItem*	trace;
+	
+	trace = getByIndex(index);
+	if (trace) {
+		return trace->getStr();
+	}
+	return NULL;
 }
 
 
@@ -155,6 +176,8 @@ void pathStr::setPath(char* inStr) {
   		}
   	}		
 }
+
+void pathStr::setPath(pathStr* inPath) {
 
 
 
@@ -215,26 +238,31 @@ void dirList::readDir(char* path) {
    dumpList();                                  // Clear the list for a new set.
    mLastIndex = -1;                             // Flag for no search yet.
    mLastItem = NULL;                            // Flag nothing found yet.
-   dir = SD.open(path);                         // Try opening the directory.
-   if (dir) {                                   // If we were able to open the working directory..
-      dir.rewindDirectory();                    // Rewind it to the first entry.
-      done = false;                             // We ain't done yet.
-      do {                                      // Start looping through the entries.
-         entry = dir.openNextFile();            // Grab an entry.
-         if (entry) {                           // If we got an entry..
-            strcpy(nameBuff,entry.name());      // Grab the name.
-            if (filterFile(nameBuff)) {         // filter out Apple nonsense.
-               newItem = new dirItem(entry);    // Create the list item.
-               addToTop(newItem);               // Pop it in the list.
-               entry.close();                   // And we close the entry.
-            }
-         } else {                               // Else, we didn't get an entry from above.
-            done = true;                        // No entry means, we are done here.
-         }
-      } while (!done);                          // And we do this loop, over and over, while we are not done.
+   if (SD.exists(path)) {								// If the directory exists..
+   	dir = SD.open(path);                      // Try opening the directory.
+   	if (dir.isDirectory()) {						// If it is a directory..
+			dir.rewindDirectory();                 // Rewind it to the first entry.
+			done = false;                          // We ain't done yet.
+			do {                                   // Start looping through the entries.
+				entry = dir.openNextFile();			// Grab an entry.
+				if (entry) {								// If we got an entry..
+					strcpy(nameBuff,entry.name());	// Grab the name.
+					if (filterFile(nameBuff)) {		// filter out Apple nonsense.
+						newItem = new dirItem(entry);	// Create the list item.
+						addToTop(newItem);            // Pop it in the list.
+						entry.close();                // And we close the entry.
+					}
+				} else {                            // Else, we didn't get an entry from above.
+					done = true;                     // No entry means, we are done here.
+				}
+			} while (!done);                       // And we do this loop, over and over, while we are not done.
+		} else {												// Else, this was a datafile.
+			Serial.println("Not a directory.");		// Print an error.
+		}
       dir.close();                              // Looping through entries is done, close up the original file.
    } else {                                     // If this worked correctly, we'd know there was an error at this point.                                        
-      Serial.println("Fail to open file.");     // Sadly, instead of returning a NULL, it just crashes.
+      Serial.print("Can't find : ");     			// Can't find it.
+      Serial.printnln(path);							//
    }
 }
 
@@ -274,7 +302,7 @@ unsigned long dirList::getItemSize(int index) {
    if (anItem) {
       return anItem->getSize();
    }
-   return NULL;
+   return 0;
 }
 
 

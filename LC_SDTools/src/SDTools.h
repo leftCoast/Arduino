@@ -4,10 +4,8 @@
 #include <SD.h>
 #include <lists.h>
 
-extern char nameBuff[];
 
 bool filterFile(char* fileName);
-
 
 
 
@@ -43,11 +41,12 @@ class pathStr :   public linkList {
 
    public:
 				pathStr(void);
+				pathStr(pathStr* inPathStr);
    virtual	~pathStr(void);
    
    			int	getPathBytes(void);
    			void	getPath(char* path);
-   			char*	getPath(void);
+   			char* getPathItemName(int index);
    			void	setPath(char* itemStr);
 };
 
@@ -108,9 +107,9 @@ class sdObj {
             bool  changeWD(char* dirName);   // Pass in ".." to go up a level.
             
 
-            int   mCS;
-            bool  mInit;
-            char* mWd;
+            int   	mCS;
+            bool  	mInit;
+            pathStr 	mWd;
 }
 
 */
