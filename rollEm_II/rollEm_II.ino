@@ -18,6 +18,11 @@
 
 
 
+// *************************************************
+// **************** LC_fona class ******************
+// *************************************************
+
+
 class LC_fona : public Adafruit_FONA {
 
   public:
@@ -58,10 +63,14 @@ bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
 
 
 
+// *************************************************
+// ***************** Main program ******************
+// *************************************************
+
+
 // Our delightful set of global variables.
 
 enum commands { noCommand, rollEm, sayHello, tell, help };
-//enum names { noName, ma, pa, alex, dan, shelby };
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 LC_fona fona = LC_fona();
@@ -69,17 +78,15 @@ LC_fona fona = LC_fona();
 bool        FONAOnline;
 byte        comBuff[COM_BUFF_BYTES];   // Buffer for all comunication.
 byte        pnBuff[PN_BUFF_BYTES];     // Buffer for current phone number.
+bool        havePN;                    // Is this a valid and current phone numnber?
 char        answer[ANSWER_BYTES];      // Buffer for our reply;
 char        intStr[INT_STR_BYTES];     // Buffer to hold a int as a string.
-bool        havePN;
 int         SMSIndex = 1;
 timeObj     serverTimer(100);
 lilParser   comParser;
-//lilParser   nameParser;
-//char        famPN[5][12];
 
 
-
+// Standerd setup() runs once at startup.
 void setup() {
 
    comParser.addCmd(rollEm,"ROLL");
@@ -87,25 +94,12 @@ void setup() {
    comParser.addCmd(sayHello,"HI");
    comParser.addCmd(help,"?");
    
-   /*
-   nameParser.addCmd(dan,"DAN");
-   nameParser.addCmd(alex,"ALEX");
-   nameParser.addCmd(shelby,"SHELBY");
-   nameParser.addCmd(ma,"MOM");
-   nameParser.addCmd(pa,"DAD");
-   
-   strcpy(&(famPN[pa][0]),"14083400352");
-   strcpy(&(famPN[ma][0]),"13607084218");
-   strcpy(&(famPN[alex][0]),"13603335200");
-   strcpy(&(famPN[dan][0]),"13609298457");
-   strcpy(&(famPN[shelby][0]),"13603332799");
-   */
-   
    havePN = false;                                 // We do not yet have a phone number to text to.
    pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
    pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
    FONAOnline = false;                             // Not ready yet..
    resetFONA();                                    // Hit reset, see if it'll come online.
+   randomSeed(A0);                                 // Might as well get a random start. 
 }
 
 
@@ -163,7 +157,6 @@ void handleMessage(char* message) {
       case noCommand : break;
       case rollEm    : doDiceRoll();   break;
       case sayHello  : doSayHello();   break;
-      //case tell      : doTell();       break;
       case help      : doHelp();       break;
       default        : doHelp();       break;
    }
@@ -178,7 +171,9 @@ void loop() {
       serverTimer.start();                                           // Reset our timer.
       message = checkForMessage();
       if (message) {
+         LED(true);
          handleMessage(message);
+         LED(false);
       }
    }
 }
@@ -193,7 +188,7 @@ void loop() {
 // User has typed Hi or Hello. Lets send back a greeting.
 void doSayHello(void) {
 
-   strcpy(&(comBuff[1]),"Greetings! I'm the online dice rolling machine.");
+   strcpy(&(comBuff[1]),"Greetings from..\nThe Ballon Server!\nCurrently, I'm an online dice rolling machine.");
    sendSMSMsg(comBuff);                                // Send the reply stored in the com buffer
 }
 
@@ -215,83 +210,35 @@ void doDiceRoll(void) {
          numDice = 1;                                    // We'll give them one anyhow.
       }
    }
-   if (numDice>MAX_DICE) {                            // If the number of dice is more than the max..
-      strcpy(answer,"Too many dice! You only get ");  // Set the answer sgtring to an error message.
-      strcat(answer,str(MAX_DICE));                   //
-      strcat(answer,".");                             //
-   } else {                                           // Else, the number of dice is ok..
-      strcpy(answer,"Rolling ");                     // Send back header.
-      strcat(answer,str(numDice));                    //
-      strcat(answer," dice.\n");                    //
-      total = 0;                                      // Zero out our total.
-      for (int i=1;i<=numDice;i++) {                  // For each die..
-         roll = random(1,6);                          // Get a random value 1..6.
-         total = total + roll;                        // Add it to the total.
-         strcat(answer,str(roll));                    // Add the value to the answer string.
-         if (i!=numDice) {                            // If there are more dice to roll..
-            strcat(answer,", ");                      // We add a comma to the answer.
-         } else {                                     // Else, we rolled them all..
-            strcat(answer,"\nTotal : ");               // Add "Total :" to the answer string.
-            strcat(answer,str(total));                // Add the actual total to the anser string.
+   if (numDice>MAX_DICE) {                               // If the number of dice is more than the max..
+      strcpy(answer,"Too many dice! You only get ");     // Set the answer sgtring to an error message.
+      strcat(answer,str(MAX_DICE));                      //
+      strcat(answer,".");                                //
+   } else {                                              // Else, the number of dice is ok..
+      strcpy(answer,"Rolling ");                         // Send back header.
+      strcat(answer,str(numDice));                       //
+      if (numDice==1) {                                  //
+         strcat(answer," die.\n");                       //
+      } else {
+         strcat(answer," dice.\n");
+      }
+      total = 0;                                         // Zero out our total.
+      for (int i=1;i<=numDice;i++) {                     // For each die..
+         roll = random(1,7);                             // Get a random value 1..6.
+         total = total + roll;                           // Add it to the total.
+         strcat(answer,str(roll));                       // Add the value to the answer string.
+         if (i!=numDice) {                               // If there are more dice to roll..
+            strcat(answer,", ");                         // We add a comma to the answer.
+         } else {                                        // Else, we rolled them all..
+            strcat(answer,"\nTotal : ");                 // Add "Total :" to the answer string.
+            strcat(answer,str(total));                   // Add the actual total to the anser string.
          }
       }
    }
-   strcpy(&(comBuff[1]),answer);                      // Copy the assemebled answer to the com buffer. 
-   sendSMSMsg(comBuff);                                // Send the reply stored in the com buffer
+   strcpy(&(comBuff[1]),answer);                         // Copy the assemebled answer to the com buffer. 
+   sendSMSMsg(comBuff);                                  // Send the reply stored in the com buffer
 }
 
- /*      
-void doTell() {
-
-   int   numParams;
-   char* nameStr;
-   char* tokenStr;
-   int   i;
-   int   name;
-
-   numParams = comParser.numParams();                                            // Get the number of params. 
-   if (numParams>1) {                                                            // If they typed in something past the command..
-      nameStr = comParser.getParamBuff();                                        // We get the first parameter, assume its ther name.
-      i = 0;                                                                     // Set char pointer to zero.
-      while(nameStr[i]!='\0') {                                                  // While we have name chars to parse..
-         nameParser.addChar(toupper(nameStr[i]));                                // Force uppercase and parse the letters.
-         i++;                                                                    // Next.
-      }
-      name = comParser.addChar(EOL);                                             // After we get all the letters, stuff in an EOL to flag the end.
-      free(nameStr);
-      if (name>0) {                                                              // If we got a valid name..
-         if (!strcmp(pnBuff,&famPN[pa][0])) strcpy(answer,"Dad");                // Dad sent it..
-         else if (!strcmp(pnBuff,&famPN[ma][0])) strcpy(answer,"Mom");           // Ma sent it..
-         else if (!strcmp(pnBuff,&famPN[alex][0])) strcpy(answer,"Alex");        // Alex sent it..
-         else if (!strcmp(pnBuff,&famPN[dan][0])) strcpy(answer,"Dan");          // Dan sent it..
-         else if (!strcmp(pnBuff,&famPN[shelby][0])) strcpy(answer,"Shelby");    // Shelby sent it..
-         strcat(answer," wanted me to tell you..\n");                            // Finish "sent" line.
-         tokenStr = comParser.getParamBuff();                                    // Grab the token after the name.
-         while(tokenStr) {                                                       // While we have tokens..                          
-            strcat(answer,tokenStr);                                             // Add the token to the output string.
-            free(tokenStr);                                                      // Free the token memory.
-            tokenStr = nameParser.getParamBuff();                                // Grab the next token.
-            if (tokenStr) {                                                      // If we got a token..
-               strcat(answer," ");                                               // Add a space to the output string.
-            }
-         }
-         switch(name) {                                                          // Now check the name to see who to send this to.
-            case pa     : strcpy(pnBuff,&famPN[pa][0]);     break;               // Pa
-            case ma     : strcpy(pnBuff,&famPN[ma][0]);     break;               // Ma
-            case alex   : strcpy(pnBuff,&famPN[alex][0]);   break;               // Etc..
-            case dan    : strcpy(pnBuff,&famPN[dan][0]);    break;
-            case shelby : strcpy(pnBuff,&famPN[shelby][0]); break;
-         }
-         strcpy(&(comBuff[1]),answer);                                           // Copy the assemebled answer to the com buffer. 
-         sendSMSMsg(comBuff);                                                    // Send the reply stored in the com buffer
-         return;                                                                 // ON success we leave the party here.
-      }
-   }
-   strcpy(answer,"Tell? Tell what? I've no idea what you are saying.\nTell [name] [message] is the format.");
-   strcpy(&(comBuff[1]),answer);                                                 // Copy in the error message. 
-   sendSMSMsg(comBuff);                                                          // Send it on its way.
-}
-*/
 
 void doHelp(void) {
 
@@ -302,7 +249,7 @@ void doHelp(void) {
 
 
 // *************************************************
-// **************** utiity functions ***************
+// **************** utilty functions ***************
 // *************************************************
 
 
@@ -408,3 +355,5 @@ char* str(int value) {
    snprintf(intStr,10,"%d",value);
    return intStr;
 }
+
+void LED(bool onOff) { digitalWrite(13,onOff); }
