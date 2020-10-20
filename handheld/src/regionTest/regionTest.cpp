@@ -4,6 +4,96 @@
 rect	aRect;
 bool	first = true;
 
+
+LCDCharBlock::LCDCharBlock(int x,int y)
+	: drawObj(x,y,5,8) {
+	
+	setColors(&yellow,&blue);
+	clearMap();
+}
+	
+	
+LCDCharBlock::~LCDCharBlock(void) {  }
+	
+	
+void LCDCharBlock::setColors(colorObj* fCOlor,colorObj* bCOlor) {
+
+	mFColor.setColor(&yellow);
+	mBColor.setColor(&blue);
+}
+
+
+void LCDCharBlock::setMapRow(byte row,byte bits) {
+
+	if (row>=0&&row<8) {
+		mBits[row] = bits;
+		setNeedRefresh();
+	}
+}
+
+void LCDCharBlock::setMap(byte* byteArray) {
+
+	for (byte i=0;i<8;i++) {
+		setMapRow(i,byteArray[i]);
+	}
+}
+		
+void LCDCharBlock::clearMap(void) { 
+
+	for (byte i=0;i<8;i++) {
+		setMapRow(i,0);
+	}
+}
+
+
+void LCDCharBlock::drawSelf(void) {
+				
+	for (byte row=0;row<8;row++) {
+		for (byte col=0;col<5;col++) {
+			if (bitRead(mBits[row],5-col)) {			
+				screen->drawPixel(x+col,y+row,&mFColor);
+			} else {
+				screen->drawPixel(x+col,y+row,&mBColor);
+			}
+		}
+	}
+}
+
+				
+byte frame1 [8] = {	
+
+	B01100,
+	B01100,
+	B00000,
+	B01110,
+	B11100,
+	B01100,
+	B11010,
+	B10011
+};
+
+
+byte frame2 [8] = {	
+
+	B01100,
+	B01100,
+	B00000,
+	B01100,
+	B01100,
+	B01100,
+	B01100,
+	B01110
+};
+
+
+timeObj	frameTimer(250);
+
+bool	firstFrame = true;
+
+
+
+
+
 // And it all starts up again..
 regionTest::regionTest()
   : panel(rgnTestApp) { }
@@ -34,6 +124,10 @@ void regionTest::setup(void) {
 	mRegion->addRect(&aRect);
 	aRect.setRect(105,135,39,19);
 	mRegion->addRect(&aRect);
+	
+	aBlock = new LCDCharBlock(100,200);
+	aBlock->setMap(frame1);
+	addObj(aBlock);
 }
 
 
@@ -50,6 +144,16 @@ void regionTest::loop(void) {
 		tone(BEEP_PIN, 200,100);
 		setNeedRefresh();
 		first = false;
+	}
+	if (frameTimer.ding()) {
+		frameTimer.start();
+		if (firstFrame) {
+			aBlock->setMap(frame2);
+			firstFrame = false;
+		} else {
+			aBlock->setMap(frame1);
+			firstFrame = true;
+		}
 	}
 }
 

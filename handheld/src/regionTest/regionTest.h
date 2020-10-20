@@ -31,6 +31,22 @@
 //  click on. But, how all that's accomplished is pretty much up to you.
 // **********************************************************************
 
+class LCDCharBlock	: public drawObj {
+
+	public:	
+					LCDCharBlock(int x,int y);
+	virtual		~LCDCharBlock(void);
+	
+				void	setColors(colorObj* fCOlor,colorObj* bCOlor);
+				void	setMapRow(byte row,byte bits);
+				void	setMap(byte* byteArray);
+				void 	clearMap(void);
+				void	drawSelf(void);
+				
+				byte		mBits[8];
+				colorObj	mFColor;
+				colorObj	mBColor;
+};
 
 
 class regionTest	: public panel {
@@ -46,6 +62,7 @@ class regionTest	: public panel {
 	
 				colorObj	backColor;
 				region*	mRegion;
+				LCDCharBlock* aBlock;
 };
 
 #endif
