@@ -111,7 +111,13 @@ void blink(int numBlinks) {
 
 
 // Fill this out big guy.
-char* str(int value) { }
+char intStr[10];
+
+char* str(int value) { 
+
+   snprintf(intStr,10,"%d",value);
+   return intStr;
+}
 
 
 void loop() {
@@ -126,55 +132,56 @@ void loop() {
    int   roll;
     
    idle();                                                           // Let anyone that's idleing have some time.
-   if (serverTimer.ding()) {
-      serverTimer.start();
+   if (serverTimer.ding()) {                                         // If its time to check messages..
+      serverTimer.start();                                           // Reset our timer.
       numSMS = fona.getNumSMS();                                     // Number SMS(s). This one gives bogus numbers at times. Max is 30.
-      if (numSMS > 30) { 
-         numSMS = 0;                                                 // Bogus readings get zero.
+      if (numSMS > 30) {                                             // If its more than it can hold..
+         numSMS = 0;                                                 // Call it a mistake. Bogus readings get zero.
       }                                 
-      if (numSMS) {
-         comBuff[1] = SMSIndex++;
-         if (SMSIndex>30) {
-            SMSIndex = 1;
+      if (numSMS) {                                                  // If we have unread text messages..
+         comBuff[1] = SMSIndex++;                                    // Load the com buffer up with the index of the message to check. Bump up the index.                                   
+         if (SMSIndex>30) {                                          // If the index is > 30..
+            SMSIndex = 1;                                            // Reset the index to 1.
          }
-         doGetSMSMsg(comBuff);
+         doGetSMSMsg(comBuff);                                       // Attempt to retrieve a message from the phone chip.
          if (comBuff[0]==0) {                                        // This says no errors. So lets decode what we got.
-            strcpy(pnBuff,&(comBuff[1]));                            // Byte 0 is error, after that is the phone number.
+            strcpy(pnBuff,&(comBuff[1]));                            // Byte 0 is error, after that is the phone number. Read it out.
             index = strlen(pnBuff)+2;                                // Locate the message part. Add two, error byte & EOS byte.
             message = &(comBuff[index]);                             // Here's the message.
             filterPNStr(pnBuff);                                     // Clear out the phone number junk.
+            havePN = strlen(pnBuff)>=7;                              // Well, it needs at least 7 chars.
             comStr = strtok(message," ");                            // First slice HI-YA!
-            if (comStr) {
-               toupper(comStr);
-               if (!strcmp("ROLL",comStr)) {
-                  numStr = strtok (NULL," ");
-                  numDice = atoi(numStr);
-                  if (numDice==0) {
-                     numDice = 1;
-                  } else if (numDice>MAX_DICE) {
-                     strcpy(answer,"Too many dice! You only get ");
-                     strcat(answer,str(MAX_DICE));
-                  } else {
-                     strcpy(answer,"Rolling! ");
-                     total = 0;
-                     for (int i=1;i<=numDice;i++) {
-                        roll = random(1,6);
-                        total = total + roll;
-                        strcat(answer,str(roll));
-                        if (i!=numDice) {
-                           strcat(answer,", ");
-                        } else {
-                           strcat(answer," Total : ");
-                           strcat(answer,str(total));
+            if (comStr) {                                            // If we have a token to decode..
+               toupper(comStr);                                      // Make life easier, just mak everything uppercase.           
+               if (!strcmp("ROLL",comStr)) {                         // If the token is "ROLL"..
+                  numStr = strtok (NULL," ");                        // See if we can get a number of dice token.
+                  numDice = atoi(numStr);                            // Parse the actual number of dice they call for.
+                  if (numDice==0) {                                  // If the number of dice is zero..
+                     numDice = 1;                                    // We'll give them one.
+                  } else if (numDice>MAX_DICE) {                     // If the number of dice is more than the max..
+                     strcpy(answer,"Too many dice! You only get ");  // Set the answer sgtring to an error message.
+                     strcat(answer,str(MAX_DICE));                   //
+                  } else {                                           // Else, the number of dice is ok..
+                     strcpy(answer,"Rolling! ");                     // Send back header.
+                     total = 0;                                      // Zero out our total.
+                     for (int i=1;i<=numDice;i++) {                  // For each die..
+                        roll = random(1,6);                          // Get a random value 1..6.
+                        total = total + roll;                        // Add it to the total.
+                        strcat(answer,str(roll));                    // Add the value to the answer string.
+                        if (i!=numDice) {                            // If there are more dice to roll..
+                           strcat(answer,", ");                      // We add a comma to the answer.
+                        } else {                                     // Else, we rolled them all..
+                           strcat(answer," Total : ");               // Add "Total :" to the answer string.
+                           strcat(answer,str(total));                // Add the total to the anser string.
                         }
                      }
                   }
-                  strcpy(&(comBuff[1]),answer);
+                  strcpy(&(comBuff[1]),answer);                      // Copy the assemebled answer to the com buffer.
                } else {
                   strcpy(&(comBuff[1]),"Sorry, the only thing I can do is Roll dice. Msg me ROLL and a number and I'll roll 'em for you.");
                } 
             }
-            doSendSMSMsg(comBuff);
+            doSendSMSMsg(comBuff);                                   // Send the reply stored in the com buffer
          }
       }
    }
