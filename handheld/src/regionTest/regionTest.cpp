@@ -105,7 +105,7 @@ regionTest::~regionTest(void) { }
 
 // setup() & loop() panel style.
 void regionTest::setup(void) {
-
+	/*
 	backColor.setColor(LC_CHARCOAL);
 	backColor.blend(&black,20);
 	backColor.blend(&red,10);
@@ -128,11 +128,13 @@ void regionTest::setup(void) {
 	aBlock = new LCDCharBlock(100,200);
 	aBlock->setMap(frame1);
 	addObj(aBlock);
+	*/
 }
 
 
 void regionTest::loop(void) {
 
+	/*
 	if (first) {
 		sleep(1000);
 		tone(BEEP_PIN, 1500,35);
@@ -155,6 +157,7 @@ void regionTest::loop(void) {
 			firstFrame = true;
 		}
 	}
+	*/
 }
 
 void printRect(rect* trace,char* label) {
