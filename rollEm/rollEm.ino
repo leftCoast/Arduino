@@ -1,15 +1,11 @@
+#include "LC_fona.h"
 #include <idlers.h>
-#include <lists.h>
-#include <quickCom.h>
-#include "cellCommon.h"
+#include <timeObj.h>
+#include "GPSnAirCommon.h"
 
-#include <SoftwareSerial.h>
-#include "Adafruit_FONA.h"
 
-#define FONA_RX 9
-#define FONA_TX 8
-#define FONA_RST 4
-#define FONA_RI  7
+#define SENSOR_TX       12
+#define SENSOR_RX       10
 
 #define COM_BUFF_BYTES  255
 #define ANSWER_BYTES    100
@@ -17,101 +13,38 @@
 #define MAX_DICE        12
 
 
-
-class LC_fona : public Adafruit_FONA {
-
-  public:
-    LC_fona(void);
-    virtual ~LC_fona(void);
-
-    bool  setParam(FONAFlashStringPtr send, int32_t param);
-    bool  checkForCallerID(char* IDBuff, byte numBytes);
-
-    FONAFlashStringPtr ok_reply;
-};
-
-
-LC_fona::LC_fona(void)
-  : Adafruit_FONA(FONA_RST) {
-  ok_reply = F("OK");
-}
-
-
-LC_fona::~LC_fona(void) {  }
-
-
-bool LC_fona::setParam(FONAFlashStringPtr send, int32_t param) {
-
-  return sendCheckReply(send, param, ok_reply);
-}
-
-
-bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
-
-  if (mySerial->available()) {                                          // Is something is there we didn't ask for..
-    if (readline(25,true) > 15) {                                      // See if we can grab the first 20 or so chars.
-      return parseReplyQuoted(F("+CLIP: "), IDBuff, numBytes, ',', 0);  // Run it through the Adafruit parser thing to see if its a caller ID.
-    }
-  }
-  return false;
-}
-
-
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
+SoftwareSerial sensor = SoftwareSerial(SENSOR_TX, SENSOR_RX);
+
 LC_fona fona = LC_fona();
 
-bool     FONAOnline;
-byte     comBuff[COM_BUFF_BYTES];    // Buffer for all comunication.
-byte     pnBuff[PN_BUFF_BYTES];      // Buffer for current phone number.
-char     answer[ANSWER_BYTES];       // Buffer for our reply;
-bool     havePN;
-int      SMSIndex = 1;
-timeObj  serverTimer(500);
+bool      FONAOnline;
+byte      comBuff[COM_BUFF_BYTES];    // Buffer for all comunication.
+byte      pnBuff[PN_BUFF_BYTES];      // Buffer for current phone number.
+char      answer[ANSWER_BYTES];       // Buffer for our reply;
+char      intStr[10];               // Buffer for writing numbers.
+bool      havePN;
+int       SMSIndex = 1;
+timeObj   serverTimer(500);
+timeObj   sensorTimer(5000);
+
 
 void setup() {
-  /*
-    Serial.begin(57600);
-    while (!Serial) { }
-    Serial.println("I'm here.");
-  */
+  
+  Serial.begin(57600);
+  //while (!Serial) { }
+  Serial.println("I'm here.");
+  sensor.begin(9600);
+  Serial.println("sensor.begin(9600); called.");
   havePN = false;                                 // We do not yet have a phone number to text to.
   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
-  //CIDBuff[0] = '\0';                              // Reset the callerID buffer.
-  //ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup for talking to the GUI.
-  //checkComErr();                                  // Read comunications error. On error we stop here and blink.
   pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
   FONAOnline = false;                             // Not ready yet..
-  resetFONA();                                    // Hit reset, see if it'll come online.
+  resetFONA();
+  Serial.println("resetFONA(); called");                                    // Hit reset, see if it'll come online.
 }
 
-
-// Single blink..
-void aBlink(void) {
-
-  digitalWrite(13, HIGH);
-  delay(75);
-  digitalWrite(13, LOW);
-}
-
-
-// String of blinks.
-void blink(int numBlinks) {
-
-  if (numBlinks == 1) {
-    aBlink();
-  } else {
-    for (int i = 1; i < numBlinks; i++) {
-      aBlink();
-      delay(150);
-    }
-    aBlink();
-  }
-}
-
-
-// Fill this out big guy.
-char intStr[10];
 
 char* str(int value) { 
 
@@ -122,6 +55,41 @@ char* str(int value) {
 
 void loop() {
 
+  //checkDebug();
+  //checkText();
+  checkSensor();
+}
+
+void checkSensor(void) {
+
+  int numBytes;
+  timeObj timOut(2000);
+  
+  if (sensorTimer.ding()) {
+    Serial.println("Checking sensor..");
+    sensor.listen();
+    while(sensor.available()) {
+      Serial.println("Dumping..");
+      sensor.read();            // Flush out the serial port.
+      sleep(5);                 // Time for more..
+    }
+    Serial.println("Sending the R");
+    sensor.print("R");
+    while(sensor.available()<sizeof(sensorData) && !timOut.ding()) {
+      sleep(5);
+    }
+    if (timOut.ding()) {
+      Serial.print("Time out.");
+    } else {
+      Serial.print("I think I got it.");
+    }
+    sensorTimer.start();
+  }
+}
+
+
+void checkText() {
+  
    int   numSMS;
    int   index;
    char* message;

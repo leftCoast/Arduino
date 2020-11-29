@@ -19,9 +19,20 @@ int               buffIndex;
 GPS_NMEA          ourParser;
 sensorData        ourDatablock;
 
+void blink13(void) {
+  
+  digitalWrite(13,HIGH);
+  delay(20);
+  digitalWrite(13,LOW);
+}
+
 
 void setup() {
    
+  
+   pinMode(13,OUTPUT);
+   digitalWrite(13,LOW);
+   //Serial.begin();
    Serial1.begin(9600);
    Serial3.begin(9600);
    synk  = false;
@@ -154,6 +165,7 @@ void loop() {
       case readingAir      : checkAir();     break;
    }
    if (Serial1.available()) {
+      blink13();
       aChar = Serial1.read();
       if (aChar=='R') {
          Serial1.write((char*)&ourDatablock,sizeof(sensorData));
