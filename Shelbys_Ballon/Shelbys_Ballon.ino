@@ -22,7 +22,7 @@ sensorData        ourDatablock;
 
 void setup() {
    
-   Serial.begin(9600);
+   Serial1.begin(9600);
    Serial3.begin(9600);
    synk  = false;
    buffIndex = 0;
@@ -153,10 +153,10 @@ void loop() {
       case readingGPS      : checkGPS();     break;
       case readingAir      : checkAir();     break;
    }
-   if (Serial.available()) {
-      aChar = Serial.read();
+   if (Serial1.available()) {
+      aChar = Serial1.read();
       if (aChar=='R') {
-         Serial.write((char*)&ourDatablock,sizeof(sensorData));
+         Serial1.write((char*)&ourDatablock,sizeof(sensorData));
       }
    }
 }
