@@ -4,8 +4,8 @@
 #include "GPSnAirCommon.h"
 
 
-#define SENSOR_TX       16
-#define SENSOR_RX       14
+#define SENSOR_TX       12
+#define SENSOR_RX       10
 
 #define COM_BUFF_BYTES  255
 #define ANSWER_BYTES    100
@@ -32,15 +32,17 @@ timeObj   sensorTimer(5000);
 void setup() {
   
   Serial.begin(57600);
-  while (!Serial) { }
+  //while (!Serial) { }
   Serial.println("I'm here.");
   sensor.begin(9600);
+  Serial.println("sensor.begin(9600); called.");
   havePN = false;                                 // We do not yet have a phone number to text to.
   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
   pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
   FONAOnline = false;                             // Not ready yet..
-  resetFONA();                                    // Hit reset, see if it'll come online.
+  resetFONA();
+  Serial.println("resetFONA(); called");                                    // Hit reset, see if it'll come online.
 }
 
 
@@ -61,9 +63,11 @@ void loop() {
 void checkSensor(void) {
 
   int numBytes;
-
+  timeObj timOut(2000);
+  
   if (sensorTimer.ding()) {
     Serial.println("Checking sensor..");
+    sensor.listen();
     while(sensor.available()) {
       Serial.println("Dumping..");
       sensor.read();            // Flush out the serial port.
@@ -71,11 +75,14 @@ void checkSensor(void) {
     }
     Serial.println("Sending the R");
     sensor.print("R");
-    while(sensor.available()<sizeof(sensorData)) {
-      Serial.println(sensor.available());
+    while(sensor.available()<sizeof(sensorData) && !timOut.ding()) {
       sleep(5);
     }
-    Serial.print("I think I got it.");
+    if (timOut.ding()) {
+      Serial.print("Time out.");
+    } else {
+      Serial.print("I think I got it.");
+    }
     sensorTimer.start();
   }
 }
