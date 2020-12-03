@@ -11,10 +11,10 @@
 #define ANSWER_BYTES    100
 #define PN_BUFF_BYTES   20
 #define MAX_DICE        12
-
+#define sensor          Serial1
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-SoftwareSerial sensor = SoftwareSerial(SENSOR_TX, SENSOR_RX);
+//oftwareSerial sensor = SoftwareSerial(SENSOR_TX, SENSOR_RX);
 
 LC_fona fona = LC_fona();
 
@@ -67,7 +67,6 @@ void checkSensor(void) {
   
   if (sensorTimer.ding()) {
     Serial.println("Checking sensor..");
-    sensor.listen();
     while(sensor.available()) {
       Serial.println("Dumping..");
       sensor.read();            // Flush out the serial port.
