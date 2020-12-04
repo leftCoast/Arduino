@@ -4,9 +4,60 @@
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
 #include "GPSnAirCommon.h"
+#include "numStream.h"
+
 
 #define DEF_BUFF_SIZE  80
 #define SEALEVELPRESSURE_HPA (1013.25)
+
+enum fields { hourField,  minField, secField, validField ,degLatField 
+       ,minLatField ,latQuadField ,degLonField ,minLonField ,lonQuadField 
+       ,knotsField ,courseField, dayField, monthField, yearField 
+       ,magVarField ,varDirField };
+
+       
+class dataOut :   public numStreamOut {
+
+   public :
+               dataOut(GPS_NMEA* inParser);
+   virtual     ~dataOut(void);
+
+   virtual  void  writeVar(int index);
+
+            GPS_NMEA*   mParser;
+};
+
+
+
+dataOut::dataOut(GPS_NMEA* inParser)
+   : numStreamOut(17) { mParser = inParser; }
+
+   
+dataOut::~dataOut(void) {  }
+
+void dataOut::writeVar(int index) {
+
+   switch((fields)index) {
+      case hourField    : outPort.print(mParser->$GPRMC.hour);         break;
+      case minField     : outPort.print(mParser->$GPRMC.min);          break;
+      case secField     : outPort.print(mParser->$GPRMC.sec);          break;
+      case validField   : outPort.print((int)mParser->$GPRMC.valid);   break;
+      case degLatField  : outPort.print(mParser->$GPRMC.degLat);       break;
+      case minLatField  : outPort.print(mParser->$GPRMC.minLat);       break;
+      case latQuadField : outPort.print((int)mParser->$GPRMC.latQuad); break;
+      case degLonField  : outPort.print(mParser->$GPRMC.degLon);       break;
+      case minLonField  : outPort.print(mParser->$GPRMC.minLon);       break;
+      case lonQuadField : outPort.print((int)mParser->$GPRMC.lonQuad); break;
+      case knotsField   : outPort.print(mParser->$GPRMC.knots);        break;
+      case courseField  : outPort.print(mParser->$GPRMC.course);       break;
+      case dayField     : outPort.print(mParser->$GPRMC.day);          break;
+      case monthField   : outPort.print(mParser->$GPRMC.month);        break;
+      case yearField    : outPort.print(mParser->$GPRMC.year);         break;
+      case magVarField  : outPort.print(mParser->$GPRMC.magVar);       break;
+      case varDirField  : outPort.print(mParser->$GPRMC.varDir);       break;
+   }
+}
+
 
 
 enum states { readingAir, readingGPS };
@@ -18,6 +69,8 @@ char              inBuff[DEF_BUFF_SIZE];
 int               buffIndex;
 GPS_NMEA          ourParser;
 sensorData        ourDatablock;
+float             savedAlt;
+dataOut           ourDataWriter(&ourParser);
 
 void blink13(void) {
   
@@ -101,10 +154,12 @@ void fillDataGPS(void) {
  void fillDataAIR(void) {
 
    ourDatablock.tempX100 = bme.temperature * 100;
-   ourDatablock.pressureX100 = bme.pressure;
+   ourDatablock.pressure = bme.pressure/100;
+   ourDatablock.pressureDecX100 = ((bme.pressure / 100.0)-ourDatablock.pressure) * 100;
    ourDatablock.humidityX100 = bme.humidity * 100;
-   ourDatablock.gasKOhmsX1000 = bme.gas_resistance;
-   ourDatablock.AltMX100 = bme.readAltitude(SEALEVELPRESSURE_HPA) * 100;
+   ourDatablock.gasKOhms = bme.gas_resistance / 1000.0;
+   ourDatablock.gasKOhmsDecx100 = ((bme.gas_resistance / 1000.0) - ourDatablock.gasKOhms) * 100;
+   ourDatablock.AltMX100 = (bme.readAltitude(SEALEVELPRESSURE_HPA)) * 100;
  }
  
 
@@ -129,7 +184,15 @@ void showAir(void) {
    Serial.print("Approx. Altitude = ");
    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
    Serial.println(" m");
+   
+   Serial.print("Saved Altitude = ");
+   Serial.print(ourDatablock.AltMX100);
+   Serial.println(" m");
+   Serial.print("Read it again? Altitude = ");
+   Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+   Serial.println(" m");
 }
+
 
 
 // Lets see if we can read the Air sensor.
@@ -137,7 +200,11 @@ void checkAir(void) {
 
    if (bme.performReading()) {
       fillDataAIR();
-      //showAir();
+      
+      Serial.println();
+       Serial.println("----------------");
+      showAir();
+      Serial.println();
    }
    changeState(readingGPS);
 }
@@ -169,6 +236,7 @@ void loop() {
       aChar = Serial1.read();
       if (aChar=='R') {
          Serial1.write((char*)&ourDatablock,sizeof(sensorData));
+         ourDataWriter.writeStream();
       }
    }
 }

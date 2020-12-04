@@ -16,8 +16,10 @@ struct  sensorData {
    uint16_t knotsX100;
    uint16_t headingX100;
    uint16_t tempX100;
-   uint16_t pressureX100;
+   uint16_t pressure;
+   uint16_t pressureDecX100;
    uint16_t humidityX100;
-   uint16_t gasKOhmsX1000;
+   uint16_t gasKOhms;
+   uint16_t gasKOhmsDecx100;
    uint16_t AltMX100;
 };

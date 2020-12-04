@@ -18,7 +18,8 @@ bool GPS_NMEA::decodeGPRMC(char* inStr) {
    
    char* token;
    char  temp[20];
-//Serial.println(inStr);
+   
+   //Serial.println(inStr);
    token = strtok(inStr,",");                   // The header.
    if (strcmp(token,"$GPRMC")) return false;    // If we are parsing the wrong thing? bail.
    token = strtok(NULL,",");                    // Parse out UTC.

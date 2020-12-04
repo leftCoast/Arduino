@@ -14,7 +14,6 @@
 #define sensor          Serial1
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-//oftwareSerial sensor = SoftwareSerial(SENSOR_TX, SENSOR_RX);
 
 LC_fona fona = LC_fona();
 
@@ -27,7 +26,7 @@ bool      havePN;
 int       SMSIndex = 1;
 timeObj   serverTimer(500);
 timeObj   sensorTimer(5000);
-
+sensorData  dataBlock;
 
 void setup() {
   
@@ -68,7 +67,6 @@ void checkSensor(void) {
   if (sensorTimer.ding()) {
     Serial.println("Checking sensor..");
     while(sensor.available()) {
-      Serial.println("Dumping..");
       sensor.read();            // Flush out the serial port.
       sleep(5);                 // Time for more..
     }
@@ -80,7 +78,14 @@ void checkSensor(void) {
     if (timOut.ding()) {
       Serial.print("Time out.");
     } else {
-      Serial.print("I think I got it.");
+      sensor.readBytes((byte*)&dataBlock,sizeof(sensorData));
+      Serial.println("I think I got it.");
+      Serial.print("Temp     : ");Serial.println(dataBlock.tempX100/100.0);
+      Serial.print("Pressure : ");Serial.println(dataBlock.pressure+(dataBlock.pressureDecX100/100.0));
+      Serial.print("Humidity : ");Serial.println(dataBlock.humidityX100/100.0);
+      Serial.print("Gas      : ");Serial.println(dataBlock.gasKOhms+(dataBlock.gasKOhmsDecx100/1000.0));
+      Serial.print("Altitude : ");Serial.println(dataBlock.AltMX100/100.0);
+      Serial.println();
     }
     sensorTimer.start();
   }
