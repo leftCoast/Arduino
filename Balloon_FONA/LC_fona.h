@@ -10,6 +10,9 @@
 #define FONA_RI         7
 
 
+void filterPNStr(char* str);
+
+
 class LC_fona : public Adafruit_FONA {
 
   public:

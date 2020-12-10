@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 
-#define outPort      Serial      // Change to fit your hardware.
-#define inPort       Serial      // Change to fit your hardware.
+#define outPort      Serial1	// Change to fit your hardware.
+#define inPort       Serial1	// Change to fit your hardware.
 #define SYNK_CHAR    '$'
 #define DELEM_CHAR   ' '
 #define END_CHR      '\n'
@@ -32,10 +32,12 @@ class numStreamIn {
             numStreamIn(int tokenBuffBytes=15);
    virtual  ~numStreamIn(void);
 
+				void  reset(void);
    virtual  void  readStream(void);
    virtual  void  readVar(int index);
 
             bool  mSynk;
+            bool	mComplete;
             char* mTokenBuff;
             int   mIndex;
 };

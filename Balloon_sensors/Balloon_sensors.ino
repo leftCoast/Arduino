@@ -1,39 +1,55 @@
 #include "GPS_NMEA.h"
 #include <Wire.h>
 #include <SPI.h>
+#include <timeObj.h>
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
-#include "GPSnAirCommon.h"
-#include "numStream.h"
+#include <numStream.h>
+
+// ***************************************************
+//                     dataOut class
+// ***************************************************
 
 
-#define DEF_BUFF_SIZE  80
-#define SEALEVELPRESSURE_HPA (1013.25)
+#define SEALEVELPRESSURE_HPA  (1013.25)
 
-enum fields { hourField,  minField, secField, validField ,degLatField 
-       ,minLatField ,latQuadField ,degLonField ,minLonField ,lonQuadField 
-       ,knotsField ,courseField, dayField, monthField, yearField 
-       ,magVarField ,varDirField };
 
+enum fields {  hourField,  minField, secField, validField, degLatField,
+               minLatField, latQuadField, degLonField, minLonField, lonQuadField,
+               knotsField, courseField, dayField, monthField, yearField,
+               magVarField, varDirField,
        
+               tempField, pressureField, humidityField, gasField, AltitudeField
+            };
+
+
 class dataOut :   public numStreamOut {
 
    public :
-               dataOut(GPS_NMEA* inParser);
+               dataOut(GPS_NMEA* inParser,Adafruit_BME680* inBme);
    virtual     ~dataOut(void);
 
    virtual  void  writeVar(int index);
 
-            GPS_NMEA*   mParser;
+            GPS_NMEA*         mParser;
+            Adafruit_BME680*  mBme;
 };
 
 
 
-dataOut::dataOut(GPS_NMEA* inParser)
-   : numStreamOut(17) { mParser = inParser; }
+// ******** Code *********
+
+
+dataOut::dataOut(GPS_NMEA* inParser,Adafruit_BME680* inBme)
+   : numStreamOut(22) {
+   
+   mParser  = inParser;
+   mBme     = inBme;
+}
 
    
 dataOut::~dataOut(void) {  }
+
 
 void dataOut::writeVar(int index) {
 
@@ -43,10 +59,10 @@ void dataOut::writeVar(int index) {
       case secField     : outPort.print(mParser->$GPRMC.sec);          break;
       case validField   : outPort.print((int)mParser->$GPRMC.valid);   break;
       case degLatField  : outPort.print(mParser->$GPRMC.degLat);       break;
-      case minLatField  : outPort.print(mParser->$GPRMC.minLat);       break;
+      case minLatField  : outPort.print(mParser->$GPRMC.minLat,4);     break;
       case latQuadField : outPort.print((int)mParser->$GPRMC.latQuad); break;
       case degLonField  : outPort.print(mParser->$GPRMC.degLon);       break;
-      case minLonField  : outPort.print(mParser->$GPRMC.minLon);       break;
+      case minLonField  : outPort.print(mParser->$GPRMC.minLon,4);     break;
       case lonQuadField : outPort.print((int)mParser->$GPRMC.lonQuad); break;
       case knotsField   : outPort.print(mParser->$GPRMC.knots);        break;
       case courseField  : outPort.print(mParser->$GPRMC.course);       break;
@@ -55,9 +71,26 @@ void dataOut::writeVar(int index) {
       case yearField    : outPort.print(mParser->$GPRMC.year);         break;
       case magVarField  : outPort.print(mParser->$GPRMC.magVar);       break;
       case varDirField  : outPort.print(mParser->$GPRMC.varDir);       break;
+      
+      case tempField       : outPort.print(mBme->temperature);                         break;
+      case pressureField   : outPort.print(mBme->pressure/100.0);                      break;
+      case humidityField   : outPort.print(mBme->humidity);                            break;
+      case gasField        : outPort.print(mBme->gas_resistance/1000.0);               break;
+      case AltitudeField   : outPort.print(mBme->readAltitude(SEALEVELPRESSURE_HPA));  break;
+      
    }
 }
 
+
+
+
+// ***************************************************
+//                     main program
+// ***************************************************
+
+#define DEF_BUFF_SIZE         200
+#define GPSPort               Serial3
+#define masterPort            Serial1
 
 
 enum states { readingAir, readingGPS };
@@ -68,9 +101,9 @@ bool              synk;
 char              inBuff[DEF_BUFF_SIZE];
 int               buffIndex;
 GPS_NMEA          ourParser;
-sensorData        ourDatablock;
-float             savedAlt;
-dataOut           ourDataWriter(&ourParser);
+dataOut*          ourDataWriter;
+timeObj           outTimer(5000);
+
 
 void blink13(void) {
   
@@ -82,16 +115,15 @@ void blink13(void) {
 
 void setup() {
    
-  
    pinMode(13,OUTPUT);
    digitalWrite(13,LOW);
-   //Serial.begin();
-   Serial1.begin(9600);
-   Serial3.begin(9600);
+   masterPort.begin(9600);    // This is our output serial port.
+   GPSPort.begin(9600);       // And this is where we read in GPS data.
    synk  = false;
    buffIndex = 0;
    ourState = readingGPS;
-
+   ourDataWriter = new dataOut(&ourParser,&bme);
+   
    bme.begin();
    // Set up oversampling and filter initialization
    bme.setTemperatureOversampling(BME680_OS_8X);
@@ -99,16 +131,17 @@ void setup() {
    bme.setPressureOversampling(BME680_OS_4X);
    bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
    bme.setGasHeater(320, 150); // 320*C for 150 ms
+   
 }
 
 
-// Lets see if there's something waiing for us from the GPS.
+// Lets see if there's something waiting for us from the GPS.
 void checkGPS(void) {
 
    char  aChar;
    
-   if (Serial3.available()) {
-      aChar = Serial3.read();
+   if (GPSPort.available()) {
+      aChar = GPSPort.read();
       //Serial.print(aChar);
       if (synk) {
          if (aChar=='\n') {
@@ -116,7 +149,6 @@ void checkGPS(void) {
             synk = false;
             if (ourParser.parseStr(inBuff)) {
                //ourParser.showGPRMC();
-               fillDataGPS();
                changeState(readingAir);
             }
             buffIndex = 0;
@@ -132,39 +164,12 @@ void checkGPS(void) {
    }
 }
 
-void fillDataGPS(void) {
-
-   ourDatablock.hour = ourParser.$GPRMC.hour;
-   ourDatablock.min = ourParser.$GPRMC.min;
-   ourDatablock.sec  = ourParser.$GPRMC.sec;
-   ourDatablock.valid = (uint16_t)ourParser.$GPRMC.valid;
-   ourDatablock.degLat = ourParser.$GPRMC.degLat;
-   ourDatablock.minLat = ourParser.$GPRMC.minLat;
-   ourDatablock.minDecLatX1000 = (ourParser.$GPRMC.minLat - ourDatablock.minLat) * 1000;
-   ourDatablock.northSouthLat = (uint16_t)ourParser.$GPRMC.latQuad;
-   ourDatablock.degLon = ourParser.$GPRMC.degLon;
-   ourDatablock.minLon = ourParser.$GPRMC.minLon;
-   ourDatablock.minDecLonX1000 = (ourParser.$GPRMC.minLon - ourDatablock.minLon) * 1000;
-   ourDatablock.eastWestLon = (uint16_t)ourParser.$GPRMC.lonQuad;
-   ourDatablock.knotsX100 = ourParser.$GPRMC.knots * 100;
-   ourDatablock.headingX100 = ourParser.$GPRMC.course * 100;
- }
-
-
- void fillDataAIR(void) {
-
-   ourDatablock.tempX100 = bme.temperature * 100;
-   ourDatablock.pressure = bme.pressure/100;
-   ourDatablock.pressureDecX100 = ((bme.pressure / 100.0)-ourDatablock.pressure) * 100;
-   ourDatablock.humidityX100 = bme.humidity * 100;
-   ourDatablock.gasKOhms = bme.gas_resistance / 1000.0;
-   ourDatablock.gasKOhmsDecx100 = ((bme.gas_resistance / 1000.0) - ourDatablock.gasKOhms) * 100;
-   ourDatablock.AltMX100 = (bme.readAltitude(SEALEVELPRESSURE_HPA)) * 100;
- }
- 
 
 void showAir(void) {
 
+   Serial.println();
+   Serial.println("----------------");
+      
    Serial.print("Temperature = ");
    Serial.print(bme.temperature);
    Serial.println(" *C");
@@ -184,27 +189,16 @@ void showAir(void) {
    Serial.print("Approx. Altitude = ");
    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
    Serial.println(" m");
-   
-   Serial.print("Saved Altitude = ");
-   Serial.print(ourDatablock.AltMX100);
-   Serial.println(" m");
-   Serial.print("Read it again? Altitude = ");
-   Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-   Serial.println(" m");
-}
 
+    Serial.println();
+}
 
 
 // Lets see if we can read the Air sensor.
 void checkAir(void) {
 
    if (bme.performReading()) {
-      fillDataAIR();
-      
-      Serial.println();
-       Serial.println("----------------");
-      showAir();
-      Serial.println();
+      //showAir();
    }
    changeState(readingGPS);
 }
@@ -214,7 +208,7 @@ void changeState(states newState) {
 
    switch (newState) {
       case readingGPS : 
-         while(Serial3.available()) Serial3.read();
+         while(GPSPort.available()) GPSPort.read();
          synk = false;
          ourState = readingGPS;
       break;
@@ -224,19 +218,14 @@ void changeState(states newState) {
 
 
 void loop() {
-   
-   char  aChar;
-   
+      
    switch (ourState) {
       case readingGPS      : checkGPS();     break;
       case readingAir      : checkAir();     break;
    }
-   if (Serial1.available()) {
+   if (outTimer.ding()) {
       blink13();
-      aChar = Serial1.read();
-      if (aChar=='R') {
-         Serial1.write((char*)&ourDatablock,sizeof(sensorData));
-         ourDataWriter.writeStream();
-      }
+      ourDataWriter->writeStream();
+      outTimer.start();
    }
 }

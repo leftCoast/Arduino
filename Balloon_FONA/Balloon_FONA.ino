@@ -1,97 +1,118 @@
 #include "LC_fona.h"
 #include <idlers.h>
 #include <timeObj.h>
-#include "GPSnAirCommon.h"
+#include "readData.h"
 
-
-#define SENSOR_TX       12
-#define SENSOR_RX       10
 
 #define COM_BUFF_BYTES  255
-#define ANSWER_BYTES    100
+#define ANSWER_BYTES    255
 #define PN_BUFF_BYTES   20
-#define MAX_DICE        12
+#define NUM_STR_BYTES   15
 #define sensor          Serial1
 
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 
 LC_fona fona = LC_fona();
 
-bool      FONAOnline;
-byte      comBuff[COM_BUFF_BYTES];    // Buffer for all comunication.
-byte      pnBuff[PN_BUFF_BYTES];      // Buffer for current phone number.
-char      answer[ANSWER_BYTES];       // Buffer for our reply;
-char      intStr[10];               // Buffer for writing numbers.
-bool      havePN;
-int       SMSIndex = 1;
-timeObj   serverTimer(500);
-timeObj   sensorTimer(5000);
-sensorData  dataBlock;
+bool     FONAOnline;
+byte     comBuff[COM_BUFF_BYTES];  // Buffer for all comunication.
+byte     pnBuff[PN_BUFF_BYTES];    // Buffer for current phone number.
+char     answer[ANSWER_BYTES];     // Buffer for our reply;
+char     numStr[15];               // Buffer for writing numbers.
+bool     havePN;
+int      SMSIndex = 1;
+timeObj  serverTimer(500);
+timeObj  sensorTimer(10000);
+dataIn   ourDataReader;
+bool     readingSensor = false;
+
 
 void setup() {
   
-  Serial.begin(57600);
-  //while (!Serial) { }
-  Serial.println("I'm here.");
-  sensor.begin(9600);
-  Serial.println("sensor.begin(9600); called.");
-  havePN = false;                                 // We do not yet have a phone number to text to.
-  pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
-  pinMode(13, OUTPUT);                            // Our one and only debugging tool.
-  pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
-  FONAOnline = false;                             // Not ready yet..
-  resetFONA();
-  Serial.println("resetFONA(); called");                                    // Hit reset, see if it'll come online.
+   Serial.begin(57600);
+   Serial.println("I'm here.");
+   sensor.begin(9600);
+   readingSensor = false;
+   
+   havePN = false;                                 // We do not yet have a phone number to text to.
+   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
+   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
+   pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
+   FONAOnline = false;                             // Not ready yet..
+   resetFONA();                                    // Hit reset, see if it'll come online.
+   serverTimer.start();                            // Fire up the server timer.
+   sensorTimer.start();                            // Fire up the sensor timer.
 }
 
 
-char* str(int value) { 
+char* i_str(int value) { 
 
-   snprintf(intStr,10,"%d",value);
-   return intStr;
+   snprintf(numStr,15,"%d",value);
+   return numStr;
 }
 
+char* f_str(int value,int fix=2) { 
+
+   snprintf(numStr,15,"%d.2",value);
+   return numStr;
+}
+
+void blink13(void) {
+  
+  digitalWrite(13,HIGH);
+  delay(20);
+  digitalWrite(13,LOW);
+}
 
 void loop() {
 
+   idle();
   //checkDebug();
   //checkText();
   checkSensor();
+  loadData();
+  //Serial.println(answer);
+  //Serial.print(strlen(answer));Serial.println(" chars");
 }
+
+
 
 void checkSensor(void) {
-
-  int numBytes;
-  timeObj timOut(2000);
-  
-  if (sensorTimer.ding()) {
-    Serial.println("Checking sensor..");
-    while(sensor.available()) {
-      sensor.read();            // Flush out the serial port.
-      sleep(5);                 // Time for more..
-    }
-    Serial.println("Sending the R");
-    sensor.print("R");
-    while(sensor.available()<sizeof(sensorData) && !timOut.ding()) {
-      sleep(5);
-    }
-    if (timOut.ding()) {
-      Serial.print("Time out.");
-    } else {
-      sensor.readBytes((byte*)&dataBlock,sizeof(sensorData));
-      Serial.println("I think I got it.");
-      Serial.print("Temp     : ");Serial.println(dataBlock.tempX100/100.0);
-      Serial.print("Pressure : ");Serial.println(dataBlock.pressure+(dataBlock.pressureDecX100/100.0));
-      Serial.print("Humidity : ");Serial.println(dataBlock.humidityX100/100.0);
-      Serial.print("Gas      : ");Serial.println(dataBlock.gasKOhms+(dataBlock.gasKOhmsDecx100/1000.0));
-      Serial.print("Altitude : ");Serial.println(dataBlock.AltMX100/100.0);
-      Serial.println();
-    }
-    sensorTimer.start();
-  }
+   
+   if (!readingSensor) {
+      while(sensor.available()) {
+         sensor.read();
+      }
+      ourDataReader.reset();
+      readingSensor = true;
+   } else {
+      if (ourDataReader.mComplete) {
+         readingSensor = false;
+         sensorTimer.start();
+      } else if(sensor.available() && !ourDataReader.mComplete) {
+         ourDataReader.readStream();
+      }
+   }
 }
 
+void loadData(void) {
 
+   strcpy(answer,"----\n"); 
+   strcat(answer,i_str(ourData.hour));strcat(answer,":");strcat(answer,i_str(ourData.min));strcat(answer,":");strcat(answer,i_str(ourData.sec));strcat(answer,"\n");
+   strcat(answer,i_str(ourData.day));strcat(answer,"/");strcat(answer,i_str(ourData.month));strcat(answer,"/");strcat(answer,i_str(ourData.year));strcat(answer,"\n");
+   strcat(answer,"Fix - "); if (ourData.valid) { strcat(answer,"valid\n"); } else { strcat(answer,"invalid\n"); }
+   strcat(answer,"Lat ");strcat(answer,i_str(ourData.degLat));strcat(answer," Deg ");strcat(answer,f_str(ourData.minLat));strcat(answer," Min "); if(ourData.latQuad==north) { strcat(answer,"N\n"); } else { strcat(answer,"S\n"); }
+   strcat(answer,"Lon ");strcat(answer,i_str(ourData.degLon));strcat(answer," Deg ");strcat(answer,f_str(ourData.minLon));strcat(answer," Min "); if(ourData.lonQuad==east) { strcat(answer,"E\n"); } else { strcat(answer,"W\n"); }
+   strcat(answer,"Spd ");strcat(answer,f_str(ourData.knots));strcat(answer," Kn\n");
+   strcat(answer,"Course ");strcat(answer,f_str(ourData.course));strcat(answer," Deg\n");
+   strcat(answer,"Mag var ");strcat(answer,f_str(ourData.magVar));if (ourData.varDir>0) { strcat(answer," + Deg\n"); } else { strcat(answer," - Deg\n"); }
+   strcat(answer,"Temp ");strcat(answer,f_str(ourData.temp));strcat(answer," Deg C\n");
+   strcat(answer,"Pres ");strcat(answer,f_str(ourData.pressure));strcat(answer," hPa\n");
+   strcat(answer,"Humidity ");strcat(answer,f_str(ourData.humidity));strcat(answer," %\n");
+   strcat(answer,"Air qual ");strcat(answer,f_str(ourData.gas));strcat(answer," KOhms\n");
+   strcat(answer,"Alt ");strcat(answer,f_str(ourData.altitude));strcat(answer," m\n"); 
+}
+    
 void checkText() {
   
    int   numSMS;
@@ -99,9 +120,6 @@ void checkText() {
    char* message;
    char* numStr;
    char* comStr;
-   int   numDice;
-   int   total;
-   int   roll;
     
    idle();                                                           // Let anyone that's idleing have some time.
    if (serverTimer.ding()) {                                         // If its time to check messages..
@@ -125,32 +143,12 @@ void checkText() {
             comStr = strtok(message," ");                            // First slice HI-YA!
             if (comStr) {                                            // If we have a token to decode..
                toupper(comStr);                                      // Make life easier, just mak everything uppercase.           
-               if (!strcmp("ROLL",comStr)) {                         // If the token is "ROLL"..
-                  numStr = strtok (NULL," ");                        // See if we can get a number of dice token.
-                  numDice = atoi(numStr);                            // Parse the actual number of dice they call for.
-                  if (numDice==0) {                                  // If the number of dice is zero..
-                     numDice = 1;                                    // We'll give them one.
-                  } else if (numDice>MAX_DICE) {                     // If the number of dice is more than the max..
-                     strcpy(answer,"Too many dice! You only get ");  // Set the answer sgtring to an error message.
-                     strcat(answer,str(MAX_DICE));                   //
-                  } else {                                           // Else, the number of dice is ok..
-                     strcpy(answer,"Rolling! ");                     // Send back header.
-                     total = 0;                                      // Zero out our total.
-                     for (int i=1;i<=numDice;i++) {                  // For each die..
-                        roll = random(1,6);                          // Get a random value 1..6.
-                        total = total + roll;                        // Add it to the total.
-                        strcat(answer,str(roll));                    // Add the value to the answer string.
-                        if (i!=numDice) {                            // If there are more dice to roll..
-                           strcat(answer,", ");                      // We add a comma to the answer.
-                        } else {                                     // Else, we rolled them all..
-                           strcat(answer," Total : ");               // Add "Total :" to the answer string.
-                           strcat(answer,str(total));                // Add the total to the anser string.
-                        }
-                     }
-                  }
+               if (!strcmp("DATA",comStr)) {                         // If the token is "DATA"..
+                  loadData();
+                  
                   strcpy(&(comBuff[1]),answer);                      // Copy the assemebled answer to the com buffer.
                } else {
-                  strcpy(&(comBuff[1]),"Sorry, the only thing I can do is Roll dice. Msg me ROLL and a number and I'll roll 'em for you.");
+                  strcpy(&(comBuff[1]),"Sorry, all I can do is send data. Msg me DATA and I'll send you some.");
                } 
             }
             doSendSMSMsg(comBuff);                                   // Send the reply stored in the com buffer
@@ -160,37 +158,7 @@ void checkText() {
 }
        
 
-// Drop in a string and this'll strip out anything
-// that's not a "dial-able" character.
-// ** WARNING ** This writes to the string in place. So you can't pass a string that was
-// allocated at compile time IE char myNum = "1 408 340-0352"
-void filterPNStr(char* str) {
 
-   int numChars;
-   int index;
-   
-   if (str) {                          // Sanity, they could pass in a NULL. They do that now and then.
-      numChars = strlen(str);          // Ok have something. Lets count 'em.
-      index = 0;                       // We'll use this to index mRawPN.
-      for(int i=0;i<=numChars;i++) {   // We'll loop though including the EOL.
-         switch(str[i]) {              // There may be better ways of doing this,
-            case '0'  :                //  but this makes it realaly obvious what we're doing.
-            case '1'  :
-            case '2'  :
-            case '3'  :
-            case '4'  :
-            case '5'  :
-            case '6'  :
-            case '7'  :
-            case '8'  :
-            case '9'  :
-            case '#'  :
-            case '*'  :
-            case '\0' : str[index++] = str[i]; break;  // Stuff in the "filtered" char.
-         }
-      }
-   }
-}
 
 
 

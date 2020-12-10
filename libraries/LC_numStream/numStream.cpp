@@ -32,16 +32,23 @@ void numStreamOut::writeVar(int index) {  }
 
 numStreamIn::numStreamIn(int tokenBuffBytes) {
    
-   mSynk = false;
-   mIndex = 0; 
+   
    mTokenBuff = NULL;
    if (resizeBuff(tokenBuffBytes,&mTokenBuff)) {
       mTokenBuff[0] = '\0';
    }
+   reset();
 }
 
 
 numStreamIn::~numStreamIn(void) { resizeBuff(0,&mTokenBuff); }
+
+void numStreamIn::reset(void) {
+	 
+	mSynk = false;
+   mComplete = false;
+   mIndex = 0;
+}
 
 
 void numStreamIn::readStream(void) {
@@ -50,8 +57,10 @@ void numStreamIn::readStream(void) {
    int   i;
 
    if (!mTokenBuff) return;                  // If we don't have a token buffer, we can't do this.
+   if (mComplete) return;							// We're done. Need a reset to do more.
    if (inPort.available()) {                 // Ok, If we have any bytes to read..
       aChar = inPort.read();                 // Read one.
+      //Serial.println(aChar);
       if (!mSynk) {                          // If we're not in synk..
          if (aChar==SYNK_CHAR) {             // If this char is the syk char..
             mSynk = true;                    // We are now in synk.

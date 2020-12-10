@@ -69,9 +69,9 @@ bool GPS_NMEA::decodeGPRMC(char* inStr) {
    token = strtok(NULL,",");                    // E or W
    if (token) {                                 // If we got a token..
       if (!strcmp(token,"E")) {
-         $GPRMC.latQuad = east;
+         $GPRMC.lonQuad = east;
       } else {
-         $GPRMC.latQuad = west;
+         $GPRMC.lonQuad = west;
       }
    }
    token = strtok(NULL,",");                    // Speed over ground in knots   
@@ -101,7 +101,7 @@ bool GPS_NMEA::decodeGPRMC(char* inStr) {
    }
    token = strtok(NULL,",");                    // E or W
    if (token) {                                 // If we got a token..
-      if (token[0]=="E") {
+      if (token[0]=='E') {
          $GPRMC.varDir = east;
       } else {
          $GPRMC.varDir = west;
