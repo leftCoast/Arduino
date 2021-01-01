@@ -15,7 +15,6 @@
 #include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
-#include <PulseOut.h>
 #include <timeObj.h>
 
 #define PULSE_OFFSET 200        // In the end, it seems like everything takes too long. By this much.
@@ -376,7 +375,3 @@ void loop() {
   }
 
 }
-
-
-
-
