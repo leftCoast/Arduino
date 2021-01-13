@@ -4,8 +4,7 @@
 #include "controlPanel.h"
 #include "loggingPanel.h"
 //#include "src/sTerm/sTerm.h"
-#include "src/breakout/breakout.h"
-#include "src/starTrek/starTrek.h"
+
 
 #define PLANTBOT_BAUD  9600 //115200 //500000
 
@@ -58,13 +57,10 @@ panel* floraOS::createPanel(int panelID) {
 		case sTermApp		:
 		   ourComPort.disableBG(false);
 		   return new sTermPanel();
-      */
-      case starTrekApp     :
-         ourComPort.disableBG(true);
-         return new starTrekPanel();
 		case breakoutApp	: 
          ourComPort.disableBG(true);
 		   return new breakout();
+      */
 		default           : return NULL;
 	}
 }

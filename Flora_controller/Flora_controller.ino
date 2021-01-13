@@ -15,8 +15,6 @@
 #include "floraOS.h"
 
 
-#define SD_CS   4
-
 void bootError(char* errStr) {
    
    screen->fillScreen(&black);   // Fill the screen black.
@@ -40,7 +38,7 @@ void setup() {
    }
    screen->fillScreen(&black);
 
-   if (!SD.begin(SD_CS)) {                   // With icons, we now MUST have an SD card.
+   if (!SD.begin(ADA_1947_SHIELD_SDCS)) {    // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");
       Serial.flush();
       bootError("No SD card.");

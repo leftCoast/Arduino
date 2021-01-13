@@ -179,17 +179,12 @@ void homeScreen::setup(void) {
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();
   addObj(calc);
-*/
+
   traceY = traceY - 40;
   appIcon*  breakOut = new appIcon(traceX,traceY,breakoutApp,BREAKOUT_PANEL_BMP);
   breakOut->begin();
   addObj(breakOut);
-
-  traceX = traceX - stepX;
-  appIcon*  starTrek = new appIcon(traceX,traceY,starTrekApp,STAR_TREK_PANEL_BMP);
-  starTrek->begin();
-  addObj(starTrek);
-  
+ */ 
 }
 
 

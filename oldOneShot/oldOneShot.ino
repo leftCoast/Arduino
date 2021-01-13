@@ -29,7 +29,7 @@ class oneShot  : public idler  {
 // ************ oneShot class code ************
 
 
-// Constructor. PUts together the inittial stuff, sets defaults.
+// Constructor. Puts together the initial stuff, sets defaults.
 oneShot::oneShot(int pinNum,float delayMs=0,float pulseMs=20) {
 
    mPinNum = pinNum;

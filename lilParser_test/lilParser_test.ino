@@ -53,9 +53,9 @@
 #define OLED_SDCS   -1    // Not wired
 
 #define POT_BTN     4
-#define POT_ANLG    A13
+#define POT_ANLG    A0  //A13
 
-#define DB_BTN      3
+#define DB_BTN      5  //3
 
 #define PARAM_FILE  "/dbos/CONFIG.SYS"
 #define DISP_BG_FILE  "/dbos/paper.bmp"
@@ -83,7 +83,7 @@ soundCard theSoundCard(soundCard_BREAKOUT, SOUND_CS, SOUND_DRQ, SOUND_RST);
 
 void setup(void) { 
 
-  Serial.begin(9600); while (!Serial);
+  //Serial.begin(9600); while (!Serial);
   
   lastFileError = F_NO_ERR;
   if (!SD.begin(SOUND_SDCS)) { lastFileError = F_BOOT_ERR; }
