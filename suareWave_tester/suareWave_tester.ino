@@ -107,9 +107,9 @@ enum commands {   noCommand,  // ALWAYS start with noCommand. Or something simla
 
 void setup() {
 
-   Serial.begin(57600);
-   ourWave.setOnOff(true);
-   ourParser.addCmd(waveOnOff,"wave");
+   Serial.begin(57600);                         // Fire up our serial port.
+   ourWave.setOnOff(true);                      // Fire up our swiare wave generator.
+   ourParser.addCmd(waveOnOff,"wave");          // Add all the commands into our parser.
    ourParser.addCmd(setPeriod,"per");
    ourParser.addCmd(setPulse,"pulse");
    ourParser.addCmd(setPercent,"%");
@@ -120,17 +120,17 @@ void setup() {
 
 void loop() {
 
-   idle();
    char  inChar;
    int   command;
-   
+
+      idle();                                                  // Let anyone in the back ground do their thing.
    if (Serial.available()) {                                   // If serial has some data..
       inChar = Serial.read();                                  // Read out a charactor.
       Serial.print(inChar);                                    // If using development machine, echo the charactor.
       command = ourParser.addChar(inChar);                     // Try parsing what we have.
       switch (command) {                                       // Check the results.
          case noCommand       : break;                         // Nothing to report, move along.
-         case waveOnOff       : handleOnOff();     break;   
+         case waveOnOff       : handleOnOff();     break;      // The rest are just command handlers. (See below)
          case setPeriod       : handlePeriod();    break;  
          case setPulse        : handlePulse();     break;
          case setPercent      : handlePercent();   break;
@@ -147,6 +147,9 @@ void loop() {
 //      Command handlers
 // **************************
 
+
+// I'm sure there's a c function that'll up or dn case a string.
+// But I'm tired of looking for it. This'll do for now.
 void dnCase(char* aStr) {
    
    int i=0;
