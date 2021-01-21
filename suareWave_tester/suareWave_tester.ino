@@ -1,4 +1,4 @@
-/************************************************************************************
+ /************************************************************************************
 *************************************************************************************
                           1/20/2021 Damn pandemic still going on.
                           At least Trump's finally out of office.
@@ -32,8 +32,8 @@ And : https://github.com/leftCoast/LC_lilParser
 #include <squareWave.h>
 #include <lilParser.h>
 
-#define  DEF_PERIOD_MS  100
-#define  DEF_PULSE_MS   10.5
+#define  DEF_PERIOD_MS  1
+#define  DEF_PULSE_MS   0.045
 #define  OUT_PIN        13
 
 // **************************
