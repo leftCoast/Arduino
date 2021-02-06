@@ -11,6 +11,7 @@
 #include <litlOS.h>
 #include "handheldOS.h"
 
+
 #define SD_CS        4
 
 void bootError(char* errStr) {

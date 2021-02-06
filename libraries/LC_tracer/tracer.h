@@ -1,5 +1,5 @@
 #ifndef tracer_h
-#define reacer.h
+#define tracer_h
 
 // OK, what the heck is a tracer?
 // This is a debugging tool that outputs when its constructed and
