@@ -1,39 +1,35 @@
 #ifndef bmpImage_h
 #define bmpImage_h
 
-
+//LftC
 #include <baseImage.h>
 
 
 class bmpImage :	public baseImage {
 
 	public:
-						bmpImage(void);
-	virtual			~bmpImage(void);
+				bmpImage(void);
+	virtual	~bmpImage(void);
 	
-	virtual		bool		openImage(char* inPath=NULL);
-	virtual		bool		saveImage(char* inPath=NULL);
+	virtual	bool		saveImage(char* inPath=NULL);
+	virtual	RGBpack	getPixel(int x,int y,File inFile=NULL);
 	
-	virtual		colorObj	getPixel(int x,int y);
-	virtual		RGBpack	getPixel(int x,int y);
-	virtual		void		getRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0);
-	
-	virtual		void		setPixel(int x,int y,colorObj* aColor);
-	virtual		void		setPixel(int x,int y,RGBpack* anRGBPack);
-	virtual		void		setRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0);
+	virtual	void		setPixel(int x,int y,colorObj* aColor);
+	virtual	void		setPixel(int x,int y,RGBpack* anRGBPack);
+	virtual	void		setRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0,File inFile=NULL);
 
 	protected:
 	
-	virtual		bool		readImage(void);
-	virtual		bool		openWorkingFile(void);
-	    			uint16_t	read16(File f);
-    				uint32_t	read32(File f);
+	virtual	bool		readImage(void);
 	
-					bool		rightSideUp;
-					int     	imageOffset;
-					int		imageDepth;
-					int		pixBytes;
-					int		bytesPerRow;
+				uint32_t	fileSize;
+				uint32_t	creatorBits;
+				uint32_t	DIBHeaderSize;	// No idea what this bit is.
+				bool		rightSideUp;
+				int     	imageOffset;
+				int		imageDepth;
+				int		pixBytes;
+				int		bytesPerRow;
 };
 
 #endif

@@ -5,18 +5,48 @@ bmpImage::bmpImage(void)
 
 
 bmpImage::~bmpImage(void) {  }
-	
 
-bool bmpImage::openImage(char* inPath=NULL);
-bool bmpImage::saveImage(char* inPath=NULL);
+
+bool bmpImage::saveImage(char* inPath) {  }
+
+
+RGBpack bmpImage::getPixel(int x,int y,File inFile) {
+
+	RGBPack	aPack;
+	File		ourFile;
 	
-colorObj bmpImage::getPixel(int x,int y);
-RGBpack bmpImage::getPixel(int x,int y);
-void bmpImage::getRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0);
-	
-void bmpImage::setPixel(int x,int y,colorObj* aColor);
-void bmpImage::setPixel(int x,int y,RGBpack* anRGBPack);
-void bmpImage::setRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0);
+	aPack.r = 0;										// We need something to pass back. Just in case.
+	aPack.g = 0;
+	aPack.b = 0;
+	if (haveInfo) {									// If we were able to read the image file (earlier)..
+		if (inFile) {									// If we were given an already open file to read..
+			inFile.seek(fileIndex(x,y));			// Point the file at the pixel.
+			inFile.read(buf,pixBytes);				// Grab the pixel.
+			aPack.r = buf[2];							// Stuff the pack.
+			aPack.g = buf[1];
+			aPack.b = buf[0];
+		} else {											// Else, no open file to read from. We'll need to open it.
+			ourFile = SD.open(filePath);			// Open up the file.
+			if (ourFile) {								// If we opened it.
+				ourFile.seek(fileIndex(x,y));		// Point the file to our pixel.
+				ourFile.read(buf,pixBytes);		// Grab the pixel.
+				aPack.r = buf[2];						// Stuff the pack.
+				aPack.g = buf[1];
+				aPack.b = buf[0];
+				ourFile.close();
+			}
+		}
+	}
+	return aPack;
+}
+
+
+
+
+
+void bmpImage::setPixel(int x,int y,colorObj* aColor) {  }
+void bmpImage::setPixel(int x,int y,RGBpack* anRGBPack) {  }
+void bmpImage::setRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0) {  }
 
 bool bmpImage::readImage(void) {
 
@@ -25,14 +55,13 @@ bool bmpImage::readImage(void) {
 	bool		success;
 	
 	success = false;														// Ok, assume failure..									
-	bmpFile = SD.open(imagePath);										// See if it works.
+	bmpFile = SD.open(imagePath);										// See if its a valid path.
 	if (bmpFile) {    													// We got a file?
 		if (read16(bmpFile) == 0x4D42) {								// If we have something or other..
-			temp = read32(bmpFile);										// We grab the file size.
-			temp = read32(bmpFile);										// Creator bits
-			temp = read32(bmpFile);										// image offset (Why read it into temp first?)
-			imageOffset = temp;											// image offset!?! Save this! (Actually, this shuts up the compiler.)
-			temp = read32(bmpFile);										// read DIB header size?
+			fileSize = read32(bmpFile);								// We grab the file size.
+			creatorBits = read32(bmpFile);							// Creator bits
+			imageOffset = read32(bmpFile);							// image offset (Why read it into temp first?)
+			DIBHeaderSize = read32(bmpFile);							// read DIB header size?
 			width = read32(bmpFile);									// width? Good thing to save for later.
 			height = read32(bmpFile);									// Height? Negative means the data is right side up. Go figure..
 			rightSideUp = height<0;										// Set a bool about that bit.
@@ -54,10 +83,21 @@ bool bmpImage::readImage(void) {
 }
 
 
-bool bmpImage::openWorkingFile(void) {
+// Given an x,y location of a pixel. Hand back the file
+// index of its location.
+unsigned long bmpImage::fileIndex(int x,int y) {
 
+	unsigned long  index;
+  
+	index = imageOffset;											// Starting here..
+	if (rightSideUp) {											// The image is right side up?
+		index = index + (y*bytesPerRow);						// Right side up
+	} else {															// Else..
+		index = index + ((height-y-1)*bytesPerRow);		// Upside down.
+	}
+	index = index + (x * pixBytes);							// Add offset for x.
+	return index;													// Tell the world.
 }
-
 
 
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order
