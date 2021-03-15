@@ -1,117 +1,18 @@
 #include <baseImage.h>
 #include <resizeBuff.h>
 
-char	tempDir[TEMP_FOLDER];
-char	pathBuff[TEMP_PATH_CHARS];
-
-
-// ***************************************************
-// NEED TO:
-//the generation of the temp path and the tempFile name stuff needs to be wrapped into the class.
-//The rest of the code needs to be rewritten to use the open * close methods at the end of this file.
-//Desturctor needs to close all files.
-//bmp Stuff needs to deal with no longer passing files around and use the open/close mnethods.
-//
-//See you after FLORIDA.
-//
-//My past you.
-
-
-
-// If we can find or create the temp files directory. Pass back true. Else we pass back
-// false for a fail.
-bool createTempDir(void) {
-
-	File	theDir;
-	bool	success;
-	int	numChars;
-	
-	success = false;										// Not a success yet..
-
-	// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
-	numChars = strlen(tempDir);                  // Lets see how long the path is.
-	if (theDir[numChars-1]=='/') {					// If we have a traileing '/'..            
-		theDir[numChars-1]='\0';						// Clip off the trailing, and yes correct, '/'.
-	}
-	//      
-	if (theDir=SD.open(tempDir,FILE_READ)) {		// If we can open the path they gave us..
-		if (theDir.isDirectory()) {               // If its a directory..
-			numChars = strlen(tempDir);            // Lets see how long the path is now.
-			if (tempDir[numChars-1]!='/') {        // If the last char is NOT a '/'..
-				strcat(tempDir,"/");                // Add one..
-			}
-			success = true;
-		}
-		theDir.close();
-	} else {
-		success = SD.mkdir(tempDir);					// Try making the directory.
-		numChars = strlen(tempDir);            	// Lets see how long the path is.
-		if (theDir[numChars-1]!='/') {				// If we DON'T have a traileing '/'.. 
-			strcat(tempDir,"/");                	// Add one..
-		}
-	}
-	return success;
-}
-			
-	
-// Run this. If it can create a new file with an previously unused file name, it'll pass
-// back true, leaving the full path to the new file in the pathBuff string. If not, it
-// passes back false.
-bool generateTempPath(void) {
-	
-	File		tempFile;
-	timeObj	timeOut(FILE_SEARCH_MS);
-	int		fileNum;
-	bool		done;
-	bool		success;
-	
-	success = false;													// As always, not a success yet.
-	if (createTempDir()) {											//	If we can find or create the temp directory..
-		done = false;													// Not done yet.
-		fileNum = 0;													// File names are a number string with ".tmp" at the end.
-		do {																// We loop around doing..
-			strcpy(pathBuff,tempDir);								//	Start building the file path starting with the temp directory.
-			strcat(pathBuff,itoa(++fileNum);						// Increment the file num the add it to the path.
-			strcat(pathBuff,".tmp");								// Add ".tmp" to the path.
-			tempFile = SD.open(pathBuff,FILE_READ);			//	Try to open this file for reading.
-			if (tempFile) {											// If the file opened..
-				tempFile.close(tempFile);							// We just close it and move on.
-			} else {														// Else, we have a possible candidate here.
-				done = true;											// Either its the real deal or a n error. In any case, we are done. 
-				tempFile = SD.open(pathBuff,FILE_WRITE);		// Try to create the file we couldn't open.
-				if (tempFile) {										// If we were able to create the file..
-					tempFile.close(tempFile);						// Close it.
-					success = true;									// And We'll call this a success!
-				}
-			}
-		} while(!done);												// Loop while we are not done.
-	}
-	return success;													// return if we had success or not.
-}
 
 
 // Just setup default values..
 baseImage::baseImage(void) {
 
-	imagePath		= NULL;
-	tempPath			= NULL;
-	imageFileOpen	= false;
-	tempFileOpen	= false;
-	haveInfo			= false;
 	width				= 0;
 	height			= 0;
 }
 
 		
 // Dump the path strings.
-baseImage::~baseImage(void) {
-
-	resizeBuff(0,&imagePath);		// Recycle the image path's RAM.
-	if (tempPath) {					// If we had a working file..
-		SD.remove(tempPath)			// Delete it from the SD card.
-		resizeBuff(0,&tempPath);	// Recycle it's path's RAM.
-	}
-}
+baseImage::~baseImage(void) { }
 
 
 // If the user wants to create a new file for the source colors. This is called
@@ -119,219 +20,157 @@ baseImage::~baseImage(void) {
 // editing.
 bool baseImage::newImage(int inWidth,int inHeight) {
 	
-	resizeBuff(0,&imagePath);		// Just in case we're changing files.
 	width		= inWidth;				// Width known.
 	height	= inHeight;				// Height known.
-	haveInfo	= true;					// We should have enough for a file.
-	return openWorkingFile();		// Return if we can setup a working file.
-}
-
-
-// Your standard open image function. This saves off the file path then calls read image 
-// to see if the file opened makes any sense.
-bool baseImage::openImage(char* imPath) {
-
-	int numChars;
-	
-	resizeBuff(0,&imagePath);								// Just in case we're changing files.
-	haveInfo = false;											// No longer setup.
-	if (inPath) {												// If we have a non NULL path pointer..
-		numChars = strlen(inPath);							// See how long the path string is.
-		if (numChars) {										// If we have any chars at all..
-			if (resizeBuff(numChars+1,&imagePath)) {	// If we get the RAM to store the path..
-				strcpy(imagePath,inPath);					// Save off the path.
-				haveInfo = readImage();						// See if we can open and understand the image file.
-			}
-		}
-	}
-	return haveInfo;											// Tell the user.
-}
-
-
-// Called by the user to save her changes. If no path is specified. Save to the original
-// image file. If a path is specified, then save the resulting image to that file. The
-// default (this) is to blindly paste the data from the tempFile to the resulting savefile
-// path.
-bool baseImage::saveImage(char* inPath=NULL) {
-
-	File	saveFile;
-	File	tempFile;
-	bool	success;
-	
-	success  = false;												// Not a success yet.
-	if (tempPath) {												// If we have a path to a temp image file.
-		tempFile = SD.open(tempPath);							// Try opening up the temp image file.
-		if (tempFile) {											// If we were successful at opening the temp image file.
-			if (inPath) {											// If we were given a non NULL save file path..
-				saveFile = SD.open(inPath,FILE_WRITE);		// Try opening up a new file at this new path.
-			} else {													// Else we were NOT given a new image file path to use..
-				saveFile = SD.open(imagePath,FILE_WRITE);	// Try opening up the original image file.		
-			}
-			if (saveFile) {										// If we were successful at opening up a save file..
-				while(tempFile.avaliable()) {					// While not at the end of the temp image file..
-					saveFile.write(tempFile.read());			// Read a byte from the temp file and write it to the save file.
-				}
-				saveFile.close();									// We opened the save file, we close it!
-				success = true;									// And we're calling this a success!
-			}
-			tempFile.close();										// We opened the temp file, we close it!
-		}
-		return success;											// Tell the world our resulting success or failure.
-	}
+	return newDocFile();
 }
 
 		
-// Grab a pixel from this location from your image file.
-// Return it as a colorObj.
-colorObj bmpImage::getPixel(int x,int y,File inFile) {
+// Grab a pixel from this location from your image file. Return it as a colorObj.
+// Typically this is what the outside user would call.
+colorObj baseImage::getPixel(int x,int y) {
 
 	colorObj	aColor;
 	RGBPack	aPack;
+	File		imageFile;
 	
-	aPack = getPixel(x,y,inFile);
-	aColor.setColor(&aPack);
-	return aColor;
+	aColor.setCOlor(&black);								// Black's a good default.
+	if(checkRowParams(row,numPix,xStart)) {			// Make sure the row params are "sane".
+		if (haveInfo) {										// If we have a valid image file.
+			imageFile = SD.open(filePath,FILE_READ);	//	Try to open this file for reading.
+			if (imageFile) {									// If we were able to open the image file..
+				aPack = getPixel(x,y,imageFile);			// Ask inherited to give us the packed pixel.
+				imageFile.close();							// Close the image file.
+				aColor.setColor(&aPack);					// Set it up as a colorObj.
+			}
+		}
+	}
+	return aColor;												// return the colorObj.
+}
+
+
+// Grab a row of pixels from this image (Or the temp) file.
+bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromTemp) {
+
+	File	imageFile;
+	int	xMax;
+	int	arrayIndex;
+	bool	success;
+	bool	opendFile;
+	
+	success = false;
+	if (haveInfo) {																// If we have a valid image file..
+		if(checkRowParams(row,numPix,xStart)) {							// Make sure the row params are "sane".
+			opendFile = false;													// Not opened a file as yet.
+			if (fromTemp) {														// If we're supposed ot get this from the temp file..
+				if (tempFilePath) {												// If we even have a temp file..
+					imageFile = SD.open(tempFilePath,FILE_READ);			//	Try to open this file for reading.
+					if (imageFile) {												// If we were able to open the temp file..
+						opendFile = true;											// Note that we opened it.
+					}
+				}
+			} else {
+				imageFile = SD.open(filePath,FILE_READ);					//	Try to open this file for reading.
+				if (imageFile) {													// If we were able to open the doc file..
+					opendFile = true;												// Note that we opened it.
+				}
+			}
+			if (opendFile) {														// If we were able to open the image file..
+				xMax = xStart + numPix;											// Calculate the endpoint.
+				arrayIndex = 0;													// Start array index at zero.
+				for(int i=xStart;i<xMax;i++) {								// Loop through all the pixels..
+					RGBArray[arrayIndex] = getPixal(row,i,&imageFile);	// Pass in the row, offset and file, get back the pixel.
+					arrayIndex++;													// Bump up the array index.
+				}
+				imageFile.close();												// Clean up our mess.
+				success = true;													// At this point we're calling it a success.
+			}
+		}
+	}
+	return success;
+}
+
+
+// Given a colorObj, set this pixel in the temp image file to that color.
+bool baseImage::setPixel(int x,int y,colorObj* aColor) {
+
+	RGBPack	aPack;
+	File		imageFile;
+	bool		success;
+	
+	success = false;														// Not a success yet.
+	if (checkXYLmits(x,y)) {											// Limit x & y to "sane" values.
+		if (haveInfo) {													// If we have a valid image file..
+			if (createTempFile()) {										// If we have or can create a temp file..	
+				imageFile SD.open(tempFilePath,FILE_WRITE);		// Have a go at opening the temp file.
+				if (imageFile) {											// If we got the temp file..
+					aPack = aColor.packColor();						// Pack up the color.
+					success = setPixel(x,y,aPack,&imageFile);		// Set the pixel with this color into this file.
+					imageFile.close();									// Close the file.
+				}
+			}
+		}
+	}
+	return success;													// Pass back our result.	
+}
+
+
+// Given an RGBPack array, set this row of pixels in the temp image file to
+// these colors.
+bool baseImage::setRow(int row,RGBpack* RGBArray,int numPix,int xStart) {
+		
+	File	imageFile;
+	int	xMax;
+	int	arrayIndex;
+	bool	success;
+	bool	noError;
+	
+	success = false;
+	if (haveInfo) {																							// If we have a valid image file..
+		if(checkRowParams(row,numPix,xStart)) {														// Make sure the row params are "sane".
+			imageFile = SD.open(tempFilePath,FILE_WRITE);											//	Try to open this file for reading.
+			if (imageFile) {																					// If we were able to open the image file..
+				xMax = xStart + numPix;																		// Calculate the endpoint.
+				arrayIndex = 0;																				// Start array index at zero.
+				noError = true;																				// Not seen an error yet.
+				for(int i=xStart;i<xMax;i++) {															// Loop through all the pixels..
+					noError = noError && setPixel(x,row,RGBArray[arrayIndex],&imageFile);	// Set the pixel with this color into this file.
+					arrayIndex++;																				// Bump up the array index.
+				}
+				imageFile.close();																			// Clean up our mess.
+				success = noError;																			// Success is true if we saw no errors.
+			}
+		}
+	}
+	return success;
 }
 
 
 // Grab a pixel from this location from your image file.
 // Return it as a RGBpack.
-RGBpack baseImage::getPixel(int x,int y,File inFile) {  }
-
-
-// Grab a row of pixels from this image file. Optionally starting
-// at xMin and ending at xMax. If xMax is zero, then the entire row.
-void bmpImage::getRow(int row,RGBpack* RGBArray,int xMin=0,xMax=0,File inFile) {
-
-	File	ourFile;
-	int	arrayIndex;
-	
-	if (haveInfo) {
-		if (row<0) row = 0;
-		if (row>=height) row = height - 1;
-		if (xMin<0) xMin = 0;
-		if (xMax==0 || xMax>=width) xMax = width-1;
-		if (xMax<xMin) return;
-		arrayIndex = 0;
-		if (inFile) {
-			for(int i=xMin;i<xMax;i++) {
-				RGBArray[arrayIndex] = getPixal(row,i,inFile);
-				arrayIndex++;
-			}
-		} else {
-			ourFile = SD.open(filePath);			// Open up the file.
-			if (ourFile) {
-				for(int i=xMin;i<xMax;i++) {
-					RGBArray[arrayIndex] = getPixal(row,i,ourFile);
-					arrayIndex++;
-				}
-				ourFile.close();						// We open it, we close it.
-			}
-		}
-	}
-}
-	
-
-
-// If any of the setting methods are called, you will need to call
-// the createWorkingFile() to setup a working file for your edits.
-
-// Given a colorObj, set this pixel in the temp image file to that color.
-void baseImage::setPixel(int x,int y,colorObj* aColor) {  }
-
+// THIS ONE MUST BE FILLED OUT BY WHOM INHERITS THIS.
+RGBpack baseImage::getPixel(int x,int y,File* inFile) {  }
+   
 
 // Given an RGBPack, set this pixel in the temp image file to that color.
-void baseImage::setPixel(int x,int y,RGBpack* anRGBPack) {  }
+// THIS is the one that should be inherited and filled out.
+bool baseImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) { }
 
 
-// Given an RGBPack array, set this row of pixels in the temp image file to
-// these colors. Passing zeros into xMin & xMax defailts them to the entire row.
-void baseImage::setRow(int row,RGBpack* RGBPackArray,int xMin,int xMax) {  }
+void baseImage::checkXYLmits(int x, int y) {
 
-
-// Used to create a temporary working file from an existing image file. The default (this)
-// is to blindly copy the existing image file to the file located at tempPath.
-bool baseImage::copyToWorkingFile(void) {
-
-	bool	success;
-	
-	success = false;												// We're not a success yet.
-	if (haveInfo) {												// If we have checked and ok'ed our image file..
-		if (generateTempPath()) {								// If we are able to generate a temp file path..
-			tempFile = SD.open(tempPath,FILE_WRITE);		// Have a shot at opening up our temp file.
-			if (tempFile) {										// If we were successful at getting a temp file..
-				ourFile = SD.open(filePath);					// Have a shot at opening up our image file.
-				if (ourFile) {										// If we were successful at opening our image file..
-					while(ourFile.avalibale()) {				// While w're not at the EOF of the image file..
-						tempFile.write(ourFile.read());		// Write this byte from the image file to the temp file.
-					}
-					success = true;								// Ok, we'll call this a success.
-					ourFile.close();								// We opened it, we close it.
-				}
-				tempFile.close();									// We opened it, we close it.
-			}
-		}
-	}
-	return success;												// Return our success or failure.
+	if (x < 0 || x >= width) return false;		// If x is negative or past the end, bail.
+	if (y < 0 || y >= height) return false;	// If y is negative or past the bottom, bail.
+	return true;										// If we got this far, call it good.
 }
 
 
-// Used to create a temporary working file from a height and width of pixels.	We can't
-// know how this is done at this time. Those who inherit us should take care of it.			
-bool newWorkingFile(int width,int height) {  }			
-
-
-// Write a pixel to the temp file. Sadly, at this point, we have no idea how. Those who
-// inherit us should be able to handle this.
-void baseImage::writePixel(int x,int y,RGBpack* anRGBPack) {  }
-
-
-// **********************************************
-// These next four are the REQUIRED management of the two files we manage. The imageFile
-// and the tempFile.	In this way the we can be sure that the files will be opened at the
-// start of writing and reading processes. Otherwise, they may be opened and closed for
-// every read and write.
-
+bool baseImage::checkRowParams(int row,int numPix,int xStart)
 	
-bool baseImage::openImage(int mode) {
-
-	if (!imageFileOpen) {
-		imageFile = SD.open(imagePath,mode);
-		if (imageFile) {
-			imageFileOpen = true;
-		}
-	}
+	if (row<0 || row>=height) return false;			// If row is negative or greater than the height, bail.
+	if (numPix<1 || numPix>width) return false;		// If numPix is zero or negative or greater than the width, bail.
+	if (xStart<0 || xStart>=width) return false;		// If xStart is negative or greater than or then same as width, bail.
+	if (width-xStart!=numPix) return false;			// If width minus xStart does not equal the numPix. bail.
+	return true;												// If we get this far we'll call it good!
 }
 
-
-void baseImage::closeImage(void) {
-
-	if (imageFile) {
-		imageFile.close();
-	}
-	imageFileOpen = false;;
-}
-
-
-bool baseImage::openTemp(int mode) {
-
-	if (!tempFileOpen) {
-			if (!tempPath) {
-				
-			tempFile = SD.open(tempPath,mode);
-			if (tempFile) {
-				tempFileOpen = true;
-			}
-		}
-	}
-
-
-void baseImage::closeTemp(void) {
-					
-	if (tempFile) {
-		tempFile.close();
-	}
-	tempFileOpen = false;;
-}			
-	
-// **********************************************

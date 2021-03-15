@@ -1,4 +1,32 @@
+#include "bmpImage.h"
 
+// .bmp files have the 2 & 4 byte numbers stored in reverse byte order
+// than what we use here in Arduinoland. These two routines swap 'em back.
+
+// For 2 byte numbers.
+uint16_t read16(File f) {
+
+    uint16_t result;
+  
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read(); // MSB
+    return result;
+  }
+
+
+// For 4 byte numbers.
+uint32_t read32(File f) {
+  
+    uint32_t result;
+  
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read();
+    ((uint8_t *)&result)[2] = f.read();
+    ((uint8_t *)&result)[3] = f.read(); // MSB
+    return result;
+  }
+  
+  
 
 bmpImage::bmpImage(void)
 : baseImage { }
@@ -7,10 +35,7 @@ bmpImage::bmpImage(void)
 bmpImage::~bmpImage(void) {  }
 
 
-bool bmpImage::saveImage(char* inPath) {  }
-
-
-RGBpack bmpImage::getPixel(int x,int y,File inFile) {
+RGBpack bmpImage::getPixel(int x,int y,File* inFile) {
 
 	RGBPack	aPack;
 	File		ourFile;
@@ -44,11 +69,19 @@ RGBpack bmpImage::getPixel(int x,int y,File inFile) {
 
 
 
-void bmpImage::setPixel(int x,int y,colorObj* aColor) {  }
-void bmpImage::setPixel(int x,int y,RGBpack* anRGBPack) {  }
-void bmpImage::setRow(int row,RGBpack* RGBPackArray,int xMin=0,xMax=0) {  }
+// Grab a pixel from this location from your image file.
+// Return it as a RGBpack.
+// THIS ONE MUST BE FILLED OUT BY WHOM INHERITS THIS.
+RGBpack baseImage::getPixel(int x,int y,File* inFile) {  }
+   
 
-bool bmpImage::readImage(void) {
+// Given an RGBPack, set this pixel in the temp image file to that color.
+// THIS is the one that should be inherited and filled out.
+bool baseImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) { }
+
+
+
+bool bmpImage::checkDoc(void) {
 
 	File		bmpFile;
 	uint32_t	temp; 
@@ -100,28 +133,3 @@ unsigned long bmpImage::fileIndex(int x,int y) {
 }
 
 
-// .bmp files have the 2 & 4 byte numbers stored in reverse byte order
-// than what we use here in Arduinoland. These two routines swap 'em back.
-
-// For 2 byte numbers.
-uint16_t bmpImage::read16(File f) {
-
-    uint16_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read(); // MSB
-    return result;
-  }
-
-
-// For 4 byte numbers.
-uint32_t bmpImage::read32(File f) {
-  
-    uint32_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read();
-    ((uint8_t *)&result)[2] = f.read();
-    ((uint8_t *)&result)[3] = f.read(); // MSB
-    return result;
-  }
