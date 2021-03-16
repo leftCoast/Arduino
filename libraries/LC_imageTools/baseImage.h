@@ -4,6 +4,11 @@
 #include <docFile.h>
 #include <colorObj.h>
 
+// We have to start somewhere. This'll be better than zero.
+#define DEF_WIDTH		240
+#define DEF_HEIGHT	320
+
+	
 class baseImage :	public docFile {
 
 	public:

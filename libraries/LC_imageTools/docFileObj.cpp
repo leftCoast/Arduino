@@ -215,7 +215,7 @@ bool docFileObj::createTempFile(void) {
 
 // Does nothing now, but it can be inherited to setup a newly created temp file that has
 // no document file to copy from.
-bool docFileObj::initNewtempFile(void) { return true; }
+bool docFileObj::initNewTempFile(void) { return true; }
 
 
 // Takes the docFile and copies it over to the tempFile giving the user somewhere to put

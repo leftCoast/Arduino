@@ -12,19 +12,19 @@ class bmpImage :	public baseImage {
 
 	protected:
 	
-	virtual		RGBpack	getPixel(int x,int y,File* imageFile);
-	virtual		void		setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile);	
-	virtual		bool		checkDoc(void);
-	virtual		bool		initNewtempFile(void);
-								
-				uint32_t	fileSize;
-				uint32_t	creatorBits;
-				uint32_t	DIBHeaderSize;	// No idea what this bit is.
-				bool		rightSideUp;
-				int     	imageOffset;
-				int		imageDepth;
-				int		pixBytes;
-				int		bytesPerRow;
+	virtual		RGBpack			getPixel(int x,int y,File* imageFile);
+	virtual		void				setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile);	
+	virtual		bool				checkDoc(void);
+					uint32_t			calcFileSize(void)
+	virtual		bool				initNewTempFile(void);
+					unsigned long	fileIndex(int x,int y);
+					
+				bool				rightSideUp;
+				int     			imageOffset;
+				int				imageDepth;
+				int				pixBytes;
+				int				bytesPerRow;
+				unsigned long	fileSize;
 };
 
 #endif

@@ -6,8 +6,8 @@
 // Just setup default values..
 baseImage::baseImage(void) {
 
-	width				= 0;
-	height			= 0;
+	width		= DEF_WIDTH;
+	height	= DEF_HEIGHT;
 }
 
 		

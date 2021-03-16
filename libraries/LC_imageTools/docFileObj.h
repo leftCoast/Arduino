@@ -23,7 +23,7 @@ class docFileObj {
 					
 	virtual		bool		checkDoc(void);
 	virtual		bool		createTempFile(void);
-	virtual		bool		initNewtempFile(void);
+	virtual		bool		initNewTempFile(void);
 	virtual		bool		copyToTempFile(void);
 										
 					char*			docFilePath;
