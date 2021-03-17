@@ -25,9 +25,9 @@ waterBtn::~waterBtn(void) {  }
 void waterBtn::setTheLook(void) {
   
   if (mCurrentState.value && mCurrentState.online) {
-    openPipe(WATER_OFF_BMP);
+    setImage(WATER_OFF_BMP);
   } else {
-    openPipe(WATER_ON_BMP);
+    setImage(WATER_ON_BMP);
   }
   needRefresh = true;
 }

@@ -1,8 +1,11 @@
 #ifndef docFileObj_h
 #define docFileObj_h
 
-#define TEMP_FOLDER		"/temp/";	// Default folder to save temp files in. 
+#define TEMP_FOLDER		"/temp/"		// Default folder to save temp files in. 
 #define FILE_SEARCH_MS	500			// Amount of milliseconds allowed to find a temp file name.
+
+#include <Arduino.h>
+#include <SD.h>
 
 
 bool createTempDir(char* dirPath);

@@ -2,7 +2,7 @@
 #define bmpImage_h
 
 #include <baseImage.h>
-
+#include <colorObj.h>
 
 class bmpImage :	public baseImage {
 
@@ -15,7 +15,8 @@ class bmpImage :	public baseImage {
 	virtual		RGBpack			getPixel(int x,int y,File* imageFile);
 	virtual		void				setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile);	
 	virtual		bool				checkDoc(void);
-					uint32_t			calcFileSize(void)
+					uint32_t			calcFileSize(void);
+					void				calcDefaults(void);
 	virtual		bool				initNewTempFile(void);
 					unsigned long	fileIndex(int x,int y);
 					

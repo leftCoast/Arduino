@@ -2,6 +2,8 @@
 
 #define DEF_IMAGE_OFFSET	54
 #define DEF_DEPTH				32
+#define COLOR_BUF_SIZE		4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
+
 
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order
 // than what we use here in Arduinoland. These two routines swap 'em back.
@@ -53,7 +55,7 @@ void write32(uint32_t val, File f) {
   
 
 bmpImage::bmpImage(void)
-: baseImage { }
+: baseImage() { }
 
 
 bmpImage::~bmpImage(void) {  }
@@ -61,14 +63,15 @@ bmpImage::~bmpImage(void) {  }
 
 // Grab a pixel from this location from your image file.
 // Return it as a RGBpack.
-RGBpack baseImage::getPixel(int x,int y,File* inFile) {
-
-	RGBPack	aPack;
+RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
 	
-	if (haveInfo) {						// If we were able to read the image file (earlier)..
-		inFile.seek(fileIndex(x,y));	// Point the file to our pixel.
-		inFile.read(buf,pixBytes);		// Grab the pixel.
-		aPack.r = buf[2];					// Stuff the pack.
+	uint8_t	buf[COLOR_BUF_SIZE];
+	RGBpack	aPack;
+	
+	if (haveInfo) {							// If we were able to read the image file (earlier)..
+		imageFile->seek(fileIndex(x,y));	// Point the file to our pixel.
+		imageFile->read(buf,pixBytes);	// Grab the pixel.
+		aPack.r = buf[2];						// Stuff the pack.
 		aPack.g = buf[1];
 		aPack.b = buf[0];
 	}
@@ -76,15 +79,15 @@ RGBpack baseImage::getPixel(int x,int y,File* inFile) {
 }
 
 
-// Given an RGBPack, set this pixel in the temp image file to that color.
+// Given an RGBpack, set this pixel in the temp image file to that color.
 // THIS is the one that should be inherited and filled out.
-bool baseImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) {
+void bmpImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) {
 	
-	if (haveInfo) {						// If we were able to read the image file (earlier)..
-		inFile.seek(fileIndex(x,y));	// Point the file to our pixel.
-		inFile.write(anRGBPack.b);		// Write out the values.
-		inFile.write(anRGBPack.g);
-		inFile.write(anRGBPack.r);
+	if (haveInfo) {								// If we were able to read the image file (earlier)..
+		imageFile->seek(fileIndex(x,y));		// Point the file to our pixel.
+		imageFile->write(anRGBPack->b);		// Write out the values.
+		imageFile->write(anRGBPack->g);
+		imageFile->write(anRGBPack->r);
 	}
 }
 
@@ -94,16 +97,18 @@ bool baseImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) {
 bool bmpImage::checkDoc(void) {
 
 	File		bmpFile;
-	uint32_t	temp; 
+	uint32_t	creatorBits;	// A thing that seems to always be zero.
+	uint32_t	DIBHeaderSize;	// Ans so is this ting.
+	uint32_t	imageHeight;	// Used as a temp. Can be negative.
 	bool		success;
 	
 	success = false;														// Ok, assume failure..									
-	bmpFile = SD.open(imagePath);										// See if its a valid path.
+	bmpFile = SD.open(docFilePath);									// See if its a valid path.
 	if (bmpFile) {    													// We got a file?
 		if (read16(bmpFile) == 0x4D42) {								// If we have something or other..
 			fileSize = read32(bmpFile);								// We grab the file size.
 			creatorBits = read32(bmpFile);							// Creator bits
-			imageOffset = read32(bmpFile);							// image offset (Why read it into temp first?)
+			imageOffset = read32(bmpFile);							// image offset.
 			DIBHeaderSize = read32(bmpFile);							// read DIB header size?
 			width = read32(bmpFile);									// width? Good thing to save for later.
 			height = read32(bmpFile);									// Height? Negative means the data is right side up. Go figure..
@@ -114,7 +119,7 @@ bool bmpImage::checkDoc(void) {
 				if (imageDepth == 24 || imageDepth == 32) {		// We can do 24 or 32 bits..
 					pixBytes = imageDepth / 8;							// Bytes / pixel
 					if (!read32(bmpFile)) {								// And no compression!
-						bytesPerRow = imageWidth * pixBytes;		// Data takes up this much, but..
+						bytesPerRow = width * pixBytes;				// Data takes up this much, but..
 						while(bytesPerRow % 4) bytesPerRow++;		// We need to pad it to a multiple of 4.
 						success = true;									// Made it this far? We can do this!
 					}
@@ -138,7 +143,7 @@ void bmpImage::calcDefaults(void) {
 }
 
 
-bool bmpImage::initNewtempFile(void) {
+bool bmpImage::initNewTempFile(void) {
 
 	File		bmpFile;
 	RGBpack	aColor;
@@ -163,7 +168,7 @@ bool bmpImage::initNewtempFile(void) {
 		aColor.b = 255;
 		for (int y = 0;y<height;y++) {				// Loop through every pixel..
 			for (int x=0;x<width;x++) {
-				setPixel(x,y,&aColor,bmpFile);		// Set it white.
+				setPixel(x,y,&aColor,&bmpFile);		// Set it white.
 			}
 		}		
 		bmpFile.close();									// Default file has been initialized. Close the file.
