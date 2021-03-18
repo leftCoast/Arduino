@@ -64,7 +64,7 @@ void handheldOS::beep() { tone(BEEP_PIN, 500,35); }
 
 void handheldOS::launchPanel(void) {
 
-  hideRedraw();
+  //hideRedraw();
   litlOS::launchPanel();
 }
 

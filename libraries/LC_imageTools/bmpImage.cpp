@@ -67,7 +67,7 @@ RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
 	
 	uint8_t	buf[COLOR_BUF_SIZE];
 	RGBpack	aPack;
-	
+
 	if (haveInfo) {							// If we were able to read the image file (earlier)..
 		imageFile->seek(fileIndex(x,y));	// Point the file to our pixel.
 		imageFile->read(buf,pixBytes);	// Grab the pixel.
@@ -99,7 +99,7 @@ bool bmpImage::checkDoc(void) {
 	File		bmpFile;
 	uint32_t	creatorBits;	// A thing that seems to always be zero.
 	uint32_t	DIBHeaderSize;	// Ans so is this ting.
-	uint32_t	imageHeight;	// Used as a temp. Can be negative.
+	int32_t	imageHeight;	// Used as a temp. Can be negative.
 	bool		success;
 	
 	success = false;														// Ok, assume failure..									
@@ -111,8 +111,8 @@ bool bmpImage::checkDoc(void) {
 			imageOffset = read32(bmpFile);							// image offset.
 			DIBHeaderSize = read32(bmpFile);							// read DIB header size?
 			width = read32(bmpFile);									// width? Good thing to save for later.
-			height = read32(bmpFile);									// Height? Negative means the data is right side up. Go figure..
-			rightSideUp = height<0;										// Set a bool about that bit.
+			imageHeight = read32(bmpFile);							// Height? Negative means the data is right side up. Go figure..
+			rightSideUp = imageHeight<0;								// Set a bool about that bit.
 			height = abs(imageHeight);									// Bloody weird encrypting.
 			if (read16(bmpFile) == 1) {								// if the next word is 1? What's this mean? Needs to be though.
 				imageDepth = read16(bmpFile);							// color depth.

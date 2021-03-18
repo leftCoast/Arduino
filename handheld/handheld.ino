@@ -29,7 +29,7 @@ void bootError(char* errStr) {
 // Setup, get the hardware running then fire up the UI & OS.
 void setup() {
 
-   analogWrite(SCREEN_PIN,0);                                      // Turn off backlight.
+   //analogWrite(SCREEN_PIN,0);                                      // Turn off backlight.
   
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // If we can't get the screen running..
       Serial.println("NO SCREEN!");                               // Send an error out the serial port.

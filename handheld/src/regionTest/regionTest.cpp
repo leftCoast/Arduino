@@ -1,6 +1,7 @@
 #include  "regionTest.h"
 #include  "label.h"
 #include <bmpObj.h>
+#include <bmpPipe.h>
 
 rect	aRect;
 bool	first = true;
@@ -120,7 +121,7 @@ void regionTest::setup(void) {
 		thePix.getLine(theLine,ln);
 		for (int i=0;i<12;i++) {
 			aColor.setColor(&(theLine[i]));
-			aColor.printRGB();
+			//aColor.printRGB();
 		}
 		Serial.println();
 	}

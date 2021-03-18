@@ -166,7 +166,7 @@ bool docFileObj::saveDocFile(char* newFilePath=NULL) {
 
 // When the inherited opens up a document, this will be called to see if its parsable as
 // the kind of file the class is looking for.
-bool docFileObj::checkDoc(void) { return true; }
+bool docFileObj::checkDoc(void) { return false; }
 
 
 // This finds a unused file name in the tempFolder then checks to make sure it can be

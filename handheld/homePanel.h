@@ -4,7 +4,7 @@
 #include <panel.h>
 #include <litlOS.h> 
 #include <bmpObj.h> 
-
+#include <bmpPipe.h>
 
 
 // *****************************************************
