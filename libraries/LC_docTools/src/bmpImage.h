@@ -10,7 +10,7 @@ class bmpImage :	public baseImage {
 				bmpImage(void);
 	virtual	~bmpImage(void);
 
-				virtual		bool	getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromTemp=false);
+				virtual		bool	getRow(int row,RGBpack* RGBArray,int numPix,int xStart=0,bool fromTemp=false);
 								void	setGFile(File* inFile);
 								
 	protected:

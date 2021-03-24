@@ -90,7 +90,6 @@ bool bmpImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromT
 	
 	success = false;
 	imageFilePtr = NULL;
-	
 	if (haveInfo) {																// If we have a valid image file..
 		if(checkRowParams(row,numPix,xStart)) {							// Make sure the row params are "sane".
 			if (gFileOpen) {														// If there is a global file..

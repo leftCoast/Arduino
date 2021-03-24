@@ -133,7 +133,7 @@ bool baseImage::setRow(int row,RGBpack* RGBArray,int numPix,int xStart) {
 				xMax = xStart + numPix;																			// Calculate the endpoint.
 				arrayIndex = 0;																					// Start array index at zero.
 				for(int i=xStart;i<xMax;i++) {																// Loop through all the pixels..
-					setPixel(i,row,&(RGBArray[arrayIndex]),&imageFile);	// Set the pixel with this color into this file.
+					setPixel(i,row,&(RGBArray[arrayIndex]),&imageFile);								// Set the pixel with this color into this file.
 					arrayIndex++;																					// Bump up the array index.
 				}
 				imageFile.close();																				// Clean up our mess.
@@ -164,6 +164,8 @@ bool baseImage::checkXYLmits(int x, int y) {
 }
 
 
+// Is this necessary? Maybe an out of bounds should just give back black instead of
+// stopping the code.
 bool baseImage::checkRowParams(int row,int numPix,int xStart) {
 	
 	if (row<0 || row>=height) return false;			// If row is negative or greater than the height, bail.
