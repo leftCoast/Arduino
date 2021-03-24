@@ -4,7 +4,6 @@
 #define DEF_DEPTH				32
 #define COLOR_BUF_SIZE		4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
 
-
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order
 // than what we use here in Arduinoland. These two routines swap 'em back.
 
@@ -55,7 +54,7 @@ void write32(uint32_t val, File f) {
   
 
 bmpImage::bmpImage(void)
-: baseImage() { }
+: baseImage() { gFileOpen = false; }
 
 
 bmpImage::~bmpImage(void) {  }
@@ -76,6 +75,68 @@ RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
 		aPack.b = buf[0];
 	}
 	return aPack;
+}
+
+
+// Grab a row of pixels from this image (Or the temp) file. The default version of this
+// works, but its slow. This is where we put our bmp file tweaks in to speed up the
+// process.
+bool bmpImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromTemp) {
+
+	File		imageFile;
+	File*		imageFilePtr;
+	uint8_t	buf[COLOR_BUF_SIZE];
+	bool		success;
+	
+	success = false;
+	imageFilePtr = NULL;
+	
+	if (haveInfo) {																// If we have a valid image file..
+		if(checkRowParams(row,numPix,xStart)) {							// Make sure the row params are "sane".
+			if (gFileOpen) {														// If there is a global file..
+				imageFilePtr = gFile;											// We'll trust it for us to read from.
+			} else if (fromTemp) {												// If we're supposed ot get this from the temp file..
+				if (tempFilePath) {												// If we even have a temp file..
+					imageFile = SD.open(tempFilePath,FILE_READ);			//	Try to open this file for reading.
+					if (imageFile) {												// If we were able to open the temp file..
+						imageFilePtr = &imageFile;								// Point to it.
+					}
+				}
+			} else {
+				imageFile = SD.open(docFilePath,FILE_READ);				//	Try to open this file for reading.
+				if (imageFile) {													// If we were able to open the doc file..
+					imageFilePtr = &imageFile;									// Point to it.
+				}
+			}
+			if (imageFilePtr) {													// If we were able to open the image file..
+				imageFilePtr->seek(fileIndex(xStart,row));				// Point the file to our pixel.
+				for(int i=0;i<numPix;i++) {									// Loop through all the pixels..
+					imageFilePtr->read(buf,pixBytes);						// Grab a pixel.
+					RGBArray[i].r = buf[2];										// Stuff the pack.
+					RGBArray[i].g = buf[1];
+					RGBArray[i].b = buf[0];
+				}
+				if (!gFileOpen) {													// If there was no global file open..
+					imageFilePtr->close();										// Clean up our mess.
+				}
+				success = true;													// At this point we're calling it a success.
+			}
+		}
+	}
+	return success;
+}
+
+
+// External code can call to set up an external file for a method to use. Calling this
+// with NULL flips the boolean to false.
+void bmpImage::setGFile(File* inFile) {
+
+	gFile = inFile;
+	if (inFile) {
+		gFileOpen = true;
+	} else {
+		gFileOpen = false;
+	}
 }
 
 

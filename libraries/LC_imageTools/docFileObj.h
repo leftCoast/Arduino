@@ -21,7 +21,9 @@ class docFileObj {
 	virtual		bool		newDocFile(void);
 	virtual		bool		openDocFile(char* filePath);
 	virtual		bool		saveDocFile(char* filePath=NULL);
-	
+					
+					char*		getDocFilePath(void);
+					char*		getTempFilePath(void);
 	protected:
 					
 	virtual		bool		checkDoc(void);

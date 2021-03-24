@@ -162,8 +162,13 @@ bool docFileObj::saveDocFile(char* newFilePath=NULL) {
 		docFile.close();											// We opened the save file, we close it!
 	}
 }
-				
 
+// These two.. If the calling code really wants to see them.. Hand back the pointers to
+// the two different path strings we hold. We have to trust they don't go changing them.			
+char* docFileObj::getDocFilePath(void) {return docFilePath; }
+char* docFileObj::getTempFilePath(void) {return tempFilePath; }
+					
+					
 // When the inherited opens up a document, this will be called to see if its parsable as
 // the kind of file the class is looking for.
 bool docFileObj::checkDoc(void) { return false; }
