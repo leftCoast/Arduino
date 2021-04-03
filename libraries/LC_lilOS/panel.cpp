@@ -1,5 +1,5 @@
 #include  <panel.h>
-#include  <litlOS.h>   // For nextApp
+#include  <lilOS.h>   // For nextApp
 
 
 // And it all starts up again..

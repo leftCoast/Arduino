@@ -12,7 +12,7 @@
 #include <keystroke.h>
 #include <scrKeyboard.h>
 #include <datafield.h>
-#include <litlOS.h>
+#include <lilOS.h>
 #include "panel.h"
 #include "src/cellListener/cellListener.h"
 #include "icons.h"
@@ -180,20 +180,23 @@ class cellEditField :  public datafield {
 // *****************************************************
 
 
-// Hardcode a clipping rouded rect to a 32x32 icon. Total hack!
-// Stop-gap for not having clipping regions or alpha channels.
-class roundedIconBtn : public appIcon {
+// We now have a mask class. Lets see if it'll work for the roundedIconBtn class.
+
+class RIBMask :   public mask {
+
+   public:
+            RIBMask(void);
+   virtual  ~RIBMask(void);
+   
+   virtual  bool  checkPixel(int x,int y);
+};
+
  
- public:
-          roundedIconBtn(int xLoc,int yLoc,int message,char* path);
-  virtual ~roundedIconBtn(void);
-  
-          void  drawPixel(int x,int y,colorObj* pixel);
-  virtual void  drawLine(File bmpFile,int x,int y);
-  virtual void  drawImage(int x,int y);
-  
-          int xLoc;
-          int yLoc;
+class roundedIconBtn :  public appIcon {
+ 
+   public:
+            roundedIconBtn(int xLoc,int yLoc,int message,char* path);
+   virtual ~roundedIconBtn(void);
 };
 
 
@@ -220,7 +223,7 @@ class homeScreen : public homePanel {
 
 
 
-class cellOS :  public litlOS {
+class cellOS :  public lilOS {
 
   public:
           cellOS(void);

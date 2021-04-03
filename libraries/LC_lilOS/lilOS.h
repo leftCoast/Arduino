@@ -47,12 +47,12 @@ class homePanel : public panel {
 // them must be able to "survive" being deleted when the
 // user switches functions. You'll be able to get more
 // info in the "panel" files.
-class litlOS :  public idler {
+class lilOS :  public idler {
 
 	public:
-				litlOS(void);
-				litlOS(int homeID);
-	virtual	~litlOS(void);
+				lilOS(void);
+				lilOS(int homeID);
+	virtual	~lilOS(void);
 
 	virtual	int		begin(void);					// The global world is online, do hookups. Returns 0, always
 	virtual	panel*	createPanel(int panelID);	// INHERIT THIS GUY AND CREATE YUR OWN CUSTOM PANELS.

@@ -1,6 +1,6 @@
 #include "calcButton.h"
 #include <calculator.h>
-#include <litlOS.h>
+#include <lilOS.h>
 
 #include "rpnCalc.h"
 

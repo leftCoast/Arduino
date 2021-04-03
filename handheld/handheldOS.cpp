@@ -40,7 +40,7 @@ int handheldOS::begin(void) {
   screenMap.addPoint(RAMPUP_END,255);
   screenMap.addPoint(RAMPDN_START,255);
   screenMap.addPoint(RAMPDN_END,0);
-  return litlOS::begin();
+  return lilOS::begin();
 }
 
   
@@ -65,7 +65,7 @@ void handheldOS::beep() { tone(BEEP_PIN, 500,35); }
 void handheldOS::launchPanel(void) {
 
   //hideRedraw();
-  litlOS::launchPanel();
+  lilOS::launchPanel();
 }
 
 

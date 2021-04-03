@@ -49,7 +49,7 @@ colorObj  battLineColor(LC_CHARCOAL);
 
 cellOS  ourOS;
 
-
+RIBMask ourRIBMask;
 
 // *****************************************************
 //                      cellOSPanel
@@ -248,67 +248,34 @@ void cellEditField::getText(char* buff) { return mEditField->getText(buff); }
 #define BMP_AX        (BMP_W - BMP_AW) / 2
 #define BMP_AY        BMP_Y + (BMP_H - BMP_AH) / 2
 
-
-
 // *********** roundedIconBtn ***********
 
-// Our icon buttons have that "rounded corner" look. Well, we have no mask ability so
-// we use this to fake it. Basically we'll hard code the corners off the rectangle.
+RIBMask::RIBMask(void) {  }
+RIBMask::~RIBMask(void) {  }
+   
+bool RIBMask::checkPixel(int x,int y) {
+
+   if ((y==0)||(y==31)) {
+      if ((x>=0 && x<3)) return false;
+      if (x>27) return false;
+   } else if ((y==1)||(y==30)) {
+      if ((x>=0 && x<2)) return false;
+      if (x>28) return false;
+   } else if ((y==2)||(y==3)||(y==29)||(y==28)) {
+      if (x==0) return false;
+      if (x==31) return false;
+  }
+  return true;
+}
 
 
-#define COLOR_BUF_SIZE  4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
- 
+
 roundedIconBtn::roundedIconBtn(int xLoc,int yLoc,int message,char* path) 
-  : appIcon(xLoc,yLoc,message,path,32) { }
+  : appIcon(xLoc,yLoc,message,path,32) { setMask(&ourRIBMask); }
 
   
 roundedIconBtn::~roundedIconBtn(void) {  }
 
-
-// This is such the hack. We just look at the local x,y value and if its
-// a corner? Just drop out of the funtion. And its all hardcoded for a
-// 32x32 icon.
-void roundedIconBtn::drawPixel(int gx,int gy,colorObj* pixel) {
-
-  int x = gx - xLoc;
-  int y = gy - yLoc;
-  
-  if ((y==0)||(y==31)) {
-    if ((x>=0 && x<3)) return;
-    if (x>27) return;
-  } else if ((y==1)||(y==30)) {
-    if ((x>=0 && x<2)) return;
-    if (x>28) return;
-  } else if ((y==2)||(y==3)||(y==29)||(y==28)) {
-    if (x==0) return;
-    if (x==31) return;
-  }
-  screen->drawPixel(gx,gy,pixel);       // Spat it out to the screen.
-}
-
-
-void roundedIconBtn::drawLine(File bmpFile,int x,int y) {
-
-  colorObj  thePixal;
-  uint8_t   buf[COLOR_BUF_SIZE];   
-  int       trace;
-  int       endTrace;
-  
-  endTrace = x+sourceRect.width;
-  for (trace=x;trace<endTrace; trace++) {       // Ok, trace does x..x+width.
-    bmpFile.read(buf,pixBytes);                 // Grab a pixel.
-    thePixal.setColor(buf[2],buf[1],buf[0]);    // Load colorObj.
-    drawPixel(trace,y,&thePixal);               // Try spatting it our to the screen.
-  }
-}
-
-
-void roundedIconBtn::drawImage(int x,int y) {
-
-  xLoc = x;
-  yLoc = y;
-  bmpPipe::drawImage(x,y);
-}
 
           
 // *********** homeScreen ***********
@@ -452,7 +419,7 @@ int cellOS::begin(void) {
   currentContact  = NULL;  // For the text panel.
   
   bringUp();
-  return litlOS::begin();
+  return lilOS::begin();
 }
 
 
@@ -477,7 +444,7 @@ panel* cellOS::createPanel(int panelID) {
 void cellOS::launchPanel(void) {
 
   hideRedraw();
-  litlOS::launchPanel();
+  lilOS::launchPanel();
 }
 
 

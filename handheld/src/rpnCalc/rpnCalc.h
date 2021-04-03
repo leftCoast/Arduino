@@ -6,7 +6,7 @@
 #include "calcButton.h"
 #include <calculator.h>
 #include <panel.h>
-#include <litlOS.h>
+#include <lilOS.h>
 
 
 // **********************************************************************

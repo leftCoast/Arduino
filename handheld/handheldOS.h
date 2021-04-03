@@ -1,7 +1,7 @@
 #ifndef handheldOS_h
 #define handheldOS_h
 
-#include <litlOS.h>
+#include <lilOS.h>
 #include <panel.h>
 
 #define SCREEN_PIN   25
@@ -16,7 +16,7 @@ enum  apps { homeApp = HOME_PANEL_ID, starTrekApp, breakoutApp, calcApp, rgnTest
 // *****************************************************
 
 
-class handheldOS : public litlOS {
+class handheldOS : public lilOS {
 
   public:
            handheldOS(void);

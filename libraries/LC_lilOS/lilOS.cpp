@@ -1,5 +1,5 @@
 
-#include <litlOS.h>
+#include <lilOS.h>
 #include <screen.h>
 
 int	nextPanel = NO_PANEL_ID;   // What panel do we want showing now?
@@ -48,30 +48,30 @@ void homePanel::drawSelf(void) {
 
 
 // *****************************************************
-// *********************   litlOS   ********************
+// *********************   lilOS   ********************
 // *****************************************************
 
  
-litlOS::litlOS(void) {
+lilOS::lilOS(void) {
 
   mPanel = NULL;
   nextPanel = HOME_PANEL_ID;
 }
 
 
-litlOS::litlOS(int homeID) {
+lilOS::lilOS(int homeID) {
 
   mPanel = NULL;
   nextPanel = homeID;
 }
 
 
-litlOS::~litlOS(void) {  }
+lilOS::~lilOS(void) {  }
 
 
 // A good plan would be to inherit, do your begin
 // then at some point during that, call this one.
-int litlOS::begin(void) {
+int lilOS::begin(void) {
 
   hookup();							// Want to use idle()? Its ready.
   nextPanel = HOME_PANEL_ID;	// Set to the default home panel.
@@ -80,10 +80,10 @@ int litlOS::begin(void) {
 
 
 // This is the guy you inherit and use to create your custom panels.
-panel* litlOS::createPanel(int panelID) { return new homePanel(); }
+panel* lilOS::createPanel(int panelID) { return new homePanel(); }
 
 
-void litlOS::launchPanel(void) {
+void lilOS::launchPanel(void) {
 
 	while(screen->touched());							// Hold 'till their finger is off the screen. Its important!
 	if (mPanel) {											// If we have a panel now..
@@ -105,7 +105,7 @@ void litlOS::launchPanel(void) {
 
 
 // Tell the current panel its loop time.
-void litlOS::loop(void) {
+void lilOS::loop(void) {
 	
 	if(!mPanel && nextPanel!=(unsigned int)mPanel) {	// If have no panel and we want one.
 		launchPanel();												// Launch a new panel.

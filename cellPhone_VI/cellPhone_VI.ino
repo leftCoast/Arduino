@@ -21,7 +21,7 @@
 #include <bmpPipe.h>
 #include <bmpKeyboard.h>
 #include <screen.h>
-#include <litlOS.h>
+#include <lilOS.h>
 #include <cellCommon.h>
 #include <eventMgr.h>
 
@@ -49,7 +49,7 @@ void bootError(char* errStr) {
 
 
 void setup() {
- 
+
   // Turn off backlight.
   analogWrite(SCREEN_PIN,0); 
                                     

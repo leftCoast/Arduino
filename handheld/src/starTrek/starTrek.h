@@ -3,7 +3,7 @@
 
 #include <panel.h>
 #include <idlers.h>
-#include <litlOS.h> 
+#include <lilOS.h> 
 #include <bmpObj.h>
 #include <textView.h>
 #include <lilParser.h>

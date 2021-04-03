@@ -2,7 +2,7 @@
 #define regionTest_h
 
 #include "panel.h"
-#include "litlOS.h"
+#include "lilOS.h"
 #include "region.h"
 
 
