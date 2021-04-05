@@ -37,8 +37,8 @@ bool createTempDir(char* dirPath) {
 			}
 		}
 		theDir.close();									// Close the directory we opened.
-	} else {													// Else there was no directory of that name..
-		if (SD.mkdir(dirPath)) {							// If we can create the directory.
+	} else {													// Else, there was no directory of that name..
+		if (SD.mkdir(dirPath)) {						// If we can create the directory.
 			numChars = strlen(dirPath);            // Lets see how long the path is.
 			if (dirPath[numChars-1]!='/') {			// If we DON'T have a traileing '/'.. 
 				numChars++;									// Add one for the '/'.
@@ -79,9 +79,10 @@ docFileObj::~docFileObj(void) {
 }
 
 
-// Create a new blank document. This removes all reference to any file we are working
-// with, deletes any temp file we had. Then, sets up a new temp file and calls
-// initNewTempFile() to initialize it.
+// Called by user to create a new blank document. (Actually, it doen't create it, it just
+// sets everything up for a new document. Leaving docFilePath = NULL) This removes all
+// reference to any file we were working with, deletes any temp file we had. Then, sets up
+// a new temp file and calls initNewTempFile() to initialize it.
 bool docFileObj::newDocFile(void){
 	
 	bool	success;
@@ -100,7 +101,7 @@ bool docFileObj::newDocFile(void){
 
 
 // Called by user to open a new document. If there is already a document that this object
-// is associated with, clear everything out and start over fresh.
+// is associated with, it clear everything out and starts over fresh with this new path.
 bool docFileObj::openDocFile(char* filePath) {
 
 	int	numChars;
@@ -126,21 +127,21 @@ bool docFileObj::openDocFile(char* filePath) {
 }
 
 
-// Take the tempFile, if any and past it over the old docFile. Passing in a file path will
-// redirect to a new docFile and this will be what we will be editing from now on.
-bool docFileObj::saveDocFile(char* newFilePath=NULL) {
+// Take the tempFile, if any, and past it over the old docFile. Passing in a file path
+// will redirect to a new docFile and this will be what we will be editing from now on.
+bool docFileObj::saveDocFile(char* newFilePath) {
 
 	File	tempFile;
 	File	docFile;
 	int	numBytes;
 	bool	success;
 	
-	success = false;													// Not a success yet.
-	if (!tempFilePath) return false;								// No temp path? This is just nuts! Bail.
-	if (newFilePath) {												// If we are saving to a new file path..
-		docFile = SD.open(newFilePath,FILE_WRITE);			// Have a go at opening the new file path.
-	} else if (docFilePath) {										// Else, we need to save to the original path..
-		docFile = SD.open(docFilePath,FILE_WRITE);			// Have a go at opening the original file path.
+	success = false;												// Not a success yet.
+	if (!tempFilePath) return false;							// No temp path? This is just nuts! Bail.
+	if (newFilePath) {											// If we are saving to a new file path..
+		docFile = SD.open(newFilePath,FILE_WRITE);		// Have a go at opening the new file path.
+	} else if (docFilePath) {									// Else, we need to save to the original path..
+		docFile = SD.open(docFilePath,FILE_WRITE);		// Have a go at opening the original file path.
 	}
 	if (docFile) {													// If we were able to open a file to save to..
 		tempFile = SD.open(tempFilePath,FILE_READ);		// Try to open up the temp file.
@@ -162,6 +163,7 @@ bool docFileObj::saveDocFile(char* newFilePath=NULL) {
 		docFile.close();											// We opened the save file, we close it!
 	}
 }
+
 
 // These two.. If the calling code really wants to see them.. Hand back the pointers to
 // the two different path strings we hold. We have to trust they don't go changing them.			
@@ -244,7 +246,7 @@ bool docFileObj::copyToTempFile(void) {
 			if (tempFile) {										// If we opened the temp file..
 				docFile = SD.open(docFilePath,FILE_READ);	// Try to open the doc file for reading.
 				if (docFile) {										// If we opened the doc file..
-					while(docFile.available()) {				// While w're not at the EOF of the image file..
+					while(docFile.available()) {				// While w're not at the EOF of the doc file..
 						tempFile.write(docFile.read());		// Write this byte from the doc file to the temp file.
 					}
 					success = true;								// Ok, we'll call this a success.

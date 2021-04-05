@@ -11,14 +11,14 @@ baseImage::baseImage(void) {
 }
 
 		
-// Dump the path strings.
+// Nothing to do at this level..
 baseImage::~baseImage(void) { }
 
 
-// If the user wants to create a new file for the source colors. This is called
+// If the user wants to create a new file for the source data. This is called
 // to set the width and height for creating the temp image file that is used for
 // editing.
-bool baseImage::newImage(int inWidth,int inHeight) {
+bool baseImage::newDocFile(int inWidth,int inHeight) {
 	
 	width		= inWidth;				// Width known.
 	height	= inHeight;				// Height known.
@@ -34,22 +34,23 @@ colorObj baseImage::getPixel(int x,int y) {
 	RGBpack	aPack;
 	File		imageFile;
 	
-	aColor.setColor(&black);								// Black's a good default.
-	if(checkXYLmits(x,y)) {									// Make sure the x,y params are "sane".
-		if (haveInfo) {										// If we have a valid image file.
-			imageFile = SD.open(docFilePath,FILE_READ);	//	Try to open this file for reading.
-			if (imageFile) {									// If we were able to open the image file..
-				aPack = getPixel(x,y,&imageFile);		// Ask inherited to give us the packed pixel.
-				imageFile.close();							// Close the image file.
-				aColor.setColor(&aPack);					// Set it up as a colorObj.
+	aColor.setColor(&black);										// Black's a good default.
+	if(checkXYLmits(x,y)) {											// Make sure the x,y params are "sane".
+		if (haveInfo) {												// If we have a valid image file.
+			imageFile = SD.open(docFilePath,FILE_READ);		//	Try to open this file for reading.
+			if (imageFile) {											// If we were able to open the image file..
+				aPack = getPixel(x,y,&imageFile);				// Ask inherited to give us the packed pixel.
+				imageFile.close();									// Close the image file.
+				aColor.setColor(&aPack);							// Set it up as a colorObj.
 			}
 		}
 	}
-	return aColor;												// return the colorObj.
+	return aColor;														// return the colorObj.
 }
 
 
-// Grab a row of pixels from this image (Or the temp) file.
+// Grab a row of pixels from this image, 0r a passed in already opened and positioned file
+// or.. the temp file.
 bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromTemp) {
 
 	File	imageFile;
@@ -89,6 +90,12 @@ bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool from
 	}
 	return success;
 }
+
+
+// Lets say we have an open file set to the correct starting point ready to go? This is
+// going to be the call we use. It should be the fastest way wo grab a bunch of image
+// data. Providing that the inherited does a good job filling it out and using it.
+bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,File* inFile) { return false; }
 
 
 // Given a colorObj, set this pixel in the temp image file to that color.

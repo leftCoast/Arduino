@@ -18,7 +18,7 @@
 #include <quickCom.h>
 #include <baseGraphics.h>
 #include <displayObj.h>
-#include <bmpPipe.h>
+//#include <bmpPipe.h>
 #include <bmpKeyboard.h>
 #include <screen.h>
 #include <lilOS.h>

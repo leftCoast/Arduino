@@ -10,8 +10,7 @@ class bmpImage :	public baseImage {
 				bmpImage(void);
 	virtual	~bmpImage(void);
 
-				virtual		bool	getRow(int row,RGBpack* RGBArray,int numPix,int xStart=0,bool fromTemp=false);
-								void	setGFile(File* inFile);
+	virtual		bool				getRow(int row,RGBpack* RGBArray,int numPix,File* inFile);
 								
 	protected:
 	
@@ -23,8 +22,6 @@ class bmpImage :	public baseImage {
 	virtual		bool				initNewTempFile(void);
 					unsigned long	fileIndex(int x,int y);
 				
-				File*				gFile;
-				bool				gFileOpen;	
 				bool				rightSideUp;
 				int     			imageOffset;
 				int				imageDepth;
