@@ -138,6 +138,7 @@ void loop() {
   if (ourComObj.haveBuff()) {                                   // If we have a complete command..
     comPtr = ourComObj.getComBuff();                            // Lets point at the command character.
     fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);             // And the last thing we do, before dumping the buffers? Look for a caller ID.
+    aBlink();
     switch (comPtr[0]) {                                        // Using the command character, decide our action.
       case getStatus    : doStatus(comPtr);     break;          // Pack up a status struct and send it back.
       case makeCall     : doCall(comPtr);       break;          // Make a call. PN is to be packed in the buffer.
@@ -147,7 +148,7 @@ void loop() {
       case getSMS       : doGetSMSMsg(comPtr);  break;          // Read & delete an incoming message.
       case pickUp       : doPickUp(comPtr);     break;          // If there's a incoming call, pick it up.
       case touchTone    : doTouchTone(comPtr);  break;          // Start or stop a touch tone.
-      default           : break;                                // Who knows? Some sort of nonsense.
+      default           : blink(3); break;                                // Who knows? Some sort of nonsense.
     }
   }
 }

@@ -1,7 +1,7 @@
 #include <cellManager.h>
 #include <cellCommon.h>
 
-#define COM_TIMEOUT 	30000
+#define COM_TIMEOUT 	5000
 #define STATUS_TIME	1250
 #define ID_MAX       2000
 
@@ -363,7 +363,9 @@ void cellManager::doStatus(void) {
 	
 	if (mStatusID==-1) {                              			// We need to fire one off?
 		mStatusID = sendCommand(getStatus,true);       			// Well, that was easy.
+		Serial.println("sentStatus");
 	} else {                                          			// We have a current one to work with?
+		Serial.print("mStatusID = ");Serial.println((int)mStatusID);
 		switch(progress(mStatusID)) {                   		// See what its up to..
 			case com_standby  : break;                    		// Its on the list.
 			case com_working  : break;                    		// Its cooking now!
