@@ -211,7 +211,7 @@ class homeScreen : public homePanel {
   virtual void  loop(void);
   virtual void  drawSelf(void);
 
-          bmpPipe*        mBackImage;
+          bmpObj*        mBackImage;
           appIcon*        calcIcon;
           appIcon*        textIcon;
           appIcon*        contactIcon;

@@ -45,7 +45,7 @@ bool LC_fona::setParam(FONAFlashStringPtr send, int32_t param) {
 bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
 
   if (mySerial->available()) {                                          // Is something is there we didn't ask for..
-    if (readline(25,true) > 15) {                                      // See if we can grab the first 20 or so chars.
+    if (readline(25,true) > 15) {                                       // See if we can grab the first 20 or so chars.
       return parseReplyQuoted(F("+CLIP: "), IDBuff, numBytes, ',', 0);  // Run it through the Adafruit parser thing to see if its a caller ID.
     }
   }
@@ -56,32 +56,46 @@ bool  LC_fona::checkForCallerID(char* IDBuff, byte numBytes) {
 SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 LC_fona fona = LC_fona();
 
+enum statItems { battVolt, battPer, SigRSSI, netStat, vol, callState, numSMS, callerID };
+statItems   statItem;
+uint16_t    batteryVolts;
+uint8_t     batteryPercent;
+uint8_t     RSSI;
+uint8_t     networkStat;
+uint8_t     volume;
+uint8_t     callStat;
+uint8_t     numSMSs;
+uint16_t    statNum;
+uint8_t     error;
+  
+bool        FONAOnline;
+qCSlave     ourComObj;
+byte        comBuff[COM_BUFF_BYTES];  // Buffer for all comunication.
+byte        pnBuff[PN_BUFF_BYTES];    // Buffer for current phone number.
+char        CIDBuff[CID_BUFF_BYTES];  // Buffer for callerID.
+bool        havePN;
 
-bool          FONAOnline;
-qCSlave       ourComObj;
-byte          comBuff[COM_BUFF_BYTES];  // Buffer for all comunication.
-byte          pnBuff[PN_BUFF_BYTES];    // Buffer for current phone number.
-char          CIDBuff[CID_BUFF_BYTES];  // Buffer for callerID.
-byte*         comPtr;
-bool          havePN;
-uint16_t      statNum;
+timeObj     blinkTimer(250);
+bool        ledOn;
 
 void setup() {
-  /*
+   /*
     Serial.begin(57600);
     while (!Serial) { }
     Serial.println("I'm here.");
-  */
-  havePN = false;                                 // We do not yet have a phone number to text to.
-  pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
-  pinMode(13, OUTPUT);                            // Our one and only debugging tool.
-  CIDBuff[0] = '\0';                              // Reset the callerID buffer.
-  ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup for talking to the GUI.
-  checkComErr();                                  // Read comunications error. On error we stop here and blink.
-  pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
-  FONAOnline = false;                             // Not ready yet..
-  resetFONA();                                    // Hit reset, see if it'll come online.
-  statNum = 1;
+   */
+   ledOn = false;
+   statItem = battVolt;                             // Init status item to check first.
+   havePN = false;                                 // We do not yet have a phone number to text to.
+   pinMode(0, INPUT);                              // Adafruit says to do this. Otherwise it may read noise.
+   pinMode(13, OUTPUT);                            // Our one and only debugging tool.
+   CIDBuff[0] = '\0';                              // Reset the callerID buffer.
+   ourComObj.begin(comBuff, COM_BUFF_BYTES, 9600); // Buff, bytes & Baud. Setup for talking to the GUI.
+   checkComErr();                                  // Read comunications error. On error we stop here and blink.
+   pinMode(FONA_RST, OUTPUT);                      // Used for resetting the FONA.
+   FONAOnline = false;                             // Not ready yet..
+   resetFONA();                                    // Hit reset, see if it'll come online.
+   statNum = 1;
 }
 
 
@@ -129,28 +143,38 @@ void checkComErr() {
 }
 
 
-void loop() {
+void loop(void) {
 
-  char  aChar;
-  
-  idle();                                                       // Let anyone that's idleing have some time.
-  checkComErr();                                                // Check for errors.
-  if (ourComObj.haveBuff()) {                                   // If we have a complete command..
-    comPtr = ourComObj.getComBuff();                            // Lets point at the command character.
-    fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);             // And the last thing we do, before dumping the buffers? Look for a caller ID.
-    aBlink();
-    switch (comPtr[0]) {                                        // Using the command character, decide our action.
-      case getStatus    : doStatus(comPtr);     break;          // Pack up a status struct and send it back.
-      case makeCall     : doCall(comPtr);       break;          // Make a call. PN is to be packed in the buffer.
-      case hangUp       : doHangUp(comPtr);     break;          // Hang up.
-      case setCurrentPN : doSetPN(comPtr);      break;          // Set the phone number we plan to have a dialog with.
-      case sendSMS      : doSendSMSMsg(comPtr); break;          // Send a message to the current phone number.
-      case getSMS       : doGetSMSMsg(comPtr);  break;          // Read & delete an incoming message.
-      case pickUp       : doPickUp(comPtr);     break;          // If there's a incoming call, pick it up.
-      case touchTone    : doTouchTone(comPtr);  break;          // Start or stop a touch tone.
-      default           : blink(3); break;                                // Who knows? Some sort of nonsense.
-    }
-  }
+   char  aChar;
+   byte* comPtr;
+   /*
+   if (blinkTimer.ding()) {
+      ledOn = !ledOn;
+      digitalWrite(13, ledOn);
+      blinkTimer.start();
+   }
+   */
+   idle();                                                  // Let anyone that's idleing have some time.
+   checkComErr();                                           // Check for errors.
+   if (ourComObj.haveBuff()) {                              // If we have a complete command..
+      //digitalWrite(13, true);
+      comPtr = ourComObj.getComBuff();                      // Lets point at the command character.
+      fona.checkForCallerID(CIDBuff, CID_BUFF_BYTES);       // And the last thing we do, before dumping the buffers? Look for a caller ID.
+      switch (comPtr[0]) {                                  // Using the command character, decide our action.
+         case getStatus    : doStatus(comPtr);     break;   // Pack up a status struct and send it back.
+         case makeCall     : doCall(comPtr);       break;   // Make a call. PN is to be packed in the buffer.
+         case hangUp       : doHangUp(comPtr);     break;   // Hang up.
+         case setCurrentPN : doSetPN(comPtr);      break;   // Set the phone number we plan to have a dialog with.
+         case sendSMS      : doSendSMSMsg(comPtr); break;   // Send a message to the current phone number.
+         case getSMS       : doGetSMSMsg(comPtr);  break;   // Read & delete an incoming message.
+         case pickUp       : doPickUp(comPtr);     break;   // If there's a incoming call, pick it up.
+         case touchTone    : doTouchTone(comPtr);  break;   // Start or stop a touch tone.
+         default           : blink(3); break;               // Who knows? Some sort of nonsense.
+      }
+      //digitalWrite(13, false);
+   } else {
+      workOnStatus();
+   }
 }
 
 
@@ -178,6 +202,89 @@ void resetFONA(void) {
 }
 
 
+void workOnStatus(void) {
+   
+   uint16_t aWord;
+   
+   switch (statItem) {
+      case battVolt     :
+         if (fona.getBattVoltage(&batteryVolts)) {                // Attempt to read the battery voltage..
+            error = error & B11111101;                            // Clear the error bit for our error flag.
+         } else {                                                 // Else, there was some sort of error..
+            batteryVolts = 0;                                     // Set it to 0 volts.
+            error = error | B00000010;                            // Set the error bit for our error flag.
+         }
+         statItem =  battPer;                                     // Bump up stat item.
+      break;                                                      // Exit.
+      case battPer      :
+         if (fona.getBattPercent(&aWord)) {                       // Attmept to read the battery percent value. (Need to pass in a uint16_t)
+            batteryPercent = aWord;                               // Success, save it into our byte storage.
+            error = error & B11111011;                            // Clear the error bit for our error flag.
+         } else {                                                 // Else, there was some sort of error..
+            batteryPercent = 0;                                   // If there was an error, set it to 0 percent.
+            error = error | B00000100;                            // And set the error bit for our error flag.
+         }
+         statItem = SigRSSI;                                              // Bump up stat item.
+      break;                                                      // Exit.
+      case SigRSSI      :
+         RSSI = fona.getRSSI();                                   // Read RSSI, no error checking available here.
+         statItem = netStat;                                      // Bump up stat item.
+      break;                                                      // Exit.
+      case netStat      :
+         networkStat = (networkStatus)fona.getNetworkStatus();    // Read network status. Same, no error checking.
+         statItem = vol;                                                  // Bump up stat item.
+      break;   
+      case vol          :
+         volume = fona.getVolume();                               // Volume.
+         statItem = callState;                                    // Bump up stat item.
+      break;                                                      // Exit.
+      case callState    :
+         callStat = (callStatus)fona.getCallStatus();             // Call status, no error checking.
+         if (callStat == CS_ready) {                              // No one calling?
+            CIDBuff[0] = 0;                                       // Clear the buffer.
+         }
+         statItem = numSMS;                                       // Bump up stat item.
+      break;                                                      // Exit.
+      case numSMS       :
+         numSMSs = fona.getNumSMS();                              // Number SMS(s). This one gives bogus numbers at times. Max is 30.
+         if (numSMSs > 30) {                                      // Try to catch the errors but might not work.
+            numSMSs = 0;                                          // Bogus readings get zero.
+            error = error | B00001000;                            // Flag the error.
+         } else {
+            error = error & B11110111;                            // Clear the error.
+         }
+         statItem = battVolt;                                     // Reset itam.
+      break;                                                      // And we are out of here!
+   }
+}
+
+
+void doStatus(byte* buff) {
+
+  cellStatus* statPtr;
+
+  statPtr = (cellStatus*)buff;                     // Basically lay a template over the com buffer.
+  error = 0;                                       // No errors yet.
+  statPtr->FONAOnline = FONAOnline;                // First thing. Is FONA online or not?
+  if (statPtr->FONAOnline) {                       // If FONA is online..
+    statPtr->batteryVolts = batteryVolts;          // Start stuffing in all the bits we been saving up.                       
+    statPtr->batteryPercent = batteryPercent;       
+    statPtr->RSSI = RSSI;
+    statPtr->networkStat = networkStat;
+    statPtr->volume = volume;
+    statPtr->callStat = callStat;
+    statPtr->numSMSs = numSMSs;                              
+    statPtr->statNum = statNum++;                  // Bump the counter as a "I'm still alive." heartbeat.
+    strcpy(statPtr->callerID, CIDBuff);            // Send back the current caller ID.
+  } else {                                         // Else, the FONA was offline.
+    error = B00000001;                             // Flag the eror.
+  }
+  statPtr->errByte = error;                        // And finally the error flag goes in.
+  error = 0;                                       // We sent it, time to clear it.
+  ourComObj.replyComBuff(sizeof(cellStatus));      // Send the info on its way.
+}
+
+/*
 void doStatus(byte* buff) {
 
   cellStatus* statPtr;
@@ -217,7 +324,7 @@ void doStatus(byte* buff) {
   statPtr->errByte = error;                                         // And finally the error flag goes in.
   ourComObj.replyComBuff(sizeof(cellStatus));                       // Send the info on its way.
 }
-
+*/
 
 void doPickUp(byte* buff) {
  
@@ -241,32 +348,6 @@ void doCall(byte* buff) {
   ourComObj.replyComBuff(1);
 }
 
-/*
-void doCall(byte* buff) {
-
-  timeObj callTimer(500);
-
-  callTimer.start();                          // Start our time out timer.
-  while (!callTimer.ding()) {                 // While we have time..
-    if (fona.getCallStatus() == 4) {          // If its connected..
-      buff[0] = 0;                            // Stamp in "no error".
-      ourComObj.replyComBuff(1);              // Send the successful result.
-      return;                                 // We're out of here!
-    }
-    if (fona.getCallStatus() != 4) {          // If the status is not connected..
-      if (fona.callPhone((char*)&buff[1])) {  // Send connect command.
-        buff[0] = 0;                          // Stamp in "no error".
-        ourComObj.replyComBuff(1);            // Send back the result.
-        return;                               // And we're done.
-      } else {                                // Else we got an error returned..
-        delay(100);                           // What the heck, try letting it settle out a bit.
-      }
-    }
-  }
-  buff[0] = 1;                                // Blast! We timed out.
-  ourComObj.replyComBuff(1);                  // Send back the error.
-}
-*/
 
 void doHangUp(byte* buff) {
 
@@ -344,7 +425,7 @@ void doGetSMSMsg(byte* buff) {
     buffLen = buffLen - numPNBytes;                               // Reset the buffer length.
     if (fona.readSMS(msgIndex, buffPtr, buffLen, &numMsgBytes)) { // If we are successfull..
       fona.deleteSMS(msgIndex);                                   // Delete the message from the SIM.
-      buff[0] = 0;                                                // Set no error flag.
+      buff[0] = 0;                                                 // Set no error flag.
       ourComObj.replyComBuff(numPNBytes + numMsgBytes + 2);       // Send back our result. + the error flag. (Add one, I'm missing the '\0')
       return;                                                     // At this point its success and we're done!
     }

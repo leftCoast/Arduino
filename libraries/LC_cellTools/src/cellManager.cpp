@@ -1,16 +1,21 @@
 #include <cellManager.h>
 #include <cellCommon.h>
+#include <resizeBuff.h>
 
-#define COM_TIMEOUT 	5000
-#define STATUS_TIME	1250
+
+#define COM_TIMEOUT 	7500
+#define STATUS_TIME	1500
 #define ID_MAX       2000
 
-#define out Serial.print
-#define outln Serial.println()
+
+#define out		Serial.print
+#define outln	Serial.println()
+
 
 cellManager	ourCellManager;
 cellStatus	statusReg;
 int			statusMS;
+
 
 // *****************************************************
 // ******************  cellCommand *********************
@@ -33,13 +38,10 @@ cellCommand::cellCommand(void)
 };
 
 
-
-
-
 cellCommand::~cellCommand(void) {
 
-  if(comData) free(comData);
-  if(replyData) free(replyData);
+	resizeBuff(0,&comData);
+	resizeBuff(0,&replyData);
 }
 
 /*
@@ -61,31 +63,27 @@ void cellCommand::showCommand(void) {
 
 
 // How many bytes are you going to need to fit this command?
-byte  cellCommand::getNumComBytes() {
-
-  return numComBytes+1;
-}
+byte  cellCommand::getNumComBytes() { return numComBytes+1; }
 
 
 // Commands are command byte followed by up to 254 data byes.
 void cellCommand::getComBuff(uint8_t* buff) {
 
-  buff[0] = commandNum;
- for(byte i=1;i<=numComBytes;i++) {
-  buff[i] = comData[i-1];
- }
+	buff[0] = commandNum;
+	for(byte i=1;i<=numComBytes;i++) {
+		buff[i] = comData[i-1];
+	}
 }
 
 
 // We are going to be handed a data buffer, allocate room for it.
 bool cellCommand::setReplySize(byte numBytes) {
 
-  replyData = (byte*)malloc(numBytes);
-  if (replyData) {
-    numReplyBytes = numBytes;
-    return true;
-  }
-  return false;
+	if (resizeBuff(numBytes,&replyData)) {
+		numReplyBytes = numBytes;
+		return true;
+	}
+  	return false;
 }
 
 
@@ -136,29 +134,28 @@ int cellManager::sendCommand(byte commandNum,char* dataStr,bool wantReply) {
 // Send  a one byte command with data block. Returns an ID#.
 int cellManager::sendCommand(byte commandNum,byte numBytes,uint8_t* comData,bool wantReply) {
 
-  cellCommand*  newCommand;
+	cellCommand*  newCommand;
 
-  newCommand = new cellCommand;                         // Whip up a new command block.
-  if (newCommand) {                                     // If we got one, good!
-    newCommand->commandID = ++mNextID;                  // Stuff in a new ID#
-    newCommand->commandNum = commandNum;                // The command they want to send.
-    newCommand->wantReply = wantReply;                  // Do they want a reply?
-    newCommand->numComBytes = numBytes;                 // Note the buff size.
-    if (numBytes>0) {                                   // Some sort of data going out?
-      newCommand->comData = (uint8_t*)malloc(numBytes); // Ask for some RAM.
-      if (newCommand->comData) {                        // If we got the RAM..
-        for(byte i=0;i<numBytes;i++) {                  // Loop through an fill in the buff.
-          newCommand->comData[i]=comData[i];
-        }
-      } else {                                          // Asked for RAM, got none. Our house is falling down!
-        delete newCommand;                              // Toss the new command block.
-        return -1;                                      // Bail out with an error.
-      }
-    }
-    addToEnd(newCommand);                               // Add the command block to the Queue.
-    return newCommand->commandID;                       // Success at this point.
-  }                                                       
-  return -1;                                            // Agaain, we're out of RAM. Maybe we should have joined the other side?
+	newCommand = new cellCommand;                         		// Whip up a new command block.
+	if (newCommand) {                                     		// If we got one, good!
+		newCommand->commandID = ++mNextID;                  		// Stuff in a new ID#
+		newCommand->commandNum = commandNum;                		// The command they want to send.
+    	newCommand->wantReply = wantReply;                  		// Do they want a reply?
+    	newCommand->numComBytes = numBytes;                 		// Note the buff size.
+    	if (numBytes>0) {                                   		// Some sort of data going out?
+      	if (resizeBuff(numBytes,&(newCommand->comData))) {		// If we can get the RAM..
+        		for(byte i=0;i<numBytes;i++) {                  	// Loop through an fill in the buff.
+          		newCommand->comData[i]=comData[i];
+        		}
+      	} else {                                          		// Asked for RAM, got none. Our house is falling down!
+        		delete newCommand;                              	// Toss the new command block.
+        		return -1;                                      	// Bail out with an error.
+      	}
+    	}
+    	addToEnd(newCommand);                               		// Add the command block to the Queue.
+    	return newCommand->commandID;                       		// Success at this point.
+  	}                                                       
+	return -1;                                            		// Agaain, we're out of RAM. Maybe we should have joined the other side?
 }
 
 
@@ -166,13 +163,13 @@ int cellManager::sendCommand(byte commandNum,byte numBytes,uint8_t* comData,bool
 // If no command is found, return com_missing as a flag.
 int cellManager::progress(int commandID) {
 
-  cellCommand*  trace;
+	cellCommand*  trace;
 
-  trace = findByID(commandID); 
-  if (trace) {
-    return trace->comState;
-  }
-  return com_missing;           // probably recycled.
+	trace = findByID(commandID); 
+	if (trace) {
+		return trace->comState;
+	}
+	return com_missing;           // probably recycled.
 }
 
 
@@ -242,20 +239,20 @@ cellCommand* cellManager::findByID(int commandID) {
 
 void cellManager::cleanList(void) {
 
-  cellCommand*  trace;
-  cellCommand*  temp;
+	cellCommand*  trace;
+	cellCommand*  temp;
   
-  trace = (cellCommand*)getFirst();                     // Grab one off the top.
-  while(trace) {                                        // While we're not sitting on a NULL.
-    if (trace->ding()||trace->comState==com_complete) { // A expired or copleted command?
-      temp = trace;                                     // Save a pointer to it.
-      trace = (cellCommand*)trace->getNext();           // Run trace past.
-      unlinkObj(temp);                                  // Unlink the expired command.
-      delete temp;                              //  Recycle.
-    } else {
-      trace = (cellCommand*)trace->getNext();   // Default run past when not finding expired commands.
-    }
-  }
+	trace = (cellCommand*)getFirst();                     	// Grab one off the top.
+	while(trace) {                                        	// While we're not sitting on a NULL.
+		if (trace->ding()||trace->comState==com_complete) {	// A expired or copleted command?
+			temp = trace;                                     	// Save a pointer to it.
+			trace = (cellCommand*)trace->getNext();           	// Run trace past.
+			unlinkObj(temp);                                  	// Unlink the expired command.
+			delete temp;                              			//  Recycle.
+		} else {
+			trace = (cellCommand*)trace->getNext();   			// Default run past when not finding expired commands.
+		}
+	}
 }
 
 
@@ -303,17 +300,17 @@ void cellManager::launchCommand(cellCommand* aCom) {
   uint8_t*  ourComBuff;
   byte      numBytes;
   
+  ourComBuff = NULL;
   if (mState==holding) {                                // Oh ohh.. Someone left something behind in here.
     dumpBuff();                                         // Dump it out.
   }
   if (mState==standby) {                                // We're waiting too!
     numBytes = aCom->getNumComBytes();                  // How big is this going to be?
-    ourComBuff = (uint8_t*)malloc(numBytes);            // Grab some RAM.
-    if (ourComBuff) {                                   // Got it?
+    if (resizeBuff(numBytes,&ourComBuff)) {             // IF we can grab some RAM.
       aCom->getComBuff(ourComBuff);                     // Get the command buffer.
       readErr();                                        // Clear out old errors.
       sendBuff(ourComBuff,numBytes,aCom->wantReply);    // Send it out, get response.
-      free(ourComBuff);                                 // Done with the command buff.
+      resizeBuff(0,&ourComBuff);                        // Done with the command buff.
       if (!readErr()) {                                 // No troubles?
         if (aCom->wantReply) {                          // If they want a reply..
           aCom->comState = com_working;                 // Set it as working and lets go!                  
@@ -363,9 +360,7 @@ void cellManager::doStatus(void) {
 	
 	if (mStatusID==-1) {                              			// We need to fire one off?
 		mStatusID = sendCommand(getStatus,true);       			// Well, that was easy.
-		Serial.println("sentStatus");
 	} else {                                          			// We have a current one to work with?
-		Serial.print("mStatusID = ");Serial.println((int)mStatusID);
 		switch(progress(mStatusID)) {                   		// See what its up to..
 			case com_standby  : break;                    		// Its on the list.
 			case com_working  : break;                    		// Its cooking now!
@@ -397,7 +392,7 @@ void cellManager::doStatus(void) {
 
 // what should the status look like when we loose connection.
 void	cellManager::clearStatus(void) {
-	
+
 	statusReg.FONAOnline			= 0;
 	statusReg.batteryVolts		= 0;
 	statusReg.batteryPercent	= 0;

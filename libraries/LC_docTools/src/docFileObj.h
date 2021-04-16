@@ -36,4 +36,10 @@ class docFileObj {
 					bool			haveInfo;
 };
 
+// We only access these one at a time. Proabaly, these are better set up as globals so
+// there is no chance for multiples copies out there in RAM. Also, it seems that the
+// File's constructor is really slow!
+extern File	tempFile;
+extern File	docFile;
+
 #endif

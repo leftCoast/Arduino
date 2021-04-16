@@ -8,6 +8,12 @@
 
 char*	tempDir = NULL;
 
+// Pretty much there's only room for one or two files anyway. These'll be global so no one
+// ends up  opening up a bunch in ignorance.
+File	tempFile;
+File	docFile;
+
+
 // This will be called automatically when needed and it will use the default folder name.
 // If you want a different location you can call this in setup() with a different name and
 // all your document files will use that.
@@ -131,8 +137,8 @@ bool docFileObj::openDocFile(char* filePath) {
 // will redirect to a new docFile and this will be what we will be editing from now on.
 bool docFileObj::saveDocFile(char* newFilePath) {
 
-	File	tempFile;
-	File	docFile;
+	//File	tempFile;
+	//File	docFile;
 	int	numBytes;
 	bool	success;
 	
@@ -150,7 +156,7 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 				docFile.write(tempFile.read());				// Read a byte from the temp file and write it to the doc file.
 			}
 			tempFile.close();										// We opened the temp file, we close it!
-			if (newFilePath) {									// If we are using a new file path..
+			if (newFilePath) {									// If we've been using a new file path..
 				numBytes = strlen(newFilePath) + 1;			// Calculate the number of byte for the new doc file path.
 				if (resizeBuff(numBytes,&docFilePath)) {	// If we can re-allocate the RAM.
 					strcpy(docFilePath,newFilePath);			// Save off our new docFile path.
@@ -181,7 +187,7 @@ bool docFileObj::checkDoc(void) { return false; }
 // this file and returns its success or failure.
 bool docFileObj::createTempFile(void) {
 	
-	File		tempFile;
+	//File		tempFile;
 	timeObj	timeOut(FILE_SEARCH_MS);
 	char*		pathBuff;
 	char		fileNumStr[TEMP_NAME_CHARS];
@@ -235,8 +241,8 @@ bool docFileObj::initNewTempFile(void) { return true; }
 // her changes.
 bool docFileObj::copyToTempFile(void) {
 
-	File	tempFile;
-	File	docFile;
+	//File	tempFile;
+	//File	docFile;
 	bool	success;
 
 	success = false;												// We're not a success yet.

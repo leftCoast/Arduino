@@ -284,12 +284,14 @@ roundedIconBtn::~roundedIconBtn(void) {  }
 homeScreen::homeScreen(void)
   : homePanel() {
 
-  int   iconX;
-  rect  imageRect;
-
-  imageRect.setRect(0,0,BMP_AW,BMP_AH);
-  mBackImage = new bmpPipe(&imageRect);
-  mBackImage->openPipe(IMAGE_FILE_PATH);
+   int   iconX;
+   //rect  imageRect;
+   
+  //imageRect.setRect(0,0,BMP_AW,BMP_AH);
+  
+  mBackImage = new bmpObj(BMP_AX,BMP_AY,BMP_AW,BMP_AH,IMAGE_FILE_PATH);
+  mBackImage->begin();
+  
   iconX = HP_ICON_X;
 
   phoneIcon = new appIcon(iconX,HP_ICON_Y,phoneApp,ICON_PHONE32);
@@ -341,10 +343,10 @@ void homeScreen::setup(void) {
 
 void homeScreen::loop(void) {  }
 
-
+//BMP_AX,BMP_AY
 void homeScreen::drawSelf(void) { 
   screen->fillScreen(&white);
-  mBackImage->drawImage(BMP_AX,BMP_AY);
+  mBackImage->drawSelf();
   screen->fillRect(ICON_BAR_X,ICON_BAR_Y,ICON_BAR_W,ICON_BAR_H,&black);
 }
 

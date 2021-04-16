@@ -42,8 +42,8 @@ enum cellComStates { com_standby, com_working, com_holding, com_complete, com_mi
 // You typically don't interact with this "cellCommand" class. Its used by "cellManager"
 // and that's the one you should interact with.
 
-class cellCommand : public linkListObj,
-                    public  timeObj {
+class cellCommand :	public linkListObj,
+                    	public timeObj {
 
   public:
           cellCommand(void);
