@@ -33,7 +33,6 @@ colorObj baseImage::getPixel(int x,int y) {
 	colorObj	aColor;
 	RGBpack	aPack;
 	File		imageFile;
-	
 	aColor.setColor(&black);										// Black's a good default.
 	if(checkXYLmits(x,y)) {											// Make sure the x,y params are "sane".
 		if (haveInfo) {												// If we have a valid image file.
@@ -152,6 +151,12 @@ bool baseImage::setRow(int row,RGBpack* RGBArray,int numPix,int xStart) {
 }
 
 
+int baseImage::getWidth(void) { return width; }
+
+
+int baseImage::getHeight(void) { return height; }
+
+					
 // Grab a pixel from this location from your image file.
 // Return it as a RGBpack.
 // THIS ONE MUST BE FILLED OUT BY WHOM THAT INHERITS THIS.

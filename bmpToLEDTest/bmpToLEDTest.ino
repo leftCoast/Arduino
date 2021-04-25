@@ -1,6 +1,8 @@
+
 #include <SD.h>
 #include <neoPixel.h>
 #include <bmpImage.h>
+#include <imgNeoPixel.h>
 #include <adafruit_1431_Obj.h>
 #include <screen.h>
 
@@ -15,11 +17,11 @@
 #define OLED_RST     8
 
 
-neoPixel    lites(NUM_LEDS, PIXEL_PIN);
-bmpImage    thePic;
-RGBpack     theLine[NUM_LEDS];
-int         lineNum;
-File        hackFile;
+neoPixel lites(NUM_LEDS, PIXEL_PIN);
+bmpImage       thePicFile;
+imgNeoPixel*   theNeoPic;
+RGBpack        theLine[NUM_LEDS];
+int            lineNum;
 
 void setup() {
   
@@ -46,10 +48,9 @@ void setup() {
    lites.setAll(&black);
    lites.show();
    delay(500);
-   if (thePic.openDocFile(FILE_NAME)) {
-      hackFile = SD.open(FILE_NAME,FILE_READ);
-      thePic.setGFile(&hackFile);
+   if (thePicFile.openDocFile(FILE_NAME)) {
       lites.setAll(&green);
+      theNeoPic = new imgNeoPixel(&lites,&thePicFile);
    } else {
       lites.setAll(&red);
    } 
@@ -59,18 +60,15 @@ void setup() {
    lites.show();
    screen->fillScreen(&black);
    lineNum = 0;
+   //theNeoPic->setupOffscreen();
 }
 
 
 
 void loop(void) {
     
-  thePic.getRow(lineNum++,theLine,NUM_LEDS);
-  for (int i=0;i<NUM_LEDS;i++) {
-    lites.setPixelColor(i,&(theLine[i]));
-    //printColor(lineNum,i,&(theLine[i]));
-  }
+  theNeoPic->setLine(lineNum++);
   if (lineNum>=NUM_LINES) lineNum = 0;
   lites.show();
-  delay(200);
+  //delay(500);
 }

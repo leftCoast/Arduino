@@ -66,7 +66,7 @@ RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
 	
 	uint8_t	buf[COLOR_BUF_SIZE];
 	RGBpack	aPack;
-
+	
 	if (haveInfo) {							// If we were able to read the image file (earlier)..
 		imageFile->seek(fileIndex(x,y));	// Point the file to our pixel.
 		imageFile->read(buf,pixBytes);	// Grab the pixel.
