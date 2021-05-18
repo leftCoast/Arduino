@@ -1,17 +1,18 @@
 
 #include <SD.h>
+#include <adafruit_1431_Obj.h>
 #include <neoPixel.h>
 #include <bmpImage.h>
 #include <imgNeoPixel.h>
-#include <adafruit_1431_Obj.h>
 #include <screen.h>
+#include <timeObj.h>
 
-#define NUM_LEDS     74 //150
-#define NUM_LINES    25
+#define NUM_LEDS     150
+#define NUM_LINES    400
+#define MS_PER_LINE  50
 #define PIXEL_PIN    10
 #define SD_CS        4
-//#define FILE_NAME    "/neoPixel.bmp"
-#define FILE_NAME    "/big.bmp"
+#define FILE_NAME    "/newPic.bmp"
 
 #define OLED_CS      7
 #define OLED_RST     8
@@ -20,55 +21,58 @@
 neoPixel lites(NUM_LEDS, PIXEL_PIN);
 bmpImage       thePicFile;
 imgNeoPixel*   theNeoPic;
+timeObj        lineTimer(MS_PER_LINE);
 RGBpack        theLine[NUM_LEDS];
 int            lineNum;
+bool           goUp;
 
 void setup() {
-  
+
+   Serial.begin(57600);
    lites.begin();
-   if (initScreen(ADAFRUIT_1431,OLED_CS,OLED_RST,INV_PORTRAIT)) {
-      lites.setAll(&green);
-      screen->fillScreen(&green);
-   } else {
-      lites.setAll(&red);
-   }
-   lites.show();
-   delay(500);
    lites.setAll(&black);
    lites.show();
-   delay(500);
-   if (SD.begin(SD_CS)) {
-      lites.setAll(&green);
-   } else {
+   initScreen(ADAFRUIT_1431,OLED_CS,OLED_RST,INV_PORTRAIT);   // Have to fire up the screen because it has the SD drive on it.
+   screen->fillScreen(&black);
+   if (!SD.begin(SD_CS)) {
       Serial.println("No SD Card?");
-      lites.setAll(&red);
    }
-   lites.show();
-   delay(500);
-   lites.setAll(&black);
-   lites.show();
-   delay(500);
    if (thePicFile.openDocFile(FILE_NAME)) {
-      lites.setAll(&green);
       theNeoPic = new imgNeoPixel(&lites,&thePicFile);
    } else {
-      lites.setAll(&red);
+      Serial.println("No File?");
    } 
-   lites.show();
-   delay(250);
-   lites.setAll(&black);
-   lites.show();
-   screen->fillScreen(&black);
    lineNum = 0;
-   //theNeoPic->setupOffscreen();
+   goUp = true;
+   theNeoPic->setupOffscreen(); // If you have the RAM, let it really rip!
 }
 
 
+// Wipe up and down..
+void incrementCount(void) {
+
+   if (goUp) {
+      lineNum++;
+      if (lineNum>NUM_LINES) {
+         lineNum=NUM_LINES;
+         goUp = false;
+        }
+   } else {
+      lineNum--;
+      if (lineNum<0) {
+         lineNum=0;
+         goUp = true;
+      }
+   }
+}
+
 
 void loop(void) {
-    
-  theNeoPic->setLine(lineNum++);
-  if (lineNum>=NUM_LINES) lineNum = 0;
-  lites.show();
-  //delay(500);
+
+   if (lineTimer.ding()) {
+      lineTimer.stepTime();            // Reset our line timer.
+      theNeoPic->setLine(lineNum);     // Read a line into the neoPixels.
+      lites.show();                    // Show it.
+      incrementCount();                // Set up for next line.
+   }
 }

@@ -17,8 +17,8 @@
 #define TAP_SUMTIME  20
 #define TAP_NUMDATA  3
 #define TAP_VAL      10
-#define AWAKE_MS     8000
-#define DIMMING_MS   3000
+#define AWAKE_MS     20000
+#define DIMMING_MS   5000
 
 
 UI        ourDisplay;
@@ -178,7 +178,7 @@ void logInd::logging(bool onOff) {
 
 
 UI::UI(void) 
-  : timeObj(250) {
+  : timeObj(250) { 
     
   mHaveScreen = false;
   mColorMap = NULL;
@@ -204,7 +204,7 @@ void UI::begin(void) {
          mTSensor = new tapSensor(TAP_PIN,TAP_SUMTIME,TAP_NUMDATA);
          if (mTSensor) {
             mTSensor->begin();
-            ourSleepMgr.setupSleep(AWAKE_MS,DIMMING_MS);
+            ourSleepMgr.setupSleep(AWAKE_MS,DIMMING_MS);    // *** COMMENT THIS LINE OUT FOR OLD SCREENS WITH NO TAP SENSORS. ***
          }
          mLastMoist = -1;
          mLastLimit = -1;

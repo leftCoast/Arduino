@@ -64,7 +64,7 @@ void textComObj::begin(void) {
 // Char by char. I wanted to be able to use the handheld and it runs through Serial1. And
 // its doing all sorts of background things we don't know about. So the hack is, when the
 // handheld sends a text command, it is sent to this objects handleTextCom() method. This
-// method flips to the serial1 port and calls this method repeatedly pusing in the text
+// method flips to the serial1 port and calls this method repeatedly pushing in the text
 // char by char. So depending on who is in charge the method of grabbing chars is different.
 void textComObj::checkTextCom(char inChar) {
 
