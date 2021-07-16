@@ -1,6 +1,7 @@
 .DS_Store
 .DS_Store
 .DS_Store
+forum_post/*
 libraries/Adafruit*
 libraries/arduino_146782
 libraries/SD/.DS_Store

@@ -14,12 +14,16 @@
 #define BREAKOUT_Y   STARTREK_Y + 40
 #define CALC_X       BREAKOUT_X - 15
 #define CALC_Y       BREAKOUT_Y + 40
-
+#define TEST_X       BREAKOUT_X + 128
+#define TEST_Y       BREAKOUT_Y
+#define EDIT_X       BREAKOUT_X + 148
+#define EDIT_Y       BREAKOUT_Y+55
 #define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
 #define CALC_PANEL_BMP        "/system/icons/RPNCalc/calc32.bmp"
 #define BREAKOUT_PANEL_BMP    "/system/icons/breakout/breakout.bmp"
 #define STAR_TREK_PANEL_BMP   "/system/icons/starTrek/sTrek32.bmp"
 #define REGION_TEST_PANEL_BMP	"/system/icons/rgnTest/test32.bmp"
+#define ICON_EDIT_PANEL_BMP   "/system/icons/iconEdit/iconEd32.bmp"
 
 homeScreen::homeScreen(void)
    : homePanel() { }
@@ -43,9 +47,13 @@ void homeScreen::setup(void) {
    breakOut->begin();
    addObj(breakOut);
    
-   appIcon*  rgnTest = new appIcon(BREAKOUT_X + 128,BREAKOUT_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
+   appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
    rgnTest->begin();
    addObj(rgnTest);
+
+   appIcon*  iconEdit = new appIcon(EDIT_X,EDIT_Y,iconEditApp,ICON_EDIT_PANEL_BMP);
+   iconEdit->begin();
+   addObj(iconEdit);
 
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    calc->begin();

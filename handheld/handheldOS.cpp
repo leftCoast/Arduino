@@ -5,7 +5,10 @@
 #include "src/starTrek/starTrek.h"
 #include "src/rpnCalc/rpnCalc.h"
 #include "src/regionTest/regionTest.h"
- 
+#include "src/iconEdit/iconEdit.h"
+#include "src/fileDBox/fileDBox.h"
+
+
 #define RAMPUP_START  0
 #define RAMPUP_END    1500
 #define RAMPDN_START  RAMPUP_END
@@ -50,10 +53,13 @@ panel* handheldOS::createPanel(int panelID) {
    beep();
    switch (panelID) {
       case homeApp      : return new homeScreen();
+      case fileOpenApp  : return new fileOpen();
+      case fileSaveApp  : return new fileSave();
       case calcApp      : return new rpnCalc();
       case starTrekApp  : return new starTrekPanel();
       case breakoutApp  : return new breakout();
       case rgnTestApp   : return new regionTest();
+      case iconEditApp  : return new iconEdit();
       default           : return NULL;
    }
 }
