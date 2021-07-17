@@ -1,8 +1,8 @@
-#include "serialWatch.h"
+#include "serialStr.h"
 #include <resizeBuff.h>
 
  
-serialWatch::serialWatch(char endChar,int numBytes) {
+serialStr::serialStr(char endChar,int numBytes) {
 
     index   = 0;
     EOL     = endChar;
@@ -12,17 +12,17 @@ serialWatch::serialWatch(char endChar,int numBytes) {
 }
 
 
-serialWatch::~serialWatch(void) { resizeBuff(0,&buff); }
+serialStr::~serialStr(void) { resizeBuff(0,&buff); }
 
 
-void serialWatch::setCallback(void(*funct)(const char*)) { 
+void serialStr::setCallback(void(*funct)(const char*)) { 
 
    callback = funct;
    hookup();
 }
 
 
-void serialWatch::idle(void) {
+void serialStr::idle(void) {
 
    char  aChar;
    
@@ -34,7 +34,7 @@ void serialWatch::idle(void) {
          buff[0] = '\0';            // Clear the inBuff string.
          index = 0;                 // Reset the index to start a new number string.
       } else {                      // Else, it wasn't a newline char..
-         if (index<bytes) {
+         if (index<(bytes-1)) {
             buff[index++] = aChar;  // So we save the char we got into the c string.
             buff[index] = '\0';     // And pop an end of string after it.
          } else {
@@ -46,4 +46,4 @@ void serialWatch::idle(void) {
 
 
 
-bool serialWatch::hadOverrun(void) { return overrun; }
+bool serialStr::hadOverrun(void) { return overrun; }
