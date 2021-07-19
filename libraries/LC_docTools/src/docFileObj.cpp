@@ -107,7 +107,7 @@ bool docFileObj::newDocFile(void){
 
 
 // Called by user to open a new document. If there is already a document that this object
-// is associated with, it clear everything out and starts over fresh with this new path.
+// is associated with, it clears everything out and starts over fresh with this new path.
 bool docFileObj::openDocFile(char* filePath) {
 
 	int	numChars;

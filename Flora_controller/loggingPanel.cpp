@@ -131,10 +131,13 @@ copyLogBtn::copyLogBtn(int x, int y,ourKeyboard* akeyboard,panel* ourPanel)
 copyLogBtn::~copyLogBtn(void) { }
     
 
-void copyLogBtn::begin(void) {
-
-  iconButton::begin();
-  setLabel();
+bool copyLogBtn::begin(void) {
+   
+   if (iconButton::begin()) {
+      setLabel();
+      return true;
+   }
+   return false;
 }
 
 
@@ -191,10 +194,12 @@ void copyLogBtn::setLabel(void) {
     mCopyLabel = NULL;
   }
   if (mXferState == xferRunning) {
-    openPipe(CUT32_BMP);
+    setBmpPath(CUT32_BMP);
+    //openPipe(CUT32_BMP);
     mCopyLabel = new bmpObj(0,y+7,LABEL_W,LABEL_H,CANCEL_DL_BMP);
   } else {
-    openPipe(COPY32_BMP);
+    setBmpPath(COPY32_BMP);
+    //openPipe(COPY32_BMP);
     mCopyLabel = new bmpObj(0,y+7,LABEL_W,LABEL_H,COPY_LOG_BMP);
   }
   mCopyLabel->begin();

@@ -3,7 +3,7 @@
 #include "homePanel.h"
 #include "controlPanel.h"
 #include "loggingPanel.h"
-//#include "src/sTerm/sTerm.h"
+#include "src/sTerm/sTerm.h"
 
 
 #define PLANTBOT_BAUD  9600 //115200 //500000
@@ -33,7 +33,7 @@ int floraOS::begin(void) {
   ourComPort.begin(PLANTBOT_BAUD);
   pinMode(BEEP_PIN, OUTPUT);
   digitalWrite(BEEP_PIN, HIGH); //Means off.
-  return litlOS::begin();
+  return lilOS::begin();
 }
 
   
@@ -49,14 +49,15 @@ panel* floraOS::createPanel(int panelID) {
 		case controlApp   : 
 		   ourComPort.disableBG(false);
 		   return new controlPanel();
-		/*case calcApp      : return new rpnCalc();*/
+		//case calcApp      : return new rpnCalc();
 		case loggingApp   : 
          ourComPort.disableBG(false);
 		   return new loggingPanel();
-       /*
+       
 		case sTermApp		:
 		   ourComPort.disableBG(false);
 		   return new sTermPanel();
+      /*
 		case breakoutApp	: 
          ourComPort.disableBG(true);
 		   return new breakout();
@@ -74,8 +75,8 @@ void floraOS::idle(void) { }
 
 void floraOS::loop(void) {
 
-  litlOS::loop();           // Let our default actions run.
-  ourComPort.updateTime();  // Give our background process a kick.
+  lilOS::loop();           // Let our default actions run.
+  ourComPort.updateTime(); // Give our background process a kick.
 }
 
 // Globals

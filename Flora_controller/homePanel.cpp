@@ -25,9 +25,9 @@ waterBtn::~waterBtn(void) {  }
 void waterBtn::setTheLook(void) {
   
   if (mCurrentState.value && mCurrentState.online) {
-    setImage(WATER_OFF_BMP);
+    setBmpPath(WATER_OFF_BMP);
   } else {
-    setImage(WATER_ON_BMP);
+    setBmpPath(WATER_ON_BMP);
   }
   needRefresh = true;
 }
@@ -169,12 +169,12 @@ void homeScreen::setup(void) {
   appIcon*  dataLog = new appIcon(traceX,traceY,loggingApp,DATA_PANEL_BMP);
   dataLog->begin();
   addObj(dataLog);
-/*
+ 
   traceX = traceX + stepX;
   appIcon*  term = new appIcon(traceX,traceY,sTermApp,STERM_PANEL_BMP);
   term->begin();
   addObj(term);
-
+/*
   traceX = traceX + stepX;
   appIcon*  calc = new appIcon(traceX,traceY,calcApp,CALC_PANEL_BMP);
   calc->begin();

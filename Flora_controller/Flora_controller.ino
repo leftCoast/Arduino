@@ -11,7 +11,7 @@
 
 #include <drawObj.h>
 #include <screen.h>
-#include <litlOS.h>
+#include <lilOS.h>
 #include "floraOS.h"
 
 

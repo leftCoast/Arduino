@@ -2,7 +2,7 @@
 #define loggingPanel_h
 
 #include <panel.h>
-#include <litlOS.h> 
+#include <lilOS.h> 
 #include <bmpObj.h> 
 #include <stateTracker.h>
 #include <flasher.h>
@@ -56,7 +56,7 @@ class copyLogBtn :  public iconButton,
             copyLogBtn(int x, int y,ourKeyboard* akeyboard,panel* ourPanel);
     virtual ~copyLogBtn(void);
 
-    virtual void  begin(void);
+    virtual bool  begin(void);
     virtual void  startFileTransfer(void);
     virtual void  deleteEditor(void);
     virtual void  doAction(void);

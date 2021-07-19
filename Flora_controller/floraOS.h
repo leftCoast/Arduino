@@ -1,16 +1,16 @@
 #ifndef floraOS_h
 #define floraOS_h
 
-#include <litlOS.h>
+#include <lilOS.h>
 #include <panel.h>
 #include <quickCom.h>
 //#include "src/rpnCalc/rpnCalc.h"
 
 
 #define BEEP_PIN    23
-//sTermApp
+
 //calcApp
-enum  apps { homeApp = HOME_PANEL_ID, controlApp, loggingApp, nextApp };
+enum  apps { homeApp = HOME_PANEL_ID, controlApp, loggingApp, sTermApp, nextApp };
 
 
 
@@ -19,7 +19,7 @@ enum  apps { homeApp = HOME_PANEL_ID, controlApp, loggingApp, nextApp };
 // *****************************************************
 
 
-class floraOS : public litlOS {
+class floraOS : public lilOS {
 
   public:
            floraOS(void);

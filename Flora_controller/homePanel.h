@@ -2,7 +2,7 @@
 #define homePanel_h
 
 #include <panel.h>
-#include <litlOS.h> 
+#include <lilOS.h> 
 #include <bmpObj.h> 
 #include <fontLabel.h> 
 #include "tools.h"
