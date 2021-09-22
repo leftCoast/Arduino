@@ -1,8 +1,9 @@
-#ifndef ltlOS_h
-#define ltlOS_h
+#ifndef lilOS_h
+#define lilOS_h
 
 #include <iconButton.h>
-#include <panel.h>
+#include <drawObj.h>
+#include <menuBar.h>
 
 // Look, just start your numbering at 2 alright?
 #define	NO_PANEL_ID		0	// You have to have this guy.
@@ -26,12 +27,49 @@ class appIcon : public iconButton {
           int  mMessage;
 };
 
+// The base panel class
+
+// The panel object. Base class for swapping in and out of different objects
+// that want to use the screen. The plan is that the OS can swap panels back
+// and forth as the user chooses different things he wants to do. Like
+// different apps. Each panel has its own setup() and loop() functions you can
+// fill in to pretend your in a "real" sketch. Wow, just like a real boy!
+
+enum menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
+
+
+// These two have to go. Need to bring these out from
+// the displayObj. But, I'm in a hurry and I'm lazy.
+#define PANEL_WIDTH   240
+#define PANEL_HEIGHT  320
+
+class menuBar;
+class lilOS;
+
+class panel : public drawGroup {
+
+	public:
+				panel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+	virtual	~panel(void);
+	
+				int	getPanelID();
+	virtual	void	setup(void);
+	virtual	void	loop(void);
+	virtual	void	drawSelf(void);
+	virtual	void	close(void);
+	virtual	void	closing(void);
+  
+				lilOS*	mOSPtr;		// Pointer to our OS.
+				int		mPanelID;   // What panal am I?
+				menuBar*	mMenuBar;	// My menu bar, if so desired.
+};
+
 
 // Default home panel with panelID of HOME_PANEL_ID
 class homePanel : public panel {
 
   public:
-          homePanel(void);
+          homePanel(lilOS* ourOS);
   virtual ~homePanel(void);
   
   virtual void  setup(void);
@@ -58,6 +96,9 @@ class lilOS :  public idler {
 	virtual	panel*	createPanel(int panelID);	// INHERIT THIS GUY AND CREATE YUR OWN CUSTOM PANELS.
 	virtual	void		launchPanel(void);			// Dispose of current and launch a newly created panel.
 	virtual	void		loop(void);						// Tell the current panel its loop time.
+	
+	// Calls to be overwritten by used version.
+	virtual	void		beep(void) = 0;
 	
 				panel*	mPanel;
 };

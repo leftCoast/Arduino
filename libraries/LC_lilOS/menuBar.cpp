@@ -1,5 +1,5 @@
 #include <menuBar.h>
-#include <panel.h>
+#include <lilOS.h>
 #include <iconButton.h>
 #include <resizeBuff.h>
 

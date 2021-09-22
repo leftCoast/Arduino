@@ -2,7 +2,7 @@
 #define menuBar_h
 
 #include <drawObj.h>
-#include <panel.h>
+//#include <panel.h>
 #include <iconButton.h>
 
 #define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
