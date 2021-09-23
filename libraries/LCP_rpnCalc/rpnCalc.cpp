@@ -238,7 +238,7 @@ void rpnCalc::loadScreen(void) {
   screen->drawRect(BTN_COL_1-3,DISP_Y-3,((BTN_COL_4+BTN_WIDTH1)-BTN_COL_1)+5,22,DISP_COLOR);
  }
 
- 
+
 void  rpnCalc::loop(void) {
 
   if (buttonPressed) {

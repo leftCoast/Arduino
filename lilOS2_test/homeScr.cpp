@@ -7,8 +7,6 @@
 #define LEFT_X    52
 #define STEP_X    52
 
-char* panelIconPath = "/system/icons/";
-
 
 homeScr::homeScr(void)
    : panel(&ourOS,homeApp,noMenuBar) { }
@@ -17,10 +15,11 @@ homeScr::homeScr(void)
 homeScr::~homeScr(void) {  }
 
 
-char* homeScr::panelPath(char* panelFolder) {
+char* homeScr::iconPath(int appID,char* iconName) {
 
-   strcpy(pathBuff,panelIconPath);
-   strcat(pathBuff,panelFolder);
+   strcpy(pathBuff,mOSPtr->panelFolder(appID));
+   strcat(pathBuff,iconName);
+   Serial.println(pathBuff);
    return pathBuff; 
 }
 
@@ -33,11 +32,21 @@ void homeScr::setup(void) {
    
    traceX = LEFT_X;
    traceY = TOP_Y;
-  
-   theAppIcon = new appIcon(traceX,traceY,calcApp,panelPath("RPNCalc/calc32.bmp"));
-   Serial.println(pathBuff);
+   Serial.println("doing the calcApp thing");
+   Serial.flush();
+   theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));
+   Serial.println("Calling begin()");
    theAppIcon->begin();
+   Serial.println("Calling addObj()");
    addObj(theAppIcon); 
+   Serial.println("doing the breakoutApp thing");
+   Serial.flush();
+   traceX = traceX + STEP_X;
+   theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));
+   theAppIcon->begin();
+   addObj(theAppIcon);
+   Serial.println("Done them things..");
+    Serial.flush();
 }
 
 

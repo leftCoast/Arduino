@@ -131,7 +131,7 @@ lilOS::~lilOS(void) {  }
 // A good plan would be to inherit, do your begin
 // then at some point during that, call this one.
 int lilOS::begin(void) {
-	Serial.println("Doing hookup..");
+
   hookup();							// Want to use idle()? Its ready.
   nextPanel = HOME_PANEL_ID;	// Set to the default home panel.
   return 0;							// 0 means no error right? Or does it mean false, fail?
@@ -139,12 +139,11 @@ int lilOS::begin(void) {
 
 
 // This is the guy you inherit and use to create your custom panels.
-panel* lilOS::createPanel(int panelID) { Serial.println("creating panel?"); return new homePanel(this); }
+panel* lilOS::createPanel(int panelID) { return new homePanel(this); }
 
 
 void lilOS::launchPanel(void) {
 
-	Serial.println("Launching panel..");
 	while(screen->touched());							// Hold 'till their finger is off the screen. Its important!
 	if (mPanel) {											// If we have a panel now..
 		mPanel->closing();								// Give the panel one last chance to get its affairs in order.

@@ -6,7 +6,6 @@
 void setup() {
 
    Serial.begin(57600);                   // Fire up serial for debugging.
-   Serial.println("Hello?");
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.
       Serial.println("NO SCREEN!");       // Screen init failed. Tell user.
       Serial.flush();                     // Make sure the mesage gets out.
@@ -19,9 +18,7 @@ void setup() {
       while(true);                        // Lock the process here.
    }
    ourEventMgr.begin();                   // Startup our event manager.
-   Serial.println("Booting OS");
    ourOS.begin();                         // Boot OS manager.
-   Serial.println("Should be running..");
 }
 
 

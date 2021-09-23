@@ -99,6 +99,9 @@ class lilOS :  public idler {
 	
 	// Calls to be overwritten by used version.
 	virtual	void		beep(void) = 0;
+	virtual	int		getTonePin(void) = 0;
+	virtual	void		setBrightness(byte brightness) = 0;
+	virtual	char*		panelFolder(int panelID) = 0;
 	
 				panel*	mPanel;
 };

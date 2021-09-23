@@ -3,8 +3,7 @@
 
 #include "toneObj.h"
 #include <label.h>
-#include <panel.h>
-#include	"../../handheldOS.h"
+#include <lilOS.h>
 
 #include "paddleObj.h"
 #include "ballObj.h"
@@ -60,9 +59,9 @@
 #define SHADOW_PRCT   60
 
 
-#define GREEN_BAR     "/system/icons/breakout/grnBar.bmp"
-#define PURPLE_BAR    "/system/icons/breakout/purpBar.bmp"
-#define RED_BAR       "/system/icons/breakout/redBar.bmp"
+//#define GREEN_BAR     "/system/icons/breakout/grnBar.bmp"
+//#define PURPLE_BAR    "/system/icons/breakout/purpBar.bmp"
+//#define RED_BAR       "/system/icons/breakout/redBar.bmp"
 
 
 extern void soundHitWall(void);
@@ -82,7 +81,7 @@ class breakout :  public panel {
 
 	enum		gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
-				breakout(void);
+				breakout(lilOS* ourOS,int ourAppID);
 	virtual	~breakout(void);
 
 	virtual	void setup();
@@ -93,6 +92,9 @@ class breakout :  public panel {
 				void setState(gameStates state);
 	virtual	void loop(void);
 
+				char*				greenPath;
+				char*				purplePath;
+				char*				redPath;
 				paddleObj*		paddle;
 				ballObj*			theBall;
 				label*			message;

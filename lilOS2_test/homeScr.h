@@ -16,7 +16,7 @@ class homeScr : public panel {
             homeScr(void);
    virtual  ~homeScr(void);
 
-            char* panelPath(char* panelFolder);
+            char* iconPath(int appID,char* iconName);
    virtual  void  setup(void);
    virtual  void  loop(void);
    virtual  void  drawSelf(void);

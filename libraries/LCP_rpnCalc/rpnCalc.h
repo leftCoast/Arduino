@@ -14,10 +14,10 @@ class rpnCalc : public panel {
           rpnCalc(lilOS* ourOS,int panelID);
   virtual ~rpnCalc(void);
 
-          void  loadScreen(void);
-  virtual void  setup(void);
-  virtual void  loop(void);
-
+          void	loadScreen(void);
+  virtual void	setup(void);
+  virtual void	loop(void);
+  
           label*          XReg;
           lineObj*        aLine;
           lineObj*        aLine2;

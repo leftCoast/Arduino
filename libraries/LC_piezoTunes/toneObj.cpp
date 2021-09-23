@@ -20,12 +20,14 @@ toneObj::~toneObj(void) {  }
 				
 void toneObj::play(int inHz,int inMs) {
 	
-	if (inHz>0) {
-		tone(mPin,inHz,inMs);
-	} else {
-		noTone(mPin);
+	if (mPin>=0) {
+		if (inHz>0) {
+			tone(mPin,inHz,inMs);
+		} else {
+			noTone(mPin);
+		}
+		setTime(inMs,true);
 	}
-	setTime(inMs,true);
 }
 
 

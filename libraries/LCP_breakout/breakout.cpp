@@ -1,27 +1,27 @@
-
+#include <resizeBuff.h>
 #include <drawObj.h>
-
 #include "breakout.h"
 #include "paddleObj.h"
 #include "ballObj.h"
 #include "brickObj.h"
 #include "toneObj.h"
-
-#include  "../../handheldOS.h"
+#include <lilOS.h>
 
 // ********* beepSounds ********
+
+int	tonePin = -1;
 
 
 void soundHitWall(void) {
 	
-	toneObj aTone(BEEP_PIN);
+	toneObj aTone(tonePin);
 
 	aTone.play(1000,50);
 }
 
 void soundHitPaddel(void) {
 	
-	toneObj aTone(BEEP_PIN);
+	toneObj aTone(tonePin);
 
 	aTone.play(750,50);
 }
@@ -29,7 +29,7 @@ void soundHitPaddel(void) {
 
 void soundHitBrick(void) {
 
-	toneObj aTone(BEEP_PIN);
+	toneObj aTone(tonePin);
 
 	aTone.play(1750,20);
 }
@@ -38,7 +38,7 @@ void soundHitBrick(void) {
 
 void soundBallLost(void) {
 	
-	toneObj aTone(BEEP_PIN);
+	toneObj aTone(tonePin);
 
 	aTone.play(500,35);
 	while(aTone.isPlaying()) idle();
@@ -50,7 +50,7 @@ void soundBallLost(void) {
 
 void soundWinner(void) {
 	
-	toneObj	aTone(BEEP_PIN);
+	toneObj	aTone(tonePin);
 	int		eNote;
 	tune		aTune;
 	
@@ -84,7 +84,7 @@ void soundWinner(void) {
 
 void soundZwoop(void) {
 
-	toneObj	aTone(BEEP_PIN);
+	toneObj	aTone(tonePin);
 
 	
 	for (int i = NOTE_C4;i<NOTE_C5;i++) {
@@ -113,7 +113,7 @@ void soundZwoop(void) {
 	
 void soundGameOver(void) {
 
-	toneObj	aTone(BEEP_PIN);
+	toneObj	aTone(tonePin);
 	
 	aTone.play(NOTE_G3,1000);
 	while(aTone.isPlaying()) idle();
@@ -124,7 +124,7 @@ void soundGameOver(void) {
 
 void soundStartBall(void) {
 
-	toneObj	aTone(BEEP_PIN);
+	toneObj	aTone(tonePin);
 	
 	aTone.play(NOTE_G6,30);
 	while(aTone.isPlaying()) idle();
@@ -134,22 +134,49 @@ void soundStartBall(void) {
 
 // ******************************
 
-breakout::breakout(void)
-  : panel(breakoutApp) {
+breakout::breakout(lilOS* ourOS,int ourAppID)
+  : panel(ourOS,ourAppID) {
 
-  frameTimer    = new timeObj(FRAME_MS);
-  paddleTimer   = new timeObj(PADDLE_MS);
-  textTimer     = new timeObj(TEXT_MS);
-  oldLoc        = -10;
-  brickIndex    = 0;        // It was originally written to run once.
+	char*	pathPtr;
+	int	pathLen;
+	
+	greenPath	= NULL;
+	purplePath	= NULL;
+	redPath		= NULL;
+	if (ourOS) {
+		tonePin = ourOS->getTonePin();
+		pathPtr = ourOS->panelFolder(ourAppID);
+		pathLen = strlen(pathPtr);
+		pathLen = pathLen + 13;
+		if (resizeBuff(pathLen,&greenPath)) {
+			strcpy(greenPath,pathPtr);
+			strcat(greenPath,"grnBar.bmp");
+		}
+		if (resizeBuff(pathLen,&purplePath)) {
+			strcpy(purplePath,pathPtr);
+			strcat(purplePath,"purpBar.bmp");
+		}
+		if (resizeBuff(pathLen,&redPath)) {
+			strcpy(redPath,pathPtr);
+			strcat(redPath,"redBar.bmp");
+		}
+	}
+	frameTimer    = new timeObj(FRAME_MS);
+	paddleTimer   = new timeObj(PADDLE_MS);
+	textTimer     = new timeObj(TEXT_MS);
+	oldLoc        = -10;
+	brickIndex    = 0;        // It was originally written to run once.
 }
 
 
 breakout::~breakout(void) {	// I think the brick list is leaking memory.
 
-  if(frameTimer) { delete frameTimer; }
-  if(paddleTimer) { delete paddleTimer; }
-  if(textTimer) { delete textTimer; }
+	resizeBuff(0,&greenPath);
+	resizeBuff(0,&purplePath);
+	resizeBuff(0,&redPath);
+	if(frameTimer) { delete frameTimer; }
+	if(paddleTimer) { delete paddleTimer; }
+	if(textTimer) { delete textTimer; }
 }
 
 
@@ -205,7 +232,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(GREEN_BAR);
+      aBrick->setColor(greenPath);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
@@ -214,7 +241,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(PURPLE_BAR);
+      aBrick->setColor(purplePath);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
@@ -223,7 +250,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(RED_BAR);
+      aBrick->setColor(redPath);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }

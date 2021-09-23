@@ -1,17 +1,24 @@
 #include "ourOSObj.h"
 #include <rpnCalc.h>
+#include <breakout.h>
 #include "homeScr.h"
 
-#define BEEP_PIN    23
+#define BEEP_PIN     23                      // The digital pin choosen for the beeper.
+#define SCREEN_PIN   25                      // The ananlog pin choosen for the screen backlight.
+#define PANEL_PATH   "/system/appFiles/"   // Where we decided to store the app folders on our SD card.
 
 // Our OS object.
 ourOSObj  ourOS;
 
 
+
+// **************************************
+// ************** ourOSObj **************
+// **************************************
+
+
 ourOSObj::ourOSObj(void)
-   : lilOS() {
-   
-}
+   : lilOS() { }
 
 
 ourOSObj::~ourOSObj(void) {  }
@@ -22,6 +29,7 @@ int ourOSObj::begin(void) {
    
    pinMode(BEEP_PIN, OUTPUT);       // Setup The beeper pin.
    digitalWrite(BEEP_PIN, HIGH);    //Means off.
+   setBrightness(255);
    return lilOS::begin();          // Return result of the inherited
 }
 
@@ -30,15 +38,49 @@ int ourOSObj::begin(void) {
 panel* ourOSObj::createPanel(int panelID) {
    
    beep();
+   //setBrightness(0);
    switch (panelID) {
       case homeApp      : return new homeScr();
       case calcApp      : return new rpnCalc(this,panelID);
       //case sTermApp     : return new sTermPanel();
-      //case breakoutApp  : return new breakout();
+      case breakoutApp  : return new breakout(this,panelID);
       default           : return NULL;
    }
 }
 
 
 // Only WE know how to make it beep.
-void ourOSObj::beep(void) { tone(BEEP_PIN, 750,20); }            
+void ourOSObj::beep(void) { tone(BEEP_PIN, 750,20); }
+
+
+// Here's the pin if you want to use it yourself.
+int ourOSObj::getTonePin(void) {return BEEP_PIN; }
+
+
+// And how to control the screen brightness.
+void ourOSObj::setBrightness(byte brightness) { analogWrite(SCREEN_PIN,brightness); }
+
+
+// Hand this an appID and get back a pointer to the path of its data folder.
+char* ourOSObj::panelFolder(int panelID) {
+     
+   strcpy(pathBuff,PANEL_PATH);
+   switch (panelID) {
+      case homeApp      : return NULL;
+      case calcApp      : 
+         strcat(pathBuff,"rpnCalc/");
+         return pathBuff;
+      break;
+      /*
+      case sTermApp     :
+         strcat(pathBuff,"sTerm");
+         return pathBuff;
+      break;
+      */
+      case breakoutApp  :
+         strcat(pathBuff,"breakout/");
+         return pathBuff;
+      break; 
+      default           : return NULL;
+   }
+}
