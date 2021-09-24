@@ -2,17 +2,9 @@
 #define menuBar_h
 
 #include <drawObj.h>
-//#include <panel.h>
 #include <iconButton.h>
 
 #define MENU_BAR_H    24  // Because we have 22x22 icos to stick on it. So there!
-
-#define ICON_NAME_X22			"/system/icons/standard/x22.bmp"
-#define ICON_NAME_NEW22			"/system/icons/standard/cross22.bmp"
-#define ICON_NAME_SEARCH22		"/system/icons/standard/search22.bmp"
-#define ICON_NAME_TRASH22		"/system/icons/standard/trashC22.bmp"
-
-#define PATH_BUFF_CHARS			128
 	
 #define CLOSE_X         0
 #define CLOSE_Y         1
@@ -52,36 +44,42 @@ class menuBar  : public drawGroup {
 class closeBtn : public iconButton {
 
   public:
-          closeBtn(panel* inPanel);
-  virtual ~closeBtn(void);
+				closeBtn(panel* inPanel);
+  virtual	~closeBtn(void);
   
-  virtual void  doAction(void);
+  virtual	void  doAction(void);
   
-          panel* mPanel;
+				panel* mPanel;
 };
 
 
 class newBtn : public iconButton {
 
   public:
-          newBtn(int x,int y);
-  virtual ~newBtn(void);
+				newBtn(panel* inPanel,int x,int y);
+  virtual	~newBtn(void);
+  
+				panel* mPanel;
 };
 
 
 class searchBtn : public iconButton {
 
   public:
-          searchBtn(int x,int y);
-  virtual ~searchBtn(void);
+				searchBtn(panel* inPanel,int x,int y);
+  virtual	~searchBtn(void);
+  
+				panel* mPanel;
 };
 
 
 class trashBtn : public iconButton {
 
   public:
-          trashBtn(int x,int y);
-  virtual ~trashBtn(void);
+				trashBtn(panel* inPanel,int x,int y);
+  virtual	~trashBtn(void);
+				
+				panel* mPanel;
 };
 
 

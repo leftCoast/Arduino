@@ -6,11 +6,20 @@
 #include <menuBar.h>
 
 // Look, just start your numbering at 2 alright?
-#define	NO_PANEL_ID		0	// You have to have this guy.
+#define	NO_PANEL_ID		0		// You have to have this guy.
 #define	HOME_PANEL_ID	1
 
-#define	DEF_APP_ICON	"/system/icons/standard/app32.bmp"
+#define	PATH_LEN			100	// Size of buffer for creating file paths.
 
+// The list of standard icons supplied by the OS for the applications to use.
+enum stdIcons	{
+	app32, check22, check32, copy32, cross22, cross32, cut32, edit22, edit32, fClose32,
+	fOpen32, mask22, mask32, paste32, pref22, pref32, search22, search32, sort22, sort32,
+	trashC22, trashC32, trashR22, trashR32, x22, x32
+};
+						
+						
+						
 // The user will expect icons to click on for panel swapping.
 // You can use this. Give it a panel ID and a full path to a
 // 32x32 bit .bmp file. Use these to populate your home panel,
@@ -19,7 +28,7 @@
 class appIcon : public iconButton {
   
   public:
-          appIcon(int xLoc,int yLoc,int message,char* path=DEF_APP_ICON,int pix=32);	// Path to .bmp icon dwg.
+          appIcon(int xLoc,int yLoc,int message,char* path,int pix=32);	// Path to .bmp icon dwg.
   virtual ~appIcon(void);
   
   virtual void  doAction(void);
@@ -101,8 +110,11 @@ class lilOS :  public idler {
 	virtual	void		beep(void) = 0;
 	virtual	int		getTonePin(void) = 0;
 	virtual	void		setBrightness(byte brightness) = 0;
-	virtual	char*		panelFolder(int panelID) = 0;
+	virtual	char*		getSystemFolder() = 0;
+	virtual	char*		getPanelFolder(int panelID) = 0;
+	virtual	char*		stdIconPath(stdIcons theIcon);
 	
+				char		pathBuff[PATH_LEN];			// Workspace for building up file paths.
 				panel*	mPanel;
 };
 

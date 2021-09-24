@@ -17,7 +17,7 @@ homeScr::~homeScr(void) {  }
 
 char* homeScr::iconPath(int appID,char* iconName) {
 
-   strcpy(pathBuff,mOSPtr->panelFolder(appID));
+   strcpy(pathBuff,mOSPtr->getPanelFolder(appID));
    strcat(pathBuff,iconName);
    Serial.println(pathBuff);
    return pathBuff; 

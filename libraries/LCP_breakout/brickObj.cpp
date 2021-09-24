@@ -1,6 +1,6 @@
 #include "brickObj.h"
 
-brickObj* brickList[TOTAL_BRICKS];
+brickObj* brickList[TOTAL_BRICKS];  // Move these two into.. The breakout class?
 int       brickIndex = 0;
 
 

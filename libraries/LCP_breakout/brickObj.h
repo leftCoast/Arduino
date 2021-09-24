@@ -1,9 +1,10 @@
 #ifndef brickObj_h
 #define brickObj_h
 
-#include  <bmpPipe.h>
 #include "backColorObj.h"
 #include "breakout.h"
+#include <bmpPipe.h>	// THIS BIT MUST GO!!
+
 
 extern int  brickIndex;
 

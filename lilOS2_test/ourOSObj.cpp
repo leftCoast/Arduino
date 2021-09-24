@@ -5,7 +5,8 @@
 
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
 #define SCREEN_PIN   25                      // The ananlog pin choosen for the screen backlight.
-#define PANEL_PATH   "/system/appFiles/"   // Where we decided to store the app folders on our SD card.
+char systemFolder[]  = "/system/";           // Where we decided to store the systemp folder on our SD card.
+char panelFolder[]   = "/system/appFiles/";  // Where we decided to store the app folders on our SD card.
 
 // Our OS object.
 ourOSObj  ourOS;
@@ -60,11 +61,13 @@ int ourOSObj::getTonePin(void) {return BEEP_PIN; }
 // And how to control the screen brightness.
 void ourOSObj::setBrightness(byte brightness) { analogWrite(SCREEN_PIN,brightness); }
 
+char*  ourOSObj::getSystemFolder(void) { return systemFolder; }
+
 
 // Hand this an appID and get back a pointer to the path of its data folder.
-char* ourOSObj::panelFolder(int panelID) {
+char* ourOSObj::getPanelFolder(int panelID) {
      
-   strcpy(pathBuff,PANEL_PATH);
+   strcpy(pathBuff,panelFolder);
    switch (panelID) {
       case homeApp      : return NULL;
       case calcApp      : 

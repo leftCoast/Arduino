@@ -10,7 +10,7 @@ int	nextPanel = NO_PANEL_ID;   // What panel do we want showing now?
 
 
 appIcon::appIcon(int xLoc,int yLoc,int message,char* path,int pix)
-  : iconButton(xLoc,yLoc,path,pix) { mMessage = message; }
+  : iconButton(xLoc,yLoc,path,pix) { mMessage = message;}
 
   
 appIcon::~appIcon(void) {  }
@@ -172,4 +172,40 @@ void lilOS::loop(void) {
 		launchPanel();												// Launch the new panel.
 	}
 	if (mPanel) { mPanel->loop(); }							// As always, if there is a panel, let it have some loop time.
+}
+
+
+char* lilOS::stdIconPath(stdIcons theIcon) {
+	
+	strcpy(pathBuff,getSystemFolder());
+	strcat(pathBuff,"icons/standard/");
+	switch(theIcon) {
+		case app32 		: strcat(pathBuff,"app32.bmp"); 		break;
+		case check22 	: strcat(pathBuff,"check22.bmp"); 	break;
+		case check32 	: strcat(pathBuff,"check32.bmp"); 	break;
+		case copy32 	: strcat(pathBuff,"copy32.bmp"); 	break;
+		case cross22 	: strcat(pathBuff,"cross22.bmp"); 	break;
+		case cross32 	: strcat(pathBuff,"cross32.bmp"); 	break;
+		case cut32 		: strcat(pathBuff,"cut32.bmp"); 		break;
+		case edit22 	: strcat(pathBuff,"edit22.bmp"); 	break;
+		case edit32 	: strcat(pathBuff,"edit32.bmp"); 	break;
+		case fClose32	: strcat(pathBuff,"fClose32.bmp"); 	break;
+		case fOpen32 	: strcat(pathBuff,"fOpen32.bmp"); 	break;
+		case mask22 	: strcat(pathBuff,"mask22.bmp"); 	break;
+		case mask32 	: strcat(pathBuff,"mask32.bmp"); 	break;
+		case paste32 	: strcat(pathBuff,"paste32.bmp"); 	break;
+		case pref22 	: strcat(pathBuff,"pref22.bmp");		break;
+		case pref32 	: strcat(pathBuff,"pref32.bmp"); 	break;
+		case search22	: strcat(pathBuff,"search22.bmp"); 	break;
+		case search32	: strcat(pathBuff,"search32.bmp"); 	break;
+		case sort22		: strcat(pathBuff,"sort22.bmp"); 	break;
+		case sort32		: strcat(pathBuff,"sort32.bmp"); 	break;
+		case trashC22	: strcat(pathBuff,"trashC22.bmp"); 	break;
+		case trashC32	: strcat(pathBuff,"trashC32.bmp"); 	break;
+		case trashR22	: strcat(pathBuff,"trashR22.bmp"); 	break;
+		case trashR32	: strcat(pathBuff,"trashR32.bmp"); 	break;
+		case x22			: strcat(pathBuff,"x22.bmp"); 		break;
+		case x32			: strcat(pathBuff,"x32.bmp"); 		break;
+	}
+	return pathBuff;
 }

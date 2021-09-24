@@ -4,6 +4,7 @@
 #include <resizeBuff.h>
 
 colorObj	menuBarColor(LC_BLACK);
+
 // *****************************************************
 // 							 menueBar
 // *****************************************************
@@ -36,7 +37,7 @@ void menuBar::drawSelf(void) { screen->fillRect(this,&menuBarColor); }
 
 
 closeBtn::closeBtn(panel* inPanel)
-  : iconButton(CLOSE_X,CLOSE_Y,ICON_NAME_X22,22) {
+  : iconButton(CLOSE_X,CLOSE_Y,inPanel->mOSPtr->stdIconPath(x22),22) {
   
   mPanel = inPanel;
   begin();
@@ -53,8 +54,12 @@ void closeBtn::doAction(void) { mPanel->close(); }
 // ******
 
 
-newBtn::newBtn(int x,int y)
-  : iconButton(x,y,ICON_NAME_NEW22,22)  { begin(); }
+newBtn::newBtn(panel* inPanel,int x,int y)
+  : iconButton(x,y,inPanel->mOSPtr->stdIconPath(cross22),22)  {
+  
+  mPanel = inPanel;
+  begin();
+}
 
    
 newBtn::~newBtn(void) {  }
@@ -64,8 +69,12 @@ newBtn::~newBtn(void) {  }
 // *****
 
 
-searchBtn::searchBtn(int x,int y)
-  : iconButton(x,y,ICON_NAME_SEARCH22,22)  { begin(); }
+searchBtn::searchBtn(panel* inPanel,int x,int y)
+  : iconButton(x,y,inPanel->mOSPtr->stdIconPath(search22),22)  {
+  
+  mPanel = inPanel;
+  begin();
+}
  
     
 searchBtn::~searchBtn(void) {  }
@@ -75,8 +84,12 @@ searchBtn::~searchBtn(void) {  }
 // *****
 
 
-trashBtn::trashBtn(int x,int y)
-  : iconButton(x,y,ICON_NAME_TRASH22,22)  { begin(); }
+trashBtn::trashBtn(panel* inPanel,int x,int y)
+  : iconButton(x,y,inPanel->mOSPtr->stdIconPath(trashC22),22)  {
+  
+  mPanel = inPanel;
+  begin();
+}
 
 
 trashBtn::~trashBtn(void) {  }

@@ -145,7 +145,7 @@ breakout::breakout(lilOS* ourOS,int ourAppID)
 	redPath		= NULL;
 	if (ourOS) {
 		tonePin = ourOS->getTonePin();
-		pathPtr = ourOS->panelFolder(ourAppID);
+		pathPtr = ourOS->getPanelFolder(ourAppID);
 		pathLen = strlen(pathPtr);
 		pathLen = pathLen + 13;
 		if (resizeBuff(pathLen,&greenPath)) {
