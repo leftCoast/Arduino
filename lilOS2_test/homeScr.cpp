@@ -2,7 +2,7 @@
 #include <lilOS.h>
 
 
-#define TOP_Y     285
+#define TOP_Y     286
 #define STEP_Y    52
 #define LEFT_X    52
 #define STEP_X    52
@@ -19,7 +19,6 @@ char* homeScr::iconPath(int appID,char* iconName) {
 
    strcpy(pathBuff,mOSPtr->getPanelFolder(appID));
    strcat(pathBuff,iconName);
-   Serial.println(pathBuff);
    return pathBuff; 
 }
 
@@ -32,25 +31,30 @@ void homeScr::setup(void) {
    
    traceX = LEFT_X;
    traceY = TOP_Y;
-   Serial.println("doing the calcApp thing");
-   Serial.flush();
+
    theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));
-   Serial.println("Calling begin()");
    theAppIcon->begin();
-   Serial.println("Calling addObj()");
    addObj(theAppIcon); 
-   Serial.println("doing the breakoutApp thing");
-   Serial.flush();
+  
    traceX = traceX + STEP_X;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));
    theAppIcon->begin();
    addObj(theAppIcon);
-   Serial.println("Done them things..");
-    Serial.flush();
 }
 
 
 void homeScr::loop(void) { }
 
 
-void homeScr::drawSelf(void) { screen->fillScreen(&black); } 
+void homeScr::drawSelf(void) { 
+
+   colorObj lineColor;
+   bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
+
+   ourOS.setBrightness(0);
+   lineColor.setColor(LC_CHARCOAL);
+   screen->fillRectGradient(0,282,240,38,&lineColor,&black);
+   theScreenImage.begin();
+   theScreenImage.draw();
+   ourOS.setBrightness(255);
+}
