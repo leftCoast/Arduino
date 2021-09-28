@@ -11,7 +11,7 @@ class bmpImage :	public baseImage {
 	virtual	~bmpImage(void);
 
 	virtual		bool				getRow(int row,RGBpack* RGBArray,int numPix,File* inFile);
-								
+	virtual		colorObj			getPixel(int x,int y);							
 	protected:
 	
 	virtual		RGBpack			getPixel(int x,int y,File* imageFile);

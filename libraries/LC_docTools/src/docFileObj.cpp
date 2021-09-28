@@ -137,8 +137,6 @@ bool docFileObj::openDocFile(char* filePath) {
 // will redirect to a new docFile and this will be what we will be editing from now on.
 bool docFileObj::saveDocFile(char* newFilePath) {
 
-	//File	tempFile;
-	//File	docFile;
 	int	numBytes;
 	bool	success;
 	
@@ -187,7 +185,6 @@ bool docFileObj::checkDoc(void) { return false; }
 // this file and returns its success or failure.
 bool docFileObj::createTempFile(void) {
 	
-	//File		tempFile;
 	timeObj	timeOut(FILE_SEARCH_MS);
 	char*		pathBuff;
 	char		fileNumStr[TEMP_NAME_CHARS];
@@ -241,8 +238,6 @@ bool docFileObj::initNewTempFile(void) { return true; }
 // her changes.
 bool docFileObj::copyToTempFile(void) {
 
-	//File	tempFile;
-	//File	docFile;
 	bool	success;
 
 	success = false;												// We're not a success yet.

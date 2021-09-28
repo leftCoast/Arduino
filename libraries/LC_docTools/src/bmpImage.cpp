@@ -59,6 +59,9 @@ bmpImage::bmpImage(void)
 
 bmpImage::~bmpImage(void) {  }
 
+// HACK : Added this to  make compiler pass this through.
+colorObj bmpImage::getPixel(int x,int y) { return baseImage::getPixel(x,y); }
+
 
 // Grab a pixel from this location from your image file.
 // Return it as a RGBpack.
