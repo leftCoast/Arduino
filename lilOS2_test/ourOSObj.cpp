@@ -11,7 +11,7 @@ char panelFolder[]   = "/system/appFiles/";  // Where we decided to store the ap
 // Our OS object.
 ourOSObj  ourOS;
 
-
+bmpMask  iconMask;
 
 // **************************************
 // ************** ourOSObj **************
@@ -31,6 +31,7 @@ int ourOSObj::begin(void) {
    pinMode(BEEP_PIN, OUTPUT);       // Setup The beeper pin.
    digitalWrite(BEEP_PIN, HIGH);    //Means off.
    setBrightness(255);
+   iconMask.readFromBMP("/system/icons/standard/mask32.bmp");
    return lilOS::begin();          // Return result of the inherited
 }
 

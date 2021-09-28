@@ -33,11 +33,13 @@ void homeScr::setup(void) {
    traceY = TOP_Y;
 
    theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));
+   theAppIcon->setMask(&iconMask);
    theAppIcon->begin();
    addObj(theAppIcon); 
   
    traceX = traceX + STEP_X;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));
+   theAppIcon->setMask(&iconMask);
    theAppIcon->begin();
    addObj(theAppIcon);
 }

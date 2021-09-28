@@ -20,6 +20,7 @@ class ourOSObj : public lilOS {
    virtual  char*    getPanelFolder(int panelID);
 };
 
-extern ourOSObj  ourOS;
+extern ourOSObj   ourOS;
+extern bmpMask    iconMask;
 
 #endif
