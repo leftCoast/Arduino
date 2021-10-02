@@ -55,13 +55,6 @@
 #define BOTTOM_BRICK  GAME_TOP + 96
 #define BRICK_ROWS    6
 #define TOTAL_BRICKS  NUM_BRICKS*BRICK_ROWS
-#define HILIGHT_PRCT  40
-#define SHADOW_PRCT   60
-
-
-//#define GREEN_BAR     "/system/icons/breakout/grnBar.bmp"
-//#define PURPLE_BAR    "/system/icons/breakout/purpBar.bmp"
-//#define RED_BAR       "/system/icons/breakout/redBar.bmp"
 
 
 extern void soundHitWall(void);
@@ -84,7 +77,8 @@ class breakout :  public panel {
 				breakout(lilOS* ourOS,int ourAppID);
 	virtual	~breakout(void);
 
-	virtual	void setup();
+	virtual	void setup(void);
+				void setupBrickBitmaps(void);
 				void fillBricks(void);
 				void doPaddle(void);
 				void doBall(void);
@@ -92,9 +86,9 @@ class breakout :  public panel {
 				void setState(gameStates state);
 	virtual	void loop(void);
 
-				char*				greenPath;
-				char*				purplePath;
-				char*				redPath;
+				bitmap*			greenBmp;
+				bitmap*			purpBmp;
+				bitmap*			redBmp;
 				paddleObj*		paddle;
 				ballObj*			theBall;
 				label*			message;

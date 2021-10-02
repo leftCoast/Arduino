@@ -31,26 +31,18 @@ bool bricks(void) {
 
 
 brickObj::brickObj(int inX,int inY)
-  : drawObj(inX,inY,BRICK_W,BRICK_H),
-  bmpPipe() {
+	: drawObj(inX,inY,BRICK_W,BRICK_H) {
 
-    homeX = inX;
-    homeY = inY;
-    brickList[brickIndex++] = this;
-  }
+	homeX = inX;
+	homeY = inY;
+	brickList[brickIndex++] = this;
+}
 
 
 brickObj::~brickObj(void) {  }
 
 
-void brickObj::setColor(char* path) {
-
-  rect  ourSource;
-  
-  ourSource.setRect(0,0,width,height);
-  openPipe(path);
-  setSourceRect(&ourSource);
-}
+void brickObj::setColor(bitmap* inBitmap) { ourBMap = inBitmap; }
 
 
 void brickObj::hit(void) {
@@ -69,6 +61,6 @@ void brickObj::reset(void) {  drawObj::setLocation(homeX,homeY); }
 void brickObj::drawSelf(void) {
   
   if (x>0 && y>0) {
-    drawImage(x,y);
-  } 
+    screen->blit(x,y,ourBMap);
+  }
 }

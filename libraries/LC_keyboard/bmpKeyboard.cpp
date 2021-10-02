@@ -51,7 +51,7 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 	
 	mKeyTextColor.setColor(LC_YELLOW);							// Set up key text color.
 	mKeyTextColor.blend(&white,60);								// Little adjustment here..
-	mModal = modal;													// Not if we are modal or not.
+	mModal = modal;													// Note if we are modal or not.
 	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);			// Set our rectangle.
 	
 	if (mKeyBMap.setSize(KEY_WD,KEY_HT)) {						// If we can allocate the RAM for the icon's bitmap..

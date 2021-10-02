@@ -3,26 +3,25 @@
 
 #include "backColorObj.h"
 #include "breakout.h"
-#include <bmpPipe.h>	// THIS BIT MUST GO!!
 
 
 extern int  brickIndex;
 
 class brickObj :	public drawObj,
-						public backColorObj,
-						public bmpPipe {
+						public backColorObj {
 
 public:
 			brickObj(int inX,int inY);
 virtual	~brickObj(void);
 
-			void  setColor(char* path);
+			void  setColor(bitmap* inBitmap);
 			void  hit(void);
 			void  reset(void);
-virtual	void  drawSelf(void);
-    
-			int       homeX;
-			int       homeY;
+virtual	void	drawSelf(void);
+    		
+			bitmap*	ourBMap;
+			int		homeX;
+			int		homeY;
 };
 
 extern brickObj* brickList[];

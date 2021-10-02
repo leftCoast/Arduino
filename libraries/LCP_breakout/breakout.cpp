@@ -1,5 +1,6 @@
 #include <resizeBuff.h>
 #include <drawObj.h>
+#include <offscreen.h>
 #include "breakout.h"
 #include "paddleObj.h"
 #include "ballObj.h"
@@ -93,23 +94,8 @@ void soundZwoop(void) {
 	}
 	
 	while(aTone.isPlaying()) idle();
-	/*
-	aTone.play(NOTE_C5,250);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_G4,125);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_E4,125);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_D4,250);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_E4,125);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_D4,125);
-	while(aTone.isPlaying()) idle();
-	aTone.play(NOTE_C4,125);
-	while(aTone.isPlaying()) idle();
-	*/
 }
+
 	
 void soundGameOver(void) {
 
@@ -137,29 +123,9 @@ void soundStartBall(void) {
 breakout::breakout(lilOS* ourOS,int ourAppID)
   : panel(ourOS,ourAppID) {
 
-	char*	pathPtr;
-	int	pathLen;
-	
-	greenPath	= NULL;
-	purplePath	= NULL;
-	redPath		= NULL;
 	if (ourOS) {
 		tonePin = ourOS->getTonePin();
-		pathPtr = ourOS->getPanelFolder(ourAppID);
-		pathLen = strlen(pathPtr);
-		pathLen = pathLen + 13;
-		if (resizeBuff(pathLen,&greenPath)) {
-			strcpy(greenPath,pathPtr);
-			strcat(greenPath,"grnBar.bmp");
-		}
-		if (resizeBuff(pathLen,&purplePath)) {
-			strcpy(purplePath,pathPtr);
-			strcat(purplePath,"purpBar.bmp");
-		}
-		if (resizeBuff(pathLen,&redPath)) {
-			strcpy(redPath,pathPtr);
-			strcat(redPath,"redBar.bmp");
-		}
+		setupBrickBitmaps();
 	}
 	frameTimer    = new timeObj(FRAME_MS);
 	paddleTimer   = new timeObj(PADDLE_MS);
@@ -171,16 +137,63 @@ breakout::breakout(lilOS* ourOS,int ourAppID)
 
 breakout::~breakout(void) {	// I think the brick list is leaking memory.
 
-	resizeBuff(0,&greenPath);
-	resizeBuff(0,&purplePath);
-	resizeBuff(0,&redPath);
+	if(greenBmp) { delete greenBmp; }
+	if(purpBmp) { delete purpBmp; }
+	if(redBmp) { delete redBmp; }
 	if(frameTimer) { delete frameTimer; }
 	if(paddleTimer) { delete paddleTimer; }
 	if(textTimer) { delete textTimer; }
 }
 
 
-void breakout::setup() {
+// We need three bitmaps for doing the bars to knock out.
+void breakout::setupBrickBitmaps(void) {
+	
+	char*			folderPtr;
+	char*			pathPtr;
+	int			pathLen;
+	offscreen	vPort; 
+	bmpObj		BMPobj(0,0,BRICK_W,BRICK_H);
+	if (BMPobj.begin()) {
+		folderPtr = NULL;
+		pathPtr	 = NULL;
+		greenBmp = new bitmap(BRICK_W,BRICK_H);				// Allocate the bitmaps.
+		purpBmp	= new bitmap(BRICK_W,BRICK_H);
+		redBmp	= new bitmap(BRICK_W,BRICK_H);
+		if (greenBmp && purpBmp && redBmp) {					// If we got all three..
+			folderPtr = mOSPtr->getPanelFolder(mPanelID);	// Ask the OS for our folder path.
+			pathLen = strlen(folderPtr);							// Num chars in this path..
+			pathLen = pathLen + 13;									// Add about 13 more for the file name.
+			if (resizeBuff(pathLen,&pathPtr)) {					// If we can allocate room for the full pathname.
+				strcpy(pathPtr,folderPtr);							// Start with the folder path.
+				strcat(pathPtr,"grnBar.bmp");						// Add the file name.
+				if (BMPobj.setBmpPath(pathPtr)) {				// If we can read this file..
+					vPort.beginDraw(greenBmp);						// Set up to offscreen drawing to the bitmap.
+					BMPobj.draw(); 								// Draw to it..
+					vPort.endDraw();									// Restore normal drawing.
+				}
+				strcpy(pathPtr,folderPtr);							// Restart with the folder path.
+				strcat(pathPtr,"purpBar.bmp");					// Add the file name.
+				if (BMPobj.setBmpPath(pathPtr)) {				// If we can read this file..
+					vPort.beginDraw(purpBmp);						// Set up to offscreen drawing to the bitmap.
+					BMPobj.draw(); 								// Draw to it..
+					vPort.endDraw();									// Restore normal drawing.
+				}
+				strcpy(pathPtr,folderPtr);							// Restart with the folder path. Again, sigh..
+				strcat(pathPtr,"redBar.bmp");						// Add the file name.
+				if (BMPobj.setBmpPath(pathPtr)) {				// If we can read this file..
+					vPort.beginDraw(redBmp);						// Set up to offscreen drawing to the bitmap.
+					BMPobj.draw(); 								// Draw to it..
+					vPort.endDraw();									// Restore normal drawing.
+				}
+				resizeBuff(0,&pathPtr);								// Recycle reuse.
+			}
+		}
+	}
+}			
+
+
+void breakout::setup(void) {
 
   backColor.setColor(&black);
   screen->fillScreen(&backColor);
@@ -232,7 +245,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(greenPath);
+      aBrick->setColor(greenBmp);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
@@ -241,7 +254,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(purplePath);
+      aBrick->setColor(purpBmp);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
@@ -250,7 +263,7 @@ void breakout::fillBricks(void) {
   for(byte j=0;j<2;j++) {
     for(byte i=0;i<NUM_BRICKS;i++) {
       aBrick = new brickObj((i*BRICK_W)+offset,y);
-      aBrick->setColor(redPath);
+      aBrick->setColor(redBmp);
       aBrick->setBackColor(&backColor);
       addObj(aBrick);
     }
