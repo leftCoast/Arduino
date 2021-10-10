@@ -13,44 +13,58 @@ char*	tempDir = NULL;
 // through and returns true as a success. This is called automatically when needed and it
 // will use the default folder name. If you want a different location, you can call this
 // in setup() with a different name and all your document files will use that.
-bool createTempDir(char* dirPath) {
+bool createTempDir(char* inPath) {
 
 	File	theDir;
 	int	numChars;
 	bool	addSlash;
 	bool	success;
+	char*	dirPath;
 	
+	Serial.println("createTempDir()");
 	if (tempDir) return true;							// If there already is a temp directory set up, bail!
-	addSlash = false;
-	success = false;
-	// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
-	numChars = strlen(dirPath);                  // Lets see how long the path is.
-	if (dirPath[numChars-1]=='/') {					// If it has has a traileing '/'..            
-		dirPath[numChars-1]='\0';						// Clip off the trailing '/'.
-	} 
-	theDir=SD.open(dirPath,FILE_READ);				// Lets try to open the path they gave us.
-	if (theDir) {											// If we were able to open the path they gave us..
-		if (theDir.isDirectory()) {               // If its a directory..
-			numChars = strlen(dirPath);            // Lets see how long the path is now.
-			if (resizeBuff(numChars+2,&tempDir)) {	// If we can allocate the tempDir path string..
-				strcpy(tempDir,dirPath);				// Copy in the path we got.
-				strcat(tempDir,"/");						// Plus the '/' we pulled off of it.
-				success = true;							// Note our success.
+	if (inPath) {
+		dirPath = NULL;
+		if (resizeBuff(strlen(inPath)+1,&dirPath)) {
+			strcpy(dirPath,inPath);
+			Serial.println("No TempDir yet..");
+			Serial.println(dirPath);
+			addSlash = false;
+			success = false;
+			// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
+			numChars = strlen(dirPath);                  // Lets see how long the path is.
+			if (dirPath[numChars-1]=='/') {					// If it has has a traileing '/'..            
+				dirPath[numChars-1]='\0';						// Clip off the trailing '/'.
+			} 
+			Serial.println(dirPath);
+			theDir=SD.open(dirPath,FILE_READ);				// Lets try to open the path they gave us.
+			if (theDir) {											// If we were able to open the path they gave us..
+				Serial.println("Found dirPath");
+				if (theDir.isDirectory()) {               // If its a directory..
+					numChars = strlen(dirPath);            // Lets see how long the path is now.
+					if (resizeBuff(numChars+2,&tempDir)) {	// If we can allocate the tempDir path string..
+						strcpy(tempDir,dirPath);				// Copy in the path we got.
+						strcat(tempDir,"/");						// Plus the '/' we pulled off of it.
+						success = true;							// Note our success.
+					}
+				}
+				theDir.close();									// Close the directory we opened.
+			} else {													// Else, there was no directory of that name..
+				Serial.println("no dirPath");
+				if (SD.mkdir(dirPath)) {						// If we can create the directory.
+					numChars = strlen(dirPath);            // Lets see how long the path is.
+					if (dirPath[numChars-1]!='/') {			// If we DON'T have a traileing '/'.. 
+						numChars++;									// Add one for the '/'.
+						addSlash = true;							// Note that we'll need to add a '/'.
+					}
+					if (resizeBuff(numChars+1,&tempDir)) {	// If we can allocate the tempDir path string..
+						strcpy(tempDir,dirPath);				// Copy in the path we got.
+						if (addSlash) strcat(tempDir,"/");	// Plus the '/' if it was missing.
+						success = true;							// Note our success.
+					}
+				}
 			}
-		}
-		theDir.close();									// Close the directory we opened.
-	} else {													// Else, there was no directory of that name..
-		if (SD.mkdir(dirPath)) {						// If we can create the directory.
-			numChars = strlen(dirPath);            // Lets see how long the path is.
-			if (dirPath[numChars-1]!='/') {			// If we DON'T have a traileing '/'.. 
-				numChars++;									// Add one for the '/'.
-				addSlash = true;							// Note that we'll need to add a '/'.
-			}
-			if (resizeBuff(numChars+1,&tempDir)) {	// If we can allocate the tempDir path string..
-				strcpy(tempDir,dirPath);				// Copy in the path we got.
-				if (addSlash) strcat(tempDir,"/");	// Plus the '/' if it was missing.
-				success = true;							// Note our success.
-			}
+			resizeBuff(0,&dirPath);
 		}
 	}
 	return success;
@@ -63,12 +77,20 @@ bool createTempDir(char* dirPath) {
 void fcpy(File dest,File src) {
 	
 	uint32_t	filePos;
+	maxBuff cpyBuff(src.size());
+	uint32_t	numBytes;
+	uint32_t	remaingBytes;
+	
 	
 	filePos = src.position();				// Lets save the file pos for miss user.
 	src.seek(0);								// Point at first byte of the src file.
 	dest.truncate();							// Clear out the old.
-	while(src.available()) {				// While not at the end of the src file..
-		dest.write(src.read());				// Write the data of the dest file.
+	remaingBytes = src.size();
+	for (int i=0;i<cpyBuff.numPasses;i++) {
+		numBytes = min(cpyBuff.numBuffBytes,remaingBytes);
+		src.read(cpyBuff.theBuff,numBytes);
+		dest.write(cpyBuff.theBuff,numBytes);
+		remaingBytes = remaingBytes - numBytes;
 	}
 	src.seek(filePos);						// Put it back like we found it.						
 }
@@ -142,11 +164,16 @@ bool docFileObj::openDocFile(int openMode) {
 		if (openMode==FILE_WRITE) {											// If they want to edit this file..
 			tempFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
 			if (tempFile) {														// If we were able to open the file..
+				Serial.println("Got tempFile");
 				if (checkDoc(tempFile)) {										// If the file past the acid test..
+					Serial.println("Check ok tempFile");
 					if (createEditPath()) {										// If we were able to create an edit path..
+						Serial.println("Created edit path");
 						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
 						if (ourFile) {												// If we were able to open the edit file..
+							Serial.println("Opened edit file");
 							fcpy(ourFile,tempFile);								// Copy the original to the new editing file.
+							Serial.println("Copied over from original file.");
 							mode = fOpenToEdit;									// We are open for editing.
 							success = true;										// Success!! The edit file is open and ready to use.
 						}
@@ -367,6 +394,7 @@ bool docFileObj::createEditPath(void) {
 	
 	if (editFilePath) return true;										// If we already have a temp path set up? Bail.
 	success = false;															// As always, not a success yet.
+	
 	if (createTempDir(TEMP_FOLDER)) {									// Ok we don't have a temp path. So, if we have or can create a temp directory..
 		pathBuff = NULL;														// Start it at NULL so resizeBuff will work correctly.
 		numBytes = strlen(tempDir)+TEMP_NAME_CHARS + 1;				//	Calculate the max RAM we'll need for the path buff.
