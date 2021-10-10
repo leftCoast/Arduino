@@ -34,13 +34,16 @@ void homeScr::setup(void) {
 
    theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));
    theAppIcon->setMask(&iconMask);
-   theAppIcon->begin();
    addObj(theAppIcon); 
   
    traceX = traceX + STEP_X;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));
    theAppIcon->setMask(&iconMask);
-   theAppIcon->begin();
+   addObj(theAppIcon);
+
+   traceX = traceX + STEP_X;
+   theAppIcon = new appIcon(traceX,traceY,iconEditApp,iconPath(iconEditApp,"iconEdit.bmp"));
+   theAppIcon->setMask(&iconMask);
    addObj(theAppIcon);
 }
 
@@ -53,10 +56,9 @@ void homeScr::drawSelf(void) {
    colorObj lineColor;
    bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
 
-   ourOS.setBrightness(0);
+   //ourOS.setBrightness(0);
    lineColor.setColor(LC_CHARCOAL);
    screen->fillRectGradient(0,282,240,38,&lineColor,&black);
-   theScreenImage.begin();
    theScreenImage.draw();
-   ourOS.setBrightness(255);
+   //ourOS.setBrightness(255);
 }

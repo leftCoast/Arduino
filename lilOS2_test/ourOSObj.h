@@ -3,7 +3,7 @@
 
 #include <lilOS.h>
 
-enum  apps { homeApp = HOME_PANEL_ID, calcApp, breakoutApp };
+enum  apps { homeApp = HOME_PANEL_ID, calcApp, breakoutApp, iconEditApp };
 
 class ourOSObj : public lilOS {
 

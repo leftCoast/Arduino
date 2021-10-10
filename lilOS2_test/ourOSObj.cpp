@@ -1,6 +1,7 @@
 #include "ourOSObj.h"
 #include <rpnCalc.h>
 #include <breakout.h>
+#include <iconEdit.h>
 #include "homeScr.h"
 
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
@@ -44,7 +45,7 @@ panel* ourOSObj::createPanel(int panelID) {
    switch (panelID) {
       case homeApp      : return new homeScr();
       case calcApp      : return new rpnCalc(this,panelID);
-      //case sTermApp     : return new sTermPanel();
+      case iconEditApp  : return new iconEdit(this,panelID);
       case breakoutApp  : return new breakout(this,panelID);
       default           : return NULL;
    }
@@ -75,12 +76,10 @@ char* ourOSObj::getPanelFolder(int panelID) {
          strcat(pathBuff,"rpnCalc/");
          return pathBuff;
       break;
-      /*
-      case sTermApp     :
-         strcat(pathBuff,"sTerm");
+      case iconEditApp  :
+         strcat(pathBuff,"iconEdit/");
          return pathBuff;
       break;
-      */
       case breakoutApp  :
          strcat(pathBuff,"breakout/");
          return pathBuff;

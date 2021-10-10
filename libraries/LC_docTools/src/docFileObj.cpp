@@ -3,20 +3,16 @@
 #include <timeObj.h>
 
 
-#define TEMP_NAME_CHARS	8	// The max num chars for the temp file name 9999.tmp
-#define PATH_MIN_CHARS	5	// Min chars is X.tmp
+#define TEMP_NAME_CHARS		8	// The max num chars for the temp file name 9999.tmp
+#define PATH_MIN_CHARS		6	// Min chars is /X.tmp
+#define DEF_LOOSE_EDIT_MSG	"Closing this file will cause you to loose these unsaved changes. Continue?"
 
 char*	tempDir = NULL;
 
-// Pretty much there's only room for one or two files anyway. These'll be global so no one
-// ends up  opening up a bunch in ignorance.
-File	tempFile;
-File	docFile;
-
-
-// This will be called automatically when needed and it will use the default folder name.
-// If you want a different location you can call this in setup() with a different name and
-// all your document files will use that.
+// Called to setup the temp directory. If there is one already set up it juts falls
+// through and returns true as a success. This is called automatically when needed and it
+// will use the default folder name. If you want a different location, you can call this
+// in setup() with a different name and all your document files will use that.
 bool createTempDir(char* dirPath) {
 
 	File	theDir;
@@ -24,7 +20,7 @@ bool createTempDir(char* dirPath) {
 	bool	addSlash;
 	bool	success;
 	
-	if (tempDir) return true;							// It there already is a temp directory set up, bail!
+	if (tempDir) return true;							// If there already is a temp directory set up, bail!
 	addSlash = false;
 	success = false;
 	// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
@@ -38,7 +34,7 @@ bool createTempDir(char* dirPath) {
 			numChars = strlen(dirPath);            // Lets see how long the path is now.
 			if (resizeBuff(numChars+2,&tempDir)) {	// If we can allocate the tempDir path string..
 				strcpy(tempDir,dirPath);				// Copy in the path we got.
-				strcat(tempDir,'/');						// Plus the '/' we pulled off of it.
+				strcat(tempDir,"/");						// Plus the '/' we pulled off of it.
 				success = true;							// Note our success.
 			}
 		}
@@ -52,7 +48,7 @@ bool createTempDir(char* dirPath) {
 			}
 			if (resizeBuff(numChars+1,&tempDir)) {	// If we can allocate the tempDir path string..
 				strcpy(tempDir,dirPath);				// Copy in the path we got.
-				if (addSlash) strcat(tempDir,'/');	// Plus the '/' if it was missing.
+				if (addSlash) strcat(tempDir,"/");	// Plus the '/' if it was missing.
 				success = true;							// Note our success.
 			}
 		}
@@ -61,130 +57,306 @@ bool createTempDir(char* dirPath) {
 }
 
 
+// fcpy() : The file version of strcpy(). The dest file must be open for writing. The src
+// file must be, at least, open for reading. (Writing is ok too) The dest file index is
+// left pointing to the end of the file. The src file index is not changed.
+void fcpy(File dest,File src) {
+	
+	uint32_t	filePos;
+	
+	filePos = src.position();				// Lets save the file pos for miss user.
+	src.seek(0);								// Point at first byte of the src file.
+	dest.truncate();							// Clear out the old.
+	while(src.available()) {				// While not at the end of the src file..
+		dest.write(src.read());				// Write the data of the dest file.
+	}
+	src.seek(filePos);						// Put it back like we found it.						
+}
+
+
+// fcat() : The file version of strcat(). The dest file must be open for writing. The src
+// file must be, at least, open for reading. (Writing is ok too) The dest file index is
+// left pointing to the end of the file. The src file index is not changed.
+void fcat(File dest,File src) {
+	
+	uint32_t	filePos;
+	uint32_t	numBytes;
+	
+	numBytes = dest.size();					// How many bytes we talking here?
+	dest.seek(numBytes);						// Point at end of the dest file.
+	filePos = src.position();				// Lets save the file pos for miss user.
+	src.seek(0);								// Point at first byte of the src file.
+	while(src.available()) {				// While not at the end of the src file..
+		dest.write(src.read());				// Write the data of the dest file.
+	}
+	src.seek(filePos);						// Put it back like we found it.					
+}
+
+
 
 // ************************************************************
 // ********************  docFileObj class  ********************
 // ************************************************************
 
-		
-docFileObj::docFileObj(void) {
 
-	docFilePath		= NULL;		// Dynamic things start at NULL.
-	tempFilePath	= NULL;		// Dynamic things start at NULL.
-	haveInfo			= false;		// And we have no info at all as yet.
+// A docFile object MUST have a path to exist. 	
+docFileObj::docFileObj(char* filePath) {
+	
+	int numBytes;
+	
+	docFilePath		= NULL;								// Dynamic things start at NULL.
+	editFilePath	= NULL;								// Dynamic things start at NULL.
+	mode 				= fClosed;							// We are NOT editing at the moment.
+	if (filePath) {										// If we have	a a file path. (Sanity, we'd better!)
+		numBytes = strlen(filePath)+1;				// Calculate the number of bytes to store it.
+		if (resizeBuff(numBytes,&docFilePath)) {	// If we get the RAM to store it..
+			strcpy(docFilePath,filePath);				// Save the path.
+		}
+	}						
 }
 
 
 docFileObj::~docFileObj(void) {
 
+	closeDocFile();						// Close files and Recycle the editFile stuff.
 	resizeBuff(0,&docFilePath);		// Recycle the docFilePath.
-	if (tempFilePath) {					// If we have a temp file..
-		SD.remove(tempFilePath);		// Erase the temp file.
-		resizeBuff(0,&tempFilePath);	// Recycle the tempFilePath.
-	}
 }
 
 
-// Called by user to create a new blank document. (Actually, it doen't create it, it just
-// sets everything up for a new document. Leaving docFilePath = NULL) This removes all
-// reference to any file we were working with, deletes any temp file we had. Then, sets up
-// a new temp file and calls initNewTempFile() to initialize it.
-bool docFileObj::newDocFile(void){
-	
+// Called by user to open a document.
+//
+// If opening for reading, its left open for reading. User MUST call close on it when
+// finished.
+// 
+// If open for editing, this creates a clone of the doc file for editing and leaves that
+// open to be used by the user for editing. And of course the user must call closed on it
+// when finished. But, before that, saveDocFile() needs to be called for saving changes to
+// the original file.
+bool docFileObj::openDocFile(int openMode) {
+
+	File	tempFile;
 	bool	success;
 	
-	success = false;							// As always, not a success yet.
-	resizeBuff(0,&docFilePath);			// New file? At this point we have no document file.
-	haveInfo = false;							// 'Cause from now we don't.
-	if (createTempFile()) {					// If we have or can create a temp file..	
-		if (initNewTempFile()) {			// If we can init this new working file.. (New docs gets this call.)
-			haveInfo = true;					// If the initTempFile() was a success, then we have info.
-			success = true;					// And this was a complete success!
-		}
-	}
-	return success;							// return our success or failure.
-}
-
-
-// Called by user to open a new document. If there is already a document that this object
-// is associated with, it clears everything out and starts over fresh with this new path.
-bool docFileObj::openDocFile(char* filePath) {
-
-	int	numChars;
-	bool	success;
-	
-	success = false;												// Not a success yet..
-	if (filePath) {												// If they gave us a non NULL path pointer..
-		numChars = strlen(filePath);							// Count the number of chars in the file path.
-		if (numChars>PATH_MIN_CHARS) {						// If the file path is > than the path minium.
-			haveInfo = false;										// No longer setup.
-			if (tempFilePath) {									// If we currently have a tempFile..
-				SD.remove(tempFilePath);						// Erase the temp file.
-				resizeBuff(0,&tempFilePath);					// Recycle the tempFilePath.	
+	success = false;																// Not a success yet..
+	if (docFilePath) {															// If we have a non-NULL path..
+		if (openMode==FILE_WRITE) {											// If they want to edit this file..
+			tempFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
+			if (tempFile) {														// If we were able to open the file..
+				if (checkDoc(tempFile)) {										// If the file past the acid test..
+					if (createEditPath()) {										// If we were able to create an edit path..
+						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
+						if (ourFile) {												// If we were able to open the edit file..
+							fcpy(ourFile,tempFile);								// Copy the original to the new editing file.
+							mode = fOpenToEdit;									// We are open for editing.
+							success = true;										// Success!! The edit file is open and ready to use.
+						}
+					}
+				}
+				tempFile.close();													// Close the doc file.
 			}
-			if (resizeBuff(numChars+1,&docFilePath)) {	// If we get the RAM to store the path..
-				strcpy(docFilePath,filePath);					// Save off the path.
-				haveInfo = checkDoc();							// See if we can open and understand the document file.
-				success = haveInfo;								// If we have info, we'll call that a success.
+		} else if (openMode==FILE_READ) {									// If they just want to read this file..
+			ourFile = SD.open(docFilePath,FILE_READ);						// Have a go at opening the doc file path.
+			if (ourFile) {															// If we were able to open the file..
+				if (checkDoc(ourFile)) {										// If the file past the acid test..
+					ourFile.seek(0);												// Point at first byte of the file.
+					mode = fOpenToRead;											// We are open for reading.
+					success = true;												// Success! The file is open and ready to read.
+				}
 			}
 		}
 	}
-	return success;												// Tell the user.
+	return success;
 }
 
 
-// Take the tempFile, if any, and past it over the old docFile. Passing in a file path
-// will redirect to a new docFile and this will be what we will be editing from now on.
+// If we are editing a file, we will save the edited version either to a new file path. If
+// one has been passed in, or if not, to the original doc file. If we are NOT editing AND
+// we are passed in a new file path, we'll clone the doc file to this new path. If, in
+// this case, no path is passed in? Its kind of.. "Shrug your shoulders and return false."
+// The user is obviously just not getting it.
 bool docFileObj::saveDocFile(char* newFilePath) {
+	
+	File				tempFile;
+	bool				success;
+	
+	success = false;													// Not a success yet.
+	if (mode==fEdited || mode==fOpenToEdit) {					// If we are using an editFile..
+		if (newFilePath) {											// If we have a new path to save to..
+			tempFile = SD.open(newFilePath,FILE_WRITE);		// Have a go at opening the new file path.
+			if (tempFile) {											// If we got the new file..
+				fcpy(tempFile,ourFile);								// Copy the edited file to the new file.
+				tempFile.close();										// Close the new file.
+				mode = fOpenToEdit;									// Clear the "dirty" flag, if any.
+				success = true;										// Success!								
+			} 
+		} else {															// Else, no path was given. Store edit to doc file.
+			tempFile = SD.open(docFilePath,FILE_WRITE);		// Have a go at opening the doc file path.
+			if (tempFile) {											// If we were able to open the file..
+				fcpy(tempFile,ourFile);								// Copy the editing file to the original file.
+				tempFile.close();										// Close the original file.
+				mode = fOpenToEdit;									// Clear the "dirty" flag, if any.
+				success = true;										// And we are a success!
+			}
+		}
+	} else if (mode==fOpenToRead && newFilePath) {			// If open to read AND we have a new path to save to..												// Set the pointer to byte 0.
+		tempFile = SD.open(newFilePath,FILE_WRITE);			// Have a go at opening the new file path.
+		if (tempFile) {												// If we got the new file..
+			fcpy(tempFile,ourFile);									// Copy the original file to the new file.
+			tempFile.close();											// Close the new file.
+			success = true;											// And again, we are a success!
+		}
+	}
+	return success;			
+}
+
+
+// Ask this question in such a way that if ok, it will return true;
+bool docFileObj::askOk(char* qStr) { return true; }
+
+
+// This closes the docFile and if there is a temp file associated with it, that is
+// deleted. There is no checking if this is ok to do, or if data will be lost. All that is
+// up to the user of this object.
+void docFileObj::closeDocFile(void) {
+
+	switch(mode) {
+		case fClosed		: break;
+		case fOpenToRead	:
+			ourFile.close();
+			mode = fClosed;
+		break;
+		case fOpenToEdit	:
+			ourFile.close();
+			SD.remove(editFilePath);
+			resizeBuff(0,&editFilePath);
+			mode = fClosed;
+		break;
+		case fEdited :
+			if (askOk(DEF_LOOSE_EDIT_MSG)){
+				ourFile.close();
+				SD.remove(editFilePath);
+				resizeBuff(0,&editFilePath);
+				mode = fClosed;
+			}
+		break;
+	}
+}
+
+
+bool docFileObj::changeDocFile(char* newPath) {
 
 	int	numBytes;
-	bool	success;
 	
-	success = false;												// Not a success yet.
-	if (!tempFilePath) return false;							// No temp path? This is just nuts! Bail.
-	if (newFilePath) {											// If we are saving to a new file path..
-		docFile = SD.open(newFilePath,FILE_WRITE);		// Have a go at opening the new file path.
-	} else if (docFilePath) {									// Else, we need to save to the original path..
-		docFile = SD.open(docFilePath,FILE_WRITE);		// Have a go at opening the original file path.
-	}
-	if (docFile) {													// If we were able to open a file to save to..
-		tempFile = SD.open(tempFilePath,FILE_READ);		// Try to open up the temp file.
-		if (tempFile) {											// If we were successful in opening up the temp file..
-			while(tempFile.available()) {						// While not at the end of the temp file..
-				docFile.write(tempFile.read());				// Read a byte from the temp file and write it to the doc file.
-			}
-			tempFile.close();										// We opened the temp file, we close it!
-			if (newFilePath) {									// If we've been using a new file path..
-				numBytes = strlen(newFilePath) + 1;			// Calculate the number of byte for the new doc file path.
-				if (resizeBuff(numBytes,&docFilePath)) {	// If we can re-allocate the RAM.
-					strcpy(docFilePath,newFilePath);			// Save off our new docFile path.
-					success = checkDoc();						// And, if we can parse the new document file. we'll call that a success!
-				}
-			} else {
-				success = true;									// Else we're using the original file, we're calling this a success.
+	if (mode==fClosed) {											// If the file is closed.
+		if (newPath) {												// If we have	a new file path. (Sanity, we'd better!)
+			numBytes = strlen(newPath)+1;						// Calculate the number of bytes to store it.
+			if (resizeBuff(numBytes,&docFilePath)) {		// If we get the RAM to store it..
+				strcpy(docFilePath,newPath);					// Save the path.
+				return true;										// Success!
 			}
 		}
-		docFile.close();											// We opened the save file, we close it!
+	}
+	return false;													// You fail!
+}
+
+
+byte docFileObj::peek(void) {
+
+	if (mode != fClosed) {
+		return ourFile.peek();
+	} else {
+		return 0;
+	}
+}
+
+uint32_t docFileObj::position(void) {
+	
+	if (mode != fClosed) {
+		return ourFile.position();
+	} else {
+		return 0;
+	}
+}
+
+bool docFileObj::seek(uint32_t index) {
+	
+	if (mode != fClosed) {
+		return ourFile.seek(index);
+	} else {
+		return false;
+	}
+}
+
+uint32_t docFileObj::size(void) {
+	
+	if (mode != fClosed) {
+		return ourFile.size(); 
+	} else {
+		return 0;
 	}
 }
 
 
-// These two.. If the calling code really wants to see them.. Hand back the pointers to
-// the two different path strings we hold. We have to trust they don't go changing them.			
-char* docFileObj::getDocFilePath(void) {return docFilePath; }
-char* docFileObj::getTempFilePath(void) {return tempFilePath; }
-					
-					
+int docFileObj::read(void) {
+
+	if (mode != fClosed) {
+		return ourFile.read();
+	} else {
+		return -1;
+	}
+}
+
+uint16_t docFileObj::read(byte* buff,uint16_t numBytes) {
+
+	if (mode != fClosed) {
+		return ourFile.read(buff,numBytes);
+	} else {
+		return 0;
+	}
+}
+
+
+size_t docFileObj::write(uint8_t aByte) {
+	
+	size_t	result;
+	
+	result = 0;
+	if (mode==fOpenToEdit || mode==fEdited) {
+		result = ourFile.write(&aByte,1);
+		if (result>0) {
+			mode = fEdited;
+		}
+	}
+	return result;
+}
+
+
+size_t docFileObj::write(byte* buff,size_t numBytes) {
+	
+	size_t result;
+	
+	result = 0;
+	if (mode==fOpenToEdit || mode==fEdited) {
+		result = ourFile.write(buff,numBytes);
+		if (result>0) {
+			mode = fEdited;
+		}
+	}
+	return result;
+}	
+
+		
 // When the inherited opens up a document, this will be called to see if its parsable as
 // the kind of file the class is looking for.
-bool docFileObj::checkDoc(void) { return false; }
+bool docFileObj::checkDoc(File inFile) { return false; }
 
 
 // This finds a unused file name in the tempFolder then checks to make sure it can be
 // created/opened. Once this is accomplished, it closes the tempFile saves off the path to
 // this file and returns its success or failure.
-bool docFileObj::createTempFile(void) {
+bool docFileObj::createEditPath(void) {
 	
+	File		tempFile;
 	timeObj	timeOut(FILE_SEARCH_MS);
 	char*		pathBuff;
 	char		fileNumStr[TEMP_NAME_CHARS];
@@ -193,7 +365,7 @@ bool docFileObj::createTempFile(void) {
 	bool		done;
 	bool		success;
 	
-	if (tempFilePath) return true;										// If we already have a temp path set up? Bail.
+	if (editFilePath) return true;										// If we already have a temp path set up? Bail.
 	success = false;															// As always, not a success yet.
 	if (createTempDir(TEMP_FOLDER)) {									// Ok we don't have a temp path. So, if we have or can create a temp directory..
 		pathBuff = NULL;														// Start it at NULL so resizeBuff will work correctly.
@@ -215,8 +387,8 @@ bool docFileObj::createTempFile(void) {
 					if (tempFile) {											// If we were able to create the file..
 						tempFile.close();										// Close it.
 						numBytes = strlen(pathBuff)+1;					// Grab the num chars of the path +1.
-						if (resizeBuff(numBytes,&tempFilePath)) {		// If we can allocate the tempFilePath c string..
-							strcpy(tempFilePath,pathBuff);				// Save off the path that worked.	
+						if (resizeBuff(numBytes,&editFilePath)) {		// If we can allocate the editFilePath c string..
+							strcpy(editFilePath,pathBuff);				// Save off the path that worked.	
 							success = true;									// And We'll call that a success!
 						}
 					}
@@ -229,36 +401,6 @@ bool docFileObj::createTempFile(void) {
 }
 
 
-// Does nothing now, but it can be inherited to setup a newly created temp file that has
-// no document file to copy from.
-bool docFileObj::initNewTempFile(void) { return true; }
-
-
-// Takes the docFile and copies it over to the tempFile giving the user somewhere to put
-// her changes.
-bool docFileObj::copyToTempFile(void) {
-
-	bool	success;
-
-	success = false;												// We're not a success yet.
-	if (haveInfo) {												// If we have checked and ok'ed our doc file..
-		if (createTempFile()) {									// If we can/or have set up a temp file.
-			tempFile = SD.open(tempFilePath,FILE_WRITE);	// Try to open the temp file for writing.
-			if (tempFile) {										// If we opened the temp file..
-				docFile = SD.open(docFilePath,FILE_READ);	// Try to open the doc file for reading.
-				if (docFile) {										// If we opened the doc file..
-					while(docFile.available()) {				// While w're not at the EOF of the doc file..
-						tempFile.write(docFile.read());		// Write this byte from the doc file to the temp file.
-					}
-					success = true;								// Ok, we'll call this a success.
-					docFile.close();								// We opened it, we close it.
-				}
-				tempFile.close();									// Again, we opened it, we close it.
-			}
-		}
-	}
-	return success;												// Return our success or failure.
-}
 
 
 

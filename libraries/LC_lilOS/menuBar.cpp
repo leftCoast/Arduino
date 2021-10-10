@@ -40,7 +40,6 @@ closeBtn::closeBtn(panel* inPanel)
   : iconButton(CLOSE_X,CLOSE_Y,inPanel->mOSPtr->stdIconPath(x22),22) {
   
   mPanel = inPanel;
-  begin();
  }
 
 
@@ -55,10 +54,9 @@ void closeBtn::doAction(void) { mPanel->close(); }
 
 
 newBtn::newBtn(panel* inPanel,int x,int y)
-  : iconButton(x,y,inPanel->mOSPtr->stdIconPath(cross22),22)  {
+  : iconButton(x,y,inPanel->mOSPtr->stdIconPath(cross22),22)  { 
   
   mPanel = inPanel;
-  begin();
 }
 
    
@@ -73,7 +71,6 @@ searchBtn::searchBtn(panel* inPanel,int x,int y)
   : iconButton(x,y,inPanel->mOSPtr->stdIconPath(search22),22)  {
   
   mPanel = inPanel;
-  begin();
 }
  
     
@@ -88,7 +85,6 @@ trashBtn::trashBtn(panel* inPanel,int x,int y)
   : iconButton(x,y,inPanel->mOSPtr->stdIconPath(trashC22),22)  {
   
   mPanel = inPanel;
-  begin();
 }
 
 

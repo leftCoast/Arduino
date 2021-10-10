@@ -13,7 +13,7 @@ appIcon::appIcon(int xLoc,int yLoc,int message,char* path,int pix)
   : iconButton(xLoc,yLoc,path,pix) { mMessage = message;}
 
   
-appIcon::~appIcon(void) {  }
+appIcon::~appIcon(void) { }
 
 
 void appIcon::doAction(void) { nextPanel = mMessage; }

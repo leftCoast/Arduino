@@ -50,10 +50,10 @@
 #define BTN_COL_3    125
 #define BTN_COL_4    175
 
-#define  CLOSE_X    BTN_COL_1
-#define  CLOSE_Y    LINE_Y + 6
-#define  CLOSE_W    BTN_WIDTH2
-#define  CLOSE_H    10
+//#define  CLOSE_X    BTN_COL_1
+//#define  CLOSE_Y    LINE_Y + 6
+//#define  CLOSE_W    BTN_WIDTH2
+//#define  CLOSE_H    10
 
 extern      bool            gSecondFx;
             calculator      mCalc;           // The calculator object. Feed it key strokes and it gives calculations.

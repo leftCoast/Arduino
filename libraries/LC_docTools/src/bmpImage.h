@@ -4,30 +4,26 @@
 #include <baseImage.h>
 #include <colorObj.h>
 
+
+extern bool createNewBmpFile(char* newPath,int inWidth,int inHeight);
+
 class bmpImage :	public baseImage {
 
 	public:
-				bmpImage(void);
+				bmpImage(char* filePath);
 	virtual	~bmpImage(void);
-
-	virtual		bool				getRow(int row,RGBpack* RGBArray,int numPix,File* inFile);
-	virtual		colorObj			getPixel(int x,int y);							
+	
+	virtual	RGBpack	getRawPixel(int x,int y);
+	virtual	void		setRawPixel(int x,int y,RGBpack* anRGBPack);	
+	virtual	bool		checkDoc(File inFile);
+				uint32_t	fileIndex(int x,int y);
+					
 	protected:
 	
-	virtual		RGBpack			getPixel(int x,int y,File* imageFile);
-	virtual		void				setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile);	
-	virtual		bool				checkDoc(void);
-					uint32_t			calcFileSize(void);
-					void				calcDefaults(void);
-	virtual		bool				initNewTempFile(void);
-					unsigned long	fileIndex(int x,int y);
-				
-				bool				rightSideUp;
-				int     			imageOffset;
-				int				imageDepth;
-				int				pixBytes;
-				int				bytesPerRow;
-				unsigned long	fileSize;
+				bool		rightSideUp;
+				int32_t	imageOffset;
+				int16_t	pixBytes;
+				int32_t	bytesPerRow;
 };
 
 #endif

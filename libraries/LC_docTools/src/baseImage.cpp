@@ -1,13 +1,11 @@
 #include <baseImage.h>
-#include <resizeBuff.h>
-
-
 
 // Just setup default values..
-baseImage::baseImage(void) {
+baseImage::baseImage(char* filePath)
+	: docFileObj(filePath) {
 
-	width		= DEF_WIDTH;
-	height	= DEF_HEIGHT;
+	width		= 0;
+	height	= 0;
 }
 
 		
@@ -15,15 +13,10 @@ baseImage::baseImage(void) {
 baseImage::~baseImage(void) { }
 
 
-// If the user wants to create a new file for the source data. This is called
-// to set the width and height for creating the temp image file that is used for
-// editing.
-bool baseImage::newDocFile(int inWidth,int inHeight) {
-	
-	width		= inWidth;				// Width known.
-	height	= inHeight;				// Height known.
-	return newDocFile();
-}
+int baseImage::getWidth(void) { return width; }
+
+
+int baseImage::getHeight(void) { return height; }
 
 		
 // Grab a pixel from this location from your image file. Return it as a colorObj.
@@ -32,140 +25,85 @@ colorObj baseImage::getPixel(int x,int y) {
 
 	colorObj	aColor;
 	RGBpack	aPack;
-	File		imageFile;
-	aColor.setColor(&black);										// Black's a good default.
-	if(checkXYLmits(x,y)) {											// Make sure the x,y params are "sane".
-		if (haveInfo) {												// If we have a valid image file.
-			imageFile = SD.open(docFilePath,FILE_READ);		//	Try to open this file for reading.
-			if (imageFile) {											// If we were able to open the image file..
-				aPack = getPixel(x,y,&imageFile);				// Ask inherited to give us the packed pixel.
-				imageFile.close();									// Close the image file.
-				aColor.setColor(&aPack);							// Set it up as a colorObj.
-			}
+
+	aColor.setColor(&black);				// Black's a good default.
+	if (mode != fClosed) {					// If the file's open for anything..	
+		if(checkXYLmits(x,y)) {				// Make sure the x,y params are "sane".
+			aPack = getRawPixel(x,y);			// Ask inherited to give us the packed pixel.
+			aColor.setColor(&aPack);		// Set it up as a colorObj.
 		}
 	}
-	return aColor;														// return the colorObj.
+	return aColor;								// return the colorObj.
 }
 
 
-// Grab a row of pixels from this image, 0r a passed in already opened and positioned file
-// or.. the temp file.
-bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,int xStart,bool fromTemp) {
-
-	File	imageFile;
-	int	xMax;
-	int	arrayIndex;
-	bool	success;
-	bool	opendFile;
-	
-	success = false;
-	if (haveInfo) {																// If we have a valid image file..
-		if(checkRowParams(row,numPix,xStart)) {							// Make sure the row params are "sane".
-			opendFile = false;													// Not opened a file as yet.
-			if (fromTemp) {														// If we're supposed ot get this from the temp file..
-				if (tempFilePath) {												// If we even have a temp file..
-					imageFile = SD.open(tempFilePath,FILE_READ);			//	Try to open this file for reading.
-					if (imageFile) {												// If we were able to open the temp file..
-						opendFile = true;											// Note that we opened it.
-					}
-				}
-			} else {
-				imageFile = SD.open(docFilePath,FILE_READ);				//	Try to open this file for reading.
-				if (imageFile) {													// If we were able to open the doc file..
-					opendFile = true;												// Note that we opened it.
-				}
-			}
-			if (opendFile) {														// If we were able to open the image file..
-				xMax = xStart + numPix;											// Calculate the endpoint.
-				arrayIndex = 0;													// Start array index at zero.
-				for(int i=xStart;i<xMax;i++) {								// Loop through all the pixels..
-					RGBArray[arrayIndex] = getPixel(i,row,&imageFile);	// Pass in the row, offset and file, get back the pixel.
-					arrayIndex++;													// Bump up the array index.
-				}
-				imageFile.close();												// Clean up our mess.
-				success = true;													// At this point we're calling it a success.
-			}
-		}
-	}
-	return success;
-}
-
-
-// Lets say we have an open file set to the correct starting point ready to go? This is
-// going to be the call we use. It should be the fastest way wo grab a bunch of image
-// data. Providing that the inherited does a good job filling it out and using it.
-bool baseImage::getRow(int row,RGBpack* RGBArray,int numPix,File* inFile) { return false; }
-
-
-// Given a colorObj, set this pixel in the temp image file to that color.
+// Given a colorObj, set this pixel to that color. (n the editing file)
 bool baseImage::setPixel(int x,int y,colorObj* aColor) {
 
 	RGBpack	aPack;
-	File		imageFile;
 	bool		success;
 	
-	success = false;														// Not a success yet.
-	if (checkXYLmits(x,y)) {											// Limit x & y to "sane" values.
-		if (haveInfo) {													// If we have a valid image file..
-			if (createTempFile()) {										// If we have or can create a temp file..	
-				imageFile = SD.open(tempFilePath,FILE_WRITE);	// Have a go at opening the temp file.
-				if (imageFile) {											// If we got the temp file..
-					aPack = aColor->packColor();						// Pack up the color.
-					setPixel(x,y,&aPack,&imageFile);					// Set the pixel with this color into this file.
-					imageFile.close();									// Close the file.
-					success = true;										// Looks good!
+	success = false;										// Not a success yet.
+	if (mode==fOpenToEdit || mode==fEdited) {		// If the file's open for editing..
+		if (checkXYLmits(x,y)) {						// If the point is within the image..											
+			aPack = aColor->packColor();				// Pack up the color.
+			setRawPixel(x,y,&aPack);						// Set the pixel.
+			success = true;								// Looks good!
+		}
+	}
+	return success;										// Pass back our result.
+}
+
+
+// Grab a row of pixels from this image.
+bool baseImage::getRow(int x,int y,int numPix,RGBpack* RGBArray) {
+
+	int	xMax;
+	int	arrayIndex;
+	bool	success;
+	
+	success = false;													// Not a success yet.
+	if (mode != fClosed) {											// If the file's open for anything..
+		xMax = x + numPix;											// Calculate xMax.
+		if (checkXYLmits(x,y)) {									// If the start point is within the image..
+			if (checkXYLmits(xMax-1,y)) {							// If the end point is ALSO within the image..
+				arrayIndex = 0;										// Start array index at zero.
+				for(int i=x;i<xMax;i++) {							// Loop through all the pixels..
+					RGBArray[arrayIndex] = getRawPixel(i,y);	// Pass in the row, offset and file, get back the pixel.
+					arrayIndex++;										// Bump up the array index.
 				}
+				success = true;										// At this point we're calling it a success.
 			}
 		}
 	}
-	return success;													// Pass back our result.	
+	return success;													// Pass back our result.
 }
 
 
 // Given an RGBpack array, set this row of pixels in the temp image file to
 // these colors.
-bool baseImage::setRow(int row,RGBpack* RGBArray,int numPix,int xStart) {
+bool baseImage::setRow(int x,int y,int numPix,RGBpack* RGBArray) {
 		
-	File	imageFile;
 	int	xMax;
 	int	arrayIndex;
 	bool	success;
 	
-	success = false;
-	if (haveInfo) {																								// If we have a valid image file..
-		if(checkRowParams(row,numPix,xStart)) {															// Make sure the row params are "sane".
-			imageFile = SD.open(tempFilePath,FILE_WRITE);												//	Try to open this file for reading.
-			if (imageFile) {																						// If we were able to open the image file..
-				xMax = xStart + numPix;																			// Calculate the endpoint.
-				arrayIndex = 0;																					// Start array index at zero.
-				for(int i=xStart;i<xMax;i++) {																// Loop through all the pixels..
-					setPixel(i,row,&(RGBArray[arrayIndex]),&imageFile);								// Set the pixel with this color into this file.
-					arrayIndex++;																					// Bump up the array index.
+	success = false;													// Not a success yet.
+	if (mode==fOpenToEdit || mode==fEdited) {					// If the file's open for editing..
+		xMax = x + numPix;											// Calculate xMax.
+		if (checkXYLmits(x,y)) {									// If the start point is within the image..
+			if (checkXYLmits(xMax,y)) {							// If the end point is ALSO within the image..
+				arrayIndex = 0;										// Start array index at zero.
+				for(int i=x;i<xMax;i++) {							// Loop through all the pixels..
+					setRawPixel(i,y,&(RGBArray[arrayIndex]));	// Pass in the row, offset and file, get back the pixel.
+					arrayIndex++;										// Bump up the array index.
 				}
-				imageFile.close();																				// Clean up our mess.
-				success = true;																					// Success is assured!
+				success = true;										// At this point we're calling it a success.
 			}
 		}
 	}
-	return success;
+	return success;													// Pass back our result.
 }
-
-
-int baseImage::getWidth(void) { return width; }
-
-
-int baseImage::getHeight(void) { return height; }
-
-					
-// Grab a pixel from this location from your image file.
-// Return it as a RGBpack.
-// THIS ONE MUST BE FILLED OUT BY WHOM THAT INHERITS THIS.
-RGBpack baseImage::getPixel(int x,int y,File* inFile) {  }
-   
-
-// Given an RGBpack, set this pixel in the temp image file to that color.
-// THIS is the one that should be inherited and filled out.
-void baseImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) { }
 
 
 bool baseImage::checkXYLmits(int x, int y) {
@@ -174,16 +112,3 @@ bool baseImage::checkXYLmits(int x, int y) {
 	if (y < 0 || y >= height) return false;	// If y is negative or past the bottom, bail.
 	return true;										// If we got this far, call it good.
 }
-
-
-// Is this necessary? Maybe an out of bounds should just give back black instead of
-// stopping the code.
-bool baseImage::checkRowParams(int row,int numPix,int xStart) {
-	
-	if (row<0 || row>=height) return false;			// If row is negative or greater than the height, bail.
-	if (numPix<1 || numPix>width) return false;		// If numPix is zero or negative or greater than the width, bail.
-	if (xStart<0 || xStart>=width) return false;		// If xStart is negative or greater than or then same as width, bail.
-	if (width-xStart!=numPix) return false;			// If width minus xStart does not equal the numPix. bail.
-	return true;												// If we get this far we'll call it good!
-}
-

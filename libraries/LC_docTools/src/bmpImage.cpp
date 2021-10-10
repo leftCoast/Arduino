@@ -49,31 +49,77 @@ void write32(uint32_t val, File f) {
 
 
 // **************************************************************************
-// ***************************** bmpImage class *****************************
-// **************************************************************************  
-  
+// ********************** Create new .bmp file function *********************
+// **************************************************************************
 
-bmpImage::bmpImage(void)
-: baseImage() { }
+ 
+bool createNewBmpFile(char* newPath,int inWidth,int inHeight) {
+
+	File		bmpFile;
+	bool		success;
+	uint32_t	pixBytes;
+	uint32_t	bytesPerRow;
+	uint32_t	fileSize;
+	uint32_t	imageBytes;
+	
+	Serial.println("createNewBmpFile");
+	success = false;															// Ok, assume failure..									
+	bmpFile = SD.open(newPath,FILE_WRITE);								// See if its a valid path.
+	if (bmpFile) {    														// We got a file?
+		Serial.println("Got .bmp file");
+		write16(0x4D42,bmpFile);											// It wants this. Whatever.
+		pixBytes		= DEF_DEPTH / 8;										// Calc. bytes per pixel.
+		bytesPerRow	= inWidth * pixBytes;								// Calc bytes per row.
+		while(bytesPerRow % 4) bytesPerRow++;							// We need to pad it to a multiple of 4.
+		fileSize = DEF_IMAGE_OFFSET + (inHeight * bytesPerRow);	// Calc. fileSize.
+		write32(fileSize,bmpFile);											// Calculate and write out the file size.
+		write32(0,bmpFile);													// write out our creator bits. All I've seen are zero.
+		write32(DEF_IMAGE_OFFSET,bmpFile);								// Image offset. Always sees to be 54. Size of header?
+		write32(40,bmpFile);													// DIB Header size. Always seems to be 40.
+		write32(inWidth,bmpFile);											// Width.
+		write32(inHeight,bmpFile);											// Height.
+		write16(1,bmpFile);													// It wants a one here. Why? Its a mystery to me.
+		write32(DEF_DEPTH,bmpFile);										// We're going for 32 bit image stuff here.
+		write32(0,bmpFile);													// No compression.
+		imageBytes = bytesPerRow * inHeight;							// Calc. total image bytes.
+		for (uint32_t i=0;i<imageBytes;i++) {							// For every bloody byte of pixel data..
+			bmpFile.write(255);												// Fill image space with white.
+		}
+		bmpFile.close();														// Default file has been initialized. Close the file.
+		success = true;														// Made it this far? We're calling this a success!
+	}
+	return success;															// Report our results.
+}
+
+
+
+// **************************************************************************
+// ***************************** bmpImage class *****************************
+// **************************************************************************
+
+
+bmpImage::bmpImage(char* filePath)
+	: baseImage(filePath) {  }
 
 
 bmpImage::~bmpImage(void) {  }
 
-// HACK : Added this to  make compiler pass this through.
-colorObj bmpImage::getPixel(int x,int y) { return baseImage::getPixel(x,y); }
-
 
 // Grab a pixel from this location from your image file.
 // Return it as a RGBpack.
-RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
+RGBpack bmpImage::getRawPixel(int x,int y) {
 	
 	uint8_t	buf[COLOR_BUF_SIZE];
 	RGBpack	aPack;
+	uint32_t	index;
 	
-	if (haveInfo) {							// If we were able to read the image file (earlier)..
-		imageFile->seek(fileIndex(x,y));	// Point the file to our pixel.
-		imageFile->read(buf,pixBytes);	// Grab the pixel.
-		aPack.r = buf[2];						// Stuff the pack.
+	if (mode != fClosed) {							// If we are not closed. IE valid open file.
+		index = fileIndex(x,y);						// Do the math for this pixel index.
+		if (index != ourFile.position()) {		// If we are NOT already there..
+			ourFile.seek(index);						// Point the file to our pixel.
+		}
+		ourFile.read(buf,pixBytes);				// Grab the pixel.
+		aPack.r = buf[2];								// Stuff the pack.
 		aPack.g = buf[1];
 		aPack.b = buf[0];
 	}
@@ -81,134 +127,67 @@ RGBpack bmpImage::getPixel(int x,int y,File* imageFile) {
 }
 
 
-bool bmpImage::getRow(int row,RGBpack* RGBArray,int numPix,File* inFile) {
-
-	uint8_t	buf[COLOR_BUF_SIZE];
-	bool		success;
-	
-	success = false;									// Not a success yet.
-	if (inFile) {										// If we got an image file..
-		if (row >= 0) {								// If we have a sane row number..
-			inFile->seek(fileIndex(0,row));		// Point the file to our starting pixel.
-		}													// Otherwise assume it has been set already.
-		for(int i=0;i<numPix;i++) {				// Loop through all the pixels..
-			inFile->read(buf,pixBytes);			// Grab a pixel.
-			RGBArray[i].r = buf[2];					// Stuff the pack.
-			RGBArray[i].g = buf[1];
-			RGBArray[i].b = buf[0];
-		}
-		success = true;								// At this point we're calling it a success.
-	}
-	return success;
-}
-
-
 // Given an RGBpack, set this pixel in the temp image file to that color.
 // THIS is the one that should be inherited and filled out.
-void bmpImage::setPixel(int x,int y,RGBpack* anRGBPack,File* imageFile) {
+void bmpImage::setRawPixel(int x,int y,RGBpack* anRGBPack) {
 	
-	if (haveInfo) {								// If we were able to read the image file (earlier)..
-		imageFile->seek(fileIndex(x,y));		// Point the file to our pixel.
-		imageFile->write(anRGBPack->b);		// Write out the values.
-		imageFile->write(anRGBPack->g);
-		imageFile->write(anRGBPack->r);
+	uint32_t	index;
+	
+	if (mode==fOpenToEdit || mode==fEdited) {		// If we are in an edit mode..
+		index = fileIndex(x,y);							// Do the math for this pixel index.
+		if (index != ourFile.position()) {			// If we are NOT already there..
+			ourFile.seek(index);						// Point the file to our pixel.
+		}
+		ourFile.write(anRGBPack->b);					// Write out the values.
+		ourFile.write(anRGBPack->g);
+		ourFile.write(anRGBPack->r);
 	}
 }
 
 
 // Open the doc file and see if its what we expect. Then grab out the info. we need to
 // "deal" with it.
-bool bmpImage::checkDoc(void) {
+bool bmpImage::checkDoc(File bmpFile) {
 
-	File		bmpFile;
 	uint32_t	creatorBits;	// A thing that seems to always be zero.
-	uint32_t	DIBHeaderSize;	// Ans so is this ting.
+	uint32_t	DIBHeaderSize;	// And so is this thing.
 	int32_t	imageHeight;	// Used as a temp. Can be negative.
+	int32_t	fileSize;
+	int16_t	imageDepth;
 	bool		success;
 	
-	success = false;														// Ok, assume failure..									
-	bmpFile = SD.open(docFilePath);									// See if its a valid path.
-	if (bmpFile) {    													// We got a file?
-		if (read16(bmpFile) == 0x4D42) {								// If we have something or other..
-			fileSize = read32(bmpFile);								// We grab the file size.
-			creatorBits = read32(bmpFile);							// Creator bits
-			imageOffset = read32(bmpFile);							// image offset.
-			DIBHeaderSize = read32(bmpFile);							// read DIB header size?
-			width = read32(bmpFile);									// width? Good thing to save for later.
-			imageHeight = read32(bmpFile);							// Height? Negative means the data is right side up. Go figure..
-			rightSideUp = imageHeight<0;								// Set a bool about that bit.
-			height = abs(imageHeight);									// Bloody weird encrypting.
-			if (read16(bmpFile) == 1) {								// if the next word is 1? What's this mean? Needs to be though.
-				imageDepth = read16(bmpFile);							// color depth.
-				if (imageDepth == 24 || imageDepth == 32) {		// We can do 24 or 32 bits..
-					pixBytes = imageDepth / 8;							// Bytes / pixel
-					if (!read32(bmpFile)) {								// And no compression!
-						bytesPerRow = width * pixBytes;				// Data takes up this much, but..
-						while(bytesPerRow % 4) bytesPerRow++;		// We need to pad it to a multiple of 4.
-						success = true;									// Made it this far? We can do this!
-					}
+	success = false;													// Ok, assume failure..									
+	if (read16(bmpFile) == 0x4D42) {								// If we have something or other..
+		fileSize = read32(bmpFile);								// We grab the file size.
+		creatorBits = read32(bmpFile);							// Creator bits
+		imageOffset = read32(bmpFile);							// image offset.
+		DIBHeaderSize = read32(bmpFile);							// read DIB header size?
+		width = read32(bmpFile);									// width? Good thing to save for later.
+		imageHeight = read32(bmpFile);							// Height? Negative means the data is right side up. Go figure..
+		rightSideUp = imageHeight<0;								// Set a bool about that bit.
+		height = abs(imageHeight);									// Bloody weird encrypting.
+		if (read16(bmpFile) == 1) {								// if the next word is 1? What's this mean? Needs to be though.
+			imageDepth = read16(bmpFile);							// color depth.
+			if (imageDepth == 24 || imageDepth == 32) {		// We can do 24 or 32 bits..
+				pixBytes = imageDepth / 8;							// Bytes / pixel
+				if (!read32(bmpFile)) {								// And no compression!
+					bytesPerRow = width * pixBytes;				// Data takes up this much, but..
+					while(bytesPerRow % 4) bytesPerRow++;		// We need to pad it to a multiple of 4.
+					success = true;									// Made it this far? We can do this!
 				}
 			}
 		}
-		bmpFile.close();													// The rule is, we opened it, we close it.
 	}
 	return success;
-}
-
-				
-void bmpImage::calcDefaults(void) {
-	
-	rightSideUp	= false;							// To make things easier, its up side down. (Positive value)
-	imageOffset	= DEF_IMAGE_OFFSET;
-	imageDepth	= DEF_DEPTH;
-	pixBytes		= DEF_DEPTH / 8;
-	bytesPerRow	= width * pixBytes;
-	while(bytesPerRow % 4) bytesPerRow++;		// We need to pad it to a multiple of 4.
-	fileSize = imageOffset + (height * bytesPerRow);
-}
-
-
-bool bmpImage::initNewTempFile(void) {
-
-	File		bmpFile;
-	RGBpack	aColor;
-	bool		success;
-	
-	success = false;										// Ok, assume failure..									
-	bmpFile = SD.open(tempFilePath,FILE_WRITE);	// See if its a valid path.
-	if (bmpFile) {    									// We got a file?
-		calcDefaults();									// Set up all the paramaters to file defaults.
-		write16(0x4D42,bmpFile);						// It wants this. Whatever.
-		write32(fileSize,bmpFile);						// Calculate and write out the file size.
-		write32(0,bmpFile);								// write out our creator bits. All I've seen are zero.
-		write32(imageOffset,bmpFile);					// Image offset. Always sees to be 54. Size of header?
-		write32(40,bmpFile);								// DIB Header size. Always seems to be 40.
-		write32(width,bmpFile);							// Width.
-		write32(height,bmpFile);						// Height.
-		write16(1,bmpFile);								// It wants a one here. Why? Its a mystery to me.
-		write32(imageDepth,bmpFile);					// We're going for 32 bit image stuff here.
-		write32(0,bmpFile);								// No compression.
-		aColor.r = 255;									// Setup a white color pack.
-		aColor.g = 255;
-		aColor.b = 255;
-		for (int y = 0;y<height;y++) {				// Loop through every pixel..
-			for (int x=0;x<width;x++) {
-				setPixel(x,y,&aColor,&bmpFile);		// Set it white.
-			}
-		}		
-		bmpFile.close();									// Default file has been initialized. Close the file.
-		success = true;									// Made it this far? We're calling this a success!
-	}
-	return success;										// Report our results.
 }
 
 
 // Given an x,y location of a pixel. Hand back the file
 // index of its location.
-unsigned long bmpImage::fileIndex(int x,int y) {
+uint32_t bmpImage::fileIndex(int x,int y) {
 
-	unsigned long  index;
-  
+	uint32_t  index;
+	
 	index = imageOffset;											// Starting here..
 	if (rightSideUp) {											// The image is right side up?
 		index = index + (y*bytesPerRow);						// Right side up
