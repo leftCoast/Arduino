@@ -1,12 +1,27 @@
 #include  <iconEdit.h>
-#include  <iconEditScr.h>
+#include <fOpenObj.h>
+
 
 #define EDITSCR_X	23
 #define EDITSCR_Y	35
 #define EDITSCR_W	32 * SCALE
 #define EDITSCR_H	32 * SCALE
 
-#define TEST_PATH "/system/icons/standard/app32.bmp"// /iconEdit/test.bmp"
+#define TEST_PATH "/cut32.bmp"// /iconEdit/test.bmp"
+
+
+saveBtn::saveBtn(int xLoc, int yLoc,char* path,iconEditScr* editScr)
+	:iconButton22(xLoc,yLoc,path) { theEditScr =  editScr; }
+	
+	
+saveBtn::~saveBtn(void) {  }				
+
+void saveBtn::doAction(void) {
+	Serial.println("saving file clicked.");
+	theEditScr->saveDocFile();
+}
+	
+
 
 
 // And it all starts up again..
@@ -25,11 +40,15 @@ iconEdit::~iconEdit(void) { }
 
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
-		
-	iconEditScr*	theEditScr;
 	
 	theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
 	addObj(theEditScr);
+	
+	saveBtn* ourSaveBtn = new saveBtn(30,1,mOSPtr->stdIconPath(fSave22),theEditScr);
+	mMenuBar->addObj(ourSaveBtn);
+	
+	fOpenObj*  theObject = new fOpenObj();
+	addObj(theObject);
 }
 
 
@@ -52,4 +71,4 @@ void iconEdit::drawSelf(void) {
 // you don't have control of that. So? No matter if you call close, or something
 // else calls close on you, this gets called so you can clean up before being
 // deleted.
-void iconEdit::closing(void) {  }
+void iconEdit::closing(void) { theEditScr->closeDocFile(); }

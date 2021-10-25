@@ -1,7 +1,7 @@
 #include "scrollingList.h"
 
 
-scrollingList::scrollingList(int x, int y, word width,word height,scrollType sType,eventSet inEventSet,bool vertical)
+scrollingList::scrollingList(int x, int y, int width,int height, scrollType sType,eventSet inEventSet,bool vertical)
 	: drawList(x,y,width,height,inEventSet,vertical) {
 
 	mType = sType;                // The kind of scroller we are.

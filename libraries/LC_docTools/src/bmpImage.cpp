@@ -136,7 +136,7 @@ void bmpImage::setRawPixel(int x,int y,RGBpack* anRGBPack) {
 	if (mode==fOpenToEdit || mode==fEdited) {		// If we are in an edit mode..
 		index = fileIndex(x,y);							// Do the math for this pixel index.
 		if (index != ourFile.position()) {			// If we are NOT already there..
-			ourFile.seek(index);						// Point the file to our pixel.
+			ourFile.seek(index);							// Point the file to our pixel.
 		}
 		ourFile.write(anRGBPack->b);					// Write out the values.
 		ourFile.write(anRGBPack->g);

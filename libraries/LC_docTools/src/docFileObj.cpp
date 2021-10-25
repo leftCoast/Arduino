@@ -5,7 +5,7 @@
 
 #define TEMP_NAME_CHARS		8	// The max num chars for the temp file name 9999.tmp
 #define PATH_MIN_CHARS		6	// Min chars is /X.tmp
-#define DEF_LOOSE_EDIT_MSG	"Closing this file will cause you to loose these unsaved changes. Continue?"
+#define DEF_LOSE_EDIT_MSG	"Closing this file will cause you to loose these unsaved changes. Continue?"
 
 char*	tempDir = NULL;
 
@@ -21,14 +21,11 @@ bool createTempDir(char* inPath) {
 	bool	success;
 	char*	dirPath;
 	
-	Serial.println("createTempDir()");
 	if (tempDir) return true;							// If there already is a temp directory set up, bail!
 	if (inPath) {
 		dirPath = NULL;
 		if (resizeBuff(strlen(inPath)+1,&dirPath)) {
 			strcpy(dirPath,inPath);
-			Serial.println("No TempDir yet..");
-			Serial.println(dirPath);
 			addSlash = false;
 			success = false;
 			// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
@@ -36,10 +33,8 @@ bool createTempDir(char* inPath) {
 			if (dirPath[numChars-1]=='/') {					// If it has has a traileing '/'..            
 				dirPath[numChars-1]='\0';						// Clip off the trailing '/'.
 			} 
-			Serial.println(dirPath);
 			theDir=SD.open(dirPath,FILE_READ);				// Lets try to open the path they gave us.
 			if (theDir) {											// If we were able to open the path they gave us..
-				Serial.println("Found dirPath");
 				if (theDir.isDirectory()) {               // If its a directory..
 					numChars = strlen(dirPath);            // Lets see how long the path is now.
 					if (resizeBuff(numChars+2,&tempDir)) {	// If we can allocate the tempDir path string..
@@ -50,7 +45,6 @@ bool createTempDir(char* inPath) {
 				}
 				theDir.close();									// Close the directory we opened.
 			} else {													// Else, there was no directory of that name..
-				Serial.println("no dirPath");
 				if (SD.mkdir(dirPath)) {						// If we can create the directory.
 					numChars = strlen(dirPath);            // Lets see how long the path is.
 					if (dirPath[numChars-1]!='/') {			// If we DON'T have a traileing '/'.. 
@@ -162,18 +156,20 @@ bool docFileObj::openDocFile(int openMode) {
 	success = false;																// Not a success yet..
 	if (docFilePath) {															// If we have a non-NULL path..
 		if (openMode==FILE_WRITE) {											// If they want to edit this file..
+			if (mode==fOpenToEdit || mode==fEdited) {						// If already open for editing.
+				ourFile.seek(ourFile.size());									// Opening a file to WRITE assumes you start at the end.
+				return true;														// Actually nothing else to do, return success!
+			}
+			if (mode==fOpenToRead) {											// If currently open to read..
+				closeDocFile();													// We close the file to open later.
+			}
 			tempFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
 			if (tempFile) {														// If we were able to open the file..
-				Serial.println("Got tempFile");
 				if (checkDoc(tempFile)) {										// If the file past the acid test..
-					Serial.println("Check ok tempFile");
 					if (createEditPath()) {										// If we were able to create an edit path..
-						Serial.println("Created edit path");
 						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
 						if (ourFile) {												// If we were able to open the edit file..
-							Serial.println("Opened edit file");
 							fcpy(ourFile,tempFile);								// Copy the original to the new editing file.
-							Serial.println("Copied over from original file.");
 							mode = fOpenToEdit;									// We are open for editing.
 							success = true;										// Success!! The edit file is open and ready to use.
 						}
@@ -182,6 +178,15 @@ bool docFileObj::openDocFile(int openMode) {
 				tempFile.close();													// Close the doc file.
 			}
 		} else if (openMode==FILE_READ) {									// If they just want to read this file..
+			if (mode==fOpenToRead) {											// If we're already open to read..
+				ourFile.seek(0);													// Opening to READ assumes you start at the beginning of the file.
+				return true;														// We're all set, lets go.
+			} else if (mode==fOpenToEdit||mode==fEdited) {				// We're in the middle of editing..
+				closeDocFile();														// We try to close the file to open later.
+				if (mode!=fClosed) {												// IF the file is NOT been closed..
+					return false;													// They didn't close it, Lets bolt!
+				}
+			}
 			ourFile = SD.open(docFilePath,FILE_READ);						// Have a go at opening the doc file path.
 			if (ourFile) {															// If we were able to open the file..
 				if (checkDoc(ourFile)) {										// If the file past the acid test..
@@ -203,8 +208,8 @@ bool docFileObj::openDocFile(int openMode) {
 // The user is obviously just not getting it.
 bool docFileObj::saveDocFile(char* newFilePath) {
 	
-	File				tempFile;
-	bool				success;
+	File	tempFile;
+	bool	success;
 	
 	success = false;													// Not a success yet.
 	if (mode==fEdited || mode==fOpenToEdit) {					// If we are using an editFile..
@@ -259,7 +264,7 @@ void docFileObj::closeDocFile(void) {
 			mode = fClosed;
 		break;
 		case fEdited :
-			if (askOk(DEF_LOOSE_EDIT_MSG)){
+			if (askOk(DEF_LOSE_EDIT_MSG)){
 				ourFile.close();
 				SD.remove(editFilePath);
 				resizeBuff(0,&editFilePath);

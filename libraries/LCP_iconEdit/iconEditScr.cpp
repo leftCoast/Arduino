@@ -9,7 +9,7 @@ iconEditScr::iconEditScr(lilOS* OSPtr,int inX,int inY,int inWidth,int inHeight,c
 	setEventSet(touchLift);
 	editColor.setColor(&red);
 	scale = SCALE;
-	
+	openDocFile(FILE_WRITE);
 }
 
 
@@ -25,10 +25,7 @@ void iconEditScr::doAction(event* inEvent,point* locaPt) {
 	if (inEvent->mType==touchEvent) {
 		xPix = inEvent->mTouchPos.x/scale;
 		yPix = inEvent->mTouchPos.y/scale;
-		if (openDocFile(FILE_WRITE)) {
-			ourOS->beep();
-			closeDocFile();
-		}
+		setPixel(xPix,yPix,&red);
 	}
 }	
 
@@ -37,7 +34,7 @@ void iconEditScr::drawSelf(void) {
 
 	colorObj	aColor;
 	
-	if (openDocFile(FILE_READ)) {
+	if (mode!=fClosed) {
 		for(int ty=0;ty<drawObj::height/scale;ty++) {
 			for(int tx=0;tx<drawObj::width/scale;tx++) {
 				aColor = getPixel(tx+offsetX,ty+offsetY);
@@ -45,8 +42,10 @@ void iconEditScr::drawSelf(void) {
 				screen->drawRect(scale*tx+x,scale*ty+y,scale,scale,&black);	
 			}
 		}
-		closeDocFile();
 	} else {
 		drawObj::drawSelf();
 	}
 }
+
+
+bool iconEditScr::askOk(char* qStr) {return true; }

@@ -14,7 +14,7 @@ class iconEditScr : public bmpObj {
 	
 	virtual	void		drawSelf(void);
 	virtual	void  	doAction(event* inEvent,point* locaPt);
-				
+	virtual	bool		askOk(char* qStr);
 				lilOS* 	ourOS;
 				colorObj	editColor;
 				int		scale;

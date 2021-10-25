@@ -189,7 +189,9 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 		case cut32 		: strcat(pathBuff,"cut32.bmp"); 		break;
 		case edit22 	: strcat(pathBuff,"edit22.bmp"); 	break;
 		case edit32 	: strcat(pathBuff,"edit32.bmp"); 	break;
-		case fClose32	: strcat(pathBuff,"fClose32.bmp"); 	break;
+		case fSave22	: strcat(pathBuff,"fSave22.bmp"); 	break;
+		case fSave32	: strcat(pathBuff,"fSave32.bmp"); 	break;
+		case fOpen22 	: strcat(pathBuff,"fOpen22.bmp"); 	break;
 		case fOpen32 	: strcat(pathBuff,"fOpen32.bmp"); 	break;
 		case mask22 	: strcat(pathBuff,"mask22.bmp"); 	break;
 		case mask32 	: strcat(pathBuff,"mask32.bmp"); 	break;

@@ -83,6 +83,8 @@ struct {
 
 // INITIALIZATION -- runs once at startup ----------------------------------
 
+#define writeData spiWrite  // Added this to attempt to get this to compile with new stuff. (Didn't seem to work) -jim
+
 void setup(void) {
   uint8_t e;
 
