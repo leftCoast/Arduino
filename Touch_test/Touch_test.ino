@@ -19,7 +19,6 @@ void setup() {
    }
    ourEventMgr.begin();                                           // Startup our event manager.
    ourOS.begin();                                                 // Boot OS manager.
-   //nextPanel = iconEditApp;
 }
 
 

@@ -60,7 +60,7 @@ class fileListDir :	public drawGroup {
 	virtual	~fileListDir(void);
 	
 				void	refresh(void);
-	virtual	void 	draw(void);
+	//virtual	void 	draw(void);
 	virtual	void	drawSelf(void);
 	
 				filePath*	ourPath;

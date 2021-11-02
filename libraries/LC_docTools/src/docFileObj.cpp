@@ -65,25 +65,37 @@ bool createTempDir(char* inPath) {
 }
 
 
+// TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
+File TRUNCATE_FILE(char* path) {
+	
+	SD.remove(path);							// Delete the file. So now it has zero bytes of data.
+	return SD.open(path,FILE_WRITE);		// Re-open the file. Now its been truncated. (Sigh..)
+}													// AND NOW WE HAVE A TRUNCATED FILE.
+							
+
 // fcpy() : The file version of strcpy(). The dest file must be open for writing. The src
 // file must be, at least, open for reading. (Writing is ok too) The dest file index is
 // left pointing to the end of the file. The src file index is not changed.
 void fcpy(File dest,File src) {
 	
-	uint32_t	filePos;
-	maxBuff cpyBuff(src.size());
-	uint32_t	numBytes;
-	uint32_t	remaingBytes;
+	unsigned long	filePos;
+	maxBuff	cpyBuff(src.size());
+	unsigned long	numBytes;
+	unsigned long	remaingBytes;
 	
 	
 	filePos = src.position();				// Lets save the file pos for miss user.
 	src.seek(0);								// Point at first byte of the src file.
-	dest.truncate();							// Clear out the old.
+	
+	// HACK, THERE IS NO truncate() CALL SO WE DO IT BEFORE THIS CALL.
+	//dest.truncate();							// Clear out the old.
+	// AND THERE YOU GO..
+	
 	remaingBytes = src.size();
 	for (int i=0;i<cpyBuff.numPasses;i++) {
 		numBytes = min(cpyBuff.numBuffBytes,remaingBytes);
 		src.read(cpyBuff.theBuff,numBytes);
-		dest.write(cpyBuff.theBuff,numBytes);
+		dest.write((char*)(cpyBuff.theBuff),numBytes);
 		remaingBytes = remaingBytes - numBytes;
 	}
 	src.seek(filePos);						// Put it back like we found it.						
@@ -169,6 +181,10 @@ bool docFileObj::openDocFile(int openMode) {
 					if (createEditPath()) {										// If we were able to create an edit path..
 						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
 						if (ourFile) {												// If we were able to open the edit file..
+						
+							ourFile.close();										// Close the file. We know we can open it.
+							ourFile = TRUNCATE_FILE(editFilePath);
+							
 							fcpy(ourFile,tempFile);								// Copy the original to the new editing file.
 							mode = fOpenToEdit;									// We are open for editing.
 							success = true;										// Success!! The edit file is open and ready to use.
@@ -216,6 +232,12 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 		if (newFilePath) {											// If we have a new path to save to..
 			tempFile = SD.open(newFilePath,FILE_WRITE);		// Have a go at opening the new file path.
 			if (tempFile) {											// If we got the new file..
+				
+				
+				tempFile.close();											// Close the file. We know we can open it.
+				tempFile = TRUNCATE_FILE(newFilePath);
+				
+				
 				fcpy(tempFile,ourFile);								// Copy the edited file to the new file.
 				tempFile.close();										// Close the new file.
 				mode = fOpenToEdit;									// Clear the "dirty" flag, if any.
@@ -224,6 +246,10 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 		} else {															// Else, no path was given. Store edit to doc file.
 			tempFile = SD.open(docFilePath,FILE_WRITE);		// Have a go at opening the doc file path.
 			if (tempFile) {											// If we were able to open the file..
+				
+				tempFile.close();											// Close the file. We know we can open it.
+				tempFile = TRUNCATE_FILE(docFilePath);
+				
 				fcpy(tempFile,ourFile);								// Copy the editing file to the original file.
 				tempFile.close();										// Close the original file.
 				mode = fOpenToEdit;									// Clear the "dirty" flag, if any.
@@ -233,6 +259,10 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 	} else if (mode==fOpenToRead && newFilePath) {			// If open to read AND we have a new path to save to..												// Set the pointer to byte 0.
 		tempFile = SD.open(newFilePath,FILE_WRITE);			// Have a go at opening the new file path.
 		if (tempFile) {												// If we got the new file..
+			
+			tempFile.close();											// Close the file. We know we can open it.
+			tempFile = TRUNCATE_FILE(newFilePath);
+			
 			fcpy(tempFile,ourFile);									// Copy the original file to the new file.
 			tempFile.close();											// Close the new file.
 			success = true;											// And again, we are a success!

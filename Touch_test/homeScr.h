@@ -2,7 +2,8 @@
 #define homePanel_h
 
 #include "ourOSObj.h"
-#include <bmpObj.h>
+#include <bmpObj.h> 
+
 
 // *****************************************************
 //                        homeScr

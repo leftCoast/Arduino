@@ -189,17 +189,17 @@ void fileListDir::refresh(void) {
 	}
 }
 
-				
+/*				
 void fileListDir::draw(void) {
 
 	maskRect* ourMask;
 	
 	ourMask = (maskRect*)gMask;
-	ourMask->setMaskInside(false);
+	ourMask->setInverse(true);
 	drawGroup::draw();
-	ourMask->setMaskInside(true);
+	ourMask->setInverse(false);
 }
-
+*/
 
 void fileListDir::drawSelf(void) { }
 
@@ -247,9 +247,9 @@ void fOpenObj::setResultCallback(void(*funct)(bool))  { resultFx = funct; }
 
 void fOpenObj::draw(void) {
 
-	ourModalMask->setMaskInside(false);
+	ourModalMask->setInverse(true);
 	drawGroup::draw();
-	ourModalMask->setMaskInside(true);
+	ourModalMask->setInverse(false);
 }
 
 void fOpenObj::drawSelf(void) {

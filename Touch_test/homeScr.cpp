@@ -1,9 +1,10 @@
 #include "homeScr.h"
 #include <lilOS.h>
 
+
 #define TOP_Y     286
 #define STEP_Y    52
-#define LEFT_X    52
+#define LEFT_X    78
 #define STEP_X    52
 
 
@@ -22,6 +23,7 @@ char* homeScr::iconPath(int appID,char* iconName) {
 }
 
 
+
 void homeScr::setup(void) {
    
    int      traceY;
@@ -34,28 +36,15 @@ void homeScr::setup(void) {
    theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));
    theAppIcon->setMask(&iconMask);
    addObj(theAppIcon); 
-   
+  
    traceX = traceX + STEP_X;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));
    theAppIcon->setMask(&iconMask);
    addObj(theAppIcon);
-
-   traceX = traceX + STEP_X;
-   theAppIcon = new appIcon(traceX,traceY,iconEditApp,iconPath(iconEditApp,"iconEdit.bmp"));
-   theAppIcon->setMask(&iconMask);
-   addObj(theAppIcon);
 }
 
 
-void homeScr::loop(void) {
-
-   sleep(1000);
-   testText->setValue("Gigantic");
-   sleep(1000);
-   testText->setValue("Crawling");
-   sleep(1000);
-   testText->setValue("Worms!!");
-}
+void homeScr::loop(void) { }
 
 
 void homeScr::drawSelf(void) { 
@@ -63,9 +52,7 @@ void homeScr::drawSelf(void) {
    colorObj lineColor;
    bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
 
-   //ourOS.setBrightness(0);
    lineColor.setColor(LC_CHARCOAL);
    screen->fillRectGradient(0,282,240,38,&lineColor,&black);
    theScreenImage.draw();
-   //ourOS.setBrightness(255);
 }
