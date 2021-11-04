@@ -47,15 +47,7 @@ void homeScr::setup(void) {
 }
 
 
-void homeScr::loop(void) {
-
-   sleep(1000);
-   testText->setValue("Gigantic");
-   sleep(1000);
-   testText->setValue("Crawling");
-   sleep(1000);
-   testText->setValue("Worms!!");
-}
+void homeScr::loop(void) { }
 
 
 void homeScr::drawSelf(void) { 

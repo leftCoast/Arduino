@@ -4,8 +4,9 @@
 #include <iconEdit.h>
 #include "homeScr.h"
 
-#define BEEP_PIN     23                      // The digital pin choosen for the beeper.
-#define SCREEN_PIN   25                      // The ananlog pin choosen for the screen backlight.
+//For Mega
+#define BEEP_PIN     14                      // The digital pin choosen for the beeper.
+#define SCREEN_PIN   A0                      // The ananlog pin choosen for the screen backlight.
 char systemFolder[]  = "/system/";           // Where we decided to store the systemp folder on our SD card.
 char panelFolder[]   = "/system/appFiles/";  // Where we decided to store the app folders on our SD card.
 
