@@ -95,14 +95,15 @@ void	cancelBtn::doAction(void) {
 // ********************* fileListItem stuff *********************
 // **************************************************************
    
-fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
+fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,L_ITEM_W,L_ITEM_H,fullClick) {
 	
 	bmpObj*	ourIcon;
 	
-	ourList	= inList;
-	ourType	= inType;
-	fileName = new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,inName,1);
+	ourViewer	= inViewer;
+	ourList		= inList;
+	ourType		= inType;
+	fileName		= new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,inName,1);
 	if (fileName) {
 		fileName->setColors(&black);
 		addObj(fileName);
@@ -146,21 +147,22 @@ void fileListItem::doAction(void) {
 		dblClickTimer.start();
 		setFocusPtr(this);
 	} else {
-		if (!dblClickTimer.ding()) {				// If we're looking at a double click..
-			fileName->getText(name);				// Grab the saved off name text.
-			switch(ourType) {							// Lets see what we are..
-				case rootType		:					// Really it can't be..
-				case folderType	:					// DOuble clicked a folder..
-					ourList->chooseFolder(name);	// Pass it to our list controller thing.
-				break;									// So long!
-				case fileType	:						// Double clicked a file..
-					ourList->chooseFile(name);		// Pass it to our list controller thing.
-				break;									// So long!
-				case noType		: break;				// Code is just broken. Give up.
+		if (!dblClickTimer.ding()) {					// If we're looking at a double click..
+			fileName->getText(name);					// Grab the saved off name text.
+			switch(ourType) {								// Lets see what we are..
+				case rootType		:						// Really it can't be..
+				case folderType	:						// Double clicked a folder..
+					ourViewer->chooseFolder(name);	// Pass it to our list controller thing.
+				break;										// So long!
+				case fileType	:							// Double clicked a file..
+					ourViewer->chooseFile(name);		// Pass it to our list controller thing.
+				break;										// So long!
+				case noType		: break;					// Code is just broken. Give up.
 			}
-		} else {											// Else, this was not  double click..
-			dblClickTimer.start();					// Restart the timer, maybe this is the start of a double?
+		} else {												// Else, this was not  double click..
+			dblClickTimer.start();						// Restart the timer, maybe this is the start of a double?
 		}
+	}
 }
 
 	
@@ -170,15 +172,13 @@ void fileListItem::doAction(void) {
 
 
 fileListBox::fileListBox(int x, int y, int width,int height)
-	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
-	
-}
+	:scrollingList(x,y,width,height,touchScroll,dragEvents) {  }
 
 
 fileListBox::~fileListBox(void) { }	
 
 
-void fileListBox::fillList(filePath* ourPath) {
+void fileListBox::fillList(fileBaseViewer* ourPath) {
 
 	pathItem*		trace;
 	fileListItem*	newListItem;
@@ -190,7 +190,7 @@ void fileListBox::fillList(filePath* ourPath) {
 		for (int i=0;i<numItems;i++) {
 			trace = ourPath->getChildItemByIndex(i);
 			if (trace) {
-				newListItem = new fileListItem(this,trace->getType(),trace->getName());
+				newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
 				addObj(newListItem);
 			}
 		}
@@ -210,13 +210,13 @@ void fileListBox::drawSelf(void) {
  
    
 // **************************************************************
-// ********************* fileListDir  stuff *********************
+// *********************** fileDir  stuff ***********************
 // **************************************************************
 
-// fileListDir is the label on the dialog box showing what our current directory is.
+// fileDir is the label on the dialog box showing what our current directory is.
 
 
-fileListDir::fileListDir(filePath* inPath)
+fileDir::fileDir(filePath* inPath)
 	: drawGroup(FL_DIR_X,FL_DIR_Y,FL_DIR_W,FL_DIR_H) {
 	
 	ourPath = inPath;
@@ -231,11 +231,11 @@ fileListDir::fileListDir(filePath* inPath)
 }
 
 
-fileListDir::~fileListDir(void) {  }
+fileDir::~fileDir(void) {  }
 
 
 // This is what we call to set the name & icon of our curent directory on the dialog box. 
-void fileListDir::refresh(void) {
+void fileDir::refresh(void) {
 
 	
 	if (ourPath) {																		// If we have non-NULL file path..
@@ -255,49 +255,74 @@ void fileListDir::refresh(void) {
 }
 
 
-void	 fileListDir::drawSelf(void) { screen->drawRect(this,&black); }
+void	 fileDir::drawSelf(void) { screen->drawRect(this,&black); }
+
 
 
 // **************************************************************
-// *********************** fOpenObj stuff ***********************
+// ******************* fileBaseViewer stuff *********************
 // **************************************************************
 
 
-fOpenObj::fOpenObj(panel* inPanel)
+fileBaseViewer::fOpenObj(panel* inPanel)
 	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {
 	
 	ourPanel = inPanel;
 	filterFx	= NULL;
-	resultFx	= NULL;
 	
-	setEventSet(fullClick);
+	OKBtn* sBtn = new OKBtn(OK_X,OK_Y,ourPanel->mOSPtr->stdIconPath(check32),this);
+	sBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	addObj(sBtn);
 	
 	cancelBtn* cBtn = new cancelBtn(CNCL_X,CNCL_Y,ourPanel->mOSPtr->stdIconPath(x32),this);
 	cBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
 	addObj(cBtn);
-	OKBtn* sBtn = new OKBtn(OK_X,OK_Y,ourPanel->mOSPtr->stdIconPath(check32),this);
-	sBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
-	addObj(sBtn);
 	
 	ourFileListBox = new fileListBox(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
 	setPath("/");
 	ourFileListBox->fillList(this);
 	addObj(ourFileListBox);
-	ourFileListDir = new fileListDir(this);
-	if (ourFileListDir) {
-		ourFileListDir->refresh();
-		addObj(ourFileListDir);
+	
+	ourFileDir = new fileDir(this);
+	if (ourFileDir) {
+		ourFileDir->refresh();
+		addObj(ourFileDir);
 	}
-	ourModalMask = NULL; //new maskRect(this);
-	/*
-	if (ourModalMask) {
-		//ourModalMask->setInverse(true);
-		gMask = ourModalMask;
-	} else {
-		gMask = NULL;
-	}
-	*/
+	
+
+// Everything we've created are draw Objectes. They will be deleted automatically when we
+// are deleted.	
+fileBaseViewer::~fileBaseViewer(void) {  }
+
+
+// Choosing folders should jump us to the next tier of folders.
+void fOpenObj::chooseFolder(char* name) {
+
+	pushChildItemByName(name);
+	ourFileListBox->fillList(this);
 }
+
+
+// we don't do anything when choosing a file. Inherited probably will.
+void fOpenObj::chooseFile(char* name) { }				
+	
+							
+// Use a callback to filter what you see.
+void fOpenObj::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
+
+
+// Basically we are nothing but big white rectangle.
+void fOpenObj::drawSelf(void) { screen->fillRect(this,&white); }
+
+	
+// **************************************************************
+// *********************** fOpenObj stuff ***********************
+// **************************************************************
+
+
+
+fOpenObj::fOpenObj(panel* inPanel)
+	:fileBaseViewer(inPanel) {  }
 
 
 fOpenObj::~fOpenObj(void) {
@@ -307,27 +332,10 @@ fOpenObj::~fOpenObj(void) {
 }
 
 
-void fOpenObj::chooseFolder(char* name) {
-	
-	
-}
-
-
 void fOpenObj::chooseFile(char* name) {
 
 }				
-							
-// Use a callback to filter what you see.
-void fOpenObj::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
 
-
-// Get a call back with the result.
-void fOpenObj::setResultCallback(void(*funct)(bool))  { resultFx = funct; }
-
-
-void fOpenObj::drawSelf(void) { screen->fillRect(this,&white); }
-
-void fOpenObj::doAction(void) {  }
 
 
 // **************************************************************
@@ -336,6 +344,10 @@ void fOpenObj::doAction(void) {  }
 
 
 fSaveObj::fSaveObj(panel* inPanel)
-	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {  }
+	:fileBaseViewer(inPanel) {  }
 	
 fSaveObj::~fSaveObj(void) {  }
+
+
+
+

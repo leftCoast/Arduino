@@ -6,7 +6,8 @@
 #include <scrollingList.h>
 #include <label.h>
 
-
+class		fileBaseViewer;
+class		fileDir;
 class		fileListBox;
 timeObj	dblClickTimer(500);
 
@@ -51,17 +52,17 @@ class cancelBtn :	public iconButton {
 class fileListItem :	public drawGroup {
 
 	public:
-				fileListItem(fileListBox* inList,fileListDir* inListDir,pathItemType inType,char* inName);
+				fileListItem(fileBaseViewer* inViewer,fileListBox* inLIxt,pathItemType inType,char* inName);
 	virtual	~fileListItem(void);
 	
 	virtual	void	draw(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
 	
-				fileListBox*	ourList;
-				fileListDir*	ourListDir;
-				pathItemType	ourType;
-				label*			fileName;
+				fileBaseViewer*	ourViewer;
+				fileListBox*		ourList;
+				pathItemType		ourType;
+				label*				fileName;
 };
 
 
@@ -73,28 +74,25 @@ class fileListItem :	public drawGroup {
 class fileListBox :	public scrollingList {
 
 	public:
-				fileListBox(int x, int y, int width,int height,fileListDir* inListDir);
+				fileListBox(int x, int y, int width,int height);
 	virtual	~fileListBox(void);
 	
-				void	fillList(filePath* ourPath);
+				void	fillList(fileBaseViewer* ourPath);
 	virtual	void	drawSelf(void);
-	
-				fileListDir*	ourFileListDir;
-	
 };
 
 
 
 // **************************************************************
-// ********************* fileListDir  stuff *********************
+// *********************** fileDir  stuff ***********************
 // **************************************************************
 
 
-class fileListDir :	public drawGroup {
+class fileDir :	public drawGroup {
 
 	public:
-				fileListDir(fOpenObj* inPath);
-	virtual	~fileListDir(void);
+				fileDir(filePath* inPath);
+	virtual	~fileDir(void);
 	
 				void	refresh(void);
 	virtual	void	drawSelf(void);
@@ -104,6 +102,31 @@ class fileListDir :	public drawGroup {
 				bmpObj*		ourIcon;
 };
 	
+	
+	
+// **************************************************************
+// ******************* fileBaseViewer stuff *********************
+// **************************************************************
+
+
+class fileBaseViewer :	public modal,
+								public filePath {
+
+	public:
+				fileBaseViewer(panel* inPanel);
+	virtual	~fileBaseViewer(void);
+				
+	virtual	void	chooseFolder(char* name);
+	virtual	void	chooseFile(char* name);
+	virtual	void	setFilterCallback(bool(*funct)(char*));	// Use a callback to filter what you see.
+	virtual	void	drawSelf(void);
+	
+				bool				(*filterFx)(char*);
+				fileListBox*	ourFileListBox;
+				fileDir*			ourFileDir;
+				panel*			ourPanel;
+};
+
 
 	
 // **************************************************************
@@ -111,24 +134,13 @@ class fileListDir :	public drawGroup {
 // **************************************************************
 
 
-class fOpenObj :	public modal,
-						public filePath {
+class fOpenObj :	public fileBaseViewer {
 
 	public:
 				fOpenObj(panel* inPanel);
 	virtual	~fOpenObj(void);
 				
-				void	chooseFolder(char* name);
-				void	chooseFile(char* name);
-				void	setFilterCallback(bool(*funct)(char*));	// Use a callback to filter what you see.
-	virtual	void	drawSelf(void);
-	virtual	void	doAction(void);
-	
-				bool				(*filterFx)(char*);
-				fileListBox*	ourFileListBox;
-				fileListDir*	ourFileListDir;
-				maskRect*		ourModalMask;
-				panel*			ourPanel;
+	virtual	void	chooseFile(char* name);
 };
 
 
@@ -138,26 +150,12 @@ class fOpenObj :	public modal,
 // **************************************************************
 
 
-class fSaveObj :	public modal,
-						public filePath {
+class fSaveObj :	public fileBaseViewer {
 
 	public:
 				fSaveObj(panel* inPanel);
 	virtual	~fSaveObj(void);
-	/*			
-	virtual	void	message(int inMsg);
-				void	setFilterCallback(bool(*funct)(char*));	// Use a callback to filter what you see.
-				void	setResultCallback(void(*funct)(bool));		// Get a call back with the result.
-	virtual	void	drawSelf(void);
-	virtual	void	doAction(void);
 	
-				bool				(*filterFx)(char*);
-				void				(*resultFx)(bool);
-				fileListBox*	ourFileListBox;
-				fileListDir*	ourFileListDir;
-				maskRect*		ourModalMask;
-				panel*			ourPanel;
-	*/
 };
 
 #endif
