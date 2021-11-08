@@ -1,5 +1,4 @@
 #include  <iconEdit.h>
-#include <fOpenObj.h>
 
 
 #define EDITSCR_X	23
@@ -10,24 +9,56 @@
 #define TEST_PATH "/cut32.bmp"// /iconEdit/test.bmp"
 
 
-saveBtn::saveBtn(int xLoc, int yLoc,char* path,iconEditScr* editScr)
-	:iconButton22(xLoc,yLoc,path) { theEditScr =  editScr; }
-	
-	
-saveBtn::~saveBtn(void) {  }				
 
-void saveBtn::doAction(void) {
-	Serial.println("saving file clicked.");
-	theEditScr->saveDocFile();
+// **************************************************************
+// ********************* saveFileBtn  stuff *********************
+// **************************************************************
+
+
+openFileBtn::openFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
+	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
+	
+	
+openFileBtn::~openFileBtn(void) {  }				
+
+void openFileBtn::doAction(void) {
+	
+	ourApp->mOSPtr->beep();
+	ourApp->beginFileOpen();
 }
 	
 
+	
+// **************************************************************
+// ********************* saveFileBtn  stuff *********************
+// **************************************************************
+
+
+saveFileBtn::saveFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
+	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
+	
+	
+saveFileBtn::~saveFileBtn(void) {  }				
+
+void saveFileBtn::doAction(void) {
+	
+	ourApp->mOSPtr->beep();
+	ourApp->beginFileSave();
+}
+	
+	
+	
+// **************************************************************
+// *********************** iconEdit stuff ***********************
+// **************************************************************
 
 
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	: panel(ourOS,ourAppID) {
-  
+	
+  	openDBox = NULL;
+  	saveDBox = NULL;
 	if (!SD.exists(TEST_PATH)) {
 		createNewBmpFile(TEST_PATH,32,32);
 	}
@@ -38,22 +69,44 @@ iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 iconEdit::~iconEdit(void) { }
 
 
+// Open up the file choosing dialog box.
+void iconEdit::beginFileOpen(void) {
+
+	openDBox = new fOpenObj(this);
+	addObj(openDBox);
+}
+
+
+// Open up the file saving dialog box.
+void iconEdit::beginFileSave(void) {
+
+	saveDBox = new fSaveObj(this);
+	addObj(saveDBox);
+}
+
+
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
 	
 	theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
 	addObj(theEditScr);
 	
-	saveBtn* ourSaveBtn = new saveBtn(30,1,mOSPtr->stdIconPath(fSave22),theEditScr);
-	mMenuBar->addObj(ourSaveBtn);
+	openFileBtn* ourOpenBtn = new openFileBtn(30,1,mOSPtr->stdIconPath(fOpen22),this);
+	mMenuBar->addObj(ourOpenBtn);
 	
-	fOpenObj*  theObject = new fOpenObj();
-	addObj(theObject);
+	saveFileBtn* ourSaveBtn = new saveFileBtn(60,1,mOSPtr->stdIconPath(fSave22),this);
+	mMenuBar->addObj(ourSaveBtn);
 }
 
 
 void iconEdit::loop(void) {
-
+	
+	if (openDBox) {
+		if (openDBox->taskComplete()) {
+			delete(openDBox);
+			openDBox = NULL;
+		}
+	}
 }
 
 

@@ -21,10 +21,45 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 
 
 // *****************************************************
-// *******************     panel    ********************
+// *******************     modal    ********************
 // *****************************************************
 
 
+modal::modal(rect* inRect,eventSet inEventSet)
+	: drawGroup(inRect,inEventSet) {
+	
+	success = false;
+	done = false;
+}
+	
+	
+modal::modal(int x, int y, int width,int height,eventSet inEventSet)
+	: drawGroup(x,y,width,height,inEventSet) { done = false; }
+	
+	
+modal::~modal(void) {  }
+
+
+// Is this event for us? Yes, they ALL are.	
+bool modal::acceptEvent(event* inEvent,point* locaPt) {
+
+	drawGroup::acceptEvent(inEvent,locaPt);	// We do the "normal" stuff.
+	return true;										// No natter what, the buck stopps here.
+}
+
+
+void modal::message(int inMsg) { done = true; }
+
+
+// Return if our taks in complete.
+bool modal::taskComplete(void) { return done; }
+
+	
+// *****************************************************
+// *******************     panel    ********************
+// *****************************************************
+	
+	
 // And it all starts up again..
 panel::panel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
   : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
@@ -120,8 +155,8 @@ lilOS::lilOS(void) {
 
 lilOS::lilOS(int homeID) {
 
-  mPanel = NULL;
-  nextPanel = homeID;
+  mPanel			= NULL;
+  nextPanel		= homeID;
 }
 
 
@@ -132,9 +167,10 @@ lilOS::~lilOS(void) {  }
 // then at some point during that, call this one.
 int lilOS::begin(void) {
 
-  hookup();							// Want to use idle()? Its ready.
-  nextPanel = HOME_PANEL_ID;	// Set to the default home panel.
-  return 0;							// 0 means no error right? Or does it mean false, fail?
+  hookup();													// Want to use idle()? Its ready.
+  icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
+  nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
+  return 0;													// 0 means no error right? Or does it mean false, fail?
 }
 
 
@@ -180,6 +216,8 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 	strcpy(pathBuff,getSystemFolder());
 	strcat(pathBuff,"icons/standard/");
 	switch(theIcon) {
+		case mask22 	: strcat(pathBuff,"mask22.bmp"); 	break;
+		case mask32 	: strcat(pathBuff,"mask32.bmp"); 	break;
 		case app32 		: strcat(pathBuff,"app32.bmp"); 		break;
 		case check22 	: strcat(pathBuff,"check22.bmp"); 	break;
 		case check32 	: strcat(pathBuff,"check32.bmp"); 	break;
@@ -193,8 +231,6 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 		case fSave32	: strcat(pathBuff,"fSave32.bmp"); 	break;
 		case fOpen22 	: strcat(pathBuff,"fOpen22.bmp"); 	break;
 		case fOpen32 	: strcat(pathBuff,"fOpen32.bmp"); 	break;
-		case mask22 	: strcat(pathBuff,"mask22.bmp"); 	break;
-		case mask32 	: strcat(pathBuff,"mask32.bmp"); 	break;
 		case paste32 	: strcat(pathBuff,"paste32.bmp"); 	break;
 		case pref22 	: strcat(pathBuff,"pref22.bmp");		break;
 		case pref32 	: strcat(pathBuff,"pref32.bmp"); 	break;

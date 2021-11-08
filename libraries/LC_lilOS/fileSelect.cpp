@@ -1,4 +1,4 @@
-#include <fOpenObj.h>
+#include <fileSelect.h>
 #include <resizeBuff.h>
 #include <adafruit_1947_Obj.h>
 
@@ -25,7 +25,7 @@
 #define OPEN_X	30
 #define OPEN_Y	40
 #define OPEN_W	180
-#define OPEN_H	140
+#define OPEN_H	170
 
 #define FL_DIR_X	FILE_LIST_X
 #define FL_DIR_Y	FILE_LIST_Y - 25
@@ -50,12 +50,52 @@ bmpObj* createListIcon(pathItemType inType) {
 	return ourIcon;
 }
 
+
+#define CNCL_X	5
+#define CNCL_Y	130
+#define OK_X	42
+#define OK_Y	130
+
+// **************************************************************
+// ************************ OKBtn stuff *************************
+// **************************************************************
+
+OKBtn::OKBtn(int xLoc,int yLoc,char* path,modal* inModal)
+	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }
+	
+OKBtn::~OKBtn(void) {  }
+	
+void OKBtn::doAction(void) {
+
+	ourModal->success = true;
+	ourModal->done = true;
+}
+
+
+
+// **************************************************************
+// ********************** cancelBtn stuff ***********************
+// **************************************************************
+
+
+cancelBtn::cancelBtn(int xLoc,int yLoc,char* path,modal* inModal)
+	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }				
+
+cancelBtn::~cancelBtn(void) {  }
+	
+void	cancelBtn::doAction(void) {
+
+	ourModal->success = false;
+	ourModal->done = true;
+}
+
+
 	
 // **************************************************************
 // ********************* fileListItem stuff *********************
 // **************************************************************
    
-fileListItem::fileListItem(fileList* inList,pathItemType inType,char* inName)
+fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,L_ITEM_W,L_ITEM_H,fullClick) {
 	
 	bmpObj*	ourIcon;
@@ -78,8 +118,10 @@ fileListItem::~fileListItem(void) { }
 void fileListItem::draw(void)	{
 
 	if (ourList->isVisible(this)) {
+		Serial.println("Drawing");
 		drawGroup::draw();
 	}
+	needRefresh = false;
 }
 
 		
@@ -98,30 +140,45 @@ void fileListItem::drawSelf(void) {
 
 void fileListItem::doAction(void) {
 	
+	char name[13];
+	
 	if (!haveFocus()) {
+		dblClickTimer.start();
 		setFocusPtr(this);
 	} else {
-		//ourList->pushChildItemByName(fileName);
-		setFocusPtr(NULL);
-	}
+		if (!dblClickTimer.ding()) {				// If we're looking at a double click..
+			fileName->getText(name);				// Grab the saved off name text.
+			switch(ourType) {							// Lets see what we are..
+				case rootType		:					// Really it can't be..
+				case folderType	:					// DOuble clicked a folder..
+					ourList->chooseFolder(name);	// Pass it to our list controller thing.
+				break;									// So long!
+				case fileType	:						// Double clicked a file..
+					ourList->chooseFile(name);		// Pass it to our list controller thing.
+				break;									// So long!
+				case noType		: break;				// Code is just broken. Give up.
+			}
+		} else {											// Else, this was not  double click..
+			dblClickTimer.start();					// Restart the timer, maybe this is the start of a double?
+		}
 }
 
 	
 // **************************************************************
-// ********************* fileList stuff *************************
+// ******************* fileListBox stuff ************************
 // **************************************************************
 
 
-fileList::fileList(int x, int y, int width,int height)
+fileListBox::fileListBox(int x, int y, int width,int height)
 	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
 	
 }
 
 
-fileList::~fileList(void) { }	
+fileListBox::~fileListBox(void) { }	
 
 
-void fileList::fillList(filePath* ourPath) {
+void fileListBox::fillList(filePath* ourPath) {
 
 	pathItem*		trace;
 	fileListItem*	newListItem;
@@ -140,16 +197,23 @@ void fileList::fillList(filePath* ourPath) {
 	}
 }
 
-void fileList::drawSelf(void) {
 
-	screen->drawRect(this,&black);
+void fileListBox::drawSelf(void) { 
+
+	rect	ourFrame;
+
+	ourFrame.setRect(this);
+	ourFrame.insetRect(-1);
+	screen->drawRect(&ourFrame,&black);
 }
-   
+
  
    
 // **************************************************************
 // ********************* fileListDir  stuff *********************
 // **************************************************************
+
+// fileListDir is the label on the dialog box showing what our current directory is.
 
 
 fileListDir::fileListDir(filePath* inPath)
@@ -170,6 +234,7 @@ fileListDir::fileListDir(filePath* inPath)
 fileListDir::~fileListDir(void) {  }
 
 
+// This is what we call to set the name & icon of our curent directory on the dialog box. 
 void fileListDir::refresh(void) {
 
 	
@@ -189,54 +254,69 @@ void fileListDir::refresh(void) {
 	}
 }
 
-/*				
-void fileListDir::draw(void) {
 
-	maskRect* ourMask;
-	
-	ourMask = (maskRect*)gMask;
-	ourMask->setInverse(true);
-	drawGroup::draw();
-	ourMask->setInverse(false);
-}
-*/
+void	 fileListDir::drawSelf(void) { screen->drawRect(this,&black); }
 
-void fileListDir::drawSelf(void) { }
 
 // **************************************************************
 // *********************** fOpenObj stuff ***********************
 // **************************************************************
 
 
-fOpenObj::fOpenObj(void)
-	:drawGroup(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {
+fOpenObj::fOpenObj(panel* inPanel)
+	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {
 	
+	ourPanel = inPanel;
 	filterFx	= NULL;
 	resultFx	= NULL;
 	
 	setEventSet(fullClick);
-	fileListBox = new fileList(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
+	
+	cancelBtn* cBtn = new cancelBtn(CNCL_X,CNCL_Y,ourPanel->mOSPtr->stdIconPath(x32),this);
+	cBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	addObj(cBtn);
+	OKBtn* sBtn = new OKBtn(OK_X,OK_Y,ourPanel->mOSPtr->stdIconPath(check32),this);
+	sBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	addObj(sBtn);
+	
+	ourFileListBox = new fileListBox(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
 	setPath("/");
-	fileListBox->fillList(this);
-	addObj(fileListBox);
+	ourFileListBox->fillList(this);
+	addObj(ourFileListBox);
 	ourFileListDir = new fileListDir(this);
 	if (ourFileListDir) {
 		ourFileListDir->refresh();
 		addObj(ourFileListDir);
 	}
-	ourModalMask = new maskRect(this);
-	gMask = ourModalMask;
+	ourModalMask = NULL; //new maskRect(this);
+	/*
+	if (ourModalMask) {
+		//ourModalMask->setInverse(true);
+		gMask = ourModalMask;
+	} else {
+		gMask = NULL;
+	}
+	*/
 }
 
 
 fOpenObj::~fOpenObj(void) {
 	
-	if (ourModalMask) delete(ourModalMask);
 	gMask = NULL;
+	if (ourModalMask) delete(ourModalMask);
 }
 
 
-			
+void fOpenObj::chooseFolder(char* name) {
+	
+	
+}
+
+
+void fOpenObj::chooseFile(char* name) {
+
+}				
+							
 // Use a callback to filter what you see.
 void fOpenObj::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
 
@@ -245,16 +325,17 @@ void fOpenObj::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
 void fOpenObj::setResultCallback(void(*funct)(bool))  { resultFx = funct; }
 
 
-void fOpenObj::draw(void) {
-
-	ourModalMask->setInverse(true);
-	drawGroup::draw();
-	ourModalMask->setInverse(false);
-}
-
-void fOpenObj::drawSelf(void) {
-
-	screen->fillRect(this,&white);
-}
+void fOpenObj::drawSelf(void) { screen->fillRect(this,&white); }
 
 void fOpenObj::doAction(void) {  }
+
+
+// **************************************************************
+// ********************** fSaveObj stuff ************************
+// **************************************************************
+
+
+fSaveObj::fSaveObj(panel* inPanel)
+	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {  }
+	
+fSaveObj::~fSaveObj(void) {  }

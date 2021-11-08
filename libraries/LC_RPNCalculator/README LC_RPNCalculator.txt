@@ -1,10 +1,10 @@
 ##LC_RPNCalculator
 
-Ah, the LC_RPNCalculator. This was started as a Macintosh project because I wanted a RPN calculator and was tired of always looking for new ones. I wanted my own. Seeing I can’t figure out c# or the damn interface builder from apple the best I could do was pass in the text on top of the buttons. 
+Ah, the LC_RPNCalculator. This was started as a Macintosh project because I wanted a RPN calculator and was tired of always looking for new ones. I wanted my own. Seeing I can’t figure out c# or the damn interface builder from Apple, the best I could do was pass in the text on top of the buttons. 
 
-Funny but that was a blessing in disguise.
+Funny, but that was a blessing in disguise.
 
-It forced me to build a fully self contained c++ library that relied on button presses coming in as c strings. Meaning it was extremely portable. So I brought it over to Arduino world and was able to compile it without any changes at all. Makes a really nice little calculator core.
+It forced me to build a fully self contained c++ library that relied on button presses coming in as c strings. Meaning it was extremely portable. So I brought it over to the Arduino world and was able to compile it without any changes at all. Makes a really nice little calculator core.
 
 
 **www.leftcoast.biz**  

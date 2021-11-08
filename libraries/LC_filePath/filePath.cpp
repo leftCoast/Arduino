@@ -52,45 +52,60 @@ int pathItem::getTotalPathChars(void) { return getParent()->getTotalPathChars() 
 // NOTE: THIS ONE STARTS AT THE HEAD OF THE LIST. IE:THE FIRST ITEM.
 void pathItem::addNameToPath(char* path) { strcat(path,name); }
 
+
+// This goes through all the nonsense of creating a path string for this particular item.
+// Then hands the string back to the caller.
+// *** WARNING *** : This allocates a string that MUST BE DE-ALLOCATED BY YOU!
+char* pathItem::getOurPath(void) {
+	
+	char* 		ourPath;
+	int			numBytes;
+	pathItem*	trace;
+	
+	ourPath = NULL;
+	numBytes = getTotalPathChars() + 1;											// Calculate the amount of RAM we need for the path.
+	if(resizeBuff(numBytes,&ourPath)) {											// If we can get the RAM for our path string..
+		trace = (pathItem*)getFirst();											// Grab a link to our root node..
+		while(trace) {																	// While trace isn't NULL..
+			trace->addNameToPath(ourPath);										// Add trace's path text to the path.
+			trace = (pathItem*)trace->dllNext;									// Jump to the next path link in our list.
+		}
+	}
+	return ourPath;
+}
+
 	
 // Return a pointer to our parent object.
 pathItem* pathItem::getParent(void) { return (pathItem*)dllPrev; }
 
 
 // Fill child list. This one will contain all the file code to take this path and read out
-// the basically do a directory listing. Each item gets some sort of path item created for
-// it and added into the list.
+// the child items. Basically do a directory listing. Each item gets some sort of path
+// item created for it and added into the list.
 pathItem* pathItem::fillChildList(void) {
 
 	char*			ourPath;
-	int			numBytes;
-	File     	dir;                                // File handle used for the current directory.
-   File     	entry;                              // File handle used for the different entries of the current directory.
-   pathItem*	trace;
-   pathItem*	newItem;                            // Its what we create.
+	File     	dir;				// File handle used for the current directory.
+   File     	entry;			// File handle used for the different entries of the current directory.
+   pathItem*	newItem;			// Its what we create.
    pathItem*	childList;
-   bool			done;                               // A boolean used to track when to stop all this nonsense.
+   bool			done;				// A boolean used to track when to stop all this nonsense.
 	
 	ourPath = NULL;
 	childList = NULL;
 	switch (ourType) {
-		case rootType		:																	// For root..
-		case folderType	:																	// And folders..
-			numBytes = getTotalPathChars() + 1;											// Calculate the amount of RAM we need for the path.
-			if(resizeBuff(numBytes,&ourPath)) {											// If we can get the RAM for our path string..
-				trace = (pathItem*)getFirst();											// Grab a link to our root node..
-				while(trace) {																	// While trace isn't NULL..
-					trace->addNameToPath(ourPath);										// Add trace's path text to the path.
-					trace = (pathItem*)trace->dllNext;									// Jump to the next path link in our list.
-				}
-				if (SD.exists(ourPath)) {													// If the directory exists..
-					dir = SD.open(ourPath);													// Try opening the directory.
-					if (dir.isDirectory()) {												// If it is a directory..
-						dir.rewindDirectory();                 						// Rewind it to the first entry.
-						done = false;                          						// We ain't done yet.
-						do {                                   						// Start looping through the entries.
-							entry = dir.openNextFile();									// Grab an entry.
-							if (entry) {														// If we got an entry..
+		case rootType		:																		// For root..
+		case folderType	:																		// And folders..
+			ourPath = getOurPath();																// Generate our path string.
+			if (ourPath) {																			// If we got our path string..
+				dir = SD.open(ourPath);															// Try opening the directory.
+				if (dir) {																			// If our directory exists..
+					if (dir.isDirectory()) {													// If it is a directory..
+						dir.rewindDirectory();                 							// Rewind it to the first entry.
+						done = false;                          							// We ain't done yet.
+						do {                                   							// Start looping through the entries.
+							entry = dir.openNextFile();										// Grab an entry.
+							if (entry) {															// If we got an entry..
 								if (strlen(entry.name()) <13) {								// If the entry name is 8.3 or shorter..
 									if (entry.isDirectory()) {									// If it is a directory..
 										newItem = new folderItem((char*)entry.name());	// Create the folderItem.
@@ -103,25 +118,27 @@ pathItem* pathItem::fillChildList(void) {
 										childList = newItem;										// You are the list!
 									}
 								}
-								entry.close();                							// And we close the entry.	
-							} else {                            						// Else, we didn't get an entry from above.
-								done = true;                     						// No entry means, we are done here.
+								entry.close();                								// And we close the entry.	
+							} else {                            							// Else, we didn't get an entry from above.
+								done = true;                     							// No entry means, we are done here.
 							}
-						} while (!done);                       						// And we do this loop, over and over, while we are not done.
-					} else {																		// Else, this was a datafile.
-						Serial.println("Not a directory.");								// Print an error.
+						} while (!done);                       							// And we do this loop, over and over, while we are not done.
+					} else {																			// Else, this was a datafile.
+						Serial.println("Not a directory.");									// Print an error.
 					}
-					dir.close();                              						// Looping through entries is done, close up the original file.
-				} else {                                     						// If this worked correctly, we'd know there was an error at this point.                                        
-					Serial.print("Can't find : ");     									// Can't find it.
-					Serial.println(ourPath);												// Print our path.
+					dir.close();                              							// Looping through entries is done, close up the original file.
+				} else {                                     							// If this worked correctly, we'd know there was an error at this point.                                        
+					Serial.print("Can't open : [");     									// Can't find it.
+					Serial.print(ourPath);														// Print our path.
+					Serial.println("]");															// 
 				}
+				resizeBuff(0,&ourPath);															// Recycle the path string.
 			} else {
-				Serial.print("Not enough RAM for path.");     						// Path is just too long!
+				Serial.print("Couldn't generate a path.");     							// Path is just too long!
 			}
 		break;
 		case fileType		:
-		case noType			: break;															// For fileType & noType, do nothing.
+		case noType			: break;																// For fileType & noType, do nothing.
 	}
 	return childList;
 }

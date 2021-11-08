@@ -13,9 +13,9 @@
 
 // The list of standard icons supplied by the OS for the applications to use.
 enum stdIcons	{
-	app32, check22, check32, copy32, cross22, cross32, cut32, edit22, edit32, fSave22,
-	fSave32, fOpen22, fOpen32, mask22, mask32, paste32, pref22, pref32, search22, search32,
-	sort22, sort32, trashC22, trashC32, trashR22, trashR32, x22, x32
+	mask22, mask32, app32, check22, check32, copy32, cross22, cross32, cut32, edit22,
+	edit32, fSave22, fSave32, fOpen22, fOpen32, paste32, pref22, pref32, search22,
+	search32, sort22, sort32, trashC22, trashC32, trashR22, trashR32, x22, x32
 };
 						
 						
@@ -35,6 +35,25 @@ class appIcon : public iconButton {
 
           int  mMessage;
 };
+
+
+// Class for building modal dialog boxes.
+class modal :	public drawGroup {
+
+	public:
+				modal(rect* inRect,eventSet inEventSet=noEvents);
+				modal(int x, int y, int width,int height,eventSet inEventSet=noEvents);
+	virtual	~modal(void);
+	
+	virtual	bool	acceptEvent(event* inEvent,point* locaPt);	// Is this event for us? Yes, they ALL are.
+	virtual	void	message(int inMsg);
+				bool	taskComplete();
+				
+				bool	success;
+				bool	done;
+};
+
+
 
 // The base panel class
 
@@ -114,8 +133,10 @@ class lilOS :  public idler {
 	virtual	char*		getPanelFolder(int panelID) = 0;
 	virtual	char*		stdIconPath(stdIcons theIcon);
 	
+	
 				char		pathBuff[PATH_LEN];			// Workspace for building up file paths.
 				panel*	mPanel;
+				bmpMask	icon32Mask;
 };
 
 extern  int nextPanel;

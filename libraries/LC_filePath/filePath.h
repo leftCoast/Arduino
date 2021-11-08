@@ -18,6 +18,7 @@ class pathItem : public dblLinkListObj {
 	virtual	int				getNumPathChars(void);
 	virtual	int				getTotalPathChars(void);
 	virtual	void				addNameToPath(char* path);
+	virtual	char* 			getOurPath(void);
 	virtual	pathItem*		getParent(void);
 	virtual	pathItem*		fillChildList(void);
 				
