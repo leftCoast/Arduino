@@ -33,6 +33,8 @@
 #define FL_DIR_H	L_ITEM_H
 
 
+timeObj	dblClickTimer(500);
+
 // Eww, this is a scary one! This allocates a #define ICON_X list icon for display. It hands it to
 // YOU with the implied agreement that : YOU will make sure that, when it's job is done,
 // it is recycled.
@@ -194,6 +196,7 @@ void fileListBox::fillList(fileBaseViewer* ourPath) {
 				addObj(newListItem);
 			}
 		}
+		setNeedRefresh();
 	}
 }
 
@@ -216,16 +219,20 @@ void fileListBox::drawSelf(void) {
 // fileDir is the label on the dialog box showing what our current directory is.
 
 
-fileDir::fileDir(filePath* inPath)
+fileDir::fileDir(filePath* inPath,fileListBox* inFileListBox)
 	: drawGroup(FL_DIR_X,FL_DIR_Y,FL_DIR_W,FL_DIR_H) {
 	
-	ourPath = inPath;
-	ourIcon = NULL;
+	ourPath			= inPath;
+	ourFileListBox	= inFileListBox;
+	ourIcon			= NULL;
 	if (ourPath) {
 		dirName = new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H);
 		if (dirName) {
 			dirName->setTextSize(1);
 			addObj(dirName);
+		}
+		if (ourFileListBox) {
+			ourFileListBox->fillList(ourPath);
 		}
 	}
 }
@@ -250,7 +257,8 @@ void fileDir::refresh(void) {
 			delete (ourIcon);															// Delete it.
 		}
 		ourIcon = createListIcon(ourPath->getCurrItem()->getType());	// Create a new one with whatever type we now have.
-		addObj(ourIcon);																// Add the new icon.
+		addObj(ourIcon);
+		ourFileListBox->fillList(ourPath);										
 	}
 }
 
@@ -264,7 +272,7 @@ void	 fileDir::drawSelf(void) { screen->drawRect(this,&black); }
 // **************************************************************
 
 
-fileBaseViewer::fOpenObj(panel* inPanel)
+fileBaseViewer::fileBaseViewer(panel* inPanel)
 	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {
 	
 	ourPanel = inPanel;
@@ -283,11 +291,12 @@ fileBaseViewer::fOpenObj(panel* inPanel)
 	ourFileListBox->fillList(this);
 	addObj(ourFileListBox);
 	
-	ourFileDir = new fileDir(this);
+	ourFileDir = new fileDir(this,ourFileListBox);
 	if (ourFileDir) {
 		ourFileDir->refresh();
 		addObj(ourFileDir);
 	}
+}
 	
 
 // Everything we've created are draw Objectes. They will be deleted automatically when we
@@ -296,23 +305,24 @@ fileBaseViewer::~fileBaseViewer(void) {  }
 
 
 // Choosing folders should jump us to the next tier of folders.
-void fOpenObj::chooseFolder(char* name) {
+void fileBaseViewer::chooseFolder(char* name) {
 
-	pushChildItemByName(name);
-	ourFileListBox->fillList(this);
+	if (pushChildItemByName(name)) {
+		ourFileDir->refresh();
+	}
 }
 
 
 // we don't do anything when choosing a file. Inherited probably will.
-void fOpenObj::chooseFile(char* name) { }				
+void fileBaseViewer::chooseFile(char* name) { }				
 	
 							
 // Use a callback to filter what you see.
-void fOpenObj::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
+void fileBaseViewer::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
 
 
 // Basically we are nothing but big white rectangle.
-void fOpenObj::drawSelf(void) { screen->fillRect(this,&white); }
+void fileBaseViewer::drawSelf(void) { screen->fillRect(this,&white); }
 
 	
 // **************************************************************
@@ -325,11 +335,7 @@ fOpenObj::fOpenObj(panel* inPanel)
 	:fileBaseViewer(inPanel) {  }
 
 
-fOpenObj::~fOpenObj(void) {
-	
-	gMask = NULL;
-	if (ourModalMask) delete(ourModalMask);
-}
+fOpenObj::~fOpenObj(void) { }
 
 
 void fOpenObj::chooseFile(char* name) {

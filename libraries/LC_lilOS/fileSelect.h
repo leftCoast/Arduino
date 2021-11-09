@@ -9,7 +9,6 @@
 class		fileBaseViewer;
 class		fileDir;
 class		fileListBox;
-timeObj	dblClickTimer(500);
 
 
 // **************************************************************
@@ -91,15 +90,16 @@ class fileListBox :	public scrollingList {
 class fileDir :	public drawGroup {
 
 	public:
-				fileDir(filePath* inPath);
+				fileDir(filePath* inPath,fileListBox* inFileListBox);
 	virtual	~fileDir(void);
 	
 				void	refresh(void);
 	virtual	void	drawSelf(void);
 	
-				filePath*	ourPath;
-				label*		dirName;
-				bmpObj*		ourIcon;
+				filePath*		ourPath;
+				fileListBox*	ourFileListBox;
+				label*			dirName;
+				bmpObj*			ourIcon;
 };
 	
 	

@@ -328,7 +328,7 @@ void breakout::showBallNum(int balls) {
   colorObj  aColor;
 
   if (balls) {
-    aColor = ballNumCMap.Map(balls);
+    aColor = ballNumCMap.map(balls);
     numBallsNum->setColors(&aColor,&backColor);
     numBallsNum->setValue(ballCount);
   } else {
