@@ -34,28 +34,15 @@
 
 
 timeObj	dblClickTimer(500);
-
-// Eww, this is a scary one! This allocates a #define ICON_X list icon for display. It hands it to
-// YOU with the implied agreement that : YOU will make sure that, when it's job is done,
-// it is recycled.
-bmpObj* createListIcon(pathItemType inType) {
-	
-	bmpObj*	ourIcon;
-	
-	if (inType==folderType) {
-		ourIcon = new bmpObj(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldr16.bmp");
-	} else if (inType==fileType) {
-		ourIcon = new bmpObj(ICON_X,ICON_Y,ICON_W,ICON_H,"/doc16.bmp");
-	} else /*if ((inType==rootType) */{
-		ourIcon = new bmpObj(ICON_X,ICON_Y,ICON_W,ICON_H,"/SD16.bmp");
-	}
-	return ourIcon;
-}
+bmpObj	folderBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldr16.bmp");
+bmpObj	folderBkBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldrBk16.bmp");
+bmpObj	docBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/doc16.bmp");
+bmpObj	SDBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/SD16.bmp");
 
 
 #define CNCL_X	5
 #define CNCL_Y	130
-#define OK_X	42
+#define OK_X	OPEN_W - 32 - CNCL_X
 #define OK_Y	130
 
 // **************************************************************
@@ -99,9 +86,7 @@ void	cancelBtn::doAction(void) {
    
 fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,L_ITEM_W,L_ITEM_H,fullClick) {
-	
-	bmpObj*	ourIcon;
-	
+		
 	ourViewer	= inViewer;
 	ourList		= inList;
 	ourType		= inType;
@@ -110,35 +95,43 @@ fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItem
 		fileName->setColors(&black);
 		addObj(fileName);
 	}
-	ourIcon = createListIcon(inType);
-	addObj(ourIcon);
 }
 
 
 fileListItem::~fileListItem(void) { }
 	
-	
+
+// Custom draw() method for list items.	
 void fileListItem::draw(void)	{
 
-	if (ourList->isVisible(this)) {
-		Serial.println("Drawing");
-		drawGroup::draw();
+	if (ourList->isVisible(this)) {	// If we are visable..
+		drawGroup::draw();				// We draw ourselves.
 	}
-	needRefresh = false;
+	needRefresh = false;					// But in all cases. We no longer need to be drawn.
 }
 
 		
 void fileListItem::drawSelf(void) { 
 	
 	colorObj aColor(LC_LIGHT_BLUE);
+	bmpObj*	ourIcon;
 	
 	if (haveFocus()) {
 		screen->fillRect(this,&aColor);
 	} else {
 		screen->fillRect(this,&white);
 	}
+	switch(ourType) {
+		case noType			: ourIcon = NULL;			break;
+		case rootType		: ourIcon = &SDBmp;		break;
+		case folderType	: ourIcon = &folderBmp;	break;
+		case fileType		: ourIcon = &docBmp;		break;
+	}
+	if (ourIcon) {
+		ourIcon->setLocation(ICON_X+x,ICON_Y+y);
+		ourIcon->drawSelf();
+	}
 }
-
 
 
 void fileListItem::doAction(void) {
@@ -186,18 +179,25 @@ void fileListBox::fillList(fileBaseViewer* ourPath) {
 	fileListItem*	newListItem;
 	int				numItems;
 	
+	Serial.println(numObjects());
 	dumpDrawObjList();
+	Serial.println(numObjects());
 	if (ourPath) {
 		numItems = ourPath->numChildItems();
+		Serial.print("adding : ");Serial.println(numItems);
 		for (int i=0;i<numItems;i++) {
+			Serial.println(i);
 			trace = ourPath->getChildItemByIndex(i);
 			if (trace) {
 				newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
 				addObj(newListItem);
+			} else {
+				Serial.println("Failed allocation.");
 			}
 		}
-		setNeedRefresh();
+		Serial.print("Now have : ");Serial.println(numObjects());
 	}
+	setNeedRefresh();
 }
 
 
@@ -208,6 +208,7 @@ void fileListBox::drawSelf(void) {
 	ourFrame.setRect(this);
 	ourFrame.insetRect(-1);
 	screen->drawRect(&ourFrame,&black);
+	screen->fillRect(this,&white);
 }
 
  
@@ -256,8 +257,8 @@ void fileDir::refresh(void) {
 		if (ourIcon) {																	// If we have an icon obj..
 			delete (ourIcon);															// Delete it.
 		}
-		ourIcon = createListIcon(ourPath->getCurrItem()->getType());	// Create a new one with whatever type we now have.
-		addObj(ourIcon);
+		//ourIcon = createListIcon(ourPath->getCurrItem()->getType());	// Create a new one with whatever type we now have.
+		//addObj(ourIcon);
 		ourFileListBox->fillList(ourPath);										
 	}
 }

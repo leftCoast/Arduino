@@ -106,7 +106,7 @@ void scrollingList::setScrollValue(float percent) {
     case dSOpenBtm  : itemMapper.setValues(0,100,0,numItems); break;    // Setup the mapper,0-100 to 0..last item + 1. The list and "below".
     case dSOpenBoth : itemMapper.setValues(0,100,-1,numItems); break;   // Setup the mapper,0-100 to -1..last item +1 . The list above and below.
   }
-  itemIndex = round(itemMapper.Map(percent));   // Map to get item index.
+  itemIndex = round(itemMapper.map(percent));   // Map to get item index.
   if (itemIndex==-1) {                          // Below 0, abovve list.
     mLoc = aboveList;                           // setOur location type to above.
     offList();                                  // Let 'em know if they want.
