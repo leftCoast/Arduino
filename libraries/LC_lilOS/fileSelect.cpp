@@ -232,9 +232,7 @@ fileDir::fileDir(filePath* inPath,fileListBox* inFileListBox)
 			dirName->setTextSize(1);
 			addObj(dirName);
 		}
-		if (ourFileListBox) {
-			ourFileListBox->fillList(ourPath);
-		}
+		refresh();
 	}
 }
 
@@ -246,25 +244,30 @@ fileDir::~fileDir(void) {  }
 void fileDir::refresh(void) {
 
 	
-	if (ourPath) {																		// If we have non-NULL file path..
-		if (dirName) {																	// If we have a text obj for the dir name..
-			if (!strcmp(ourPath->getCurrItemName(),"/")) {					// If we're looking at root..
-				dirName->setValue("SD Root");										// Set a more.. descriptive name for '/'.
-			} else {	
-				dirName->setValue(ourPath->getCurrItemName());				// Set the new name for the current directory.
-			}
-		} 
-		if (ourIcon) {																	// If we have an icon obj..
-			delete (ourIcon);															// Delete it.
+	if (dirName && ourFileListBox) {																	// If we have a text obj for the dir name..
+		if (!strcmp(ourPath->getCurrItemName(),"/")) {					// If we're looking at root..
+			dirName->setValue("SD Root");										// Set a more.. descriptive name for '/'.
+		} else {	
+			dirName->setValue(ourPath->getCurrItemName());				// Set the new name for the current directory.
 		}
-		//ourIcon = createListIcon(ourPath->getCurrItem()->getType());	// Create a new one with whatever type we now have.
-		//addObj(ourIcon);
-		ourFileListBox->fillList(ourPath);										
-	}
+		ourFileListBox->fillList(ourPath);
+	}										
 }
 
 
-void	 fileDir::drawSelf(void) { screen->drawRect(this,&black); }
+void	 fileDir::drawSelf(void) {
+
+	bmpObj*	ourIcon;
+	
+	screen->drawRect(this,&black);
+	if (!strcmp(ourPath->getCurrItemName(),"/")) {
+		ourIcon = &SDBmp;
+	} else {
+		ourIcon = &folderBkBmp;
+	}
+	ourIcon->setLocation(ICON_X+x,ICON_Y+y);
+	ourIcon->drawSelf();
+}
 
 
 
@@ -308,7 +311,9 @@ fileBaseViewer::~fileBaseViewer(void) {  }
 // Choosing folders should jump us to the next tier of folders.
 void fileBaseViewer::chooseFolder(char* name) {
 
+	Serial.println(getPath());
 	if (pushChildItemByName(name)) {
+		Serial.println(getPath());
 		ourFileDir->refresh();
 	}
 }

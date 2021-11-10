@@ -198,7 +198,7 @@ bool docFileObj::openDocFile(int openMode) {
 				ourFile.seek(0);													// Opening to READ assumes you start at the beginning of the file.
 				return true;														// We're all set, lets go.
 			} else if (mode==fOpenToEdit||mode==fEdited) {				// We're in the middle of editing..
-				closeDocFile();														// We try to close the file to open later.
+				closeDocFile();													// We try to close the file to open later.
 				if (mode!=fClosed) {												// IF the file is NOT been closed..
 					return false;													// They didn't close it, Lets bolt!
 				}
@@ -429,9 +429,8 @@ bool docFileObj::createEditPath(void) {
 	
 	if (editFilePath) return true;										// If we already have a temp path set up? Bail.
 	success = false;															// As always, not a success yet.
-	
-	if (createTempDir(TEMP_FOLDER)) {									// Ok we don't have a temp path. So, if we have or can create a temp directory..
-		pathBuff = NULL;														// Start it at NULL so resizeBuff will work correctly.
+	if (createTempDir(TEMP_FOLDER)) {									// If we have, or can create, a temp directory..
+		pathBuff = NULL;														// Starting at NULL so resizeBuff will work correctly.
 		numBytes = strlen(tempDir)+TEMP_NAME_CHARS + 1;				//	Calculate the max RAM we'll need for the path buff.
 		if (resizeBuff(numBytes,&pathBuff)) {							// If we can allocate the RAM.
 			done = false;														// Not done yet.

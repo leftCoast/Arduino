@@ -377,6 +377,7 @@ bool filePath::setPath(char* inPath) {
 }
 
 
+// We'll allocate this, but we'll also reuse the memory. So be careful. It won't last.
 char* filePath::getPath(void) {
 	
 	int			numBytes;
