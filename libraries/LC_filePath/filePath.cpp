@@ -383,22 +383,22 @@ char* filePath::getPath(void) {
 	int			numBytes;
 	pathItem*	trace;
 	
-	if (pathList) {
-		trace = (fileItem*)pathList->getLast();
-		if (trace) {
-			numBytes = trace->getTotalPathChars() + 1;
-			if (resizeBuff(numBytes,&path)) {
-				trace = pathList;
-				while(trace) {
-					trace->addNameToPath(path);
-					trace = (pathItem*)trace->dllNext;
+	if (pathList) {												// If we have a path list..
+		trace = (fileItem*)pathList->getLast();			// Grab the last item in the path.
+		if (trace) {												// If we got that last item..
+			numBytes = trace->getTotalPathChars() + 1;	// Go down the list to the root and calc. the num of path chars needed.
+			if (resizeBuff(numBytes,&path)) {				// Grab the RAM needed to store the path string.
+				trace = pathList;									// Gab the head node of the path. (Root)
+				while(trace) {										// While we're pointing to a path node..
+					trace->addNameToPath(path);				// Add this nodes name to the string.
+					trace = (pathItem*)trace->dllNext;		// And jump to the next node.
 				}
-				return path;
+				return path;										// All done, pass back the complete path string.
 			}
 		}
 	}
-	path[0] = '\0';
-	return path;
+	resizeBuff(0,&path);											// If we get here? It failed. Recycle the RAM.
+	return path;													// Return the NULL result.
 }
 
 
@@ -559,17 +559,10 @@ bool filePath::pushItem(pathItem* theNewGuy) {
 			if (theNewGuy->getType()==rootType) {		// If this new guy is a rootType..
 				pathList = theNewGuy;						// Point the pathList at this new guy.
 				success = true;								// And there we go. A success!
-			} else {												// Else, NOT a root type?..
-				aRoot = new rootItem();						// We'll fix it. Try to create a root item.
-				if (aRoot) {									// If we got the root item..
-					pathList = aRoot;							// Point the pathList at this new root.
-					theNewGuy->linkToEnd(pathList);		// Then tell the new item to link itself to the end of the list.
-					success = true;							// And again, we pulled this mess out of the fire.
-				} 			
 			}
 		}
 	}
-	refreshChildList();											// This will at least clean out the old list.
+	refreshChildList();										// This will at least clean out the old list.
 	return success;
 }
 
@@ -590,7 +583,7 @@ void filePath::popItem(void) {
 			delete (theLastGuy);											// Delete the last node.
 		}
 	}
-	refreshChildList();														// This will at least clean out the old list.
+	refreshChildList();													// This will at least clean out the old list.
 }
 			
 
