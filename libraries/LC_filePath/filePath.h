@@ -76,8 +76,8 @@ class filePath {
 				int				numChildItems(void);
 				pathItem*		getChildItemByName(char* name);
 				bool				pushChildItemByName(char* name);
-				pathItem*		getChildItemByIndex(int index);
-				bool				pushChildItemByIndex(int index);
+				//pathItem*		getChildItemByIndex(int index);
+				//bool				pushChildItemByIndex(int index);
 				bool				pushItem(pathItem* theNewGuy);
 				void				popItem(void);
 				

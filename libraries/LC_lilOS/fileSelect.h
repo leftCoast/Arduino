@@ -61,7 +61,8 @@ class fileListItem :	public drawGroup {
 				fileBaseViewer*	ourViewer;
 				fileListBox*		ourList;
 				pathItemType		ourType;
-				label*				fileName;
+				//label*				fileName;
+				char*					ourName;
 };
 
 

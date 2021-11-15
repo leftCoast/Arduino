@@ -38,7 +38,8 @@ bmpObj	folderBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldr16.bmp");
 bmpObj	folderBkBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldrBk16.bmp");
 bmpObj	docBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/doc16.bmp");
 bmpObj	SDBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/SD16.bmp");
-
+label		itemLabel(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,"no name",1);
+int		numItmes = 0;
 
 #define CNCL_X	5
 #define CNCL_Y	130
@@ -86,19 +87,30 @@ void	cancelBtn::doAction(void) {
    
 fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,L_ITEM_W,L_ITEM_H,fullClick) {
-		
+	
+	int	numChars;
+	numItmes++;
+	Serial.print(numItmes);
 	ourViewer	= inViewer;
 	ourList		= inList;
 	ourType		= inType;
+	ourName		= NULL;
+	numChars = strlen(inName)+1;
+	if (resizeBuff(numChars,&ourName)) {
+		strcpy(ourName,inName);
+	}
+	/*
 	fileName		= new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,inName,1);
 	if (fileName) {
 		fileName->setColors(&black);
 		addObj(fileName);
 	}
+	*/
 }
 
 
-fileListItem::~fileListItem(void) { }
+fileListItem::~fileListItem(void) { numItmes--;
+	Serial.print(numItmes);resizeBuff(0,&ourName); }
 	
 
 // Custom draw() method for list items.	
@@ -115,6 +127,7 @@ void fileListItem::drawSelf(void) {
 	
 	colorObj aColor(LC_LIGHT_BLUE);
 	bmpObj*	ourIcon;
+	label*	ourLabel;
 	
 	if (haveFocus()) {
 		screen->fillRect(this,&aColor);
@@ -131,26 +144,31 @@ void fileListItem::drawSelf(void) {
 		ourIcon->setLocation(ICON_X+x,ICON_Y+y);
 		ourIcon->drawSelf();
 	}
+	if (ourName) {
+		itemLabel.setLocation(L_ITEM_TXT_X+x,L_ITEM_TXT_Y+y);
+		itemLabel.setColors(&black);
+		itemLabel.setValue(ourName);
+		itemLabel.drawSelf();
+	}
 }
 
 
 void fileListItem::doAction(void) {
 	
-	char name[13];
+	//char name[13];
 	
 	if (!haveFocus()) {
 		dblClickTimer.start();
 		setFocusPtr(this);
 	} else {
-		if (!dblClickTimer.ding()) {					// If we're looking at a double click..
-			fileName->getText(name);					// Grab the saved off name text.
+		if (!dblClickTimer.ding()) {					// If we're looking at a double click..			
 			switch(ourType) {								// Lets see what we are..
 				case rootType		:						// Really it can't be..
 				case folderType	:						// Double clicked a folder..
-					ourViewer->chooseFolder(name);	// Pass it to our list controller thing.
+					ourViewer->chooseFolder(ourName);	// Pass it to our list controller thing.
 				break;										// So long!
 				case fileType	:							// Double clicked a file..
-					ourViewer->chooseFile(name);		// Pass it to our list controller thing.
+					ourViewer->chooseFile(ourName);		// Pass it to our list controller thing.
 				break;										// So long!
 				case noType		: break;					// Code is just broken. Give up.
 			}
@@ -179,23 +197,23 @@ void fileListBox::fillList(fileBaseViewer* ourPath) {
 	fileListItem*	newListItem;
 	int				numItems;
 	
-	Serial.println(numObjects());
+	//Serial.println(numObjects());
 	dumpDrawObjList();
-	Serial.println(numObjects());
+	//Serial.println(numObjects());
 	if (ourPath) {
 		numItems = ourPath->numChildItems();
-		Serial.print("adding : ");Serial.println(numItems);
+		//Serial.print("adding : ");Serial.println(numItems);
 		for (int i=0;i<numItems;i++) {
-			Serial.println(i);
+			//Serial.println(i);
 			trace = ourPath->getChildItemByIndex(i);
 			if (trace) {
 				newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
 				addObj(newListItem);
 			} else {
-				Serial.println("Failed allocation.");
+				//Serial.println("Failed allocation.");
 			}
 		}
-		Serial.print("Now have : ");Serial.println(numObjects());
+		//Serial.print("Now have : ");Serial.println(numObjects());
 	}
 	setNeedRefresh();
 }
@@ -291,9 +309,10 @@ fileBaseViewer::fileBaseViewer(panel* inPanel)
 	addObj(cBtn);
 	
 	ourFileListBox = new fileListBox(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
-	setPath("/");
-	ourFileListBox->fillList(this);
+	setPath("/system/");
 	addObj(ourFileListBox);
+	ourFileListBox->fillList(this);
+	
 	
 	ourFileDir = new fileDir(this,ourFileListBox);
 	if (ourFileDir) {

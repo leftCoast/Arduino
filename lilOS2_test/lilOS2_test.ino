@@ -1,10 +1,15 @@
+#include <debug.h>
 #include <SD.h>
 #include <adafruit_1947_Obj.h>
-#include <screen.h> 
+#include <screen.h>
 #include "ourOSObj.h"
 
-void setup() {
+//RAMMonitor ourMonitor;
 
+void setup() {
+   
+   //ourMonitor.begin();
+   
    Serial.begin(57600);                                           // Fire up serial for debugging.
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.
       Serial.println("NO SCREEN!");                               // Screen init failed. Tell user.
@@ -19,7 +24,7 @@ void setup() {
    }
    ourEventMgr.begin();                                           // Startup our event manager.
    ourOS.begin();                                                 // Boot OS manager.
-   nextPanel = iconEditApp;
+   //nextPanel = iconEditApp;
 }
 
 
