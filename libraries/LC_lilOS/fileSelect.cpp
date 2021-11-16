@@ -39,12 +39,13 @@ bmpObj	folderBkBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldrBk16.bmp");
 bmpObj	docBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/doc16.bmp");
 bmpObj	SDBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/SD16.bmp");
 label		itemLabel(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,"no name",1);
-int		numItmes = 0;
+
 
 #define CNCL_X	5
 #define CNCL_Y	130
 #define OK_X	OPEN_W - 32 - CNCL_X
 #define OK_Y	130
+
 
 // **************************************************************
 // ************************ OKBtn stuff *************************
@@ -89,8 +90,7 @@ fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItem
 	: drawGroup(1,1,L_ITEM_W,L_ITEM_H,fullClick) {
 	
 	int	numChars;
-	numItmes++;
-	Serial.print(numItmes);
+	
 	ourViewer	= inViewer;
 	ourList		= inList;
 	ourType		= inType;
@@ -99,18 +99,10 @@ fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItem
 	if (resizeBuff(numChars,&ourName)) {
 		strcpy(ourName,inName);
 	}
-	/*
-	fileName		= new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,inName,1);
-	if (fileName) {
-		fileName->setColors(&black);
-		addObj(fileName);
-	}
-	*/
 }
 
 
-fileListItem::~fileListItem(void) { numItmes--;
-	Serial.print(numItmes);resizeBuff(0,&ourName); }
+fileListItem::~fileListItem(void) { resizeBuff(0,&ourName); }
 	
 
 // Custom draw() method for list items.	
@@ -154,9 +146,7 @@ void fileListItem::drawSelf(void) {
 
 
 void fileListItem::doAction(void) {
-	
-	//char name[13];
-	
+		
 	if (!haveFocus()) {
 		dblClickTimer.start();
 		setFocusPtr(this);
@@ -195,25 +185,20 @@ void fileListBox::fillList(fileBaseViewer* ourPath) {
 
 	pathItem*		trace;
 	fileListItem*	newListItem;
-	int				numItems;
 	
-	//Serial.println(numObjects());
 	dumpDrawObjList();
-	//Serial.println(numObjects());
 	if (ourPath) {
-		numItems = ourPath->numChildItems();
-		//Serial.print("adding : ");Serial.println(numItems);
-		for (int i=0;i<numItems;i++) {
-			//Serial.println(i);
-			trace = ourPath->getChildItemByIndex(i);
-			if (trace) {
-				newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
+		trace = ourPath->childList;
+		while(trace) {
+			newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
+			if (newListItem) {
 				addObj(newListItem);
+				trace = (pathItem*)trace->dllNext;
 			} else {
-				//Serial.println("Failed allocation.");
+				Serial.println("Failed allocation.");
+				trace = NULL;															// Shut down loop.
 			}
 		}
-		//Serial.print("Now have : ");Serial.println(numObjects());
 	}
 	setNeedRefresh();
 }
@@ -239,7 +224,7 @@ void fileListBox::drawSelf(void) {
 
 
 fileDir::fileDir(filePath* inPath,fileListBox* inFileListBox)
-	: drawGroup(FL_DIR_X,FL_DIR_Y,FL_DIR_W,FL_DIR_H) {
+	: drawGroup(FL_DIR_X,FL_DIR_Y,FL_DIR_W,FL_DIR_H,fullClick) {
 	
 	ourPath			= inPath;
 	ourFileListBox	= inFileListBox;
@@ -248,10 +233,12 @@ fileDir::fileDir(filePath* inPath,fileListBox* inFileListBox)
 		dirName = new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H);
 		if (dirName) {
 			dirName->setTextSize(1);
+			dirName->setColors(&black);
 			addObj(dirName);
 		}
 		refresh();
 	}
+	
 }
 
 
@@ -273,10 +260,16 @@ void fileDir::refresh(void) {
 }
 
 
-void	 fileDir::drawSelf(void) {
+void fileDir::drawSelf(void) {
 
 	bmpObj*	ourIcon;
+	colorObj aColor(LC_LIGHT_BLUE);
 	
+	if (haveFocus()) {
+		screen->fillRect(this,&aColor);
+	} else {
+		screen->fillRect(this,&white);
+	}
 	screen->drawRect(this,&black);
 	if (!strcmp(ourPath->getCurrItemName(),"/")) {
 		ourIcon = &SDBmp;
@@ -284,7 +277,27 @@ void	 fileDir::drawSelf(void) {
 		ourIcon = &folderBkBmp;
 	}
 	ourIcon->setLocation(ICON_X+x,ICON_Y+y);
-	ourIcon->drawSelf();
+	ourIcon->draw();
+}
+
+
+void fileDir::doAction(void) {
+	
+	if (!haveFocus()) {												// If we DON'T have focus..
+		dblClickTimer.start();										// Start the double click timer.
+		setFocusPtr(this);											// And set focus to us.
+	} else {																// Else, we DID have focus..
+		if (!dblClickTimer.ding()) {								// If we're looking at a double click..			
+			if (!strcmp(ourPath->getCurrItemName(),"/")) {	// If we're looking at root..
+				return;													// We just give up now.
+			} else {														// Else, We double clicked a folder..
+				ourPath->popItem();									// Pop path to the parent directory.
+				refresh();												// And do a refresh.
+			}
+		} else {															// Else, this was not  double click..
+			dblClickTimer.start();									// Restart the timer, maybe this is the start of a double?
+		}
+	}
 }
 
 
@@ -311,13 +324,11 @@ fileBaseViewer::fileBaseViewer(panel* inPanel)
 	ourFileListBox = new fileListBox(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
 	setPath("/system/");
 	addObj(ourFileListBox);
-	ourFileListBox->fillList(this);
-	
 	
 	ourFileDir = new fileDir(this,ourFileListBox);
 	if (ourFileDir) {
-		ourFileDir->refresh();
 		addObj(ourFileDir);
+		ourFileDir->refresh();
 	}
 }
 	

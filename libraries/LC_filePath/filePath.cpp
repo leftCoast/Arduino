@@ -119,6 +119,9 @@ pathItem* pathItem::fillChildList(void) {
 									} else {															// Else there is no list.. (yet)
 										childList = newItem;										// You are the list!
 									}
+								} else {
+									Serial.print("Skipped : ");
+									Serial.println(entry.name());
 								}
 								entry.close();                								// And we close the entry.	
 							} else {                            							// Else, we didn't get an entry from above.

@@ -96,6 +96,7 @@ class fileDir :	public drawGroup {
 	
 				void	refresh(void);
 	virtual	void	drawSelf(void);
+	virtual	void	doAction(void);
 	
 				filePath*		ourPath;
 				fileListBox*	ourFileListBox;
