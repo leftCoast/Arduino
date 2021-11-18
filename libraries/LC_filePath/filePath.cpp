@@ -405,15 +405,15 @@ void filePath::refreshChildList(void) {
 						done = true;                     							// No entry means, we are done here.
 					}
 				} while (!done);                       							// And we do this loop, over and over, while we are not done.
-			} else {																			// Else, this was a datafile.
-				Serial.println("Not a directory.");									// Print an error.
 			}
 			dir.close();                              							// Looping through entries is done, close up the original file.
-		} else {                                     							// If this worked correctly, we'd know there was an error at this point.                                        
-			Serial.print("Can't open : [");     									// Can't find it.
-			Serial.print(ourPath);														// Print our path.
-			Serial.println("]");															// 
 		}
+	} else {																					// Else, we can't even open the path we have?
+		Serial.println("In refreshChildList()");
+		Serial.print("Can't open path [");											// This is bad, it actually warrants an error message.
+		Serial.print(ourPath);
+		Serial.println("]");
+		Serial.println("All paths should, at least, be valid!");
 	}
 }
 
@@ -482,8 +482,8 @@ bool   filePath::pushChildItemByName(char* name) {
 		}
 		if (newItem) {									// If we were able to allocate the new item..
 			success = pushItem(newItem);			// Try putting the new item at the end of the pathList. Save off the result.
-			if (!success) {
-				delete(newItem);
+			if (!success) {							// If, for some reason, we couldn't push it on there..
+				delete(newItem);						// Make sure to delete it. No leaking!
 			}
 		}
 	}
@@ -495,21 +495,25 @@ bool   filePath::pushChildItemByName(char* name) {
 bool filePath::pushItem(pathItem* theNewGuy) {
 
 	rootItem*	aRoot;
+	pathItem*	theLastGuy;
 	bool			success;
 	
-	success = false;											// Not a success yet.
-	if (theNewGuy) {											// If we got a non-NULL new guy..
-		if (pathList) {										// If we have a non-NULL pathList..
-			theNewGuy->linkToEnd(pathList);				// Tell the new guy to link hisself to the end of the list.
-			success = true;									// Shit howdy! Looks ike we done did it!
-		} else {													// Else, we had an empty (NULL) pathList..
-			if (theNewGuy->getType()==rootType) {		// If this new guy is a rootType..
-				pathList = theNewGuy;						// Point the pathList at this new guy.
-				success = true;								// And there we go. A success!
+	success = false;													// Not a success yet.
+	if (theNewGuy) {													// If we got a non-NULL new guy..
+		if (pathList) {												// If we have a non-NULL pathList..
+			theLastGuy = (pathItem*)pathList->getLast();		// We grab the last item on the list.
+			if (theLastGuy->getType()!=fileType) {				// If the last guy is not a file. (Dead end)
+				theNewGuy->linkToEnd(pathList);					// Tell the new guy to link hisself to the end of the list.
+				success = true;										// Shit howdy! Looks ike we done did it!
+			}
+		} else {															// Else, we had an empty (NULL) pathList..
+			if (theNewGuy->getType()==rootType) {				// If this new guy is a rootType..
+				pathList = theNewGuy;								// Point the pathList at this new guy.
+				success = true;										// And there we go. A success!
 			}
 		}
 	}
-	refreshChildList();										// This will at least clean out the old list.
+	refreshChildList();												// This will at least clean out the old list.
 	return success;
 }
 

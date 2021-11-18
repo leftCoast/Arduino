@@ -181,10 +181,8 @@ bool docFileObj::openDocFile(int openMode) {
 					if (createEditPath()) {										// If we were able to create an edit path..
 						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
 						if (ourFile) {												// If we were able to open the edit file..
-						
 							ourFile.close();										// Close the file. We know we can open it.
 							ourFile = TRUNCATE_FILE(editFilePath);
-							
 							fcpy(ourFile,tempFile);								// Copy the original to the new editing file.
 							mode = fOpenToEdit;									// We are open for editing.
 							success = true;										// Success!! The edit file is open and ready to use.
