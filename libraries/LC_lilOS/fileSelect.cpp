@@ -3,7 +3,7 @@
 #include <adafruit_1947_Obj.h>
 
 #define FILE_LIST_X			10
-#define FILE_LIST_Y			30
+#define FILE_LIST_Y			50
 #define FILE_LIST_WIDTH		100
 #define NUM_LIST_ITEMS		5
 
@@ -24,27 +24,31 @@
 
 #define OPEN_X	30
 #define OPEN_Y	40
-#define OPEN_W	180
-#define OPEN_H	170
+#define OPEN_W	120
+#define OPEN_H	190
 
 #define FL_DIR_X	FILE_LIST_X
 #define FL_DIR_Y	FILE_LIST_Y - 25
 #define FL_DIR_W	FILE_LIST_WIDTH
 #define FL_DIR_H	L_ITEM_H
 
+#define CNCL_X	10
+#define CNCL_Y	OPEN_H - 40
+#define OK_X	OPEN_W - 32 - CNCL_X
+#define OK_Y	OPEN_H - 40
+
+#define LABEL_X	5
+#define LABEL_Y	10
+#define LABEL_W	OPEN_W - LABEL_X * 2
+#define LABEL_H	18
+
+
 
 timeObj	dblClickTimer(500);
 bmpObj	folderBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldr16.bmp");
-bmpObj	folderBkBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/fldrBk16.bmp");
 bmpObj	docBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/doc16.bmp");
-bmpObj	SDBmp(ICON_X,ICON_Y,ICON_W,ICON_H,"/SD16.bmp");
 label		itemLabel(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H,"no name",1);
 
-
-#define CNCL_X	5
-#define CNCL_Y	130
-#define OK_X	OPEN_W - 32 - CNCL_X
-#define OK_Y	130
 
 
 // **************************************************************
@@ -56,11 +60,7 @@ OKBtn::OKBtn(int xLoc,int yLoc,char* path,modal* inModal)
 	
 OKBtn::~OKBtn(void) {  }
 	
-void OKBtn::doAction(void) {
-
-	ourModal->success = true;
-	ourModal->done = true;
-}
+void OKBtn::doAction(void) { ourModal->setSuccess(true); }
 
 
 
@@ -74,11 +74,7 @@ cancelBtn::cancelBtn(int xLoc,int yLoc,char* path,modal* inModal)
 
 cancelBtn::~cancelBtn(void) {  }
 	
-void	cancelBtn::doAction(void) {
-
-	ourModal->success = false;
-	ourModal->done = true;
-}
+void	cancelBtn::doAction(void) { ourModal->setSuccess(false); }
 
 
 	
@@ -128,7 +124,7 @@ void fileListItem::drawSelf(void) {
 	}
 	switch(ourType) {
 		case noType			: ourIcon = NULL;			break;
-		case rootType		: ourIcon = &SDBmp;		break;
+		case rootType		: ourIcon = NULL;			break;
 		case folderType	: ourIcon = &folderBmp;	break;
 		case fileType		: ourIcon = &docBmp;		break;
 	}
@@ -168,7 +164,18 @@ void fileListItem::doAction(void) {
 	}
 }
 
-	
+
+void fileListItem::setThisFocus(bool setLoose) {
+
+	drawGroup::setThisFocus(setLoose);
+	if (setLoose) {
+		ourViewer->setItem(this);
+	} else {
+		ourViewer->setItem(NULL);
+	}
+}
+
+
 // **************************************************************
 // ******************* fileListBox stuff ************************
 // **************************************************************
@@ -181,6 +188,15 @@ fileListBox::fileListBox(int x, int y, int width,int height)
 fileListBox::~fileListBox(void) { }	
 
 
+bool fileListBox::checkFile(fileBaseViewer* ourPath,pathItem* trace) {
+	
+	if (ourPath->filterFx) {
+		return ourPath->filterFx(trace->getName());
+	}
+	return true;
+}
+
+
 void fileListBox::fillList(fileBaseViewer* ourPath) {
 
 	pathItem*		trace;
@@ -190,14 +206,15 @@ void fileListBox::fillList(fileBaseViewer* ourPath) {
 	if (ourPath) {
 		trace = ourPath->childList;
 		while(trace) {
-			newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
-			if (newListItem) {
-				addObj(newListItem);
-				trace = (pathItem*)trace->dllNext;
-			} else {
-				Serial.println("Failed allocation.");
-				trace = NULL;															// Shut down loop.
+			if (checkFile(ourPath,trace)) {
+				newListItem = new fileListItem(ourPath,this,trace->getType(),trace->getName());
+				if (newListItem) {
+					addObj(newListItem);
+				} else {
+					trace = NULL;							// No r=RAM fail.
+				}
 			}
+			if (trace) trace = (pathItem*)trace->dllNext;
 		}
 	}
 	setNeedRefresh();
@@ -220,25 +237,29 @@ void fileListBox::drawSelf(void) {
 // *********************** fileDir  stuff ***********************
 // **************************************************************
 
+
 // fileDir is the label on the dialog box showing what our current directory is.
-
-
 fileDir::fileDir(filePath* inPath,fileListBox* inFileListBox)
 	: drawGroup(FL_DIR_X,FL_DIR_Y,FL_DIR_W,FL_DIR_H,fullClick) {
 	
 	ourPath			= inPath;
 	ourFileListBox	= inFileListBox;
-	ourIcon			= NULL;
+	folderIcon = new bmpObj(ICON_X,-200,ICON_W,ICON_H,"/fldrBk16.bmp");
+	if (folderIcon) {
+		addObj(folderIcon);
+	}
+	SDIcon = new bmpObj(ICON_X,-200,ICON_W,ICON_H,"/SD16.bmp");
+	if (SDIcon) {
+		addObj(SDIcon);
+	}
 	if (ourPath) {
 		dirName = new label(L_ITEM_TXT_X,L_ITEM_TXT_Y,L_ITEM_TXT_W,L_ITEM_TXT_H);
 		if (dirName) {
 			dirName->setTextSize(1);
-			dirName->setColors(&black);
 			addObj(dirName);
 		}
 		refresh();
 	}
-	
 }
 
 
@@ -252,8 +273,12 @@ void fileDir::refresh(void) {
 	if (dirName && ourFileListBox) {																	// If we have a text obj for the dir name..
 		if (!strcmp(ourPath->getCurrItemName(),"/")) {					// If we're looking at root..
 			dirName->setValue("SD Root");										// Set a more.. descriptive name for '/'.
+			SDIcon->setLocation(ICON_X,ICON_Y);
+			folderIcon->setLocation(ICON_X,-200);
 		} else {	
 			dirName->setValue(ourPath->getCurrItemName());				// Set the new name for the current directory.
+			SDIcon->setLocation(ICON_X,-200);
+			folderIcon->setLocation(ICON_X,ICON_Y);
 		}
 		ourFileListBox->fillList(ourPath);
 	}										
@@ -262,7 +287,6 @@ void fileDir::refresh(void) {
 
 void fileDir::drawSelf(void) {
 
-	bmpObj*	ourIcon;
 	colorObj aColor(LC_LIGHT_BLUE);
 	
 	if (haveFocus()) {
@@ -271,13 +295,6 @@ void fileDir::drawSelf(void) {
 		screen->fillRect(this,&white);
 	}
 	screen->drawRect(this,&black);
-	if (!strcmp(ourPath->getCurrItemName(),"/")) {
-		ourIcon = &SDBmp;
-	} else {
-		ourIcon = &folderBkBmp;
-	}
-	ourIcon->setLocation(ICON_X+x,ICON_Y+y);
-	ourIcon->draw();
 }
 
 
@@ -301,30 +318,45 @@ void fileDir::doAction(void) {
 }
 
 
+void fileDir::setThisFocus(bool setLoose) {
+
+	colorObj aColor(LC_LIGHT_BLUE);
+	
+	if (setLoose) {
+		dirName->setColors(&black,&aColor);
+	} else {
+		dirName->setColors(&black,&white);
+	}
+	drawObj::setThisFocus(setLoose);
+}
+
 
 // **************************************************************
 // ******************* fileBaseViewer stuff *********************
 // **************************************************************
 
 
-fileBaseViewer::fileBaseViewer(panel* inPanel)
+fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
 	:modal(OPEN_X,OPEN_Y,OPEN_W,OPEN_H) {
 	
 	ourPanel = inPanel;
-	filterFx	= NULL;
-	
+	filterFx	= funct;
+	ourLabel = new label(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);
+	if (ourLabel) {
+		ourLabel->setTextSize(1);
+		ourLabel->setJustify(TEXT_CENTER);
+		ourLabel->setValue("Default name");
+		addObj(ourLabel);
+	}
 	OKBtn* sBtn = new OKBtn(OK_X,OK_Y,ourPanel->mOSPtr->stdIconPath(check32),this);
 	sBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
-	addObj(sBtn);
-	
+	addObj(sBtn);	
 	cancelBtn* cBtn = new cancelBtn(CNCL_X,CNCL_Y,ourPanel->mOSPtr->stdIconPath(x32),this);
 	cBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
-	addObj(cBtn);
-	
+	addObj(cBtn);	
 	ourFileListBox = new fileListBox(FILE_LIST_X,FILE_LIST_Y,FILE_LIST_WIDTH,FILE_LIST_HEIGHT);
-	setPath("/system/");
-	addObj(ourFileListBox);
-	
+	setPath("/");
+	addObj(ourFileListBox);	
 	ourFileDir = new fileDir(this,ourFileListBox);
 	if (ourFileDir) {
 		addObj(ourFileDir);
@@ -341,24 +373,33 @@ fileBaseViewer::~fileBaseViewer(void) {  }
 // Choosing folders should jump us to the next tier of folders.
 void fileBaseViewer::chooseFolder(char* name) {
 
-	Serial.println(getPath());
 	if (pushChildItemByName(name)) {
-		Serial.println(getPath());
 		ourFileDir->refresh();
 	}
-}
+}	
+
+// we do the choose file thing. Default to doing nothing?
+void fileBaseViewer::chooseFile(char* name) {  }
+
+// Needed as a pass through.		
+void fileBaseViewer::setSuccess(bool trueFalse)	{ modal::setSuccess(trueFalse); }
 
 
-// we don't do anything when choosing a file. Inherited probably will.
-void fileBaseViewer::chooseFile(char* name) { }				
+// If a list item gets highlighted, we save a pointer to it in case its the last thing we do.	
+void fileBaseViewer::setItem(fileListItem* currentSelected) { currentItem = currentSelected; }
+
 	
-							
-// Use a callback to filter what you see.
-void fileBaseViewer::setFilterCallback(bool(*funct)(char*)) { filterFx = funct; }
-
-
 // Basically we are nothing but big white rectangle.
-void fileBaseViewer::drawSelf(void) { screen->fillRect(this,&white); }
+void fileBaseViewer::drawSelf(void) {
+
+	x++;
+	y++;
+	screen->drawRect(this,&black);
+	x--;
+	y--;
+	screen->fillRect(this,&white);
+	screen->drawRect(this,&black);
+}
 
 	
 // **************************************************************
@@ -367,15 +408,31 @@ void fileBaseViewer::drawSelf(void) { screen->fillRect(this,&white); }
 
 
 
-fOpenObj::fOpenObj(panel* inPanel)
-	:fileBaseViewer(inPanel) {  }
+fOpenObj::fOpenObj(panel* inPanel,bool(*funct)(char*)=NULL)
+	:fileBaseViewer(inPanel,funct) {  }
 
 
 fOpenObj::~fOpenObj(void) { }
 
 
+// Someone double clicked on a file. Open this one!
 void fOpenObj::chooseFile(char* name) {
+	
+	currentItem = NULL;				// On a double click we already have the name. Clear this.
+	pushChildItemByName(name);		// Push the clicked name into the path.
+	setSuccess(true);					// And we call success to end this.
+}
 
+
+// Pass this to modal. The different sub classes will use this.
+void fOpenObj::setSuccess(bool trueFalse) {
+
+	if (currentItem && trueFalse) {							// If we have a current item and succes will be true..
+		if (currentItem->ourType==fileType) {				// If this item is a file..
+			pushChildItemByName(currentItem->ourName);	// Push it onto the path.
+		}
+	}
+	fileBaseViewer::setSuccess(trueFalse);					// Call the inherited to unwind everthing.
 }				
 
 
@@ -385,11 +442,17 @@ void fOpenObj::chooseFile(char* name) {
 // **************************************************************
 
 
-fSaveObj::fSaveObj(panel* inPanel)
-	:fileBaseViewer(inPanel) {  }
+fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL)
+	:fileBaseViewer(inPanel,funct) {  }
 	
 fSaveObj::~fSaveObj(void) {  }
 
 
+// Pass this to modal. The different sub classes will use this.
+void fSaveObj::setSuccess(bool trueFalse) {
+
+	fileBaseViewer::setSuccess(trueFalse);
+
+}
 
 

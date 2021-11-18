@@ -11,16 +11,15 @@ class pathItem : public dblLinkListObj {
 
 	public:
 				pathItem(void);
+				pathItem(pathItem* aGrandItem);
 	virtual	~pathItem(void);
 	
 				pathItemType	getType(void);
 	virtual	char* 			getName(void);
 	virtual	int				getNumPathChars(void);
-	virtual	int				getTotalPathChars(void);
-	virtual	void				addNameToPath(char* path);
-	virtual	char* 			getOurPath(void);
+	virtual	void				addNameToPath(char* path) =0;
 	virtual	pathItem*		getParent(void);
-	virtual	pathItem*		fillChildList(void);
+				pathItem*		getNext(void);
 				
 				pathItemType	ourType;
 				char				name[13];
@@ -33,7 +32,7 @@ class rootItem : public	pathItem {
 				rootItem(void);
 	virtual	~rootItem(void);
 	
-	virtual	int	getTotalPathChars(void);
+	virtual	int	getNumPathChars(void);
 	virtual	void	addNameToPath(char* path);
 };
 
@@ -44,8 +43,7 @@ class fileItem : public	pathItem {
 				fileItem(char* fileName);
 	virtual	~fileItem(void);
 	
-	virtual	pathItem*	fillChildList(void);
-	virtual	void			addNextChild(pathItem* childItem);
+	virtual	void addNameToPath(char* path);
 };
 
 
@@ -55,8 +53,8 @@ class folderItem : public	pathItem {
 				folderItem(char* folderName);
 	virtual	~folderItem(void);
 	
-	virtual	void	addNameToPath(char* path);	
-	virtual	int	getNumPathBytes(void);
+	virtual	int	getNumPathChars(void);
+	virtual	void	addNameToPath(char* path);
 };
 
 
@@ -67,6 +65,7 @@ class filePath {
 	virtual	~filePath(void);
 	
 				void				reset(void);
+				int				numPathBytes(void);
 				pathItemType	checkPathPlus(char* name);
 				bool				setPath(char* inPath);
 				char*				getPath(void);
@@ -76,8 +75,6 @@ class filePath {
 				int				numChildItems(void);
 				pathItem*		getChildItemByName(char* name);
 				bool				pushChildItemByName(char* name);
-				//pathItem*		getChildItemByIndex(int index);
-				//bool			pushChildItemByIndex(int index);
 				bool				pushItem(pathItem* theNewGuy);
 				void				popItem(void);
 				

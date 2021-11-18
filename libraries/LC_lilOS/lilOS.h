@@ -47,7 +47,7 @@ class modal :	public drawGroup {
 	
 	virtual	bool	acceptEvent(event* inEvent,point* locaPt);	// Is this event for us? Yes, they ALL are.
 	virtual	void	message(int inMsg);
-				bool	taskComplete();
+	virtual	void	setSuccess(bool trueFalse);
 				
 				bool	success;
 				bool	done;

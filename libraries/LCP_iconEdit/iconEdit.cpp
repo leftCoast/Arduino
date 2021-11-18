@@ -69,12 +69,22 @@ iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 iconEdit::~iconEdit(void) { }
 
 
+bool myFilter(char* fileName) {
+
+	if (fileName[0]=='_') 					return false;
+	if (!strcmp(fileName,"SPOTLI~1"))	return false;
+	if (!strcmp(fileName,"TRASHE~1"))	return false;
+	else return true;
+}
+
+
 // Open up the file choosing dialog box.
 void iconEdit::beginFileOpen(void) {
 
-	openDBox = new fOpenObj(this);
+	openDBox = new fOpenObj(this,myFilter);
 	addObj(openDBox);
 }
+
 
 
 // Open up the file saving dialog box.
@@ -88,8 +98,8 @@ void iconEdit::beginFileSave(void) {
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
 	
-	theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
-	addObj(theEditScr);
+	//theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
+	//addObj(theEditScr);
 	
 	openFileBtn* ourOpenBtn = new openFileBtn(30,1,mOSPtr->stdIconPath(fOpen22),this);
 	mMenuBar->addObj(ourOpenBtn);
@@ -102,9 +112,18 @@ void iconEdit::setup(void) {
 void iconEdit::loop(void) {
 	
 	if (openDBox) {
-		if (openDBox->taskComplete()) {
+		if (openDBox->done) {
+			if (openDBox->success) {
+				if (theEditScr) {
+					delete theEditScr;
+				}
+				Serial.println(openDBox->getPath());
+				theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,openDBox->getPath());
+				addObj(theEditScr);
+			}
 			delete(openDBox);
 			openDBox = NULL;
+			setNeedRefresh(true);
 		}
 	}
 }

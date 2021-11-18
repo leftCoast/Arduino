@@ -57,11 +57,11 @@ class fileListItem :	public drawGroup {
 	virtual	void	draw(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
+	virtual	void	setThisFocus(bool);
 	
 				fileBaseViewer*	ourViewer;
 				fileListBox*		ourList;
 				pathItemType		ourType;
-				//label*				fileName;
 				char*					ourName;
 };
 
@@ -77,6 +77,7 @@ class fileListBox :	public scrollingList {
 				fileListBox(int x, int y, int width,int height);
 	virtual	~fileListBox(void);
 	
+				bool	checkFile(fileBaseViewer* ourPath,pathItem* trace);
 				void	fillList(fileBaseViewer* ourPath);
 	virtual	void	drawSelf(void);
 };
@@ -97,11 +98,13 @@ class fileDir :	public drawGroup {
 				void	refresh(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
+	virtual	void	setThisFocus(bool setLoose);
 	
 				filePath*		ourPath;
 				fileListBox*	ourFileListBox;
 				label*			dirName;
-				bmpObj*			ourIcon;
+				bmpObj*			SDIcon;
+				bmpObj*			folderIcon;
 };
 	
 	
@@ -115,18 +118,21 @@ class fileBaseViewer :	public modal,
 								public filePath {
 
 	public:
-				fileBaseViewer(panel* inPanel);
+				fileBaseViewer(panel* inPanel,bool(*funct)(char*));
 	virtual	~fileBaseViewer(void);
-				
+	
 	virtual	void	chooseFolder(char* name);
 	virtual	void	chooseFile(char* name);
-	virtual	void	setFilterCallback(bool(*funct)(char*));	// Use a callback to filter what you see.
+	virtual	void	setSuccess(bool trueFalse);
+	virtual	void	setItem(fileListItem* currentSelected);
 	virtual	void	drawSelf(void);
 	
 				bool				(*filterFx)(char*);
+				fileListItem*	currentItem;
 				fileListBox*	ourFileListBox;
 				fileDir*			ourFileDir;
 				panel*			ourPanel;
+				label*			ourLabel;
 };
 
 
@@ -139,10 +145,11 @@ class fileBaseViewer :	public modal,
 class fOpenObj :	public fileBaseViewer {
 
 	public:
-				fOpenObj(panel* inPanel);
+				fOpenObj(panel* inPanel,bool(*funct)(char*)=NULL);
 	virtual	~fOpenObj(void);
 				
 	virtual	void	chooseFile(char* name);
+	virtual	void	setSuccess(bool trueFalse);
 };
 
 
@@ -155,9 +162,10 @@ class fOpenObj :	public fileBaseViewer {
 class fSaveObj :	public fileBaseViewer {
 
 	public:
-				fSaveObj(panel* inPanel);
+				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
+	virtual	void	setSuccess(bool trueFalse);
 };
 
 #endif

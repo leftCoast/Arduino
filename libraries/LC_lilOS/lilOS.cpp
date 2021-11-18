@@ -52,7 +52,11 @@ void modal::message(int inMsg) { done = true; }
 
 
 // Return if our taks in complete.
-bool modal::taskComplete(void) { return done; }
+void modal::setSuccess(bool trueFalse) {
+
+	success = trueFalse;
+	done		= true;
+}
 
 	
 // *****************************************************
