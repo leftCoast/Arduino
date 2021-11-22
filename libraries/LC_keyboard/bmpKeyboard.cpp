@@ -47,20 +47,16 @@ bmpKeyboard::bmpKeyboard(editable* inEditObj,bool modal)
 
   	rect			sRect;
 	offscreen	vPort; 
-	bmpPipe		keyCap;
+	bmpObj		keyCap(0,0,KEY_WD,KEY_HT,KEYCAP24);
 	
-	mKeyTextColor.setColor(LC_YELLOW);							// Set up key text color.
-	mKeyTextColor.blend(&white,60);								// Little adjustment here..
-	mModal = modal;													// Note if we are modal or not.
-	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);			// Set our rectangle.
-	
-	if (mKeyBMap.setSize(KEY_WD,KEY_HT)) {						// If we can allocate the RAM for the icon's bitmap..
-		sRect.setRect(0, 0, KEY_WD, KEY_HT);					// Setup dimensions of the key icon.
-		keyCap.setSourceRect(&sRect);								// Point the bitmap pope to the bits in the file.
-		keyCap.openPipe(KEYCAP24);									// Open up and see if we can read the bitmap file.
-		vPort.beginDraw(&mKeyBMap);								// Set up to offscreen drawing to the bitmap.
-		keyCap.drawImage(0,0); 										// Draw to it..
-		vPort.endDraw();												// Restore normal drawing.
+	mKeyTextColor.setColor(LC_YELLOW);					// Set up key text color.
+	mKeyTextColor.blend(&white,60);						// Little adjustment here..
+	mModal = modal;											// Note if we are modal or not.
+	setRect(0, 320 - 4 * KEY_HT, 240, 4 * KEY_HT);	// Set our rectangle.
+	if (mKeyBMap.setSize(KEY_WD,KEY_HT)) {				// If we can allocate the RAM for the icon's bitmap..
+		vPort.beginDraw(&mKeyBMap);						// Set up to offscreen drawing to the bitmap.
+		keyCap.drawSelf(); 									// Draw to it..
+		vPort.endDraw();										// Restore normal drawing.
 	}
 }
 
@@ -221,10 +217,8 @@ void bmpInputKey::drawSelf(void) {
 		if (clicked) {
 			screen->fillRect(this, &white);
 		} else {
-			rect  sRect(0,0,width,height);
-			bmpPipe aPipe(&sRect);
-			aPipe.openPipe(SPACEB72);
-			aPipe.drawImage(x,y);
+			bmpObj aBmp(x,y,width,height,SPACEB72);
+			aBmp.drawSelf();
 		}
 	} else {                          // "Normal printing
 		center.x = width/2;
@@ -253,55 +247,27 @@ void bmpInputKey::drawSelf(void) {
 }
 
 
-/*
-void bmpInputKey::drawSelf(void) {
-			
-	if (clicked) {
-		screen->fillRect(this, &white);
-	} else {
-		if (buff[0]==' ') {               // Special hack for spacebar.
-			rect  sRect(0,0,width,height);
-			bmpPipe aPipe(&sRect);
-			aPipe.openPipe(SPACEB72);
-			aPipe.drawImage(x,y);
-		} else {                          // "Normal printing
-			screen->blit(x,y,mKeyBMap);
-			x = x + 7;
-			y = y + 9;
-			label::drawSelf();
-			x = x - 7;
-			y = y - 9;
-		}
-	}
-}
-*/
-
-
   // *****************************************************
   //                       bmpControlKey
   // *****************************************************
 
 
 
-bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard * inKeyboard, char* bmpName)
-	: controlKey(inLabel, inCom, inX, inY, inWidth, inHeight, inKeyboard) {
-
-	rect  sRect;
-
-	mBmpPipe.openPipe(bmpName);
-	sRect.setRect(0, 0, width, height);
-	mBmpPipe.setSourceRect(&sRect);
-  }
+bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard, char* bmpName)
+	: controlKey(inLabel, inCom, inX, inY, inWidth, inHeight, inKeyboard) { ourBMPObj = new bmpObj(inX,inY,inWidth,inHeight,bmpName); }
 
 
-  bmpControlKey::~bmpControlKey(void) {  }
+  bmpControlKey::~bmpControlKey(void) { if (ourBMPObj) delete(ourBMPObj); }
 
 
   void bmpControlKey::drawSelf(void) {
     
     if (clicked) {
       screen->fillRect(this, &white);
+    } else if (ourBMPObj) {
+      	ourBMPObj->setLocation(x,y);	// Just in case we moved. Remember this was just hacked on.
+      	ourBMPObj->drawSelf();
     } else {
-      mBmpPipe.drawImage(x, y);
+    	screen->fillRect(this, &red);
     }
   }

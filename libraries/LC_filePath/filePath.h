@@ -64,10 +64,10 @@ class filePath {
 				filePath(void);
 	virtual	~filePath(void);
 	
-				void				reset(void);
+	virtual	void				reset(void);
 				int				numPathBytes(void);
 				pathItemType	checkPathPlus(char* name);
-				bool				setPath(char* inPath);
+	virtual	bool				setPath(char* inPath);
 				char*				getPath(void);
 				pathItem*		getCurrItem(void);
 				char*				getCurrItemName(void);
@@ -75,13 +75,12 @@ class filePath {
 				int				numChildItems(void);
 				pathItem*		getChildItemByName(char* name);
 				bool				pushChildItemByName(char* name);
-				bool				pushItem(pathItem* theNewGuy);
-				void				popItem(void);
+	virtual	bool				pushItem(pathItem* theNewGuy);
+	virtual	void				popItem(void);
 				
 				pathItem*	pathList;
 				pathItem*	childList;
 				char*			path;
 };
-
 
 #endif

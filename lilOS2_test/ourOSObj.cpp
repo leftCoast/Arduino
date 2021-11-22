@@ -2,6 +2,7 @@
 #include <rpnCalc.h>
 #include <breakout.h>
 #include <iconEdit.h>
+#include <starTrek.h>
 #include "homeScr.h"
 
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
@@ -12,7 +13,6 @@ char panelFolder[]   = "/system/appFiles/";  // Where we decided to store the ap
 // Our OS object.
 ourOSObj  ourOS;
 
-//bmpMask  iconMask;
 
 // **************************************
 // ************** ourOSObj **************
@@ -47,6 +47,7 @@ panel* ourOSObj::createPanel(int panelID) {
       case calcApp      : return new rpnCalc(this,panelID);
       case iconEditApp  : return new iconEdit(this,panelID);
       case breakoutApp  : return new breakout(this,panelID);
+      case starTrekApp  : return new starTrekPanel(this,panelID);
       default           : return NULL;
    }
 }
@@ -62,6 +63,7 @@ int ourOSObj::getTonePin(void) {return BEEP_PIN; }
 
 // And how to control the screen brightness.
 void ourOSObj::setBrightness(byte brightness) { analogWrite(SCREEN_PIN,brightness); }
+
 
 char*  ourOSObj::getSystemFolder(void) { return systemFolder; }
 
@@ -84,6 +86,10 @@ char* ourOSObj::getPanelFolder(int panelID) {
          strcat(pathBuff,"breakout/");
          return pathBuff;
       break; 
+      case starTrekApp  :
+         strcat(pathBuff,"starTrek/");
+         return pathBuff;
+      break;
       default           : return NULL;
    }
 }

@@ -44,6 +44,11 @@ void homeScr::setup(void) {
    theAppIcon = new appIcon(traceX,traceY,iconEditApp,iconPath(iconEditApp,"iconEdit.bmp"));
    theAppIcon->setMask(&(mOSPtr->icon32Mask));
    addObj(theAppIcon);
+
+   traceX = traceX + STEP_X;
+   theAppIcon = new appIcon(traceX,traceY,starTrekApp,iconPath(starTrekApp,"sTrek32.bmp"));
+   theAppIcon->setMask(&(mOSPtr->icon32Mask));
+   addObj(theAppIcon);
 }
 
 

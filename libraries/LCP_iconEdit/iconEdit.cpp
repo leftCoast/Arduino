@@ -6,9 +6,6 @@
 #define EDITSCR_W	32 * SCALE
 #define EDITSCR_H	32 * SCALE
 
-#define TEST_PATH "/cut32.bmp"// /iconEdit/test.bmp"
-
-
 
 // **************************************************************
 // ********************* saveFileBtn  stuff *********************
@@ -40,6 +37,7 @@ saveFileBtn::saveFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
 	
 saveFileBtn::~saveFileBtn(void) {  }				
 
+
 void saveFileBtn::doAction(void) {
 	
 	ourApp->mOSPtr->beep();
@@ -57,11 +55,9 @@ void saveFileBtn::doAction(void) {
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	: panel(ourOS,ourAppID) {
 	
-  	openDBox = NULL;
-  	saveDBox = NULL;
-	if (!SD.exists(TEST_PATH)) {
-		createNewBmpFile(TEST_PATH,32,32);
-	}
+  	openDBox		= NULL;
+  	saveDBox		= NULL;
+  	theEditScr	= NULL;
 }
 
 
@@ -86,7 +82,6 @@ void iconEdit::beginFileOpen(void) {
 }
 
 
-
 // Open up the file saving dialog box.
 void iconEdit::beginFileSave(void) {
 
@@ -101,10 +96,10 @@ void iconEdit::setup(void) {
 	//theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
 	//addObj(theEditScr);
 	
-	openFileBtn* ourOpenBtn = new openFileBtn(30,1,mOSPtr->stdIconPath(fOpen22),this);
+	openFileBtn* ourOpenBtn = new openFileBtn(40,1,mOSPtr->stdIconPath(fOpen22),this);
 	mMenuBar->addObj(ourOpenBtn);
 	
-	saveFileBtn* ourSaveBtn = new saveFileBtn(60,1,mOSPtr->stdIconPath(fSave22),this);
+	saveFileBtn* ourSaveBtn = new saveFileBtn(80,1,mOSPtr->stdIconPath(fSave22),this);
 	mMenuBar->addObj(ourSaveBtn);
 }
 
@@ -123,6 +118,18 @@ void iconEdit::loop(void) {
 			}
 			delete(openDBox);
 			openDBox = NULL;
+			setNeedRefresh(true);
+		}
+	}
+	if (saveDBox) {
+		if (saveDBox->done) {
+			if (saveDBox->success) {					
+				Serial.println("SAVE TO : ");Serial.println(saveDBox->getPath());
+			} else {
+				Serial.println("CANCEL");
+			}
+			delete(saveDBox);
+			saveDBox = NULL;
 			setNeedRefresh(true);
 		}
 	}

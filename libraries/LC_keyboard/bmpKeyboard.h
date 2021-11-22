@@ -4,8 +4,7 @@
 #include <scrKeyboard.h>
 #include <bmpObj.h>
 #include <bitmap.h>
-#include <bmpPipe.h>
-
+#include <bmpObj.h>
 
 
 // *****************************************************
@@ -64,7 +63,7 @@ class bmpControlKey : public controlKey {
 
   virtual void    drawSelf(void);
           
-          bmpPipe mBmpPipe;
+          bmpObj*	ourBMPObj;
 };
 
 

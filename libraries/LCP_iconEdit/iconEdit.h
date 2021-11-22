@@ -4,7 +4,9 @@
 #include <lilOS.h>
 #include <iconButton.h>
 #include  <iconEditScr.h>
-#include <fileSelect.h>
+#include <fOpenObj.h>
+#include <fSaveObj.h>
+
 
 class iconEdit;
 

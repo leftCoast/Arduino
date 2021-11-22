@@ -1,5 +1,5 @@
-#ifndef fileSelect_h
-#define fileSelect_h
+#ifndef fileBaseViewer_h
+#define fileBaseViewer_h
 
 #include <lilOS.h>
 #include <filePath.h>
@@ -51,7 +51,7 @@ class cancelBtn :	public iconButton {
 class fileListItem :	public drawGroup {
 
 	public:
-				fileListItem(fileBaseViewer* inViewer,fileListBox* inLIxt,pathItemType inType,char* inName);
+				fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName);
 	virtual	~fileListItem(void);
 	
 	virtual	void	draw(void);
@@ -78,8 +78,12 @@ class fileListBox :	public scrollingList {
 	virtual	~fileListBox(void);
 	
 				bool	checkFile(fileBaseViewer* ourPath,pathItem* trace);
-				void	fillList(fileBaseViewer* ourPath);
+	virtual	void	fillList(fileBaseViewer* ourPath);
 	virtual	void	drawSelf(void);
+	
+				bmpObj*	folderBmp;
+				bmpObj*	docBmp;
+				label*	itemLabel;
 };
 
 
@@ -92,7 +96,7 @@ class fileListBox :	public scrollingList {
 class fileDir :	public drawGroup {
 
 	public:
-				fileDir(filePath* inPath,fileListBox* inFileListBox);
+				fileDir(fileBaseViewer* inViewer,fileListBox* inFileListBox);
 	virtual	~fileDir(void);
 	
 				void	refresh(void);
@@ -100,11 +104,11 @@ class fileDir :	public drawGroup {
 	virtual	void	doAction(void);
 	virtual	void	setThisFocus(bool setLoose);
 	
-				filePath*		ourPath;
-				fileListBox*	ourFileListBox;
-				label*			dirName;
-				bmpObj*			SDIcon;
-				bmpObj*			folderIcon;
+				fileBaseViewer*	ourViewer;
+				fileListBox*		ourFileListBox;
+				label*				dirName;
+				bmpObj*				SDIcon;
+				bmpObj*				folderIcon;
 };
 	
 	
@@ -132,40 +136,10 @@ class fileBaseViewer :	public modal,
 				fileListBox*	ourFileListBox;
 				fileDir*			ourFileDir;
 				panel*			ourPanel;
+				OKBtn*			sBtn;
+				cancelBtn*		cBtn;
 				label*			ourLabel;
-};
-
-
-	
-// **************************************************************
-// ********************** fOpenObj stuff ************************
-// **************************************************************
-
-
-class fOpenObj :	public fileBaseViewer {
-
-	public:
-				fOpenObj(panel* inPanel,bool(*funct)(char*)=NULL);
-	virtual	~fOpenObj(void);
-				
-	virtual	void	chooseFile(char* name);
-	virtual	void	setSuccess(bool trueFalse);
-};
-
-
-
-// **************************************************************
-// ********************** fSaveObj stuff ************************
-// **************************************************************
-
-
-class fSaveObj :	public fileBaseViewer {
-
-	public:
-				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
-	virtual	~fSaveObj(void);
-	
-	virtual	void	setSuccess(bool trueFalse);
+				timeObj*			dblClickTimer;
 };
 
 #endif
