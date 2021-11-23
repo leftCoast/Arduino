@@ -18,6 +18,7 @@ class homeScr : public panel {
             char* iconPath(int appID,char* iconName);
    virtual  void  setup(void);
    virtual  void  loop(void);
+            void  doStarField(void);
    virtual  void  drawSelf(void);
 
             char  pathBuff[80];

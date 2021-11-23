@@ -75,6 +75,35 @@ void homeScr::setup(void) {
 
 void homeScr::loop(void) { }
 
+void homeScr::doStarField(void) {
+
+   int         randNum;
+   colorMapper ourCMapper;
+   colorObj    aColor;
+   mapper      yMapper(0,282,0,100);
+   float       yPercent;
+   
+   aColor.setColor(LC_LIGHT_BLUE);
+   aColor.blend(&blue,50);
+   ourCMapper.setColors(&white,&aColor);
+   randomSeed(A20);
+   for (int sy=0;sy<282;sy++) {
+      for (int sx=0;sx<240;sx++) {
+         randNum = random(0,400);
+         if (randNum==300) {
+            yPercent = yMapper.map(sy);
+            aColor = ourCMapper.map(yPercent);
+            screen->drawPixel(sx,sy,&aColor);
+         }
+         if (sy<141 && randNum==250) {
+            yPercent = yMapper.map(sy);
+            aColor = ourCMapper.map(yPercent);
+            screen->drawPixel(sx,sy,&aColor);
+         }
+      }
+   }
+}
+
 
 void homeScr::drawSelf(void) { 
 
@@ -88,6 +117,7 @@ void homeScr::drawSelf(void) {
    scrFadeColor.setColor(LC_LIGHT_BLUE);
    scrFadeColor.blend(&blue,50);
    screen->fillRectGradient(0,0,240,282,&black,&scrFadeColor);
+   doStarField();
    //theScreenImage.draw();
    ourOS.setBrightness(255);
 }
