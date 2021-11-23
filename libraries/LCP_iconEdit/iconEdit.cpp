@@ -85,7 +85,7 @@ void iconEdit::beginFileOpen(void) {
 // Open up the file saving dialog box.
 void iconEdit::beginFileSave(void) {
 
-	saveDBox = new fSaveObj(this);
+	saveDBox = new fSaveObj(this,myFilter);
 	addObj(saveDBox);
 }
 
@@ -123,10 +123,8 @@ void iconEdit::loop(void) {
 	}
 	if (saveDBox) {
 		if (saveDBox->done) {
-			if (saveDBox->success) {					
-				Serial.println("SAVE TO : ");Serial.println(saveDBox->getPath());
-			} else {
-				Serial.println("CANCEL");
+			if (saveDBox->success && theEditScr) {					
+				theEditScr->saveDocFile(saveDBox->getSavePath());
 			}
 			delete(saveDBox);
 			saveDBox = NULL;

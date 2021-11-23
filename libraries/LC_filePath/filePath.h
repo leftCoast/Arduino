@@ -68,7 +68,7 @@ class filePath {
 				int				numPathBytes(void);
 				pathItemType	checkPathPlus(char* name);
 	virtual	bool				setPath(char* inPath);
-				char*				getPath(void);
+	virtual	char*				getPath(void);
 				pathItem*		getCurrItem(void);
 				char*				getCurrItemName(void);
 				void				refreshChildList(void);

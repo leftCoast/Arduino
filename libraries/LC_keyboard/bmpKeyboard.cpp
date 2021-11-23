@@ -1,5 +1,4 @@
-#include "bmpKeyboard.h"
-
+#include <bmpKeyboard.h>
 #include <editable.h>
 #include <bitmap.h>
 #include <offscreen.h>

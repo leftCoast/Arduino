@@ -177,7 +177,8 @@ void filePath::reset(void) {
 	resizeBuff(0,&path);				// And our temporary path buffer is recycled.
 }
  
- 
+
+// Returns the total number of path bytes needed to hold the path string.
 int filePath::numPathBytes(void) {
 
  	pathItem*	trace;

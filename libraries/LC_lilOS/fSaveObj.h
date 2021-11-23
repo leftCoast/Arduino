@@ -2,6 +2,26 @@
 #define fSaveObj_h
 
 #include <fileBaseViewer.h>
+#include <bmpKeyboard.h>
+#include <editLabel.h>
+
+class fSaveObj;
+
+// **************************************************************
+// ********************* saveKbd stuff *************************
+// **************************************************************
+
+
+class saveKbd : public bmpKeyboard {
+
+	public:
+				saveKbd(editable* inEditObj,fSaveObj* inModal);
+	virtual	~saveKbd(void);
+	
+	virtual	void	handleKey(keyCommands inEditCom);
+	
+				fSaveObj*	ourModal;
+};
 
 
 // **************************************************************
@@ -22,9 +42,11 @@ class fSaveObj :	public fileBaseViewer {
 	virtual	bool	pushItem(pathItem* theNewGuy);
 	virtual	void	popItem(void);
 	virtual	void	setSuccess(bool trueFalse);
+	virtual	char*	getSavePath(void);
 	
-				label*	pathStr;
-				label*	nameStr;
+				label*		pathStr;
+				editLabel*	nameStr;
+				char*			savePath;
 };
 
 #endif

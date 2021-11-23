@@ -7,13 +7,14 @@
 
 void setup() {
    
+   
    Serial.begin(57600);                                           // Fire up serial for debugging.
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.
       Serial.println("NO SCREEN!");                               // Screen init failed. Tell user.
       Serial.flush();                                             // Make sure the message gets out.
       while(true);                                                // Lock the process here.
    }
-   screen->fillScreen(&black);                                    // Black is a good color to start with.
+   ourOS.setBrightness(0);                                        // Turn off the screen backlight. (Home screen wil turn it bak on.)
    if (!SD.begin(ADA_1947_SHIELD_SDCS)) {                         // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Tell user we have no SD card.
       Serial.flush();                                             // Make sure the mesage gets out.
@@ -21,7 +22,6 @@ void setup() {
    }
    ourEventMgr.begin();                                           // Startup our event manager.
    ourOS.begin();                                                 // Boot OS manager.
-   //nextPanel = iconEditApp;
 }
 
 
