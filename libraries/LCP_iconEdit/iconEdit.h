@@ -11,13 +11,25 @@
 class iconEdit;
 
 
+class newFileBtn : public iconButton22 {
+
+	public :
+					newFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp);
+	virtual		~newFileBtn(void);					
+
+	virtual		void    doAction(void);
+
+					iconEdit*	ourApp;
+};
+
+
 class openFileBtn : public iconButton22 {
 
 	public :
 					openFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp);
 	virtual		~openFileBtn(void);					
 
-virtual void    doAction(void);
+	virtual		void    doAction(void);
 
 					iconEdit*	ourApp;
 };
@@ -29,7 +41,7 @@ class saveFileBtn : public iconButton22 {
 					saveFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp);
 	virtual		~saveFileBtn(void);					
 
-virtual void    doAction(void);
+	virtual		void    doAction(void);
 
 					iconEdit*	ourApp;
 };
@@ -41,6 +53,7 @@ class iconEdit	: public panel {
 					iconEdit(lilOS* ourOS,int ourAppID);
 	virtual		~iconEdit(void);
 
+				void	beginFileNew(void);
 				void	beginFileOpen(void);
 				void	beginFileSave(void);
 	virtual	void	setup(void);

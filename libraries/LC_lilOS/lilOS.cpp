@@ -231,10 +231,14 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 		case cut32 		: strcat(pathBuff,"cut32.bmp"); 		break;
 		case edit22 	: strcat(pathBuff,"edit22.bmp"); 	break;
 		case edit32 	: strcat(pathBuff,"edit32.bmp"); 	break;
+		case fNew22		: strcat(pathBuff,"fNew22.bmp"); 	break;
+		case fNew32		: strcat(pathBuff,"fNew32.bmp"); 	break;
 		case fSave22	: strcat(pathBuff,"fSave22.bmp"); 	break;
 		case fSave32	: strcat(pathBuff,"fSave32.bmp"); 	break;
 		case fOpen22 	: strcat(pathBuff,"fOpen22.bmp"); 	break;
 		case fOpen32 	: strcat(pathBuff,"fOpen32.bmp"); 	break;
+		case FdrNew22	: strcat(pathBuff,"FdrNew22.bmp"); 	break;
+		case FdrNew32	: strcat(pathBuff,"FdrNew32.bmp"); 	break;
 		case paste32 	: strcat(pathBuff,"paste32.bmp"); 	break;
 		case pref22 	: strcat(pathBuff,"pref22.bmp");		break;
 		case pref32 	: strcat(pathBuff,"pref32.bmp"); 	break;

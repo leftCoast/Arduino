@@ -14,11 +14,11 @@
 // The list of standard icons supplied by the OS for the applications to use.
 enum stdIcons	{
 	mask22, mask32, app32, check22, check32, copy32, cross22, cross32, cut32, edit22,
-	edit32, fSave22, fSave32, fOpen22, fOpen32, paste32, pref22, pref32, search22,
-	search32, sort22, sort32, trashC22, trashC32, trashR22, trashR32, x22, x32
+	edit32, fNew22, fNew32, fSave22, fSave32, fOpen22, fOpen32, FdrNew22, FdrNew32,
+	paste32, pref22, pref32, search22, search32, sort22, sort32, trashC22, trashC32,
+	trashR22, trashR32, x22, x32
 };
-						
-						
+										
 						
 // The user will expect icons to click on for panel swapping.
 // You can use this. Give it a panel ID and a full path to a

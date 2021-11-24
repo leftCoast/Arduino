@@ -6,7 +6,25 @@
 #define EDITSCR_W	32 * SCALE
 #define EDITSCR_H	32 * SCALE
 
+// **************************************************************
+// ********************** newFileBtn stuff **********************
+// **************************************************************
 
+
+newFileBtn::newFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
+	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
+	
+	
+newFileBtn::~newFileBtn(void) {  }				
+
+void newFileBtn::doAction(void) {
+	
+	ourApp->mOSPtr->beep();
+	ourApp->beginFileNew();
+}
+	
+
+	
 // **************************************************************
 // ********************* saveFileBtn  stuff *********************
 // **************************************************************
@@ -73,6 +91,13 @@ bool myFilter(char* fileName) {
 	else return true;
 }
 
+// Start a fewsh new file to edit.
+void iconEdit::beginFileNew(void) {
+
+	// Check if there are edits to deal with.
+	// Of everything is ok, create the new document with defualt name.
+}
+
 
 // Open up the file choosing dialog box.
 void iconEdit::beginFileOpen(void) {
@@ -96,10 +121,13 @@ void iconEdit::setup(void) {
 	//theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
 	//addObj(theEditScr);
 	
-	openFileBtn* ourOpenBtn = new openFileBtn(40,1,mOSPtr->stdIconPath(fOpen22),this);
+	newFileBtn* ourNewBtn = new newFileBtn(40,1,mOSPtr->stdIconPath(fNew22),this);
+	mMenuBar->addObj(ourNewBtn);
+	
+	openFileBtn* ourOpenBtn = new openFileBtn(80,1,mOSPtr->stdIconPath(fOpen22),this);
 	mMenuBar->addObj(ourOpenBtn);
 	
-	saveFileBtn* ourSaveBtn = new saveFileBtn(80,1,mOSPtr->stdIconPath(fSave22),this);
+	saveFileBtn* ourSaveBtn = new saveFileBtn(120,1,mOSPtr->stdIconPath(fSave22),this);
 	mMenuBar->addObj(ourSaveBtn);
 }
 
