@@ -88,10 +88,13 @@ bool myFilter(char* fileName) {
 	if (fileName[0]=='_') 					return false;
 	if (!strcmp(fileName,"SPOTLI~1"))	return false;
 	if (!strcmp(fileName,"TRASHE~1"))	return false;
+	if (strstr(fileName,"DS_STO"))		return false;
+	if (strstr(fileName,".DS_"))			return false;
 	else return true;
 }
 
-// Start a fewsh new file to edit.
+
+// Start a fresh new file to edit.
 void iconEdit::beginFileNew(void) {
 
 	// Check if there are edits to deal with.

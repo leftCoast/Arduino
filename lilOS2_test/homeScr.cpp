@@ -86,7 +86,7 @@ void homeScr::doStarField(void) {
    aColor.setColor(LC_LIGHT_BLUE);
    aColor.blend(&blue,50);
    ourCMapper.setColors(&white,&aColor);
-   randomSeed(A20);
+   randomSeed(analogRead(A20));
    for (int sy=0;sy<282;sy++) {
       for (int sx=0;sx<240;sx++) {
          randNum = random(0,400);
