@@ -6,72 +6,11 @@
 #define EDITSCR_W	32 * SCALE
 #define EDITSCR_H	32 * SCALE
 
-// **************************************************************
-// ********************** newFileBtn stuff **********************
-// **************************************************************
-
-
-newFileBtn::newFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
-	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
-	
-	
-newFileBtn::~newFileBtn(void) {  }				
-
-void newFileBtn::doAction(void) {
-	
-	ourApp->mOSPtr->beep();
-	ourApp->beginFileNew();
-}
-	
-
-	
-// **************************************************************
-// ********************* saveFileBtn  stuff *********************
-// **************************************************************
-
-
-openFileBtn::openFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
-	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
-	
-	
-openFileBtn::~openFileBtn(void) {  }				
-
-void openFileBtn::doAction(void) {
-	
-	ourApp->mOSPtr->beep();
-	ourApp->beginFileOpen();
-}
-	
-
-	
-// **************************************************************
-// ********************* saveFileBtn  stuff *********************
-// **************************************************************
-
-
-saveFileBtn::saveFileBtn(int xLoc, int yLoc,char* path,iconEdit* inApp)
-	:iconButton22(xLoc,yLoc,path) { ourApp =  inApp; }
-	
-	
-saveFileBtn::~saveFileBtn(void) {  }				
-
-
-void saveFileBtn::doAction(void) {
-	
-	ourApp->mOSPtr->beep();
-	ourApp->beginFileSave();
-}
-	
-	
-	
-// **************************************************************
-// *********************** iconEdit stuff ***********************
-// **************************************************************
 
 
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
-	: panel(ourOS,ourAppID) {
+	: panel(ourAppID) {
 	
   	openDBox		= NULL;
   	saveDBox		= NULL;
@@ -121,16 +60,11 @@ void iconEdit::beginFileSave(void) {
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
 	
-	//theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,TEST_PATH);
-	//addObj(theEditScr);
-	
-	newFileBtn* ourNewBtn = new newFileBtn(40,1,mOSPtr->stdIconPath(fNew22),this);
+	stdComBtn* ourNewBtn = newStdIcon(40,1,icon22,newFileCmd,this);
 	mMenuBar->addObj(ourNewBtn);
-	
-	openFileBtn* ourOpenBtn = new openFileBtn(80,1,mOSPtr->stdIconPath(fOpen22),this);
+	stdComBtn* ourOpenBtn = newStdIcon(80,1,icon22,openFileCmd,this);
 	mMenuBar->addObj(ourOpenBtn);
-	
-	saveFileBtn* ourSaveBtn = new saveFileBtn(120,1,mOSPtr->stdIconPath(fSave22),this);
+	stdComBtn* ourSaveBtn = newStdIcon(120,1,icon22,saveFileCmd,this);
 	mMenuBar->addObj(ourSaveBtn);
 }
 
@@ -144,7 +78,7 @@ void iconEdit::loop(void) {
 					delete theEditScr;
 				}
 				Serial.println(openDBox->getPath());
-				theEditScr = new iconEditScr(mOSPtr,EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,openDBox->getPath());
+				theEditScr = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,openDBox->getPath());
 				addObj(theEditScr);
 			}
 			delete(openDBox);
@@ -180,3 +114,17 @@ void iconEdit::drawSelf(void) {
 // else calls close on you, this gets called so you can clean up before being
 // deleted.
 void iconEdit::closing(void) { theEditScr->closeDocFile(); }
+
+
+
+void  iconEdit::handleCom(stdComs comID) {
+
+	switch(comID) {
+		case newFileCmd	: beginFileNew();				break;
+		case openFileCmd	: beginFileOpen();			break;
+		case saveFileCmd	: beginFileSave();			break;
+		default				: panel::handleCom(comID);	break;
+	}
+}
+
+

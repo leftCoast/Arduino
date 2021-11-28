@@ -4,9 +4,9 @@
 #include <screen.h>
 #include "ourOSObj.h"
 
+ourOSObj  ourOS;
 
 void setup() {
-   
    
    Serial.begin(57600);                                           // Fire up serial for debugging.
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.

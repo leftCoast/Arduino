@@ -48,34 +48,6 @@
 #define DEF_LABEL_W	DEF_SELECT_W - DEF_LABEL_X * 2
 #define DEF_LABEL_H	18
 
-
-
-// **************************************************************
-// ************************ OKBtn stuff *************************
-// **************************************************************
-
-OKBtn::OKBtn(int xLoc,int yLoc,char* path,modal* inModal)
-	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }
-	
-OKBtn::~OKBtn(void) {  }
-	
-void OKBtn::doAction(void) { ourModal->setSuccess(true); }
-
-
-
-// **************************************************************
-// ********************** cancelBtn stuff ***********************
-// **************************************************************
-
-
-cancelBtn::cancelBtn(int xLoc,int yLoc,char* path,modal* inModal)
-	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }				
-
-cancelBtn::~cancelBtn(void) {  }
-	
-void	cancelBtn::doAction(void) { ourModal->setSuccess(false); }
-
-
 	
 // **************************************************************
 // ********************* fileListItem stuff *********************
@@ -357,11 +329,9 @@ fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
 		ourLabel->setValue("Default name");
 		addObj(ourLabel);
 	}
-	sBtn = new OKBtn(DEF_OK_X,DEF_OK_Y,ourPanel->mOSPtr->stdIconPath(check32),this);
-	sBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
-	addObj(sBtn);	
-	cBtn = new cancelBtn(DEF_CNCL_X,DEF_CNCL_Y,ourPanel->mOSPtr->stdIconPath(x32),this);
-	cBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	sBtn = newStdIcon(DEF_OK_X,DEF_OK_Y,icon32,okCmd,this);
+	addObj(sBtn);
+	cBtn = newStdIcon(DEF_CNCL_X,DEF_CNCL_Y,icon32,cancelCmd,this);
 	addObj(cBtn);	
 	ourFileListBox = new fileListBox(DEF_FILE_LIST_X,DEF_FILE_LIST_Y,DEF_FILE_LIST_W,FILE_LIST_HEIGHT);
 	setPath("/");
@@ -412,3 +382,11 @@ void fileBaseViewer::drawSelf(void) {
 }
 
 
+void  fileBaseViewer::handleCom(stdComs comID) {
+
+	switch(comID) {
+		case cancelCmd	: setSuccess(false); break;
+		case okCmd		: setSuccess(true); break;
+		default			: break;
+	}
+}

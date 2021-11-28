@@ -2,6 +2,7 @@
 #define fileBaseViewer_h
 
 #include <lilOS.h>
+#include <stdComs.h>
 #include <filePath.h>
 #include <scrollingList.h>
 #include <label.h>
@@ -11,37 +12,6 @@ class		fileDir;
 class		fileListBox;
 
 
-// **************************************************************
-// ************************ OKBtn stuff *************************
-// **************************************************************
-
-class OKBtn :	public iconButton {
-
-	public:
-				OKBtn(int xLoc,int yLoc,char* path,modal* inModal);
-	virtual	~OKBtn(void);
-	
-	virtual	void	doAction(void);
-	
-				modal*	ourModal;
-};
-
-
-// **************************************************************
-// ********************** cancelBtn stuff ***********************
-// **************************************************************
-
-
-class cancelBtn :	public iconButton {
-
-	public:
-				cancelBtn(int xLoc,int yLoc,char* path,modal* inModal);
-	virtual	~cancelBtn(void);
-	
-	virtual	void	doAction(void);
-	
-				modal*	ourModal;
-};
 
 // **************************************************************
 // ********************* fileListItem stuff *********************
@@ -119,7 +89,8 @@ class fileDir :	public drawGroup {
 
 
 class fileBaseViewer :	public modal,
-								public filePath {
+								public filePath,
+								public listener {
 
 	public:
 				fileBaseViewer(panel* inPanel,bool(*funct)(char*));
@@ -130,14 +101,15 @@ class fileBaseViewer :	public modal,
 	virtual	void	setSuccess(bool trueFalse);
 	virtual	void	setItem(fileListItem* currentSelected);
 	virtual	void	drawSelf(void);
+	virtual	void	handleCom(stdComs comID);
 	
 				bool				(*filterFx)(char*);
 				fileListItem*	currentItem;
 				fileListBox*	ourFileListBox;
 				fileDir*			ourFileDir;
 				panel*			ourPanel;
-				OKBtn*			sBtn;
-				cancelBtn*		cBtn;
+				stdComBtn*		sBtn;
+				stdComBtn*		cBtn;
 				label*			ourLabel;
 				timeObj*			dblClickTimer;
 };

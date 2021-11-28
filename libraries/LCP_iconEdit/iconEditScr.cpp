@@ -2,10 +2,9 @@
 
 char* iconFolder = NULL;
 
-iconEditScr::iconEditScr(lilOS* OSPtr,int inX,int inY,int inWidth,int inHeight,char* filePath) 
+iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath) 
 	: bmpObj(inX,inY,inWidth,inHeight,filePath) {
 	
-	ourOS = OSPtr;
 	setEventSet(touchLift);
 	editColor.setColor(&red);
 	scale = SCALE;
@@ -21,7 +20,7 @@ void iconEditScr::doAction(event* inEvent,point* locaPt) {
 	int xPix;
 	int yPix;
 	
-	ourOS->beep();
+	ourOSPtr->beep();
 	if (inEvent->mType==touchEvent) {
 		xPix = inEvent->mTouchPos.x/scale;
 		yPix = inEvent->mTouchPos.y/scale;

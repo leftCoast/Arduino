@@ -10,9 +10,6 @@
 char systemFolder[]  = "/system/";           // Where we decided to store the systemp folder on our SD card.
 char panelFolder[]   = "/system/appFiles/";  // Where we decided to store the app folders on our SD card.
 
-// Our OS object.
-ourOSObj  ourOS;
-
 
 // **************************************
 // ************** ourOSObj **************
@@ -30,8 +27,8 @@ ourOSObj::~ourOSObj(void) {  }
 int ourOSObj::begin(void) {
    
    pinMode(BEEP_PIN, OUTPUT);       // Setup The beeper pin.
-   digitalWrite(BEEP_PIN, HIGH);    //Means off.
-   return lilOS::begin();          // Return result of the inherited
+   digitalWrite(BEEP_PIN, HIGH);    // Means off.
+   return lilOS::begin();           // Return result of the inherited
 }
 
 

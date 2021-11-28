@@ -12,7 +12,7 @@ struct spacer {
    float stepSize;
 };
 
-//
+
 spacer calcSpacer(float numItems, float itemLength, float areaLength) {
    
    spacer   aSpacer;
@@ -25,7 +25,7 @@ spacer calcSpacer(float numItems, float itemLength, float areaLength) {
 
 
 homeScr::homeScr(void)
-   : panel(&ourOS,homeApp,noMenuBar) { }
+   : panel(homeApp,noMenuBar) { }
 
    
 homeScr::~homeScr(void) {  }
@@ -33,7 +33,7 @@ homeScr::~homeScr(void) {  }
 
 char* homeScr::iconPath(int appID,char* iconName) {
 
-   strcpy(pathBuff,mOSPtr->getPanelFolder(appID));
+   strcpy(pathBuff,ourOSPtr->getPanelFolder(appID));
    strcat(pathBuff,iconName);
    return pathBuff; 
 }
@@ -53,22 +53,22 @@ void homeScr::setup(void) {
    traceY      = BAR_Y;                                                                         // Set our y location.
    
    theAppIcon = new appIcon(traceX,traceY,calcApp,iconPath(calcApp,"calc32.bmp"));              // Create icon for the calculator.
-   theAppIcon->setMask(&(mOSPtr->icon32Mask));                                                  // Add the mask to the icon.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Add the mask to the icon.
    addObj(theAppIcon);                                                                          // Send the icon to our drawObj list to be displayed.
    
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));    // Create icon for the breakout game.
-   theAppIcon->setMask(&(mOSPtr->icon32Mask));                                                  // Add the mask to the icon. (Its the same mask over and over.)
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Add the mask to the icon. (Its the same mask over and over.)
    addObj(theAppIcon);                                                                          // Send the icon to our drawObj list to be displayed.
-                                                                                                
+                                                                                               
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,iconEditApp,iconPath(iconEditApp,"iconEdit.bmp"));    // Create icon for the icon editor disaster.
-   theAppIcon->setMask(&(mOSPtr->icon32Mask));                                                  // Add the mask.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Add the mask.
    addObj(theAppIcon);                                                                          // And its off to the races.
-
+   
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,starTrekApp,iconPath(starTrekApp,"sTrek32.bmp"));     // Create icon for the Star Trek game.
-   theAppIcon->setMask(&(mOSPtr->icon32Mask));                                                  // Mask.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Mask.
    addObj(theAppIcon);                                                                          // Drop it into the list. 
 }
 
@@ -111,7 +111,7 @@ void homeScr::drawSelf(void) {
    colorObj scrFadeColor;
    //bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
 
-   ourOS.setBrightness(0);
+   ourOSPtr->setBrightness(0);
    lineColor.setColor(LC_CHARCOAL);
    screen->fillRectGradient(0,282,240,38,&lineColor,&black);
    scrFadeColor.setColor(LC_LIGHT_BLUE);
@@ -119,5 +119,5 @@ void homeScr::drawSelf(void) {
    screen->fillRectGradient(0,0,240,282,&black,&scrFadeColor);
    doStarField();
    //theScreenImage.draw();
-   ourOS.setBrightness(255);
+   ourOSPtr->setBrightness(255);
 }

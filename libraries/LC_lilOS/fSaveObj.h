@@ -7,43 +7,6 @@
 
 class fSaveObj;
 
-
-
-// **************************************************************
-// ********************** newFolderBtn stuff ***********************
-// **************************************************************
-
-
-class newFolderBtn :	public iconButton {
-
-	public:
-				newFolderBtn(int xLoc,int yLoc,char* path,modal* inModal);
-	virtual	~newFolderBtn(void);
-	
-	virtual	void	doAction(void);
-	
-				modal*	ourModal;
-};
-
-
-// **************************************************************
-// ********************** deleteBtn stuff ***********************
-// **************************************************************
-
-
-class deleteBtn :	public iconButton {
-
-	public:
-				deleteBtn(int xLoc,int yLoc,char* path,modal* inModal);
-	virtual	~deleteBtn(void);
-	
-	virtual	void	doAction(void);
-	
-				modal*	ourModal;
-};
-
-
-
 // **************************************************************
 // ********************* saveKbd stuff *************************
 // **************************************************************
@@ -73,20 +36,15 @@ class fSaveObj :	public fileBaseViewer {
 	virtual	~fSaveObj(void);
 	
 				void	setName(char* inName);
-				void	showPath(void);
-	virtual	void	reset(void);
-	virtual	bool	setPath(char* inPath);
-	virtual	bool	pushItem(pathItem* theNewGuy);
-	virtual	void	popItem(void);
 	virtual	void	setSuccess(bool trueFalse);
 	virtual	char*	getSavePath(void);
 	virtual	void	drawSelf(void);
-	
-				label*			pathStr;
-				editLabel*		nameStr;
-				newFolderBtn*	folderBtn;
-				deleteBtn*		delBtn;
-				char*				savePath;
+	virtual	void	handleCom(stdComs comID);
+	virtual	void	setItem(fileListItem* currentSelected);
+			
+				char*			savePath;
+				label*		pathStr;
+				editLabel*	nameStr;
 };
 
 #endif

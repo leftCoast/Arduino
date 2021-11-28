@@ -45,40 +45,6 @@
 #define DELETE_X		NEW_FLDR_X
 #define DELETE_Y		NEW_FLDR_Y + 45
 
-// **************************************************************
-// ********************** newFolderBtn stuff ***********************
-// **************************************************************
-
-
-newFolderBtn::newFolderBtn(int xLoc,int yLoc,char* path,modal* inModal)
-	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }
-	
-	
-newFolderBtn::~newFolderBtn(void) {  }
-
-	
-void newFolderBtn::doAction(void) {
-
-}
-	
-
-
-// **************************************************************
-// ********************** deleteBtn stuff ***********************
-// **************************************************************
-
-
-deleteBtn::deleteBtn(int xLoc,int yLoc,char* path,modal* inModal)
-	: iconButton(xLoc,yLoc,path) { ourModal = inModal; }
-	
-deleteBtn::~deleteBtn(void) {  }
-
-	
-void deleteBtn::doAction(void) {
-
-}
-
-
 
 // **************************************************************
 // ********************* saveKbd stuff *************************
@@ -95,9 +61,9 @@ saveKbd::~saveKbd(void) {  }
 void saveKbd::handleKey(keyCommands inEditCom) {
 
 	if (inEditCom==cancel) {
-		ourModal->setSuccess(false);
+		ourModal->handleCom(cancelCmd);
 	} else if (inEditCom==ok) {
-		ourModal->setSuccess(true);
+		ourModal->handleCom(okCmd);
 	}
 	bmpKeyboard::handleKey(inEditCom);
 }
@@ -113,6 +79,8 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	
 	int kbdX;
 	int kbdY;
+	stdComBtn*	folderBtn;
+	stdComBtn*	delBtn;
 	
 	savePath = NULL;
 	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);																			// Resize our window.
@@ -132,12 +100,10 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	ourFileDir->setLocation(DIR_OBJ_X,DIR_OBJ_Y);																										// Hook it into the drawObject ist.
 	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);										// Create a name string obj.
 	addObj(nameStr);																												// Hook it into the drawObject ist.
-	setName("starTrek.bmp");																									// Set the name to a default for now.
-	folderBtn = new newFolderBtn(NEW_FLDR_X,NEW_FLDR_Y,ourPanel->mOSPtr->stdIconPath(FdrNew32),this);
-	folderBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	setName("noName.bmp");																									// Set the name to a default for now.
+	folderBtn = newStdIcon(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
 	addObj(folderBtn);
-	delBtn = new deleteBtn(DELETE_X,DELETE_Y,ourPanel->mOSPtr->stdIconPath(trashC32),this);
-	delBtn->setMask(&(ourPanel->mOSPtr->icon32Mask));
+	delBtn = newStdIcon(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
 	addObj(delBtn);
 	saveKbd* aKbd = new saveKbd(nameStr,this);
 	kbdX = aKbd->x;
@@ -146,7 +112,6 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	aKbd->loadKeys();
 	addObj(aKbd);
 	nameStr->beginEditing();
-	showPath();	
 }
 	
 
@@ -160,41 +125,6 @@ void fSaveObj::setName(char* inName) {
 	}
 }
 
-
-void fSaveObj::showPath(void) { 
-
-	if (pathStr) {
-		pathStr->setValue(getPath());
-	}
-}
-
-
-void fSaveObj::reset(void) {
-
-	fileBaseViewer::reset();
-	showPath();
-}
-
-bool fSaveObj::setPath(char* inPath) {
-	
-	fileBaseViewer::setPath(inPath);
-	showPath();
-}
-
-
-bool fSaveObj::pushItem(pathItem* theNewGuy) {
-	
-	fileBaseViewer::pushItem(theNewGuy);
-	showPath();
-}
-
-
-void fSaveObj::popItem(void) {
-
-	fileBaseViewer::popItem();
-	showPath();
-}
-	
 	 
 // The file viewer is going down either with a success or a failure. Deal with that here.
 void fSaveObj::setSuccess(bool trueFalse) {
@@ -221,6 +151,17 @@ void fSaveObj::setSuccess(bool trueFalse) {
 char* fSaveObj::getSavePath(void) { return savePath; }
 
 
+void fSaveObj::setItem(fileListItem* currentSelected) {
+
+	fileBaseViewer::setItem(currentSelected);
+	if (currentSelected->ourType==fileType) {
+		nameStr->endEditing();
+		nameStr->setValue(currentSelected->ourName);
+		nameStr->beginEditing();
+	}
+}
+
+
 // Basically we are nothing but big white rectangle.
 void fSaveObj::drawSelf(void) {
 	
@@ -239,3 +180,11 @@ void fSaveObj::drawSelf(void) {
 }
 
 
+void  fSaveObj::handleCom(stdComs comID) {
+
+	switch(comID) {
+		case newFolderCmd		:	break;
+		case deleteItemCmd	:	break;
+		default 					:	fileBaseViewer::handleCom(comID);	break;
+	}
+}

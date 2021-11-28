@@ -2,7 +2,9 @@
 #include <lilOS.h>
 #include <screen.h>
 
-int	nextPanel = NO_PANEL_ID;   // What panel do we want showing now?
+int		nextPanel	= NO_PANEL_ID;   // What panel do we want showing now?
+lilOS*	ourOSPtr		= NULL;	
+
 
 // *****************************************************
 // ********************   appIcon  *********************
@@ -65,10 +67,9 @@ void modal::setSuccess(bool trueFalse) {
 	
 	
 // And it all starts up again..
-panel::panel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
+panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
   : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
   
-  	mOSPtr	= ourOS;									// Save a pointer to our OS object.
 	mPanelID = panelID;								// Save what "kind" of panel we are.
 	mMenuBar = NULL;									// Default to NULL.
 	switch (menuBarChoice) {						// Lets see what kind of bar they wish for?
@@ -117,13 +118,24 @@ void panel::close(void) { nextPanel = HOME_PANEL_ID; }
 void panel::closing(void) {  }
 
 
+// We get a close command, we close! At least by default.
+void panel::handleCom(stdComs comID) {
+
+	switch(comID) {
+		case closeCmd	: close(); break;
+		default			: break;
+	}
+}
+
+
+
 // *****************************************************
 // *******************   homePanel  ********************
 // *****************************************************
 
 
-homePanel::homePanel(lilOS* ourOS)
-  : panel(ourOS,HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
+homePanel::homePanel(void)
+  : panel(HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
 
 
 homePanel::~homePanel(void) {  }
@@ -154,6 +166,7 @@ lilOS::lilOS(void) {
 
   mPanel = NULL;
   nextPanel = HOME_PANEL_ID;
+  ourOSPtr = this;
 }
 
 
@@ -161,10 +174,11 @@ lilOS::lilOS(int homeID) {
 
   mPanel			= NULL;
   nextPanel		= homeID;
+  ourOSPtr = this;
 }
 
 
-lilOS::~lilOS(void) {  }
+lilOS::~lilOS(void) { ourOSPtr = NULL; }
 
 
 // A good plan would be to inherit, do your begin
@@ -173,13 +187,14 @@ int lilOS::begin(void) {
 
   hookup();													// Want to use idle()? Its ready.
   icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
+  icon22Mask.readFromBMP(stdIconPath(mask22));	// Read out and setup the standard 22x22 icon mask.
   nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
   return 0;													// 0 means no error right? Or does it mean false, fail?
 }
 
 
 // This is the guy you inherit and use to create your custom panels.
-panel* lilOS::createPanel(int panelID) { return new homePanel(this); }
+panel* lilOS::createPanel(int panelID) { return new homePanel(); }
 
 
 void lilOS::launchPanel(void) {

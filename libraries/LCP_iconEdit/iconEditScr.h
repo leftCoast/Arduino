@@ -9,13 +9,13 @@
 class iconEditScr : public bmpObj {
 
 	public:
-				iconEditScr(lilOS* OSPtr,int inX,int inY,int inWidth,int inHeight,char* filePath);
+				iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath);
 	virtual	~iconEditScr(void);
 	
 	virtual	void		drawSelf(void);
 	virtual	void  	doAction(event* inEvent,point* locaPt);
 	virtual	bool		askOk(char* qStr);
-				lilOS* 	ourOS;
+
 				colorObj	editColor;
 				int		scale;
 };

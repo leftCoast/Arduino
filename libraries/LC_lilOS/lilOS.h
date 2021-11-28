@@ -74,10 +74,11 @@ enum menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
 class menuBar;
 class lilOS;
 
-class panel : public drawGroup {
+class panel :	public drawGroup,
+					public listener {
 
 	public:
-				panel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+				panel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~panel(void);
 	
 				int	getPanelID();
@@ -86,8 +87,8 @@ class panel : public drawGroup {
 	virtual	void	drawSelf(void);
 	virtual	void	close(void);
 	virtual	void	closing(void);
-  
-				lilOS*	mOSPtr;		// Pointer to our OS.
+	virtual	void	handleCom(stdComs comID);
+	
 				int		mPanelID;   // What panal am I?
 				menuBar*	mMenuBar;	// My menu bar, if so desired.
 };
@@ -97,7 +98,7 @@ class panel : public drawGroup {
 class homePanel : public panel {
 
   public:
-          homePanel(lilOS* ourOS);
+          homePanel(void);
   virtual ~homePanel(void);
   
   virtual void  setup(void);
@@ -137,8 +138,11 @@ class lilOS :  public idler {
 				char		pathBuff[PATH_LEN];			// Workspace for building up file paths.
 				panel*	mPanel;
 				bmpMask	icon32Mask;
+				bmpMask	icon22Mask;
 };
 
-extern  int nextPanel;
+extern int		nextPanel;
+extern lilOS*	ourOSPtr;
+
 
 #endif

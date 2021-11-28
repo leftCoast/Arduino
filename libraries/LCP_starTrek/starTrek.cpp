@@ -51,7 +51,7 @@ starTrekKeyboard::~starTrekKeyboard(void) {  }
 
 
 // Make the keys beep.
-void starTrekKeyboard::keyClicked(keyboardKey* aKey) { mPanel->mOSPtr->beep(); }
+void starTrekKeyboard::keyClicked(keyboardKey* aKey) { ourOSPtr->beep(); }
 
 
 // Time to send a text command. The text, as it comes from the edit field has no \n.
@@ -185,7 +185,7 @@ void	starTrekText::appendText(char aChar) {
 
 
 starTrekPanel::starTrekPanel(lilOS* inOS,int ourAppID)
-  : panel(inOS,ourAppID) {
+  : panel(ourAppID) {
   
   mUpdater = new starTrekUpdater(this);
   quickExit = false;
