@@ -329,9 +329,9 @@ fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
 		ourLabel->setValue("Default name");
 		addObj(ourLabel);
 	}
-	sBtn = newStdIcon(DEF_OK_X,DEF_OK_Y,icon32,okCmd,this);
+	sBtn = newStdBtn(DEF_OK_X,DEF_OK_Y,icon32,okCmd,this);
 	addObj(sBtn);
-	cBtn = newStdIcon(DEF_CNCL_X,DEF_CNCL_Y,icon32,cancelCmd,this);
+	cBtn = newStdBtn(DEF_CNCL_X,DEF_CNCL_Y,icon32,cancelCmd,this);
 	addObj(cBtn);	
 	ourFileListBox = new fileListBox(DEF_FILE_LIST_X,DEF_FILE_LIST_Y,DEF_FILE_LIST_W,FILE_LIST_HEIGHT);
 	setPath("/");

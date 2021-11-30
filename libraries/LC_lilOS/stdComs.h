@@ -10,8 +10,11 @@
 enum stdComs	{	cutCmd, copyCmd, closeCmd, pasteCmd, cancelCmd, okCmd, newFileCmd,
 						newFolderCmd, newItemCmd, openFileCmd, saveFileCmd, deleteItemCmd,
 						searchCmd, sortCmd, editCmd };
-						
-enum iconSize	{ icon22, icon32 };
+
+enum stdLabels	{	warnLbl, choiceLbl, noteLbl, folderLbl, folderRetLbl, docLbl,
+						SDCardLbl };
+										
+enum iconSize	{ icon16, icon22, icon32 };
 
 						
 // **************************************************************
@@ -48,7 +51,7 @@ class stdComBtn : public iconButton {
 				stdComs		ourComID;
 };
 
-
-stdComBtn* newStdIcon(int x,int y,iconSize inSize,stdComs iconType,listener* inListener);
+bmpObj*		newStdLbl(int x,int y,iconSize inSize,stdLabels iconType);
+stdComBtn*	newStdBtn(int x,int y,iconSize inSize,stdComs iconType,listener* inListener);
 
 #endif

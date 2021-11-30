@@ -13,6 +13,7 @@ class ourOSObj : public lilOS {
   
    virtual  int      begin(void);                     // The hardware is online, do hookups.
    virtual  panel*   createPanel(int panelID);        // We need to write our own panel creation method.
+            //void     backlightOn(void);
    virtual  void     beep(void);                      // Only WE know how to make it beep.
    virtual  int      getTonePin(void);
    virtual  void     setBrightness(byte brightness);  // 0 for full bright 255 for off.
@@ -20,7 +21,6 @@ class ourOSObj : public lilOS {
    virtual  char*    getPanelFolder(int panelID);
 };
 
-//extern ourOSObj   ourOS;
 extern bmpMask    iconMask;
 
 #endif

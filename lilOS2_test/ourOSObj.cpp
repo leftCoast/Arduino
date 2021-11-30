@@ -31,20 +31,25 @@ int ourOSObj::begin(void) {
    return lilOS::begin();           // Return result of the inherited
 }
 
+void backlightOn(void) { ourOSPtr->setBrightness(255); }
 
 // We need to write our own panel creation method.
 panel* ourOSObj::createPanel(int panelID) {
    
+   panel* result;
+   
    beep();
-   //setBrightness(0);
+   setBrightness(0);
    switch (panelID) {
-      case homeApp      : return new homeScr();
-      case calcApp      : return new rpnCalc(this,panelID);
-      case iconEditApp  : return new iconEdit(this,panelID);
-      case breakoutApp  : return new breakout(this,panelID);
-      case starTrekApp  : return new starTrekPanel(this,panelID);
-      default           : return NULL;
+      case homeApp      : result = new homeScr();                    break;
+      case calcApp      : result = new rpnCalc(this,panelID);        break;
+      case iconEditApp  : result = new iconEdit(this,panelID);       break;
+      case breakoutApp  : result = new breakout(this,panelID);       break;
+      case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
+      default           : result = NULL;
    }
+   drawNotify.setCallback(backlightOn);
+   return(result);
 }
 
 

@@ -2,6 +2,8 @@
 #include <resizeBuff.h>
 #include <bmpKeyboard.h>
 #include <editLabel.h>
+#include <alertObj.h>
+
 
 #define out(x) Serial.print(x)
 #define outln(x) Serial.println(x)
@@ -73,6 +75,8 @@ void saveKbd::handleKey(keyCommands inEditCom) {
 // ********************* fSaveObj stuff *************************
 // **************************************************************
 
+fSaveObj* staticThis;
+
 	
 fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	:fileBaseViewer(inPanel,funct) {
@@ -82,6 +86,7 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	stdComBtn*	folderBtn;
 	stdComBtn*	delBtn;
 	
+	staticThis = this;
 	savePath = NULL;
 	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);																			// Resize our window.
 	ourLabel->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);																// Resize the label to fit.
@@ -101,9 +106,9 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);										// Create a name string obj.
 	addObj(nameStr);																												// Hook it into the drawObject ist.
 	setName("noName.bmp");																									// Set the name to a default for now.
-	folderBtn = newStdIcon(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
+	folderBtn = newStdBtn(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
 	addObj(folderBtn);
-	delBtn = newStdIcon(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
+	delBtn = newStdBtn(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
 	addObj(delBtn);
 	saveKbd* aKbd = new saveKbd(nameStr,this);
 	kbdX = aKbd->x;
@@ -166,7 +171,7 @@ void fSaveObj::setItem(fileListItem* currentSelected) {
 void fSaveObj::drawSelf(void) {
 	
 	rect	aRect(SAVE_SCR_X,SAVE_SCR_Y,SAVE_SCR_W,SAVE_SCR_H);
-	
+
 	aRect.x++;										// Quick move it over one click in x.
 	aRect.y++;										// One click in y.
 	screen->drawRect(&aRect,&black);	// One pixal rectangle makes our drop shadow.
@@ -179,12 +184,28 @@ void fSaveObj::drawSelf(void) {
 	screen->fillRect(&aRect,&black);
 }
 
+//WarnAlert
+//choiceAlert
+//noteAlert
+void	fSaveObj::createAlert(void) {
+	
+	alertObj* newAlert = new alertObj("New Alert!!",staticThis,choiceAlert,true);
+	staticThis->addObj(newAlert);
+}
+
 
 void  fSaveObj::handleCom(stdComs comID) {
 
 	switch(comID) {
-		case newFolderCmd		:	break;
-		case deleteItemCmd	:	break;
+		case newFolderCmd		:	
+			drawNotify.setCallback(fSaveObj::createAlert);
+			//alertObj* newAlert = new alertObj("New Alert!!",this,true);
+			//addObj(newAlert);
+		break;
+		case deleteItemCmd	:
+			//alertObj* deleteAlert = new alertObj("Delete Alert!!",this,true);
+			//ourPanel->addObj(deleteAlert);
+		break;
 		default 					:	fileBaseViewer::handleCom(comID);	break;
 	}
 }

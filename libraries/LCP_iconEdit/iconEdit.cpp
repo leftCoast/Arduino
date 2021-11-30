@@ -60,11 +60,11 @@ void iconEdit::beginFileSave(void) {
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
 	
-	stdComBtn* ourNewBtn = newStdIcon(40,1,icon22,newFileCmd,this);
+	stdComBtn* ourNewBtn = newStdBtn(40,1,icon22,newFileCmd,this);
 	mMenuBar->addObj(ourNewBtn);
-	stdComBtn* ourOpenBtn = newStdIcon(80,1,icon22,openFileCmd,this);
+	stdComBtn* ourOpenBtn = newStdBtn(80,1,icon22,openFileCmd,this);
 	mMenuBar->addObj(ourOpenBtn);
-	stdComBtn* ourSaveBtn = newStdIcon(120,1,icon22,saveFileCmd,this);
+	stdComBtn* ourSaveBtn = newStdBtn(120,1,icon22,saveFileCmd,this);
 	mMenuBar->addObj(ourSaveBtn);
 }
 

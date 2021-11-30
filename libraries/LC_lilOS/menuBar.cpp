@@ -17,7 +17,7 @@ menuBar::menuBar(panel* inPanel,bool closeBox)
   
   mPanel = inPanel;
   if (closeBox) {
-    ourCloseBtn = newStdIcon(CLOSE_X,CLOSE_Y,CLOSE_SIZE,closeCmd,mPanel);
+    ourCloseBtn = newStdBtn(CLOSE_X,CLOSE_Y,CLOSE_SIZE,closeCmd,mPanel);
     addObj(ourCloseBtn);
   }
 }

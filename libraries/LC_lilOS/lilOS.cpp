@@ -240,23 +240,29 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 		case app32 		: strcat(pathBuff,"app32.bmp"); 		break;
 		case check22 	: strcat(pathBuff,"check22.bmp"); 	break;
 		case check32 	: strcat(pathBuff,"check32.bmp"); 	break;
+		case choice32 	: strcat(pathBuff,"choice32.bmp"); 	break;
 		case copy32 	: strcat(pathBuff,"copy32.bmp"); 	break;
 		case cross22 	: strcat(pathBuff,"cross22.bmp"); 	break;
 		case cross32 	: strcat(pathBuff,"cross32.bmp"); 	break;
 		case cut32 		: strcat(pathBuff,"cut32.bmp"); 		break;
+		case doc16 		: strcat(pathBuff,"doc16.bmp"); 		break;
 		case edit22 	: strcat(pathBuff,"edit22.bmp"); 	break;
 		case edit32 	: strcat(pathBuff,"edit32.bmp"); 	break;
 		case fNew22		: strcat(pathBuff,"fNew22.bmp"); 	break;
 		case fNew32		: strcat(pathBuff,"fNew32.bmp"); 	break;
+		case folder16	: strcat(pathBuff,"fldr16.bmp"); 	break;
+		case fldrRet16	: strcat(pathBuff,"fldrBk16.bmp"); 	break;
 		case fSave22	: strcat(pathBuff,"fSave22.bmp"); 	break;
 		case fSave32	: strcat(pathBuff,"fSave32.bmp"); 	break;
 		case fOpen22 	: strcat(pathBuff,"fOpen22.bmp"); 	break;
 		case fOpen32 	: strcat(pathBuff,"fOpen32.bmp"); 	break;
 		case FdrNew22	: strcat(pathBuff,"FdrNew22.bmp"); 	break;
 		case FdrNew32	: strcat(pathBuff,"FdrNew32.bmp"); 	break;
+		case note32		: strcat(pathBuff,"note32.bmp"); 	break;
 		case paste32 	: strcat(pathBuff,"paste32.bmp"); 	break;
 		case pref22 	: strcat(pathBuff,"pref22.bmp");		break;
 		case pref32 	: strcat(pathBuff,"pref32.bmp"); 	break;
+		case SDCard16 	: strcat(pathBuff,"SD16.bmp"); 		break;
 		case search22	: strcat(pathBuff,"search22.bmp"); 	break;
 		case search32	: strcat(pathBuff,"search32.bmp"); 	break;
 		case sort22		: strcat(pathBuff,"sort22.bmp"); 	break;
@@ -265,6 +271,7 @@ char* lilOS::stdIconPath(stdIcons theIcon) {
 		case trashC32	: strcat(pathBuff,"trashC32.bmp"); 	break;
 		case trashR22	: strcat(pathBuff,"trashR22.bmp"); 	break;
 		case trashR32	: strcat(pathBuff,"trashR32.bmp"); 	break;
+		case warn32		: strcat(pathBuff,"warn32.bmp"); 	break;
 		case x22			: strcat(pathBuff,"x22.bmp"); 		break;
 		case x32			: strcat(pathBuff,"x32.bmp"); 		break;
 	}

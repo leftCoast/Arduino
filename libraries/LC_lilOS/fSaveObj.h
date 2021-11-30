@@ -7,6 +7,7 @@
 
 class fSaveObj;
 
+
 // **************************************************************
 // ********************* saveKbd stuff *************************
 // **************************************************************
@@ -35,6 +36,7 @@ class fSaveObj :	public fileBaseViewer {
 				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
+	static	void	createAlert(void);
 				void	setName(char* inName);
 	virtual	void	setSuccess(bool trueFalse);
 	virtual	char*	getSavePath(void);
@@ -45,6 +47,7 @@ class fSaveObj :	public fileBaseViewer {
 				char*			savePath;
 				label*		pathStr;
 				editLabel*	nameStr;
+				//bool			drawing;
 };
 
 #endif

@@ -44,15 +44,66 @@ void stdComBtn::active(bool trueFalse) {
 }
 
 
+// Need a standard label icon? Here you go!
+bmpObj* newStdLbl(int x,int y,iconSize inSize,stdLabels iconType) {
 
-// Need an icon? Let us create one for you!
-stdComBtn* newStdIcon(int x,int y,iconSize inSize,stdComs iconType,listener* inListener) {
+	bmpObj*	anBmpObjPtr;
+
+	anBmpObjPtr = NULL;
+	switch (iconType) {
+		case warnLbl		:
+			if (inSize==icon32) {
+				anBmpObjPtr = new bmpObj(x,y,32,32,ourOSPtr->stdIconPath(warn32));
+			}
+		break;
+		case choiceLbl		:
+			if (inSize==icon32) {
+				anBmpObjPtr = new bmpObj(x,y,32,32,ourOSPtr->stdIconPath(choice32));
+			}
+		break;
+		case noteLbl		:
+			if (inSize==icon32) {
+				anBmpObjPtr = new bmpObj(x,y,32,32,ourOSPtr->stdIconPath(note32));
+			}
+		break;
+		case folderLbl		:
+			if (inSize==icon16) {
+				anBmpObjPtr = new bmpObj(x,y,16,16,ourOSPtr->stdIconPath(folder16));
+			}
+		break;
+		case folderRetLbl	:
+			if (inSize==icon16) {
+				anBmpObjPtr = new bmpObj(x,y,16,16,ourOSPtr->stdIconPath(fldrRet16));
+			}
+		break;
+		case docLbl			:
+			if (inSize==icon16) {
+				anBmpObjPtr = new bmpObj(x,y,16,16,ourOSPtr->stdIconPath(doc16));
+			}
+		break;
+		case SDCardLbl		:
+			if (inSize==icon16) {
+				anBmpObjPtr = new bmpObj(x,y,16,16,ourOSPtr->stdIconPath(SDCard16));
+			}
+		break;
+	}
+	if (anBmpObjPtr) {
+		if (inSize==icon32) {
+			anBmpObjPtr->setMask(&(ourOSPtr->icon32Mask));
+		}
+	}
+	return anBmpObjPtr;
+}
+
+
+// Need a standard button? Let us create one for you!
+stdComBtn* newStdBtn(int x,int y,iconSize inSize,stdComs iconType,listener* inListener) {
 
 	stdComBtn*	anIconPtr;
 
 	anIconPtr = NULL;
 	switch (iconType) {
-		case cutCmd :
+		case cutCmd		:
 			if (inSize==icon32) {
 				anIconPtr = new stdComBtn(x,y,ourOSPtr->stdIconPath(cut32),iconType,inListener,32);
 			}		

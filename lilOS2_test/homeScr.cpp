@@ -75,6 +75,7 @@ void homeScr::setup(void) {
 
 void homeScr::loop(void) { }
 
+
 void homeScr::doStarField(void) {
 
    int         randNum;
@@ -107,17 +108,19 @@ void homeScr::doStarField(void) {
 
 void homeScr::drawSelf(void) { 
 
+   
+   //bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
    colorObj lineColor;
    colorObj scrFadeColor;
-   //bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
 
-   ourOSPtr->setBrightness(0);
    lineColor.setColor(LC_CHARCOAL);
+   lineColor.blend(&blue,20);
    screen->fillRectGradient(0,282,240,38,&lineColor,&black);
+   
+   //theScreenImage.draw();
+  
    scrFadeColor.setColor(LC_LIGHT_BLUE);
    scrFadeColor.blend(&blue,50);
    screen->fillRectGradient(0,0,240,282,&black,&scrFadeColor);
    doStarField();
-   //theScreenImage.draw();
-   ourOSPtr->setBrightness(255);
 }
