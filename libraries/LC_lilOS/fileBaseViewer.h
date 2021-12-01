@@ -101,6 +101,7 @@ class fileBaseViewer :	public modal,
 	virtual	void	setSuccess(bool trueFalse);
 	virtual	void	setItem(fileListItem* currentSelected);
 	virtual	void	drawSelf(void);
+	virtual	void	addObj(drawObj* newObj);
 	virtual	void	handleCom(stdComs comID);
 	
 				bool				(*filterFx)(char*);

@@ -346,7 +346,7 @@ fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
 	
 
 // Everything we've created are draw Objectes. They will be deleted automatically when we
-// are deleted.	
+// are deleted. Except for the double click timer. We take care of that ourselves.	
 fileBaseViewer::~fileBaseViewer(void) { if (dblClickTimer) delete(dblClickTimer); }
 
 
@@ -380,6 +380,9 @@ void fileBaseViewer::drawSelf(void) {
 	screen->fillRect(this,&white);	// Fill our rectangle white.
 	screen->drawRect(this,&black);	// And draw  black outline for us.
 }
+
+// Put the new guy at the top of the list. WITHOUT calling redraw on everyone.
+void fileBaseViewer::addObj(drawObj* newObj) { newObj->linkAfter(&listHeader); }
 
 
 void  fileBaseViewer::handleCom(stdComs comID) {

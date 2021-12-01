@@ -2,7 +2,7 @@
 #include <resizeBuff.h>
 #include <bmpKeyboard.h>
 #include <editLabel.h>
-#include <alertObj.h>
+
 
 
 #define out(x) Serial.print(x)
@@ -48,6 +48,8 @@
 #define DELETE_Y		NEW_FLDR_Y + 45
 
 
+
+
 // **************************************************************
 // ********************* saveKbd stuff *************************
 // **************************************************************
@@ -88,29 +90,30 @@ fSaveObj::fSaveObj(panel* inPanel,bool(*funct)(char*))
 	
 	staticThis = this;
 	savePath = NULL;
-	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);																			// Resize our window.
-	ourLabel->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);																// Resize the label to fit.
-	ourLabel->setValue("Choose save location");																			// Set the label name.
-	ourLabel->setJustify(TEXT_CENTER);																						// Center to make it look good.
-	if (sBtn) {																														// If we have a default success button..
-		delete(sBtn);																												// Delete it.
-		sBtn = NULL;																												// And NULL it out as a flag.
+	ourAlert = NULL;
+	wereDoing = choosing;
+	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);											// Resize our window.
+	ourLabel->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);								// Resize the label to fit.
+	ourLabel->setValue("Choose save location");											// Set the label name.
+	ourLabel->setJustify(TEXT_CENTER);														// Center to make it look good.
+	if (sBtn) {																						// If we have a default success button..
+		delete(sBtn);																				// Delete it.
+		sBtn = NULL;																				// And NULL it out as a flag.
 	}
-	if (cBtn) {																														// If we have a default cancel button..
-		delete(cBtn);																												// Delete it.
-		cBtn = NULL;																												// And NULL it out as a flag.
+	if (cBtn) {																						// If we have a default cancel button..
+		delete(cBtn);																				// Delete it.
+		cBtn = NULL;																				// And NULL it out as a flag.
 	}
-	pathStr = NULL;
 	ourFileListBox->setLocation(FILE_LIST_X,FILE_LIST_Y);
-	ourFileDir->setLocation(DIR_OBJ_X,DIR_OBJ_Y);																										// Hook it into the drawObject ist.
-	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);										// Create a name string obj.
-	addObj(nameStr);																												// Hook it into the drawObject ist.
-	setName("noName.bmp");																									// Set the name to a default for now.
+	ourFileDir->setLocation(DIR_OBJ_X,DIR_OBJ_Y);										// Hook it into the drawObject ist.
+	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);		// Create a name string obj.
+	addObj(nameStr);																				// Hook it into the drawObject ist.
+	setName("noName.bmp");																		// Set the name to a default for now.
 	folderBtn = newStdBtn(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
 	addObj(folderBtn);
 	delBtn = newStdBtn(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
 	addObj(delBtn);
-	saveKbd* aKbd = new saveKbd(nameStr,this);
+	aKbd = new saveKbd(nameStr,this);
 	kbdX = aKbd->x;
 	kbdY = aKbd->y;
 	aKbd->setLocation(kbdX,kbdY-22);
@@ -126,7 +129,13 @@ fSaveObj::~fSaveObj(void) { resizeBuff(0,&savePath); }
 void fSaveObj::setName(char* inName) {
 
 	if (nameStr) {
-		nameStr->setValue(inName);
+		if (nameStr->mEditing) {
+			nameStr->endEditing();
+			nameStr->setValue(inName);
+			nameStr->beginEditing();
+		} else {
+			nameStr->setValue(inName);
+		}
 	}
 }
 
@@ -184,27 +193,95 @@ void fSaveObj::drawSelf(void) {
 	screen->fillRect(&aRect,&black);
 }
 
-//WarnAlert
-//choiceAlert
-//noteAlert
-void	fSaveObj::createAlert(void) {
+
+void	fSaveObj::newFolderAlert(void) {
 	
-	alertObj* newAlert = new alertObj("New Alert!!",staticThis,choiceAlert,true);
-	staticThis->addObj(newAlert);
+	staticThis->ourAlert = new alertObj("Enter new folder name.",staticThis,choiceAlert,false,false);
+	staticThis->addObj(staticThis->ourAlert);
+	staticThis->setMode(newFolder);
+}
+
+
+// This deletes the selected file from the SD card.
+void	fSaveObj::deleteFile() {
+
+	if (pushChildItemByName(currentItem->ourName)) {	// Add the selected name to the end of the path.
+		SD.remove(getPath());									// Get the path string and use it to delete the file.
+		popItem();													// POp the name we added to the path back off.
+		refreshChildList();										// Refresh the child list now missing the file.
+		ourFileDir->refresh();									// Refresh the dialog box's file list.
+	}
+}
+
+
+void	fSaveObj::deleteFileAlert(void) {
+	
+	char buff[60];
+	
+	strcpy(buff,"Are you sure you want to delete ");
+	strcat(buff,staticThis->currentItem->ourName);
+	strcat(buff,"?");
+	staticThis->ourAlert = new alertObj(buff,staticThis,warnAlert,true,true);
+	staticThis->addObj(staticThis->ourAlert);
+	staticThis->setMode(deletingFile);
+}
+
+
+void fSaveObj::setMode(saveModes newMode) {
+	
+	if (wereDoing==newFolder && newMode==choosing) {
+		aKbd->setEditField(nameStr);
+		nameStr->beginEditing();
+	} else if (wereDoing==choosing && newMode==newFolder) {
+		//nameStr->endEditing();
+		//aKbd->setEditField(ourAlert->nameStr);
+		//ourAlert->nameStr->beginEditing();
+	}
+	wereDoing = newMode;
 }
 
 
 void  fSaveObj::handleCom(stdComs comID) {
 
 	switch(comID) {
+		case okCmd				:
+			if (wereDoing==newFolder) {
+				//createFolder(folderName);
+				delete(ourAlert);
+				ourAlert = NULL;
+				setMode(choosing);
+				ourPanel->setNeedRefresh();
+			} else if (wereDoing==deletingFile) {
+				deleteFile();
+				delete(ourAlert);
+				ourAlert = NULL;
+				setName("noName.bmp");
+				setMode(choosing);
+				ourPanel->setNeedRefresh();
+			} else {
+				fileBaseViewer::handleCom(comID);
+			}		
+		break;
+		case cancelCmd			:
+			if (wereDoing==newFolder) {
+				delete(ourAlert);
+				ourAlert = NULL;
+				setMode(choosing);
+				ourPanel->setNeedRefresh();
+			} else if (wereDoing==deletingFile) {
+				delete(ourAlert);
+				ourAlert = NULL;
+				setMode(choosing);
+				ourPanel->setNeedRefresh();
+			} else {
+				fileBaseViewer::handleCom(comID);
+			}
+		break;
 		case newFolderCmd		:	
-			drawNotify.setCallback(fSaveObj::createAlert);
-			//alertObj* newAlert = new alertObj("New Alert!!",this,true);
-			//addObj(newAlert);
+			drawNotify.setCallback(fSaveObj::newFolderAlert);
 		break;
 		case deleteItemCmd	:
-			//alertObj* deleteAlert = new alertObj("Delete Alert!!",this,true);
-			//ourPanel->addObj(deleteAlert);
+			drawNotify.setCallback(fSaveObj::deleteFileAlert);
 		break;
 		default 					:	fileBaseViewer::handleCom(comID);	break;
 	}

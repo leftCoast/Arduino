@@ -4,9 +4,11 @@
 #include <fileBaseViewer.h>
 #include <bmpKeyboard.h>
 #include <editLabel.h>
+#include <alertObj.h>
 
 class fSaveObj;
 
+enum saveModes { choosing,newFolder,deletingFile };
 
 // **************************************************************
 // ********************* saveKbd stuff *************************
@@ -36,18 +38,23 @@ class fSaveObj :	public fileBaseViewer {
 				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
-	static	void	createAlert(void);
+	//static	void	createAlert(void);
 				void	setName(char* inName);
 	virtual	void	setSuccess(bool trueFalse);
 	virtual	char*	getSavePath(void);
 	virtual	void	drawSelf(void);
+	static	void	newFolderAlert(void);
+				void	deleteFile(void);
+	static	void	deleteFileAlert(void);
+				void	setMode(saveModes newMode);
 	virtual	void	handleCom(stdComs comID);
 	virtual	void	setItem(fileListItem* currentSelected);
 			
+				saveModes	wereDoing;
 				char*			savePath;
-				label*		pathStr;
+				saveKbd*		aKbd;
 				editLabel*	nameStr;
-				//bool			drawing;
+				alertObj*	ourAlert;
 };
 
 #endif
