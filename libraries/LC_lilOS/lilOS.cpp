@@ -25,40 +25,40 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 // *****************************************************
 // *******************     modal    ********************
 // *****************************************************
-
-
-modal::modal(rect* inRect,eventSet inEventSet)
-	: drawGroup(inRect,inEventSet) {
-	
-	success = false;
-	done = false;
-}
-	
-	
-modal::modal(int x, int y, int width,int height,eventSet inEventSet)
-	: drawGroup(x,y,width,height,inEventSet) { done = false; }
-	
-	
-modal::~modal(void) {  }
-
-
+// 
+// 
+// modal::modal(rect* inRect,eventSet inEventSet)
+// 	: drawGroup(inRect,inEventSet) {
+// 	
+// 	success = false;
+// 	done = false;
+// }
+// 	
+// 	
+// modal::modal(int x, int y, int width,int height,eventSet inEventSet)
+// 	: drawGroup(x,y,width,height,inEventSet) { done = false; }
+// 	
+// 	
+// modal::~modal(void) {  }
+// 
+// 
 // Is this event for us? Yes, they ALL are.	
-bool modal::acceptEvent(event* inEvent,point* locaPt) {
-
-	drawGroup::acceptEvent(inEvent,locaPt);	// We do the "normal" stuff.
-	return true;										// No natter what, the buck stopps here.
-}
-
-
-void modal::message(int inMsg) { done = true; }
-
-
+// bool modal::acceptEvent(event* inEvent,point* locaPt) {
+// 
+// 	drawGroup::acceptEvent(inEvent,locaPt);	// We do the "normal" stuff.
+// 	return true;										// No natter what, the buck stopps here.
+// }
+// 
+// 
+// void modal::message(int inMsg) { done = true; }
+// 
+// 
 // Return if our taks in complete.
-void modal::setSuccess(bool trueFalse) {
-
-	success = trueFalse;
-	done		= true;
-}
+// void modal::setSuccess(bool trueFalse) {
+// 
+// 	success = trueFalse;
+// 	done		= true;
+// }
 
 	
 // *****************************************************

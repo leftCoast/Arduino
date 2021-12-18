@@ -22,20 +22,20 @@
 #define	LABEL_Y		ALERT_H/2 - 16
 
 
-alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel)
+alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel,keyboard* inKbd)
 	: modal(ALERT_X,ALERT_Y,ALERT_W,ALERT_H) { 
 	
 	bmpObj*	ourLabel;
 	
 	ourListener = inListener;
-	textView* theMsg = new textView(MSG_X,MSG_Y,MSG_W,MSG_H);
+	theMsg = new textView(MSG_X,MSG_Y,MSG_W,MSG_H);
 	if (theMsg) {
 		theMsg->setTextColors(&black,&white);
 		theMsg->setText(msg);
 		addObj(theMsg);
 	}
 	if (useOk) {
-		okBtn = newStdBtn(OK_X,OK_Y,icon32,okCmd,ourListener);
+		okBtn = newStdBtn(OK_X,OK_Y,icon32,okCmd,this);
 		if (okBtn) {
 			addObj(okBtn);
 		}
@@ -43,7 +43,7 @@ alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bo
 		okBtn = NULL;
 	}
 	if (useCancel) {
-		cancelBtn = newStdBtn(CANCEL_X,CANCEL_Y,icon32,cancelCmd,ourListener);
+		cancelBtn = newStdBtn(CANCEL_X,CANCEL_Y,icon32,cancelCmd,this);
 		if (cancelBtn) {
 			addObj(cancelBtn);
 		} 
@@ -54,14 +54,31 @@ alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bo
 		case noteAlert		: ourLabel = newStdLbl(LABEL_X,LABEL_Y,icon32,noteLbl);		break;
 		case choiceAlert	: ourLabel = newStdLbl(LABEL_X,LABEL_Y,icon32,choiceLbl);	break;
 		case warnAlert		: ourLabel = newStdLbl(LABEL_X,LABEL_Y,icon32,warnLbl);		break;
+		case noIconAlert	: ourLabel = NULL; break;
 	}
 	if (ourLabel) {
 		addObj(ourLabel);
 	}
+	ourKbd = inKbd;
 }
 
 	
 alertObj::~alertObj(void) {  }
+
+
+// Is this event for us? Well yes, they ALL are. Except if we have a keyboard..	
+bool alertObj::acceptEvent(event* inEvent,point* locaPt) {
+
+	if (drawGroup::acceptEvent(inEvent,locaPt)) {			// If its actually ours..
+		return true;	 												// We return true.
+	}
+	if (ourKbd) {														// If we have a keyboard..
+		if (screen->gY(locaPt->y)>=ourKbd->globalY()) {		// If the touch is on the keyboard..
+			return false;												// In this one case, we let it pass to the keyboard.
+		}
+	}
+	return true;														// In all other cases, the buck stops here.
+}
 
 	
 void alertObj::drawSelf(void) {
@@ -72,6 +89,21 @@ void alertObj::drawSelf(void) {
 	x--;										// Reset x.
 	y--;										// Reset y.
 	screen->fillRect(this,&white);	// Fill our rectangle white.
-	screen->drawRect(this,&black);	// And draw  black outline for us.
+	screen->drawRect(this,&black);	// And draw black outline.
 }
-	
+
+
+
+// We handle ok & cancel. If we have a listener, we'll pass these on.	
+void alertObj::handleCom(stdComs comID) {
+
+	switch(comID) {
+		case okCmd		: setSuccess(true); break;
+		case cancelCmd	: setSuccess(false); break;
+	}
+	if (ourListener) {
+		ourListener->handleCom(comID);
+	}
+}
+
+

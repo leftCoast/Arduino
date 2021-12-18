@@ -10,8 +10,9 @@ class fSaveObj;
 
 enum saveModes { choosing,newFolder,deletingFile };
 
+
 // **************************************************************
-// ********************* saveKbd stuff *************************
+// ********************* saveKbd  stuff *************************
 // **************************************************************
 
 
@@ -27,6 +28,27 @@ class saveKbd : public bmpKeyboard {
 };
 
 
+
+// **************************************************************
+// ******************** saveAlert  stuff ************************
+// **************************************************************
+
+
+class folderAlert :	public alertObj {
+
+	public:
+				folderAlert(char* msg,saveKbd* inKbd,listener* inListener);
+	virtual	~folderAlert(void);
+	
+	virtual	bool	acceptEvent(event* inEvent,point* locaPt);
+	//virtual	void	drawSelf(void);
+	
+				saveKbd*		sKbd;
+				editLabel*	folderPath;
+};
+
+
+
 // **************************************************************
 // ********************* fSaveObj stuff *************************
 // **************************************************************
@@ -38,23 +60,20 @@ class fSaveObj :	public fileBaseViewer {
 				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
-	//static	void	createAlert(void);
 				void	setName(char* inName);
-	virtual	void	setSuccess(bool trueFalse);
 	virtual	char*	getSavePath(void);
-	virtual	void	drawSelf(void);
-	static	void	newFolderAlert(void);
+				void	createFolder(void);
 				void	deleteFile(void);
-	static	void	deleteFileAlert(void);
 				void	setMode(saveModes newMode);
 	virtual	void	handleCom(stdComs comID);
 	virtual	void	setItem(fileListItem* currentSelected);
 			
-				saveModes	wereDoing;
-				char*			savePath;
-				saveKbd*		aKbd;
-				editLabel*	nameStr;
-				alertObj*	ourAlert;
+				saveModes		wereDoing;
+				char*				savePath;
+				saveKbd*			aKbd;
+				editLabel*		nameStr;
+				alertObj*		deleteAlert;
+				folderAlert*	newFldrAlertPtr;
 };
 
 #endif

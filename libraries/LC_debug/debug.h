@@ -13,9 +13,9 @@ class debug {
                 debug(void);
   virtual       ~debug(void);
   
-				void  trace(char* message,bool hold=true);
-				void  trace(char* message,int inNum,bool hold=true);
-				void  trace(char* message,char* inStr,bool hold=true);
+				void  trace(const char* message,bool hold=true);
+				void  trace(const char* message,int inNum,bool hold=true);
+				void  trace(const char* message,const char* inStr,bool hold=true);
 };
 
 extern debug db;

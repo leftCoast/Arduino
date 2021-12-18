@@ -156,8 +156,9 @@ void fileListItem::setThisFocus(bool setLoose) {
 fileListBox::fileListBox(int x, int y, int width,int height)
 	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
 	
-	folderBmp		= new bmpObj(DEF_LIST_ICON_X,DEF_LIST_ICON_Y,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/fldr16.bmp");
-	docBmp			= new bmpObj(DEF_LIST_ICON_X,DEF_LIST_ICON_Y,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/doc16.bmp");
+	
+	folderBmp		= newStdLbl(DEF_LIST_ICON_X,DEF_LIST_ICON_Y,icon16,folderLbl);
+	docBmp			= newStdLbl(DEF_LIST_ICON_X,DEF_LIST_ICON_Y,icon16,docLbl);
 	itemLabel		= new label(DEF_LIST_ITEM_TXT_X,DEF_LIST_ITEM_TXT_Y,DEF_LIST_ITEM_TXT_W,DEF_LIST_ITEM_TXT_H,"no name",1);
 }
 
@@ -226,11 +227,13 @@ fileDir::fileDir(fileBaseViewer* inViewer,fileListBox* inFileListBox)
 	
 	ourViewer		= inViewer;
 	ourFileListBox	= inFileListBox;
-	folderIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/fldrBk16.bmp");
+	folderIcon = newStdLbl(DEF_LIST_ICON_X,-200,icon16,folderRetLbl);
+	//folderIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/fldrBk16.bmp");
 	if (folderIcon) {
 		addObj(folderIcon);
 	}
-	SDIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/SD16.bmp");
+	SDIcon = newStdLbl(DEF_LIST_ICON_X,-200,icon16,SDCardLbl);
+	//SDIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/SD16.bmp");
 	if (SDIcon) {
 		addObj(SDIcon);
 	}
@@ -318,21 +321,14 @@ void fileDir::setThisFocus(bool setLoose) {
 
 
 fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
-	:modal(DEF_SELECT_X,DEF_SELECT_Y,DEF_SELECT_W,DEF_SELECT_H) {
+	:alertObj("Default name",NULL,noIconAlert,true,true) {
 	
-	ourPanel = inPanel;
-	filterFx	= funct;
-	ourLabel = new label(DEF_LABEL_X,DEF_LABEL_Y,DEF_LABEL_W,DEF_LABEL_H);
-	if (ourLabel) {
-		ourLabel->setTextSize(1);
-		ourLabel->setJustify(TEXT_CENTER);
-		ourLabel->setValue("Default name");
-		addObj(ourLabel);
-	}
-	sBtn = newStdBtn(DEF_OK_X,DEF_OK_Y,icon32,okCmd,this);
-	addObj(sBtn);
-	cBtn = newStdBtn(DEF_CNCL_X,DEF_CNCL_Y,icon32,cancelCmd,this);
-	addObj(cBtn);	
+	this->setRect(DEF_SELECT_X,DEF_SELECT_Y,DEF_SELECT_W,DEF_SELECT_H);
+	ourPanel		= inPanel;
+	filterFx		= funct;
+	theMsg->setRect(DEF_LABEL_X,DEF_LABEL_Y,DEF_LABEL_W,DEF_LABEL_H);
+	okBtn->setLocation(DEF_OK_X,DEF_OK_Y);
+	cancelBtn->setLocation(DEF_CNCL_X,DEF_CNCL_Y);
 	ourFileListBox = new fileListBox(DEF_FILE_LIST_X,DEF_FILE_LIST_Y,DEF_FILE_LIST_W,FILE_LIST_HEIGHT);
 	setPath("/");
 	addObj(ourFileListBox);	
@@ -362,7 +358,7 @@ void fileBaseViewer::chooseFolder(char* name) {
 void fileBaseViewer::chooseFile(char* name) {  }
 
 // Needed as a pass through.		
-void fileBaseViewer::setSuccess(bool trueFalse)	{ modal::setSuccess(trueFalse); }
+//void fileBaseViewer::setSuccess(bool trueFalse)	{ modal::setSuccess(trueFalse); }
 
 
 // If a list item gets highlighted, we save a pointer to it in case its the last thing we do.	
@@ -370,19 +366,29 @@ void fileBaseViewer::setItem(fileListItem* currentSelected) { currentItem = curr
 
 	
 // Basically we are nothing but big white rectangle.
-void fileBaseViewer::drawSelf(void) {
-
-	x++;										// Quick move it over one click in x.
-	y++;										// One click in y.
-	screen->drawRect(this,&black);	// One pixal rectangle makes our drop shadow.
-	x--;										// Reset x.
-	y--;										// Reset y.
-	screen->fillRect(this,&white);	// Fill our rectangle white.
-	screen->drawRect(this,&black);	// And draw  black outline for us.
-}
+// void fileBaseViewer::drawSelf(void) {
+// 
+// 	x++;										// Quick move it over one click in x.
+// 	y++;										// One click in y.
+// 	screen->drawRect(this,&black);	// One pixal rectangle makes our drop shadow.
+// 	x--;										// Reset x.
+// 	y--;										// Reset y.
+// 	screen->fillRect(this,&white);	// Fill our rectangle white.
+// 	screen->drawRect(this,&black);	// And draw  black outline for us.
+// }
 
 // Put the new guy at the top of the list. WITHOUT calling redraw on everyone.
-void fileBaseViewer::addObj(drawObj* newObj) { newObj->linkAfter(&listHeader); }
+//void fileBaseViewer::addObj(drawObj* newObj) { newObj->linkAfter(&listHeader); }
+
+
+// void fileBaseViewer::idle(void) {
+// 
+// 	if (condemned){
+// 		delete(condemned);
+// 		condemned = NULL;
+// 		ourPanel->setNeedRefresh();
+// 	}
+// }
 
 
 void  fileBaseViewer::handleCom(stdComs comID) {

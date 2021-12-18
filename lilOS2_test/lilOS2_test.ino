@@ -14,7 +14,7 @@ void setup() {
       Serial.flush();                                             // Make sure the message gets out.
       while(true);                                                // Lock the process here.
    }
-   ourOS.setBrightness(0);                                        // Turn off the screen backlight. (Home screen wil turn it bak on.)
+   //ourOS.setBrightness(0);                                        // Turn off the screen backlight. (Home screen wil turn it bak on.)
    if (!SD.begin(ADA_1947_SHIELD_SDCS)) {                         // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Tell user we have no SD card.
       Serial.flush();                                             // Make sure the mesage gets out.

@@ -96,9 +96,11 @@ class keyboard : public drawGroup {
 	virtual	void			setEditField(editable* inLabel);
 	virtual	keyStates	getState(void);
 	virtual	void    		drawSelf(void);
+				int			globalY(void);
 			
           editable*		mEditObj;
           keyStates		mState;
+          int				mGlobalY;
 }; 
 
 

@@ -1,8 +1,9 @@
 #include "ourOSObj.h"
 #include <rpnCalc.h>
 #include <breakout.h>
-#include <iconEdit.h>
-#include <starTrek.h>
+//#include <iconEdit.h>
+//#include <starTrek.h>
+#include "testAppPanel.h"
 #include "homeScr.h"
 
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
@@ -31,7 +32,7 @@ int ourOSObj::begin(void) {
    return lilOS::begin();           // Return result of the inherited
 }
 
-void backlightOn(void) { ourOSPtr->setBrightness(255); }
+//void backlightOn(void) { ourOSPtr->setBrightness(255); }
 
 // We need to write our own panel creation method.
 panel* ourOSObj::createPanel(int panelID) {
@@ -39,16 +40,16 @@ panel* ourOSObj::createPanel(int panelID) {
    panel* result;
    
    beep();
-   setBrightness(0);
+   //setBrightness(0);
    switch (panelID) {
       case homeApp      : result = new homeScr();                    break;
       case calcApp      : result = new rpnCalc(this,panelID);        break;
-      case iconEditApp  : result = new iconEdit(this,panelID);       break;
+      //case iconEditApp : result = new iconEdit(this,panelID);       break;
       case breakoutApp  : result = new breakout(this,panelID);       break;
-      case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
+      //case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
+      case testApp      : result = new testAppPanel(this,panelID);  break;
       default           : result = NULL;
    }
-   drawNotify.setCallback(backlightOn);
    return(result);
 }
 
@@ -78,18 +79,22 @@ char* ourOSObj::getPanelFolder(int panelID) {
          strcat(pathBuff,"rpnCalc/");
          return pathBuff;
       break;
-      case iconEditApp  :
-         strcat(pathBuff,"iconEdit/");
-         return pathBuff;
-      break;
+//      case iconEditApp  :
+//         strcat(pathBuff,"iconEdit/");
+//         return pathBuff;
+//      break;
       case breakoutApp  :
          strcat(pathBuff,"breakout/");
          return pathBuff;
       break; 
-      case starTrekApp  :
-         strcat(pathBuff,"starTrek/");
+//      case starTrekApp  :
+//         strcat(pathBuff,"starTrek/");
+//         return pathBuff;
+//      break;
+      case testApp      :
+         strcpy(pathBuff,getSystemFolder());
+         strcat(pathBuff,"icons/standard/");
          return pathBuff;
-      break;
       default           : return NULL;
    }
 }

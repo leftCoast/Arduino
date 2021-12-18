@@ -6,7 +6,7 @@
  sensing chip from an analog pin on an Arduino.
  
  Constructor takes a pin number. 
- Foe example : LM35 mySensor(A2);
+ For example : LM35 mySensor(A2);
  When you want a reading just call either tempC()
  for centigrade or tempF() for Farenheight.
  

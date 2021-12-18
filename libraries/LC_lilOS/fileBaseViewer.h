@@ -1,11 +1,11 @@
 #ifndef fileBaseViewer_h
 #define fileBaseViewer_h
 
+#include <alertObj.h>
 #include <lilOS.h>
-#include <stdComs.h>
 #include <filePath.h>
 #include <scrollingList.h>
-#include <label.h>
+//#include <label.h>
 
 class		fileBaseViewer;
 class		fileDir;
@@ -88,9 +88,8 @@ class fileDir :	public drawGroup {
 // **************************************************************
 
 
-class fileBaseViewer :	public modal,
-								public filePath,
-								public listener {
+class fileBaseViewer :	public alertObj,
+								public filePath {
 
 	public:
 				fileBaseViewer(panel* inPanel,bool(*funct)(char*));
@@ -98,10 +97,11 @@ class fileBaseViewer :	public modal,
 	
 	virtual	void	chooseFolder(char* name);
 	virtual	void	chooseFile(char* name);
-	virtual	void	setSuccess(bool trueFalse);
+	//virtual	void	setSuccess(bool trueFalse);
 	virtual	void	setItem(fileListItem* currentSelected);
-	virtual	void	drawSelf(void);
-	virtual	void	addObj(drawObj* newObj);
+	//virtual	void	drawSelf(void);
+	//virtual	void	addObj(drawObj* newObj);
+	//virtual	void	idle(void);
 	virtual	void	handleCom(stdComs comID);
 	
 				bool				(*filterFx)(char*);
@@ -109,10 +109,11 @@ class fileBaseViewer :	public modal,
 				fileListBox*	ourFileListBox;
 				fileDir*			ourFileDir;
 				panel*			ourPanel;
-				stdComBtn*		sBtn;
-				stdComBtn*		cBtn;
-				label*			ourLabel;
+				//stdComBtn*		sBtn;
+				//stdComBtn*		cBtn;
+				///label*			ourLabel;
 				timeObj*			dblClickTimer;
+				//drawObj*			condemned;
 };
 
 #endif

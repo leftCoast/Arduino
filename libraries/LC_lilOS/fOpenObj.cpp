@@ -24,10 +24,10 @@ fOpenObj::fOpenObj(panel* inPanel,bool(*funct)(char*))
 	:fileBaseViewer(inPanel,funct) {
 	
 	this->setRect(OPEN_X,OPEN_Y,OPEN_W,OPEN_H);
-	ourLabel->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);
-	ourLabel->setValue("Choose file");
-	sBtn->setLocation(OK_X,OK_Y);
-	cBtn->setLocation(CNCL_X,CNCL_Y);
+	theMsg->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);
+	theMsg->setText("Choose file");
+	okBtn->setLocation(OK_X,OK_Y);
+	cancelBtn->setLocation(CNCL_X,CNCL_Y);
 }
 
 

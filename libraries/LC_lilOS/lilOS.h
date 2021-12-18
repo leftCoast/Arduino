@@ -37,24 +37,6 @@ class appIcon : public iconButton {
 };
 
 
-// Class for building modal dialog boxes.
-class modal :	public drawGroup {
-
-	public:
-				modal(rect* inRect,eventSet inEventSet=noEvents);
-				modal(int x, int y, int width,int height,eventSet inEventSet=noEvents);
-	virtual	~modal(void);
-	
-	virtual	bool	acceptEvent(event* inEvent,point* locaPt);	// Is this event for us? Yes, they ALL are.
-	virtual	void	message(int inMsg);
-	virtual	void	setSuccess(bool trueFalse);
-				
-				bool	success;
-				bool	done;
-};
-
-
-
 // The base panel class
 
 // The panel object. Base class for swapping in and out of different objects

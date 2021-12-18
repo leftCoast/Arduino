@@ -5,7 +5,7 @@
 debug::debug(void) { }
 debug::~debug(void) { }
 
-void debug::trace(char* message,bool hold) {
+void debug::trace(const char* message,bool hold) {
 
   Serial.print(message);
   Serial.flush();
@@ -17,14 +17,14 @@ void debug::trace(char* message,bool hold) {
 }
 
 
-void debug::trace(char* message,char* inStr,bool hold) {
+void debug::trace(const char* message,const char* inStr,bool hold) {
 
 	Serial.print(message);
 	trace(inStr,hold);
 }
 
 	
-void debug::trace(char* message,int inNum,bool hold) {
+void debug::trace(const char* message,int inNum,bool hold) {
 
   char* buff;
   int   numChars;

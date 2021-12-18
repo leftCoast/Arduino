@@ -58,17 +58,22 @@ void homeScr::setup(void) {
    
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,breakoutApp,iconPath(breakoutApp,"breakout.bmp"));    // Create icon for the breakout game.
-   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Add the mask to the icon. (Its the same mask over and over.)
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Add the mask to the icon. (Its the same mask over and over.)
    addObj(theAppIcon);                                                                          // Send the icon to our drawObj list to be displayed.
-                                                                                               
+   /*                                                                                           
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,iconEditApp,iconPath(iconEditApp,"iconEdit.bmp"));    // Create icon for the icon editor disaster.
-   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Add the mask.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Add the mask.
    addObj(theAppIcon);                                                                          // And its off to the races.
    
    traceX = traceX + stepX;
    theAppIcon = new appIcon(traceX,traceY,starTrekApp,iconPath(starTrekApp,"sTrek32.bmp"));     // Create icon for the Star Trek game.
-   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                  // Mask.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
+   addObj(theAppIcon);                                                                          // Drop it into the list. 
+   */
+   traceX = traceX + stepX;
+   theAppIcon = new appIcon(traceX,traceY,testApp,iconPath(testApp,"app32.bmp"));           // Create icon for the testApp.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
    addObj(theAppIcon);                                                                          // Drop it into the list. 
 }
 

@@ -405,5 +405,6 @@ void keyboard::handleKey(keyStates inState) { mState = inState; }
 
 keyStates keyboard::getState(void) { return mState; }
 
-void keyboard::drawSelf(void) { }
+void keyboard::drawSelf(void) { mGlobalY = screen->gY(y); }
 
+int keyboard::globalY(void) { return mGlobalY; }

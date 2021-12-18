@@ -31,3 +31,4 @@ libraries/LC_comPlayer
 libraries/LC_FONA
 libraries/LC_handheld
 libraries/Teensy-RAM-Monitor
+libraries/ANSI/
