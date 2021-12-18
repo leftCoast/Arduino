@@ -17,6 +17,8 @@ void testAppPanel::setup(void) {
    aFlasher = new flasher(20,160,10,10);
    aFlasher->setOnOff(true);
    addObj(aFlasher);
+   stdComBtn* aBtn = newStdBtn(40,50,icon32,newItemCmd,this);
+   addObj(aBtn);
 }
 
 
@@ -26,7 +28,7 @@ void testAppPanel::loop(void) {
    
    if (alertStart.ding()) {
       alertStart.reset();
-      anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
+      //anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
    }
 }
 
@@ -51,10 +53,21 @@ void testAppPanel::closing(void) { }
 
 void  testAppPanel::handleCom(stdComs comID) {
 
+   alertObj* anAlert;
+   
    switch(comID) {
-      case okCmd     : aFlasher->setColors(&green,&black);   break;
-      case cancelCmd : aFlasher->setColors(&red,&black);     break;
+      case okCmd     :
+         aFlasher->setColors(&green,&black);
+         setNeedRefresh();
+      break;
+      case cancelCmd :
+         aFlasher->setColors(&red,&black);
+         setNeedRefresh();
+      break;
+      case newItemCmd :
+         anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
+      break;
       default  : panel::handleCom(comID); break;
    }
-   setNeedRefresh();
+   
 }

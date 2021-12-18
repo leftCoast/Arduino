@@ -10,12 +10,12 @@ modalMgr	ourModalMgr;
 
 // Create a new modal object using a rectangle..
 modal::modal(rect* inRect,eventSet inEventSet)
-	: drawGroup(inRect,inEventSet) { ST init(); }
+	: drawGroup(inRect,inEventSet) {  init(); }
 
 
 // Create a new modal object using a the standard location & size values..	
 modal::modal(int x, int y, int width,int height,eventSet inEventSet)
-	: drawGroup(x,y,width,height,inEventSet) { ST init(); }
+	: drawGroup(x,y,width,height,inEventSet) {  init(); }
 	
 
 // Here we are "Ensured" ourLink will be valid. Why? Because if the modal linked list is
@@ -26,7 +26,7 @@ modal::~modal(void) { if (ourLink) ourLink->ourModal = NULL; }
 
 // We have different constructors so lets tie them together with a common init routine.
 void modal::init(void) {
-ST
+
 	drawing	= false;									// We're keeping quiet 'till we're ready.
 	success	= false;									// We're not a success yet.
 	done		= false;									// We're not done yet. Heck, not even started.
@@ -37,11 +37,10 @@ ST
 
 // Do what it takes to no have things draw over you. (Like the button that created you.)
 void  modal::checkIfReady(void) {
-ST
-	if (!drawing) {					// Just in case some Bozo calls this..
-		if (readyTimer.ding()) {	// First we check the ready timer.									
-			drawing = true;			// We'll call this good. Time to draw!
-			readyTimer.reset();		// Reset the timer so we never have to go though this again.
+
+	if (!drawing) {						// Just in case some Bozo calls this..
+		if (!ourEventMgr.active()) {	// If the even mgr. says we're ready..
+			drawing = true;				// We'll call this good. Time to draw!
 		}
 	}
 }
@@ -49,7 +48,7 @@ ST
 
 // We only draw when we're ready!
 void	modal::draw(void) { 
-ST
+
 	if (drawing) {
 		drawGroup::draw();
 	} else {
@@ -70,7 +69,7 @@ bool modal::acceptEvent(event* inEvent,point* locaPt) {
 // This is called when our task is complete. We are done and we were either a success our
 // a failure. All it does is set the two boolean flags so we can be deleted at "their" leisure.
 void modal::setSuccess(bool trueFalse) {
-ST
+
 	drawing = false;
 	success = trueFalse;
 	done		= true;
@@ -85,7 +84,7 @@ ST
 // Our modla link constructor..	
 modalLink::modalLink(modal* inModal)
 	: linkListObj() {
-ST 
+ 
 	ourModal		= inModal; 		// We're passed in the address of the modal we're tracking.
 	viewList.addObj(inModal);	// And we add it to the global view list.
 }
@@ -94,13 +93,14 @@ ST
 // Our destructor. If we still have a link to our modal, we delete that first. And that
 // will cause our link to our modla to be NULLed out by the death of the modal. Shouldn't
 // be an issue because we are not going to be around to acces it again anyway.
-modalLink::~modalLink(void) {ST if (ourModal) delete(ourModal); }
+modalLink::~modalLink(void) { if (ourModal) delete(ourModal); }
 
 
+// Returns if the modal is ready to be deleted, or has already been deleted.
 bool modalLink::complete(void) {
-ST
-	if (ourModal) return ourModal->done;
-	else return true;
+
+	if (ourModal) return ourModal->done;	// If we have a modal, see if it's done.
+	else return true;								// Else, no modal.. Then it IS done.
 }
 
 
@@ -113,7 +113,7 @@ ST
 
 modalMgr::modalMgr(void)
 	:linkList(),
-	idler(){ ST count = 0; }
+	idler(){  count = 0; }
 	
 	
 modalMgr::~modalMgr(void) { }
@@ -147,7 +147,7 @@ modalMgr::~modalMgr(void) { }
 // THE BOTTOM LINE? Don't call this yourself! Just create your modal and let this
 // automatically be called in due time to link all the nonsense together.
 modalLink* modalMgr::addLink(modal* inModal) {
-ST
+
 	modalLink* newLink;
 	
 	hookup();									// Well, this is a good time to start idling.
@@ -158,6 +158,7 @@ ST
 }
 
 
+// Check through the list and see if any need to be deleted.
 void modalMgr::idle(void) {
 	
 	modalLink* trace;
