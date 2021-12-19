@@ -27,8 +27,8 @@ class alertObj :	public modal,
 	
 				listener*	ourListener;
 				textView*	theMsg;
-				stdComBtn*	okBtn;			// Save these two just in case some one needs to
-				stdComBtn*	cancelBtn;		// muck with 'em.
+				stdComBtn*	okBtn;
+				stdComBtn*	cancelBtn;
 				keyboard*	ourKbd;
 };
 

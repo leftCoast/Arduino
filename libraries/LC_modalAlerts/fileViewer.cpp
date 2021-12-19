@@ -1,4 +1,4 @@
-#include <fileBaseViewer.h>
+#include <fileViewer.h>
 #include <resizeBuff.h>
 #include <adafruit_1947_Obj.h>
 
@@ -48,13 +48,14 @@
 #define DEF_LABEL_W	DEF_SELECT_W - DEF_LABEL_X * 2
 #define DEF_LABEL_H	18
 
+#define DBL_CLCK_MS	500
 	
 // **************************************************************
 // ********************* fileListItem stuff *********************
 // **************************************************************
   
    
-fileListItem::fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName)
+fileListItem::fileListItem(fileViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,DEF_LIST_ITEM_W,DEF_LIST_ITEM_H,fullClick) {
 	
 	int	numChars;
@@ -171,7 +172,7 @@ fileListBox::~fileListBox(void) {
 }	
 
 
-bool fileListBox::checkFile(fileBaseViewer* ourPath,pathItem* trace) {
+bool fileListBox::checkFile(fileViewer* ourPath,pathItem* trace) {
 	
 	if (ourPath->filterFx) {
 		return ourPath->filterFx(trace->getName());
@@ -180,7 +181,7 @@ bool fileListBox::checkFile(fileBaseViewer* ourPath,pathItem* trace) {
 }
 
 
-void fileListBox::fillList(fileBaseViewer* ourPath) {
+void fileListBox::fillList(fileViewer* ourPath) {
 
 	pathItem*		trace;
 	fileListItem*	newListItem;
@@ -221,19 +222,19 @@ void fileListBox::drawSelf(void) {
 // **************************************************************
 
 
-// fileDir is the label on the dialog box showing what our current directory is.
-fileDir::fileDir(fileBaseViewer* inViewer,fileListBox* inFileListBox)
-	: drawGroup(DEF_DIR_OBJ_X,DEF_DIR_OBJ_Y,DEF_DIR_OBJ_W,DEF_DIR_OBJ_H,fullClick) {
+// fileDir is the label on the dialog box showing what our current directory is. It is the
+// filePath object so its basically the boss of the dialog box.
+fileDir::fileDir(int inX, int inY, int inWidth,int inHeight)
+	: drawGroup(DEF_DIR_OBJ_X,DEF_DIR_OBJ_Y,DEF_DIR_OBJ_W,DEF_DIR_OBJ_H,fullClick),
+	filePath() {
 	
-	ourViewer		= inViewer;
-	ourFileListBox	= inFileListBox;
+	ourFileListBox	= new fileListBox(); 
+	dblClickTimer.setTime(DBL_CLCK_MS);
 	folderIcon = newStdLbl(DEF_LIST_ICON_X,-200,icon16,folderRetLbl);
-	//folderIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/fldrBk16.bmp");
 	if (folderIcon) {
 		addObj(folderIcon);
 	}
 	SDIcon = newStdLbl(DEF_LIST_ICON_X,-200,icon16,SDCardLbl);
-	//SDIcon = new bmpObj(DEF_LIST_ICON_X,-200,DEF_LIST_ICON_W,DEF_LIST_ICON_H,"/SD16.bmp");
 	if (SDIcon) {
 		addObj(SDIcon);
 	}
@@ -246,6 +247,8 @@ fileDir::fileDir(fileBaseViewer* inViewer,fileListBox* inFileListBox)
 }
 
 
+// Our destructor. The only things we allocated were given to our viewList. Our viewlist
+// will take care of deleting them. So, there's nothing really for us to do here.
 fileDir::~fileDir(void) {  }
 
 
@@ -253,74 +256,78 @@ fileDir::~fileDir(void) {  }
 void fileDir::refresh(void) {
 
 	
-	if (dirName && ourFileListBox) {								// If we have a text obj for the dir name..
-		if (!strcmp(ourViewer->getCurrItemName(),"/")) {		// If we're looking at root..
-			dirName->setValue("SD Root");							// Set a more.. descriptive name for '/'.
-			SDIcon->setLocation(DEF_LIST_ICON_X,DEF_LIST_ICON_Y);
-			folderIcon->setLocation(DEF_LIST_ICON_X,-200);
-		} else {	
-			dirName->setValue(ourViewer->getCurrItemName());	// Set the new name for the current directory.
-			SDIcon->setLocation(DEF_LIST_ICON_X,-200);
-			folderIcon->setLocation(DEF_LIST_ICON_X,DEF_LIST_ICON_Y);
-		}
-		ourFileListBox->fillList(ourViewer);
+	if (dirName && ourFileListBox) {												// If we have all our "parts"..
+		if (!strcmp(getCurrItemName(),"/")) {									// If we're looking at root..
+			dirName->setValue("SD Root");											// Set a more.. descriptive name for '/'.
+			SDIcon->setLocation(DEF_LIST_ICON_X,DEF_LIST_ICON_Y);			// Set the SD icon in place.
+			folderIcon->setLocation(DEF_LIST_ICON_X,-200);					// Move the folder icon offscreen.
+		} else {																			// Else, we're looking at a folder..
+			dirName->setValue(getCurrItemName());								// Set the new name for the current directory.
+			SDIcon->setLocation(DEF_LIST_ICON_X,-200);						// Set the SD icon offscreen.
+			folderIcon->setLocation(DEF_LIST_ICON_X,DEF_LIST_ICON_Y);	// Set the folder-return icon in place.
+		}																					//
+		ourFileListBox->fillList(this);											// Ok, we're all set, fill the file list box.
 	}										
 }
 
 
+// When its time to draw ourselves on the screen..
 void fileDir::drawSelf(void) {
 
 	colorObj aColor(LC_LIGHT_BLUE);
 	
-	if (haveFocus()) {
-		screen->fillRect(this,&aColor);
-	} else {
-		screen->fillRect(this,&white);
-	}
-	screen->drawRect(this,&black);
+	if (haveFocus()) {						// If we have focus.. (been touched)
+		screen->fillRect(this,&aColor);	// We paint our rectangle highlight blue.
+	} else {										// Else, we don't have focus..
+		screen->fillRect(this,&white);	// We paint our rect white.
+	}												//
+	screen->drawRect(this,&black);		// Lastly we frame our rect with a black outline.
 }
 
 
+// This is what is called when we receive a click from the user..
 void fileDir::doAction(void) {
 	
-	if (!haveFocus()) {													// If we DON'T have focus..
-		ourViewer->dblClickTimer->start();							// Start the double click timer.
-		setFocusPtr(this);												// And set focus to us.
-	} else {																	// Else, we DID have focus..
-		if (!ourViewer->dblClickTimer->ding()) {					// If we're looking at a double click..			
-			if (!strcmp(ourViewer->getCurrItemName(),"/")) {	// If we're looking at root..
-				return;														// We just give up now.
-			} else {															// Else, We double clicked a folder..
-				ourViewer->popItem();									// Pop path to the parent directory.
-				refresh();													// And do a refresh.
+	if (!haveFocus()) {									// If we DON'T have focus..
+		dblClickTimer.start();							// Start the double click timer.
+		setFocusPtr(this);								// And set focus to us.
+	} else {													// Else, we DID have focus..
+		if (!dblClickTimer.ding()) {					// If we're looking at a double click..			
+			if (!strcmp(getCurrItemName(),"/")) {	// If we're looking at root..
+				return;										// We just give up now.
+			} else {											// Else, We double clicked a folder..
+				popItem();									// Pop path to the parent directory.
+				refresh();									// And do a refresh.
 			}
-		} else {																// Else, this was not  double click..
-			ourViewer->dblClickTimer->start();						// Restart the timer, maybe this is the start of a double?
+		} else {												// Else, this was not double click..
+			dblClickTimer.start();						// Restart the timer, maybe this is the start of a double?
 		}
 	}
 }
 
 
+// This is what is called when we either get or loose focus. What we do is change the
+// background color for our name field.
 void fileDir::setThisFocus(bool setLoose) {
 
 	colorObj aColor(LC_LIGHT_BLUE);
 	
-	if (setLoose) {
-		dirName->setColors(&black,&aColor);
-	} else {
-		dirName->setColors(&black,&white);
-	}
-	drawObj::setThisFocus(setLoose);
+	if (setLoose) {								 	// If we are getting focus.. (Been touched)
+		dirName->setColors(&black,&aColor);		// Set the background color of the text to highlight blue;
+	} else {												// Else, if we're loosing focus.. (Something else got touched)
+		dirName->setColors(&black,&white);		// Set the background color of the text back to white.
+	}														//
+	drawObj::setThisFocus(setLoose);				// And do whatever our ancestor wanted to do..
 }
 
 
 
 // **************************************************************
-// ******************* fileBaseViewer stuff *********************
+// ******************* fileViewer stuff *********************
 // **************************************************************
 
 
-fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
+fileViewer::fileViewer(panel* inPanel,bool(*funct)(char*))
 	:alertObj("Default name",NULL,noIconAlert,true,true) {
 	
 	this->setRect(DEF_SELECT_X,DEF_SELECT_Y,DEF_SELECT_W,DEF_SELECT_H);
@@ -337,17 +344,16 @@ fileBaseViewer::fileBaseViewer(panel* inPanel,bool(*funct)(char*))
 		addObj(ourFileDir);
 		ourFileDir->refresh();
 	}
-	dblClickTimer	= new timeObj(500);
 }
 	
 
 // Everything we've created are draw Objectes. They will be deleted automatically when we
 // are deleted. Except for the double click timer. We take care of that ourselves.	
-fileBaseViewer::~fileBaseViewer(void) { if (dblClickTimer) delete(dblClickTimer); }
+fileViewer::~fileViewer(void) { if (dblClickTimer) delete(dblClickTimer); }
 
 
 // Choosing folders should jump us to the next tier of folders.
-void fileBaseViewer::chooseFolder(char* name) {
+void fileViewer::chooseFolder(char* name) {
 
 	if (pushChildItemByName(name)) {
 		ourFileDir->refresh();
@@ -355,18 +361,18 @@ void fileBaseViewer::chooseFolder(char* name) {
 }	
 
 // we do the choose file thing. Default to doing nothing?
-void fileBaseViewer::chooseFile(char* name) {  }
+void fileViewer::chooseFile(char* name) {  }
 
 // Needed as a pass through.		
-//void fileBaseViewer::setSuccess(bool trueFalse)	{ modal::setSuccess(trueFalse); }
+//void fileViewer::setSuccess(bool trueFalse)	{ modal::setSuccess(trueFalse); }
 
 
 // If a list item gets highlighted, we save a pointer to it in case its the last thing we do.	
-void fileBaseViewer::setItem(fileListItem* currentSelected) { currentItem = currentSelected; }
+void fileViewer::setItem(fileListItem* currentSelected) { currentItem = currentSelected; }
 
 	
 // Basically we are nothing but big white rectangle.
-// void fileBaseViewer::drawSelf(void) {
+// void fileViewer::drawSelf(void) {
 // 
 // 	x++;										// Quick move it over one click in x.
 // 	y++;										// One click in y.
@@ -378,10 +384,10 @@ void fileBaseViewer::setItem(fileListItem* currentSelected) { currentItem = curr
 // }
 
 // Put the new guy at the top of the list. WITHOUT calling redraw on everyone.
-//void fileBaseViewer::addObj(drawObj* newObj) { newObj->linkAfter(&listHeader); }
+//void fileViewer::addObj(drawObj* newObj) { newObj->linkAfter(&listHeader); }
 
 
-// void fileBaseViewer::idle(void) {
+// void fileViewer::idle(void) {
 // 
 // 	if (condemned){
 // 		delete(condemned);
@@ -391,7 +397,7 @@ void fileBaseViewer::setItem(fileListItem* currentSelected) { currentItem = curr
 // }
 
 
-void  fileBaseViewer::handleCom(stdComs comID) {
+void  fileViewer::handleCom(stdComs comID) {
 
 	switch(comID) {
 		case cancelCmd	: setSuccess(false); break;

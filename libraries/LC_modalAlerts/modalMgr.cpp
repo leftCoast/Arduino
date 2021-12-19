@@ -35,12 +35,12 @@ void modal::init(void) {
 }
 
 
-// Do what it takes to no have things draw over you. (Like the button that created you.)
+// Do what it takes to not have things draw over you. (Like the button that created you.)
 void  modal::checkIfReady(void) {
 
 	if (!drawing) {						// Just in case some Bozo calls this..
-		if (!ourEventMgr.active()) {	// If the even mgr. says we're ready..
-			drawing = true;				// We'll call this good. Time to draw!
+		if (!ourEventMgr.active()) {	// If the event mgr. says its all quiet out there..
+			drawing = true;				// We'll call this good. Allow drawing.
 		}
 	}
 }
@@ -61,7 +61,7 @@ void	modal::draw(void) {
 // gone quiet as well.	
 bool modal::acceptEvent(event* inEvent,point* locaPt) {
 
-	drawGroup::acceptEvent(inEvent,locaPt);				// We do the "normal" stuff. (We are a drawGroup)
+	drawGroup::acceptEvent(inEvent,locaPt);				// We do our "normal" stuff. (We are a drawGroup)
 	return true;													// No Matter what, the buck stops here.
 }
 
@@ -70,9 +70,9 @@ bool modal::acceptEvent(event* inEvent,point* locaPt) {
 // a failure. All it does is set the two boolean flags so we can be deleted at "their" leisure.
 void modal::setSuccess(bool trueFalse) {
 
-	drawing = false;
-	success = trueFalse;
-	done		= true;
+	drawing = false;		// Task is done, so we stop any more drawing.
+	success = trueFalse;	// Record our succes.
+	done		= true;		// Flag that we are done here.
 }
 
 

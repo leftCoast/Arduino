@@ -1,13 +1,12 @@
-#ifndef fileBaseViewer_h
-#define fileBaseViewer_h
+#ifndef fileViewer_h
+#define fileViewer_h
 
 #include <alertObj.h>
 #include <lilOS.h>
 #include <filePath.h>
 #include <scrollingList.h>
-//#include <label.h>
 
-class		fileBaseViewer;
+class		fileViewer;
 class		fileDir;
 class		fileListBox;
 
@@ -21,7 +20,7 @@ class		fileListBox;
 class fileListItem :	public drawGroup {
 
 	public:
-				fileListItem(fileBaseViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName);
+				fileListItem(fileViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName);
 	virtual	~fileListItem(void);
 	
 	virtual	void	draw(void);
@@ -29,7 +28,7 @@ class fileListItem :	public drawGroup {
 	virtual	void	doAction(void);
 	virtual	void	setThisFocus(bool);
 	
-				fileBaseViewer*	ourViewer;
+				fileViewer*	ourViewer;
 				fileListBox*		ourList;
 				pathItemType		ourType;
 				char*					ourName;
@@ -47,8 +46,8 @@ class fileListBox :	public scrollingList {
 				fileListBox(int x, int y, int width,int height);
 	virtual	~fileListBox(void);
 	
-				bool	checkFile(fileBaseViewer* ourPath,pathItem* trace);
-	virtual	void	fillList(fileBaseViewer* ourPath);
+				bool	checkFile(fileViewer* ourPath,pathItem* trace);
+	virtual	void	fillList(fileViewer* ourPath);
 	virtual	void	drawSelf(void);
 	
 				bmpObj*	folderBmp;
@@ -63,10 +62,11 @@ class fileListBox :	public scrollingList {
 // **************************************************************
 
 
-class fileDir :	public drawGroup {
+class fileDir :	public drawGroup,
+						public filePath {
 
 	public:
-				fileDir(fileBaseViewer* inViewer,fileListBox* inFileListBox);
+				fileDir(fileListBox* inFileListBox);
 	virtual	~fileDir(void);
 	
 				void	refresh(void);
@@ -74,46 +74,38 @@ class fileDir :	public drawGroup {
 	virtual	void	doAction(void);
 	virtual	void	setThisFocus(bool setLoose);
 	
-				fileBaseViewer*	ourViewer;
 				fileListBox*		ourFileListBox;
 				label*				dirName;
 				bmpObj*				SDIcon;
 				bmpObj*				folderIcon;
+				timeObj				dblClickTimer;
 };
 	
 	
 	
 // **************************************************************
-// ******************* fileBaseViewer stuff *********************
+// ********************* fileViewer stuff ***********************
 // **************************************************************
 
 
-class fileBaseViewer :	public alertObj,
-								public filePath {
+class fileViewer :	public alertObj {
 
 	public:
-				fileBaseViewer(panel* inPanel,bool(*funct)(char*));
-	virtual	~fileBaseViewer(void);
+				fileViewer(listener* inListener,bool(*funct)(char*));
+	virtual	~fileViewer(void);
 	
 	virtual	void	chooseFolder(char* name);
 	virtual	void	chooseFile(char* name);
-	//virtual	void	setSuccess(bool trueFalse);
 	virtual	void	setItem(fileListItem* currentSelected);
-	//virtual	void	drawSelf(void);
-	//virtual	void	addObj(drawObj* newObj);
-	//virtual	void	idle(void);
 	virtual	void	handleCom(stdComs comID);
 	
 				bool				(*filterFx)(char*);
-				fileListItem*	currentItem;
-				fileListBox*	ourFileListBox;
+				//fileListItem*	currentItem;
+				//fileListBox*	ourFileListBox;
 				fileDir*			ourFileDir;
-				panel*			ourPanel;
-				//stdComBtn*		sBtn;
-				//stdComBtn*		cBtn;
-				///label*			ourLabel;
-				timeObj*			dblClickTimer;
-				//drawObj*			condemned;
+				
+
+				
 };
 
 #endif
