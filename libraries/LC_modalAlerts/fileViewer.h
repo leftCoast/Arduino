@@ -11,7 +11,6 @@ class		fileDir;
 class		fileListBox;
 
 
-
 // **************************************************************
 // ********************* fileListItem stuff *********************
 // **************************************************************
@@ -20,7 +19,7 @@ class		fileListBox;
 class fileListItem :	public drawGroup {
 
 	public:
-				fileListItem(fileViewer* inViewer,fileListBox* inList,pathItemType inType,char* inName);
+				fileListItem(fileListBox* inList,pathItemType inType,char* inName);
 	virtual	~fileListItem(void);
 	
 	virtual	void	draw(void);
@@ -28,7 +27,6 @@ class fileListItem :	public drawGroup {
 	virtual	void	doAction(void);
 	virtual	void	setThisFocus(bool);
 	
-				fileViewer*	ourViewer;
 				fileListBox*		ourList;
 				pathItemType		ourType;
 				char*					ourName;
@@ -43,13 +41,16 @@ class fileListItem :	public drawGroup {
 class fileListBox :	public scrollingList {
 
 	public:
-				fileListBox(int x, int y, int width,int height);
+				fileListBox(int x, int y, int width,int height,bool(*funct)(char*));
 	virtual	~fileListBox(void);
-	
-				bool	checkFile(fileViewer* ourPath,pathItem* trace);
-	virtual	void	fillList(fileViewer* ourPath);
+				
+				void	setFileDir(fileDir* inFileDir);
+				bool	checkFile(pathItem* trace);
+	virtual	void	fillList(void);
 	virtual	void	drawSelf(void);
 	
+				bool		(*filterFx)(char*);
+				fileDir*	ourFileDir;
 				bmpObj*	folderBmp;
 				bmpObj*	docBmp;
 				label*	itemLabel;
@@ -66,19 +67,23 @@ class fileDir :	public drawGroup,
 						public filePath {
 
 	public:
-				fileDir(fileListBox* inFileListBox);
+				fileDir(int inX, int inY, int inWidth,int inHeight,fileViewer* inViewer,fileListBox* inListBox);
 	virtual	~fileDir(void);
 	
 				void	refresh(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
 	virtual	void	setThisFocus(bool setLoose);
+	virtual	void	setItem(pathItemType inType,char* name);
+	virtual	void	chooseFolder(char* name);
+	virtual	void	chooseFile(char* name);
+	virtual	char* endChoice(void);
 	
-				fileListBox*		ourFileListBox;
-				label*				dirName;
-				bmpObj*				SDIcon;
-				bmpObj*				folderIcon;
-				timeObj				dblClickTimer;
+				fileViewer*		ourViewer;
+				fileListBox*	ourFileListBox;
+				label*			dirName;
+				bmpObj*			SDIcon;
+				bmpObj*			folderIcon;
 };
 	
 	
@@ -94,18 +99,15 @@ class fileViewer :	public alertObj {
 				fileViewer(listener* inListener,bool(*funct)(char*));
 	virtual	~fileViewer(void);
 	
-	virtual	void	chooseFolder(char* name);
-	virtual	void	chooseFile(char* name);
-	virtual	void	setItem(fileListItem* currentSelected);
+	virtual	void	makeFileDir(void);
 	virtual	void	handleCom(stdComs comID);
+	virtual	char*	getPathResult(void);
 	
-				bool				(*filterFx)(char*);
-				//fileListItem*	currentItem;
-				//fileListBox*	ourFileListBox;
+				listener*		ourListener;
 				fileDir*			ourFileDir;
-				
-
-				
+				fileListBox*	ourListBox;
+				fileListItem*	currentItem;
+								
 };
 
 #endif

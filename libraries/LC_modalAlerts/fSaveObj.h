@@ -1,7 +1,8 @@
+/*
 #ifndef fSaveObj_h
 #define fSaveObj_h
 
-#include <fileBaseViewer.h>
+#include <fileViewer.h>
 #include <bmpKeyboard.h>
 #include <editLabel.h>
 #include <alertObj.h>
@@ -54,7 +55,7 @@ class folderAlert :	public alertObj {
 // **************************************************************
 
 	
-class fSaveObj :	public fileBaseViewer {
+class fSaveObj :	public fileViewer {
 
 	public:
 				fSaveObj(panel* inPanel,bool(*funct)(char*)=NULL);
@@ -77,3 +78,4 @@ class fSaveObj :	public fileBaseViewer {
 };
 
 #endif
+*/

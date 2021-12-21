@@ -1,3 +1,4 @@
+/*
 #include <fSaveObj.h>
 #include <resizeBuff.h>
 #include <bmpKeyboard.h>
@@ -330,3 +331,4 @@ void fSaveObj::handleCom(stdComs comID) {
 		break;
 	}
 }
+*/

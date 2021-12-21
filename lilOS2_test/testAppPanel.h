@@ -17,7 +17,7 @@ class testAppPanel   : public panel {
    virtual  void  closing(void);
    virtual  void  handleCom(stdComs comID);
 
-            timeObj  alertStart;
+            //timeObj  alertStart;
             flasher* aFlasher;
 };
 

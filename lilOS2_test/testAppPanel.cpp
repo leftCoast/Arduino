@@ -1,6 +1,6 @@
 #include "testAppPanel.h"
 #include <alertObj.h>
-
+#include <fSelectObj.h>
 
 
 // And it all starts up again..
@@ -13,7 +13,7 @@ testAppPanel::~testAppPanel(void) {  }
 
 void testAppPanel::setup(void) {
    
-   alertStart.setTime(5000);
+   //alertStart.setTime(5000);
    aFlasher = new flasher(20,160,10,10);
    aFlasher->setOnOff(true);
    addObj(aFlasher);
@@ -22,15 +22,7 @@ void testAppPanel::setup(void) {
 }
 
 
-void testAppPanel::loop(void) {
-   
-   alertObj* anAlert;
-   
-   if (alertStart.ding()) {
-      alertStart.reset();
-      //anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
-   }
-}
+void testAppPanel::loop(void) { }
 
 
 // The default here is to not draw ourselves. You can change that.
@@ -65,7 +57,8 @@ void  testAppPanel::handleCom(stdComs comID) {
          setNeedRefresh();
       break;
       case newItemCmd :
-         anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
+         //anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
+         anAlert = new fSelectObj(NULL);
       break;
       default  : panel::handleCom(comID); break;
    }
