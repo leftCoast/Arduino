@@ -23,6 +23,7 @@ class testAppPanel   : public panel {
             fSelectObj* choosAlert;
             flasher*    aFlasher;
             label*      choosenPath;
+            bool        needRefresh;
 };
 
 #endif

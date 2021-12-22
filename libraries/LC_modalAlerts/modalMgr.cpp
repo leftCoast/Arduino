@@ -28,7 +28,6 @@ modal::~modal(void) { if (ourLink) ourLink->ourModal = NULL; }
 void modal::init(void) {
 
 	drawing	= false;									// We're keeping quiet 'till we're ready.
-	success	= false;									// We're not a success yet.
 	done		= false;									// We're not done yet. Heck, not even started.
 	ourLink	= ourModalMgr.addLink(this);		// Tell the global modal manager that we have arrived.
 	readyTimer.setTime(100,true);					// Set the cooldown time and start the timer.
@@ -68,12 +67,12 @@ bool modal::acceptEvent(event* inEvent,point* locaPt) {
 
 // This is called when our task is complete. We are done and we were either a success our
 // a failure. All it does is set the two boolean flags so we can be deleted at "their" leisure.
-void modal::setSuccess(bool trueFalse) {
-
-	drawing = false;		// Task is done, so we stop any more drawing.
-	success = trueFalse;	// Record our succes.
-	done		= true;		// Flag that we are done here.
-}
+// void modal::setSuccess(bool trueFalse) {
+// 
+// 	drawing = false;		// Task is done, so we stop any more drawing.
+// 	success = trueFalse;	// Record our succes.
+// 	done		= true;		// Flag that we are done here.
+// }
 
 
 // *****************************************************

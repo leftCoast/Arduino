@@ -1,5 +1,5 @@
 #include <fSelectObj.h>
-#include <debug.h>
+//#include <debug.h>
 
 // The overall size and placement of the open d-box.
 #define OPEN_X	50
@@ -40,26 +40,26 @@
 
 selectFileDir::selectFileDir(int inX, int inY, int inWidth,int inHeight,selectType inSelectType,fileViewer* inViewer,fileListBox* inListBox)
 	:fileDir(inX,inY,inWidth,inHeight,inViewer,inListBox) {
-ST	
+	
 	ourSelectType	= inSelectType;
 	currentType		= noType;
 	currentNamePtr	= NULL;
 }
 	
 	
-selectFileDir::~selectFileDir(void) { ST }
+selectFileDir::~selectFileDir(void) {  }
 
 
 // In this case a double click on a filename means this is the user's choice.
 void selectFileDir::chooseFile(char* name) {
-ST
+
 	if (ourSelectType!=foldersOnly) {		// If its Ok to choose a file..
 		if (pushChildItemByName(name)) {		// If we can push this filename on the path..
 			currentType = noType;				// Remove type. Because we've just used it.
 			currentNamePtr = NULL;				// And remove the name pointer as well.
 			ourViewer->handleCom(okCmd);		// We tell the viewer we're done.
 		} else {										// Else, some horrible error happened..
-			ourViewer->handleCom(okCancel);	// We tell the viewer we failed.
+			ourViewer->handleCom(cancelCmd);	// We tell the viewer we failed.
 		}
 	}
 }
@@ -70,7 +70,7 @@ ST
 // we also must take in account what the user is actually allowing. Looking for a file and
 // getting back a folder will not win us many friends.
 void selectFileDir::setItem(pathItemType inType,char* name) {
-ST
+
 	switch(ourSelectType) {
 		case filesOnly			:
 			if (inType == fileType) {
@@ -94,10 +94,9 @@ ST
 
 // Afer all the smoke and nonsense is over. This is the resulting choice from the user.
 char* selectFileDir::endChoice(void) {
-ST
+
 	pathItem*	lastItem;
 	
-	if (!ourViewer->done) return NULL;					// We can ONLY call this AFTER we are done.
 	if (currentNamePtr) {									// If there's a current name, remember, this has been vetted above.
 		if (pushChildItemByName(currentNamePtr)) {	// If we CAN'T push this name onto the path.
 			currentNamePtr = NULL;							// We've now used the current name pointer, so we need to NULL it out.
@@ -134,7 +133,7 @@ ST
 
 fSelectObj::fSelectObj(listener* inListener,bool(*funct)(char*),selectType inSelectType)
 	:fileViewer(inListener,funct) {
-	ST
+	
 	currentItem = NULL;
 	ourSelectType = inSelectType;
 	this->setRect(OPEN_X,OPEN_Y,OPEN_W,OPEN_H);
@@ -146,7 +145,6 @@ fSelectObj::fSelectObj(listener* inListener,bool(*funct)(char*),selectType inSel
 	if (ourFileDir) delete(ourFileDir);																			// Loose the original.
 	ourFileDir = new selectFileDir(DIR_X,DIR_Y,DIR_W,DIR_H,ourSelectType,this,ourListBox);		// Create our version.
 	if (ourFileDir) {																									// If everything went ok..
-		ourFileDir->printRect("FileDir Just cooked : ");
 		addObj(ourFileDir);																							// Add our new one to the draw list.
 		ourFileDir->setPath("/");																					// Set some sort of default path.
 		ourFileDir->refresh();
@@ -159,7 +157,7 @@ fSelectObj::~fSelectObj(void) { }
 
 // It's always nice to set a default path to make looking for things easier.
 void fSelectObj::setInitialPath(char* inPath) {
-ST
+
 	if (ourFileDir) {
 		ourFileDir->setPath(inPath);
 	}
@@ -168,19 +166,12 @@ ST
 
 // And we handle commands from our things.
 void  fSelectObj::handleCom(stdComs comID) {
-ST
-	switch(comID) {											// Checking the command we receive..
-		case cancelCmd	: setSuccess(false); break;	// Cancel, set success to false and go.
-		case okCmd		: 										// Ok, well that's what they clicked..
-			if (!getPathResult()) {							// If there is no path result..
-				comID = cancelCmd;							// Picked a blocked choice. Make it a cancel.
-				setSuccess(false);							// And success is really false.
-			} else {												// Else, they picked a good choice..
-				setSuccess(true);								// Set success to true!
-			}
-		break;													// And we're done with checking
-		default			: break;								// And with all our checks.
+
+	if (comID==okCmd) {					// We got an Ok command..
+		if (!getPathResult()) {			// If there is no path result..
+			comID = cancelCmd;			// Picked a blocked choice. Make it a cancel.
+		}
 	}
-	if (ourListener) ourListener->handleCom(comID);	// If we have a listener.. Let them have a go at the command.
+	fileViewer::handleCom(comID);		// And we let the inherited deal with it.
 }
 

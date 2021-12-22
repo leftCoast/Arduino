@@ -54,6 +54,7 @@ class fileListBox :	public scrollingList {
 				bmpObj*	folderBmp;
 				bmpObj*	docBmp;
 				label*	itemLabel;
+				timeObj*	clickTimer;
 };
 
 
@@ -73,7 +74,6 @@ class fileDir :	public drawGroup,
 				void	refresh(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
-	virtual	void	setThisFocus(bool setLoose);
 	virtual	void	setItem(pathItemType inType,char* name);
 	virtual	void	chooseFolder(char* name);
 	virtual	void	chooseFile(char* name);
@@ -102,7 +102,7 @@ class fileViewer :	public alertObj {
 	virtual	void	handleCom(stdComs comID);
 	virtual	char*	getPathResult(void);
 	
-				listener*		ourListener;
+				//listener*		ourListener;
 				fileDir*			ourFileDir;
 				fileListBox*	ourListBox;
 				fileListItem*	currentItem;

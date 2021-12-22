@@ -5,7 +5,7 @@
 
 // And it all starts up again..
 testAppPanel::testAppPanel(lilOS* ourOS,int ourAppID)
-   : panel(ourAppID) {  }
+   : panel(ourAppID) { needRefresh = false; }
 
 
 testAppPanel::~testAppPanel(void) {  }
@@ -24,7 +24,13 @@ void testAppPanel::setup(void) {
 }
 
 
-void testAppPanel::loop(void) { }
+void testAppPanel::loop(void) {
+   
+   if (needRefresh && !ourEventMgr.active()) {
+      setNeedRefresh();
+      needRefresh = false;
+   }
+}
 
 
 // The default here is to not draw ourselves. You can change that.
@@ -54,13 +60,13 @@ void  testAppPanel::handleCom(stdComs comID) {
          aFlasher->setColors(&green,&black);
          choosenPath->setValue(choosAlert->getPathResult());
          choosAlert = NULL;
-         setNeedRefresh();
+         needRefresh = true;
       break;
       case cancelCmd :
          aFlasher->setColors(&red,&black);
          choosAlert = NULL;
          choosenPath->setValue("Canceled");
-            setNeedRefresh();
+         needRefresh = true;
       break;
       case newItemCmd :
          choosAlert = new fSelectObj(this);

@@ -1,6 +1,7 @@
 #include <alertObj.h>
 #include <textView.h>
 
+//#include <debug.h>
 
 #define	ALERT_X		20
 #define	ALERT_Y		40
@@ -93,13 +94,12 @@ void alertObj::drawSelf(void) {
 }
 
 
-
 // We handle ok & cancel. If we have a listener, we'll pass these on.	
 void alertObj::handleCom(stdComs comID) {
 
 	switch(comID) {
-		case okCmd		: setSuccess(true); break;
-		case cancelCmd	: setSuccess(false); break;
+		case okCmd		:  								//setSuccess(true); break;
+		case cancelCmd	: done = true; break;		// setSuccess(false); break;
 	}
 	if (ourListener) {
 		ourListener->handleCom(comID);

@@ -31,12 +31,10 @@ class modal :	public drawGroup {
 	virtual	void  checkIfReady(void);
 	virtual	void	draw(void);
 	virtual	bool	acceptEvent(event* inEvent,point* locaPt);
-	virtual	void	setSuccess(bool trueFalse);
 				
 				modalLink*	ourLink;
 				timeObj		readyTimer;
 				bool			drawing;
-				bool			success;
 				bool			done;
 };
 
