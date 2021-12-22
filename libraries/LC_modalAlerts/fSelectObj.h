@@ -29,7 +29,6 @@ class fSelectObj :	public fileViewer {
 				fSelectObj(listener* inListener,bool(*funct)(char*)=NULL,selectType inSelectType=filesOnly);
 	virtual	~fSelectObj(void);
 	
-	virtual	void	makeFileDir(void);
 	virtual	void	setInitialPath(char* inPath);
 	virtual	void  handleCom(stdComs comID);
 	

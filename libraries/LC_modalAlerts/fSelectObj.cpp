@@ -40,24 +40,26 @@
 
 selectFileDir::selectFileDir(int inX, int inY, int inWidth,int inHeight,selectType inSelectType,fileViewer* inViewer,fileListBox* inListBox)
 	:fileDir(inX,inY,inWidth,inHeight,inViewer,inListBox) {
-	
+ST	
 	ourSelectType	= inSelectType;
 	currentType		= noType;
 	currentNamePtr	= NULL;
 }
 	
 	
-selectFileDir::~selectFileDir(void) {  }
+selectFileDir::~selectFileDir(void) { ST }
 
 
 // In this case a double click on a filename means this is the user's choice.
 void selectFileDir::chooseFile(char* name) {
-
+ST
 	if (ourSelectType!=foldersOnly) {		// If its Ok to choose a file..
 		if (pushChildItemByName(name)) {		// If we can push this filename on the path..
 			currentType = noType;				// Remove type. Because we've just used it.
 			currentNamePtr = NULL;				// And remove the name pointer as well.
 			ourViewer->handleCom(okCmd);		// We tell the viewer we're done.
+		} else {										// Else, some horrible error happened..
+			ourViewer->handleCom(okCancel);	// We tell the viewer we failed.
 		}
 	}
 }
@@ -68,7 +70,7 @@ void selectFileDir::chooseFile(char* name) {
 // we also must take in account what the user is actually allowing. Looking for a file and
 // getting back a folder will not win us many friends.
 void selectFileDir::setItem(pathItemType inType,char* name) {
-
+ST
 	switch(ourSelectType) {
 		case filesOnly			:
 			if (inType == fileType) {
@@ -92,11 +94,14 @@ void selectFileDir::setItem(pathItemType inType,char* name) {
 
 // Afer all the smoke and nonsense is over. This is the resulting choice from the user.
 char* selectFileDir::endChoice(void) {
-
+ST
 	pathItem*	lastItem;
 	
+	if (!ourViewer->done) return NULL;					// We can ONLY call this AFTER we are done.
 	if (currentNamePtr) {									// If there's a current name, remember, this has been vetted above.
-		if (!pushChildItemByName(currentNamePtr)) {	// If we CAN'T push this name onto the path.
+		if (pushChildItemByName(currentNamePtr)) {	// If we CAN'T push this name onto the path.
+			currentNamePtr = NULL;							// We've now used the current name pointer, so we need to NULL it out.
+		} else {
 			return NULL;										// Something very wrong is going on. Return NULL.
 		}
 	}
@@ -137,27 +142,24 @@ fSelectObj::fSelectObj(listener* inListener,bool(*funct)(char*),selectType inSel
 	theMsg->setText("Choose file");
 	okBtn->setLocation(OK_X,OK_Y);
 	cancelBtn->setLocation(CNCL_X,CNCL_Y);
+	
+	if (ourFileDir) delete(ourFileDir);																			// Loose the original.
+	ourFileDir = new selectFileDir(DIR_X,DIR_Y,DIR_W,DIR_H,ourSelectType,this,ourListBox);		// Create our version.
+	if (ourFileDir) {																									// If everything went ok..
+		ourFileDir->printRect("FileDir Just cooked : ");
+		addObj(ourFileDir);																							// Add our new one to the draw list.
+		ourFileDir->setPath("/");																					// Set some sort of default path.
+		ourFileDir->refresh();
+	}
 }
 
 
 fSelectObj::~fSelectObj(void) { }
 
 
-
-void fSelectObj::makeFileDir(void) {
-	ST
-	ourFileDir = new selectFileDir(DIR_X,DIR_Y,DIR_W,DIR_H,ourSelectType,this,ourListBox);
-	ourListBox->setFileDir(ourFileDir);
-	if (ourFileDir) {
-		addObj(ourFileDir);
-		ourFileDir->setPath("/");
-	}
-}
-
-
 // It's always nice to set a default path to make looking for things easier.
 void fSelectObj::setInitialPath(char* inPath) {
-
+ST
 	if (ourFileDir) {
 		ourFileDir->setPath(inPath);
 	}
@@ -166,7 +168,7 @@ void fSelectObj::setInitialPath(char* inPath) {
 
 // And we handle commands from our things.
 void  fSelectObj::handleCom(stdComs comID) {
-
+ST
 	switch(comID) {											// Checking the command we receive..
 		case cancelCmd	: setSuccess(false); break;	// Cancel, set success to false and go.
 		case okCmd		: 										// Ok, well that's what they clicked..

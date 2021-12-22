@@ -19,6 +19,8 @@ void testAppPanel::setup(void) {
    addObj(aFlasher);
    stdComBtn* aBtn = newStdBtn(40,50,icon32,newItemCmd,this);
    addObj(aBtn);
+   choosenPath = new label(20,300,200,18);
+   addObj(choosenPath);
 }
 
 
@@ -50,15 +52,18 @@ void  testAppPanel::handleCom(stdComs comID) {
    switch(comID) {
       case okCmd     :
          aFlasher->setColors(&green,&black);
+         choosenPath->setValue(choosAlert->getPathResult());
+         choosAlert = NULL;
          setNeedRefresh();
       break;
       case cancelCmd :
          aFlasher->setColors(&red,&black);
-         setNeedRefresh();
+         choosAlert = NULL;
+         choosenPath->setValue("Canceled");
+            setNeedRefresh();
       break;
       case newItemCmd :
-         //anAlert = new alertObj("Your five seconds are up..",this,choiceAlert,true,true);
-         anAlert = new fSelectObj(NULL);
+         choosAlert = new fSelectObj(this);
       break;
       default  : panel::handleCom(comID); break;
    }

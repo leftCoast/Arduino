@@ -4,6 +4,9 @@
 #include <lilOS.h>
 #include <stdComs.h>
 #include <flasher.h>
+#include <label.h>
+#include <fSelectObj.h>
+
 
 class testAppPanel   : public panel {
 
@@ -17,8 +20,9 @@ class testAppPanel   : public panel {
    virtual  void  closing(void);
    virtual  void  handleCom(stdComs comID);
 
-            //timeObj  alertStart;
-            flasher* aFlasher;
+            fSelectObj* choosAlert;
+            flasher*    aFlasher;
+            label*      choosenPath;
 };
 
 #endif

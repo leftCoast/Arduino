@@ -99,7 +99,6 @@ class fileViewer :	public alertObj {
 				fileViewer(listener* inListener,bool(*funct)(char*));
 	virtual	~fileViewer(void);
 	
-	virtual	void	makeFileDir(void);
 	virtual	void	handleCom(stdComs comID);
 	virtual	char*	getPathResult(void);
 	

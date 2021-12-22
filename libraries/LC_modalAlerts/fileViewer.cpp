@@ -58,7 +58,7 @@
    
 fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,DEF_LIST_ITEM_W,DEF_LIST_ITEM_H,fullClick) {
-	
+ST	
 	int	numChars;
 	
 	ourList		= inList;
@@ -71,12 +71,12 @@ fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
 }
 
 
-fileListItem::~fileListItem(void) { resizeBuff(0,&ourName); }
+fileListItem::~fileListItem(void) {ST resizeBuff(0,&ourName); }
 	
 
 // Custom draw() method for list items.	
 void fileListItem::draw(void)	{
-
+ST
 	if (ourList->isVisible(this)) {	// If we are visable..
 		drawGroup::draw();				// We draw ourselves.
 	}
@@ -85,7 +85,7 @@ void fileListItem::draw(void)	{
 
 		
 void fileListItem::drawSelf(void) { 
-	
+ST	
 	colorObj aColor(LC_LIGHT_BLUE);
 	bmpObj*	ourIcon;
 	
@@ -115,7 +115,7 @@ void fileListItem::drawSelf(void) {
 
 // Our item has been clicked! What the Hell do we do?
 void fileListItem::doAction(void) {
-		
+ST		
 	if (!haveFocus()) {													// If we DON't have focus (First click)..
 		setFocusPtr(this);												// And grab the focus for ourselves.
 	} else {																	// Else, we've been clicked before..
@@ -137,7 +137,7 @@ void fileListItem::doAction(void) {
 
 // We have finally gained focus, our life's ambition! And how do we deal with this?
 void fileListItem::setThisFocus(bool setLoose) {
-
+ST
 	drawGroup::setThisFocus(setLoose);
 	if (setLoose) {
 		ourList->ourFileDir->setItem(ourType,ourName);
@@ -155,7 +155,7 @@ void fileListItem::setThisFocus(bool setLoose) {
 
 fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(char*))
 	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
-	
+ST	
 	filterFx			= funct;
 	ourFileDir		= NULL;
 	folderBmp		= newStdLbl(DEF_LIST_ICON_X,DEF_LIST_ICON_Y,icon16,folderLbl);
@@ -167,19 +167,19 @@ fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(char*))
 // Ohe only things that we need to delete are the three icons. Everything else is delt
 // with automatically by the group list.
 fileListBox::~fileListBox(void) {
-
+ST
 	if (folderBmp) delete(folderBmp);
 	if (docBmp) delete(docBmp);
 	if (itemLabel) delete(itemLabel);
 }	
 
 // AFTER we've been created, the bossman fileDir is created. Now we get a link to that.
-void	fileListBox::setFileDir(fileDir* inFileDir) { ourFileDir = inFileDir; }
+void	fileListBox::setFileDir(fileDir* inFileDir) { ST ourFileDir = inFileDir; }
 
 
 // As each path item is created its handed in here to check if its OK to add to the list.
 bool fileListBox::checkFile(pathItem* trace) {
-	
+ST	
 	if (filterFx) {
 		return filterFx(trace->getName());
 	}
@@ -190,7 +190,7 @@ bool fileListBox::checkFile(pathItem* trace) {
 // Those who control our lives from  behind the scenes have deemed.. It is time to refresh
 // our list of path items. Lets get this done.
 void fileListBox::fillList(void) {
-
+ST
 	pathItem*		trace;
 	fileListItem*	newListItem;
 	
@@ -215,7 +215,7 @@ void fileListBox::fillList(void) {
 
 // Ah, finally they want to see us! Well at least the stage that this list is played on.
 void fileListBox::drawSelf(void) { 
-
+ST
 	rect	ourFrame;
 
 	ourFrame.setRect(this);						// Set up a rect from our bounding rect.
@@ -234,9 +234,9 @@ void fileListBox::drawSelf(void) {
 // fileDir is the label on the dialog box showing what our current directory is. It is the
 // filePath object so its basically the boss of the dialog box.
 fileDir::fileDir(int inX, int inY, int inWidth,int inHeight,fileViewer* inViewer,fileListBox* inListBox)
-	: drawGroup(inViewer,inY,inWidth,inHeight,fullClick),
+	: drawGroup(inX,inY,inWidth,inHeight,fullClick),
 	filePath() {
-	
+ST	
 	ourViewer 		= inViewer;
 	ourFileListBox	= inListBox;
 	if (ourFileListBox) {
@@ -261,13 +261,17 @@ fileDir::fileDir(int inX, int inY, int inWidth,int inHeight,fileViewer* inViewer
 
 // Our destructor. The only things we allocated were given to our viewList. Our viewlist
 // will take care of deleting them. So, there's nothing really for us to do here.
-fileDir::~fileDir(void) {  }
+fileDir::~fileDir(void) { 
+ST
+	if (ourFileListBox) {
+		ourFileListBox->setFileDir(NULL);
+	}
+}
 
 
 // This is what we call to set the name & icon of our curent directory on the dialog box. 
 void fileDir::refresh(void) {
-
-	
+ST
 	if (dirName && ourFileListBox) {												// If we have all our "parts"..
 		if (!strcmp(getCurrItemName(),"/")) {									// If we're looking at root..
 			dirName->setValue("SD Root");											// Set a more.. descriptive name for '/'.
@@ -279,15 +283,16 @@ void fileDir::refresh(void) {
 			folderIcon->setLocation(DEF_LIST_ICON_X,DEF_LIST_ICON_Y);	// Set the folder-return icon in place.
 		}																					//
 		ourFileListBox->fillList();												// Ok, we're all set, fill the file list box.
+		setNeedRefresh();
 	}										
 }
 
 
 // When its time to draw ourselves on the screen..
 void fileDir::drawSelf(void) {
-
+ST
 	colorObj aColor(LC_LIGHT_BLUE);
-	
+
 	if (haveFocus()) {						// If we have focus.. (been touched)
 		screen->fillRect(this,&aColor);	// We paint our rectangle highlight blue.
 	} else {										// Else, we don't have focus..
@@ -299,7 +304,7 @@ void fileDir::drawSelf(void) {
 
 // This is what is called when we receive a click from the user..
 void fileDir::doAction(void) {
-	
+ST	
 	if (!haveFocus()) {									// If we DON'T have focus..
 		setFocusPtr(this);								// And set focus to us.
 	} else {													// Else, we DID have focus..
@@ -318,7 +323,7 @@ void fileDir::doAction(void) {
 // This is what is called when we either get or loose focus. What we do is change the
 // background color for our name field.
 void fileDir::setThisFocus(bool setLoose) {
-
+ST
 	colorObj aColor(LC_LIGHT_BLUE);
 	
 	if (setLoose) {								 	// If we are getting focus.. (Been touched)
@@ -331,24 +336,28 @@ void fileDir::setThisFocus(bool setLoose) {
 
 
 // Descendants may need to do something when a path item is selected in the list box.
-void fileDir::setItem(pathItemType inType,char* name) { }
+void fileDir::setItem(pathItemType inType,char* name) {ST }
 
 
 // Choosing folders should jump us to the next tier of folders.
 void fileDir::chooseFolder(char* name) {
-	
+ST	
 	if (pushChildItemByName(name)) {
 		refresh();
 	}
 }	
 
 // We don't do the choose file thing. Descendants probably will..
-void fileDir::chooseFile(char* name) { }
+void fileDir::chooseFile(char* name) {ST }
 
 
 // Let the calling function have a look at what should be the result path that we are
 // showing on the screen.
-char* fileDir::endChoice(void) { return getPath();	}
+char* fileDir::endChoice(void) {
+ST
+	if (!ourViewer->done) return NULL;	// Not done? Can't do this function.
+	return getPath();							// For now, you get the path as it is.
+}
 		
 
 
@@ -359,7 +368,7 @@ char* fileDir::endChoice(void) { return getPath();	}
 
 fileViewer::fileViewer(listener* inListener,bool(*funct)(char*))
 	:alertObj("Default name",NULL,noIconAlert,true,true) {
-	
+ST	
 	ourListener		= inListener;
 	
 	this->setRect(DEF_SELECT_X,DEF_SELECT_Y,DEF_SELECT_W,DEF_SELECT_H);
@@ -372,20 +381,7 @@ fileViewer::fileViewer(listener* inListener,bool(*funct)(char*))
 	ourListBox = new fileListBox(DEF_FILE_LIST_X,DEF_FILE_LIST_Y,DEF_FILE_LIST_W,FILE_LIST_HEIGHT,funct);
 	addObj(ourListBox);	
 	
-	makeFileDir();
-}
-	
-
-// Everything we've created are draw Objectes. They will be deleted automatically when we
-// are deleted.	
-fileViewer::~fileViewer(void) { }
-
-
-// Descendants will typically make custom versions of the fileDir objects. This allows
-// that to happen, by inheriting this function and using it to create custom versions.
-void fileViewer::makeFileDir(void) {
-	ST
-	db.trace("Wrong one",false);
+	// Descendants will typically make custom versions of the fileDir objects.
 	ourFileDir = new fileDir(DEF_DIR_X,DEF_DIR_Y,DEF_DIR_W,DEF_DIR_H,this,ourListBox);
 	if (ourFileDir) {
 		addObj(ourFileDir);
@@ -393,11 +389,16 @@ void fileViewer::makeFileDir(void) {
 		ourFileDir->refresh();
 	}
 }
+	
+
+// Everything we've created are draw Objectes. They will be deleted automatically when we
+// are deleted.	
+fileViewer::~fileViewer(void) { ST }
 
 
 // And we handle commands from our things.
 void  fileViewer::handleCom(stdComs comID) {
-
+ST
 	switch(comID) {
 		case cancelCmd	: setSuccess(false); break;
 		case okCmd		: setSuccess(true); break;
@@ -409,7 +410,7 @@ void  fileViewer::handleCom(stdComs comID) {
 
 // Whom ever created us can use this to read the result of our actions.
 char*  fileViewer::getPathResult(void) {
-
+ST
 	if (ourFileDir) {
 		return ourFileDir->endChoice();
 	}
