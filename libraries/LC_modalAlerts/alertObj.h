@@ -4,7 +4,6 @@
 #include <textView.h>
 #include <modalMgr.h>
 #include <stdComs.h>
-#include <scrKeyboard.h>
 
 // Your base modal Alert object. This is something that is modal and handles ok &  cancel
 // commands. It will also pass these commands to its listener, if it has one. How would I
@@ -18,7 +17,7 @@ class alertObj :	public modal,
 						public listener {
 	
 	public :
-				alertObj(char* msg,listener* inListener,alertType inType,bool useOk=true,bool useCancel=false,keyboard* inKbd=NULL);
+				alertObj(char* msg,listener* inListener,alertType inType,bool useOk=true,bool useCancel=false);
 	virtual	~alertObj(void);
 	
 	virtual	bool	acceptEvent(event* inEvent,point* locaPt);
@@ -29,7 +28,6 @@ class alertObj :	public modal,
 				textView*	theMsg;
 				stdComBtn*	okBtn;
 				stdComBtn*	cancelBtn;
-				keyboard*	ourKbd;
 };
 
 #endif

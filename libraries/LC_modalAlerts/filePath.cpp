@@ -52,22 +52,6 @@ char* pathItem::getName(void) { return name; }
 // Folders will be more. But again, this is a good default.
 int pathItem::getNumPathChars(void) {  return strlen(name); }
 
-/*
-// We are building a text path. The buffer is big enough, just add yourself to the end.
-// NOTE: THIS ONE STARTS AT THE HEAD OF THE LIST. IE:THE FIRST ITEM.
-void pathItem::addNameToPath(char* path) {
-
-	Serial.print("ITEM adding name to path. ");
-	Serial.println((int)ourType);
-	Serial.print("Starting with [");
-	Serial.print(path);
-	Serial.println("]");
-	strcat(path,name);
-	Serial.print("Ending with [");
-	Serial.print(path);
-	Serial.println("]");
-}
-*/
 	
 // Return a pointer to our parent object.
 pathItem* pathItem::getParent(void) { return (pathItem*)dllPrev; }
@@ -415,7 +399,7 @@ void filePath::refreshChildList(void) {
 		Serial.println("In refreshChildList()");
 		Serial.print("Can't open path [");											// This is bad, it actually warrants an error message.
 		Serial.print(ourPath);
-		Serial.println("]");
+		Serial.println("] ");
 		Serial.println("All paths should, at least, be valid!");
 	}
 }

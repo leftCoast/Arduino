@@ -94,13 +94,14 @@ class keyboard : public drawGroup {
 	virtual	void			handleKey(keyCommands inEditCom);
 	virtual	void			handleKey(keyStates inState);
 	virtual	void			setEditField(editable* inLabel);
+	virtual	editable*	getEditField(void);
 	virtual	keyStates	getState(void);
-	virtual	void    		drawSelf(void);
-				int			globalY(void);
+	//virtual	void    		drawSelf(void);
+				//int			globalY(void);
 			
           editable*		mEditObj;
           keyStates		mState;
-          int				mGlobalY;
+          //int				mGlobalY;
 }; 
 
 

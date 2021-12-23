@@ -23,7 +23,7 @@
 #define	LABEL_Y		ALERT_H/2 - 16
 
 
-alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel,keyboard* inKbd)
+alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel)
 	: modal(ALERT_X,ALERT_Y,ALERT_W,ALERT_H) { 
 	
 	bmpObj*	ourLabel;
@@ -60,7 +60,6 @@ alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bo
 	if (ourLabel) {
 		addObj(ourLabel);
 	}
-	ourKbd = inKbd;
 }
 
 	
@@ -72,11 +71,6 @@ bool alertObj::acceptEvent(event* inEvent,point* locaPt) {
 
 	if (drawGroup::acceptEvent(inEvent,locaPt)) {			// If its actually ours..
 		return true;	 												// We return true.
-	}
-	if (ourKbd) {														// If we have a keyboard..
-		if (screen->gY(locaPt->y)>=ourKbd->globalY()) {		// If the touch is on the keyboard..
-			return false;												// In this one case, we let it pass to the keyboard.
-		}
 	}
 	return true;														// In all other cases, the buck stops here.
 }

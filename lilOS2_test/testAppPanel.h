@@ -5,10 +5,12 @@
 #include <stdComs.h>
 #include <flasher.h>
 #include <label.h>
+#include <alertObj.h>
 #include <fSelectObj.h>
+#include <fSaveObj.h>
 
 
-class testAppPanel   : public panel {
+class testAppPanel : public panel {
 
    public:
                testAppPanel(lilOS* ourOS,int ourAppID);
@@ -21,6 +23,7 @@ class testAppPanel   : public panel {
    virtual  void  handleCom(stdComs comID);
 
             fSelectObj* choosAlert;
+            fSaveObj*   saveAlert;
             flasher*    aFlasher;
             label*      choosenPath;
             bool        needRefresh;

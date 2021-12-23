@@ -82,6 +82,7 @@ int bmpKeyboard::col(int col, int row) {
         return KEY_WD * (col - 1);
       }
   }
+  return 0;	// Shut up compiler!
 }
 
 

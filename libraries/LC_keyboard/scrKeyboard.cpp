@@ -401,10 +401,12 @@ void keyboard::handleKey(keyCommands inEditCom) {
 
 void keyboard::setEditField(editable* inEditObj) { mEditObj = inEditObj; }
 
+editable*  keyboard::getEditField(void) { return mEditObj; }
+
 void keyboard::handleKey(keyStates inState) { mState = inState; }
 
 keyStates keyboard::getState(void) { return mState; }
 
-void keyboard::drawSelf(void) { mGlobalY = screen->gY(y); }
+//void keyboard::drawSelf(void) { mGlobalY = screen->gY(y); }
 
-int keyboard::globalY(void) { return mGlobalY; }
+//int keyboard::globalY(void) { return mGlobalY; }

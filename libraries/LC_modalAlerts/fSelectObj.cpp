@@ -1,5 +1,5 @@
 #include <fSelectObj.h>
-//#include <debug.h>
+
 
 // The overall size and placement of the open d-box.
 #define OPEN_X	50
@@ -35,7 +35,7 @@
 
 
 // **************************************************************
-// ********************* selectFileDir stuff **********************
+// ******************** selectFileDir stuff *********************
 // **************************************************************
 
 selectFileDir::selectFileDir(int inX, int inY, int inWidth,int inHeight,selectType inSelectType,fileViewer* inViewer,fileListBox* inListBox)
@@ -127,7 +127,7 @@ char* selectFileDir::endChoice(void) {
 
 
 // **************************************************************
-// ********************** fSelectObj stuff ************************
+// ********************* fSelectObj stuff ***********************
 // **************************************************************
 
 

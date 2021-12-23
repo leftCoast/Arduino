@@ -1,7 +1,4 @@
 #include "testAppPanel.h"
-#include <alertObj.h>
-#include <fSelectObj.h>
-
 
 // And it all starts up again..
 testAppPanel::testAppPanel(lilOS* ourOS,int ourAppID)
@@ -69,7 +66,8 @@ void  testAppPanel::handleCom(stdComs comID) {
          needRefresh = true;
       break;
       case newItemCmd :
-         choosAlert = new fSelectObj(this);
+         //choosAlert = new fSelectObj(this);
+         saveAlert = new fSaveObj((listener*)this);
       break;
       default  : panel::handleCom(comID); break;
    }

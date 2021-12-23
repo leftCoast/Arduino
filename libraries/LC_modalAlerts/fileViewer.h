@@ -5,6 +5,8 @@
 #include <lilOS.h>
 #include <filePath.h>
 #include <scrollingList.h>
+#include <label.h>
+
 
 class		fileViewer;
 class		fileDir;
@@ -102,7 +104,6 @@ class fileViewer :	public alertObj {
 	virtual	void	handleCom(stdComs comID);
 	virtual	char*	getPathResult(void);
 	
-				//listener*		ourListener;
 				fileDir*			ourFileDir;
 				fileListBox*	ourListBox;
 				fileListItem*	currentItem;
