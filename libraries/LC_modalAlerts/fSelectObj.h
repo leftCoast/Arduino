@@ -6,6 +6,11 @@
 enum selectType { filesOnly, foldersOnly, filesAndFolders };
 
 
+// **************************************************************
+// ********************* selectFileDir **************************
+// **************************************************************
+
+
 class selectFileDir :	public fileDir {
 
 	public:
@@ -21,6 +26,11 @@ class selectFileDir :	public fileDir {
 				pathItemType	currentType;
 };
 
+
+
+// **************************************************************
+// *********************** fSelectObj ***************************
+// **************************************************************
 
 
 class fSelectObj :	public fileViewer {

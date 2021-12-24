@@ -55,14 +55,17 @@ void  testAppPanel::handleCom(stdComs comID) {
    switch(comID) {
       case okCmd     :
          aFlasher->setColors(&green,&black);
-         choosenPath->setValue(choosAlert->getPathResult());
-         choosAlert = NULL;
+//         choosenPath->setValue(choosAlert->getPathResult());
+//         choosAlert = NULL;
+         choosenPath->setValue(saveAlert->getPathResult());
+         saveAlert = NULL;
          needRefresh = true;
       break;
       case cancelCmd :
          aFlasher->setColors(&red,&black);
-         choosAlert = NULL;
+//         choosAlert = NULL;
          choosenPath->setValue("Canceled");
+         saveAlert = NULL;
          needRefresh = true;
       break;
       case newItemCmd :

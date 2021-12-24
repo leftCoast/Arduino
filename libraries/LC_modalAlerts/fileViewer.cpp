@@ -3,7 +3,7 @@
 #include <adafruit_1947_Obj.h>
 #include <stdComs.h>
 
-//#include <debug.h>
+#include <debug.h>
 
 #define DBL_CLICK_MS	500
 
@@ -142,9 +142,10 @@ void fileListItem::doAction(void) {
 
 // We have finally gained focus, our life's ambition! And how do we deal with this?
 void fileListItem::setThisFocus(bool setLoose) {
-
+ST
 	drawGroup::setThisFocus(setLoose);
 	if (setLoose) {
+		db.trace("calling setItem()",false);
 		ourList->ourFileDir->setItem(ourType,ourName);
 	} else {
 		ourList->ourFileDir->setItem(noType,NULL);
@@ -215,7 +216,7 @@ void fileListBox::fillList(void) {
 			if (trace) trace = (pathItem*)trace->dllNext;											// Jump to the next item on the list.
 		}
 	}
-	//setNeedRefresh();																								
+	setNeedRefresh();																								
 }
 
 
@@ -310,7 +311,7 @@ void fileDir::drawSelf(void) {
 
 // This is what is called when we receive a click from the user..
 void fileDir::doAction(void) {
-													// Else, we DID have focus..
+														// Else, we DID have focus..
 	if (!strcmp(getCurrItemName(),"/")) {	// If we're looking at root..
 		return;										// We just give up now.
 	} else {											// Else, We double clicked a folder..
@@ -321,7 +322,7 @@ void fileDir::doAction(void) {
 
 
 // Descendants may need to do something when a path item is selected in the list box.
-void fileDir::setItem(pathItemType inType,char* name) { }
+void fileDir::setItem(pathItemType inType,char* name) { db.trace("Wrong setItem()",false); }
 
 
 // Choosing folders should jump us to the next tier of folders.

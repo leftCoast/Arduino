@@ -9,27 +9,29 @@
 
 // The overall size and placement of the save d-box.
 #define SAVE_X			30
-#define SAVE_Y			30
+#define SAVE_Y			28
 #define SAVE_W			160
-#define SAVE_H			155
+#define SAVE_H			156
 
 // And the label for the top of the d-box
 #define LABEL_X		5
-#define LABEL_Y		11
+#define LABEL_Y		8
 #define LABEL_W		SAVE_W - LABEL_X*2
 #define LABEL_H		18
 
 // The directory popup stuff.
 #define DIR_X	10
-#define DIR_Y	24
+#define DIR_Y	20
+#define DIR_W	100
+#define DIR_H	18
 
 // File list, size & num items.
 #define FILE_LIST_X	10
-#define FILE_LIST_Y	DIR_Y + 24
+#define FILE_LIST_Y	DIR_Y + 23
 
 // The editable file name.
 #define NAME_STR_X	DIR_X
-#define NAME_STR_Y	143
+#define NAME_STR_Y	141
 #define NAME_STR_W	100
 #define NAME_STR_H	18
 
@@ -85,6 +87,44 @@
 // 	return false;												// Else, we pass it on for the keyboard to catch.								
 // }
 
+// **************************************************************
+// *********************** saveFileDir **************************
+// **************************************************************
+
+saveFileDir::saveFileDir(int inX, int inY, int inWidth,int inHeight,fSaveObj* inViewer,fileListBox* inListBox)
+	:fileDir(inX,inY,inWidth,inHeight,inViewer,inListBox) { finalPath	= NULL; }
+	
+	
+saveFileDir::~saveFileDir(void) { if (finalPath) resizeBuff(0,&finalPath); }
+
+
+// When doing a save of a file. The thing we're looking for is a default file name. This
+// is what we're going to use setItem() for. If the user clicks a file, we will update its
+// editable name field with that name.
+void saveFileDir::setItem(pathItemType inType,char* name) {
+ST
+	if (inType == fileType) {
+		((fSaveObj*)ourViewer)->setName(name);
+	}
+}
+
+
+// Afer all the smoke and nonsense is over. This is the resulting choice from the user.
+// It is the current path + the editable name from ourViewer.
+char* saveFileDir::endChoice(void) {
+	
+	int	numBytes;
+	
+	numBytes = numPathBytes();
+	numBytes = numBytes + strlen(((fSaveObj*)ourViewer)->getName());
+	if(resizeBuff(numBytes,&finalPath)) {
+		strcpy(finalPath,getPath());
+		strcat(finalPath,((fSaveObj*)ourViewer)->getName());
+	}
+	return finalPath;
+}
+
+
 
 // **************************************************************
 // ********************* fSaveObj stuff *************************
@@ -102,36 +142,48 @@ fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
 	kbdUser::setListener(this);
 	savePath				= NULL;
 	wereDoing			= choosing;
-	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);											// Resize our window.
+	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);										// Resize our window.
 	theMsg->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);								// Resize the label to fit.
-	theMsg->setText("  Choose save location");											// Set the label name.
-	if (okBtn) {																						// If we have a default success button..
-		delete(okBtn);																				// Delete it.
-		okBtn = NULL;																				// And NULL it out as a flag.
+	theMsg->setText("   Choose save location");										// Set the label name.
+	if (okBtn) {																				// If we have a default success button..
+		delete(okBtn);																			// Delete it.
+		okBtn = NULL;																			// And NULL it out as a flag.
 	}
-	if (cancelBtn) {																						// If we have a default cancel button..
-		delete(cancelBtn);																				// Delete it.
-		cancelBtn = NULL;																				// And NULL it out as a flag.
+	if (cancelBtn) {																			// If we have a default cancel button..
+		delete(cancelBtn);																	// Delete it.
+		cancelBtn = NULL;																		// And NULL it out as a flag.
 	}
-	ourListBox->setLocation(FILE_LIST_X,FILE_LIST_Y);
+	ourListBox->setLocation(FILE_LIST_X,FILE_LIST_Y);								// Move the list box to where we want it.
 	ourFileDir->setLocation(DIR_X,DIR_Y);												// Hook it into the drawObject ist.
-	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);		// Create a name string obj.
-	addObj(nameStr);																				// Hook it into the drawObject ist.
+	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);	// Create a name string obj.
+	nameStr->setEventSet(touchLift);
+	addObj(nameStr);																			// Hook it into the drawObject ist.
 	setEditField(nameStr);
-	setName("noName.bmp");																		// Set the name to a default for now.
+	setName("noName.bmp");																	// Set the name to a default for now.
 	folderBtn = newStdBtn(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
 	addObj(folderBtn);
 	delBtn = newStdBtn(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
 	addObj(delBtn);
+	if (ourFileDir) delete(ourFileDir);													// Loose the original.
+	ourFileDir = new saveFileDir(DIR_X,DIR_Y,DIR_W,DIR_H,this,ourListBox);	// Create our version.
+	if (ourFileDir) {																			// If everything went ok..
+		addObj(ourFileDir);																	// Add our new one to the draw list.
+		ourFileDir->setPath("/");															// Set some sort of default path.
+		ourFileDir->refresh();																// Draw everything.
+	}
 }
 	
 
 fSaveObj::~fSaveObj(void) { resizeBuff(0,&savePath); }
 
 
+char*	fSaveObj::getName(void) { return nameStr->editBuff; }
+
+
 void fSaveObj::setName(char* inName) {
 
 	if (nameStr) {
+		db.trace("looking at nameStr",false);
 		if (nameStr->mEditing) {
 			nameStr->endEditing();
 		}
@@ -224,13 +276,12 @@ void fSaveObj::handleCom(stdComs comID) {
 		case choosing		:
 			switch(comID) {
 				case newFolderCmd		:	
-					//drawNotify.setCallback(fSaveObj::newFolderAlert);
+					setMode(newFolder);
 				break;
 				case deleteItemCmd	:
-					//drawNotify.setCallback(fSaveObj::deleteFileAlert);
+					setMode(deletingFile);
 				break;
 				default 					:
-					db.trace("got a command..",comID);
 					fileViewer::handleCom(comID);
 				break;
 			}			

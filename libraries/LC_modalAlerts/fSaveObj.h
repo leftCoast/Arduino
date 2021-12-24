@@ -32,6 +32,23 @@ enum saveModes { choosing,newFolder,deletingFile };
 
 
 // **************************************************************
+// *********************** saveFileDir **************************
+// **************************************************************
+
+
+class saveFileDir :	public fileDir {
+
+	public:
+				saveFileDir(int inX, int inY, int inWidth,int inHeight,fSaveObj* inViewer,fileListBox* inListBox);
+	virtual	~saveFileDir(void);
+
+	virtual	void	setItem(pathItemType inType,char* name);
+	virtual	char* endChoice(void);
+	
+				char*				finalPath;
+};
+
+// **************************************************************
 // ********************* fSaveObj stuff *************************
 // **************************************************************
 
@@ -44,12 +61,10 @@ class fSaveObj :	public fileViewer,
 	virtual	~fSaveObj(void);
 	
 				void	setName(char* inName);
-	//virtual	char*	getSavePath(void);
-				//void	createFolder(void);
-				//void	deleteFile(void);
+				char*	getName(void);
 				void	setMode(saveModes newMode);
 	virtual	void	handleCom(stdComs comID);
-	//virtual	void	setItem(fileListItem* currentSelected);
+
 			
 				saveModes		wereDoing;
 				char*				savePath;
