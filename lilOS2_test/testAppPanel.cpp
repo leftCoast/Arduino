@@ -10,8 +10,7 @@ testAppPanel::~testAppPanel(void) {  }
 
 void testAppPanel::setup(void) {
    
-   //alertStart.setTime(5000);
-   aFlasher = new flasher(20,160,10,10);
+   aFlasher = new flasher(10,40,10,10);
    aFlasher->setOnOff(true);
    addObj(aFlasher);
    stdComBtn* aBtn = newStdBtn(40,50,icon32,newItemCmd,this);
@@ -59,18 +58,16 @@ void  testAppPanel::handleCom(stdComs comID) {
 //         choosAlert = NULL;
          choosenPath->setValue(saveAlert->getPathResult());
          saveAlert = NULL;
-         needRefresh = true;
       break;
       case cancelCmd :
          aFlasher->setColors(&red,&black);
 //         choosAlert = NULL;
          choosenPath->setValue("Canceled");
          saveAlert = NULL;
-         needRefresh = true;
       break;
       case newItemCmd :
          //choosAlert = new fSelectObj(this);
-         saveAlert = new fSaveObj((listener*)this);
+         saveAlert = new fSaveObj(this);
       break;
       default  : panel::handleCom(comID); break;
    }

@@ -4,7 +4,7 @@
 
 int		nextPanel	= NO_PANEL_ID;   // What panel do we want showing now?
 lilOS*	ourOSPtr		= NULL;	
-
+panel*	ourPanel		= NULL;
 
 // *****************************************************
 // ********************   appIcon  *********************
@@ -20,45 +20,6 @@ appIcon::~appIcon(void) { }
 
 void appIcon::doAction(void) { nextPanel = mMessage; }
 
-
-
-// *****************************************************
-// *******************     modal    ********************
-// *****************************************************
-// 
-// 
-// modal::modal(rect* inRect,eventSet inEventSet)
-// 	: drawGroup(inRect,inEventSet) {
-// 	
-// 	success = false;
-// 	done = false;
-// }
-// 	
-// 	
-// modal::modal(int x, int y, int width,int height,eventSet inEventSet)
-// 	: drawGroup(x,y,width,height,inEventSet) { done = false; }
-// 	
-// 	
-// modal::~modal(void) {  }
-// 
-// 
-// Is this event for us? Yes, they ALL are.	
-// bool modal::acceptEvent(event* inEvent,point* locaPt) {
-// 
-// 	drawGroup::acceptEvent(inEvent,locaPt);	// We do the "normal" stuff.
-// 	return true;										// No natter what, the buck stopps here.
-// }
-// 
-// 
-// void modal::message(int inMsg) { done = true; }
-// 
-// 
-// Return if our taks in complete.
-// void modal::setSuccess(bool trueFalse) {
-// 
-// 	success = trueFalse;
-// 	done		= true;
-// }
 
 	
 // *****************************************************
@@ -83,11 +44,12 @@ panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
 			addObj(mMenuBar);
 		break;
 	}
+	ourPanel = this;
 }
 
 
 // The world as you know it, is ending..
-panel::~panel(void) { }
+panel::~panel(void) { ourPanel = NULL; }
 
 
 // Whom ever is managing panels can assign IDs to us for

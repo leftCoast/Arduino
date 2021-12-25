@@ -322,7 +322,7 @@ void fileDir::doAction(void) {
 
 
 // Descendants may need to do something when a path item is selected in the list box.
-void fileDir::setItem(pathItemType inType,char* name) { db.trace("Wrong setItem()",false); }
+void fileDir::setItem(pathItemType inType,char* name) { }
 
 
 // Choosing folders should jump us to the next tier of folders.

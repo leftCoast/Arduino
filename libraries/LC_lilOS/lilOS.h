@@ -125,6 +125,6 @@ class lilOS :  public idler {
 
 extern int		nextPanel;
 extern lilOS*	ourOSPtr;
-
+extern panel*	ourPanel;
 
 #endif

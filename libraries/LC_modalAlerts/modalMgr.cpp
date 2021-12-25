@@ -65,15 +65,6 @@ bool modal::acceptEvent(event* inEvent,point* locaPt) {
 }
 
 
-// This is called when our task is complete. We are done and we were either a success our
-// a failure. All it does is set the two boolean flags so we can be deleted at "their" leisure.
-// void modal::setSuccess(bool trueFalse) {
-// 
-// 	drawing = false;		// Task is done, so we stop any more drawing.
-// 	success = trueFalse;	// Record our succes.
-// 	done		= true;		// Flag that we are done here.
-// }
-
 
 // *****************************************************
 // ******************    modalLink   *******************

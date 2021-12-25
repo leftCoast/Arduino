@@ -20,6 +20,7 @@ class alertObj :	public modal,
 				alertObj(char* msg,listener* inListener,alertType inType,bool useOk=true,bool useCancel=false);
 	virtual	~alertObj(void);
 	
+				void	setMsg(char* inMessage);
 	virtual	bool	acceptEvent(event* inEvent,point* locaPt);
 	virtual	void	drawSelf(void);
 	virtual	void	handleCom(stdComs comID);

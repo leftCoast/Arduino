@@ -5,7 +5,7 @@
 #include <editLabel.h>
 #include <colorRect.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 // The overall size and placement of the save d-box.
 #define SAVE_X			30
@@ -39,8 +39,105 @@
 #define NEW_FLDR_X	120	
 #define NEW_FLDR_Y	FILE_LIST_Y
 
+// Delete file/folder button.
 #define DELETE_X		NEW_FLDR_X
 #define DELETE_Y		NEW_FLDR_Y + 45
+
+#define NEW_NAME_X	50
+#define NEW_NAME_Y	45
+#define NEW_NAME_W	100
+#define NEW_NAME_H	10
+
+#define NEW_FLDR_MSG	"Enter new folder name."
+#define DELETE_MSG	"Are you sure you want to delete "
+
+// **************************************************************
+// ******************* deleteAlert stuff ************************
+// **************************************************************
+
+
+deleteAlert::deleteAlert(listener* inListener,filePath* inPath,char* selectName)
+	: alertObj("",inListener,warnAlert,false,false),
+	kbdUser(this) {
+	
+	int			numBytes;
+	char* 		resultMsg;
+	pathItem*	currItem;
+	
+	ourPath			= inPath;
+	resultMsg		= NULL;
+	ourSelectName	= selectName;									// We're going to trust that this is good for the duration.
+	if (selectName) {
+		ourPath->pushChildItemByName(selectName);
+	}
+	currItem = inPath->getCurrItem();
+	if (currItem) {
+		numBytes = 30 + strlen(DELETE_MSG);
+		if (resizeBuff(numBytes,&resultMsg)) {
+			strcpy(resultMsg,DELETE_MSG);
+			if (currItem->getType()==folderType) {
+				strcat(resultMsg,"folder:");
+				strcat(resultMsg,currItem->getName());
+				setMsg(resultMsg);
+			} else if (currItem->getType()==fileType) {
+				strcat(resultMsg,"file:");
+				strcat(resultMsg,currItem->getName());
+				setMsg(resultMsg);
+			} else {
+				setMsg("Whatever! this is messed up!");
+			}
+			resizeBuff(0,&resultMsg);
+		}
+	}
+}
+	
+
+// Your standard destructor.	
+deleteAlert::~deleteAlert(void) { }
+
+
+// Is this event for us? Well yes, they ALL are. Except if we have a keyboard..	
+bool deleteAlert::acceptEvent(event* inEvent,point* locaPt) {
+
+	point	globalPt;
+	
+	if (drawGroup::acceptEvent(inEvent,locaPt)) {	// If its actually ours..
+		return true;	 										// We return true.
+	}																//
+	globalPt = screen->gP(locaPt);						// Modals are global. So global is good.
+	checkKbdEvent(inEvent,&globalPt);					// Not ours? Let the keyboard have a shot at it.
+	return true;												// In all cases, the buck stops here.
+}
+
+
+// Its time to actually delete the item from whatever the user gave us. Either it works
+// or it doesn't. We don't check in this routine. 
+void deleteAlert::deleteItem(void) {
+	
+	// bla bla bla..
+	// bla..
+	ourPath->popItem();											// We should loose the item we offed.
+	ourPath->refreshChildList();								// Redo the child list without the item.
+}
+
+
+// Clicks and commands come filtering in here..
+void deleteAlert::handleCom(stdComs comID) {
+	
+	switch(comID) {						// Check what we got as a command..
+		case okCmd			:				// We got an ok click..
+			deleteItem();					// Have a shot at deleting the item.
+			done = true;					// This alert is done!
+		break;
+		case cancelCmd		:				// Both okCmd & cancelCmd land here.
+			if (ourSelectName) {			// If we had a name to add..
+				ourPath->popItem();		// We need to loose it.
+			}
+			done = true;					// This alert is done!
+		break;								// And these case statements are done!
+	}
+	ourListener->handleCom(comID);	// Let our listener have a shot.		
+}
 
 
 
@@ -49,47 +146,86 @@
 // **************************************************************
 
 
-// folderAlert::folderAlert(char* msg,saveKbd* inKbd,listener* inListener)
-// 	: alertObj(msg,inListener,choiceAlert,false,false) { 
-// 	
-// 	colorRect*	aRect;
-// 	colorObj		backColor;
-// 	
-// 	sKbd = inKbd;
-// 	backColor.setColor(LC_GREY);
-// 	aRect = new colorRect(NEW_NAME_X-2,NEW_NAME_Y-2,NEW_NAME_W+4,NEW_NAME_H+4,1);
-// 	aRect->setColor(&backColor);
-// 	addObj(aRect);
-// 	folderPath = new editLabel(NEW_NAME_X,NEW_NAME_Y,NEW_NAME_W,NEW_NAME_H,"newName");
-// 	folderPath->setColors(&black,&backColor);
-// 	sKbd->setEditField(folderPath);
-// 	folderPath->beginEditing();
-// 	addObj(folderPath);
-// }
-// 	
-// 	
-// folderAlert::~folderAlert(void) {  }
-// 
-// 
-// //Is this event for us? Yes, they ALL are.	
-// bool folderAlert::acceptEvent(event* inEvent,point* locaPt) {
-// 
-// 	int	globalY;
-// 	
-// 	globalY = screen->gY(inEvent->mTouchPos.y);		// Event comes in a local point, get global.
-// 	Serial.println(inEvent->mTouchPos.y);
-// 	Serial.println(globalY);
-// 	Serial.println(sKbd->y);
-// 	Serial.println("-----");
-// 	if (globalY-45<sKbd->y) {									// If the y point is above the keyboard..
-// 		return modal::acceptEvent(inEvent,locaPt);	// We do the "modal" thing.
-// 	}
-// 	return false;												// Else, we pass it on for the keyboard to catch.								
-// }
+folderAlert::folderAlert(listener* inListener,filePath* inPath)
+	: alertObj(NEW_FLDR_MSG,inListener,choiceAlert,false,false),
+	kbdUser(this) { 
+	
+	colorRect*	aRect;
+	colorObj		backColor;
+	
+	ourPath = inPath;
+	backColor.setColor(LC_GREY);
+	aRect = new colorRect(NEW_NAME_X-2,NEW_NAME_Y-2,NEW_NAME_W+4,NEW_NAME_H+4,1);
+	aRect->setColor(&backColor);
+	addObj(aRect);
+	nameLabel = new editLabel(NEW_NAME_X,NEW_NAME_Y,NEW_NAME_W,NEW_NAME_H,"untitled");
+	addObj(nameLabel);
+	nameLabel->setColors(&black,&backColor);
+	nameLabel->beginEditing();
+	setEditField(nameLabel);
+}
+	
+
+// Your standard destructor.	
+folderAlert::~folderAlert(void) { }
+
+
+
+// Is this event for us? Well yes, they ALL are. Except if we have a keyboard..	
+bool folderAlert::acceptEvent(event* inEvent,point* locaPt) {
+
+	point	globalPt;
+	
+	if (drawGroup::acceptEvent(inEvent,locaPt)) {	// If its actually ours..
+		return true;	 										// We return true.
+	}																//
+	globalPt = screen->gP(locaPt);						// Modals are all global. At least the keyboard is. So global is good.
+	checkKbdEvent(inEvent,&globalPt);					// Not ours? Let the keyboard have a shot at it.
+	return true;												// In all cases, the buck stops here.
+}
+
+
+// Its time to actually create the folder from whatever the user gave us. Either it works
+// or it doesn't. We don't check in this routine. 
+void folderAlert::createFolder(void) {
+	
+	char* finalPath;
+	int	numBytes;
+	
+	finalPath = NULL;														// All pointers we start at NULL.
+	if (ourPath) {															// If we actually have a path.. (sanity)
+		numBytes = ourPath->numPathBytes();							// Get the amount of bytes the path string needs.
+		numBytes = numBytes + strlen(nameLabel->editBuff);		// Add the number of bytes the name string needs.
+		if(resizeBuff(numBytes,&finalPath)) {						// If we can grab the memory for this..
+			strcpy(finalPath,ourPath->getPath());					// Our original path goes in.
+			strcat(finalPath,nameLabel->editBuff);					// We add the user's name/path to it.
+			SD.mkdir(finalPath);											// Tell the SD card lib to create the folder.
+			resizeBuff(0,&finalPath);									// Recycle the path memory.
+			ourPath->refreshChildList();								// Get our new folder into the child list.
+		}
+	}
+}
+
+
+// Clicks and commands come filtering in here..
+void folderAlert::handleCom(stdComs comID) {
+	
+	switch(comID) {						// Check what we got as a command..
+		case okCmd			:				// We got an ok click..
+			createFolder();				// Have a shot at creating a folder.
+		case cancelCmd		:				// Both okCmd & cancelCmd land here.
+			done = true;					// This alert is done!
+		break;								// And these case statements are done!
+	}
+	ourListener->handleCom(comID);	// Let our listener have a shot.		
+}
+
+
 
 // **************************************************************
 // *********************** saveFileDir **************************
 // **************************************************************
+
 
 saveFileDir::saveFileDir(int inX, int inY, int inWidth,int inHeight,fSaveObj* inViewer,fileListBox* inListBox)
 	:fileDir(inX,inY,inWidth,inHeight,inViewer,inListBox) { finalPath	= NULL; }
@@ -98,13 +234,22 @@ saveFileDir::saveFileDir(int inX, int inY, int inWidth,int inHeight,fSaveObj* in
 saveFileDir::~saveFileDir(void) { if (finalPath) resizeBuff(0,&finalPath); }
 
 
+// This is what is called when we receive a click from the user..
+void saveFileDir::doAction(void) {
+	
+	((fSaveObj*)ourViewer)->setSelectedName(NULL);	// Clear out the saved selected name.
+	fileDir::doAction();										// Do whatever you need to do.
+}
+
+
 // When doing a save of a file. The thing we're looking for is a default file name. This
 // is what we're going to use setItem() for. If the user clicks a file, we will update its
 // editable name field with that name.
 void saveFileDir::setItem(pathItemType inType,char* name) {
-ST
-	if (inType == fileType) {
-		((fSaveObj*)ourViewer)->setName(name);
+
+	((fSaveObj*)ourViewer)->setSelectedName(name);	// We let them all be saved for later.
+	if (inType == fileType) {								// If its a file..
+		((fSaveObj*)ourViewer)->setName(name);			// Its used to set the editable file name.
 	}
 }
 
@@ -134,13 +279,13 @@ char* saveFileDir::endChoice(void) {
 	
 fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
 	:fileViewer(inListener,funct),
-	kbdUser() {
+	kbdUser(this) {
 	
 	stdComBtn*	folderBtn;
 	stdComBtn*	delBtn;
 	
-	kbdUser::setListener(this);
 	savePath				= NULL;
+	selectedName		= NULL;
 	wereDoing			= choosing;
 	this->setRect(SAVE_X,SAVE_Y,SAVE_W,SAVE_H);										// Resize our window.
 	theMsg->setRect(LABEL_X,LABEL_Y,LABEL_W,LABEL_H);								// Resize the label to fit.
@@ -155,11 +300,11 @@ fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
 	}
 	ourListBox->setLocation(FILE_LIST_X,FILE_LIST_Y);								// Move the list box to where we want it.
 	ourFileDir->setLocation(DIR_X,DIR_Y);												// Hook it into the drawObject ist.
-	nameStr = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);	// Create a name string obj.
-	nameStr->setEventSet(touchLift);
-	addObj(nameStr);																			// Hook it into the drawObject ist.
-	setEditField(nameStr);
-	setName("noName.bmp");																	// Set the name to a default for now.
+	nameLabel = new editLabel(NAME_STR_X,NAME_STR_Y,NAME_STR_W,NAME_STR_H);	// Create a name string obj.
+	nameLabel->setEventSet(touchLift);
+	addObj(nameLabel);																			// Hook it into the drawObject ist.
+	setEditField(nameLabel);
+	setName("untitled.bmp");																	// Set the name to a default for now.
 	folderBtn = newStdBtn(NEW_FLDR_X,NEW_FLDR_Y,icon32,newFolderCmd,this);
 	addObj(folderBtn);
 	delBtn = newStdBtn(DELETE_X,DELETE_Y,icon32,deleteItemCmd,this);
@@ -172,99 +317,79 @@ fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
 		ourFileDir->refresh();																// Draw everything.
 	}
 }
-	
-
-fSaveObj::~fSaveObj(void) { resizeBuff(0,&savePath); }
 
 
-char*	fSaveObj::getName(void) { return nameStr->editBuff; }
+fSaveObj::~fSaveObj(void) { 
+
+	resizeBuff(0,&savePath);
+	resizeBuff(0,&selectedName);
+}
+
+
+char*	fSaveObj::getName(void) { return nameLabel->editBuff; }
 
 
 void fSaveObj::setName(char* inName) {
 
-	if (nameStr) {
-		db.trace("looking at nameStr",false);
-		if (nameStr->mEditing) {
-			nameStr->endEditing();
+	if (nameLabel) {
+		if (nameLabel->mEditing) {
+			nameLabel->endEditing();
 		}
-		nameStr->setValue(inName);
-		nameStr->beginEditing();
+		nameLabel->setValue(inName);
+		nameLabel->beginEditing();
 	}
 }
 
-// 
-// char* fSaveObj::getSavePath(void) { return savePath; }
-// 
-// 
-// void fSaveObj::setItem(fileListItem* currentSelected) {
-// 
-// 	fileBaseViewer::setItem(currentSelected);
-// 	if (currentSelected->ourType==fileType) {
-// 		nameStr->endEditing();
-// 		nameStr->setValue(currentSelected->ourName);
-// 		nameStr->beginEditing();
-// 	}
-// }
-// 
-
-// void	fSaveObj::newFolderAlert(void) {
-// 	
-// 	nameStr->endEditing();
-// 	newFldrAlertPtr = new folderAlert("Enter new folder name.",staticThis->aKbd,staticThis);
-// 	setMode(newFolder);
-// }
-
-
-// This deletes the selected file from the SD card.
-// void	fSaveObj::createFolder(void) {
-// 		
-// 	char* newPathStr;
-// 	int	numChars;
-// 	
-// 	newPathStr = NULL;														// Starting off at NULL.
-// 	numChars = newFldrAlertPtr->folderPath->getNumChars();		// Grab the number of chars in the new name. (minus '\0')
-// 	numChars = numChars + numPathBytes();								// Add to this the total chars (including '\0') of our current path.
-// 	if (resizeBuff(numChars,&newPathStr)) {							// If we can grab the RAM..
-// 		strcpy(newPathStr,getPath());										// Stuff in our current path string.
-// 		strcat(newPathStr,newFldrAlertPtr->folderPath->buff);		// Add to that the new folder name string (Can be path)
-// 		SD.mkdir(newPathStr);												// USe the new path string to create the folder.
-// 		resizeBuff(0,&newPathStr);											// Recycle the RAM.
-// 		refreshChildList();													// Refresh the child list now missing the file.
-// 		ourFileDir->refresh();												// Refresh the dialog box's file list.
-// 	}
-// }
-
-
-
-// This deletes the selected file from the SD card.
-// void	fSaveObj::deleteFile() {
-// 
-// 	if (pushChildItemByName(currentItem->ourName)) {	// Add the selected name to the end of the path.
-// 		SD.remove(getPath());									// Get the path string and use it to delete the file.
-// 		popItem();													// POp the name we added to the path back off.
-// 		refreshChildList();										// Refresh the child list now missing the file.
-// 		ourFileDir->refresh();									// Refresh the dialog box's file list.
-// 	}
-// }
-
-
-// void	fSaveObj::deleteFileAlert(void) {
-// 	
-// 	char buff[60];
-// 	
-// 	strcpy(buff,"Are you sure you want to delete ");
-// 	strcat(buff,staticThis->currentItem->ourName);
-// 	strcat(buff,"?");
-// 	staticThis->deleteAlert = new alertObj(buff,staticThis,warnAlert,true,true);
-// 	staticThis->addObj(staticThis->deleteAlert);
-// 	staticThis->setMode(deletingFile);
-// }
+// We're going to keep a copy of the current selected name off the child list.
+void	fSaveObj::setSelectedName(char* name) {
+	
+	if (!name) {															// If we got a NULL..
+		resizeBuff(0,&selectedName);									// Recycle the buffer, set to NULL.
+	} else if (resizeBuff(strlen(name)+1,&selectedName)) {	// Else, if we can allocate the new buffer..
+		strcpy(selectedName,name);										// We copy the name for later.
+		setName(name);														// And typically we use the name
+	}	
+}
 
 
 void fSaveObj::setMode(saveModes newMode) {
 	
-	if (wereDoing==newFolder && newMode==choosing) {
-			setEditField(nameStr);
+	switch(wereDoing) {
+		case choosing		:
+			switch(newMode) {
+				case choosing		: return;
+				case newFolder		:
+					newFldrAlert = new folderAlert(this,ourFileDir);
+				break;
+				case deletingFile	:
+					doDeleteAlert  = new deleteAlert(this,ourFileDir,selectedName);
+				break;
+			}
+		break;
+		case newFolder		:
+			switch(newMode) {
+				case choosing		:
+					drawing = false;
+					ourFileDir->refresh();
+				break;
+				case newFolder		: return;
+				case deletingFile	:
+					doDeleteAlert  = new deleteAlert(this,ourFileDir,selectedName);
+				break;
+			}
+		break;
+		case deletingFile	:
+			switch(newMode) {
+				case choosing		:
+					drawing = false;
+					ourFileDir->refresh();
+				break;
+				case newFolder		:
+					newFldrAlert = new folderAlert(this,ourFileDir);
+				break;
+				case deletingFile	: return;
+			}
+		break;
 	}
 	wereDoing = newMode;
 }
@@ -272,42 +397,17 @@ void fSaveObj::setMode(saveModes newMode) {
 
 void fSaveObj::handleCom(stdComs comID) {
 
-	switch(wereDoing) {
-		case choosing		:
-			switch(comID) {
-				case newFolderCmd		:	
-					setMode(newFolder);
-				break;
-				case deleteItemCmd	:
-					setMode(deletingFile);
-				break;
-				default 					:
-					fileViewer::handleCom(comID);
-				break;
-			}			
-		break;
-		case newFolder		:
-			switch (comID) {
-				case okCmd		:
-					//createFolder();
-					setMode(choosing);
-				break;
-				case cancelCmd	:
-					setMode(choosing);
-				break;
+	switch(comID) {
+		case newFolderCmd		: setMode(newFolder);				break;
+		case deleteItemCmd	: setMode(deletingFile);			break;
+		case okCmd				:
+		case cancelCmd			:
+			if (wereDoing==choosing) {
+				fileViewer::handleCom(comID);
+			} else {
+				setMode(choosing);
 			}
 		break;
-		case deletingFile	:
-			switch (comID) {
-				case okCmd		:
-					//deleteFile();
-					setName("noName.bmp");
-					setMode(choosing);
-				break;
-				case cancelCmd	:
-					setMode(choosing);
-				break;
-			}
-		break;
-	}
+		default 					: fileViewer::handleCom(comID);	break;
+	}			
 }

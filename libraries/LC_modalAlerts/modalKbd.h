@@ -18,10 +18,12 @@ class modalKbd :	public bmpKeyboard {
 				modalKbd(void);
 	virtual	~modalKbd(void);
 	
-	virtual	void	setListener(listener* inListener);
-	virtual	void	handleKey(keyCommands inEditCom);
-	virtual	void	drawSelf(void);
+	virtual	void			setListener(listener* inListener);
+	virtual	listener*	getListener(void);
+	virtual	void			handleKey(keyCommands inEditCom);
+	virtual	void			drawSelf(void);
 	
+	private :
 				listener*	ourListener;
 };
 
@@ -35,14 +37,14 @@ class modalKbd :	public bmpKeyboard {
 class kbdUser {
 
 	public :
-				kbdUser(void);
+				kbdUser(listener* inListener);
 	virtual	~kbdUser(void);
-
-				void	setListener(listener* inListener);				
-				void	setEditField(editLabel* inEditable);
-
+	
+				void			setEditField(editLabel* inEditable);
+				void			checkKbdEvent(event* inEvent,point* globalPt);
 				
-				editable*	lastEditObj;
+				listener*	lastListener;
+				editLabel*	lastEditObj;
 };
 
 #endif

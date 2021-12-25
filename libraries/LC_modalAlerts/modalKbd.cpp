@@ -1,5 +1,6 @@
 #include <modalKbd.h>
 
+//#include <debug.h>
 
 modalKbd*		theKbd	= NULL;
 int				kbdUsers	= 0;
@@ -11,21 +12,29 @@ int				kbdUsers	= 0;
 // **************************************************************
 
 
+// OUr modal keyboard constructor..
 modalKbd::modalKbd(void)
-	: bmpKeyboard(NULL,true) {
+	: bmpKeyboard(NULL,true) {		// Make me a modal with no editing field.
 	
-	ourListener = NULL;
-	loadKeys();
-	viewList.addObj(this);
+	ourListener = NULL;				// No listener.
+	loadKeys();							// Load the keys. (Why not in the .bmp constructor?)
+	viewList.addObj(this);			// And we add ourselves to the root view list.
 }
 
 
+// Nothing really to do for the destructor.
 modalKbd::~modalKbd(void) { }
 
 
+// Set our listener. The guy that wants to hear commands like okCmd.
 void modalKbd::setListener(listener* inListener) { ourListener = inListener; }
 	
 	
+// Set our listener. The guy that wants to hear commands like okCmd.
+listener* modalKbd::getListener(void) { return ourListener; }
+
+	
+//	Basically what we really need is to lay down a black background for the keys.
 void modalKbd::drawSelf(void) { screen->fillRect(this,&black); }
 
 
@@ -51,25 +60,28 @@ void modalKbd::handleKey(keyCommands inEditCom) {
 
 
 // Constructor. Make sure there IS a keyboard. Save the last modal's edit field so we can
-// replace it later.	
-kbdUser::kbdUser(void) {
+// replace it later.	Save off who our last Listener was so we can reset that as well.
+kbdUser::kbdUser(listener* inListener) {
 
-	if (!theKbd) {											// If no keyboard..
-		theKbd = new modalKbd;							// We create one.
-		kbdUsers	= 0;										// And set the user count to zero.
-	}															//
-	if (theKbd) {											// Ok, If we have a keyboard..
-		kbdUsers++;											// Bump up the user count.
-		lastEditObj = theKbd->getEditField();		// Save off the last modal's edit field.
-		if (lastEditObj) {								// If we got an actual edit field..
-			lastEditObj->endEditing();					// Shut off its editing.
+	lastEditObj		= NULL;												// Nice to start off as a NULL.
+	lastListener	= NULL;												// This one too.
+	if (!theKbd) {															// If no keyboard..
+		theKbd = new modalKbd;											// We create one.
+		kbdUsers	= 0;														// And set the user count to zero.
+	}																			//
+	if (theKbd) {															// Ok. If we have, or just created, a keyboard..
+		kbdUsers++;															// Bump up the user count.
+		if (kbdUsers>1) {													// If there was a user before us..
+			lastEditObj = (editLabel*)theKbd->getEditField();	// Save off the last modal's edit field.
+			lastListener = theKbd->getListener();					// Save off a pointer to the last Listener.
 		}
+		theKbd->setListener(inListener);								// And now set to the new listener.
 	}
 }
 
 
 // Destructor, bump down the count, if zero, delete the keyboard. If not set the last
-// modal's edit field in there.
+// modal's edit field in there. And the last listenener as listenener.
 kbdUser::~kbdUser(void) {
 	
 	kbdUsers--;											// Bump down the amount of keyboard users.
@@ -79,38 +91,41 @@ kbdUser::~kbdUser(void) {
 			theKbd = NULL;								// Flag it as gone.
 		}
 	} else {												// Else, there's still uers left..
-		if (theKbd && lastEditObj) {				// If we have a keyboard and their last edit object.
+		if (theKbd) {									// If we have a keyboard and their last edit object.
+			theKbd->setListener(lastListener);	// Put back the old listener.
 			theKbd->setEditField(lastEditObj);	// Set their edit field back in there.
-			lastEditObj->beginEditing();			// And fire its editing back up for them.
+			if (lastEditObj) {						// If we really did have an edit object..
+				lastEditObj->beginEditing();		// And fire its editing back up for them.
+			}
 		}
 	}
 }
 
 
-void kbdUser::setListener(listener* inListener) {
-
-	if (theKbd) {
-		theKbd->setListener(inListener);
-	}
-}
-
-
+// This is just for switching edit fields. We don't save the last one here.
 void kbdUser::setEditField(editLabel* inEditable) {
 
 	editLabel*	oldEditable;
 	
-	if (theKbd) {
-		oldEditable = (editLabel*)theKbd->getEditField();
+	if (theKbd) {									// If we have a keyboard..
+		oldEditable = theKbd->getEditField();
 		if (oldEditable) {
+			oldEditable->mSuccess = true;
 			oldEditable->endEditing();
 		}
-		theKbd->setEditField(inEditable);
-		if (inEditable) {
-			inEditable->beginEditing();
+		theKbd->setEditField(inEditable);	// Set the new edit field.
+		if (inEditable) {							// If there IS a new edit field..
+			inEditable->beginEditing();		// Fire up editing.
 		}
 	}
 }
-	
-	
-	
+
+
+void kbdUser::checkKbdEvent(event* inEvent,point* globalPt) {
+
+	if (theKbd) {
+		theKbd->acceptEvent(inEvent,globalPt);
+	}
+}
+
 	

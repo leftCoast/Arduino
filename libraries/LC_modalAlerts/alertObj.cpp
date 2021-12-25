@@ -1,5 +1,6 @@
 #include <alertObj.h>
 #include <textView.h>
+#include <lilOS.h>
 
 //#include <debug.h>
 
@@ -63,7 +64,11 @@ alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bo
 }
 
 	
-alertObj::~alertObj(void) {  }
+alertObj::~alertObj(void) { ourPanel->aTouchAbove(); }
+
+
+// User wants the message changed. What - ever!
+void alertObj::setMsg(char* inMessage) { theMsg->setText(inMessage); }
 
 
 // Is this event for us? Well yes, they ALL are. Except if we have a keyboard..	
