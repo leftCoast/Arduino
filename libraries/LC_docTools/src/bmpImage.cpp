@@ -1,4 +1,6 @@
 #include "bmpImage.h"
+#include <resizeBuff.h>
+
 
 #define DEF_IMAGE_OFFSET	54
 #define DEF_DEPTH				32
@@ -62,11 +64,9 @@ bool createNewBmpFile(char* newPath,int inWidth,int inHeight) {
 	uint32_t	fileSize;
 	uint32_t	imageBytes;
 	
-	Serial.println("createNewBmpFile");
 	success = false;															// Ok, assume failure..									
 	bmpFile = SD.open(newPath,FILE_WRITE);								// See if its a valid path.
 	if (bmpFile) {    														// We got a file?
-		Serial.println("Got .bmp file");
 		write16(0x4D42,bmpFile);											// It wants this. Whatever.
 		pixBytes		= DEF_DEPTH / 8;										// Calc. bytes per pixel.
 		bytesPerRow	= inWidth * pixBytes;								// Calc bytes per row.
@@ -103,6 +103,32 @@ bmpImage::bmpImage(char* filePath)
 
 
 bmpImage::~bmpImage(void) {  }
+
+
+// A inheritable method that sets the x,y size of a new image file.
+void bmpImage::setNewFileParams(void) {
+	newW = 32;
+	newH = 32;
+}
+
+
+// Once the image params are setup. We can call this to create the file.
+bool bmpImage::newDocFile(char* folderPath) {
+
+	bool success;
+	
+	success = false;												// Not a success yet.
+	closeDocFile();												// Close the original file, if any.
+	if (createTempFile(folderPath,".BMP")) {				// If we can create a suitable path..
+		if (createNewBmpFile(pathBuff,newW,newH)) {		// If, using this path we can create a new file..
+			if (changeDocFile(pathBuff)) {					// If we can change to this new path..
+				success = true;									// That's a success!
+			}															//
+		}																//
+		resizeBuff(0,&pathBuff);								// Loose the buffer.
+	}																	//
+	return success;												// Return our success.
+}
 
 
 // Grab a pixel from this location from your image file.

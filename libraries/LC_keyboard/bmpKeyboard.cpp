@@ -236,7 +236,7 @@ void bmpInputKey::drawSelf(void) {
 					current.x = i;
 					current.y = j;
 					dist = distance(center,current);
-					aPixel.blend(&white,distMapper.Map(dist));
+					aPixel.blend(&white,distMapper.map(dist));
 					ourBMap.setColor(i,j,&aPixel);
 				}
 			}

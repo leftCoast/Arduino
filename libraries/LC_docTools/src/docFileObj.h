@@ -37,7 +37,7 @@
 // addition it releases the memory used for holding the file path strings.
 
 
-#define TEMP_FOLDER		"/temp/"		// Default folder to save temporary edit files in. 
+#define TEMP_FOLDER		"/temp/"		// Default folder to save temporary edit files in.
 #define FILE_SEARCH_MS	500			// Amount of milliseconds allowed to find a temp file name.
 
 #include <Arduino.h>
@@ -46,8 +46,7 @@
 
 bool createTempDir(char* dirPath);
 
-
-		
+	
 class docFileObj {
 
 	public:
@@ -56,20 +55,22 @@ class docFileObj {
 					docFileObj(char* filePath);
 	virtual		~docFileObj(void);
 	
-	virtual		bool		openDocFile(int openMode);
-	virtual		bool		saveDocFile(char* newFilePath=NULL);
-	virtual		bool		askOk(char* qStr);
-					void		closeDocFile(void);
-					bool		changeDocFile(char* newPath);
-					
-					byte		peek(void);
-					uint32_t	position(void);
-					bool		seek(uint32_t index);
-					uint32_t	size(void);
-					int		read(void);
-					uint16_t	read(byte* buff,uint16_t numBytes);
-					size_t	write(uint8_t aByte);
-					size_t	write(byte* buff,size_t numBytes);
+	virtual		void			setNewFileParams(void)=0;			// Set up whatever info. needed to create a new file.
+	virtual		bool			newDocFile(char* folderPath)=0;	// Using the info. create a new numbered file.
+	virtual		bool			openDocFile(int openMode);
+	virtual		bool			saveDocFile(char* newFilePath=NULL);
+					void			closeDocFile(void);
+					bool			changeDocFile(char* newPath);
+					bool			fileEdited();	
+					byte			peek(void);
+					uint32_t		position(void);
+					bool			seek(uint32_t index);
+					uint32_t		size(void);
+					int			read(void);
+					uint16_t		read(byte* buff,uint16_t numBytes);
+					size_t		write(uint8_t aByte);
+					size_t		write(byte* buff,size_t numBytes);
+					bool			createTempFile(const char* folderPath,const char* extension);
 					
 	protected:
 					
@@ -77,6 +78,7 @@ class docFileObj {
 	virtual		bool		createEditPath(void);
 					
 					fileModes	mode;	
+					char*			pathBuff;
 					char*			docFilePath;
 					char*			editFilePath;
 					File			ourFile;

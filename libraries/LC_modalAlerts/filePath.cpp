@@ -525,4 +525,39 @@ void filePath::popItem(void) {
 }
 			
 
+// Scary recursive delete of the last item of a path. Be it a file or a folder.
+bool filePath::deleteCurrentItem(void) {
+
+	pathItem* trace;
 	
+	trace = getCurrItem();												// Ok, trace gets the last item on the list.
+	if (trace) {															// If we got an item..
+		if (trace->getType()==fileType) {							// If this item is a file..
+			if(SD.remove(getPath())) {									// If we can delete it..
+				popItem();													// We pop it off the end of the list.
+				return true;												// And we are done with a success!
+			} else {															// Else, didn't delete?
+				return false;												// No idea on what's wrong, just give up.
+			}																	// 
+		} else if (trace->getType()==folderType) {				// Else, it was NOT a file. If its a folder..
+			do {																// For each..
+				refreshChildList();										// Make sure we have a current child list.
+				if (childList) {											// If we have a child list..
+					pushChildItemByName(childList->getName());	// Push this child onto the current path.
+					if (!deleteCurrentItem()) {						// If we CAN'T delete it..
+						return false;										// We fail..
+					}															//
+				} else {														// If there is no child..				
+					if(SD.rmdir(getPath())) {							// If we can delete the folder..
+						popItem();											// We pop it off the end of the list.
+						return true;										// We return true!
+					}
+				}																//
+			} while(childList);											// Pretty much we're saying "forever".
+		}																		//
+	} else {																	// Else, who knows what's going wrong..
+		return false;														// Just stop.
+	}																			//
+	return false;															// Kinda' fell through, return false..
+}
+

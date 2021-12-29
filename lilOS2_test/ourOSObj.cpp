@@ -1,9 +1,9 @@
 #include "ourOSObj.h"
 #include <rpnCalc.h>
 #include <breakout.h>
-//#include <iconEdit.h>
+#include <iconEdit.h>
 //#include <starTrek.h>
-#include "testAppPanel.h"
+//#include "testAppPanel.h"
 #include "homeScr.h"
 
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
@@ -44,10 +44,10 @@ panel* ourOSObj::createPanel(int panelID) {
    switch (panelID) {
       case homeApp      : result = new homeScr();                    break;
       case calcApp      : result = new rpnCalc(this,panelID);        break;
-      //case iconEditApp : result = new iconEdit(this,panelID);       break;
+      case iconEditApp : result = new iconEdit(this,panelID);       break;
       case breakoutApp  : result = new breakout(this,panelID);       break;
       //case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
-      case testApp      : result = new testAppPanel(this,panelID);  break;
+      //case testApp      : result = new testAppPanel(this,panelID);  break;
       default           : result = NULL;
    }
    return(result);
@@ -79,10 +79,10 @@ char* ourOSObj::getPanelFolder(int panelID) {
          strcat(pathBuff,"rpnCalc/");
          return pathBuff;
       break;
-//      case iconEditApp  :
-//         strcat(pathBuff,"iconEdit/");
-//         return pathBuff;
-//      break;
+      case iconEditApp  :
+         strcat(pathBuff,"iconEdit/");
+         return pathBuff;
+      break;
       case breakoutApp  :
          strcat(pathBuff,"breakout/");
          return pathBuff;
@@ -91,10 +91,10 @@ char* ourOSObj::getPanelFolder(int panelID) {
 //         strcat(pathBuff,"starTrek/");
 //         return pathBuff;
 //      break;
-      case testApp      :
-         strcpy(pathBuff,getSystemFolder());
-         strcat(pathBuff,"icons/standard/");
-         return pathBuff;
-      default           : return NULL;
+//      case testApp      :
+//         strcpy(pathBuff,getSystemFolder());
+//         strcat(pathBuff,"icons/standard/");
+//         return pathBuff;
+//      default           : return NULL;
    }
 }

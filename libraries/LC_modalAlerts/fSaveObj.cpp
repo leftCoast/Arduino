@@ -113,11 +113,9 @@ bool deleteAlert::acceptEvent(event* inEvent,point* locaPt) {
 // Its time to actually delete the item from whatever the user gave us. Either it works
 // or it doesn't. We don't check in this routine. 
 void deleteAlert::deleteItem(void) {
-	
-	// bla bla bla..
-	// bla..
-	ourPath->popItem();											// We should loose the item we offed.
-	ourPath->refreshChildList();								// Redo the child list without the item.
+
+	ourPath->deleteCurrentItem();		// Kill off the offending item..
+	ourPath->refreshChildList();		// Redo the child list without the item.
 }
 
 

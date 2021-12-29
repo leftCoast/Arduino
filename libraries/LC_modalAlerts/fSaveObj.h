@@ -87,6 +87,7 @@ class fSaveObj :	public fileViewer,
 				fSaveObj(listener* inListener,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
+				void	setInitialPath(char* inPath);
 				void	setName(char* inName);
 				char*	getName(void);
 				void	setSelectedName(char* name);

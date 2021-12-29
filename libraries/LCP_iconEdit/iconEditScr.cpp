@@ -1,5 +1,7 @@
 #include <iconEditScr.h>
 
+#include <debug.h>
+
 char* iconFolder = NULL;
 
 iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath) 
@@ -30,10 +32,11 @@ void iconEditScr::doAction(event* inEvent,point* locaPt) {
 
 
 void iconEditScr::drawSelf(void) {
-
+ST
 	colorObj	aColor;
 	
 	if (mode!=fClosed) {
+		db.trace("Drawing editor",false);
 		for(int ty=0;ty<drawObj::height/scale;ty++) {
 			for(int tx=0;tx<drawObj::width/scale;tx++) {
 				aColor = getPixel(tx+offsetX,ty+offsetY);
@@ -45,6 +48,3 @@ void iconEditScr::drawSelf(void) {
 		drawObj::drawSelf();
 	}
 }
-
-
-bool iconEditScr::askOk(char* qStr) {return true; }

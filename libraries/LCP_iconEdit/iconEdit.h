@@ -2,30 +2,24 @@
 #define iconEdit_h
 
 #include <lilOS.h>
-#include <stdComs.h>
-#include  <iconEditScr.h>
-#include <fOpenObj.h>
-#include <fSaveObj.h>
+#include	<iconEditScr.h>
+#include <documentPanel.h>
+
+#define DEF_FLDR	"/EIcons/"
 
 
-class iconEdit	: public panel {
+class iconEdit	: public documentPanel {
 
 	public:
-					iconEdit(lilOS* ourOS,int ourAppID);
-	virtual		~iconEdit(void);
-
-				void	beginFileNew(void);
-				void	beginFileOpen(void);
-				void	beginFileSave(void);
+					
+				iconEdit(lilOS* ourOS,int ourAppID);
+	virtual	~iconEdit(void);
+	
+	virtual	void	createDocObj(void);
 	virtual	void	setup(void);
-	virtual	void	loop(void);
 	virtual	void	drawSelf(void);
-	virtual	void	closing(void);
 	virtual	void	handleCom(stdComs comID);
 	
-				iconEditScr*	theEditScr;
-				fOpenObj*		openDBox;
-				fSaveObj*		saveDBox;
 };
 
 #endif

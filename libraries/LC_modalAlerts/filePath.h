@@ -77,6 +77,7 @@ class filePath {
 				bool				pushChildItemByName(char* name);
 	virtual	bool				pushItem(pathItem* theNewGuy);
 	virtual	void				popItem(void);
+				bool				deleteCurrentItem(void);
 				
 				pathItem*	pathList;
 				pathItem*	childList;
