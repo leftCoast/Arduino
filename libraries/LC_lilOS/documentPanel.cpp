@@ -234,14 +234,14 @@ void documentPanel::handleComSaveOpen(stdComs comID) {
 ST
 	switch(comID) {																// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:														// Ok ws cliked..
-			if (ourDoc->saveDocFile(selectAlert->getPathResult())) {	// We're able to save it..
+			if (ourDoc->saveDocFile(saveAlert->getPathResult())) {	// We're able to save it..
 				ourState = haveNamedFileNoEdits;								// We have a named file with no edits. ('Cause we saved them)
 			} else {																	// Else, something went wrong with the saving..
-				ourState = selectAlert->getLastState();					// We go back to where we were.
+				ourState = saveAlert->getLastState();						// We go back to where we were.
 			}																			//
 		break;																		// And we're done here.
 		case cancelCmd		:														// Cancel was clicked..
-			ourState = selectAlert->getLastState();						// Return to previous state.
+			ourState = saveAlert->getLastState();							// Return to previous state.
 		break;																		// And we're done.
 		default: panel::handleCom(comID);									// Everything else we pass up the chain.
 	}
@@ -275,16 +275,18 @@ ST
 
 // Handle the commands from the buttons and dialog boxes..
 void documentPanel::handleCom(stdComs comID) {
-	
+ST	
 	if (ourDoc) {																								// If we have a fileObj..
 		if (ourDoc->fileEdited()) {																// If it has changes..
+			db.trace("Edited",false);
 			switch(ourState) {																				// For these unedited states..
 				case fileClosed				: 																// fileClosed and..
 				case haveFileNoNameNoEdits	: ourState = hasEditsNoName; break;					// no name no edits -> hasEditsNoName.
 				case haveNamedFileNoEdits	: ourState = hasEditsNamed; break;					// Has Name no edits -> hasEditsNamed.
 				default							: break;														// Shut up compiler!
 			}																										//
-		}																											//
+		}
+		db.trace("State:",ourState,false);																											//
 		switch(ourState) {																					// For each state we can be in..
 			case fileClosed				: handleComFileClosed(comID);					break;	// We have a handeler
 			case haveFileNoNameNoEdits	: handleComHaveFileNoNameNoEdits(comID);	break;	// to deal with it.

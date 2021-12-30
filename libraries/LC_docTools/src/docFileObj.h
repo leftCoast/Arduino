@@ -44,7 +44,6 @@
 #include <SD.h>
 
 
-//bool createTempDir(char* dirPath);
 char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension);
 	
 	
@@ -70,7 +69,6 @@ class docFileObj {
 					uint16_t		read(byte* buff,uint16_t numBytes);
 					size_t		write(uint8_t aByte);
 					size_t		write(byte* buff,size_t numBytes);
-					bool			createTempFile(const char* folderPath,const char* extension);
 					
 	protected:
 					
@@ -78,7 +76,6 @@ class docFileObj {
 	virtual		bool		createEditPath(void);
 					
 					fileModes	mode;	
-					char*			pathBuff;
 					char*			docFilePath;
 					char*			editFilePath;
 					File			ourFile;

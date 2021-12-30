@@ -47,7 +47,7 @@ bool baseImage::setPixel(int x,int y,colorObj* aColor) {
 	if (mode==fOpenToEdit || mode==fEdited) {		// If the file's open for editing..
 		if (checkXYLmits(x,y)) {						// If the point is within the image..											
 			aPack = aColor->packColor();				// Pack up the color.
-			setRawPixel(x,y,&aPack);						// Set the pixel.
+			setRawPixel(x,y,&aPack);					// Set the pixel.
 			success = true;								// Looks good!
 		}
 	}

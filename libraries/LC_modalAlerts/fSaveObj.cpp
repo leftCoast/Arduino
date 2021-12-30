@@ -5,7 +5,7 @@
 #include <editLabel.h>
 #include <colorRect.h>
 
-//#include <debug.h>
+#include <debug.h>
 
 // The overall size and placement of the save d-box.
 #define SAVE_X			30
@@ -85,6 +85,7 @@ deleteAlert::deleteAlert(listener* inListener,filePath* inPath,char* selectName)
 				setMsg(resultMsg);
 			} else {
 				setMsg("Whatever! this is messed up!");
+				db.trace("selectName:",selectName,false);
 			}
 			resizeBuff(0,&resultMsg);
 		}

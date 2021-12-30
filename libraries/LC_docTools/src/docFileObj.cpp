@@ -13,6 +13,7 @@ bool createFolder(const char* folderPath) {
 	bool	success;
 	char*	dirPath;
 	
+	success = false;											// If we started with a success, why start?
 	if (folderPath) {											// If we got a path. (Sanity)
 		numChars = strlen(folderPath);					// Lets see how long the path is.
 		if (folderPath[numChars-1]=='/') {				// Paths end in '/'. Make sure this has that.
@@ -155,7 +156,6 @@ docFileObj::docFileObj(char* filePath) {
 ST	
 	int numBytes;
 	
-	pathBuff			= NULL;									// Dynamic things start at NULL.
 	docFilePath		= NULL;									// Dynamic things start at NULL.
 	editFilePath	= NULL;									// Dynamic things start at NULL.
 	mode 				= fClosed;								// We are NOT editing at the moment.
@@ -171,7 +171,6 @@ ST
 docFileObj::~docFileObj(void) {
 ST
 	closeDocFile();					// Close files and Recycle the editFile stuff.
-	resizeBuff(0,&pathBuff);		// Recycle the pathBuff.
 	resizeBuff(0,&docFilePath);	// Recycle the docFilePath.
 	
 }
@@ -396,7 +395,7 @@ uint16_t docFileObj::read(byte* buff,uint16_t numBytes) {
 
 
 size_t docFileObj::write(uint8_t aByte) {
-	
+ST	
 	size_t	result;
 	
 	result = 0;
@@ -411,7 +410,7 @@ size_t docFileObj::write(uint8_t aByte) {
 
 
 size_t docFileObj::write(byte* buff,size_t numBytes) {
-	
+ST		
 	size_t result;
 	
 	result = 0;
@@ -430,64 +429,24 @@ size_t docFileObj::write(byte* buff,size_t numBytes) {
 bool docFileObj::checkDoc(File inFile) { return false; }
 
 
-// This finds a unused file name in the named folder then checks to make sure it can be
-// created/opened. Once this is accomplished, it closes the tempFile and returns success.
-bool docFileObj::createTempFile(const char* folderPath,const char* extension) {
-ST
-	File		tempFile;
-	timeObj	timeOut(FILE_SEARCH_MS);
-	char		fileNumStr[4];
-	int		fileNum;
-	int		numBytes;
-	bool		done;
-	
-	if (createFolder(folderPath)) {								// If we have, or can create, the directory..
-		pathBuff = NULL;												// Starting at NULL so resizeBuff will work correctly.
-		numBytes = strlen(folderPath);							//	Calculate the max RAM we'll need for the path buff.
-		numBytes = numBytes + strlen(extension);				// And the extension..
-		numBytes = numBytes + 10;									// And more n' enough for the name.
-		if (resizeBuff(numBytes,&pathBuff)) {					// If we can allocate the RAM.
-			done = false;												// Not done yet.
-			fileNum = 0;												// File names are a number string with ".tmp" at the end.
-			do {															// We loop around doing..
-				strcpy(pathBuff,folderPath);						//	Start building the file path with the temp directory.
-				itoa(fileNum++,fileNumStr,4);						// Create a number string.
-				strcat(pathBuff,fileNumStr);						// Add the file num to the path.
-				strcat(pathBuff,extension);						// Add .??? to the path.
-				tempFile = SD.open(pathBuff,FILE_READ);		//	Try to open this file for reading.
-				if (tempFile) {										// If the file opened..
-					tempFile.close();									// We just close it and move on.
-				} else {													// Else, we have a possible candidate here.
-					done = true;										// Either its the real deal or an error. In any case, we are done. 
-					tempFile = SD.open(pathBuff,FILE_WRITE);	// Try to create the file we couldn't open.
-					if (tempFile) {									// If we were able to create the file..
-						tempFile.close();								// Close it.
-						return true;									// And We'll call that a success!
-					}														//
-				}															//
-			} while(!done && !timeOut.ding());					// Loop while we are not done. (And have time)
-		}																	//
-	}																		//
-	return false;														// return if we had success or not.
-}
-
-
 // Find an unused temp file and assign it to the edit file path.
 bool docFileObj::createEditPath(void) {
 ST	
-	if (createTempFile(TEMP_FOLDER,".tmp")) {							// If we can find an unused valid temp file path.
-		if (resizeBuff(strlen(pathBuff)+1,&editFilePath)) {	// If we can allocate the RAM to save this path.
-			strcpy(editFilePath,pathBuff);							// Set our edit file path to this temp file path.
-			resizeBuff(0,&pathBuff);										// Recycle the RAM.
-			return true;													// Return success!
-		}
+	char* filePath;
+	bool	success;
+	
+	success = false;														// Start without success.
+	filePath = numberedFilePath(TEMP_FOLDER,"efp",".tmp");	// Find an unused valid temp file path.
+	if (filePath) {														// If we succeeded in this task..
+		db.trace("filePath :",filePath,false);
+		if (resizeBuff(strlen(filePath)+1,&editFilePath)) {	// If we can allocate the RAM to save this path.
+			strcpy(editFilePath,filePath);							// Set our edit file path to this temp file path.
+			success = true;												// Success!
+		}																		//
+		resizeBuff(0,&filePath);										// Recycle the RAM.
 	}
-	return false;															// If we got here, we've failed.
+	return success;															// If we got here, we've failed.
 }
-
-
-
-
 
 										
 					

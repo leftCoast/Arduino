@@ -144,34 +144,32 @@ RGBpack bmpImage::getRawPixel(int x,int y) {
 	RGBpack	aPack;
 	uint32_t	index;
 	
-	if (mode != fClosed) {							// If we are not closed. IE valid open file.
-		index = fileIndex(x,y);						// Do the math for this pixel index.
-		if (index != ourFile.position()) {		// If we are NOT already there..
-			ourFile.seek(index);						// Point the file to our pixel.
-		}
-		ourFile.read(buf,pixBytes);				// Grab the pixel.
-		aPack.r = buf[2];								// Stuff the pack.
-		aPack.g = buf[1];
-		aPack.b = buf[0];
-	}
-	return aPack;
+	if (mode != fClosed) {			// If we are not closed. IE valid open file.
+		index = fileIndex(x,y);		// Do the math for this pixel index.
+		if (index != position()) {	// If we are NOT already there..
+			seek(index);				// Point the file to our pixel.
+		}									//
+		read(buf,pixBytes);			// Grab the pixel.
+		aPack.r = buf[2];				// Stuff the pack.
+		aPack.g = buf[1];				//
+		aPack.b = buf[0];				//
+	}										//
+	return aPack;						// Return the pack.
 }
 
 
-// Given an RGBpack, set this pixel in the temp image file to that color.
-// THIS is the one that should be inherited and filled out.
 void bmpImage::setRawPixel(int x,int y,RGBpack* anRGBPack) {
-	
+ST	
 	uint32_t	index;
-	
+
 	if (mode==fOpenToEdit || mode==fEdited) {		// If we are in an edit mode..
 		index = fileIndex(x,y);							// Do the math for this pixel index.
-		if (index != ourFile.position()) {			// If we are NOT already there..
-			ourFile.seek(index);							// Point the file to our pixel.
-		}
-		ourFile.write(anRGBPack->b);					// Write out the values.
-		ourFile.write(anRGBPack->g);
-		ourFile.write(anRGBPack->r);
+		if (index != position()) {						// If we are NOT already there..
+			seek(index);									// Point the file to our pixel.
+		}														//
+		write(anRGBPack->b);								// Write out the values.
+		write(anRGBPack->g);								//
+		write(anRGBPack->r);								//
 	}
 }
 
