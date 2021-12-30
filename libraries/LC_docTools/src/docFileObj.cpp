@@ -2,67 +2,90 @@
 #include <resizeBuff.h>
 #include <timeObj.h>
 
+#include <debug.h>
 
-#define TEMP_NAME_CHARS		8	// The max num chars for the temp file name 9999.tmp
-#define PATH_MIN_CHARS		6	// Min chars is /X.tmp
-//#define DEF_LOSE_EDIT_MSG	"Closing this file will cause you to loose these unsaved changes. Continue?"
 
-char*	tempDir = NULL;
-
-// Called to setup the temp directory. If there is one already set up it juts falls
-// through and returns true as a success. This is called automatically when needed and it
-// will use the default folder name. If you want a different location, you can call this
-// in setup() with a different name and all your document files will use that.
-bool createFolder(char* inPath) {
+// Returns true if this folderPath can be found, or created.
+bool createFolder(const char* folderPath) {
 
 	File	theDir;
 	int	numChars;
-	bool	addSlash;
 	bool	success;
 	char*	dirPath;
 	
-	if (tempDir) return true;							// If there already is a temp directory set up, bail!
-	if (inPath) {
-		dirPath = NULL;
-		if (resizeBuff(strlen(inPath)+1,&dirPath)) {
-			strcpy(dirPath,inPath);
-			addSlash = false;
-			success = false;
-			// WAIT!! Patching bug here. If you pass name/ and it fails, it crashes! No '/' no crash.
-			numChars = strlen(dirPath);                  // Lets see how long the path is.
-			if (dirPath[numChars-1]=='/') {					// If it has has a traileing '/'..            
-				dirPath[numChars-1]='\0';						// Clip off the trailing '/'.
-			} 
-			theDir=SD.open(dirPath,FILE_READ);				// Lets try to open the path they gave us.
-			if (theDir) {											// If we were able to open the path they gave us..
-				if (theDir.isDirectory()) {               // If its a directory..
-					numChars = strlen(dirPath);            // Lets see how long the path is now.
-					if (resizeBuff(numChars+2,&tempDir)) {	// If we can allocate the tempDir path string..
-						strcpy(tempDir,dirPath);				// Copy in the path we got.
-						strcat(tempDir,"/");						// Plus the '/' we pulled off of it.
-						success = true;							// Note our success.
-					}
-				}
-				theDir.close();									// Close the directory we opened.
-			} else {													// Else, there was no directory of that name..
-				if (SD.mkdir(dirPath)) {						// If we can create the directory.
-					numChars = strlen(dirPath);            // Lets see how long the path is.
-					if (dirPath[numChars-1]!='/') {			// If we DON'T have a traileing '/'.. 
-						numChars++;									// Add one for the '/'.
-						addSlash = true;							// Note that we'll need to add a '/'.
-					}
-					if (resizeBuff(numChars+1,&tempDir)) {	// If we can allocate the tempDir path string..
-						strcpy(tempDir,dirPath);				// Copy in the path we got.
-						if (addSlash) strcat(tempDir,"/");	// Plus the '/' if it was missing.
-						success = true;							// Note our success.
-					}
-				}
-			}
-			resizeBuff(0,&dirPath);
-		}
-	}
-	return success;
+	if (folderPath) {											// If we got a path. (Sanity)
+		numChars = strlen(folderPath);					// Lets see how long the path is.
+		if (folderPath[numChars-1]=='/') {				// Paths end in '/'. Make sure this has that.
+			dirPath = NULL;									// Dynamic starts with NULL.
+			if (resizeBuff(numChars+1,&dirPath)) {		// WAIT!! Patching bug here. If you pass 
+				strcpy(dirPath,folderPath);				// "name/" and it fails, it crashes!
+				success = false;								// No '/' no crash.
+				dirPath[numChars]='\0';						// Clip off the trailing '/'.
+				theDir=SD.open(dirPath,FILE_READ);		// Lets try to open the path they gave us.
+				if (theDir) {									// If we were able to open the path they gave us..
+					success = theDir.isDirectory();		// If its a directory, its a success.
+					theDir.close();							// Close the directory we opened.
+				} else {											// Else, there was no directory of that name..
+					success = SD.mkdir(dirPath);			// If we can create the directory, its a success.
+				}													//
+				resizeBuff(0,&dirPath);						// Toss the temp buff.
+			}														//
+		}															//
+	}																//
+	return success;											// Return whether we were a success or not?
+}																	
+
+
+// Given a path, baseName and extension this hands back a string with a path to an unused
+// numbered file. For example "/docs/NoName5.doc". IF it can not allocated this file it
+// will return NULL. IF THIS IS A SUCCESS, YOU MUST DE-ALLOCATE THE RETURNED STRING.
+char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension) {
+
+	File	tempFile;
+	char* result;
+	int	numBytes;
+	int	maxNum;
+	int	fileNum;
+	char	numStr[8];
+	bool	done;
+	
+	result = NULL;														// As always, dynamic stuff starts at NULL.
+	if (strlen(baseName)<8 											// If the params make sense..
+		&& strlen(extension)<=4 									//
+		&& folderPath[0]=='/') {									//
+		if (createFolder(folderPath)) {							// If we can find/create the folder..
+			maxNum = pow(10,8 - strlen(baseName));				// How many chars we got for a value?
+			maxNum--;													// Actually, you get one too many.
+			numBytes = strlen(folderPath) + 8 + 4 + 1;		// Path, max name, max extension, '\0'.
+			if (resizeBuff(numBytes,&result)) {					// If we can get the RAM..
+				fileNum = 1;											// Starting at one.
+				done = false;											// 'Cause we ain't.
+				do {														// Do for each..
+					itoa(fileNum++,numStr,7);						// Setup a number string.
+					strcpy(result,folderPath);						// Build up the test path.
+					strcat(result,baseName);						// Add the base name.
+					strcat(result,numStr);							// Add the number string.
+					strcat(result,extension);						// Add the extension.
+					tempFile = SD.open(result,FILE_READ);		//	Try to open this file for reading.
+					if (tempFile) {									// If the file opened..
+						tempFile.close();								// We just close it and move on.
+					} else {												// Else, we have a possible candidate here.
+						done = true;									// Either its the real deal or an error. In any case, we are done. 
+						tempFile = SD.open(result,FILE_WRITE);	// Try to create the file we couldn't open.
+						if (tempFile) {								// If we were able to create the file..
+							tempFile.close();							// Close it.
+							return result;								// And We'll call that a success!
+						}													//
+					}														//
+				} while(!done && fileNum<maxNum);				// Loop while we are not done. (And have numbers to go.)
+				resizeBuff(0,&result);								// If we get here, its a failure so recycle the RAM.
+			}																//
+		}																	//
+	}																		//
+	return result;														// And this'll be returning a NULL.
 }
+	
+
 
 
 // TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
@@ -129,7 +152,7 @@ void fcat(File dest,File src) {
 
 // A docFile object MUST have a path to exist. 	
 docFileObj::docFileObj(char* filePath) {
-	
+ST	
 	int numBytes;
 	
 	pathBuff			= NULL;									// Dynamic things start at NULL.
@@ -146,7 +169,7 @@ docFileObj::docFileObj(char* filePath) {
 
 
 docFileObj::~docFileObj(void) {
-
+ST
 	closeDocFile();					// Close files and Recycle the editFile stuff.
 	resizeBuff(0,&pathBuff);		// Recycle the pathBuff.
 	resizeBuff(0,&docFilePath);	// Recycle the docFilePath.
@@ -164,7 +187,7 @@ docFileObj::~docFileObj(void) {
 // when finished. But, before that, saveDocFile() needs to be called for saving changes to
 // the original file.
 bool docFileObj::openDocFile(int openMode) {
-
+ST
 	File	tempFile;
 	bool	success;
 	
@@ -224,7 +247,7 @@ bool docFileObj::openDocFile(int openMode) {
 // this case, no path is passed in? Its kind of.. "Shrug your shoulders and return false."
 // The user is obviously just not getting it.
 bool docFileObj::saveDocFile(char* newFilePath) {
-	
+ST	
 	File	tempFile;
 	bool	success;
 	
@@ -277,7 +300,7 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 // deleted. There is no checking if this is ok to do, or if data will be lost. All that is
 // up to the user of this object.
 void docFileObj::closeDocFile(void) {
-
+ST
 	switch(mode) {
 		case fClosed		: break;
 		case fOpenToRead	:
@@ -296,7 +319,7 @@ void docFileObj::closeDocFile(void) {
 
 
 bool docFileObj::changeDocFile(char* newPath) {
-
+ST
 	int	numBytes;
 	
 	if (mode==fClosed) {											// If the file is closed.
@@ -304,6 +327,7 @@ bool docFileObj::changeDocFile(char* newPath) {
 			numBytes = strlen(newPath)+1;						// Calculate the number of bytes to store it.
 			if (resizeBuff(numBytes,&docFilePath)) {		// If we get the RAM to store it..
 				strcpy(docFilePath,newPath);					// Save the path.
+				db.trace("Change Success!",false);
 				return true;										// Success!
 			}
 		}
@@ -312,7 +336,7 @@ bool docFileObj::changeDocFile(char* newPath) {
 }
 
 
-bool docFileObj::fileEdited(void) { return mode==fEdited; }
+bool docFileObj::fileEdited(void) { ST return mode==fEdited; }
 
 
 byte docFileObj::peek(void) {
@@ -409,7 +433,7 @@ bool docFileObj::checkDoc(File inFile) { return false; }
 // This finds a unused file name in the named folder then checks to make sure it can be
 // created/opened. Once this is accomplished, it closes the tempFile and returns success.
 bool docFileObj::createTempFile(const char* folderPath,const char* extension) {
-
+ST
 	File		tempFile;
 	timeObj	timeOut(FILE_SEARCH_MS);
 	char		fileNumStr[4];
@@ -450,7 +474,7 @@ bool docFileObj::createTempFile(const char* folderPath,const char* extension) {
 
 // Find an unused temp file and assign it to the edit file path.
 bool docFileObj::createEditPath(void) {
-	
+ST	
 	if (createTempFile(TEMP_FOLDER,".tmp")) {							// If we can find an unused valid temp file path.
 		if (resizeBuff(strlen(pathBuff)+1,&editFilePath)) {	// If we can allocate the RAM to save this path.
 			strcpy(editFilePath,pathBuff);							// Set our edit file path to this temp file path.

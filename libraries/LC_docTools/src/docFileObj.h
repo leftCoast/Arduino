@@ -44,8 +44,9 @@
 #include <SD.h>
 
 
-bool createTempDir(char* dirPath);
-
+//bool createTempDir(char* dirPath);
+char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension);
+	
 	
 class docFileObj {
 
@@ -55,8 +56,7 @@ class docFileObj {
 					docFileObj(char* filePath);
 	virtual		~docFileObj(void);
 	
-	virtual		void			setNewFileParams(void)=0;			// Set up whatever info. needed to create a new file.
-	virtual		bool			newDocFile(char* folderPath)=0;	// Using the info. create a new numbered file.
+	virtual		bool			createNewDocFile(void) = 0;
 	virtual		bool			openDocFile(int openMode);
 	virtual		bool			saveDocFile(char* newFilePath=NULL);
 					void			closeDocFile(void);

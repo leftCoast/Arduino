@@ -1,6 +1,8 @@
 #include "bmpImage.h"
 #include <resizeBuff.h>
 
+#include <debug.h>
+
 
 #define DEF_IMAGE_OFFSET	54
 #define DEF_DEPTH				32
@@ -54,9 +56,8 @@ void write32(uint32_t val, File f) {
 // ********************** Create new .bmp file function *********************
 // **************************************************************************
 
- 
-bool createNewBmpFile(char* newPath,int inWidth,int inHeight) {
-
+bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
+ST
 	File		bmpFile;
 	bool		success;
 	uint32_t	pixBytes;
@@ -99,36 +100,40 @@ bool createNewBmpFile(char* newPath,int inWidth,int inHeight) {
 
 
 bmpImage::bmpImage(char* filePath)
-	: baseImage(filePath) {  }
+	: baseImage(filePath) { newImgPath = NULL; }
 
 
-bmpImage::~bmpImage(void) {  }
+bmpImage::~bmpImage(void) { resizeBuff(0,&newImgPath); }
 
 
-// A inheritable method that sets the x,y size of a new image file.
-void bmpImage::setNewFileParams(void) {
-	newW = 32;
-	newH = 32;
+// Setup for the next createNewDocFile() call.
+void bmpImage::setPWH(char* imgPath,int w,int h) { 
+
+	if (resizeBuff(strlen(imgPath)+1,&newImgPath)) {
+		strcpy(newImgPath,imgPath);
+	}
+	newW	= w;
+	newH	= h;
 }
 
 
-// Once the image params are setup. We can call this to create the file.
-bool bmpImage::newDocFile(char* folderPath) {
+bool bmpImage::setNewBMPFile(char* BMPPath,int w,int h) {
 
-	bool success;
+	bool	success;
 	
-	success = false;												// Not a success yet.
-	closeDocFile();												// Close the original file, if any.
-	if (createTempFile(folderPath,".BMP")) {				// If we can create a suitable path..
-		if (createNewBmpFile(pathBuff,newW,newH)) {		// If, using this path we can create a new file..
-			if (changeDocFile(pathBuff)) {					// If we can change to this new path..
-				success = true;									// That's a success!
-			}															//
-		}																//
-		resizeBuff(0,&pathBuff);								// Loose the buffer.
-	}																	//
-	return success;												// Return our success.
+	success = false;									// Not a success yet.
+	closeDocFile();									// Close the original file, if any.
+	if (createNewBMPFile(BMPPath,w,h)) {		// If we can setup the new file..
+		if (changeDocFile(BMPPath)) {				// If we can change to this new file..
+			success = openDocFile(FILE_WRITE);	// Success means we can open this new file for writing.
+		}													//
+	}														//
+	return success;									// Return our success.
 }
+
+
+// We get a general "We need a new file now" call. So using defaults..
+bool bmpImage::createNewDocFile(void) { return setNewBMPFile(newImgPath,newW,newH); }
 
 
 // Grab a pixel from this location from your image file.
@@ -174,7 +179,7 @@ void bmpImage::setRawPixel(int x,int y,RGBpack* anRGBPack) {
 // Open the doc file and see if its what we expect. Then grab out the info. we need to
 // "deal" with it.
 bool bmpImage::checkDoc(File bmpFile) {
-
+ST
 	uint32_t	creatorBits;	// A thing that seems to always be zero.
 	uint32_t	DIBHeaderSize;	// And so is this thing.
 	int32_t	imageHeight;	// Used as a temp. Can be negative.
@@ -204,6 +209,7 @@ bool bmpImage::checkDoc(File bmpFile) {
 			}
 		}
 	}
+	db.trace("checking :",success,false);
 	return success;
 }
 

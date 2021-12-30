@@ -6,6 +6,8 @@ char* iconFolder = NULL;
 
 iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath) 
 	: bmpObj(inX,inY,inWidth,inHeight,filePath) {
+	ST
+	db.trace(filePath,false);
 	
 	setEventSet(touchLift);
 	editColor.setColor(&red);
@@ -18,7 +20,7 @@ iconEditScr::~iconEditScr(void) {  }
 
 
 void iconEditScr::doAction(event* inEvent,point* locaPt) {
-
+ST
 	int xPix;
 	int yPix;
 	
@@ -36,7 +38,6 @@ ST
 	colorObj	aColor;
 	
 	if (mode!=fClosed) {
-		db.trace("Drawing editor",false);
 		for(int ty=0;ty<drawObj::height/scale;ty++) {
 			for(int tx=0;tx<drawObj::width/scale;tx++) {
 				aColor = getPixel(tx+offsetX,ty+offsetY);

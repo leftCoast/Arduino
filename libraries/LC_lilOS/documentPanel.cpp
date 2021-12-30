@@ -85,20 +85,16 @@ askOkObj::~askOkObj(void) {  }
 
 
 // Our handy dandy constructor.
-documentPanel::documentPanel(int panelID,char* inDocFolder,menuBarChoices menuBarChoice,eventSet inEventSet)
+documentPanel::documentPanel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
 	: panel(panelID,menuBarChoice,inEventSet) {
 	
-	askAlert		= NULL;												// NULL out all the dynamic stuff for starters.
-	selectAlert	= NULL;												// NULL
-	saveAlert	= NULL;												// NULL
-	docFolder	= NULL;												//	You get the picture..
-	ourDoc		= NULL;												//
-	filter		= appleFilter;										// Filter function gets defaulted to Apple junk stripper.
-	if (resizeBuff(strlen(inDocFolder)+1,&docFolder)) {	// If we can allocate the RAM for the folder path..
-		strcpy(docFolder,inDocFolder);							// Copy the folder path.
-	}
-	ourState			= noFile;										// Actually no file object. But this
-}																			// really means is no file IN the object.
+	askAlert		= NULL;							// NULL out all the dynamic stuff for starters.
+	selectAlert	= NULL;							// NULL
+	saveAlert	= NULL;							// NULL
+	ourDoc		= NULL;							//
+	filter		= appleFilter;					// Filter function gets defaulted to Apple junk stripper.
+	ourState		= haveFileNoNameNoEdits;	// Well, it'll be this once the docObj is created..
+}
 
 
 // Destructor. Alerts auto-destruct as do any drawObjects. We need to deal with the
@@ -106,7 +102,6 @@ documentPanel::documentPanel(int panelID,char* inDocFolder,menuBarChoices menuBa
 documentPanel::~documentPanel(void) {
 
 	if (ourDoc) delete(ourDoc);	// Loose the document object.
-	resizeBuff(0,&docFolder);		// And this needs to go.
 }
 
 
@@ -120,28 +115,26 @@ ST
 	mMenuBar->addObj(ourOpenBtn);
 	stdComBtn* ourSaveBtn = newStdBtn(120,1,icon22,saveFileCmd,this);
 	mMenuBar->addObj(ourSaveBtn);
-	handleCom(newFileCmd);
 }
 
 void documentPanel::closing(void) {ST if (ourDoc) ourDoc->closeDocFile(); }
-
-
-// We have no file to edit..
-void documentPanel::handleComNoFile(stdComs comID) {
+					
+					
+// We have a file, but it's closed..
+void documentPanel::handleComFileClosed(stdComs comID) {
 ST	
-	switch(comID) {																	// Checking for each command..
-		case newFileCmd	:															// Ask for a new file to be created.
-			ourDoc->setNewFileParams();											// Setup for creating a new file.
-			if (ourDoc->newDocFile(docFolder)) {								// If we can create this new file..
-				ourState = haveFileNoNameNoEdits;								// Our state is now, have file, no name, no edits.
-			}																				//
-		break;																			// And we're all done.
-		case openFileCmd	:															// Ask to choose a file to edit.
-			selectAlert = new selectFileObj(this,noFile,comID,filter);	// Open the select file alert.
-			ourState = selectOpen;													// Our state is now selectAlert is open.
-		break;																			// And again, we are done.
-		case saveFileCmd	: break;													// Save file? Pointless, we'll do nothing of the kind!
-		default: panel::handleCom(comID);										// Everything else we pass up the chain.
+	switch(comID) {																			// Checking for each command..
+		case newFileCmd	:																	// Ask for a new file to be created.
+			if (ourDoc->createNewDocFile()) {											// If we can create this new file..
+				ourState = haveFileNoNameNoEdits;										// Our state is now, have file, no name, no edits.
+			}																						//
+		break;																					// And we're all done.
+		case openFileCmd	:																	// Ask to choose a file to edit.
+			selectAlert = new selectFileObj(this,fileClosed,comID,filter);		// Open the select file alert.
+			ourState = selectOpen;															// Our state is now selectAlert is open.
+		break;																					// And again, we are done.
+		case saveFileCmd	: break;															// Save file? Pointless, we'll do nothing of the kind!
+		default: panel::handleCom(comID);												// Everything else we pass up the chain.
 	}
 }
 
@@ -168,9 +161,8 @@ void documentPanel::handleComHaveNamedFileNoEdits(stdComs comID) {
 ST	
 	switch(comID) {																						// Checking for each command..
 		case newFileCmd	:																				// Ask for a new file to be created.
-			ourDoc->setNewFileParams();																// Setup for creating a new file.
-			if (ourDoc->newDocFile(docFolder)) {													// If we can create this new file..
-				ourState = haveFileNoNameNoEdits;													// Our state is now, have file, no name, no edits.
+			if (ourDoc->createNewDocFile()) {													// If we can create this new file..
+				ourState = haveFileNoNameNoEdits;												// Our state is now, have file, no name, no edits.
 			}																									//
 		break;																								// Sign off.
 		case openFileCmd	:																				// They want to open a different file..
@@ -223,7 +215,9 @@ ST
 	switch(comID) {																	// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:															// Ok ws cliked..
 			if (ourDoc->changeDocFile(selectAlert->getPathResult())) {	// If we can change to this new file..
-				ourState = haveNamedFileNoEdits;									// We have a named file with no edits yet.
+				if (ourDoc->openDocFile(FILE_WRITE)) {							// Open the damn file.
+					ourState = haveNamedFileNoEdits;								// We have a named file with no edits yet.
+				} 
 			} else {																		// Else, something went wrong..
 				ourState = selectAlert->getLastState();						// Sad, we go back to where we were.
 			}																				//
@@ -256,26 +250,25 @@ ST
 
 void documentPanel::handleComAskOpen(stdComs comID) {
 ST
-	switch(comID) {																				// With an Alert open, we only check the okCmd & cancelCmd
-		case okCmd			:																		// Ok ws cliked..
-			ourDoc->closeDocFile();																// Close the file, loose the changes.
-			ourState = noFile;																	// Right now, our state is noFile.
-			if (askAlert->getLastComID()==newFileCmd) {									// They were asking for a new file to be created..
-				ourDoc->setNewFileParams();													// Setup for creating a new file.
-				if (ourDoc->newDocFile(docFolder)) {										// If we can create this new file..
-					ourState = haveFileNoNameNoEdits;										// Our state is now, have file, no name, no edits.
-				}																						//																				//
+	switch(comID) {																					// With an Alert open, we only check the okCmd & cancelCmd
+		case okCmd			:																			// Ok ws cliked..
+			ourDoc->closeDocFile();																	// Close the file, loose the changes.
+			ourState = fileClosed;																	// Right now, our state is fileClosed.
+			if (askAlert->getLastComID()==newFileCmd) {										// They were asking for a new file to be created..
+				if (ourDoc->createNewDocFile()) {												// If we can create this new file..
+					ourState = haveFileNoNameNoEdits;											// Our state is now, have file, no name, no edits.
+				}																							//																				//
 			} else if (askAlert->getLastComID()==openFileCmd) {							// They wanted to open a different file..
-				selectAlert = new selectFileObj(this,noFile,openFileCmd,filter);	// Open the select file alert.
-				ourState = selectOpen;															// Now our state is select open.
-			} else if (askAlert->getLastComID()==closeCmd) {							// They wanted the panel closed..
-				panel::handleCom(closeCmd);													// This one, we pass up the chain.
-			}																							//
-		break;																						// Done, Whew!
-		case cancelCmd		:																		// Cancel was clicked..
-			ourState = askAlert->getLastState();											// Return to previous state.
-		break;																						//
-		default: panel::handleCom(comID);													// Everything else we pass up the chain.
+				selectAlert = new selectFileObj(this,fileClosed,openFileCmd,filter);	// Open the select file alert.
+				ourState = selectOpen;																// Now our state is select open.
+			} else if (askAlert->getLastComID()==closeCmd) {								// They wanted the panel closed..
+				panel::handleCom(closeCmd);														// This one, we pass up the chain.
+			}																								//
+		break;																							// Done, Whew!
+		case cancelCmd		:																			// Cancel was clicked..
+			ourState = askAlert->getLastState();												// Return to previous state.
+		break;																							//
+		default: panel::handleCom(comID);														// Everything else we pass up the chain.
 	}
 }
 
@@ -286,14 +279,14 @@ void documentPanel::handleCom(stdComs comID) {
 	if (ourDoc) {																								// If we have a fileObj..
 		if (ourDoc->fileEdited()) {																// If it has changes..
 			switch(ourState) {																				// For these unedited states..
-				case noFile						: 																// noFile and..
+				case fileClosed				: 																// fileClosed and..
 				case haveFileNoNameNoEdits	: ourState = hasEditsNoName; break;					// no name no edits -> hasEditsNoName.
 				case haveNamedFileNoEdits	: ourState = hasEditsNamed; break;					// Has Name no edits -> hasEditsNamed.
 				default							: break;														// Shut up compiler!
 			}																										//
 		}																											//
 		switch(ourState) {																					// For each state we can be in..
-			case noFile						: handleComNoFile(comID);						break;	// We have a handeler
+			case fileClosed				: handleComFileClosed(comID);					break;	// We have a handeler
 			case haveFileNoNameNoEdits	: handleComHaveFileNoNameNoEdits(comID);	break;	// to deal with it.
 			case haveNamedFileNoEdits	: handleComHaveNamedFileNoEdits(comID);	break;	//
 			case hasEditsNoName			: handleComHasEditsNoName(comID);			break;	//

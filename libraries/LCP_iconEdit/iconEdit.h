@@ -5,7 +5,7 @@
 #include	<iconEditScr.h>
 #include <documentPanel.h>
 
-#define DEF_FLDR	"/EIcons/"
+#define ICON_FLDR	"/EIcons/"
 
 
 class iconEdit	: public documentPanel {
@@ -18,6 +18,8 @@ class iconEdit	: public documentPanel {
 	virtual	void	createDocObj(void);
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
+	virtual	void	handleComHaveNamedFileNoEdits(stdComs comID);
+	virtual	void	handleComAskOpen(stdComs comID);
 	virtual	void	handleCom(stdComs comID);
 	
 };

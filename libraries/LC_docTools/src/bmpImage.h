@@ -5,7 +5,8 @@
 #include <colorObj.h>
 
 
-extern bool createNewBmpFile(char* newPath,int inWidth,int inHeight);
+bool createNewBMPFile(char* newPath,int inWidth,int inHeight);
+
 
 class bmpImage :	public baseImage {
 
@@ -13,8 +14,9 @@ class bmpImage :	public baseImage {
 				bmpImage(char* filePath);
 	virtual	~bmpImage(void);
 	
-	virtual	void		setNewFileParams(void);				// Set up whatever info. needed to create a new .bmp file.
-	virtual	bool		newDocFile(char* folderPath);		// Using the info. create a new numbered file.
+				void		setPWH(char* imgPath,int w,int h);
+	virtual	bool		setNewBMPFile(char* BMPPath,int w,int h);
+	virtual	bool		createNewDocFile(void);
 	virtual	RGBpack	getRawPixel(int x,int y);
 	virtual	void		setRawPixel(int x,int y,RGBpack* anRGBPack);	
 	virtual	bool		checkDoc(File inFile);
@@ -22,6 +24,7 @@ class bmpImage :	public baseImage {
 					
 	protected:
 				
+				char*		newImgPath;
 				int		newW;
 				int		newH;
 				bool		rightSideUp;

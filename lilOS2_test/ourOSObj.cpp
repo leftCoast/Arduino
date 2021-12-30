@@ -95,6 +95,7 @@ char* ourOSObj::getPanelFolder(int panelID) {
 //         strcpy(pathBuff,getSystemFolder());
 //         strcat(pathBuff,"icons/standard/");
 //         return pathBuff;
-//      default           : return NULL;
+//      break;
+      default           : return NULL;
    }
 }

@@ -16,7 +16,7 @@
 extern bool appleFilter(const char* fileName);
 
 
-enum docPanelStates {	noFile, haveFileNoNameNoEdits, haveNamedFileNoEdits, 
+enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,
 								hasEditsNoName, hasEditsNamed, selectOpen, saveOpen, askOpen };
 
 
@@ -93,13 +93,14 @@ class askOkObj :	public alertObj,
 
 class documentPanel :	public panel {
 	public :
-				documentPanel(int panelID,char* inDocFolder,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+				documentPanel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~documentPanel(void);
 	
 	virtual	void	createDocObj(void)=0;	// This is where YOU plug in the KIND of document object you want.
 	virtual	void	setup(void);
 	virtual	void	closing(void);
-	virtual	void	handleComNoFile(stdComs comID);
+	virtual	void	handleComFileClosed(stdComs comID);
+	//virtual	void	handleComNoFile(stdComs comID);
 	virtual	void	handleComHaveFileNoNameNoEdits(stdComs comID);
 	virtual	void	handleComHaveNamedFileNoEdits(stdComs comID);
 	virtual	void	handleComHasEditsNoName(stdComs comID);
@@ -109,7 +110,6 @@ class documentPanel :	public panel {
 	virtual	void	handleComAskOpen(stdComs comID);
 	virtual	void	handleCom(stdComs comID);
 	
-				char*				docFolder;
 				docPanelStates	ourState;
 				askOkObj*		askAlert;
 				selectFileObj*	selectAlert;

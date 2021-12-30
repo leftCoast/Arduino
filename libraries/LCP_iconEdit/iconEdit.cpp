@@ -1,4 +1,5 @@
 #include <iconEdit.h>
+#include <resizeBuff.h>
 
 #include <debug.h>
 
@@ -15,24 +16,27 @@ bool iconEditFilter(const char* fileName) { return appleFilter(fileName); }
 
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
-	: documentPanel(ourAppID,DEF_FLDR) { }
+	: documentPanel(ourAppID) { ST }
 
 
 // The world as you know it, is ending..
-iconEdit::~iconEdit(void) { }
-
-
-// This sets up a path for a new document. We override the original so that they will all
-// get made with OUR extension.
-//bool iconEdit::setNewDocPath(const char* extension) { documentPanel::setNewDocPath(".bmp"); }
+iconEdit::~iconEdit(void) { ST }
 
 
 // This creates the docFileObj that's used as the manager for whatever file we are
 // editing. It is declared as a pure virtual, so we can/must use it to make OUR kind of
 // document.
 void iconEdit::createDocObj(void) { 
-ST
-	ourDoc = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,docFolder);
+	
+	char* newFilePath;
+	
+	newFilePath = numberedFilePath(ICON_FLDR,"icon",".bmp");											// Looking at our folder, create an unused file name.
+	if (newFilePath) {																							// If we got that name..
+		if (createNewBMPFile(newFilePath,32,32)) {														// Setup that file as a blank, readable .BMP file.
+			ourDoc = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,newFilePath);	// Create our actual docFileObj.
+		}																												//
+		resizeBuff(0,&newFilePath);																				// Recycle our copy of the file path.
+	}
 }
 
 
@@ -61,7 +65,70 @@ ST
 }
 
 
+void iconEdit::handleComHaveNamedFileNoEdits(stdComs comID) {
+ST	
+	char* newFilePath;
+	
+	newFilePath = NULL;
+	switch(comID) {																						// Checking for each command..
+		case newFileCmd	:																				// Ask for a new file to be created.
+			newFilePath = numberedFilePath(ICON_FLDR,"icon",".bmp");							// Looking at our folder, create an unused file name.
+			if (newFilePath) {																			// If we got that name..
+				if (createNewBMPFile(newFilePath,32,32)) {										// Set up the file as a readable .bmp image.
+					((iconEditScr*)ourDoc)->setPWH(newFilePath,32,32);							// Set up the document's new file defaults.
+					if (ourDoc->createNewDocFile()) {												// If we can create this new file..
+						ourState = haveFileNoNameNoEdits;											// Our state is now, have file, no name, no edits.
+					}																							//
+				}																								//
+				resizeBuff(0,&newFilePath);															// Recycle the path buff.
+			}																									//
+		break;																								// Sign off.
+		case openFileCmd	:																				// They want to open a different file..
+			selectAlert = new selectFileObj(this,haveNamedFileNoEdits,comID,filter);	// Open the select file alert.
+			ourState = selectOpen;																		// Our state is now selectAlert is open.
+		break;																								// Exit.
+		case saveFileCmd	: break;																		// Save nothing? Again, pointless. Exit.
+		default: panel::handleCom(comID);															// Everything else we pass up the chain.
+	}
+}
 
-void  iconEdit::handleCom(stdComs comID) { documentPanel::handleCom(comID); }
+
+void iconEdit::handleComAskOpen(stdComs comID) {
+ST
+	char* newFilePath;
+	
+	newFilePath = NULL;
+	switch(comID) {																					// With an Alert open, we only check the okCmd & cancelCmd
+		case okCmd			:																			// Ok ws cliked..
+			ourDoc->closeDocFile();																	// Close the file, loose the changes.
+			ourState = fileClosed;																	// Right now, our state is fileClosed.
+			if (askAlert->getLastComID()==newFileCmd) {										// They were asking for a new file to be created..
+				newFilePath = numberedFilePath(ICON_FLDR,"icon",".bmp");					// Looking at our folder, create an unused file name.
+				if (newFilePath) {																	// If we got that name..
+					if (createNewBMPFile(newFilePath,32,32)) {								// Set up the file as a readable .bmp image.
+						((iconEditScr*)ourDoc)->setPWH(newFilePath,32,32);					// Set up the document's new file defaults.
+						if (ourDoc->createNewDocFile()) {										// If we can create this new file..
+							ourState = haveFileNoNameNoEdits;									// Our state is now, have file, no name, no edits.
+						}																					//
+					}																						//
+					resizeBuff(0,&newFilePath);													// Recycle the path buff.
+				}																							//																				//
+			} else if (askAlert->getLastComID()==openFileCmd) {							// They wanted to open a different file..
+				selectAlert = new selectFileObj(this,fileClosed,openFileCmd,filter);	// Open the select file alert.
+				ourState = selectOpen;																// Now our state is select open.
+			} else if (askAlert->getLastComID()==closeCmd) {								// They wanted the panel closed..
+				panel::handleCom(closeCmd);														// This one, we pass up the chain.
+			}																								//
+		break;																							// Done, Whew!
+		case cancelCmd		:																			// Cancel was clicked..
+			ourState = askAlert->getLastState();												// Return to previous state.
+		break;																							//
+		default: panel::handleCom(comID);														// Everything else we pass up the chain.
+	}
+}
+
+
+
+void  iconEdit::handleCom(stdComs comID) { ST documentPanel::handleCom(comID); }
 
 
