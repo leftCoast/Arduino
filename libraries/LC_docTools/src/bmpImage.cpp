@@ -68,6 +68,8 @@ ST
 	success = false;															// Ok, assume failure..									
 	bmpFile = SD.open(newPath,FILE_WRITE);								// See if its a valid path.
 	if (bmpFile) {    														// We got a file?
+		
+		// File header 14 bytes.
 		write16(0x4D42,bmpFile);											// It wants this. Whatever.
 		pixBytes		= DEF_DEPTH / 8;										// Calc. bytes per pixel.
 		bytesPerRow	= inWidth * pixBytes;								// Calc bytes per row.
@@ -75,16 +77,34 @@ ST
 		fileSize = DEF_IMAGE_OFFSET + (inHeight * bytesPerRow);	// Calc. fileSize.
 		write32(fileSize,bmpFile);											// Calculate and write out the file size.
 		write32(0,bmpFile);													// write out our creator bits. All I've seen are zero.
-		write32(DEF_IMAGE_OFFSET,bmpFile);								// Image offset. Always sees to be 54. Size of header?
-		write32(40,bmpFile);													// DIB Header size. Always seems to be 40.
+		write32(DEF_IMAGE_OFFSET,bmpFile);								// Image offset. Always seems to be 54. Size of header?
+		
+		// DIB Header
+		write32(40,bmpFile);													// DIB Header size. Always seems to be 40. 40->BITMAPINFOHEADER
 		write32(inWidth,bmpFile);											// Width.
-		write32(inHeight,bmpFile);											// Height.
+		write32(inHeight,bmpFile);											// Height. (Positive, upside down)
+		
 		write16(1,bmpFile);													// It wants a one here. Why? Its a mystery to me.
-		write32(DEF_DEPTH,bmpFile);										// We're going for 32 bit image stuff here.
+		write16(DEF_DEPTH,bmpFile);										// We're going for 32 bit image stuff here.
 		write32(0,bmpFile);													// No compression.
 		imageBytes = bytesPerRow * inHeight;							// Calc. total image bytes.
-		for (uint32_t i=0;i<imageBytes;i++) {							// For every bloody byte of pixel data..
-			bmpFile.write(255);												// Fill image space with white.
+		write32(imageBytes,bmpFile);										// Stuff it in.
+		
+		int index;
+		byte buff[4];
+		
+		for (int y=0;y<1/*inHeight*/;y++) {
+			for (int x=0;x<inWidth;x++) {
+				index = DEF_IMAGE_OFFSET;											// Starting here..
+				index = index + ((inHeight-y-1)*bytesPerRow);					// Upside down.
+				index = index + (x * pixBytes);							
+				bmpFile.seek(index);
+					buff[0] = 000;	// BLUE
+					buff[1] = 000; // GREEN
+					buff[2] = 255; // RED
+					buff[3] = 000; // Padding?
+				bmpFile.write(buff,4);
+			}
 		}
 		bmpFile.close();														// Default file has been initialized. Close the file.
 		success = true;														// Made it this far? We're calling this a success!

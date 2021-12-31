@@ -77,6 +77,7 @@ ST
 				if (createNewBMPFile(newFilePath,32,32)) {										// Set up the file as a readable .bmp image.
 					((iconEditScr*)ourDoc)->setPWH(newFilePath,32,32);							// Set up the document's new file defaults.
 					if (ourDoc->createNewDocFile()) {												// If we can create this new file..
+						((iconEditScr*)ourDoc)->setNeedRefresh();									// Going to need a re-draw.
 						ourState = haveFileNoNameNoEdits;											// Our state is now, have file, no name, no edits.
 					}																							//
 				}																								//

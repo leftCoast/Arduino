@@ -161,8 +161,8 @@ void documentPanel::handleComHaveNamedFileNoEdits(stdComs comID) {
 ST	
 	switch(comID) {																						// Checking for each command..
 		case newFileCmd	:																				// Ask for a new file to be created.
-			if (ourDoc->createNewDocFile()) {													// If we can create this new file..
-				ourState = haveFileNoNameNoEdits;												// Our state is now, have file, no name, no edits.
+			if (ourDoc->createNewDocFile()) {														// If we can create this new file..
+				ourState = haveFileNoNameNoEdits;													// Our state is now, have file, no name, no edits.
 			}																									//
 		break;																								// Sign off.
 		case openFileCmd	:																				// They want to open a different file..
