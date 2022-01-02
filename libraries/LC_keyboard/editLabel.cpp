@@ -1,7 +1,8 @@
 #include <editLabel.h>
 #include <resizeBuff.h>
 #include <mapper.h>
-#include <debug.h>
+
+//#include <debug.h>
 
 editLabel::editLabel()
 	: label(),

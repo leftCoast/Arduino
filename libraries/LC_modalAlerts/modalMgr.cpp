@@ -1,5 +1,6 @@
 #include <modalMgr.h>
-#include <debug.h>
+
+//#include <debug.h>
 
 modalMgr	ourModalMgr;
 

@@ -158,7 +158,7 @@ void fileListItem::setThisFocus(bool setLoose) {
 // **************************************************************
 
 
-fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(char*))
+fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(pathItem*))
 	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
 	
 	filterFx			= funct;
@@ -187,7 +187,7 @@ void	fileListBox::setFileDir(fileDir* inFileDir) {  ourFileDir = inFileDir; }
 bool fileListBox::checkFile(pathItem* trace) {
 	
 	if (filterFx) {
-		return filterFx(trace->getName());
+		return filterFx(trace);
 	}
 	return true;
 }
@@ -350,7 +350,7 @@ char* fileDir::endChoice(void) {
 // **************************************************************
 
 
-fileViewer::fileViewer(listener* inListener,bool(*funct)(char*))
+fileViewer::fileViewer(listener* inListener,bool(*funct)(pathItem*))
 	:alertObj("Default name",NULL,noIconAlert,true,true) {
 	
 	ourListener		= inListener;
@@ -381,11 +381,11 @@ fileViewer::~fileViewer(void) {  }
 
 
 // This is the default path we want to show.
-// void fileViewer::setPath(char* inPath) {
-// 	
-// 	ourFileDir->setPath(inPath); 
-// 	ourFileDir->refresh();
-// }
+void fileViewer::setPath(char* inPath) {
+	
+	ourFileDir->setPath(inPath); 
+	ourFileDir->refresh();
+}
 	
 // And we handle commands from our things.
 void fileViewer::handleCom(stdComs comID) {  alertObj::handleCom(comID); }

@@ -61,7 +61,9 @@ class docFileObj {
 					void			closeDocFile(void);
 					bool			changeDocFile(char* newPath);
 					void			setAsAutoGen(bool trueFalse=true);
-					bool			fileEdited();	
+					bool			fileEdited();
+					char*			getName(void);
+					char*			getFolder(void);	
 					byte			peek(void);
 					uint32_t		position(void);
 					bool			seek(uint32_t index);

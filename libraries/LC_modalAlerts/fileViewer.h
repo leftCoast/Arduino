@@ -43,7 +43,7 @@ class fileListItem :	public drawGroup {
 class fileListBox :	public scrollingList {
 
 	public:
-				fileListBox(int x, int y, int width,int height,bool(*funct)(char*));
+				fileListBox(int x, int y, int width,int height,bool(*funct)(pathItem*));
 	virtual	~fileListBox(void);
 				
 				void	setFileDir(fileDir* inFileDir);
@@ -51,7 +51,7 @@ class fileListBox :	public scrollingList {
 	virtual	void	fillList(void);
 	virtual	void	drawSelf(void);
 	
-				bool		(*filterFx)(char*);
+				bool		(*filterFx)(pathItem*);
 				fileDir*	ourFileDir;
 				bmpObj*	folderBmp;
 				bmpObj*	docBmp;
@@ -98,10 +98,10 @@ class fileDir :	public drawGroup,
 class fileViewer :	public alertObj {
 
 	public:
-				fileViewer(listener* inListener,bool(*funct)(char*));
+				fileViewer(listener* inListener,bool(*funct)(pathItem*));
 	virtual	~fileViewer(void);
 	
-	//virtual	void	setPath(char* inPath);
+	virtual	void	setPath(char* inPath);
 	virtual	void	handleCom(stdComs comID);
 	virtual	char*	getPathResult(void);
 	

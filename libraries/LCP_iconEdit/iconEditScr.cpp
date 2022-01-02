@@ -1,6 +1,6 @@
 #include <iconEditScr.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 char* iconFolder = NULL;
 
@@ -11,8 +11,8 @@ iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath
 	setEventSet(touchLift);
 	editColor.setColor(&red);
 	scale = SCALE;
-	xMap.setValues(0,inWidth-1,0,31);
-	yMap.setValues(0,inHeight-1,0,31);
+	xMap.setValues(inX+1,inWidth+inX-1,0,32);
+	yMap.setValues(inY+1,inHeight+inY-1,0,32);
 	openDocFile(FILE_WRITE);
 }
 
@@ -21,9 +21,7 @@ iconEditScr::~iconEditScr(void) {  }
 
 
 void iconEditScr::doAction(event* inEvent,point* locaPt) {
-ST
-	
-	
+
 	int xPix;
 	int yPix;
 	
@@ -31,15 +29,13 @@ ST
 	if (inEvent->mType==touchEvent) {
 		xPix = xMap.map(locaPt->x);
 		yPix = yMap.map(locaPt->y);
-		//xPix = inEvent->mTouchPos.x/scale;
-		//yPix = inEvent->mTouchPos.y/scale;
 		setPixel(xPix,yPix,&red);
 	}
 }	
 
 
 void iconEditScr::drawSelf(void) {
-ST
+
 	colorObj	aColor;
 	
 	if (mode!=fClosed) {

@@ -5,7 +5,7 @@
 #include <editLabel.h>
 #include <colorRect.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 // The overall size and placement of the save d-box.
 #define SAVE_X			30
@@ -85,7 +85,6 @@ deleteAlert::deleteAlert(listener* inListener,filePath* inPath,char* selectName)
 				setMsg(resultMsg);
 			} else {
 				setMsg("Whatever! this is messed up!");
-				db.trace("selectName:",selectName,false);
 			}
 			resizeBuff(0,&resultMsg);
 		}
@@ -276,7 +275,7 @@ char* saveFileDir::endChoice(void) {
 
 
 	
-fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
+fSaveObj::fSaveObj(listener* inListener,bool(*funct)(pathItem*))
 	:fileViewer(inListener,funct),
 	kbdUser(this) {
 	
@@ -346,7 +345,7 @@ void	fSaveObj::setSelectedName(const char* name) {
 		resizeBuff(0,&selectedName);									// Recycle the buffer, set to NULL.
 	} else if (resizeBuff(strlen(name)+1,&selectedName)) {	// Else, if we can allocate the new buffer..
 		strcpy(selectedName,name);										// We copy the name for later.
-		setName(name);														// And typically we use the name
+		//setName(name);														// And typically we use the name
 	}	
 }
 

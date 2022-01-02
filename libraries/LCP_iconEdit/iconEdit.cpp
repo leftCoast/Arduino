@@ -1,21 +1,55 @@
 #include <iconEdit.h>
 #include <resizeBuff.h>
 
-#include <debug.h>
+//#include <debug.h>
+
+
+bool hasExtension(char* inStr,const char* extension) {
+
+	int 	numChars;
+	int	index;
+	
+	numChars = strlen(inStr);
+	if (numChars>strlen(extension)) {
+		index = numChars;
+		while(inStr[index]!='.'&&index>=0) index--;
+		if (inStr[index]=='.') {
+			return !strcmp(&(inStr[index]),extension);
+		}
+	}
+	return false;
+}
 
 
 // For now we do this. Later we'll have more info.
-bool iconEditFilter(const char* fileName) { return appleFilter(fileName); }
+bool iconEditFilter(pathItem* inItem) {
+
+	char*	subStr;
+	
+	if (appleFilter(inItem)) {
+		if (inItem->getType()==fileType) {
+			return hasExtension(inItem->getName(),".BMP");
+		} else {
+			return true;
+		}
+	}
+	return false;
+}
 
 
 
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
-	: documentPanel(ourAppID) { ST haveComToPassOn = false; }
+	: documentPanel(ourAppID) {
+	
+	haveComToPassOn = false;
+	setDefaultPath(ICON_FLDR);
+	setFilter(iconEditFilter);
+}
 
 
 // The world as you know it, is ending..
-iconEdit::~iconEdit(void) { ST }
+iconEdit::~iconEdit(void) {  }
 
 
 // This creates the docFileObj that's used as the manager for whatever file we are
@@ -65,7 +99,7 @@ void iconEdit::createNewDocFile(void) {
 
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
-ST
+
 	documentPanel::setup();
 	if (ourDoc) {
 		addObj((iconEditScr*)ourDoc);
@@ -85,7 +119,7 @@ void iconEdit::loop(void) {
 
 // The default here is to not draw ourselves. You can change that.
 void iconEdit::drawSelf(void) {
-ST
+
 	colorObj	aColor;
 	rect		aRect;
 	

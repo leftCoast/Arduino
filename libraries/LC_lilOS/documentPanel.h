@@ -13,7 +13,7 @@
 //
 // For more in-depth documentation on how it works, see the .cpp file.
 
-extern bool appleFilter(const char* fileName);
+extern bool appleFilter(pathItem* inItem);
 
 
 enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,
@@ -42,7 +42,7 @@ class stateHolder {
 
 	
 		
-// **************************************************************
+// ************************************************************** 
 // *********************    selectFileObj    ********************
 // **************************************************************
 
@@ -51,7 +51,7 @@ class selectFileObj :	public fSelectObj,
 								public stateHolder {
 
 	public :
-				selectFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(char*)=NULL);
+				selectFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(pathItem*)=NULL);
 	virtual	~selectFileObj(void);
 };
 
@@ -66,7 +66,7 @@ class saveFileObj :	public fSaveObj,
 							public stateHolder {
 
 	public :
-				saveFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(char*)=NULL);
+				saveFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(pathItem*)=NULL);
 	virtual	~saveFileObj(void);
 };
 
@@ -119,6 +119,8 @@ class documentPanel :	public panel {
 	virtual	void	createNewDocFile(void)=0;
 	virtual	void	setup(void);
 	virtual	void	closing(void);
+	virtual	void	setFilter(bool(*funct)(pathItem*));
+	virtual	void	setDefaultPath(const char* inFolder);
 	virtual	void	handleComFileClosed(stdComs comID);
 	virtual	void	handleComHaveFileNoNameNoEdits(stdComs comID);
 	virtual	void	handleComHaveNamedFileNoEdits(stdComs comID);
@@ -136,6 +138,7 @@ class documentPanel :	public panel {
 				selectFileObj*	selectAlert;
 				saveFileObj*	saveAlert;
 				docFileObj*		ourDoc;
+				char*				defaultPath;
 				bool				(*filter)(char*);
 };
 

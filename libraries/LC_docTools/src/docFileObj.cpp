@@ -1,6 +1,7 @@
 #include <docFileObj.h>
 #include <resizeBuff.h>
 #include <timeObj.h>
+#include <filePath.h>
 
 //#include <debug.h>
 
@@ -380,6 +381,26 @@ void docFileObj::setAsAutoGen(bool trueFalse) { autoGenFile = trueFalse; }
 
 bool docFileObj::fileEdited(void) {  return mode==fEdited; }
 
+
+// This should pass back the name of the file for our document.
+char* docFileObj::getName(void) {
+	
+	filePath aPath;
+	
+	aPath.setPath(docFilePath);
+	return aPath.getCurrItemName();
+}
+
+
+// This should give us the folder path that our file is saved in.
+char* docFileObj::getFolder(void) {
+
+	filePath aPath;
+	
+	aPath.setPath(docFilePath);
+	aPath.popItem();
+	return aPath.getCurrItemName();
+}
 
 byte docFileObj::peek(void) {
 

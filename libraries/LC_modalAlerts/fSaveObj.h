@@ -84,10 +84,9 @@ class fSaveObj :	public fileViewer,
 						public kbdUser {
 
 	public:
-				fSaveObj(listener* inListener,bool(*funct)(char*)=NULL);
+				fSaveObj(listener* inListener,bool(*funct)(pathItem*)=NULL);
 	virtual	~fSaveObj(void);
 	
-				//void	setInitialPath(char* inPath);
 				void	setName(const char* inName);
 				char*	getName(void);
 				void	setSelectedName(const char* name);
