@@ -3,11 +3,6 @@
 
 #include <debug.h>
 
-#define EDITSCR_X	23
-#define EDITSCR_Y	35
-#define EDITSCR_W	32 * SCALE
-#define EDITSCR_H	32 * SCALE
-
 
 // For now we do this. Later we'll have more info.
 bool iconEditFilter(const char* fileName) { return appleFilter(fileName); }
