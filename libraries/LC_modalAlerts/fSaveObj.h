@@ -67,7 +67,7 @@ class saveFileDir :	public fileDir {
 	virtual	~saveFileDir(void);
 
 	virtual	void	doAction(void);
-	virtual	void	setItem(pathItemType inType,char* name);
+	virtual	void	setItem(pathItemType inType,const char* name);
 	virtual	char* endChoice(void);
 	
 				char*				finalPath;
@@ -87,10 +87,10 @@ class fSaveObj :	public fileViewer,
 				fSaveObj(listener* inListener,bool(*funct)(char*)=NULL);
 	virtual	~fSaveObj(void);
 	
-				void	setInitialPath(char* inPath);
-				void	setName(char* inName);
+				//void	setInitialPath(char* inPath);
+				void	setName(const char* inName);
 				char*	getName(void);
-				void	setSelectedName(char* name);
+				void	setSelectedName(const char* name);
 				void	setMode(saveModes newMode);
 	virtual	void	handleCom(stdComs comID);
 

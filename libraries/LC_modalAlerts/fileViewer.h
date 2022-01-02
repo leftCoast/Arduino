@@ -76,9 +76,9 @@ class fileDir :	public drawGroup,
 				void	refresh(void);
 	virtual	void	drawSelf(void);
 	virtual	void	doAction(void);
-	virtual	void	setItem(pathItemType inType,char* name);
-	virtual	void	chooseFolder(char* name);
-	virtual	void	chooseFile(char* name);
+	virtual	void	setItem(pathItemType inType,const char* name);
+	virtual	void	chooseFolder(const char* name);
+	virtual	void	chooseFile(const char* name);
 	virtual	char* endChoice(void);
 	
 				fileViewer*		ourViewer;
@@ -101,6 +101,7 @@ class fileViewer :	public alertObj {
 				fileViewer(listener* inListener,bool(*funct)(char*));
 	virtual	~fileViewer(void);
 	
+	//virtual	void	setPath(char* inPath);
 	virtual	void	handleCom(stdComs comID);
 	virtual	char*	getPathResult(void);
 	

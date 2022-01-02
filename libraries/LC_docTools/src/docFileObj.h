@@ -60,6 +60,7 @@ class docFileObj {
 	virtual		bool			saveDocFile(char* newFilePath=NULL);
 					void			closeDocFile(void);
 					bool			changeDocFile(char* newPath);
+					void			setAsAutoGen(bool trueFalse=true);
 					bool			fileEdited();	
 					byte			peek(void);
 					uint32_t		position(void);
@@ -75,7 +76,8 @@ class docFileObj {
 	virtual		bool		checkDoc(File inFile);
 	virtual		bool		createEditPath(void);
 					
-					fileModes	mode;	
+					fileModes	mode;
+					bool			autoGenFile;	
 					char*			docFilePath;
 					char*			editFilePath;
 					File			ourFile;

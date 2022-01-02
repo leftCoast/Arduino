@@ -17,7 +17,8 @@ extern bool appleFilter(const char* fileName);
 
 
 enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,
-								hasEditsNoName, hasEditsNamed, selectOpen, saveOpen, askOpen };
+								hasEditsNoName, hasEditsNamed, selectOpen, saveOpen, askOpen,
+								newDocFileOpen };
 
 
 // **************************************************************
@@ -90,17 +91,35 @@ class askOkObj :	public alertObj,
 // ********************		documentPanel		********************
 // **************************************************************
 
+// Note on createDocObj(void). //This is one that the class that inherits this, creates the
+// document object of the class that it will edit. Use this to create the fileObj of your
+// design and be able to edit it.
+//
+// Note on createNewDocFile(void). This is also one that the class that inherits this
+// fills out. The result of this function is to send back an okCmd or cancelCmd through
+// the command/listener channel. Depending on whether or not a new doc was created and
+// loaded or not. 
+//
+// Why is this written this way?
+// 
+// The documentPanel class has no idea what kind of document any child class will be
+// dealing with. So it has no idea what is involved in creating a new one. There is a very
+// good chance that this may involve asking the user for information using an alert
+// Object. So, this gives the child object the option to dovetail it's own alert object
+// into the UI.
+
 
 class documentPanel :	public panel {
+
 	public :
 				documentPanel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~documentPanel(void);
 	
-	virtual	void	createDocObj(void)=0;	// This is where YOU plug in the KIND of document object you want.
+	virtual	void	createDocObj(void)=0;	
+	virtual	void	createNewDocFile(void)=0;
 	virtual	void	setup(void);
 	virtual	void	closing(void);
 	virtual	void	handleComFileClosed(stdComs comID);
-	//virtual	void	handleComNoFile(stdComs comID);
 	virtual	void	handleComHaveFileNoNameNoEdits(stdComs comID);
 	virtual	void	handleComHaveNamedFileNoEdits(stdComs comID);
 	virtual	void	handleComHasEditsNoName(stdComs comID);
@@ -108,9 +127,11 @@ class documentPanel :	public panel {
 	virtual	void	handleComSelectOpen(stdComs comID);
 	virtual	void	handleComSaveOpen(stdComs comID);
 	virtual	void	handleComAskOpen(stdComs comID);
+	virtual	void	handleNewDocFileOpen(stdComs);
 	virtual	void	handleCom(stdComs comID);
 	
 				docPanelStates	ourState;
+				docPanelStates	savedState;	// Used for creating new doc files.
 				askOkObj*		askAlert;
 				selectFileObj*	selectAlert;
 				saveFileObj*	saveAlert;

@@ -16,11 +16,13 @@ class iconEdit	: public documentPanel {
 	virtual	~iconEdit(void);
 	
 	virtual	void	createDocObj(void);
+	virtual	void	createNewDocFile(void);
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
-	virtual	void	handleComHaveNamedFileNoEdits(stdComs comID);
-	virtual	void	handleComAskOpen(stdComs comID);
-	virtual	void	handleCom(stdComs comID);
+	virtual	void	loop(void);
+	
+				bool		haveComToPassOn;
+				stdComs	comID;
 	
 };
 

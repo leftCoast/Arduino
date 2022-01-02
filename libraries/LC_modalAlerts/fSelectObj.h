@@ -17,8 +17,8 @@ class selectFileDir :	public fileDir {
 				selectFileDir(int inX, int inY, int inWidth,int inHeight,selectType inSelectType,fileViewer* inViewer,fileListBox* inListBox);
 	virtual	~selectFileDir(void);
 
-	virtual	void	chooseFile(char* name);
-	virtual	void	setItem(pathItemType inType,char* name);
+	virtual	void	chooseFile(const char* name);
+	virtual	void	setItem(pathItemType inType,const char* name);
 	virtual	char* endChoice(void);
 	
 				selectType		ourSelectType;

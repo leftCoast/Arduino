@@ -60,7 +60,7 @@
    
 fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
 	: drawGroup(1,1,DEF_LIST_ITEM_W,DEF_LIST_ITEM_H,fullClick) {
-	
+
 	int	numChars;
 	
 	ourList		= inList;
@@ -73,7 +73,7 @@ fileListItem::fileListItem(fileListBox* inList,pathItemType inType,char* inName)
 }
 
 
-fileListItem::~fileListItem(void) { resizeBuff(0,&ourName); }
+fileListItem::~fileListItem(void) {  resizeBuff(0,&ourName); }
 	
 
 // Custom draw() method for list items.	
@@ -321,11 +321,11 @@ void fileDir::doAction(void) {
 
 
 // Descendants may need to do something when a path item is selected in the list box.
-void fileDir::setItem(pathItemType inType,char* name) { }
+void fileDir::setItem(pathItemType inType,const char* name) { }
 
 
 // Choosing folders should jump us to the next tier of folders.
-void fileDir::chooseFolder(char* name) {
+void fileDir::chooseFolder(const char* name) {
 	
 	if (pushChildItemByName(name)) {
 		refresh();
@@ -333,7 +333,7 @@ void fileDir::chooseFolder(char* name) {
 }	
 
 // We don't do the choose file thing. Descendants probably will..
-void fileDir::chooseFile(char* name) { }
+void fileDir::chooseFile(const char* name) { }
 
 
 // Let the calling function have a look at what should be the result path that we are
@@ -369,7 +369,7 @@ fileViewer::fileViewer(listener* inListener,bool(*funct)(char*))
 	ourFileDir = new fileDir(DEF_DIR_X,DEF_DIR_Y,DEF_DIR_W,DEF_DIR_H,this,ourListBox);
 	if (ourFileDir) {
 		addObj(ourFileDir);
-		ourFileDir->setPath("/"); 
+		ourFileDir->setPath("/");
 		ourFileDir->refresh();
 	}
 }
@@ -380,8 +380,15 @@ fileViewer::fileViewer(listener* inListener,bool(*funct)(char*))
 fileViewer::~fileViewer(void) {  }
 
 
+// This is the default path we want to show.
+// void fileViewer::setPath(char* inPath) {
+// 	
+// 	ourFileDir->setPath(inPath); 
+// 	ourFileDir->refresh();
+// }
+	
 // And we handle commands from our things.
-void fileViewer::handleCom(stdComs comID) { alertObj::handleCom(comID); }
+void fileViewer::handleCom(stdComs comID) {  alertObj::handleCom(comID); }
 
 
 // Whom ever created us can use this to read the result of our actions.

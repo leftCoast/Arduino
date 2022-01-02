@@ -68,7 +68,7 @@ deleteAlert::deleteAlert(listener* inListener,filePath* inPath,char* selectName)
 	resultMsg		= NULL;
 	ourSelectName	= selectName;									// We're going to trust that this is good for the duration.
 	if (selectName) {
-		ourPath->pushChildItemByName(selectName);
+		ourPath->pushChildItemByName((char*)selectName);
 	}
 	currItem = inPath->getCurrItem();
 	if (currItem) {
@@ -244,7 +244,7 @@ void saveFileDir::doAction(void) {
 // When doing a save of a file. The thing we're looking for is a default file name. This
 // is what we're going to use setItem() for. If the user clicks a file, we will update its
 // editable name field with that name.
-void saveFileDir::setItem(pathItemType inType,char* name) {
+void saveFileDir::setItem(pathItemType inType,const char* name) {
 
 	((fSaveObj*)ourViewer)->setSelectedName(name);	// We let them all be saved for later.
 	if (inType == fileType) {								// If its a file..
@@ -313,7 +313,7 @@ fSaveObj::fSaveObj(listener* inListener,bool(*funct)(char*))
 	if (ourFileDir) {																			// If everything went ok..
 		addObj(ourFileDir);																	// Add our new one to the draw list.
 		ourFileDir->setPath("/");															// Set some sort of default path.
-		ourFileDir->refresh();																// Draw everything.
+		ourFileDir->refresh();
 	}
 }
 
@@ -328,19 +328,19 @@ fSaveObj::~fSaveObj(void) {
 char*	fSaveObj::getName(void) { return nameLabel->editBuff; }
 
 
-void fSaveObj::setName(char* inName) {
+void fSaveObj::setName(const char* inName) {
 
 	if (nameLabel) {
 		if (nameLabel->mEditing) {
 			nameLabel->endEditing();
 		}
-		nameLabel->setValue(inName);
+		nameLabel->setValue((char*)inName);
 		nameLabel->beginEditing();
 	}
 }
 
 // We're going to keep a copy of the current selected name off the child list.
-void	fSaveObj::setSelectedName(char* name) {
+void	fSaveObj::setSelectedName(const char* name) {
 	
 	if (!name) {															// If we got a NULL..
 		resizeBuff(0,&selectedName);									// Recycle the buffer, set to NULL.

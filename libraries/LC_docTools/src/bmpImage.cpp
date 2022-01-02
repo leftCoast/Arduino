@@ -1,7 +1,7 @@
 #include "bmpImage.h"
 #include <resizeBuff.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 
 #define DEF_IMAGE_OFFSET	54
@@ -57,13 +57,15 @@ void write32(uint32_t val, File f) {
 // **************************************************************************
 
 bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
-ST
+
 	File		bmpFile;
 	bool		success;
 	uint32_t	pixBytes;
 	uint32_t	bytesPerRow;
 	uint32_t	fileSize;
 	uint32_t	imageBytes;
+	int index;
+	byte buff[4];
 	
 	success = false;															// Ok, assume failure..									
 	bmpFile = SD.open(newPath,FILE_WRITE);								// See if its a valid path.
@@ -89,26 +91,21 @@ ST
 		write32(0,bmpFile);													// No compression.
 		imageBytes = bytesPerRow * inHeight;							// Calc. total image bytes.
 		write32(imageBytes,bmpFile);										// Stuff it in.
-		
-		int index;
-		byte buff[4];
-		
-		for (int y=0;y<1/*inHeight*/;y++) {
-			for (int x=0;x<inWidth;x++) {
-				index = DEF_IMAGE_OFFSET;											// Starting here..
-				index = index + ((inHeight-y-1)*bytesPerRow);					// Upside down.
-				index = index + (x * pixBytes);							
-				bmpFile.seek(index);
-					buff[0] = 000;	// BLUE
-					buff[1] = 000; // GREEN
-					buff[2] = 255; // RED
-					buff[3] = 000; // Padding?
-				bmpFile.write(buff,4);
-			}
-		}
+		buff[3] = 0;															// Padding.
+		while(bmpFile.position()<DEF_IMAGE_OFFSET) {					// Just in case we didn't make it to the right spot..
+			bmpFile.write(&(buff[3]),1);									// Force the issue!
+		}																			// Now..
+		for (int y=0;y<inHeight;y++) {									// We're going to..
+			for (int x=0;x<inWidth;x++) {									// Go to every pixel
+				buff[0] = 255;	// BLUE										// And write the color white.
+				buff[1] = 255; // GREEN										//
+				buff[2] = 255; // RED										//
+				bmpFile.write(buff,4);										// Stamp out the 4 byte color.
+			}																		//
+		}																			//
 		bmpFile.close();														// Default file has been initialized. Close the file.
 		success = true;														// Made it this far? We're calling this a success!
-	}
+	}																				//
 	return success;															// Report our results.
 }
 
@@ -179,7 +176,7 @@ RGBpack bmpImage::getRawPixel(int x,int y) {
 
 
 void bmpImage::setRawPixel(int x,int y,RGBpack* anRGBPack) {
-ST	
+	
 	uint32_t	index;
 
 	if (mode==fOpenToEdit || mode==fEdited) {		// If we are in an edit mode..
@@ -197,7 +194,7 @@ ST
 // Open the doc file and see if its what we expect. Then grab out the info. we need to
 // "deal" with it.
 bool bmpImage::checkDoc(File bmpFile) {
-ST
+
 	uint32_t	creatorBits;	// A thing that seems to always be zero.
 	uint32_t	DIBHeaderSize;	// And so is this thing.
 	int32_t	imageHeight;	// Used as a temp. Can be negative.
@@ -227,7 +224,6 @@ ST
 			}
 		}
 	}
-	db.trace("checking :",success,false);
 	return success;
 }
 

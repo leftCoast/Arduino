@@ -1,5 +1,7 @@
 #include <fSelectObj.h>
 
+//#include <debug.h>
+
 
 // The overall size and placement of the open d-box.
 #define OPEN_X	50
@@ -51,15 +53,15 @@ selectFileDir::~selectFileDir(void) {  }
 
 
 // In this case a double click on a filename means this is the user's choice.
-void selectFileDir::chooseFile(char* name) {
+void selectFileDir::chooseFile(const char* name) {
 
-	if (ourSelectType!=foldersOnly) {		// If its Ok to choose a file..
-		if (pushChildItemByName(name)) {		// If we can push this filename on the path..
-			currentType = noType;				// Remove type. Because we've just used it.
-			currentNamePtr = NULL;				// And remove the name pointer as well.
-			ourViewer->handleCom(okCmd);		// We tell the viewer we're done.
-		} else {										// Else, some horrible error happened..
-			ourViewer->handleCom(cancelCmd);	// We tell the viewer we failed.
+	if (ourSelectType!=foldersOnly) {				// If its Ok to choose a file..
+		if (pushChildItemByName((char*)name)) {	// If we can push this filename on the path..
+			currentType = noType;						// Remove type. Because we've just used it.
+			currentNamePtr = NULL;						// And remove the name pointer as well.
+			ourViewer->handleCom(okCmd);				// We tell the viewer we're done.
+		} else {												// Else, some horrible error happened..
+			ourViewer->handleCom(cancelCmd);			// We tell the viewer we failed.
 		}
 	}
 }
@@ -69,24 +71,24 @@ void selectFileDir::chooseFile(char* name) {
 // user clicks the cmdOk button and we need to glue it to the end of our path string. But
 // we also must take in account what the user is actually allowing. Looking for a file and
 // getting back a folder will not win us many friends.
-void selectFileDir::setItem(pathItemType inType,char* name) {
+void selectFileDir::setItem(pathItemType inType,const char* name) {
 
 	switch(ourSelectType) {
 		case filesOnly			:
 			if (inType == fileType) {
 				currentType		= inType;
-				currentNamePtr = name;
+				currentNamePtr = (char*)name;
 			}
 		break;
 		case foldersOnly		:
 			if (inType == folderType) {
 				currentType		= inType;
-				currentNamePtr = name;
+				currentNamePtr = (char*)name;
 			}
 		break;
 		case filesAndFolders	:
 			currentType		= inType;
-			currentNamePtr = name;
+			currentNamePtr = (char*)name;
 		break;
 	}
 }
@@ -152,7 +154,7 @@ fSelectObj::fSelectObj(listener* inListener,bool(*funct)(char*),selectType inSel
 }
 
 
-fSelectObj::~fSelectObj(void) { }
+fSelectObj::~fSelectObj(void) {  }
 
 
 // It's always nice to set a default path to make looking for things easier.
