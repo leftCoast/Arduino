@@ -1,30 +1,14 @@
 #include <iconEdit.h>
 #include <resizeBuff.h>
 
-//#include <debug.h>
+#include <debug.h>
 
+#define COLOR_BTN_X		EDITSCR_X
+#define COLOR_BTN_Y		EDITSCR_Y + EDITSCR_H + 10
+#define COLOR_BTN_NAME	"color32.bmp"
 
-bool hasExtension(char* inStr,const char* extension) {
-
-	int 	numChars;
-	int	index;
-	
-	numChars = strlen(inStr);
-	if (numChars>strlen(extension)) {
-		index = numChars;
-		while(inStr[index]!='.'&&index>=0) index--;
-		if (inStr[index]=='.') {
-			return !strcmp(&(inStr[index]),extension);
-		}
-	}
-	return false;
-}
-
-
-// For now we do this. Later we'll have more info.
+// Our .bmp file filter.
 bool iconEditFilter(pathItem* inItem) {
-
-	char*	subStr;
 	
 	if (appleFilter(inItem)) {
 		if (inItem->getType()==fileType) {
@@ -38,18 +22,46 @@ bool iconEditFilter(pathItem* inItem) {
 
 
 
+// **************************************************************
+// **********************    colorBtnObj    *********************
+// **************************************************************
+
+
+colorBtnObj::colorBtnObj(iconEdit* inEditor)
+	: iconButton(COLOR_BTN_X,COLOR_BTN_Y,inEditor->getColorPickerPath()) {
+	
+	ourEditor = inEditor;
+	setMask(&(ourOSPtr->icon32Mask));
+}
+
+
+colorBtnObj::~colorBtnObj(void) {   }
+	
+	
+void colorBtnObj::doAction(void) {  ourEditor->openColorPicker(); }
+
+
+
+// **************************************************************
+// ************************    iconEdit    **********************
+// **************************************************************
+
+	
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	: documentPanel(ourAppID) {
 	
+	strBuff = NULL;
 	haveComToPassOn = false;
 	setDefaultPath(ICON_FLDR);
 	setFilter(iconEditFilter);
+	ourState = editing;
 }
 
 
+
 // The world as you know it, is ending..
-iconEdit::~iconEdit(void) {  }
+iconEdit::~iconEdit(void) { resizeBuff(0,&strBuff); }
 
 
 // This creates the docFileObj that's used as the manager for whatever file we are
@@ -93,16 +105,19 @@ void iconEdit::createNewDocFile(void) {
 	} else {
 		comID = cancelCmd;
 	}
+	ourState = newDoc;
 	haveComToPassOn = true;
 }
 
 
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
-
+	
 	documentPanel::setup();
 	if (ourDoc) {
 		addObj((iconEditScr*)ourDoc);
+		colorBtn = new colorBtnObj(this);
+		addObj(colorBtn);
 	}
 }
 
@@ -110,10 +125,13 @@ void iconEdit::setup(void) {
 void iconEdit::loop(void) {
 	
 	if (haveComToPassOn) {
-		documentPanel::handleCom(comID);
+		handleCom(comID);
 		((iconEditScr*)ourDoc)->setNeedRefresh();
 		haveComToPassOn = false;
 	}
+	if (strBuff) {												// If we find a strBuff..
+		resizeBuff(0,&strBuff);								// Deallocate it.
+	}																// Its only used for passing back string info.
 }
 
 
@@ -129,5 +147,71 @@ void iconEdit::drawSelf(void) {
 	aColor.setColor(LC_GREY);				// Make it a nice color.
 	screen->fillRect(&aRect,&aColor);	// Draw it!
 }
+
+
+// This is used to find the color picker button graphic we use on our screen.
+char* iconEdit::getColorPickerPath(void) {
+
+	char*	ourFolder;
+	int	numChars;
+	
+	ourFolder = ourOSPtr->getPanelFolder(getPanelID());	// Path to our folder on this system.
+	numChars = strlen(ourFolder);									// Count the chars.
+	numChars = numChars + strlen(COLOR_BTN_NAME);			// Add the chars of the button name.
+	numChars++;															// And one for '\0'.
+	if (resizeBuff(numChars,&strBuff)) {						// If we can allocate the RAM..
+		strcpy(strBuff,ourFolder);									// Copy in the folder path.
+		strcat(strBuff,COLOR_BTN_NAME);							// Add the name.
+	}																		// Take a deep breath..
+	return strBuff;													// And pass back the string buffer.
+}
+
+
+void iconEdit::openColorPicker(void) {
+	
+	colorObj	aColor;
+	
+	if (ourState == editing) { 
+		aColor.setColor(&(((iconEditScr*)ourDoc)->editColor));
+		colorAlert = new colorPicker(this);
+		colorAlert->setColor(&aColor);
+		ourState = getColor;
+	}
+}
+
+
+void iconEdit::editingMode(stdComs comID) {
+	documentPanel::handleCom(comID);
+}
+
+
+void iconEdit::newDocOpen(stdComs comID) {
+
+	documentPanel::handleCom(comID);
+	ourState = editing;
+}
+
+
+void iconEdit::colorOpen(stdComs comID) {
+	
+	if (comID==okCmd) {
+		((iconEditScr*)ourDoc)->editColor = colorAlert->result();
+	}
+	ourState = editing;
+}
+
+
+
+
+// Handle the commands from the buttons and dialog boxes..
+void iconEdit::handleCom(stdComs comID) {
+
+	switch(ourState) {
+		case editing	: editingMode(comID);	break;
+		case newDoc		: newDocOpen(comID);		break;
+		case getColor	: colorOpen(comID);		break;
+	}
+}
+
 
 

@@ -29,7 +29,7 @@ void iconEditScr::doAction(event* inEvent,point* locaPt) {
 	if (inEvent->mType==touchEvent) {
 		xPix = xMap.map(locaPt->x);
 		yPix = yMap.map(locaPt->y);
-		setPixel(xPix,yPix,&red);
+		setPixel(xPix,yPix,&editColor);
 	}
 }	
 

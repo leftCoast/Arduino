@@ -8,12 +8,15 @@
 
 // Base framework for a document editing panel. This ties in all the state and dilog boxes
 // for doing something like this. New file, open file, save file, do you really want to
-// loose unsaved changes.. All that jazz. Seeing its for a document file you can use it as
+// loose unsaved changes? All that jazz. Seeing its for a document file, you can use it as
 // a base class for for anything derived from the document class.
 //
 // For more in-depth documentation on how it works, see the .cpp file.
 
+
+// Couple tools for filtering out file lists.
 extern bool appleFilter(pathItem* inItem);
+extern bool hasExtension(char* inStr,const char* extension);
 
 
 enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,
