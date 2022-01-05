@@ -82,6 +82,7 @@ class docFileObj {
 					bool			autoGenFile;	
 					char*			docFilePath;
 					char*			editFilePath;
+					char*			returnBuffer;
 					File			ourFile;
 					
 							

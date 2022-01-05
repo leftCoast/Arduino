@@ -1,7 +1,7 @@
 #include <documentPanel.h>
 #include <resizeBuff.h>
 
-//#include <debug.h>
+#include <debug.h>
 
 #define SAVE_BEFORE_CLOSE "Continue and loose unsaved changes?"
 
@@ -148,7 +148,7 @@ void documentPanel::setDefaultPath(const char* inFolder) { heapStr(&defaultPath,
 			
 // We have a file, but it's closed..
 void documentPanel::handleComFileClosed(stdComs comID) {
-	
+ST	
 	switch(comID) {																			// Checking for each command..
 		case newFileCmd	:																	// Ask for a new file to be created.
 			createNewDocFile();																// If we can create a new file..
@@ -170,7 +170,7 @@ void documentPanel::handleComFileClosed(stdComs comID) {
 
 // We have an auto generated new file that's un-edited.
 void documentPanel::handleComHaveFileNoNameNoEdits(stdComs comID) {
-	
+ST	
 	switch(comID) {																						// Checking for each command..
 		case newFileCmd	: break;																		// New file? Pointless, we do nothing and exit.
 		case openFileCmd	:																				// Ask to open new file.
@@ -193,14 +193,18 @@ void documentPanel::handleComHaveFileNoNameNoEdits(stdComs comID) {
 
 
 void documentPanel::handleComHaveNamedFileNoEdits(stdComs comID) {
-	
+ST	
+	if (comID==closeCmd) db.trace("Got close ",comID,false);
+	else db.trace("Got ??? ",comID,false);
 	switch(comID) {																						// Checking for each command..
 		case newFileCmd	:																				// Ask for a new file to be created.
+			db.trace("This would be newFileCmd ",comID,false);
 			createNewDocFile();																			// If we can create a new file..
 			savedState = ourState;																		// We don't have an alert to stuff this into, save it here.
 			ourState = newDocFileOpen;																	// Our state is now that we are waiting for it to be created.																							//
 		break;																								// Sign off.
 		case openFileCmd	:																				// They want to open a different file..
+			db.trace("This would be openFileCmd ",comID,false);
 			selectAlert = new selectFileObj(this,haveNamedFileNoEdits,comID,filter);	// Open the select file alert.
 			if (defaultPath) {																			// If we have a default folder selected..
 				selectAlert->setPath(defaultPath);													// Point the select Alert to that folder.
@@ -208,18 +212,24 @@ void documentPanel::handleComHaveNamedFileNoEdits(stdComs comID) {
 			ourState = selectOpen;																		// Our state is now selectAlert is open.
 		break;																								// Exit.
 		case saveFileCmd	:																				// Ask to save this file.
-			saveAlert = new saveFileObj(this,haveFileNoNameNoEdits,comID,filter);		// Open the save file alert.
-			saveAlert->setPath(ourDoc->getFolder());												// Point the select Alert to the file's folder.
-			saveAlert->setName(ourDoc->getName());													// And we preload the file name.
+			db.trace("This would be saveFileCmd ",comID,false);
+			saveAlert = new saveFileObj(this,haveNamedFileNoEdits,comID,filter);		// Open the save file alert.
+			tempStr folderPath(ourDoc->getFolder());												// Grab and save the folder path.
+			tempStr fileName(ourDoc->getName());													// Grab  and save the file name.
+			saveAlert->setPath(folderPath.getStr());												// Point the select Alert to the file's folder.
+			saveAlert->setName(fileName.getStr());													// And we preload the file name.
 			ourState = saveOpen;																			// Our state is now saveAlert is open.
 		break;																								// And we are done.
-		default: panel::handleCom(comID);															// Everything else we pass up the chain.
+		default :
+			db.trace("This would be default ",comID,false);
+			panel::handleCom(comID);													// Everything else we pass up the chain.
 	}
+	db.trace("Was anyone called ?",comID,false);
 }
 
 
 void documentPanel::handleComHasEditsNoName(stdComs comID) {
-
+ST
 	switch(comID) {																		// Checking for each command..
 		case newFileCmd	:																// Ask for a new file to be created..
 		case openFileCmd	:																// They want to open a different file.
@@ -240,7 +250,7 @@ void documentPanel::handleComHasEditsNoName(stdComs comID) {
 
 
 void documentPanel::handleComHasEditsNamed(stdComs comID) {
-
+ST
 	switch(comID) {																		// Checking for each command..
 		case newFileCmd	:																// Ask for a new file to be created..
 		case openFileCmd	:																// They want to open a different file.
@@ -250,9 +260,11 @@ void documentPanel::handleComHasEditsNamed(stdComs comID) {
 		break;																				// Done.
 		case saveFileCmd	:																// Ask to save this file.
 			saveAlert = new saveFileObj(this,hasEditsNamed,comID,filter);	// Open the save file alert.
-			saveAlert->setPath(ourDoc->getFolder());								// Point the select Alert to the file's folder.
-			saveAlert->setName(ourDoc->getName());									// And we preload the file name.
-			ourState = saveOpen;															// Our state is now about saveAlert being open.
+			tempStr folderPath(ourDoc->getFolder());								// Grab and save the folder path.
+			tempStr fileName(ourDoc->getName());									// Grab  and save the file name.
+			saveAlert->setPath(folderPath.getStr());								// Point the select Alert to the file's folder.
+			saveAlert->setName(fileName.getStr());									// And we preload the file name.
+			ourState = saveOpen;															// Our state is now saveAlert is open.
 		break;																				// Done.
 		default: panel::handleCom(comID);											// Everything else we pass up the chain.
 	}
@@ -260,7 +272,7 @@ void documentPanel::handleComHasEditsNamed(stdComs comID) {
 
 
 void documentPanel::handleComSelectOpen(stdComs comID) {
-	
+ST	
 	switch(comID) {																	// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:															// Ok ws cliked..
 			ourDoc->closeDocFile();													// Close the file.
@@ -279,8 +291,9 @@ void documentPanel::handleComSelectOpen(stdComs comID) {
 	}
 }
 
-void documentPanel::handleComSaveOpen(stdComs comID) {
 
+void documentPanel::handleComSaveOpen(stdComs comID) {
+ST
 	switch(comID) {																	// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:															// Ok ws cliked..
 			ourState = saveAlert->getLastState();								// Just in case we fail here..
@@ -297,7 +310,7 @@ void documentPanel::handleComSaveOpen(stdComs comID) {
 
 
 void documentPanel::handleComAskOpen(stdComs comID) {
-
+ST
 	switch(comID) {																					// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:																			// Ok ws cliked..
 			ourDoc->closeDocFile();																	// Close the file, loose the changes.
@@ -325,7 +338,7 @@ void documentPanel::handleComAskOpen(stdComs comID) {
 
 
 void documentPanel::handleNewDocFileOpen(stdComs comID) {
-
+ST
 	switch(comID) {																// With an Alert open, we only check the okCmd & cancelCmd
 		case okCmd			:														// Ok was cliked..
 			ourState = haveFileNoNameNoEdits;								// We have an un-named file with no edits. (Because it's a new file)																			//
@@ -340,7 +353,7 @@ void documentPanel::handleNewDocFileOpen(stdComs comID) {
 
 // Handle the commands from the buttons and dialog boxes..
 void documentPanel::handleCom(stdComs comID) {
-	
+ST	
 	if (ourDoc) {																								// If we have a fileObj..
 		if (ourDoc->fileEdited()) {																// If it has changes..
 			switch(ourState) {																				// For these unedited states..

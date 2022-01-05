@@ -3,7 +3,7 @@
 #include <SD.h>
 #include <resizeBuff.h>
 
-//#include <debug.h>
+#include <debug.h>
 
 void upCase(char* inStr) {
 
@@ -221,7 +221,7 @@ pathItemType filePath::checkPathPlus(char* name) {
 // brain dead and we're stuck with it for now. If the path is NOT found on the SD card,
 // this fails and gives back a false. This does NOT fill out the childList. Only the pathList
 bool filePath::setPath(char* inPath) {
-	
+
 	rootItem*	theRoot;
 	folderItem*	aFolder;
 	fileItem*	aFile;
@@ -308,7 +308,7 @@ bool filePath::setPath(char* inPath) {
 
 // We'll allocate this, but we'll also reuse the memory. So be careful. It won't last.
 char* filePath::getPath(void) {
-	
+
 	pathItem*	trace;
 	
 	resizeBuff(0,&path);										// Clear the last path string.

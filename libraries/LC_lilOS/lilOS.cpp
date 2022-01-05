@@ -2,6 +2,10 @@
 #include <lilOS.h>
 #include <screen.h>
 
+#include <debug.h>
+
+
+
 int		nextPanel	= NO_PANEL_ID;   // What panel do we want showing now?
 lilOS*	ourOSPtr		= NULL;	
 panel*	ourPanel		= NULL;
@@ -82,7 +86,9 @@ void panel::closing(void) {  }
 
 // We get a close command, we close! At least by default.
 void panel::handleCom(stdComs comID) {
-
+ST
+db.trace("panel::handleCom()",false);
+if (comID==closeCmd) db.trace("panel::handleCom() got coseCmd",false);
 	switch(comID) {
 		case closeCmd	: close(); break;
 		default			: break;
