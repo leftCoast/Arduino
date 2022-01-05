@@ -5,7 +5,7 @@
 #include <editLabel.h>
 #include <colorRect.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 // The overall size and placement of the save d-box.
 #define SAVE_X			30

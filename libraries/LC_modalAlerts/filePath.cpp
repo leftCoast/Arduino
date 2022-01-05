@@ -3,7 +3,7 @@
 #include <SD.h>
 #include <resizeBuff.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 void upCase(char* inStr) {
 

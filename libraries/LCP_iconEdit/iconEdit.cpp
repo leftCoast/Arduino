@@ -1,7 +1,7 @@
 #include <iconEdit.h>
 #include <resizeBuff.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 #define COLOR_BTN_X		EDITSCR_X
 #define COLOR_BTN_Y		EDITSCR_Y + EDITSCR_H + 10

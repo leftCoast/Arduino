@@ -2,7 +2,7 @@
 #include <lilOS.h>
 #include <screen.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 
 
@@ -86,9 +86,7 @@ void panel::closing(void) {  }
 
 // We get a close command, we close! At least by default.
 void panel::handleCom(stdComs comID) {
-ST
-db.trace("panel::handleCom()",false);
-if (comID==closeCmd) db.trace("panel::handleCom() got coseCmd",false);
+
 	switch(comID) {
 		case closeCmd	: close(); break;
 		default			: break;

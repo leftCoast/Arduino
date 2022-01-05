@@ -3,7 +3,7 @@
 #include <adafruit_1947_Obj.h>
 #include <stdComs.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 #define DBL_CLICK_MS	500
 
@@ -382,7 +382,7 @@ fileViewer::~fileViewer(void) {  }
 
 // This is the default path we want to show.
 void fileViewer::setPath(char* inPath) {
-db.trace("fileViewer::setPath : ",inPath,false);
+
 	ourFileDir->setPath(inPath); 
 	ourFileDir->refresh();
 }
