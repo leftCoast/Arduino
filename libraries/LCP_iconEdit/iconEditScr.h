@@ -17,13 +17,17 @@ class iconEditScr : public bmpObj {
 				iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath);
 	virtual	~iconEditScr(void);
 	
-	virtual	void		drawSelf(void);
+				int		getBrushSize(void);
+	virtual	void		setBrushSize(int inSize);
+	virtual	void		doPixels(int x,int y,int dia,colorObj* color);
 	virtual	void  	doAction(event* inEvent,point* locaPt);
+	virtual	void		drawSelf(void);
 
 				mapper	xMap;
 				mapper	yMap;
 				colorObj	editColor;
 				int		scale;
+				int		brushSize;
 };
 
 #endif

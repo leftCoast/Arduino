@@ -7,6 +7,12 @@
 #define COLOR_BTN_Y		EDITSCR_Y + EDITSCR_H + 10
 #define COLOR_BTN_NAME	"color32.bmp"
 
+#define BRUSH_SLDR_X		COLOR_BTN_X + 50
+#define BRUSH_SLDR_Y		COLOR_BTN_Y + 7
+#define BRUSH_SLDR_W		140
+#define BRUSH_SLDR_H		18
+
+
 // Our .bmp file filter.
 bool iconEditFilter(pathItem* inItem) {
 	
@@ -56,6 +62,8 @@ iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	setDefaultPath(ICON_FLDR);
 	setFilter(iconEditFilter);
 	ourState = editing;
+	percentToBrush.setValues(0,100,1,6);
+	brushToPercent.setValues(1,6,0,100);
 }
 
 
@@ -118,11 +126,16 @@ void iconEdit::setup(void) {
 		addObj((iconEditScr*)ourDoc);
 		colorBtn = new colorBtnObj(this);
 		addObj(colorBtn);
+		brushSlider = new slider(BRUSH_SLDR_X,BRUSH_SLDR_Y,BRUSH_SLDR_W,BRUSH_SLDR_H);
+		brushSlider->setValue(brushToPercent.map(1));
+		addObj(brushSlider);
 	}
 }
 
 
 void iconEdit::loop(void) {
+	
+	int brush;
 	
 	if (haveComToPassOn) {
 		handleCom(comID);
@@ -132,6 +145,10 @@ void iconEdit::loop(void) {
 	if (strBuff) {												// If we find a strBuff..
 		resizeBuff(0,&strBuff);								// Deallocate it.
 	}																// Its only used for passing back string info.
+	brush = round(percentToBrush.map(brushSlider->getValue()));
+	if (brush != ((iconEditScr*)ourDoc)->brushSize) {
+		((iconEditScr*)ourDoc)->setBrushSize(brush);	
+	}										
 }
 
 
@@ -199,8 +216,6 @@ void iconEdit::colorOpen(stdComs comID) {
 	}
 	ourState = editing;
 }
-
-
 
 
 // Handle the commands from the buttons and dialog boxes..

@@ -3,7 +3,7 @@
 #include <timeObj.h>
 #include <filePath.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 
 // Returns true if this folderPath can be found, or created.
@@ -386,25 +386,22 @@ bool docFileObj::fileEdited(void) {  return mode==fEdited; }
 
 // This should pass back the name of the file for our document.
 char* docFileObj::getName(void) {
-ST	
+	
 	filePath aPath;
 	
 	aPath.setPath(docFilePath);
 	heapStr(&returnBuffer,aPath.getCurrItemName());
-	db.trace("File name : ",returnBuffer,false);
 	return returnBuffer;
 }
 
 
 // This should give us the folder path that our file is saved in.
 char* docFileObj::getFolder(void) {
-ST
+
 	filePath aPath;
-	db.trace("Saved docFilePath : ",docFilePath,false);
 	aPath.setPath(docFilePath);
 	aPath.popItem();
 	heapStr(&returnBuffer,aPath.getPath());
-	db.trace("docFileObj::getFolder() result : ",returnBuffer,false);
 	return returnBuffer;
 }
 

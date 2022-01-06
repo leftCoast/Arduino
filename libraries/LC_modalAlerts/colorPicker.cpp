@@ -66,7 +66,7 @@ colorPicker::colorPicker(listener* inListener)
 }
 
 
-colorPicker::~colorPicker(void) { ST }
+colorPicker::~colorPicker(void) {  }
 
 
 void colorPicker::setColor(colorObj* inColor) {

@@ -10,8 +10,10 @@ bool appleFilter(pathItem* inItem) {
 	if (inItem->getName()[0]=='_') 					return false;
 	if (!strcmp(inItem->getName(),"SPOTLI~1"))	return false;
 	if (!strcmp(inItem->getName(),"TRASHE~1"))	return false;
+	if (!strcmp(inItem->getName(),"FSEVEN~1"))	return false;
 	if (strstr(inItem->getName(),"DS_STO"))		return false;
 	if (strstr(inItem->getName(),".DS_"))			return false;
+	
 	else return true;
 }
 

@@ -1,10 +1,7 @@
 #include "homeScr.h"
 #include <lilOS.h>
 
-#define out(x) Serial.print(x)
-#define outln(x) Serial.println(x)
-
-#define BAR_Y        286
+#define BAR_Y  286
 
 
 struct spacer {
@@ -47,7 +44,7 @@ void homeScr::setup(void) {
    appIcon* theAppIcon;
    spacer   barSpacer;
 
-   barSpacer   = calcSpacer(4,32,240);                                                          // Calculate bar spacing. Num apps, icon width, bar width.
+   barSpacer   = calcSpacer(3,32,240);                                                          // Calculate bar spacing. Num apps, icon width, bar width.
    traceX      = barSpacer.startPos;                                                            // Set initial x position.
    stepX       = barSpacer.stepSize;                                                            // Set our step size.
    traceY      = BAR_Y;                                                                         // Set our y location.

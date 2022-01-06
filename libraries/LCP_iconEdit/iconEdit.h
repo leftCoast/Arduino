@@ -61,7 +61,10 @@ class iconEdit	:	public documentPanel {
 				stdComs			comID;
 				colorPicker*	colorAlert;
 				colorBtnObj*	colorBtn;
+				slider*			brushSlider;
 				char*				strBuff;
+				mapper			percentToBrush;
+				mapper			brushToPercent;
 };
 
 
