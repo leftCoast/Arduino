@@ -13,7 +13,7 @@ bool appleFilter(pathItem* inItem) {
 	if (!strcmp(inItem->getName(),"FSEVEN~1"))	return false;
 	if (strstr(inItem->getName(),"DS_STO"))		return false;
 	if (strstr(inItem->getName(),".DS_"))			return false;
-	
+	if (strstr(inItem->getName(),".FSEVE"))		return false;
 	else return true;
 }
 

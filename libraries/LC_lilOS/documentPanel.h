@@ -2,7 +2,7 @@
 #define documentPanel_h
 
 #include <docFileObj.h>
-#include <lilOs.h>
+#include <lilOS.h>
 #include <fSelectObj.h>
 #include <fSaveObj.h>
 
@@ -15,8 +15,8 @@
 
 
 // Couple tools for filtering out file lists.
-extern bool appleFilter(pathItem* inItem);
-extern bool hasExtension(char* inStr,const char* extension);
+bool appleFilter(pathItem* inItem);
+bool hasExtension(char* inStr,const char* extension);
 
 
 enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,

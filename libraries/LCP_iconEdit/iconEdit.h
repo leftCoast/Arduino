@@ -49,12 +49,12 @@ class iconEdit	:	public documentPanel {
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
 	virtual	void	loop(void);
-				char* getColorPickerPath(void);
-	virtual	void	openColorPicker(void);
-	virtual	void	editingMode(stdComs comID);
-	virtual	void	newDocOpen(stdComs comID);
-	virtual	void	colorOpen(stdComs comID);
-	virtual	void	handleCom(stdComs comID);
+	virtual	char* getLocalFilePath(const char* fileName);	// This will be VERY handy later..
+				void	openColorPicker(void);
+				void	editingMode(stdComs comID);
+				void	newDocOpen(stdComs comID);
+				void	colorOpen(stdComs comID);
+				void	handleCom(stdComs comID);
 	
 				iEditStates		ourState;
 				bool				haveComToPassOn;

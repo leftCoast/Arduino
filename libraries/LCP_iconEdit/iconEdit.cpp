@@ -5,11 +5,15 @@
 
 #define COLOR_BTN_X		EDITSCR_X
 #define COLOR_BTN_Y		EDITSCR_Y + EDITSCR_H + 10
-#define COLOR_BTN_NAME	"color32.bmp"
+#define COLOR_BTN_NAME	"color22.bmp"
 
-#define BRUSH_SLDR_X		COLOR_BTN_X + 50
-#define BRUSH_SLDR_Y		COLOR_BTN_Y + 7
-#define BRUSH_SLDR_W		140
+#define BRUSH_BTN_X		COLOR_BTN_X + 24
+#define BRUSH_BTN_Y		COLOR_BTN_Y
+#define BRUSH_BTN_NAME	"brush22.bmp"
+
+#define BRUSH_SLDR_X		BRUSH_BTN_X + 50
+#define BRUSH_SLDR_Y		COLOR_BTN_Y
+#define BRUSH_SLDR_W		100
 #define BRUSH_SLDR_H		18
 
 
@@ -26,7 +30,25 @@ bool iconEditFilter(pathItem* inItem) {
 	return false;
 }
 
-
+// **************************************************************
+// **********************    brushBtnObj    *********************
+// **************************************************************
+// 
+// 
+// brushBtnObj::brushBtnObj(iconEdit* inEditor)
+// 	: iconButton(BRUSH_BTN_X,BRUSH_BTN_Y,inEditor->getLocalFilePath(BRUSH_BTN_NAME),22) {
+// 	
+// 	ourEditor = inEditor;
+// }
+// 
+// 
+// brushBtnObj::~brushBtnObj(void) {   }
+// 	
+// 	
+// void brushBtnObj::doAction(void) {  ourEditor->openBrushPicker(); }
+// 
+// 
+// 
 
 // **************************************************************
 // **********************    colorBtnObj    *********************
@@ -34,10 +56,9 @@ bool iconEditFilter(pathItem* inItem) {
 
 
 colorBtnObj::colorBtnObj(iconEdit* inEditor)
-	: iconButton(COLOR_BTN_X,COLOR_BTN_Y,inEditor->getColorPickerPath()) {
+	: iconButton(COLOR_BTN_X,COLOR_BTN_Y,inEditor->getLocalFilePath(COLOR_BTN_NAME),22) {
 	
 	ourEditor = inEditor;
-	setMask(&(ourOSPtr->icon32Mask));
 }
 
 
@@ -62,8 +83,8 @@ iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	setDefaultPath(ICON_FLDR);
 	setFilter(iconEditFilter);
 	ourState = editing;
-	percentToBrush.setValues(0,100,1,6);
-	brushToPercent.setValues(1,6,0,100);
+	percentToBrush.setValues(0,100,1,12);
+	brushToPercent.setValues(1,12,0,100);
 }
 
 
@@ -129,6 +150,8 @@ void iconEdit::setup(void) {
 		brushSlider = new slider(BRUSH_SLDR_X,BRUSH_SLDR_Y,BRUSH_SLDR_W,BRUSH_SLDR_H);
 		brushSlider->setValue(brushToPercent.map(1));
 		addObj(brushSlider);
+		//iconButton* brushBtn = new iconButton(BRUSH_BTN_X,BRUSH_BTN_Y,getLocalFilePath(BRUSH_BTN_NAME),22);
+		//addObj(brushBtn);
 	}
 }
 
@@ -167,18 +190,18 @@ void iconEdit::drawSelf(void) {
 
 
 // This is used to find the color picker button graphic we use on our screen.
-char* iconEdit::getColorPickerPath(void) {
+char* iconEdit::getLocalFilePath(const char* fileName) {
 
 	char*	ourFolder;
 	int	numChars;
 	
 	ourFolder = ourOSPtr->getPanelFolder(getPanelID());	// Path to our folder on this system.
 	numChars = strlen(ourFolder);									// Count the chars.
-	numChars = numChars + strlen(COLOR_BTN_NAME);			// Add the chars of the button name.
+	numChars = numChars + strlen(fileName);					// Add the chars of the file name.
 	numChars++;															// And one for '\0'.
 	if (resizeBuff(numChars,&strBuff)) {						// If we can allocate the RAM..
 		strcpy(strBuff,ourFolder);									// Copy in the folder path.
-		strcat(strBuff,COLOR_BTN_NAME);							// Add the name.
+		strcat(strBuff,fileName);									// Add the name.
 	}																		// Take a deep breath..
 	return strBuff;													// And pass back the string buffer.
 }
@@ -195,6 +218,14 @@ void iconEdit::openColorPicker(void) {
 		ourState = getColor;
 	}
 }
+
+
+// void iconEdit::openBrushPicker(void) {
+// 		
+// 	if (ourState == editing) { 
+// 		ourState = getBrush;
+// 	}
+// }
 
 
 void iconEdit::editingMode(stdComs comID) {

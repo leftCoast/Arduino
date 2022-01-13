@@ -8,7 +8,6 @@
 class colorPicker :	public alertObj {
 
 	public:
-	
 				colorPicker(listener* inListener);
 	virtual	~colorPicker(void);
 	

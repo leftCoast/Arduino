@@ -1,5 +1,5 @@
 #include <colorPicker.h>
-#include <debug.h>
+//#include <debug.h>
 
 
 #define CP_X		20
