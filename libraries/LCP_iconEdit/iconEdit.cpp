@@ -79,7 +79,6 @@ iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
 	: documentPanel(ourAppID) {
 	
 	strBuff = NULL;
-	haveComToPassOn = false;
 	setDefaultPath(ICON_FLDR);
 	setFilter(iconEditFilter);
 	ourState = editing;
@@ -98,49 +97,44 @@ iconEdit::~iconEdit(void) { resizeBuff(0,&strBuff); }
 // document.
 void iconEdit::createDocObj(void) { 
 	
-	char* newFilePath;
+	tempStr	newFilePath;
 	
-	newFilePath = numberedFilePath(ICON_FLDR,"icon",".bmp");											// Looking at our folder, create an unused file name.
-	if (newFilePath) {																							// If we got that name..
-		if (createNewBMPFile(newFilePath,32,32)) {														// Setup that file as a blank, readable .BMP file.
-			ourDoc = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,newFilePath);	// Create our actual docFileObj.
-			if (ourDoc) ourDoc->setAsAutoGen();																// This is an auto generated file. It'll be auto destructed later.
-		}																												//
-		resizeBuff(0,&newFilePath);																			// Recycle our copy of the file path.
+	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));												// Looking at our folder, create an unused file name.
+	if (newFilePath.getStr()) {																							// If we got that name..
+		if (createNewBMPFile(newFilePath.getStr(),32,32)) {														// Setup that file as a blank, readable .BMP file.
+			ourDoc = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,newFilePath.getStr());	// Create our actual docFileObj.
+			if (ourDoc) ourDoc->setAsAutoGen();																			// This is an auto generated file. It'll be auto destructed later.
+		}																															//
 	}
 }
 
 
-void iconEdit::createNewDocFile(void) {
-
-	char* newFilePath;
- 	bool	success;
+bool iconEdit::createNewDocFile(void) {
+	
+	tempStr	newFilePath;
+ 	bool		success;
  	
  	success = false;
 	newFilePath = NULL;
-	ourDoc->closeDocFile();													// We close what we have.. (If anything)
-	newFilePath = numberedFilePath(ICON_FLDR,"icon",".bmp");		// Looking at our folder, create an unused file name.
-	if (newFilePath) {														// If we got that name..
-		if (createNewBMPFile(newFilePath,32,32)) {					// Set up the file as a readable .bmp image.
-			if (ourDoc->changeDocFile(newFilePath)) {					// If we can change to this file..
-				success = ourDoc->openDocFile(FILE_WRITE);			// Success is if we can open this file for editing.
-				ourDoc->setAsAutoGen();										// This is an auto generated file. It'll be auto destructed later.
-			}																		//
-		}																			//
-		resizeBuff(0,&newFilePath);										// Recycle the path buff.
-	}
-	if (success) {
-		comID = okCmd;
-	} else {
-		comID = cancelCmd;
-	}
-	ourState = newDoc;
-	haveComToPassOn = true;
+	ourDoc->closeDocFile();															// We close what we have.. (If anything)
+	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));		// Looking at our folder, create an unused file name.
+	if (newFilePath.getStr()) {													// If we got that name..
+		if (createNewBMPFile(newFilePath.getStr(),32,32)) {				// Set up the file as a readable .bmp image.
+			if (ourDoc->changeDocFile(newFilePath.getStr())) {				// If we can change to this file..
+				success = ourDoc->openDocFile(FILE_WRITE);					// Success is if we can open this file for editing.
+				ourDoc->setAsAutoGen();												// This is an auto generated file. It'll be auto destructed later.
+				((iconEditScr*)ourDoc)->setNeedRefresh();						// Cause a redraw.
+			}																				//
+		}																					//
+	}																						//
+	return success;																	// Return result.
 }
 
 
 // setup() & loop() panel style.
 void iconEdit::setup(void) {
+	
+	colorObj	backColor(LC_GREY);
 	
 	documentPanel::setup();
 	if (ourDoc) {
@@ -159,25 +153,20 @@ void iconEdit::setup(void) {
 void iconEdit::loop(void) {
 	
 	int brush;
-	
-	if (haveComToPassOn) {
-		handleCom(comID);
-		((iconEditScr*)ourDoc)->setNeedRefresh();
-		haveComToPassOn = false;
-	}
+
 	if (strBuff) {												// If we find a strBuff..
 		resizeBuff(0,&strBuff);								// Deallocate it.
 	}																// Its only used for passing back string info.
 	brush = round(percentToBrush.map(brushSlider->getValue()));
 	if (brush != ((iconEditScr*)ourDoc)->brushSize) {
 		((iconEditScr*)ourDoc)->setBrushSize(brush);	
-	}										
+	}								
 }
 
 
 // The default here is to not draw ourselves. You can change that.
 void iconEdit::drawSelf(void) {
-
+	
 	colorObj	aColor;
 	rect		aRect;
 	
@@ -191,19 +180,19 @@ void iconEdit::drawSelf(void) {
 
 // This is used to find the color picker button graphic we use on our screen.
 char* iconEdit::getLocalFilePath(const char* fileName) {
-
-	char*	ourFolder;
-	int	numChars;
 	
-	ourFolder = ourOSPtr->getPanelFolder(getPanelID());	// Path to our folder on this system.
-	numChars = strlen(ourFolder);									// Count the chars.
-	numChars = numChars + strlen(fileName);					// Add the chars of the file name.
-	numChars++;															// And one for '\0'.
-	if (resizeBuff(numChars,&strBuff)) {						// If we can allocate the RAM..
-		strcpy(strBuff,ourFolder);									// Copy in the folder path.
-		strcat(strBuff,fileName);									// Add the name.
-	}																		// Take a deep breath..
-	return strBuff;													// And pass back the string buffer.
+	tempStr	ourFolder;
+	int		numChars;
+	
+	ourFolder.setStr(ourOSPtr->getPanelFolder(getPanelID()));	// Path to our folder on this system.
+	numChars = ourFolder.numChars();										// Count the chars.
+	numChars = numChars + strlen(fileName);							// Add the chars of the file name.
+	numChars++;																	// And one for '\0'.
+	if (resizeBuff(numChars,&strBuff)) {								// If we can allocate the RAM..
+		strcpy(strBuff,ourFolder.getStr());								// Copy in the folder path.
+		strcat(strBuff,fileName);											// Add the name.
+	}																				// Take a deep breath..
+	return strBuff;															// And pass back the string buffer.
 }
 
 
@@ -229,14 +218,8 @@ void iconEdit::openColorPicker(void) {
 
 
 void iconEdit::editingMode(stdComs comID) {
-	documentPanel::handleCom(comID);
-}
-
-
-void iconEdit::newDocOpen(stdComs comID) {
 
 	documentPanel::handleCom(comID);
-	ourState = editing;
 }
 
 
@@ -254,7 +237,7 @@ void iconEdit::handleCom(stdComs comID) {
 
 	switch(ourState) {
 		case editing	: editingMode(comID);	break;
-		case newDoc		: newDocOpen(comID);		break;
+		//case newDoc		: newDocOpen(comID);		break;
 		case getColor	: colorOpen(comID);		break;
 	}
 }

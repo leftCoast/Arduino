@@ -1,11 +1,10 @@
 #include <iconEditScr.h>
 
-#include <debug.h>
+//#include <debug.h>
 
 
 iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath) 
 	: bmpObj(inX,inY,inWidth,inHeight,filePath) {
-	
 	
 	setEventSet(touchNDrag);
 	editColor.setColor(&red);
@@ -14,6 +13,7 @@ iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath
 	yMap.setValues(inY+1,inHeight+inY-1,0,32);
 	openDocFile(FILE_WRITE);
 	brushSize = 1;
+	dragging = false;
 }
 
 
@@ -39,9 +39,7 @@ void iconEditScr::doPixels(int x,int y,int dia,colorObj* color) {
 	float			percent;
 	RGBpack		packedBackColor;
 	colorObj		backColor;
-	
-	//db.trace("Going to paint!");
-	
+		
 	if (x>=0 && y>=0 && dia>2 && color) {			// Just one big pack of sanity checking..
 		rad = dia/2.0;
 		distMapper.setValues(0,rad,100,0);
@@ -65,9 +63,6 @@ void iconEditScr::doPixels(int x,int y,int dia,colorObj* color) {
 		setPixel(x,y,color);
 	}
 }
-
-float savedTime;
-bool	dragging = false;
 
 void iconEditScr::doAction(event* inEvent,point* locaPt) {
 

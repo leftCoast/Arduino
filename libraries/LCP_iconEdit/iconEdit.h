@@ -39,13 +39,13 @@ class iconEdit	:	public documentPanel {
 
 	public:
 	
-	enum iEditStates { editing, newDoc, getColor };
+	enum iEditStates { editing, getColor };
 	 				
 				iconEdit(lilOS* ourOS,int ourAppID);
 	virtual	~iconEdit(void);
 	
 	virtual	void	createDocObj(void);
-	virtual	void	createNewDocFile(void);
+	virtual	bool	createNewDocFile(void);
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
 	virtual	void	loop(void);
@@ -57,7 +57,6 @@ class iconEdit	:	public documentPanel {
 				void	handleCom(stdComs comID);
 	
 				iEditStates		ourState;
-				bool				haveComToPassOn;
 				stdComs			comID;
 				colorPicker*	colorAlert;
 				colorBtnObj*	colorBtn;

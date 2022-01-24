@@ -339,7 +339,6 @@ void fileDir::chooseFile(const char* name) { }
 // Let the calling function have a look at what should be the result path that we are
 // showing on the screen.
 char* fileDir::endChoice(void) {
-
 	return getPath();							// For now, you get the path as it is.
 }
 		

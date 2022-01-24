@@ -23,6 +23,8 @@ enum docPanelStates {	fileClosed, haveFileNoNameNoEdits, haveNamedFileNoEdits,
 								hasEditsNoName, hasEditsNamed, selectOpen, saveOpen, askOpen,
 								newDocFileOpen };
 
+char* docStateStr(docPanelStates aState);
+
 
 // **************************************************************
 // **********************    stateHolder    *********************
@@ -94,7 +96,7 @@ class askOkObj :	public alertObj,
 // ********************		documentPanel		********************
 // **************************************************************
 
-// Note on createDocObj(void). //This is one that the class that inherits this, creates the
+// Note on createDocObj(void). This is one that the class that inherits this, creates the
 // document object of the class that it will edit. Use this to create the fileObj of your
 // design and be able to edit it.
 //
@@ -119,7 +121,7 @@ class documentPanel :	public panel {
 	virtual	~documentPanel(void);
 	
 	virtual	void	createDocObj(void)=0;	
-	virtual	void	createNewDocFile(void)=0;
+	virtual	bool	createNewDocFile(void)=0;
 	virtual	void	setup(void);
 	virtual	void	closing(void);
 	virtual	void	setFilter(bool(*funct)(pathItem*));

@@ -4,8 +4,16 @@
 #include <lists.h>
 
 
-enum pathItemType { noType, rootType, folderType, fileType };
 
+//****************************************************************************************
+// pathItem:
+//
+// This will have the default actions. For all the different types pf path items. Root,
+// folder, file. This pathItem is pure virtual so it'll never be able to be created.
+//****************************************************************************************
+
+
+enum pathItemType { noType, rootType, folderType, fileType };
 
 class pathItem : public dblLinkListObj {
 
@@ -26,6 +34,14 @@ class pathItem : public dblLinkListObj {
 };
 
 
+
+//****************************************************************************************
+// rootItem:
+//
+// All paths start with one. Basically the SD card.
+//****************************************************************************************
+
+
 class rootItem : public	pathItem {
 	
 	public:
@@ -35,6 +51,14 @@ class rootItem : public	pathItem {
 	virtual	int	getNumPathChars(void);
 	virtual	void	addNameToPath(char* path);
 };
+
+
+
+//****************************************************************************************
+// fileItem:
+//
+// These are so useful. You can store stuff in 'em!
+//****************************************************************************************
 
 
 class fileItem : public	pathItem {
@@ -47,6 +71,14 @@ class fileItem : public	pathItem {
 };
 
 
+
+//****************************************************************************************	
+// folderItem:
+//
+// A little more complicated than a silly old file.
+//****************************************************************************************
+
+
 class folderItem : public	pathItem {
 	
 	public:
@@ -56,6 +88,16 @@ class folderItem : public	pathItem {
 	virtual	int	getNumPathChars(void);
 	virtual	void	addNameToPath(char* path);
 };
+
+
+
+//****************************************************************************************
+// filePath:
+//
+// And now we get to the actual filePath class. This is the bit the user will typically
+// interact with. And the bit that will interact with the SD card's file system as well.
+//
+//****************************************************************************************
 
 
 class filePath {
@@ -71,6 +113,7 @@ class filePath {
 	virtual	char*				getPath(void);
 				pathItem*		getCurrItem(void);
 				char*				getCurrItemName(void);
+				void				dumpChildList(void);
 				void				refreshChildList(void);
 				int				numChildItems(void);
 				pathItem*		getChildItemByName(char* name);

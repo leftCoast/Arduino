@@ -2,6 +2,8 @@
 #define fSelectObj_h
 
 #include <fileViewer.h>
+#include <resizeBuff.h>
+#include <strTools.h>
 
 enum selectType { filesOnly, foldersOnly, filesAndFolders };
 
@@ -22,7 +24,7 @@ class selectFileDir :	public fileDir {
 	virtual	char* endChoice(void);
 	
 				selectType		ourSelectType;
-				char*				currentNamePtr;
+				tempStr			currentName;
 				pathItemType	currentType;
 };
 

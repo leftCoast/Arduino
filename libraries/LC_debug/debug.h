@@ -2,10 +2,11 @@
 #define debug_h
 
 #include "Arduino.h"
-//#include <RamMonitor.h>
+#include <RamMonitor.h>
 #include <idlers.h>
 #include <timeObj.h>
 
+		
 
 class debug {
 
@@ -13,16 +14,36 @@ class debug {
                 debug(void);
   virtual       ~debug(void);
   
-				void  trace(const char* message,bool hold=true);
-				void  trace(const char* message,int inNum,bool hold=true);
-				void  trace(const char* message,const char* inStr,bool hold=true);
+				void  trace(const char* message,bool hold=false);
+				void  trace(const char* message,int inNum,bool hold=false);
+				void  trace(const char* message,const char* inStr,bool hold=false);
 };
 
 extern debug db;
 #define ST db.trace(__func__,false);
 
-/*
-#ifdef RAM_MONITOR
+
+class traceLoop {
+
+	public :
+				enum traceStates { idle, active, done };
+				
+            traceLoop(int inLoops=5);
+	virtual	~traceLoop(void);
+	
+				void	trace(const char* msg);
+  				
+  				traceStates	ourState;
+  				int 			count;
+  				int 			loops;
+};
+
+extern bool			traceLoopActive;
+extern traceLoop	traceList[];
+
+//#define RAM_MONITOR
+
+//#ifdef RAM_MONITOR
 
 class RAMMonitor :	public idler,
 							public timeObj {
@@ -39,6 +60,6 @@ class RAMMonitor :	public idler,
   				RamMonitor ram;
 };
 
-#endif //RAM_MONITOR
-*/	
+//#endif //RAM_MONITOR
+	
 #endif

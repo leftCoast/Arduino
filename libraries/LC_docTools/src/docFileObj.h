@@ -36,15 +36,15 @@
 // E) Deleting the object will have much the same effect as calling closeDocFile(). In
 // addition it releases the memory used for holding the file path strings.
 
+#include <SDTools.h>
 
 #define TEMP_FOLDER		"/temp/"		// Default folder to save temporary edit files in.
 #define FILE_SEARCH_MS	500			// Amount of milliseconds allowed to find a temp file name.
 
-#include <Arduino.h>
-#include <SD.h>
-
-
-char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension);
+// #ifdef FILE_WRITE
+// #undef FILE_WRITE
+// #define FILE_WRITE (O_READ | O_WRITE | O_CREAT)
+// #endif
 	
 	
 class docFileObj {

@@ -22,7 +22,7 @@ modal::modal(int x, int y, int width,int height,eventSet inEventSet)
 // Here we are "Ensured" ourLink will be valid. Why? Because if the modal linked list is
 // deleted, that will delete us first. So this should go tikkey boo. If we get deleted by
 // someone else? The list is still there. So Again, no worries! Go unlink ourselves.
-modal::~modal(void) { if (ourLink) ourLink->ourModal = NULL; }
+modal::~modal(void) {  if (ourLink) ourLink->ourModal = NULL; }
 
 
 // We have different constructors so lets tie them together with a common init routine.
@@ -31,7 +31,6 @@ void modal::init(void) {
 	drawing	= false;									// We're keeping quiet 'till we're ready.
 	done		= false;									// We're not done yet. Heck, not even started.
 	ourLink	= ourModalMgr.addLink(this);		// Tell the global modal manager that we have arrived.
-	readyTimer.setTime(100,true);					// Set the cooldown time and start the timer.
 }
 
 
@@ -57,8 +56,7 @@ void	modal::draw(void) {
 }
 	
 	
-// Is this event for us? Well yes, they ALL are. AND we'll check to see if the world has
-// gone quiet as well.	
+// Is this event for us? Well yes, they ALL are.
 bool modal::acceptEvent(event* inEvent,point* locaPt) {
 
 	drawGroup::acceptEvent(inEvent,locaPt);				// We do our "normal" stuff. (We are a drawGroup)
@@ -84,7 +82,13 @@ modalLink::modalLink(modal* inModal)
 // Our destructor. If we still have a link to our modal, we delete that first. And that
 // will cause our link to our modla to be NULLed out by the death of the modal. Shouldn't
 // be an issue because we are not going to be around to acces it again anyway.
-modalLink::~modalLink(void) { if (ourModal) delete(ourModal); }
+modalLink::~modalLink(void) {
+
+	if (ourModal) {					// If we have a modal out there we're watching..
+		ourModal->ourLink = NULL;	// We knock off its link to us. Keep stuff from getting weird.
+		delete(ourModal);				// And NOW we delete the modal.
+	}
+}
 
 
 // Returns if the modal is ready to be deleted, or has already been deleted.

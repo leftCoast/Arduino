@@ -9,7 +9,9 @@
 #define	NO_PANEL_ID		0		// You have to have this guy.
 #define	HOME_PANEL_ID	1
 
-#define	PATH_LEN			100	// Size of buffer for creating file paths.
+#define STD_ICON_FLDR		"icons/standard/"
+
+
 
 // The list of standard icons supplied by the OS for the applications to use.
 enum stdIcons	{
@@ -117,7 +119,7 @@ class lilOS :  public idler {
 	virtual	char*		stdIconPath(stdIcons theIcon);
 	
 	
-				char		pathBuff[PATH_LEN];			// Workspace for building up file paths.
+				char*		pathBuff;			// Workspace for building up file paths.
 				panel*	mPanel;
 				bmpMask	icon32Mask;
 				bmpMask	icon22Mask;

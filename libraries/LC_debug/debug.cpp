@@ -41,11 +41,68 @@ void debug::trace(const char* message,int inNum,bool hold) {
   }
 }
 
-
 debug db;
 
-/*
-#ifdef RAM_MONITOR
+//****************************************************************************************
+//	traceLoop
+// Used for things that repeat a LOT. Like loop() or idle(). This gives a global that can
+// be switched on in your code and a limit as to how many to print. So as to not flood the
+// serial monitor.
+//****************************************************************************************
+
+
+traceLoop::traceLoop(int inLoops) {
+	
+	loops		= inLoops;
+	count		= 0;
+	ourState	= idle;
+}
+
+
+traceLoop::~traceLoop(void) {  }
+
+
+void traceLoop::trace(const char* msg) {  
+	
+	switch(ourState) {
+		case idle	:
+			if (traceLoopActive) {
+				count = 0;
+				db.trace(msg);
+				count++;
+				if (count>=loops) {
+					ourState = done;
+				} else {
+					ourState = active;
+				}
+			}
+		break;
+		case active	:
+			if (traceLoopActive) {
+				db.trace(msg);
+				count++;
+				if (count>=loops) {
+					ourState = done;
+				}
+			} else {
+				ourState	= idle;
+			}
+		break;
+		case done	:
+			if (!traceLoopActive) {
+				ourState	= idle;
+			}
+		break;
+	}
+}
+
+
+bool traceLoopActive = false;
+
+traceLoop traceList[5];
+
+
+//#ifdef RAM_MONITOR
 
 // ******************************************
 // *************** RAMMonitor ***************
@@ -111,5 +168,4 @@ void RAMMonitor::idle(void) {
 	ram.run();
 }
 
-#endif //RAM_MONITOR
-*/
+//#endif //RAM_MONITOR

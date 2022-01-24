@@ -1,5 +1,6 @@
 #include "bmpImage.h"
 #include <resizeBuff.h>
+#include <strTools.h>
 
 //#include <debug.h>
 
@@ -8,8 +9,9 @@
 #define DEF_DEPTH				32
 #define COLOR_BUF_SIZE		4   // When grabbing a color off a bitmap you get 3 or 4 bytes. Go big!
 
-// .bmp files have the 2 & 4 byte numbers stored in reverse byte order
-// than what we use here in Arduinoland. These two routines swap 'em back.
+// .bmp files have the 2 & 4 byte numbers stored in reverse byte order than what we use
+// here in Arduinoland. These routines swap 'em back. (Sure seems like they aren't doing
+// anything to me though..
 
 // For 2 byte numbers.
 uint16_t read16(File f) {
@@ -70,6 +72,7 @@ bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
 	success = false;															// Ok, assume failure..									
 	bmpFile = SD.open(newPath,FILE_WRITE);								// See if its a valid path.
 	if (bmpFile) {    														// We got a file?
+		bmpFile.seek(0);														// Write puts us at the end. Move to the beginning.
 		
 		// File header 14 bytes.
 		write16(0x4D42,bmpFile);											// It wants this. Whatever.
@@ -94,12 +97,12 @@ bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
 		buff[3] = 0;															// Padding.
 		while(bmpFile.position()<DEF_IMAGE_OFFSET) {					// Just in case we didn't make it to the right spot..
 			bmpFile.write(&(buff[3]),1);									// Force the issue!
-		}																			// Now..
+		}
+		buff[0] = 255;	// BLUE												// We're going for the color white.
+		buff[1] = 255; // GREEN												//
+		buff[2] = 255; // RED												//																			// Now..
 		for (int y=0;y<inHeight;y++) {									// We're going to..
 			for (int x=0;x<inWidth;x++) {									// Go to every pixel
-				buff[0] = 255;	// BLUE										// And write the color white.
-				buff[1] = 255; // GREEN										//
-				buff[2] = 255; // RED										//
 				bmpFile.write(buff,4);										// Stamp out the 4 byte color.
 			}																		//
 		}																			//
@@ -111,24 +114,22 @@ bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
 
 
 
-// **************************************************************************
-// ***************************** bmpImage class *****************************
-// **************************************************************************
+//****************************************************************************************
+// bmpImage class:
+//****************************************************************************************
 
 
 bmpImage::bmpImage(char* filePath)
 	: baseImage(filePath) { newImgPath = NULL; }
 
 
-bmpImage::~bmpImage(void) { resizeBuff(0,&newImgPath); }
+bmpImage::~bmpImage(void) { freeStr(&newImgPath); }
 
 
 // Setup for the next createNewDocFile() call.
 void bmpImage::setPWH(char* imgPath,int w,int h) { 
 
-	if (resizeBuff(strlen(imgPath)+1,&newImgPath)) {
-		strcpy(newImgPath,imgPath);
-	}
+	heapStr(&newImgPath,imgPath);
 	newW	= w;
 	newH	= h;
 }
@@ -136,16 +137,15 @@ void bmpImage::setPWH(char* imgPath,int w,int h) {
 
 bool bmpImage::setNewBMPFile(char* BMPPath,int w,int h) {
 
-	bool	success;
+	tempStr newPath(BMPPath);								// Save a local copy..
 	
-	success = false;									// Not a success yet.
-	closeDocFile();									// Close the original file, if any.
-	if (createNewBMPFile(BMPPath,w,h)) {		// If we can setup the new file..
-		if (changeDocFile(BMPPath)) {				// If we can change to this new file..
-			success = openDocFile(FILE_WRITE);	// Success means we can open this new file for writing.
-		}													//
-	}														//
-	return success;									// Return our success.
+	closeDocFile();											// Close the original file, if any.
+	if (createNewBMPFile(newPath.getStr(),w,h)) {	// If we can setup the new file..
+		if (changeDocFile(newPath.getStr())) {			// If we can change to this new file..
+			return  true;										// We'll call that a success.
+		}															//
+	}																//
+	return false;												// Return our success.
 }
 
 

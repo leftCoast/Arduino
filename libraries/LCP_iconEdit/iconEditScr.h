@@ -28,6 +28,8 @@ class iconEditScr : public bmpObj {
 				colorObj	editColor;
 				int		scale;
 				int		brushSize;
+				float 	savedTime;
+				bool		dragging;
 };
 
 #endif

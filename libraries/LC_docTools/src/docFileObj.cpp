@@ -2,172 +2,20 @@
 #include <resizeBuff.h>
 #include <timeObj.h>
 #include <filePath.h>
+#include <strTools.h>
 
 //#include <debug.h>
 
 
-// Returns true if this folderPath can be found, or created.
-bool createFolder(const char* folderPath) {
-
-	File	theDir;
-	int	numChars;
-	bool	success;
-	char*	dirPath;
-	
-	success = false;											// If we started with a success, why start?
-	if (folderPath) {											// If we got a path. (Sanity)
-		numChars = strlen(folderPath);					// Lets see how long the path is.
-		if (folderPath[numChars-1]=='/') {				// Paths end in '/'. Make sure this has that.
-			dirPath = NULL;									// Dynamic starts with NULL.
-			if (resizeBuff(numChars+1,&dirPath)) {		// WAIT!! Patching bug here. If you pass 
-				strcpy(dirPath,folderPath);				// "name/" and it fails, it crashes!
-				success = false;								// No '/' no crash.
-				dirPath[numChars]='\0';						// Clip off the trailing '/'.
-				theDir=SD.open(dirPath,FILE_READ);		// Lets try to open the path they gave us.
-				if (theDir) {									// If we were able to open the path they gave us..
-					success = theDir.isDirectory();		// If its a directory, its a success.
-					theDir.close();							// Close the directory we opened.
-				} else {											// Else, there was no directory of that name..
-					success = SD.mkdir(dirPath);			// If we can create the directory, its a success.
-				}													//
-				resizeBuff(0,&dirPath);						// Toss the temp buff.
-			}														//
-		}															//
-	}																//
-	return success;											// Return whether we were a success or not?
-}																	
-
-
-// Given a path, baseName and extension this hands back a string with a path to an unused
-// numbered file. For example "/docs/NoName5.doc". IF it can not allocated this file it
-// will return NULL. IF THIS IS A SUCCESS, YOU MUST DE-ALLOCATE THE RETURNED STRING.
-char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension) {
-
-	File	tempFile;
-	char* result;
-	int	numBytes;
-	int	maxNum;
-	int	fileNum;
-	char	numStr[8];
-	bool	done;
-	
-	result = NULL;														// As always, dynamic stuff starts at NULL.
-	if (strlen(baseName)<8 											// If the params make sense..
-		&& strlen(extension)<=4 									//
-		&& folderPath[0]=='/') {									//
-		if (createFolder(folderPath)) {							// If we can find/create the folder..
-			maxNum = pow(10,8 - strlen(baseName));				// How many chars we got for a value?
-			maxNum--;													// Actually, you get one too many.
-			numBytes = strlen(folderPath) + 8 + 4 + 1;		// Path, max name, max extension, '\0'.
-			if (resizeBuff(numBytes,&result)) {					// If we can get the RAM..
-				fileNum = 1;											// Starting at one.
-				done = false;											// 'Cause we ain't.
-				do {														// Do for each..
-					itoa(fileNum++,numStr,7);						// Setup a number string.
-					strcpy(result,folderPath);						// Build up the test path.
-					strcat(result,baseName);						// Add the base name.
-					strcat(result,numStr);							// Add the number string.
-					strcat(result,extension);						// Add the extension.
-					tempFile = SD.open(result,FILE_READ);		//	Try to open this file for reading.
-					if (tempFile) {									// If the file opened..
-						tempFile.close();								// We just close it and move on.
-					} else {												// Else, we have a possible candidate here.
-						done = true;									// Either its the real deal or an error. In any case, we are done. 
-						tempFile = SD.open(result,FILE_WRITE);	// Try to create the file we couldn't open.
-						if (tempFile) {								// If we were able to create the file..
-							tempFile.close();							// Close it.
-							return result;								// And We'll call that a success!
-						}													//
-					}														//
-				} while(!done && fileNum<maxNum);				// Loop while we are not done. (And have numbers to go.)
-				resizeBuff(0,&result);								// If we get here, its a failure so recycle the RAM.
-			}																//
-		}																	//
-	}																		//
-	return result;														// And this'll be returning a NULL.
-}
-	
-
-
-
-// TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
-File TRUNCATE_FILE(char* path) {
-	
-	SD.remove(path);							// Delete the file. So now it has zero bytes of data.
-	return SD.open(path,FILE_WRITE);		// Re-open the file. Now its been truncated. (Sigh..)
-}													// AND NOW WE HAVE A TRUNCATED FILE.
-							
-
-// fcpy() : The file version of strcpy(). The dest file must be open for writing. The src
-// file must be, at least, open for reading. (Writing is ok too) The dest file index is
-// left pointing to the end of the file. The src file index is not changed.
-void fcpy(File dest,File src) {
-	
-	unsigned long	filePos;
-	maxBuff	cpyBuff(src.size());
-	unsigned long	numBytes;
-	unsigned long	remaingBytes;
-	
-	
-	filePos = src.position();				// Lets save the file pos for miss user.
-	src.seek(0);								// Point at first byte of the src file.
-	
-	// HACK, THERE IS NO truncate() CALL SO WE DO IT BEFORE THIS CALL.
-	//dest.truncate();							// Clear out the old.
-	// AND THERE YOU GO..
-	
-	remaingBytes = src.size();
-	for (int i=0;i<cpyBuff.numPasses;i++) {
-		numBytes = min(cpyBuff.numBuffBytes,remaingBytes);
-		src.read(cpyBuff.theBuff,numBytes);
-		dest.write((char*)(cpyBuff.theBuff),numBytes);
-		remaingBytes = remaingBytes - numBytes;
-	}
-	src.seek(filePos);						// Put it back like we found it.						
-}
-
-
-// fcat() : The file version of strcat(). The dest file must be open for writing. The src
-// file must be, at least, open for reading. (Writing is ok too) The dest file index is
-// left pointing to the end of the file. The src file index is not changed.
-void fcat(File dest,File src) {
-	
-	uint32_t	filePos;
-	uint32_t	numBytes;
-	
-	numBytes = dest.size();					// How many bytes we talking here?
-	dest.seek(numBytes);						// Point at end of the dest file.
-	filePos = src.position();				// Lets save the file pos for miss user.
-	src.seek(0);								// Point at first byte of the src file.
-	while(src.available()) {				// While not at the end of the src file..
-		dest.write(src.read());				// Write the data of the dest file.
-	}
-	src.seek(filePos);						// Put it back like we found it.					
-}
-
-
-
-// ************************************************************
-// ********************  docFileObj class  ********************
-// ************************************************************
-
-
 // A docFile object MUST have a path to exist. 	
 docFileObj::docFileObj(char* filePath) {
-	
-	int numBytes;
-	
+		
 	docFilePath		= NULL;									// Dynamic things start at NULL.
 	editFilePath	= NULL;									// Dynamic things start at NULL.
 	returnBuffer	= NULL;									// Someone wants..  Say.. a path? Store it here. Pass this back.
 	autoGenFile		= false;									// We assume this is NOT an autoGenerated temp file.
 	mode 				= fClosed;								// We are NOT editing at the moment.
-	if (filePath) {											// If we have	a a file path. (Sanity, we'd better!)
-		numBytes = strlen(filePath)+1;					// Calculate the number of bytes to store it.
-		if (resizeBuff(numBytes,&docFilePath)) {		// If we get the RAM to store it..
-			strcpy(docFilePath,filePath);					// Save the path.
-		}
-	}		
+	heapStr(&docFilePath,filePath);						// Grab our local copy of the file path.		
 }
 
 
@@ -175,11 +23,12 @@ docFileObj::~docFileObj(void) {
 
 	closeDocFile();					// Close files and Recycle the editFile stuff.
 	if (autoGenFile) {				// If this was originally an auto generated file..
-		SD.remove(docFilePath);		// Delete the auto file.
+		SD.remove(docFilePath);		// Delete the auto file. (This and changFile())
 		autoGenFile = false;			// And we are no longer carrying an auto generated file.
 	}
-	resizeBuff(0,&docFilePath);	// Recycle the docFilePath.
-	resizeBuff(0,&returnBuffer);	// And the return buffer.
+	freeStr(&docFilePath);			// Recycle the docFilePath.
+	freeStr(&editFilePath);			// Recycle the editFilePath.
+	freeStr(&returnBuffer);			// And the return buffer.
 }
 
 
@@ -209,7 +58,7 @@ bool docFileObj::openDocFile(int openMode) {
 			}
 			tempFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
 			if (tempFile) {														// If we were able to open the file..
-				if (checkDoc(tempFile)) {										// If the file past the acid test..
+				if (checkDoc(tempFile)) {										// If the file passed the acid test..
 					if (createEditPath()) {										// If we were able to create an edit path..
 						ourFile = SD.open(editFilePath,FILE_WRITE);		// Have a go at opening the edit file path.	
 						if (ourFile) {												// If we were able to open the edit file..
@@ -227,18 +76,15 @@ bool docFileObj::openDocFile(int openMode) {
 			if (mode==fOpenToRead) {											// If we're already open to read..
 				ourFile.seek(0);													// Opening to READ assumes you start at the beginning of the file.
 				return true;														// We're all set, lets go.
-			} else if (mode==fOpenToEdit||mode==fEdited) {				// We're in the middle of editing..
-				closeDocFile();													// We try to close the file to open later.
-				if (mode!=fClosed) {												// IF the file is NOT been closed..
-					return false;													// They didn't close it, Lets bolt!
-				}
-			}
-			ourFile = SD.open(docFilePath,FILE_READ);						// Have a go at opening the doc file path.
-			if (ourFile) {															// If we were able to open the file..
-				if (checkDoc(ourFile)) {										// If the file past the acid test..
-					ourFile.seek(0);												// Point at first byte of the file.
-					mode = fOpenToRead;											// We are open for reading.
-					success = true;												// Success! The file is open and ready to read.
+			} else {
+				closeDocFile();													// We close the file.
+				ourFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
+				if (ourFile) {														// If we were able to open the file..
+					if (checkDoc(ourFile)) {									// If the file passed the acid test..
+						ourFile.seek(0);											// Point at first byte of the file.
+						mode = fOpenToRead;										// We are open for reading.
+						success = true;											// Success! The file is open and ready to read.
+					}
 				}
 			}
 		}
@@ -302,13 +148,13 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 								autoGenFile = false;						// And we are no longer carrying an auto generated file.
 							}													//
 							success = true;								// Success!
-						}
-					}
-				}
+						}														//
+					}															//
+				}																//
 			} else {															// Else, mode is either closed or read only..
 				savedMode = mode;											// Save off the mode we started with.
 				if (mode==fClosed) {										// If the file's closed..
-					openDocFile(FILE_READ);								// Give it a show to open it for reading.
+					openDocFile(FILE_READ);								// Give it a shot to open it for reading.
 				}																//
 				if (mode==fOpenToRead) {								// If the file is open to read..
 					tempFile = SD.open(newFilePath,FILE_WRITE);	// Have a go at opening our (new) file path.
@@ -322,18 +168,18 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 							if (savedMode==fOpenToRead) {				// If the original was open for reading..
 								if (openDocFile(FILE_READ)) {			// If we can Open the new doc file for reading..
 									success = true;						// We'll call that a success!
-								}
+								}												//
 							} else {											// Else it was originally closed..
 								success = true;							// We'll call that a success as well!
-							}
-						}
-					}
-				}
-			}
-			freeStr(&savedPath);
-		}
-	}
-	return success;
+							}													//
+						}														//
+					}															//
+				}																//
+			}																	//
+			freeStr(&savedPath);											// Free the allocated string buffer.
+		}																		//
+	}																			//
+	return success;														// Return the result, success or failure.
 }
 
 
@@ -342,45 +188,45 @@ bool docFileObj::saveDocFile(char* newFilePath) {
 // up to the user of this object.
 void docFileObj::closeDocFile(void) {
 
-	switch(mode) {
-		case fClosed		: break;
-		case fOpenToRead	:
-			ourFile.close();
-			mode = fClosed;
-		break;
-		case fOpenToEdit	:
-		case fEdited :
-			ourFile.close();
-			SD.remove(editFilePath);
-			resizeBuff(0,&editFilePath);
-			mode = fClosed;
-		break;
-	}
+	switch(mode) {									// Mode decides our action..
+		case fClosed		: return;			// If already closed, bolt.
+		case fOpenToRead	:						// If open to read..
+			ourFile.close();						// Close the file.
+		break;										// And we're done.
+		case fOpenToEdit	:						// Open for editing..
+		case fEdited		:						// Or open for editing and have changes..
+			ourFile.close();						// We close our document file.
+			SD.remove(editFilePath);			// We remove our document editing file.
+			freeStr(&editFilePath);				// Recycle the edit file path.
+		break;										//
+	}													//
+	mode = fClosed;								// Mode is now, closed.
 }
 
 
 bool docFileObj::changeDocFile(char* newPath) {
-
-	int	numBytes;
-	if (mode==fClosed) {											// If the file is closed.
-		if (newPath) {												// If we have	a new file path. (Sanity, we'd better!)
-			if (autoGenFile) {									// If this was originally an auto generated file..
-				SD.remove(docFilePath);							// Delete the auto file.
-				autoGenFile = false;								// And we are no longer carrying an auto generated file.
-			}
-			numBytes = strlen(newPath)+1;						// Calculate the number of bytes to store it.
-			if (resizeBuff(numBytes,&docFilePath)) {		// If we get the RAM to store it..
-				strcpy(docFilePath,newPath);					// Save the path.
-				return true;										// Success!
-			}
-		}
-	}
-	return false;													// You fail!
+	
+	if (newPath) {									// If we have a new file path. (Sanity, we'd better!)
+		closeDocFile();							// Close our current document file.
+		if (autoGenFile) {						// If this was originally an auto generated file..
+			SD.remove(docFilePath);				// Delete the auto file.
+			autoGenFile = false;					// And we are no longer carrying an auto generated file.
+		}												//
+		heapStr(&docFilePath,newPath);		// Save the new path.
+		if (docFilePath) {						// If we got the RAM to store it..
+			return true;							// Success!
+		}												//					
+	}													//
+	return false;									// Either no name or not enough RAM to store it.
 }
 
+
+
+// Save off whether our document has an auto generated name or not.
 void docFileObj::setAsAutoGen(bool trueFalse) { autoGenFile = trueFalse; }
 
 
+// Return if we have unsaved changes or not.
 bool docFileObj::fileEdited(void) {  return mode==fEdited; }
 
 
@@ -399,11 +245,13 @@ char* docFileObj::getName(void) {
 char* docFileObj::getFolder(void) {
 
 	filePath aPath;
-	aPath.setPath(docFilePath);
-	aPath.popItem();
-	heapStr(&returnBuffer,aPath.getPath());
-	return returnBuffer;
+	
+	aPath.setPath(docFilePath);					// Setup the path obj for this path string.
+	aPath.popItem();									// Pop the last file/folder off the string.
+	heapStr(&returnBuffer,aPath.getPath());	// Allocate and save off the resultant path string.
+	return returnBuffer;								// Return a pinter to the resultant path string.
 }
+
 
 byte docFileObj::peek(void) {
 
@@ -414,6 +262,7 @@ byte docFileObj::peek(void) {
 	}
 }
 
+
 uint32_t docFileObj::position(void) {
 	
 	if (mode != fClosed) {
@@ -423,6 +272,7 @@ uint32_t docFileObj::position(void) {
 	}
 }
 
+
 bool docFileObj::seek(uint32_t index) {
 	
 	if (mode != fClosed) {
@@ -431,6 +281,7 @@ bool docFileObj::seek(uint32_t index) {
 		return false;
 	}
 }
+
 
 uint32_t docFileObj::size(void) {
 	
@@ -450,6 +301,7 @@ int docFileObj::read(void) {
 		return -1;
 	}
 }
+
 
 uint16_t docFileObj::read(byte* buff,uint16_t numBytes) {
 
@@ -498,20 +350,12 @@ bool docFileObj::checkDoc(File inFile) { return false; }
 
 // Find an unused temp file and assign it to the edit file path.
 bool docFileObj::createEditPath(void) {
-	
-	char* filePath;
-	bool	success;
-	
-	success = false;														// Start without success.
-	filePath = numberedFilePath(TEMP_FOLDER,"efp",".tmp");	// Find an unused valid temp file path.
-	if (filePath) {														// If we succeeded in this task..
-		if (resizeBuff(strlen(filePath)+1,&editFilePath)) {	// If we can allocate the RAM to save this path.
-			strcpy(editFilePath,filePath);							// Set our edit file path to this temp file path.
-			success = true;												// Success!
-		}																		//
-		resizeBuff(0,&filePath);										// Recycle the RAM.
-	}
-	return success;															// If we got here, we've failed.
+		
+	heapStr(&editFilePath,numberedFilePath(TEMP_FOLDER,"efp",".tmp"));	// Find an unused valid temp file path.
+	if (editFilePath) {																	// If we succeeded in this task..
+		return true;																		// If we got here, we've succeeded!
+	}																							//
+	return false;																			// Otherwise, we return false.
 }
 
 										

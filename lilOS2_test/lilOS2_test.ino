@@ -4,11 +4,17 @@
 #include <screen.h>
 #include "ourOSObj.h"
 
-ourOSObj  ourOS;
+
+//RAMMonitor rammy;
+
+ourOSObj ourOS;
 
 void setup() {
    
+   //rammy.begin();
+   
    Serial.begin(57600);                                           // Fire up serial for debugging.
+  
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.
       Serial.println("NO SCREEN!");                               // Screen init failed. Tell user.
       Serial.flush();                                             // Make sure the message gets out.
@@ -27,6 +33,16 @@ void setup() {
 
 void loop() {     // During loop..
    
-  idle();         // Idlers get their time.
-  ourOS.loop();   // ourOS gets time to pass on to the current panel.
+   char buff[40];
+   char buff2[10];
+   
+   traceList[0].trace("***LOOP HERE***");
+   if (traceLoopActive) {
+      strcpy(buff,"Calling idle(), Num idlers : ");
+      strcat(buff,itoa(theIdlers.getCount(),buff2,DEC));
+   }
+   traceList[1].trace(buff);
+   idle();         // Idlers get their time.
+   traceList[2].trace("Calling ourOS.loop()");
+   ourOS.loop();   // ourOS gets time to pass on to the current panel.
 }

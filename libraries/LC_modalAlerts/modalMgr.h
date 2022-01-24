@@ -8,14 +8,14 @@
 
 // Why this manager for modals? Here's the issue. Modals are typically placed "above" the
 // rest of your screen items, and that causes all sorts of redraw and click through 
-// issues. Also, there is the issue of modal's needing to be deleted because the also tend
-// to be temporary in nature. So this gives us three issues to deal with.
+// issues. Also, there is the issue of modal's needing to be deleted because they also
+// tend to be temporary in nature. So this gives us three issues to deal with.
 //
 // 1) Need to draw after everything below is completed drawing.
 // 2) Need to block other screen items below from getting clicks.
-// 3) Need to have a mechanism for auto deletion. Because deleting oneself leads to crashing.
-//
-// 
+// 3) Need to have a mechanism for auto deletion. Because deleting oneself leads to
+//    nasty crashing.
+
 
 class modalLink;
 
@@ -33,7 +33,6 @@ class modal :	public drawGroup {
 	virtual	bool	acceptEvent(event* inEvent,point* locaPt);
 				
 				modalLink*	ourLink;
-				timeObj		readyTimer;
 				bool			drawing;
 				bool			done;
 };

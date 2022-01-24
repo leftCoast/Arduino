@@ -194,7 +194,7 @@ void editLabel::doAction(event* inEvent,point* locaPt) {
 	mapper	touchMapper(0,width,0,getViewChars()); 
 	
 	if (mEditing) {
-		touchLoc = round(touchMapper.Map(locaPt->x));
+		touchLoc = round(touchMapper.map(locaPt->x));
 		deltaX = touchLoc - cursor;
 		setIndex(index + deltaX-1);
 	}

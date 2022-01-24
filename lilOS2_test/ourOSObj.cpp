@@ -5,7 +5,7 @@
 //#include <starTrek.h>
 //#include "testAppPanel.h"
 #include "homeScr.h"
-
+#include <debug.h>
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
 #define SCREEN_PIN   25                      // The ananlog pin choosen for the screen backlight.
 char systemFolder[]  = "/system/";           // Where we decided to store the systemp folder on our SD card.
@@ -71,31 +71,26 @@ char*  ourOSObj::getSystemFolder(void) { return systemFolder; }
 
 // Hand this an appID and get back a pointer to the path of its data folder.
 char* ourOSObj::getPanelFolder(int panelID) {
-     
-   strcpy(pathBuff,panelFolder);
-   switch (panelID) {
-      case homeApp      : return NULL;
-      case calcApp      : 
-         strcat(pathBuff,"rpnCalc/");
-         return pathBuff;
-      break;
-      case iconEditApp  :
-         strcat(pathBuff,"iconEdit/");
-         return pathBuff;
-      break;
-      case breakoutApp  :
-         strcat(pathBuff,"breakout/");
-         return pathBuff;
-      break; 
-//      case starTrekApp  :
-//         strcat(pathBuff,"starTrek/");
-//         return pathBuff;
-//      break;
-//      case testApp      :
-//         strcpy(pathBuff,getSystemFolder());
-//         strcat(pathBuff,"icons/standard/");
-//         return pathBuff;
-//      break;
-      default           : return NULL;
+    int numBytes;
+
+   numBytes = strlen(panelFolder) + 10;  // 8 for name, 1 for '/', 1 for '\0'.
+   if (resizeBuff(numBytes,&pathBuff)) {
+      strcpy(pathBuff,panelFolder);
+      switch (panelID) {
+         case homeApp      : return NULL;
+         case calcApp      : 
+            strcat(pathBuff,"rpnCalc/");
+            return pathBuff;
+         break;
+         case iconEditApp  :
+            strcat(pathBuff,"iconEdit/");
+            return pathBuff;
+         break;
+         case breakoutApp  :
+            strcat(pathBuff,"breakout/");
+            return pathBuff;
+         break;
+         default           : return NULL;
+      }
    }
 }

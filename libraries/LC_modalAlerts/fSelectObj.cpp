@@ -45,7 +45,6 @@ selectFileDir::selectFileDir(int inX, int inY, int inWidth,int inHeight,selectTy
 	
 	ourSelectType	= inSelectType;
 	currentType		= noType;
-	currentNamePtr	= NULL;
 }
 	
 	
@@ -58,7 +57,7 @@ void selectFileDir::chooseFile(const char* name) {
 	if (ourSelectType!=foldersOnly) {				// If its Ok to choose a file..
 		if (pushChildItemByName((char*)name)) {	// If we can push this filename on the path..
 			currentType = noType;						// Remove type. Because we've just used it.
-			currentNamePtr = NULL;						// And remove the name pointer as well.
+			currentName.setStr(NULL);					// And remove the name as well.
 			ourViewer->handleCom(okCmd);				// We tell the viewer we're done.
 		} else {												// Else, some horrible error happened..
 			ourViewer->handleCom(cancelCmd);			// We tell the viewer we failed.
@@ -77,18 +76,18 @@ void selectFileDir::setItem(pathItemType inType,const char* name) {
 		case filesOnly			:
 			if (inType == fileType) {
 				currentType		= inType;
-				currentNamePtr = (char*)name;
+				currentName.setStr(name);
 			}
 		break;
 		case foldersOnly		:
 			if (inType == folderType) {
 				currentType		= inType;
-				currentNamePtr = (char*)name;
+				currentName.setStr(name);
 			}
 		break;
 		case filesAndFolders	:
 			currentType		= inType;
-			currentNamePtr = (char*)name;
+			currentName.setStr(name);
 		break;
 	}
 }
@@ -99,11 +98,11 @@ char* selectFileDir::endChoice(void) {
 
 	pathItem*	lastItem;
 	
-	if (currentNamePtr) {									// If there's a current name, remember, this has been vetted above.
-		if (pushChildItemByName(currentNamePtr)) {	// If we CAN'T push this name onto the path.
-			currentNamePtr = NULL;							// We've now used the current name pointer, so we need to NULL it out.
+	if (currentName.getStr()) {									// If there's a current name, remember, this has been vetted above.
+		if (pushChildItemByName(currentName.getStr())) {	// If we CAN push this name onto the path.
+			currentName.setStr(NULL);								// We've now used the current name pointer, so we need to NULL it out.
 		} else {
-			return NULL;										// Something very wrong is going on. Return NULL.
+			return NULL;												// Something very wrong is going on. Return NULL.
 		}
 	}
 	lastItem = getCurrItem();								// Grab the last item on the path.
