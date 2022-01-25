@@ -3,7 +3,7 @@
 #include <breakout.h>
 #include <iconEdit.h>
 //#include <starTrek.h>
-//#include "testAppPanel.h"
+#include "testApp.h"
 #include "homeScr.h"
 #include <debug.h>
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
@@ -47,7 +47,7 @@ panel* ourOSObj::createPanel(int panelID) {
       case iconEditApp : result = new iconEdit(this,panelID);       break;
       case breakoutApp  : result = new breakout(this,panelID);       break;
       //case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
-      //case testApp      : result = new testAppPanel(this,panelID);  break;
+      case testAppID      : result = new testApp(this,panelID);  break;
       default           : result = NULL;
    }
    return(result);
@@ -88,6 +88,10 @@ char* ourOSObj::getPanelFolder(int panelID) {
          break;
          case breakoutApp  :
             strcat(pathBuff,"breakout/");
+            return pathBuff;
+         break;
+         case testAppID  :
+            strcat(pathBuff,"testApp/");
             return pathBuff;
          break;
          default           : return NULL;

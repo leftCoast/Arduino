@@ -44,7 +44,7 @@ void homeScr::setup(void) {
    appIcon* theAppIcon;
    spacer   barSpacer;
 
-   barSpacer   = calcSpacer(3,32,240);                                                          // Calculate bar spacing. Num apps, icon width, bar width.
+   barSpacer   = calcSpacer(4,32,240);                                                          // Calculate bar spacing. Num apps, icon width, bar width.
    traceX      = barSpacer.startPos;                                                            // Set initial x position.
    stepX       = barSpacer.stepSize;                                                            // Set our step size.
    traceY      = BAR_Y;                                                                         // Set our y location.
@@ -68,10 +68,10 @@ void homeScr::setup(void) {
 //   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
 //   addObj(theAppIcon);                                                                          // Drop it into the list. 
  
-//   traceX = traceX + stepX;
-//   theAppIcon = new appIcon(traceX,traceY,testApp,iconPath(testApp,"app32.bmp"));           // Create icon for the testApp.
-//   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
-//   addObj(theAppIcon);                                                                          // Drop it into the list. 
+   traceX = traceX + stepX;
+   theAppIcon = new appIcon(traceX,traceY,testAppID,iconPath(testAppID,"testApp.bmp"));                  // Create icon for the testApp.
+   theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
+   addObj(theAppIcon);                                                                          // Drop it into the list. 
  
 }
 
