@@ -1,4 +1,4 @@
-#include <debug.h>
+//#include <debug.h>
 #include <SD.h>
 #include <adafruit_1947_Obj.h>
 #include <screen.h>
@@ -33,16 +33,6 @@ void setup() {
 
 void loop() {     // During loop..
    
-   char buff[40];
-   char buff2[10];
-   
-   traceList[0].trace("***LOOP HERE***");
-   if (traceLoopActive) {
-      strcpy(buff,"Calling idle(), Num idlers : ");
-      strcat(buff,itoa(theIdlers.getCount(),buff2,DEC));
-   }
-   traceList[1].trace(buff);
    idle();         // Idlers get their time.
-   traceList[2].trace("Calling ourOS.loop()");
    ourOS.loop();   // ourOS gets time to pass on to the current panel.
 }

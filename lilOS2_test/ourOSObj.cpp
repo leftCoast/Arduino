@@ -5,7 +5,9 @@
 //#include <starTrek.h>
 #include "testApp.h"
 #include "homeScr.h"
-#include <debug.h>
+//#include <debug.h>
+
+
 #define BEEP_PIN     23                      // The digital pin choosen for the beeper.
 #define SCREEN_PIN   25                      // The ananlog pin choosen for the screen backlight.
 char systemFolder[]  = "/system/";           // Where we decided to store the systemp folder on our SD card.

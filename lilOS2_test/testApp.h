@@ -3,13 +3,30 @@
 
 #include <lilOS.h>
 
-class bubble : public drawObj {
+class grid : public drawObj {
+    
     public:
-            bubble(void);
+            grid(int centerX,int centerY);
+   virtual  ~grid(void);
+
+            void  setColor(colorObj* inColor);
+   virtual  void  drawSelf(void);
+
+            point    center;
+            colorObj gridColor;
+};
+
+
+class bubble : public drawObj {
+   
+    public:
+            bubble(int startX,int startY,grid* inGrid);
    virtual  ~bubble(void);
 
-   virtual  void eraseSelf(void);
-   virtual  void drawSelf(void);
+   virtual  void  eraseSelf(void);
+   virtual  void  drawSelf(void);
+   
+            grid* ourGrid;
 };
 
 
@@ -24,9 +41,12 @@ class testApp :  public panel {
 
    virtual  void drawSelf(void);
 
-            point    oldLoc;
-            bubble*  theBubble;
-            timeObj  bubbleTimer;
+            point          center;
+            point          oldLoc;
+            bubble*        theBubble;
+            grid*          theGrid;
+            timeObj        bubbleTimer;
+            colorMultiMap  gridMap;
 };
 
 

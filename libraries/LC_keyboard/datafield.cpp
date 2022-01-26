@@ -1,5 +1,5 @@
 #include "datafield.h"
-#include "debug.h"
+//#include "debug.h"
 
 // Minimum constructor. The thought is that this may be created as a global. So lets not
 // make that an impossibility.
