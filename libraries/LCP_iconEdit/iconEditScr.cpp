@@ -3,7 +3,7 @@
 //#include <debug.h>
 
 
-iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath) 
+iconEditScr::iconEditScr(int inX,int inY,int inWidth,int inHeight,const char* filePath) 
 	: bmpObj(inX,inY,inWidth,inHeight,filePath) {
 	
 	setEventSet(touchNDrag);

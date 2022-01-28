@@ -46,7 +46,7 @@ bool hasExtension(char* inStr,const char* extension) {
 	int	index;
 	
 	numChars = strlen(inStr);
-	if (numChars>strlen(extension)) {
+	if (numChars>(int)strlen(extension)) {
 		index = numChars;
 		while(inStr[index]!='.'&&index>=0) index--;
 		if (inStr[index]=='.') {

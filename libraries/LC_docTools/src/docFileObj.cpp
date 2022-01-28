@@ -8,7 +8,7 @@
 
 
 // A docFile object MUST have a path to exist. 	
-docFileObj::docFileObj(char* filePath) {
+docFileObj::docFileObj(const char* filePath) {
 		
 	docFilePath		= NULL;									// Dynamic things start at NULL.
 	editFilePath	= NULL;									// Dynamic things start at NULL.
@@ -101,7 +101,7 @@ bool docFileObj::openDocFile(int openMode) {
 //
 // In any case, if the new path is different than the original path, we leave here
 // pointing at the new path.
-bool docFileObj::saveDocFile(char* newFilePath) {
+bool docFileObj::saveDocFile(const char* newFilePath) {
 
 	File			tempFile;
 	char*			savedPath;
@@ -204,7 +204,7 @@ void docFileObj::closeDocFile(void) {
 }
 
 
-bool docFileObj::changeDocFile(char* newPath) {
+bool docFileObj::changeDocFile(const char* newPath) {
 	
 	if (newPath) {									// If we have a new file path. (Sanity, we'd better!)
 		closeDocFile();							// Close our current document file.

@@ -15,7 +15,7 @@ class homeScr : public panel {
             homeScr(void);
    virtual  ~homeScr(void);
 
-            char* iconPath(int appID,char* iconName);
+            char* iconPath(int appID,const char* iconName);
    virtual  void  setup(void);
    virtual  void  loop(void);
             void  doStarField(void);

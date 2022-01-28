@@ -30,7 +30,7 @@ enum stdIcons	{
 class appIcon : public iconButton {
   
   public:
-          appIcon(int xLoc,int yLoc,int message,char* path,int pix=32);	// Path to .bmp icon dwg.
+          appIcon(int xLoc,int yLoc,int message,const char* path,int pix=32);	// Path to .bmp icon dwg.
   virtual ~appIcon(void);
   
   virtual void  doAction(void);

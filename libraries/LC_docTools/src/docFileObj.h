@@ -52,14 +52,14 @@ class docFileObj {
 	public:
 					enum fileModes { fClosed, fOpenToEdit, fEdited, fOpenToRead };
 	
-					docFileObj(char* filePath);
+					docFileObj(const char* filePath);
 	virtual		~docFileObj(void);
 	
 	virtual		bool			createNewDocFile(void) = 0;
 	virtual		bool			openDocFile(int openMode);
-	virtual		bool			saveDocFile(char* newFilePath=NULL);
+	virtual		bool			saveDocFile(const char* newFilePath=NULL);
 					void			closeDocFile(void);
-					bool			changeDocFile(char* newPath);
+					bool			changeDocFile(const char* newPath);
 					void			setAsAutoGen(bool trueFalse=true);
 					bool			fileEdited();
 					char*			getName(void);

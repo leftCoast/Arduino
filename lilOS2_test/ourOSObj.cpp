@@ -96,7 +96,7 @@ char* ourOSObj::getPanelFolder(int panelID) {
             strcat(pathBuff,"testApp/");
             return pathBuff;
          break;
-         default           : return NULL;
       }
    }
+   return NULL;
 }

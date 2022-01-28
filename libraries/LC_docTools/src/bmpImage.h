@@ -5,17 +5,17 @@
 #include <colorObj.h>
 
 
-bool createNewBMPFile(char* newPath,int inWidth,int inHeight);
+bool createNewBMPFile(const char* newPath,int inWidth,int inHeight);
 
 
 class bmpImage :	public baseImage {
 
 	public:
-				bmpImage(char* filePath);
+				bmpImage(const char* filePath);
 	virtual	~bmpImage(void);
 	
-				void		setPWH(char* imgPath,int w,int h);
-	virtual	bool		setNewBMPFile(char* BMPPath,int w,int h);
+				void		setPWH(const char* imgPath,int w,int h);
+	virtual	bool		setNewBMPFile(const char* BMPPath,int w,int h);
 	virtual	bool		createNewDocFile(void);
 	virtual	RGBpack	getRawPixel(int x,int y);
 	virtual	void		setRawPixel(int x,int y,RGBpack* anRGBPack);	

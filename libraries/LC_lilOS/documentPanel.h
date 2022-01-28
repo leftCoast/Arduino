@@ -144,7 +144,8 @@ class documentPanel :	public panel {
 				saveFileObj*	saveAlert;
 				docFileObj*		ourDoc;
 				char*				defaultPath;
-				bool				(*filter)(char*);
+				//bool				(*filter)(const char*);
+				bool				(*filter)(pathItem*);
 };
 
 

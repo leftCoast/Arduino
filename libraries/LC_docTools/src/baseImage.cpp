@@ -1,7 +1,7 @@
 #include <baseImage.h>
 
 // Just setup default values..
-baseImage::baseImage(char* filePath)
+baseImage::baseImage(const char* filePath)
 	: docFileObj(filePath) {
 
 	width		= 0;

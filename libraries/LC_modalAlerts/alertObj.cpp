@@ -24,7 +24,7 @@
 #define	LABEL_Y		ALERT_H/2 - 16
 
 
-alertObj::alertObj(char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel)
+alertObj::alertObj(const char* msg,listener* inListener,alertType inType,bool useOk,bool useCancel)
 	: modal(ALERT_X,ALERT_Y,ALERT_W,ALERT_H) { 
 	
 	bmpObj*	ourLabel;
@@ -68,7 +68,7 @@ alertObj::~alertObj(void) { ourPanel->aTouchAbove(); }
 
 
 // User wants the message changed. What - ever!
-void alertObj::setMsg(char* inMessage) { theMsg->setText(inMessage); }
+void alertObj::setMsg(const char* inMessage) { theMsg->setText(inMessage); }
 
 
 // Is this event for us? Well yes, they ALL are. Except if we have a keyboard..	

@@ -28,7 +28,7 @@ homeScr::homeScr(void)
 homeScr::~homeScr(void) {  }
 
 
-char* homeScr::iconPath(int appID,char* iconName) {
+char* homeScr::iconPath(int appID,const char* iconName) {
 
    strcpy(pathBuff,ourOSPtr->getPanelFolder(appID));
    strcat(pathBuff,iconName);
@@ -90,7 +90,7 @@ void homeScr::doStarField(void) {
    aColor.setColor(LC_LIGHT_BLUE);
    aColor.blend(&blue,50);
    ourCMapper.setColors(&white,&aColor);
-   randomSeed(analogRead(A20));
+   //randomSeed(analogRead(A20));
    for (int sy=0;sy<282;sy++) {
       for (int sx=0;sx<240;sx++) {
          randNum = random(0,400);

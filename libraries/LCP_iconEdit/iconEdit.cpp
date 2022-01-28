@@ -99,12 +99,12 @@ void iconEdit::createDocObj(void) {
 	
 	tempStr	newFilePath;
 	
-	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));												// Looking at our folder, create an unused file name.
-	if (newFilePath.getStr()) {																							// If we got that name..
+	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));																// Looking at our folder, create an unused file name.
+	if (newFilePath.getStr()) {																											// If we got that name..
 		if (createNewBMPFile(newFilePath.getStr(),32,32)) {														// Setup that file as a blank, readable .BMP file.
 			ourDoc = new iconEditScr(EDITSCR_X,EDITSCR_Y,EDITSCR_W,EDITSCR_H,newFilePath.getStr());	// Create our actual docFileObj.
-			if (ourDoc) ourDoc->setAsAutoGen();																			// This is an auto generated file. It'll be auto destructed later.
-		}																															//
+			if (ourDoc) ourDoc->setAsAutoGen();																							// This is an auto generated file. It'll be auto destructed later.
+		}																																			//
 	}
 }
 
@@ -116,18 +116,18 @@ bool iconEdit::createNewDocFile(void) {
  	
  	success = false;
 	newFilePath = NULL;
-	ourDoc->closeDocFile();															// We close what we have.. (If anything)
-	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));		// Looking at our folder, create an unused file name.
-	if (newFilePath.getStr()) {													// If we got that name..
-		if (createNewBMPFile(newFilePath.getStr(),32,32)) {				// Set up the file as a readable .bmp image.
-			if (ourDoc->changeDocFile(newFilePath.getStr())) {				// If we can change to this file..
-				success = ourDoc->openDocFile(FILE_WRITE);					// Success is if we can open this file for editing.
-				ourDoc->setAsAutoGen();												// This is an auto generated file. It'll be auto destructed later.
-				((iconEditScr*)ourDoc)->setNeedRefresh();						// Cause a redraw.
-			}																				//
-		}																					//
-	}																						//
-	return success;																	// Return result.
+	ourDoc->closeDocFile();																	// We close what we have.. (If anything)
+	newFilePath.setStr(numberedFilePath(ICON_FLDR,"icon",".bmp"));				// Looking at our folder, create an unused file name.
+	if (newFilePath.getStr()) {															// If we got that name..
+		if (createNewBMPFile(newFilePath.getStr(),32,32)) {		// Set up the file as a readable .bmp image.
+			if (ourDoc->changeDocFile(newFilePath.getStr())) {	// If we can change to this file..
+				success = ourDoc->openDocFile(FILE_WRITE);							// Success is if we can open this file for editing.
+				ourDoc->setAsAutoGen();														// This is an auto generated file. It'll be auto destructed later.
+				((iconEditScr*)ourDoc)->setNeedRefresh();								// Cause a redraw.
+			}																						//
+		}																							//
+	}																								//
+	return success;																			// Return result.
 }
 
 

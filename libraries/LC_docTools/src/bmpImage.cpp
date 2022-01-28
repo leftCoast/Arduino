@@ -58,7 +58,7 @@ void write32(uint32_t val, File f) {
 // ********************** Create new .bmp file function *********************
 // **************************************************************************
 
-bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
+bool createNewBMPFile(const char* newPath,int inWidth,int inHeight) {
 
 	File		bmpFile;
 	bool		success;
@@ -66,7 +66,6 @@ bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
 	uint32_t	bytesPerRow;
 	uint32_t	fileSize;
 	uint32_t	imageBytes;
-	int index;
 	byte buff[4];
 	
 	success = false;															// Ok, assume failure..									
@@ -119,7 +118,7 @@ bool createNewBMPFile(char* newPath,int inWidth,int inHeight) {
 //****************************************************************************************
 
 
-bmpImage::bmpImage(char* filePath)
+bmpImage::bmpImage(const char* filePath)
 	: baseImage(filePath) { newImgPath = NULL; }
 
 
@@ -127,7 +126,7 @@ bmpImage::~bmpImage(void) { freeStr(&newImgPath); }
 
 
 // Setup for the next createNewDocFile() call.
-void bmpImage::setPWH(char* imgPath,int w,int h) { 
+void bmpImage::setPWH(const char* imgPath,int w,int h) { 
 
 	heapStr(&newImgPath,imgPath);
 	newW	= w;
@@ -135,7 +134,7 @@ void bmpImage::setPWH(char* imgPath,int w,int h) {
 }
 
 
-bool bmpImage::setNewBMPFile(char* BMPPath,int w,int h) {
+bool bmpImage::setNewBMPFile(const char* BMPPath,int w,int h) {
 
 	tempStr newPath(BMPPath);								// Save a local copy..
 	

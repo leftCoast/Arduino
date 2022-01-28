@@ -14,7 +14,7 @@ panel*	ourPanel		= NULL;
 // *****************************************************
 
 
-appIcon::appIcon(int xLoc,int yLoc,int message,char* path,int pix)
+appIcon::appIcon(int xLoc,int yLoc,int message,const char* path,int pix)
   : iconButton(xLoc,yLoc,path,pix) { mMessage = message;}
 
   

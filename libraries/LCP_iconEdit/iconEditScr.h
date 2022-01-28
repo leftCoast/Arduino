@@ -14,7 +14,7 @@
 class iconEditScr : public bmpObj {
 
 	public:
-				iconEditScr(int inX,int inY,int inWidth,int inHeight,char* filePath);
+				iconEditScr(int inX,int inY,int inWidth,int inHeight,const char* filePath);
 	virtual	~iconEditScr(void);
 	
 				int		getBrushSize(void);

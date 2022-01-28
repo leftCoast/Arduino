@@ -8,7 +8,7 @@
 class baseImage :	public docFileObj {
 
 	public:
-					baseImage(char* filePath);
+					baseImage(const char* filePath);
 	virtual		~baseImage(void);
 	
 					int		getWidth(void);
