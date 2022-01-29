@@ -65,13 +65,27 @@ void bubble::drawSelf(void) {
 }
 
 
+   
+setAngleBtn::setAngleBtn(int xLoc,int yLoc,const char* path,testApp* inApp)
+   :iconButton(xLoc,yLoc,path) { ourApp = inApp; }
+
+
+setAngleBtn::~setAngleBtn(void) {  }
+
+
+void setAngleBtn::doAction(void) { ourApp->setOffsets(); }
+
+
+
+
+
 
 
 testApp::testApp(lilOS* ourOS,int ourAppID)
    : panel(ourAppID) {
       
    colorObj mixColor;
-   
+
    bubbleTimer.setTime(BUBBLE_MS);
    center.x = BOUND_CX;
    center.y = BOUND_CY;
@@ -84,43 +98,98 @@ testApp::testApp(lilOS* ourOS,int ourAppID)
    gridMap.addColor(10,&mixColor);
    mixColor.setColor(&blue);
    mixColor.blend(&black,50);
-   gridMap.addColor(30,&mixColor); 
+   gridMap.addColor(30,&mixColor);
+   bno = new Adafruit_BNO055(55, 0x28);
+   offsetX = 0;
+   offsetY = 0; 
 }
 
-   
-testApp::~testApp(void) {  }
+ 
+testApp::~testApp(void) {
+
+   if (bno) delete(bno);
+}
+
 
 void testApp::setup(void) {
 
+   if (!bno->begin()) {
+      Serial.print("No BNO055 detected");
+   } else {
+      displaySensorDetails();
+      bno->setExtCrystalUse(true);
+      sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
+   }
    theGrid = new grid(BOUND_CX,BOUND_CY);
    theBubble = new bubble(BUBBLE_SX,BUBBLE_SY,theGrid);
    addObj(theBubble);
    addObj(theGrid);
+   setAngleBtn* ourAngleBtn = new setAngleBtn(20,280,iconPath(mPanelID,"crossHr.bmp"),this);
+   ourAngleBtn->setMask(&(ourOSPtr->icon32Mask)); 
+   addObj(ourAngleBtn);
 }
 
+
+char* testApp::iconPath(int appID,const char* iconName) {
+
+   strcpy(pathBuff,ourOSPtr->getPanelFolder(appID));
+   strcat(pathBuff,iconName);
+   return pathBuff; 
+}
+
+
+void testApp::setOffsets(void) {
+   
+   sensors_event_t   event;
+  
+   bno->getEvent(&event);
+   offsetX = -round(sin(theCalc.deg_2_rad(event.orientation.z))*sinMult);
+   offsetY = round(sin(theCalc.deg_2_rad(event.orientation.y))*sinMult);
+}
+
+
+void  testApp::displaySensorDetails(void) {
+  
+  sensor_t sensor;
+  
+  bno->getSensor(&sensor);
+  Serial.println("------------------------------------");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
+  Serial.println("------------------------------------");
+  Serial.println("");
+}
 
 
 void testApp::loop(void) {  
 
-  point     newLoc;
-  point     touchPt;
-  float     dist;
-  colorObj  gridColor;
+   point             newLoc;
+   point             touchPt;
+   float             dist;
+   colorObj          gridColor;
+   sensors_event_t   event;
   
    if (bubbleTimer.ding()) {
       bubbleTimer.stepTime();
-      if(screen->touched()) {
-         touchPt = screen->getPoint();
-         dist = distance(center,touchPt);
-         if (dist<=DIST_LIMIT) {
-            newLoc.x = touchPt.x - BUBBLE_RAD;
-            newLoc.y = touchPt.y - BUBBLE_RAD;
-            if (newLoc.x!=oldLoc.x||newLoc.y!=oldLoc.y) {
-               theBubble->setLocation(newLoc.x,newLoc.y);
-               oldLoc = newLoc;
-               gridColor = gridMap.map(dist);
-               theGrid->setColor(&gridColor);
-            }
+      bno->getEvent(&event);
+      touchPt = center;
+      touchPt.x = touchPt.x - round(sin(theCalc.deg_2_rad(event.orientation.z))*sinMult);
+      touchPt.y = touchPt.y + round(sin(theCalc.deg_2_rad(event.orientation.y))*sinMult);
+      touchPt.x = touchPt.x - offsetX;
+      touchPt.y = touchPt.y - offsetY;
+      dist = distance(center,touchPt);
+      if (dist<=DIST_LIMIT) {
+         newLoc.x = touchPt.x - BUBBLE_RAD;
+         newLoc.y = touchPt.y - BUBBLE_RAD;
+         if (newLoc.x!=oldLoc.x||newLoc.y!=oldLoc.y) {
+            theBubble->setLocation(newLoc.x,newLoc.y);
+            oldLoc = newLoc;
+            gridColor = gridMap.map(dist);
+            theGrid->setColor(&gridColor);
          }
       }
    }
