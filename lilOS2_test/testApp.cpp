@@ -1,4 +1,5 @@
 #include "testApp.h"
+#include <runningAvg.h>
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -78,7 +79,8 @@ void setAngleBtn::doAction(void) { ourApp->setOffsets(); }
 
 
 
-
+runningAvg smootherX(5);
+runningAvg smootherY(5);
 
 
 testApp::testApp(lilOS* ourOS,int ourAppID)
@@ -181,6 +183,8 @@ void testApp::loop(void) {
       touchPt.y = touchPt.y + round(sin(theCalc.deg_2_rad(event.orientation.y))*sinMult);
       touchPt.x = touchPt.x - offsetX;
       touchPt.y = touchPt.y - offsetY;
+      touchPt.x = smootherX.addData(touchPt.x);
+      touchPt.y = smootherY.addData(touchPt.y);
       dist = distance(center,touchPt);
       if (dist<=DIST_LIMIT) {
          newLoc.x = touchPt.x - BUBBLE_RAD;
