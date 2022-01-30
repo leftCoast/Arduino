@@ -1,5 +1,7 @@
 #include "testApp.h"
 #include <runningAvg.h>
+#include <colorRect.h>
+#include <label.h>
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -18,7 +20,15 @@
 
 #define DIST_LIMIT   BOUND_DIA/2 - BUBBLE_RAD
 
-  
+#define TXT_H        8
+#define LINE_H       10
+#define LBL_X        60
+#define LBL_W        70
+#define VAL_X        150
+#define VAL_W        30
+#define VAL2_X       VAL_X + VAL_W + 10
+
+
 grid::grid(int centerX,int centerY)
    :drawObj(BOUND_X,BOUND_Y,BOUND_DIA,BOUND_DIA) {
 
@@ -74,7 +84,18 @@ setAngleBtn::setAngleBtn(int xLoc,int yLoc,const char* path,testApp* inApp)
 setAngleBtn::~setAngleBtn(void) {  }
 
 
-void setAngleBtn::doAction(void) { ourApp->setOffsets(); }
+void setAngleBtn::doAction(void) { ourApp->setOffsets(true); }
+
+
+
+clearAngleBtn::clearAngleBtn(int xLoc,int yLoc,const char* path,testApp* inApp)
+   :iconButton(xLoc,yLoc,path) { ourApp = inApp; }
+
+
+clearAngleBtn::~clearAngleBtn(void) {  }
+
+
+void clearAngleBtn::doAction(void) { ourApp->setOffsets(false); }
 
 
 
@@ -102,6 +123,8 @@ testApp::testApp(lilOS* ourOS,int ourAppID)
    mixColor.blend(&black,50);
    gridMap.addColor(30,&mixColor);
    bno = new Adafruit_BNO055(55, 0x28);
+   scrColor.setColor(LC_OLIVE);
+   scrColor.blend(&green,20);
    offsetX = 0;
    offsetY = 0; 
 }
@@ -115,10 +138,13 @@ testApp::~testApp(void) {
 
 void testApp::setup(void) {
 
+   int      yVal;
+   int      offset;
+   label*   aLabel;
+   
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
    } else {
-      displaySensorDetails();
       bno->setExtCrystalUse(true);
       sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
    }
@@ -126,9 +152,128 @@ void testApp::setup(void) {
    theBubble = new bubble(BUBBLE_SX,BUBBLE_SY,theGrid);
    addObj(theBubble);
    addObj(theGrid);
-   setAngleBtn* ourAngleBtn = new setAngleBtn(20,280,iconPath(mPanelID,"crossHr.bmp"),this);
-   ourAngleBtn->setMask(&(ourOSPtr->icon32Mask)); 
-   addObj(ourAngleBtn);
+
+   clearAngleBtn* ourCAngleBtn = new clearAngleBtn(20,240,iconPath(mPanelID,"globeCH.bmp"),this);
+   ourCAngleBtn->setMask(&(ourOSPtr->icon32Mask)); 
+   addObj(ourCAngleBtn);
+   
+   setAngleBtn* ourSAngleBtn = new setAngleBtn(20,280,iconPath(mPanelID,"crossHr.bmp"),this);
+   ourSAngleBtn->setMask(&(ourOSPtr->icon32Mask)); 
+   addObj(ourSAngleBtn);
+
+   yVal     = 250;
+   offset   = LINE_H;
+
+   aLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Abs.");
+   addObj(aLabel);
+
+   aLabel = new label(VAL2_X,yVal,VAL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Rel.");
+   addObj(aLabel);
+   
+   yVal = yVal + offset;
+   
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Angle x :");
+   addObj(aLabel);
+
+   xLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   xLabel->setColors(&cyan,&scrColor);
+   xLabel->setJustify(TEXT_RIGHT);
+   xLabel->setValue(2.4);
+   addObj(xLabel);
+
+   x2Label = new label(VAL2_X,yVal,VAL_W,TXT_H);
+   x2Label->setColors(&cyan,&scrColor);
+   x2Label->setJustify(TEXT_RIGHT);
+   x2Label->setValue(0);
+   addObj(x2Label);
+
+   yVal = yVal + offset;
+
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Angle y :");
+   addObj(aLabel);
+
+   yLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   yLabel->setColors(&cyan,&scrColor);
+   yLabel->setJustify(TEXT_RIGHT);
+   yLabel->setValue(13);
+   addObj(yLabel);
+
+   y2Label = new label(VAL2_X,yVal,VAL_W,TXT_H);
+   y2Label->setColors(&cyan,&scrColor);
+   y2Label->setJustify(TEXT_RIGHT);
+   y2Label->setValue(0);
+   addObj(y2Label);
+
+   yVal = yVal + offset;
+
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Angle z :");
+   addObj(aLabel);
+
+   zLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   zLabel->setColors(&cyan,&scrColor);
+   zLabel->setJustify(TEXT_RIGHT);
+   zLabel->setValue(-4.2);
+   addObj(zLabel);
+
+   yVal = yVal + offset;
+
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Offset x :");
+   addObj(aLabel);
+
+   offsetXLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   offsetXLabel->setColors(&cyan,&scrColor);
+   offsetXLabel->setJustify(TEXT_RIGHT);
+   offsetXLabel->setValue(4);
+   addObj(offsetXLabel);
+
+    yVal = yVal + offset;
+
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Offset y :");
+   addObj(aLabel);
+
+   offsetYLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   offsetYLabel->setColors(&cyan,&scrColor);
+   offsetYLabel->setJustify(TEXT_RIGHT);
+   offsetYLabel->setValue(6);
+   addObj(offsetYLabel);
+}
+
+
+void testApp::showValues(float x,float y,float z) {
+
+   xLabel->setValue(x);
+   yLabel->setValue(y);
+   zLabel->setValue(z);
+   x2Label->setValue(x-offsetX);
+   y2Label->setValue(y-offsetY);
+}
+
+
+void testApp::showOffsets(float x,float y) {
+
+   offsetXLabel->setValue(x);
+   offsetYLabel->setValue(y);
 }
 
 
@@ -140,30 +285,19 @@ char* testApp::iconPath(int appID,const char* iconName) {
 }
 
 
-void testApp::setOffsets(void) {
+void testApp::setOffsets(bool setClear) {
    
    sensors_event_t   event;
-  
-   bno->getEvent(&event);
-   offsetX = -round(sin(theCalc.deg_2_rad(event.orientation.z))*sinMult);
-   offsetY = round(sin(theCalc.deg_2_rad(event.orientation.y))*sinMult);
-}
 
-
-void  testApp::displaySensorDetails(void) {
-  
-  sensor_t sensor;
-  
-  bno->getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  Serial.println("");
+   if (setClear) {
+      bno->getEvent(&event);
+      offsetX = event.orientation.z;
+      offsetY = event.orientation.y;
+   } else {
+      offsetX = 0;
+      offsetY = 0;
+   }
+   showOffsets(offsetX,offsetY);
 }
 
 
@@ -179,10 +313,9 @@ void testApp::loop(void) {
       bubbleTimer.stepTime();
       bno->getEvent(&event);
       touchPt = center;
-      touchPt.x = touchPt.x - round(sin(theCalc.deg_2_rad(event.orientation.z))*sinMult);
-      touchPt.y = touchPt.y + round(sin(theCalc.deg_2_rad(event.orientation.y))*sinMult);
-      touchPt.x = touchPt.x - offsetX;
-      touchPt.y = touchPt.y - offsetY;
+      showValues(event.orientation.z,event.orientation.y,event.orientation.x);
+      touchPt.x = touchPt.x - round(sin(theCalc.deg_2_rad(event.orientation.z - offsetX))*sinMult);
+      touchPt.y = touchPt.y + round(sin(theCalc.deg_2_rad(event.orientation.y - offsetY))*sinMult);
       touchPt.x = smootherX.addData(touchPt.x);
       touchPt.y = smootherY.addData(touchPt.y);
       dist = distance(center,touchPt);
@@ -201,10 +334,7 @@ void testApp::loop(void) {
 
 
 void testApp::drawSelf(void) {
-
-   colorObj scrColor(LC_OLIVE);
-   
-   scrColor.blend(&green,20);
+    
    screen->fillScreen(&scrColor);
    screen->fillCircle(BOUND_X,BOUND_Y,BOUND_DIA,&black);
 }

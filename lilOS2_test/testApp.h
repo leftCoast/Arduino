@@ -7,6 +7,8 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include <calculator.h>
+#include <label.h>
+
 
 class testApp;
 
@@ -49,6 +51,18 @@ class setAngleBtn :  public iconButton {
 };
 
 
+class clearAngleBtn :  public iconButton {
+   
+   public:
+            clearAngleBtn(int xLoc,int yLoc,const char* path,testApp* ourApp);
+   virtual  ~clearAngleBtn(void);
+   
+   virtual  void  doAction(void);
+   
+            testApp* ourApp;          
+};
+
+
 class testApp :  public panel {
 
    public:
@@ -56,18 +70,21 @@ class testApp :  public panel {
    virtual  ~testApp(void);
 
    virtual  void     setup(void);
+            void     showValues(float x,float y,float z);
+            void     showOffsets(float x,float y);
             char*    iconPath(int appID,const char* iconName);
-            void     setOffsets(void);
+            void     setOffsets(bool setClear);
             void     displaySensorDetails(void);
    virtual  void     loop(void);
 
    virtual  void drawSelf(void);
-   
+
+            colorObj          scrColor;
             Adafruit_BNO055*  bno;
             calculator        theCalc;
             float             sinMult;
-            int               offsetX;
-            int               offsetY;
+            float             offsetX;
+            float             offsetY;
             point             center;
             point             oldLoc;
             bubble*           theBubble;
@@ -75,6 +92,14 @@ class testApp :  public panel {
             timeObj           bubbleTimer;
             colorMultiMap     gridMap;
             char              pathBuff[80];
+            label*            xLabel;
+            label*            yLabel;
+            label*            zLabel;
+            label*            offsetXLabel;
+            label*            offsetYLabel;
+            label*            x2Label;
+            label*            y2Label;
+            
 };
 
 
