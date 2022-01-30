@@ -71,7 +71,7 @@ class testApp :  public panel {
 
    virtual  void     setup(void);
             void     showValues(float x,float y,float z);
-            void     showOffsets(float x,float y);
+            void     showOffsets(float x,float y,float z);
             char*    iconPath(int appID,const char* iconName);
             void     setOffsets(bool setClear);
             void     displaySensorDetails(void);
@@ -85,6 +85,7 @@ class testApp :  public panel {
             float             sinMult;
             float             offsetX;
             float             offsetY;
+            float             offsetZ;
             point             center;
             point             oldLoc;
             bubble*           theBubble;
@@ -97,8 +98,10 @@ class testApp :  public panel {
             label*            zLabel;
             label*            offsetXLabel;
             label*            offsetYLabel;
+            label*            offsetZLabel;
             label*            x2Label;
             label*            y2Label;
+            label*            z2Label;
             
 };
 

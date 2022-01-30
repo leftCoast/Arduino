@@ -23,9 +23,10 @@
 #define TXT_H        8
 #define LINE_H       10
 #define LBL_X        60
+#define LBL_Y_BEGIN  240
 #define LBL_W        70
-#define VAL_X        150
-#define VAL_W        35
+#define VAL_X        LBL_X + LBL_W + 10
+#define VAL_W        40
 #define VAL2_X       VAL_X + VAL_W + 10
 
 
@@ -126,7 +127,8 @@ testApp::testApp(lilOS* ourOS,int ourAppID)
    scrColor.setColor(LC_OLIVE);
    scrColor.blend(&green,20);
    offsetX = 0;
-   offsetY = 0; 
+   offsetY = 0;
+   offsetZ = 0; 
 }
 
  
@@ -161,7 +163,7 @@ void testApp::setup(void) {
    ourSAngleBtn->setMask(&(ourOSPtr->icon32Mask)); 
    addObj(ourSAngleBtn);
 
-   yVal     = 250;
+   yVal     = LBL_Y_BEGIN;
    offset   = LINE_H;
 
    aLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
@@ -187,12 +189,14 @@ void testApp::setup(void) {
    xLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    xLabel->setColors(&cyan,&scrColor);
    xLabel->setJustify(TEXT_RIGHT);
-   xLabel->setValue(2.4);
+   xLabel->setPrecision(1);
+   xLabel->setValue(0);
    addObj(xLabel);
 
    x2Label = new label(VAL2_X,yVal,VAL_W,TXT_H);
    x2Label->setColors(&cyan,&scrColor);
    x2Label->setJustify(TEXT_RIGHT);
+   x2Label->setPrecision(1);
    x2Label->setValue(0);
    addObj(x2Label);
 
@@ -207,12 +211,14 @@ void testApp::setup(void) {
    yLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    yLabel->setColors(&cyan,&scrColor);
    yLabel->setJustify(TEXT_RIGHT);
-   yLabel->setValue(13);
+   yLabel->setPrecision(1);
+   yLabel->setValue(0);
    addObj(yLabel);
 
    y2Label = new label(VAL2_X,yVal,VAL_W,TXT_H);
    y2Label->setColors(&cyan,&scrColor);
    y2Label->setJustify(TEXT_RIGHT);
+   y2Label->setPrecision(1);
    y2Label->setValue(0);
    addObj(y2Label);
 
@@ -227,8 +233,16 @@ void testApp::setup(void) {
    zLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    zLabel->setColors(&cyan,&scrColor);
    zLabel->setJustify(TEXT_RIGHT);
-   zLabel->setValue(-4.2);
+   zLabel->setPrecision(1);
+   zLabel->setValue(0);
    addObj(zLabel);
+
+   z2Label = new label(VAL2_X,yVal,VAL_W,TXT_H);
+   z2Label->setColors(&cyan,&scrColor);
+   z2Label->setJustify(TEXT_RIGHT);
+   z2Label->setPrecision(1);
+   z2Label->setValue(0);
+   addObj(z2Label);
 
    yVal = yVal + offset;
 
@@ -241,7 +255,8 @@ void testApp::setup(void) {
    offsetXLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    offsetXLabel->setColors(&cyan,&scrColor);
    offsetXLabel->setJustify(TEXT_RIGHT);
-   offsetXLabel->setValue(4);
+   offsetXLabel->setPrecision(1);
+   offsetXLabel->setValue(offsetX);
    addObj(offsetXLabel);
 
     yVal = yVal + offset;
@@ -255,8 +270,24 @@ void testApp::setup(void) {
    offsetYLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    offsetYLabel->setColors(&cyan,&scrColor);
    offsetYLabel->setJustify(TEXT_RIGHT);
-   offsetYLabel->setValue(6);
+   offsetYLabel->setPrecision(1);
+   offsetYLabel->setValue(offsetY);
    addObj(offsetYLabel);
+
+   yVal = yVal + offset;
+
+   aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
+   aLabel->setColors(&cyan,&scrColor);
+   aLabel->setJustify(TEXT_RIGHT);
+   aLabel->setValue("Offset z :");
+   addObj(aLabel);
+
+   offsetZLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
+   offsetZLabel->setColors(&cyan,&scrColor);
+   offsetZLabel->setJustify(TEXT_RIGHT);
+   offsetZLabel->setPrecision(1);
+   offsetZLabel->setValue(offsetZ);
+   addObj(offsetZLabel);
 }
 
 
@@ -267,13 +298,15 @@ void testApp::showValues(float x,float y,float z) {
    zLabel->setValue(z);
    x2Label->setValue(x-offsetX);
    y2Label->setValue(y-offsetY);
+   z2Label->setValue(z-offsetZ);
 }
 
 
-void testApp::showOffsets(float x,float y) {
+void testApp::showOffsets(float x,float y,float z) {
 
    offsetXLabel->setValue(x);
    offsetYLabel->setValue(y);
+   offsetZLabel->setValue(z);
 }
 
 
@@ -291,13 +324,15 @@ void testApp::setOffsets(bool setClear) {
 
    if (setClear) {
       bno->getEvent(&event);
-      offsetX = event.orientation.z;
+      offsetX = event.orientation.z;  // Yes messed up. FIX LATER.
       offsetY = event.orientation.y;
+      offsetZ = event.orientation.x;
    } else {
       offsetX = 0;
       offsetY = 0;
+      offsetZ = 0;
    }
-   showOffsets(offsetX,offsetY);
+   showOffsets(offsetX,offsetY,offsetZ);
 }
 
 
