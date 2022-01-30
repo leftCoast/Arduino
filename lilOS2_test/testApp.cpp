@@ -25,7 +25,7 @@
 #define LBL_X        60
 #define LBL_W        70
 #define VAL_X        150
-#define VAL_W        30
+#define VAL_W        35
 #define VAL2_X       VAL_X + VAL_W + 10
 
 
