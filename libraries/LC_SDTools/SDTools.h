@@ -4,12 +4,6 @@
 #include <SD.h>
 
 
-// #ifdef FILE_WRITE
-// #undef FILE_WRITE
-// #define FILE_WRITE (O_READ | O_WRITE | O_CREAT)
-// #endif
-
-
 // Returns true if this folderPath can be found, or created.
 bool createFolder(const char* folderPath);
 
@@ -19,8 +13,10 @@ bool createFolder(const char* folderPath);
 // very long before being recycled.
 char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension);
 
+
 // TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
 File TRUNCATE_FILE(char* path);
+
 
 // fcpy() : The file version of strcpy(). The dest file must be open for writing. The src
 // file must be, at least, open for reading. (Writing is ok too) The dest file index is

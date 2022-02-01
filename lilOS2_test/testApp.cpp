@@ -2,6 +2,7 @@
 #include <runningAvg.h>
 #include <colorRect.h>
 #include <label.h>
+#include <triDBase.h>
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -143,7 +144,8 @@ void testApp::setup(void) {
    int      yVal;
    int      offset;
    label*   aLabel;
-   
+
+   printSTLFile("/teensyM.STL");
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
    } else {
