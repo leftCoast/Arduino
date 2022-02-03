@@ -30,4 +30,7 @@ void fcpy(File dest,File src);
 void fcat(File dest,File src);
 
 
+// Pass in your extension and a file path. returns if the file extension matches.
+bool extensionMatch(const char* extension,const char* filePath);
+
 #endif

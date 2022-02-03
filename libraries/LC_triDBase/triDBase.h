@@ -11,18 +11,33 @@ struct triDPoint {
 };
 
 
-struct triDVector {
-
+struct triDDirection{
+	
 	float	xRad;
 	float	yRad;
 	float	zRad;
-	float	length;
+};
+
+// Free vector : Has direction and magnatude only. Floats in space?
+struct triDDirFreeVect {
+
+	triDDirection	dir;
+	float				mag;
 };
 
 
-struct triDLine {
+// Rectangular Free vector : Free vector with start point 0,0,0. And an end point x,y,z
+struct triDRectFreeVect {
 
-	triDPoint lineEnds[2];
+	triDPoint	endPt;
+};
+
+
+// Bound vector : Vector from start point to end.
+struct triDBoundVect {
+
+	triDPoint startPt;
+	triDPoint endPt;
 };
 
 
@@ -35,24 +50,13 @@ struct triDTriangle {
 
 struct triDFacet {
 
-	triDVector		normVect;
+	triDVect			normVect;
 	triDTriangle	corners;
 };
 
 
-extern int8_t STLHeader[];
-extern int8_t numFacets;
+float dotProduct(triDRectFreeVect* ptA,triDRectFreeVect* ptB);
 
-struct STLFacet {
-
-	float	normVect[3];	// 12 bytes
-	float	vertex1[3];		// 12 bytes
-	float	vertex2[3];		// 12 bytes
-	float	vertex3[3];		// 12 bytes
-	int8_t	extra[2];	// 2 bytes
-};
-
-extern void printSTLFile(const char* filePath);
-
+float	angleBetween(
 			
 #endif

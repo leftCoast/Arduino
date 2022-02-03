@@ -150,3 +150,38 @@ void fcat(File dest,File src) {
 	src.seek(filePos);													// Put it back like we found it.					
 }
 
+
+// Pass in your extension and a file path. returns if the file extension match.
+bool extensionMatch(const char* extension,const char* filePath) {
+
+	char*	ext;
+	char* path;
+	char*	pathExt;
+	int	index;
+	bool	success;
+	
+	success	= false;										// Not a success yet.
+	ext		= NULL;										// Local pointers start at NULL
+	path		= NULL;										// Yeah, you too!
+	heapStr(&ext,extension);							// Save off local copy of the extension.
+	heapStr(&path,filePath);							// Save off local copy of the path.
+	upCase(ext);											// Up case both;
+	upCase(path);											// I said both.
+	index = strlen(path)-1;								// Starting index at last character of path.
+	while(index && path[index]!='.') index--;		// Run backwards looking for the dot.
+	if (index) {											// If not zero, must be the dot.
+		pathExt = &(path[index]);						// Grab the address of this character.
+		success = !strcmp(ext,pathExt);				// Do a string compare. Save the result
+	}															//
+	heapStr(&ext;											// Free the local copy of the extension.
+	heapStr(&path;											// Free the local copy of the path.
+	return success;										// Return our results.
+}
+	
+	
+	
+
+
+}
+
+
