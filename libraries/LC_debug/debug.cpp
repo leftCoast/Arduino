@@ -41,6 +41,24 @@ void debug::trace(const char* message,int inNum,bool hold) {
   }
 }
 
+
+// void debug::trace(const char* message,float inNum,bool hold) {
+// 
+//   char* buff;
+//   int   numChars;
+//   
+//   buff = NULL;
+//   numChars = strlen(message);
+//   if (resizeBuff(numChars+10,&buff)) {
+//     strcpy(buff,message);
+//     snprintf(&(buff[numChars]),"9.2%f",inNum);
+//     trace(buff,hold);
+//     resizeBuff(0,&buff);
+//   } else {
+//     Serial.println(F("NO RAM!!"));
+//   }
+// }
+
 debug db;
 
 //****************************************************************************************

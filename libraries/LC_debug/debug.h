@@ -16,6 +16,7 @@ class debug {
   
 				void  trace(const char* message,bool hold=false);
 				void  trace(const char* message,int inNum,bool hold=false);
+				//void  trace(const char* message,float inNum,bool hold=false);
 				void  trace(const char* message,const char* inStr,bool hold=false);
 };
 

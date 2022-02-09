@@ -3,6 +3,15 @@
 
 #include <Arduino.h>
 
+
+
+//****************************************************************************************
+// triDPoint:
+//
+// Three values in the x,y,z coordinate space.
+//****************************************************************************************
+
+
 struct triDPoint {
 	
 	float	x;
@@ -11,52 +20,69 @@ struct triDPoint {
 };
 
 
-struct triDDirection{
-	
-	float	xRad;
-	float	yRad;
-	float	zRad;
+
+//****************************************************************************************
+// triDSpace:
+//
+// Six values in the x,y,z coordinate space that define a rectangular solid. Good for
+// showing the limits in size for a 3D object.
+//****************************************************************************************
+
+struct triDSpace {
+
+	float		xMin;
+	float		xMax;
+	float		yMin;
+	float		yMax;
+	float		zMin;
+	float		zMax;
 };
 
-// Free vector : Has direction and magnatude only. Floats in space?
-struct triDDirFreeVect {
+triDPoint centerPt(triDSpace* inSpace);
 
-	triDDirection	dir;
-	float				mag;
-};
-
-
-// Rectangular Free vector : Free vector with start point 0,0,0. And an end point x,y,z
-struct triDRectFreeVect {
-
-	triDPoint	endPt;
-};
-
-
-// Bound vector : Vector from start point to end.
-struct triDBoundVect {
-
-	triDPoint startPt;
-	triDPoint endPt;
-};
+//****************************************************************************************
+// triDTriangle:
+//
+// Three points in three space that define a triangle. Typically used as facets for 3D
+// object.
+//****************************************************************************************
 
 
 struct triDTriangle {
 	
-	triDPoint verticies[3];
+	triDPoint corners[3];
+};
+
+triDPoint centerPt(triDTriangle* inTriangle);
+
+//****************************************************************************************
+// triDRotation:
+//
+// Holds pitch, yaw and roll angles.
+//****************************************************************************************
+
+
+struct triDRotation{
+	
+	float	xRad;	// Pitch
+	float	yRad;	// Yaw
+	float	zRad;	// Roll
 };
 
 
+// Free vector : Has direction and magnatude only. Floats in space?
+// struct triDDirFreeVect {
+// 
+// 	triDRotation	dir;
+// 	float				mag;
+// };
+// 
+// 
+// Rectangular Free vector : Free vector with start point 0,0,0. And an end point x,y,z
+// struct triDRectFreeVect {
+// 
+// 	triDPoint	endPt;
+// };
 
-struct triDFacet {
-
-	triDVect			normVect;
-	triDTriangle	corners;
-};
-
-
-float dotProduct(triDRectFreeVect* ptA,triDRectFreeVect* ptB);
-
-float	angleBetween(
 			
 #endif

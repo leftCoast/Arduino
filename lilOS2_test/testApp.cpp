@@ -2,7 +2,7 @@
 #include <runningAvg.h>
 #include <colorRect.h>
 #include <label.h>
-#include <triDBase.h>
+#include <stlObj.h>
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -31,6 +31,14 @@
 #define VAL2_X       VAL_X + VAL_W + 10
 
 
+
+//****************************************************************************************
+// grid:
+// 
+// The cross hair thing.
+//****************************************************************************************
+
+
 grid::grid(int centerX,int centerY)
    :drawObj(BOUND_X,BOUND_Y,BOUND_DIA,BOUND_DIA) {
 
@@ -55,7 +63,15 @@ void grid::drawSelf(void) {
    screen->drawVLine(BOUND_CX,BOUND_Y,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
    screen->drawVLine(BOUND_CX,BOUND_CY+(TARGET_DIA/2),(BOUND_DIA-TARGET_DIA)/2,&gridColor);
 }
+
+
    
+//****************************************************************************************
+// bubble:
+// 
+// The thing that floats about under the grid
+//****************************************************************************************
+
 
 bubble::bubble(int startX,int startY,grid* inGrid)
    : drawObj(startX,startY,BUBBLE_RAD*2,BUBBLE_RAD*2) {
@@ -78,7 +94,14 @@ void bubble::drawSelf(void) {
 }
 
 
-   
+
+//****************************************************************************************
+// setAngleBtn:
+// 
+// The thing the user touches to set "this" angle as zero.
+//****************************************************************************************   
+
+
 setAngleBtn::setAngleBtn(int xLoc,int yLoc,const char* path,testApp* inApp)
    :iconButton(xLoc,yLoc,path) { ourApp = inApp; }
 
@@ -88,6 +111,13 @@ setAngleBtn::~setAngleBtn(void) {  }
 
 void setAngleBtn::doAction(void) { ourApp->setOffsets(true); }
 
+
+
+//****************************************************************************************
+// clearAngleBtn:
+// 
+// The thing the user touches to set ground angle back to zero.
+//****************************************************************************************
 
 
 clearAngleBtn::clearAngleBtn(int xLoc,int yLoc,const char* path,testApp* inApp)
@@ -101,10 +131,17 @@ void clearAngleBtn::doAction(void) { ourApp->setOffsets(false); }
 
 
 
+//****************************************************************************************
+// The testApp:
+// 
+// The thing that holds everyhting together.
+//****************************************************************************************
+
 
 runningAvg smootherX(5);
 runningAvg smootherY(5);
 
+float rad_2_deg(float x) { return x*180/M_PI; }
 
 testApp::testApp(lilOS* ourOS,int ourAppID)
    : panel(ourAppID) {
@@ -144,14 +181,22 @@ void testApp::setup(void) {
    int      yVal;
    int      offset;
    label*   aLabel;
-
-   printSTLFile("/teensyM.STL");
+   mapper   deg(0,2*M_PI,0,360);
+   
+   stlFile testFile("/teensyM.STL");
+   
+   
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
    } else {
       bno->setExtCrystalUse(true);
       sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
    }
+  
+   stlObj* theModel = new stlObj(20,40,180,180,"/teensyM.STL");
+   addObj(theModel);
+   
+   /*
    theGrid = new grid(BOUND_CX,BOUND_CY);
    theBubble = new bubble(BUBBLE_SX,BUBBLE_SY,theGrid);
    addObj(theBubble);
@@ -290,25 +335,28 @@ void testApp::setup(void) {
    offsetZLabel->setPrecision(1);
    offsetZLabel->setValue(offsetZ);
    addObj(offsetZLabel);
+   */
 }
 
 
 void testApp::showValues(float x,float y,float z) {
-
+   /*
    xLabel->setValue(x);
    yLabel->setValue(y);
    zLabel->setValue(z);
    x2Label->setValue(x-offsetX);
    y2Label->setValue(y-offsetY);
    z2Label->setValue(z-offsetZ);
+   */
 }
 
 
 void testApp::showOffsets(float x,float y,float z) {
-
+   /*
    offsetXLabel->setValue(x);
    offsetYLabel->setValue(y);
    offsetZLabel->setValue(z);
+   */
 }
 
 
@@ -345,7 +393,8 @@ void testApp::loop(void) {
    float             dist;
    colorObj          gridColor;
    sensors_event_t   event;
-  
+
+   /*
    if (bubbleTimer.ding()) {
       bubbleTimer.stepTime();
       bno->getEvent(&event);
@@ -367,11 +416,12 @@ void testApp::loop(void) {
          }
       }
    }
+   */
 }
 
 
 void testApp::drawSelf(void) {
     
    screen->fillScreen(&scrColor);
-   screen->fillCircle(BOUND_X,BOUND_Y,BOUND_DIA,&black);
+   //screen->fillCircle(BOUND_X,BOUND_Y,BOUND_DIA,&black);
 }

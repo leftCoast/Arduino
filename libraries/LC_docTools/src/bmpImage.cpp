@@ -12,45 +12,45 @@
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order than what we use
 // here in Arduinoland. These routines swap 'em back. (Sure seems like they aren't doing
 // anything to me though..
-
+// 
 // For 2 byte numbers.
-uint16_t read16(File f) {
-
-    uint16_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read(); // MSB
-    return result;
-  }
-
-
-void write16(uint16_t val, File f) {
-  
-   f.write(((uint8_t *)&val)[0]);
-	f.write(((uint8_t *)&val)[1]);
-}
-
-
+// uint16_t read16(File f) {
+// 
+//     uint16_t result;
+//   
+//     ((uint8_t *)&result)[0] = f.read(); // LSB
+//     ((uint8_t *)&result)[1] = f.read(); // MSB
+//     return result;
+//   }
+// 
+// 
+// void write16(uint16_t val, File f) {
+//   
+//    f.write(((uint8_t *)&val)[0]);
+// 	f.write(((uint8_t *)&val)[1]);
+// }
+// 
+// 
 // For 4 byte numbers.
-uint32_t read32(File f) {
-  
-    uint32_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read();
-    ((uint8_t *)&result)[2] = f.read();
-    ((uint8_t *)&result)[3] = f.read(); // MSB
-    return result;
-  }
-  
-  
-void write32(uint32_t val, File f) {
-  
-	f.write(((uint8_t *)&val)[0]);
-	f.write(((uint8_t *)&val)[1]);
-	f.write(((uint8_t *)&val)[2]);
-	f.write(((uint8_t *)&val)[3]);
-}  
+// uint32_t read32(File f) {
+//   
+//     uint32_t result;
+//   
+//     ((uint8_t *)&result)[0] = f.read(); // LSB
+//     ((uint8_t *)&result)[1] = f.read();
+//     ((uint8_t *)&result)[2] = f.read();
+//     ((uint8_t *)&result)[3] = f.read(); // MSB
+//     return result;
+//   }
+//   
+//   
+// void write32(uint32_t val, File f) {
+//   
+// 	f.write(((uint8_t *)&val)[0]);
+// 	f.write(((uint8_t *)&val)[1]);
+// 	f.write(((uint8_t *)&val)[2]);
+// 	f.write(((uint8_t *)&val)[3]);
+// }  
 
 
 

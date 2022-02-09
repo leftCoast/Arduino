@@ -3,6 +3,31 @@
 
 #include <SD.h>
 
+//****************************************************************************************
+// little indian integers:
+// Many files have the 2 & 4 byte integers stored in reverse byte order than what we use
+// here in Arduinoland. These routines swap 'em back.
+//
+//****************************************************************************************
+
+
+// For reading two byte numbers.
+uint16_t read16(File f);
+
+
+// For writing two byte numbers.
+void write16(uint16_t val, File f);
+
+
+// For reading four byte numbers.
+uint32_t read32(File f);
+  
+  
+// For writing four byte numbers.  
+void write32(uint32_t val, File f);
+
+
+
 
 // Returns true if this folderPath can be found, or created.
 bool createFolder(const char* folderPath);

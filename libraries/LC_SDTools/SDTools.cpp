@@ -1,7 +1,62 @@
 #include <SDTools.h>
 #include <resizeBuff.h>
+#include <strTools.h>
 
 //#include <debug.h>
+
+
+
+
+//****************************************************************************************
+// little indian integers:
+// Many files have the 2 & 4 byte integers stored in reverse byte order than what we use
+// here in Arduinoland. These routines swap 'em back.
+//
+//****************************************************************************************
+
+
+// For reading two byte numbers.
+uint16_t read16(File f) {
+
+    uint16_t result;
+  
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read(); // MSB
+    return result;
+  }
+
+
+// For writing two byte numbers.
+void write16(uint16_t val, File f) {
+  
+   f.write(((uint8_t *)&val)[0]);
+	f.write(((uint8_t *)&val)[1]);
+}
+
+
+// For reading four byte numbers.
+uint32_t read32(File f) {
+  
+    uint32_t result;
+  
+    ((uint8_t *)&result)[0] = f.read(); // LSB
+    ((uint8_t *)&result)[1] = f.read();
+    ((uint8_t *)&result)[2] = f.read();
+    ((uint8_t *)&result)[3] = f.read(); // MSB
+    return result;
+  }
+  
+  
+// For writing four byte numbers.  
+void write32(uint32_t val, File f) {
+  
+	f.write(((uint8_t *)&val)[0]);
+	f.write(((uint8_t *)&val)[1]);
+	f.write(((uint8_t *)&val)[2]);
+	f.write(((uint8_t *)&val)[3]);
+}  
+
+
 
 
 // Returns true if this folderPath can be found, or created.
@@ -35,12 +90,6 @@ bool createFolder(const char* folderPath) {
 }	
 
 
-
-// This guy will be used as a pass back buffer. Once you get it returned to you. The first
-// and only thing to do with it is make a local copy. Who knows what call will change it
-// and cause things to blow up on your face. For easy local copies see temStr().
-char* tempPath = NULL;	
-
 // Given a path, baseName and extension this hands back a string with a path to an unused
 // numbered file. For example "/docs/NoName5.doc". IF it can not allocated this file it
 // will return NULL. IF THIS IS A SUCCESS, YOU MUST COPY THE RETURNED STRING. I won't last
@@ -61,32 +110,32 @@ char* numberedFilePath(const char* folderPath,const char* baseName,const char* e
 			maxNum = pow(10,8 - strlen(baseName));					// How many chars we got for a value?
 			maxNum--;														// Actually, you get one too many.
 			numBytes = strlen(folderPath) + 8 + 4 + 1;			// Path, max name, max extension, '\0'.
-			if (resizeBuff(numBytes,&tempPath)) {					// If we can get the RAM..
+			if (resizeBuff(numBytes,&returnStr)) {					// If we can get the RAM..
 				fileNum = 1;												// Starting at one.
 				done = false;												// 'Cause we ain't.
 				do {															// Do for each..
 					itoa(fileNum++,numStr,7);							// Setup a number string.
-					strcpy(tempPath,folderPath);						// Build up the test path.
-					strcat(tempPath,baseName);							// Add the base name.
-					strcat(tempPath,numStr);							// Add the number string.
-					strcat(tempPath,extension);						// Add the extension.
-					tempFile = SD.open(tempPath,FILE_READ);		//	Try to open this file for reading.
+					strcpy(returnStr,folderPath);						// Build up the test path.
+					strcat(returnStr,baseName);							// Add the base name.
+					strcat(returnStr,numStr);							// Add the number string.
+					strcat(returnStr,extension);						// Add the extension.
+					tempFile = SD.open(returnStr,FILE_READ);		//	Try to open this file for reading.
 					if (tempFile) {										// If the file opened..
 						tempFile.close();									// We just close it and move on.
 					} else {													// Else, we have a possible candidate here.
 						done = true;										// Either its the real deal or an error. In any case, we are done. 
-						tempFile = SD.open(tempPath,FILE_WRITE);	// Try to create the file we couldn't open.
+						tempFile = SD.open(returnStr,FILE_WRITE);	// Try to create the file we couldn't open.
 						if (tempFile) {									// If we were able to create the file..
 							tempFile.close();								// Close it.
-							return tempPath;								// And We'll call that a success!
+							return returnStr;								// And We'll call that a success!
 						}														//
 					}															//
 				} while(!done && fileNum<maxNum);					// Loop while we are not done. (And have numbers to go.)
-				resizeBuff(0,&tempPath);								// If we get here, its a failure so recycle the RAM.
+				resizeBuff(0,&returnStr);								// If we get here, its a failure so recycle the RAM.
 			}																	//
 		}																		//
 	}																			//
-	return tempPath;														// And this'll be returning a NULL.
+	return returnStr;														// And this'll be returning a NULL.
 }
 
 
@@ -173,15 +222,9 @@ bool extensionMatch(const char* extension,const char* filePath) {
 		pathExt = &(path[index]);						// Grab the address of this character.
 		success = !strcmp(ext,pathExt);				// Do a string compare. Save the result
 	}															//
-	heapStr(&ext;											// Free the local copy of the extension.
-	heapStr(&path;											// Free the local copy of the path.
+	freeStr(&ext);											// Free the local copy of the extension.
+	freeStr(&path);										// Free the local copy of the path.
 	return success;										// Return our results.
 }
 	
 	
-	
-
-
-}
-
-

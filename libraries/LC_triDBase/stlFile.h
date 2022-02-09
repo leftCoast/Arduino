@@ -2,37 +2,40 @@
 #define stlFile_h
 
 #include <triDbase.h>
-
+#include <triDVector.h>
+#include <SD.h>
 
 struct STLFacet {
 
-	float	normVect[3];	// 12 bytes
-	float	vertex1[3];		// 12 bytes
-	float	vertex2[3];		// 12 bytes
-	float	vertex3[3];		// 12 bytes
-	int8_t	extra[2];	// 2 bytes
+	float		normVect[3];	// 12 bytes
+	float		vertex1[3];		// 12 bytes
+	float		vertex2[3];		// 12 bytes
+	float		vertex3[3];		// 12 bytes
+	int16_t	extra;			// 2 bytes
 };
 
 
-class stlFile : {
+	
+class stlFile {
 
 	public:
 				stlFile(const char* stlPath);
-	virtual	~stlObj(void);
+	virtual	~stlFile(void);
 	
-				bool		checkFile(void);
-				char*		getSavedFileName(void);
-				long		getNumFacets(void);
-				bool		openForBatchRead(void);
-				STLFacet	getFacet(long index);
-				void		closeBatchRead(void);	
-				void		printSTLFile(void);
-				void		printFacet(STLFacet* inFacet);
+				bool			checkFile(void);
+				char*			getSavedFileName(void);
+				int32_t		getNumFacets(void);
+				bool			openForBatchRead(void);
+	virtual	STLFacet		getFacet(int32_t index);	// Inherit to change orientation.
+				void			closeBatchRead(void);	
+				void			printSTLFile(void);
+				void			printFacet(STLFacet* inFacet,int32_t index);
 				
-				char*	path;
-				bool	isValid;
-				bool	fileOpen;
-				File	fileObj;
+				char*			path;
+				bool			isValid;
+				bool			fileOpen;
+				File			fileObj;
+				int32_t		numFacets;
 };
 
 #endif
