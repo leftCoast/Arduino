@@ -72,7 +72,8 @@ void homeScr::setup(void) {
    theAppIcon = new appIcon(traceX,traceY,testAppID,iconPath(testAppID,"testApp.bmp"));                  // Create icon for the testApp.
    theAppIcon->setMask(&(ourOSPtr->icon32Mask));                                                // Mask.
    addObj(theAppIcon);                                                                          // Drop it into the list. 
- 
+
+   
 }
 
 

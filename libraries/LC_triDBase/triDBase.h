@@ -28,17 +28,17 @@ struct triDPoint {
 // showing the limits in size for a 3D object.
 //****************************************************************************************
 
-struct triDSpace {
+// struct triDSpace {
+// 
+// 	float		xMin;
+// 	float		xMax;
+// 	float		yMin;
+// 	float		yMax;
+// 	float		zMin;
+// 	float		zMax;
+// };
 
-	float		xMin;
-	float		xMax;
-	float		yMin;
-	float		yMax;
-	float		zMin;
-	float		zMax;
-};
-
-triDPoint centerPt(triDSpace* inSpace);
+//triDPoint centerPt(triDSpace* inSpace);
 
 //****************************************************************************************
 // triDTriangle:
@@ -53,7 +53,7 @@ struct triDTriangle {
 	triDPoint corners[3];
 };
 
-triDPoint centerPt(triDTriangle* inTriangle);
+//triDPoint centerPt(triDTriangle* inTriangle);
 
 //****************************************************************************************
 // triDRotation:
@@ -68,21 +68,5 @@ struct triDRotation{
 	float	yRad;	// Yaw
 	float	zRad;	// Roll
 };
-
-
-// Free vector : Has direction and magnatude only. Floats in space?
-// struct triDDirFreeVect {
-// 
-// 	triDRotation	dir;
-// 	float				mag;
-// };
-// 
-// 
-// Rectangular Free vector : Free vector with start point 0,0,0. And an end point x,y,z
-// struct triDRectFreeVect {
-// 
-// 	triDPoint	endPt;
-// };
-
 			
 #endif

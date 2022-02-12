@@ -19,12 +19,13 @@ struct STLFacet {
 class stlFile {
 
 	public:
-				stlFile(const char* stlPath);
+				stlFile(const char* stlPath=NULL);
 	virtual	~stlFile(void);
 	
+				void			setPath(const char* stlPath);
 				bool			checkFile(void);
 				char*			getSavedFileName(void);
-				int32_t		getNumFacets(void);
+				uint32_t		getNumFacets(void);
 				bool			openForBatchRead(void);
 	virtual	STLFacet		getFacet(int32_t index);	// Inherit to change orientation.
 				void			closeBatchRead(void);	
@@ -35,7 +36,7 @@ class stlFile {
 				bool			isValid;
 				bool			fileOpen;
 				File			fileObj;
-				int32_t		numFacets;
+				uint32_t		numFacets;
 };
 
 #endif

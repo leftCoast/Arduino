@@ -6,65 +6,122 @@
 #include <triDVector.h>
 #include <lists.h>
 #include <drawObj.h>
-
+#include <strTools.h>
 
 class stlObj;
 
-class triDObj {
+//****************************************************************************************
+// renderSetup: (used internally)
+//
+// Render setup is the information needed to calculate the set of visable viewFacets from
+// a list of triDFacets.  In order to do that we need to "see" just what the viewer "sees".
+// 
+// The origin is the location, in three space, of of where to locate the centner of the 3D
+// object. The location of the object, as it comes to us, is undefined. So placing this
+// point in the center of the view and back some, will at least get you something you can
+// see.
+//
+// Orientation is the yaw(x), roll(y), pitch(z) of the object around its center point.
+// These values are in radians.  IE 360 deg = 2Pi radians etc.
+// 
+// Scale is a multiplier of the given point values. The size of the object is also
+// undefined. So you'll need the scaler to size it to a resonable size. (And who knows
+// what that'll be.)
+//
+// The camera point is where the viewer's eye is thought to be. Typically, middle of the
+// view and a large (Maybe -300 ish) set back in the z axes. This gives the perspective of
+// the resulting image.
+//
+// viewWidth and viewHeight These give the bounding rectangle that the user is viewing the
+// resulting object through. Used for clipping facets that can't be seen. But more
+// importantly, used as the 2 dimensional plane that the rendering is projected on. The
+// top left of the viewing rectangle is your system's origin point.
+//
+//****************************************************************************************
 
-	public:
-				triDObj(void);
-	virtual	~triDObj(void);
-	
-	virtual	triDPoint	getCenter(void);
-	virtual	void			setRotation(triDRotation* inAngle);
-	
-				triDRotation	angle;
+
+struct renderSetup {
+
+	triDPoint		locaton;
+	triDRotation	orientation;
+	float				scale;
+	triDPoint		camera;
+	int				viewWidth;
+	int				viewHeight;
 };
 
 
-class triangle :	public triDObj {
 
-	public:
-				triangle(triDPoint* inCorner1,triDPoint* inCorner2,triDPoint* inCorner3);
-	virtual	~triangle(void);
-	
-	virtual	triDPoint	getCenter(void);
+//****************************************************************************************	
+// viewFacet: (used internally)
+//
+// view Facet is the output of the triDEngine. viewFacets are generated as an ordered
+// list from back to front. This is so that the calling program can start at 0 and just
+// run down the list drawing ready formed triangles to the screen.
+//
+// viewFacets are only shapes with a triDvector to give their three D angle. The calling
+// program has the task of deciding what color to "paint" these triangles.
+//
+// normalVect, used to compare with light sources to choose facet color.
+//
+// Corners A,B,C These are the three points of a 3D triangle mapped to a 2D image of a
+// triangle ready to be drawn to the display. Meaning, that they are already in view
+// coordinates, rounded to integers with 0,0 as the upper left hand corner of the view.
+// Ready to go!
+//
+//****************************************************************************************
+
+ 
+struct viewFacet {
+
+	triDVector	normalVect;
+	point			cornerA;
+	point			cornerB;
+	point			cornerC;
 };
 
-
-class space :	public triDObj {
-
-	public:
-				space(void;
-	virtual	~space(void);
-	
-				void			addPt(triDPoint* inPt);
-				void			clearSpace(void);
-	virtual	triDPoint	getCenter(void);
-	
-				bool		noX;
-				bool		noY;
-				bool		noZ;
-				float		xMin;
-				float		xMax;
-				float		yMin;
-				float		yMax;
-				float		zMin;
-				float		zMax;
-};
 
 
 //****************************************************************************************
-// indexItem:
+// objCenter: (used internally)
 //
-// The user should not interact with this class directly. indexItem is used by facetList
+// Add all the facets of a 3D object into this and it calculates the center point of the
+// object.
+//
+//****************************************************************************************
+
+
+class objCenter {
+
+	public:
+				objCenter(void);
+	virtual	~objCenter(void);
+	
+				void			addSTLFacet(STLFacet* aFacet);
+				void			addItem(float x,float y,float z);
+				triDPoint	getCenterPt(void);
+				
+				bool	pointSet;
+				
+				float	xMin;
+				float	xMax;
+				float	yMin;
+				float	yMax;
+				float	zMin;
+				float	zMax;	
+};
+	
+	
+//****************************************************************************************
+// indexItem: (used internally)
+//
+// The user should not interact with this class directly. indexItem is used by triDEngine
 // to track facets in the .stl file.
 //
 // Why is this?
 //
 // We can't keep the facet list in memory. It can be just too big! So, to help, the
-// facetList class goes though the file and prunes out the facets the user can't possibly
+// triDEngine class goes though the file and prunes out the facets the user can't possibly
 // see. The remaining facets are stored only by their index in the .stl file. And, this
 // list of indexes is sorted by their distance from the user's eye. An indexItem is one of
 // the links of this list.
@@ -74,19 +131,19 @@ class space :	public triDObj {
 class indexItem : public linkListObj {
 
 	public:
-				indexItem(int32_t index,float distance);
+				indexItem(uint32_t index,float distance);
 	virtual	~indexItem(void);
 	
-	int32_t	getIndex(void);
+	uint32_t	getIndex(void);
 	
-				int32_t	facetIndex;
+				uint32_t	facetIndex;
 				float		zDistance;
 };
 
 
 
 //****************************************************************************************
-// facetList
+// triDEngine: (used internally)
 //
 // The user should not interact with this class directly. This is used by the strObj class
 // to set up the orientation of the 3D object for rendering. Prunes and sorts the facet
@@ -108,44 +165,39 @@ class indexItem : public linkListObj {
 //****************************************************************************************
 
 
-class facetList : public linkList,
-						public stlFile {
+class triDEngine :	public linkList,
+							public stlFile {
 	public:
-				facetList(char* stlPath);
-	virtual	~facetList(void);
+				triDEngine(void);
+	virtual	~triDEngine(void);
 	
-				void				setCamera(triDVector* inCamera);
-				void				setScale(float scale);
-				void				setObjOrent(triDPoint* inObjLoc,triDRotation* inObjAngle);
-				bool				createVisList(void);								// Build the list of visible facets.
-				int32_t			getNumVisFacets(void);							// How many visible facets are on the list?
-				triDFacet		getVisFacet(int32_t index);					// Get this faces off the visible list. (visible list index)
+				bool			begin(const char* stlPath);
+				bool			createList(renderSetup* setup);						// Build the list of visible facets.
+				uint32_t		getNumViewFacets(void);									// How many visible facets are on the list?
+				viewFacet	getViewFacet(renderSetup* setup,int32_t index);	// Get this facet off the visible list. (visible list index)
 				
 	protected:
+				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
+	virtual	STLFacet		getFacet(int32_t index);
+				void			addIndexItem(indexItem* newItem);
+				
+				void			setScale(renderSetup* setup,STLFacet* aFacet);
+				void			setRotation(renderSetup* setup,STLFacet* aFacet);
+				void			setLocation(renderSetup* setup,STLFacet* aFacet);
+				void			doTransformations(renderSetup* setup,STLFacet* aFacet);
+				float			inView(renderSetup* setup,STLFacet* aFacet);
 	
-	virtual	STLFacet			getFacet(int32_t index);
-				void				clearObjSpan(void);
-				void				addPtToObjSpan(float x,float y,float z);
-				void				addToObjSpan(STLFacet* aFacet);
-				void				locateOrigin(void);
-				void				addIndexItem(indexItem* newItem);
-				bool				inView(STLFacet* aFacet);
-				float				getDistance(STLFacet* aFacet);
-	
-				bool				init;				// We ready to go?
-				bool				haveList;		// Is list current to orientation?
-				triDPoint		origin;			// The center point of the 3D object
-				triDPoint		objLoc;			// The x,y,z offset from the top right corner of the view.
-				triDRotation	objAngle;		// The pitch(x) yaw(y) roll(z) around the origin point of the 3D object.
-				float				scale;			// Object scale.
-				triDSpace		objSpan;			// The retangular solid that the 3D object fits into.
-				triDVector		camera;			// The camera location.
+				bool			init;				// We ready to go?
+				bool			haveList;		// Is list current to orientation?
+				triDPoint	objOrg;			// The one matching our inputted file.
+				triDPoint	scaledOrigin;	// The one matching our current object scale.
+				mapper		ptMapper;
 };
 
 
 
 //****************************************************************************************
-// stlObj
+// stlObj: (You can mess with this one.)
 //
 // This is the class the user uses to place a 3D object in the view list to be draw on the
 // screen. It stores all the information needed to setup the drawing environment. Ambient
@@ -165,26 +217,28 @@ class stlObj :	public drawObj {
 				
 				void			begin(void);
 				void			setAmbiantlight(colorObj* inColor);
-				void			setlightSource(triDPoint* lightLoc,colorObj* color);
-				void			setObjOrent(triDPoint* inObjLoc,triDRotation* inObjAngle);
-				void			setScale(float inScale);
-				
-				triDFacet	getTriDFacet(int32_t index);
+				void			setlightLoc(triDPoint* lightLoc);
+				void			setlightColor(colorObj* color);
+				void			setObjScale(float scale);
+				void			setObjLoc(triDPoint* loc);
+				void			setObjAngle(triDRotation* angle);
+				void			setCamera(triDPoint* cam);
 	virtual	void			drawSelf(void);
 	
 	protected:
 				void			calcLightMapper(void);
-				colorObj		calcColor(triDFacet* aFacet);
-				void			scaleValues(triDFacet* aFacet,float scale);
+				colorObj		calcColor(viewFacet* aFacet);
 				
 				bool				init;
+				bool				setupChange;
+				char*				savedPath;
+				renderSetup		setup;
 				colorObj			ambientColor;
-				triDVector		spotPos;
+				triDPoint		spotPos;
 				colorObj 		spotColor;
 				colorMultiMap	lightMapper;
-				facetList*		indexList;
+				triDEngine		ourFacetList;
 };
-
 
 
 #endif

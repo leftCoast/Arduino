@@ -14,8 +14,10 @@ class triDVector {
 			
 	virtual	~triDVector(void);
 				
+				void			setVector(triDPoint* startPt,triDPoint* endPt);
 				void			setVector(float startX,float startY,float startZ,float inEndX,float inEndY,float inEndZ);
 				void			setFreeVector(float inEndX,float inEndY,float inEndZ);
+				void			setFreeVector(triDPoint* inPoint);
 				void			setStartpoint(float startX,float startY,float startZ);
 				void			setStartpoint(triDPoint* inPoint);
 				void			setEndpoint(float inEndX,float inEndY,float inEndZ);
@@ -23,9 +25,13 @@ class triDVector {
 				triDPoint	getStartpoint(void);
 				triDPoint	getEndpoint(void);
 				triDPoint	getFreeVect(void);
+				void			moveToOrigin(void);
+				void			moveBack(void);
+				void			rotateVect(triDRotation* rotation);
 				float			dotProduct(triDVector* inVect);
 				float			magnitude(void);
 				float			angleBetween(triDVector* inVect);
+				void			printVector(void);
 				
 	protected:
 	
@@ -35,6 +41,9 @@ class triDVector {
 				float endX;
 				float endY;
 				float endZ;
+				float saveX;
+				float saveY;
+				float saveZ;
 };
 
 

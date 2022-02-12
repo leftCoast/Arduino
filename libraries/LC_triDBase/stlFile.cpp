@@ -2,6 +2,8 @@
 #include <strTools.h>
 #include <SDTools.h>
 
+#include <debug.h>
+
 
 #define HDR_BYTES			80
 #define FACETNUM_BYTES	4
@@ -30,6 +32,15 @@ stlFile::~stlFile(void) {
 }
 	
 	
+void stlFile::setPath(const char* stlPath) {
+
+	if (fileOpen) {			// If the file's open..
+		closeBatchRead();		// Close it.
+	}								//
+	heapStr(&path,stlPath);	// Save off the path.
+}
+
+
 // Do our best to see if this is a valid .stl file or not.	
 bool stlFile::checkFile(void) {
 	
@@ -83,12 +94,13 @@ char* stlFile::getSavedFileName(void) {
 }
 
 
-int32_t stlFile::getNumFacets(void) {
+uint32_t stlFile::getNumFacets(void) {
 	
 	bool				alreadyOpen;
 	unsigned long	savedLoc;
 	
 	if (numFacets) return numFacets;					// Zero means we've not looked.
+	
 	if (fileOpen) {										// If the file is already open..
 		alreadyOpen = true;								// Save the state of our file.
 		savedLoc = fileObj.position();				// Lets save the file pos for miss user.										

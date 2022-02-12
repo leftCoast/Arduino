@@ -142,6 +142,8 @@ runningAvg smootherX(5);
 runningAvg smootherY(5);
 
 float rad_2_deg(float x) { return x*180/M_PI; }
+float deg_2_rad(double x) { return x*M_PI/180; }
+
 
 testApp::testApp(lilOS* ourOS,int ourAppID)
    : panel(ourAppID) {
@@ -182,18 +184,22 @@ void testApp::setup(void) {
    int      offset;
    label*   aLabel;
    mapper   deg(0,2*M_PI,0,360);
-   
-   stlFile testFile("/teensyM.STL");
-   
-   
+      
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
    } else {
       bno->setExtCrystalUse(true);
       sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
    }
-  
+
+   triDRotation angle;
    stlObj* theModel = new stlObj(20,40,180,180,"/teensyM.STL");
+   theModel->begin();
+   theModel->setObjScale(4);
+   angle.xRad = deg_2_rad(-70);
+   angle.yRad = deg_2_rad(0);
+   angle.zRad = deg_2_rad(0);
+   theModel->setObjAngle(&angle);
    addObj(theModel);
    
    /*
