@@ -172,9 +172,9 @@ class triDEngine :	public linkList,
 	virtual	~triDEngine(void);
 	
 				bool			begin(const char* stlPath);
-				bool			createList(renderSetup* setup);						// Build the list of visible facets.
-				uint32_t		getNumViewFacets(void);									// How many visible facets are on the list?
-				viewFacet	getViewFacet(renderSetup* setup,int32_t index);	// Get this facet off the visible list. (visible list index)
+				bool			createList(renderSetup* setup);			// Build the list of visible facets.						
+				void			resetList(void);								// Reset the viewFacet list to the back for a new read.
+				viewFacet	getNextViewFacet(renderSetup* setup);	// Get the next facet off the visible list. (visible list index)
 				
 	protected:
 				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
@@ -185,10 +185,12 @@ class triDEngine :	public linkList,
 				void			setRotation(renderSetup* setup,STLFacet* aFacet);
 				void			setLocation(renderSetup* setup,STLFacet* aFacet);
 				void			doTransformations(renderSetup* setup,STLFacet* aFacet);
+				void 			scaleOrigin(float scale);
 				float			inView(renderSetup* setup,STLFacet* aFacet);
 	
 				bool			init;				// We ready to go?
 				bool			haveList;		// Is list current to orientation?
+				indexItem*	currItem;		// Tracks the text facet handed back.
 				triDPoint	objOrg;			// The one matching our inputted file.
 				triDPoint	scaledOrigin;	// The one matching our current object scale.
 				mapper		ptMapper;

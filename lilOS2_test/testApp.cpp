@@ -195,7 +195,7 @@ void testApp::setup(void) {
    triDRotation angle;
    stlObj* theModel = new stlObj(20,40,180,180,"/teensyM.STL");
    theModel->begin();
-   theModel->setObjScale(4);
+   //theModel->setObjScale(1);
    angle.xRad = deg_2_rad(-70);
    angle.yRad = deg_2_rad(0);
    angle.zRad = deg_2_rad(0);

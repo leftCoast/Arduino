@@ -27,6 +27,7 @@ class triDVector {
 				triDPoint	getFreeVect(void);
 				void			moveToOrigin(void);
 				void			moveBack(void);
+				bool			isNullVector(void);
 				void			rotateVect(triDRotation* rotation);
 				float			dotProduct(triDVector* inVect);
 				float			magnitude(void);

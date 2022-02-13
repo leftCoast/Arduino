@@ -61,6 +61,8 @@ triDPoint objCenter::getCenterPt(void) {
 	aCenter.x = (xMin+xMax)/2.0;
 	aCenter.y = (yMin+yMax)/2.0;
 	aCenter.z = (zMin+zMax)/2.0;
+	Serial.print("Calculated center of obj: ");
+	printTriDPt(&aCenter);
 	return aCenter;
 }
 
@@ -92,17 +94,19 @@ triDEngine::triDEngine(void)
 	: linkList(),
 	stlFile() {
 	
-	init		= false;
-	haveList	= false;
+	init				= false;
+	haveList			= false;
+	currItem	= NULL;
 }
 					
 					
 triDEngine::~triDEngine(void) { }
 
 
-// Do the things we hold off 'till the code starts.
+// Do the things we hold off 'till the code starts. Reading how many facets we have and
+// calculating the center point of our 3D object.
 bool triDEngine::begin(const char* stlPath) {
-
+ST
 	STLFacet		aFacet;
 	objCenter	objSpan;
 	
@@ -132,56 +136,52 @@ ST
 	if (init) {
 		dumpList();
 		haveList = false;
+		scaleOrigin(setup->scale);
 		for(uint32_t i=0;i<numFacets;i++) {
-			Serial.print("*");
 			aFacet = getFacet(i);
 			doTransformations(setup,&aFacet);
 			zDist = inView(setup,&aFacet);
+			Serial.print("zDist: ");Serial.println(zDist);
 			if (zDist>0) {
 				newItem = new indexItem(i,zDist);
 				addIndexItem(newItem);
 			}
 		}
-		Serial.println(numFacets);
 		haveList = true;
 	}
 	return haveList;
 }
 
 
-// We read the file and only grabbed the index of facets that "can be" visible. Return the
-// number of facets that we kept.
-uint32_t triDEngine::getNumViewFacets(void) {
-
-	if (haveList) {
-		return getCount();
-	} else {
-		return 0;
-	}
-}
+void triDEngine::resetList(void) { currItem = NULL; }
 
 
 // Of our remaining visible list. Lets give back a facet triangle at index..
-viewFacet triDEngine::getViewFacet(renderSetup* setup,int32_t index) {
+viewFacet triDEngine::getNextViewFacet(renderSetup* setup) {
+ST	
+	STLFacet		fileFacet;										// The facet we can get.
+	indexItem*	anItem;											// The thing with the index in it.
+	viewFacet	aFacet;											// The facet we want.
 	
-	STLFacet		fileFacet;									// The facet we can get.
-	viewFacet	aFacet;										// The facet we want.
-	indexItem*	anItem;										// The thing with the index in it.
-	
-	if (haveList) {											// If we got a file and have a current list..
-		anItem = (indexItem*)getByIndex(index);		// Grab an index thing.
-		fileFacet = getFacet(anItem->facetIndex);		// Grab a Facet facet from the file.
-		printFacet(&fileFacet,anItem->facetIndex);
-		db.trace("Doing transforms..");
-		doTransformations(setup,&fileFacet);			// Do the flip and move all around thing.
-		printFacet(&fileFacet,anItem->facetIndex);
-		aFacet = calcViewFacet(setup,&fileFacet);		// Transform the 3D facet, 2 Space and return it.
-	} else {														// Else, we're missing the file or list..
-		db.trace("failed!");
-		aFacet.normalVect.setStartpoint(0,0,0);		// A zero normal can be flag for fail.
-		aFacet.normalVect.setEndpoint(0,0,0);			//
-	}																//
-	return aFacet;												// And we return our stuffed triangle.
+	aFacet.normalVect.setStartpoint(0,0,0);				// A NULL normal can be flag for fail.
+	aFacet.normalVect.setEndpoint(0,0,0);					//
+	if (haveList) {												// If we got a file and have a current list..
+		if (currItem) {											// If the current item is pointing to an item..
+			anItem = (indexItem*)currItem->getNext();		// Grab the item after that one.
+		} else {														// Else, pointing at NULL..
+			anItem = (indexItem*)getFirst();					// Means we want the first one.
+		}																//
+		currItem = anItem;										// Works for all cases. Auto resets on NULL.
+		if (anItem) {												// If we got a valid item..
+			fileFacet = getFacet(anItem->facetIndex);		// Grab a Facet facet from the file.
+			printFacet(&fileFacet,anItem->facetIndex);
+			db.trace("Doing transforms..");
+			doTransformations(setup,&fileFacet);			// Do the flip and move all around thing.
+			printFacet(&fileFacet,anItem->facetIndex);
+			aFacet = calcViewFacet(setup,&fileFacet);		// Transform the 3D facet to 2 Space and return it.
+		}																//
+	}																	//
+	return aFacet;													// And we return our stuffed triangle.
 }
 	
 	
@@ -239,7 +239,12 @@ STLFacet triDEngine::getFacet(int32_t index) {
 	aFacet.vertex2[2] = -aFacet.vertex2[2];
 	aFacet.vertex3[1] = -aFacet.vertex3[1];
 	aFacet.vertex3[2] = -aFacet.vertex3[2];
+	Serial.println("************************************");
+	Serial.println("NEW FACET");
+	Serial.println("************************************");
+	printFacet(&aFacet,index);
 	return aFacet;
+	
 }
 
 
@@ -266,7 +271,8 @@ void triDEngine::addIndexItem(indexItem* newItem) {
 
 
 void triDEngine::setScale(renderSetup* setup,STLFacet* aFacet) {
-
+ST
+	Serial.print("Scale: ");Serial.println(setup->scale);
 	aFacet->vertex1[0] = aFacet->vertex1[0] * setup->scale;
 	aFacet->vertex1[1] = aFacet->vertex1[1] * setup->scale;
 	aFacet->vertex1[2] = aFacet->vertex1[2] * setup->scale;
@@ -278,17 +284,22 @@ void triDEngine::setScale(renderSetup* setup,STLFacet* aFacet) {
 	aFacet->vertex3[0] = aFacet->vertex3[0] * setup->scale;
 	aFacet->vertex3[1] = aFacet->vertex3[1] * setup->scale;
 	aFacet->vertex3[2] = aFacet->vertex3[2] * setup->scale;
+	printFacet(aFacet,0);
 }
 
 
 void triDEngine::setRotation(renderSetup* setup,STLFacet* aFacet) {
-	
+ST	
 	triDVector	aFreeVect;
 	triDPoint	aCornerPt;
-
+	
 	aCornerPt.x = aFacet->vertex1[0];
 	aCornerPt.y = aFacet->vertex1[1];
 	aCornerPt.z = aFacet->vertex1[2];
+
+	Serial.print("Vertex1 scaledOrigin:   ");printTriDPt(&scaledOrigin);
+	Serial.print("aCornerPt:   ");printTriDPt(&aCornerPt);
+	
 	aFreeVect.setVector(&scaledOrigin,&aCornerPt);
 	aFreeVect.moveToOrigin();
 	aFreeVect.rotateVect(&(setup->orientation));
@@ -301,6 +312,10 @@ void triDEngine::setRotation(renderSetup* setup,STLFacet* aFacet) {
 	aCornerPt.x = aFacet->vertex2[0];
 	aCornerPt.y = aFacet->vertex2[1];
 	aCornerPt.z = aFacet->vertex2[2];
+	
+	Serial.print("Vertex2 scaledOrigin:   ");printTriDPt(&scaledOrigin);
+	Serial.print("aCornerPt:   ");printTriDPt(&aCornerPt);
+	
 	aFreeVect.setVector(&scaledOrigin,&aCornerPt);
 	aFreeVect.moveToOrigin();
 	aFreeVect.rotateVect(&(setup->orientation));
@@ -313,6 +328,10 @@ void triDEngine::setRotation(renderSetup* setup,STLFacet* aFacet) {
 	aCornerPt.x = aFacet->vertex3[0];
 	aCornerPt.y = aFacet->vertex3[1];
 	aCornerPt.z = aFacet->vertex3[2];
+	
+	Serial.print("Vertex3 scaledOrigin:   ");printTriDPt(&scaledOrigin);
+	Serial.print("aCornerPt:   ");printTriDPt(&aCornerPt);
+	
 	aFreeVect.setVector(&scaledOrigin,&aCornerPt);
 	aFreeVect.moveToOrigin();
 	aFreeVect.rotateVect(&(setup->orientation));
@@ -322,17 +341,25 @@ void triDEngine::setRotation(renderSetup* setup,STLFacet* aFacet) {
 	aFacet->vertex3[1] = aCornerPt.y;
 	aFacet->vertex3[2] = aCornerPt.z;
 	
+	Serial.print("NormVector calcualtion: ");
+	
 	aFreeVect.setFreeVector(aFacet->normVect[0],aFacet->normVect[1],aFacet->normVect[2]);
 	aFreeVect.rotateVect(&(setup->orientation));
 	aCornerPt = aFreeVect.getEndpoint();
+	
+	Serial.print("NormVector result: ");
+	printTriDPt(&aCornerPt);
+	Serial.println();
+	
 	aFacet->normVect[0] = aCornerPt.x;
 	aFacet->normVect[1] = aCornerPt.y;
 	aFacet->normVect[2] = aCornerPt.z;
+	printFacet(aFacet,0);
 }
 
 
 void triDEngine::setLocation(renderSetup* setup,STLFacet* aFacet) {
-	
+ST	
 	aFacet->vertex1[0] += setup->locaton.x;
 	aFacet->vertex1[1] += setup->locaton.y;
 	aFacet->vertex1[2] += setup->locaton.z;
@@ -344,17 +371,30 @@ void triDEngine::setLocation(renderSetup* setup,STLFacet* aFacet) {
 	aFacet->vertex3[0] += setup->locaton.x;
 	aFacet->vertex3[1] += setup->locaton.y;
 	aFacet->vertex3[2] += setup->locaton.z;
+	printFacet(aFacet,0);
 }
 
 
 void triDEngine::doTransformations(renderSetup* setup,STLFacet* aFacet) {
-	
+ST	
+	Serial.println("####################################");
+	Serial.println("STARTING TRASFORMATIONS");
+	Serial.println("####################################");
+	printFacet(aFacet,0);
 	setScale(setup,aFacet);
 	setRotation(setup,aFacet);
 	setLocation(setup,aFacet);
 }
 
+// Pass in the scaling factor and this sets the scaledOrigin point for doing translations.
+void triDEngine::scaleOrigin(float scale) {
 
+	scaledOrigin.x = objOrg.x * scale;
+	scaledOrigin.y = objOrg.y * scale;
+	scaledOrigin.z = objOrg.z * scale;
+}
+
+	
 // We check to see if this facet is facing the viewer or away from the viewer. We don't
 // draw ones that are facing away.
 float triDEngine::inView(renderSetup* setup,STLFacet* aFacet) {
@@ -368,6 +408,11 @@ ST
 	doTransformations(setup,aFacet);
 	facetNormal.setFreeVector(aFacet->normVect[0],aFacet->normVect[1],aFacet->normVect[2]);
 	cameraVect.setFreeVector(&scaledOrigin);
+	
+	Serial.println("GOING TO DO ANGLE TO CAMERA :  ");
+	Serial.print("CAMERA Vector:");cameraVect.printVector();
+	Serial.print("NORMAL Vector:");facetNormal.printVector();
+	
 	angle = cameraVect.angleBetween(&facetNormal);
 	Serial.print("angle: ");Serial.println(angle);
 	if (angle <= M_PI/2.0) {
@@ -504,23 +549,28 @@ void stlObj::setCamera(triDPoint* cam) {
 
 
 void stlObj::drawSelf(void) {
-ST	
-	uint32_t		numFacets;
+
 	viewFacet	aFacet;
 	colorObj		aColor;
-
+	bool			done;
+	
 	if (ourFacetList.openForBatchRead()) {
 		if (setupChange) {
 			if (ourFacetList.createList(&setup)) {
 				setupChange = false;
 			}
 		}
-		numFacets = ourFacetList.getNumViewFacets();
-		for (uint32_t i=0;i<numFacets;i++) {
-			aFacet = ourFacetList.getViewFacet(&setup,i);
-			aColor = calcColor(&aFacet);
-			screen->fillTriangle(&(aFacet.cornerA),&(aFacet.cornerB),&(aFacet.cornerC),&aColor);
-		}
+		ourFacetList.resetList();
+		done = false;
+		do {
+			aFacet = ourFacetList.getNextViewFacet(&setup);
+			if (aFacet.normalVect.isNullVector()) {
+				done = true;
+			} else {
+				aColor = calcColor(&aFacet);
+				screen->fillTriangle(&(aFacet.cornerA),&(aFacet.cornerB),&(aFacet.cornerC),&aColor);
+			}
+		} while(!done);
 		ourFacetList.closeBatchRead();
 	}
 }

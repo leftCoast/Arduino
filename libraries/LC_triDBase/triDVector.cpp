@@ -116,7 +116,7 @@ triDPoint  triDVector::getStartpoint(void) {
 	
 	aPoint.x = stX;
 	aPoint.y = stY;
-	aPoint.y = stZ;
+	aPoint.z = stZ;
 	return aPoint;
 }
 
@@ -128,7 +128,7 @@ triDPoint  triDVector::getEndpoint(void) {
 	
 	aPoint.x = endX;
 	aPoint.y = endY;
-	aPoint.y = endZ;
+	aPoint.z = endZ;
 	return aPoint;
 }
 
@@ -176,7 +176,19 @@ void triDVector::moveBack(void) {
 	saveZ	= 0;
 }
 				
-				
+
+// Basically asking if all points are 0,0,0. NULL vector.
+bool triDVector::isNullVector(void) {
+
+	if (endX==0 && endY==0 && endZ==0) {
+		if (stX==0 && stY==0 && stZ==0)	{
+			return true;
+		}
+	}
+	return false;
+}
+
+	
 // If we are a free vector, see above. Do the pitch roll yaw transform on our end
 // point. If NOT a free vector? Do it on BOTH points. IE we transverse sideways as if we
 // were the end of a free vector in 3Space. THE INPUTTED ANGLE IS A DISPLACEMENT FROM THE
@@ -232,16 +244,17 @@ float triDVector::dotProduct(triDVector* inVect) {
 // Magnitude This is calculated by finding out free vector valuers and using the formula : 
 // Root (x^2 + y^2 + z^2)
 float triDVector::magnitude(void) {
-	
+ST	
 	triDPoint	aPt;
 	float			sumSquares;
 	float			result;
 	
-	db.trace("Calc mag :  ");
+	Serial.print("Calc mag :  ");
 	printVector();
 	aPt = getFreeVect();
 	sumSquares = aPt.x * aPt.x + aPt.y * aPt.y + aPt.z * aPt.z;
 	result = sqrt(sumSquares);
+	Serial.print("Mag result:  ");Serial.println(result);
 	return result;
 }
 
@@ -249,7 +262,7 @@ float triDVector::magnitude(void) {
 // Angle between us (As a free vector) and a passed in vector. The calculation is given by
 // the formula : A•B = ||A|| ||B|| cos Angle
 float triDVector::angleBetween(triDVector* inVect) {
-	
+ST	
 	float dotProd;
 	float magA;
 	float magB;
@@ -258,9 +271,9 @@ float triDVector::angleBetween(triDVector* inVect) {
 	printVector();
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
-	Serial.print("magA: ");Serial.print(magA);
+	Serial.print("magA: ");Serial.println(magA);
 	magB = inVect->magnitude();
-	Serial.print("    magB: ");Serial.print(magB);
+	Serial.print("    magB: ");Serial.println(magB);
 	result = acos(dotProd/(magA * magB));
 	Serial.print("    result: ");Serial.println(result);
 	return result;
