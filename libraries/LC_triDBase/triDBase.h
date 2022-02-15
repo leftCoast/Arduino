@@ -19,27 +19,22 @@ struct triDPoint {
 	float	z;
 };
 
+// res = ptA + ptB
+triDPoint triDPointAdd(triDPoint* ptA,triDPoint* ptB);
+
+// res = ptA - ptB
+triDPoint triDPointSub(triDPoint* ptA,triDPoint* ptB);
+
+// res = ptA * ptB
+triDPoint triDPointMult(triDPoint* ptA,triDPoint* ptB);
+
+// res = ptA * scale
+triDPoint triDPointScale(triDPoint* ptA,float scale);
+
+// Show us what you got.
 void printTriDPt(triDPoint* pt);
 
 
-//****************************************************************************************
-// triDSpace:
-//
-// Six values in the x,y,z coordinate space that define a rectangular solid. Good for
-// showing the limits in size for a 3D object.
-//****************************************************************************************
-
-// struct triDSpace {
-// 
-// 	float		xMin;
-// 	float		xMax;
-// 	float		yMin;
-// 	float		yMax;
-// 	float		zMin;
-// 	float		zMax;
-// };
-
-//triDPoint centerPt(triDSpace* inSpace);
 
 //****************************************************************************************
 // triDTriangle:
@@ -54,7 +49,11 @@ struct triDTriangle {
 	triDPoint corners[3];
 };
 
-//triDPoint centerPt(triDTriangle* inTriangle);
+// returns average of the x,y,z values for a center of the triangle.
+triDPoint getCentPt(triDTriangle* triangle);
+
+// Show us what you got.
+void printTriDTriangle(triDTriangle* triangle);
 
 //****************************************************************************************
 // triDRotation:

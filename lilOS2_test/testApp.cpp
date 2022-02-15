@@ -193,13 +193,19 @@ void testApp::setup(void) {
    }
 
    triDRotation angle;
-   stlObj* theModel = new stlObj(20,40,180,180,"/teensyM.STL");
+   triDPoint   location;
+   stlObj* theModel = new stlObj(20,100,180,180,"/teensyM.STL");
+   //stlObj* theModel = new stlObj(20,100,180,180,"/test.stl");
    theModel->begin();
-   //theModel->setObjScale(1);
-   angle.xRad = deg_2_rad(-70);
+   theModel->setObjScale(10);
+   angle.xRad = deg_2_rad(0);
    angle.yRad = deg_2_rad(0);
    angle.zRad = deg_2_rad(0);
    theModel->setObjAngle(&angle);
+   location.x = 0;
+   location.y = 0;
+   location.z = 0;
+   //theModel->setObjLoc(&location);
    addObj(theModel);
    
    /*

@@ -169,7 +169,7 @@ void stlFile::printSTLFile(void) {
 	Serial.println(getSavedFileName());
 	Serial.println(getNumFacets());
 	if (openForBatchRead()) {
-		for(int32_t i=0;i<getNumFacets();i++) {
+		for(uint32_t i=0;i<getNumFacets();i++) {
 			aFacet = getFacet(i);
 			printFacet(&aFacet,i);
 			Serial.println("---------------------------------------");

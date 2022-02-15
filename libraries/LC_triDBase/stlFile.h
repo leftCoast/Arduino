@@ -27,7 +27,7 @@ class stlFile {
 				char*			getSavedFileName(void);
 				uint32_t		getNumFacets(void);
 				bool			openForBatchRead(void);
-	virtual	STLFacet		getFacet(int32_t index);	// Inherit to change orientation.
+	virtual	STLFacet		getFacet(int32_t index);
 				void			closeBatchRead(void);	
 				void			printSTLFile(void);
 				void			printFacet(STLFacet* inFacet,int32_t index);

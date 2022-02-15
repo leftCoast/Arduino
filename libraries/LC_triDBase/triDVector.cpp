@@ -61,11 +61,13 @@ void triDVector::setVector(float startX,float startY,float startZ,float inEndX,f
 	setEndpoint(inEndX,inEndY,inEndZ);
 }
 
+
 // Fill end the end point and clear out the start point.
 void triDVector::setFreeVector(float inEndX,float inEndY,float inEndZ) {
 
 	setVector(0,0,0,inEndX,inEndY,inEndZ);
 }
+
 
 void triDVector::setFreeVector(triDPoint* inPoint) {
 	
@@ -141,8 +143,8 @@ triDPoint triDVector::getFreeVect(void) {
 	triDPoint	aPoint;
 	
 	aPoint.x = endX - stX;
-	aPoint.y = endX - stY;
-	aPoint.z = endX - stZ;
+	aPoint.y = endY - stY;
+	aPoint.z = endZ - stZ;
 	return aPoint;
 }
 
@@ -156,7 +158,10 @@ void triDVector::moveToOrigin(void) {
 	saveZ	= stZ;
 	endX	=  endX - stX;
 	endY	=  endY - stY;
-	endY	=  endY - stY;
+	endY	=  endZ - stZ;
+	stX	= 0;
+	stY	= 0;
+	stZ	= 0;
 }
 
 
@@ -244,17 +249,14 @@ float triDVector::dotProduct(triDVector* inVect) {
 // Magnitude This is calculated by finding out free vector valuers and using the formula : 
 // Root (x^2 + y^2 + z^2)
 float triDVector::magnitude(void) {
-ST	
+	
 	triDPoint	aPt;
 	float			sumSquares;
 	float			result;
 	
-	Serial.print("Calc mag :  ");
-	printVector();
 	aPt = getFreeVect();
 	sumSquares = aPt.x * aPt.x + aPt.y * aPt.y + aPt.z * aPt.z;
 	result = sqrt(sumSquares);
-	Serial.print("Mag result:  ");Serial.println(result);
 	return result;
 }
 
@@ -262,20 +264,20 @@ ST
 // Angle between us (As a free vector) and a passed in vector. The calculation is given by
 // the formula : A•B = ||A|| ||B|| cos Angle
 float triDVector::angleBetween(triDVector* inVect) {
-ST	
+	
 	float dotProd;
 	float magA;
 	float magB;
 	float	result;
 	
-	printVector();
+	//printVector();
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
-	Serial.print("magA: ");Serial.println(magA);
+	//Serial.print("magA: ");Serial.println(magA);
 	magB = inVect->magnitude();
-	Serial.print("    magB: ");Serial.println(magB);
+	//Serial.print("    magB: ");Serial.println(magB);
 	result = acos(dotProd/(magA * magB));
-	Serial.print("    result: ");Serial.println(result);
+	//Serial.print("    result: ");Serial.println(result);
 	return result;
 }
 

@@ -42,7 +42,7 @@ class stlObj;
 
 struct renderSetup {
 
-	triDPoint		locaton;
+	triDPoint		location;
 	triDRotation	orientation;
 	float				scale;
 	triDPoint		camera;
@@ -74,13 +74,15 @@ struct renderSetup {
  
 struct viewFacet {
 
-	triDVector	normalVect;
-	point			cornerA;
-	point			cornerB;
-	point			cornerC;
+	triDVector		normalVect;
+	triDTriangle	original;
+	point				cornerA;
+	point				cornerB;
+	point				cornerC;
 };
 
-
+viewFacet loadViewFacet(STLFacet* fileFacet);
+void printViewFacet(viewFacet* aFacet);
 
 //****************************************************************************************
 // objCenter: (used internally)
@@ -100,9 +102,9 @@ class objCenter {
 				void			addSTLFacet(STLFacet* aFacet);
 				void			addItem(float x,float y,float z);
 				triDPoint	getCenterPt(void);
+				void			printObjCenter(void);
 				
 				bool	pointSet;
-				
 				float	xMin;
 				float	xMax;
 				float	yMin;
@@ -177,23 +179,24 @@ class triDEngine :	public linkList,
 				viewFacet	getNextViewFacet(renderSetup* setup);	// Get the next facet off the visible list. (visible list index)
 				
 	protected:
+	
+	//virtual	STLFacet		getFacet(int32_t index);
 				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
-	virtual	STLFacet		getFacet(int32_t index);
 				void			addIndexItem(indexItem* newItem);
-				
 				void			setScale(renderSetup* setup,STLFacet* aFacet);
 				void			setRotation(renderSetup* setup,STLFacet* aFacet);
-				void			setLocation(renderSetup* setup,STLFacet* aFacet);
+				void			setLocation(STLFacet* aFacet);
 				void			doTransformations(renderSetup* setup,STLFacet* aFacet);
-				void 			scaleOrigin(float scale);
+				//void 			scaleOrigin(float scale);
 				float			inView(renderSetup* setup,STLFacet* aFacet);
 	
 				bool			init;				// We ready to go?
 				bool			haveList;		// Is list current to orientation?
-				indexItem*	currItem;		// Tracks the text facet handed back.
+				indexItem*	currItem;		// Tracks the next facet handed back.
 				triDPoint	objOrg;			// The one matching our inputted file.
 				triDPoint	scaledOrigin;	// The one matching our current object scale.
-				mapper		ptMapper;
+				triDPoint	offset;			// Calculated offset to each point by user.
+				mapper		ptMapper;		// mapper for doing.. I forget what.
 };
 
 
