@@ -158,7 +158,7 @@ void triDVector::moveToOrigin(void) {
 	saveZ	= stZ;
 	endX	=  endX - stX;
 	endY	=  endY - stY;
-	endY	=  endZ - stZ;
+	endZ	=  endZ - stZ;
 	stX	= 0;
 	stY	= 0;
 	stZ	= 0;
@@ -200,21 +200,37 @@ bool triDVector::isNullVector(void) {
 // CURRENT ANGLE.
 void  triDVector::rotateVect(triDRotation* rotation) {
 	
-	float			mag;
+	twoDPoint	rotatPt;
 	triDVector	shorty;
 	triDPoint	shortyEndPt;
 	
-	mag = magnitude();												// Calc magnitude once.
-	if (rotation->xRad) {											// If we rotate around x, y increases.
-		endY = mag*sin((asin(endY/mag))+rotation->xRad);	// The formula.. To calculate new y endpoint.
-	}																		//
-	if (rotation->yRad) {											// If we rotate around y, z increases.
-		endZ = mag*sin((asin(endZ/mag))+rotation->yRad);	// Again my magic formula.
-	}																		//
-	if (rotation->zRad) {											// Rotate around z, x increases.
-		endX = mag*sin((asin(endX/mag))+rotation->zRad);	// Lord I hope this fromula works..
+	
+	if (rotation->xRad) {											// Rotate around x
+		db.trace("Rotate x: ");
+		rotatPt.x = endY;
+		rotatPt.y = endZ;
+		rotate(&rotatPt,rotation->xRad);
+		endY = rotatPt.x;
+		endZ = rotatPt.y;
+	}
+	if (rotation->yRad) {											// Rotate around y
+		db.trace("Rotate y: ");
+		rotatPt.x = endZ;
+		rotatPt.y = endX;
+		rotate(&rotatPt,rotation->yRad);
+		endZ = rotatPt.x;
+		endX = rotatPt.y;
+	}
+	if (rotation->zRad) {											// Rotate around z
+		db.trace("Rotate z: ");
+		rotatPt.x = endX;
+		rotatPt.y = endY;
+		rotate(&rotatPt,rotation->zRad);
+		endX = rotatPt.x;
+		endY = rotatPt.y;
 	}																		//
 	if (stX!=0||stY!=0||stZ!=0) {									// If we have a start point, oh lord..
+		db.trace("Rotate SHORTY!: ");
 		shorty.setFreeVector(stX,stY,stZ);						// No problem! Create a free vector from our start point.
 		shorty.rotateVect(rotation);								// And recursively rotate THAT vector using whata we did here.
 		shortyEndPt = shorty.getEndpoint();						// Grab the resulting endpoint.
@@ -268,17 +284,11 @@ float triDVector::angleBetween(triDVector* inVect) {
 	float dotProd;
 	float magA;
 	float magB;
-	float	result;
 	
-	//printVector();
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
-	//Serial.print("magA: ");Serial.println(magA);
 	magB = inVect->magnitude();
-	//Serial.print("    magB: ");Serial.println(magB);
-	result = acos(dotProd/(magA * magB));
-	//Serial.print("    result: ");Serial.println(result);
-	return result;
+	return acos(dotProd/(magA * magB));
 }
 
 

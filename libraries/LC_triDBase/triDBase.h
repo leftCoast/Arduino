@@ -4,6 +4,25 @@
 #include <Arduino.h>
 
 
+//****************************************************************************************
+// twoDPoint:
+//
+// Two values, the x,y coordinate space.
+//
+// Neede a better than int 2D point because math. SO this was setup as a tool for doing
+// rotations.
+//****************************************************************************************
+
+
+struct twoDPoint {
+	
+	float	x;
+	float y;
+};
+
+
+void rotate(twoDPoint* ptA,float angle);
+
 
 //****************************************************************************************
 // triDPoint:
@@ -30,6 +49,7 @@ triDPoint triDPointMult(triDPoint* ptA,triDPoint* ptB);
 
 // res = ptA * scale
 triDPoint triDPointScale(triDPoint* ptA,float scale);
+
 
 // Show us what you got.
 void printTriDPt(triDPoint* pt);

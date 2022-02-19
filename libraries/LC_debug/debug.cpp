@@ -120,7 +120,7 @@ bool traceLoopActive = false;
 traceLoop traceList[5];
 
 
-//#ifdef RAM_MONITOR
+#ifdef RAM_MONITOR
 
 // ******************************************
 // *************** RAMMonitor ***************
@@ -186,4 +186,4 @@ void RAMMonitor::idle(void) {
 	ram.run();
 }
 
-//#endif //RAM_MONITOR
+#endif //RAM_MONITOR

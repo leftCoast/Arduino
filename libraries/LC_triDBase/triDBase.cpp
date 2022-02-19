@@ -1,6 +1,19 @@
 #include <triDBase.h>
 
 
+// This rotates a point by angle radians around the x,y axis.
+void rotate(twoDPoint* ptA,float angle) {
+
+	float	x;
+	float	y;
+	float	mag;
+	
+	mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));
+	ptA->x = mag * cos(acos(ptA->x/mag)+angle);
+	ptA->y = mag * sin(asin(ptA->y/mag)+angle);
+}
+
+
 // res = ptA + ptB
 triDPoint	triDPointAdd(triDPoint* ptA,triDPoint* ptB) {
 

@@ -11,7 +11,7 @@ triDVector		normalVect;
 	
 	
 void print2DPt(point* aPt) {
-
+ST
 	Serial.print("Point x, y: ");
 	Serial.print(aPt->x);
 	Serial.print(", ");
@@ -26,10 +26,10 @@ void print2DPt(point* aPt) {
 // point				cornerC;
 	
 viewFacet loadViewFacet(STLFacet* fileFacet) {
-
+ST
 	viewFacet	res;
 	
-	res.normalVect.setFreeVector(fileFacet->normVect[0],fileFacet->normVect[1],fileFacet->normVect[1]);
+	res.normalVect.setFreeVector(fileFacet->normVect[0],fileFacet->normVect[1],fileFacet->normVect[2]);
 	
 	res.original.corners[0].x = fileFacet->vertex1[0];
 	res.original.corners[0].y = fileFacet->vertex1[1];
@@ -51,11 +51,13 @@ viewFacet loadViewFacet(STLFacet* fileFacet) {
 	
 	res.cornerC.x = 0;
 	res.cornerC.y = 0;
+	
+	return res;
 }
 
 	
 void printViewFacet(viewFacet* aFacet) {
-
+ST
 	Serial.print("Normal vector x,y,z : ");
 	aFacet->normalVect.printVector();
 	Serial.println("Original facet : ");
@@ -69,14 +71,14 @@ void printViewFacet(viewFacet* aFacet) {
 }
 
 
-objCenter::objCenter(void) { pointSet = false; }
+objCenter::objCenter(void) { ST pointSet = false; }
 
 				
 objCenter::~objCenter(void) { }
 	
 	
 void objCenter::addSTLFacet(STLFacet* aFacet) {
-
+ST
 	float x;
 	float y;
 	float	z;
@@ -97,7 +99,7 @@ void objCenter::addSTLFacet(STLFacet* aFacet) {
 
 
 void objCenter::addItem(float x,float y,float z) {
-
+ST
 	if (!pointSet) {
 		xMin = x;
 		xMax = x;
@@ -118,7 +120,7 @@ void objCenter::addItem(float x,float y,float z) {
 
 
 triDPoint objCenter::getCenterPt(void) {
-
+ST
 	triDPoint	aCenter;
 	
 	aCenter.x = (xMin+xMax)/2.0;
@@ -129,7 +131,7 @@ triDPoint objCenter::getCenterPt(void) {
 
 	
 void objCenter::printObjCenter(void) {
-
+ST
 	triDPoint	aCenter;
 	
 	Serial.println("----------  objCenter  ----------");
@@ -157,7 +159,7 @@ void objCenter::printObjCenter(void) {
 
 indexItem::indexItem(uint32_t index,float distance)
 	: linkListObj() {
-	
+ST	
 	facetIndex	= index;
 	zDistance	= distance;
 }
@@ -165,7 +167,7 @@ indexItem::indexItem(uint32_t index,float distance)
 indexItem::~indexItem(void) {  }
 
 
-uint32_t indexItem::getIndex(void) { return facetIndex; }
+uint32_t indexItem::getIndex(void) { ST return facetIndex; }
 
 
 
@@ -175,7 +177,7 @@ uint32_t indexItem::getIndex(void) { return facetIndex; }
 triDEngine::triDEngine(void)
 	: linkList(),
 	stlFile() {
-	
+ST	
 	init				= false;
 	haveList			= false;
 	currItem	= NULL;
@@ -188,7 +190,7 @@ triDEngine::~triDEngine(void) { }
 // Do the things we hold off 'till the code starts. Reading how many facets we have and
 // calculating the center point of our 3D object.
 bool triDEngine::begin(const char* stlPath) {
-
+ST
 	STLFacet		aFacet;
 	objCenter	objSpan;
 	
@@ -211,7 +213,7 @@ bool triDEngine::begin(const char* stlPath) {
 // Run down the list of facets in the file and only save those that are possibly in view.
 // Keeping them sorted as to depth as they come in.	
 bool triDEngine::createList(renderSetup* setup) {
-
+ST
 	indexItem*	newItem;
 	float			zDist;
 	STLFacet		aFacet;
@@ -219,11 +221,14 @@ bool triDEngine::createList(renderSetup* setup) {
 	if (init) {
 		dumpList();
 		haveList = false;
+		db.trace("Scaling origin **********");
 		scaledOrigin = triDPointScale(&objOrg,setup->scale);
+		db.trace("Calculating offsets ********");
 		offset = triDPointSub(&(setup->location),&scaledOrigin);
+		db.trace("Going into loop!! ********");
 		for(uint32_t i=0;i<numFacets;i++) {
+			db.trace("Grabbing facet ::: ",(int)i);
 			aFacet = getFacet(i);
-			doTransformations(setup,&aFacet);
 			zDist = inView(setup,&aFacet);
 			if (zDist>0) {
 				newItem = new indexItem(i,zDist);
@@ -236,12 +241,12 @@ bool triDEngine::createList(renderSetup* setup) {
 }
 
 
-void triDEngine::resetList(void) { currItem = NULL; }
+void triDEngine::resetList(void) {ST currItem = NULL; }
 
 
 // Of our remaining visible list. Lets give back a facet triangle at index..
 viewFacet triDEngine::getNextViewFacet(renderSetup* setup) {
-	
+ST	
 	STLFacet		fileFacet;										// The facet we can get.
 	indexItem*	anItem;											// The thing with the index in it.
 	viewFacet	aFacet;											// The facet we want.
@@ -273,14 +278,7 @@ viewFacet triDEngine::getNextViewFacet(renderSetup* setup) {
 				
 // protected
 
-//STLFacet		getFacet(int32_t index);
 
-void setupOffsets(renderSetup* setup) {
-
-	triDPoint	offset;
-	
-	
-}
 
 // triDVector		normalVect;
 // triDTriangle	original;
@@ -292,7 +290,7 @@ void setupOffsets(renderSetup* setup) {
 // I have a completely ready to go STLFacet. I have the screen to render it on. I have the
 // camera location to get angles. Map the x,y, points using the z locatrion to the screen.
 viewFacet  triDEngine::calcViewFacet(renderSetup* setup,STLFacet* fileFacet) {
-	
+ST	
 	viewFacet	aFacet;
 	int			x;
 	int			y;
@@ -319,14 +317,15 @@ viewFacet  triDEngine::calcViewFacet(renderSetup* setup,STLFacet* fileFacet) {
 	y = round(ptMapper.map(0));
 	aFacet.cornerC.x = x;
 	aFacet.cornerC.y = y;
-	
+	Serial.print("returning this facet: ");
+	printViewFacet(&aFacet);
 	return aFacet;
 }
 
 
 // Add new index items, sorted deep to shallow z values.
 void triDEngine::addIndexItem(indexItem* newItem) {
-
+ST
 	indexItem*	trace;																	
 	if (isEmpty()) {																					// If this is the first one..
 		addToTop(newItem);																			// Add it to the top.
@@ -348,7 +347,11 @@ void triDEngine::addIndexItem(indexItem* newItem) {
 
 // Scale seems to work.
 void triDEngine::setScale(renderSetup* setup,STLFacet* aFacet) {
-
+ST	
+	Serial.println("********** Going to scale starting with ************");
+	Serial.print("Scale multiplyer: "); Serial.println(setup->scale);
+	
+	printFacet(aFacet,0);
 	aFacet->vertex1[0] = aFacet->vertex1[0] * setup->scale;
 	aFacet->vertex1[1] = aFacet->vertex1[1] * setup->scale;
 	aFacet->vertex1[2] = aFacet->vertex1[2] * setup->scale;
@@ -360,14 +363,28 @@ void triDEngine::setScale(renderSetup* setup,STLFacet* aFacet) {
 	aFacet->vertex3[0] = aFacet->vertex3[0] * setup->scale;
 	aFacet->vertex3[1] = aFacet->vertex3[1] * setup->scale;
 	aFacet->vertex3[2] = aFacet->vertex3[2] * setup->scale;
+	Serial.println("**********     And ending up with     ************");
+	printFacet(aFacet,0);
 }
 
 
 void triDEngine::setRotation(renderSetup* setup,STLFacet* fileFacet) {
-	
+ST
 	triDVector	aFreeVect;
 	triDPoint	aCornerPt;
 	
+	Serial.println("********** Going to rotate starting with ************");
+	Serial.print("Rotation x,y,z: ");
+	Serial.print(setup->orientation.xRad);Serial.print(", ");
+	Serial.print(setup->orientation.yRad);Serial.print(", ");
+	Serial.println(setup->orientation.zRad);
+	Serial.println("Scaled origin x,y,z: ");
+	Serial.print(scaledOrigin.x);Serial.print(", ");
+	Serial.print(scaledOrigin.y);Serial.print(", ");
+	Serial.println(scaledOrigin.z);
+	Serial.println();
+	
+	printFacet(fileFacet,0);
 	aCornerPt.x = fileFacet->vertex1[0];
 	aCornerPt.y = fileFacet->vertex1[1];
 	aCornerPt.z = fileFacet->vertex1[2];
@@ -380,6 +397,9 @@ void triDEngine::setRotation(renderSetup* setup,STLFacet* fileFacet) {
 	fileFacet->vertex1[0] = aCornerPt.x;
 	fileFacet->vertex1[1] = aCornerPt.y;
 	fileFacet->vertex1[2] = aCornerPt.z;
+	
+	Serial.println("First point rotated..");
+	printFacet(fileFacet,1);
 	
 	aCornerPt.x = fileFacet->vertex2[0];
 	aCornerPt.y = fileFacet->vertex2[1];
@@ -414,11 +434,20 @@ void triDEngine::setRotation(renderSetup* setup,STLFacet* fileFacet) {
 	fileFacet->normVect[0] = aCornerPt.x;
 	fileFacet->normVect[1] = aCornerPt.y;
 	fileFacet->normVect[2] = aCornerPt.z;
+	Serial.println("**********     And ending up with     ************");
+	printFacet(fileFacet,0);
 }
 
 
 void triDEngine::setLocation(STLFacet* aFacet) {
-
+ST
+	Serial.println("********** Going to set location starting with ************");
+	Serial.print("Offset x,y,z: ");
+	Serial.print(offset.x);Serial.print(", ");
+	Serial.print(offset.y);Serial.print(", ");
+	Serial.println(offset.z);
+	
+	printFacet(aFacet,0);
 	aFacet->vertex1[0] += offset.x;
 	aFacet->vertex1[1] += offset.y;
 	aFacet->vertex1[2] += offset.z;
@@ -430,30 +459,24 @@ void triDEngine::setLocation(STLFacet* aFacet) {
 	aFacet->vertex3[0] += offset.x;
 	aFacet->vertex3[1] += offset.y;
 	aFacet->vertex3[2] += offset.z;
+	Serial.println("**********     And ending up with     ************");
+	printFacet(aFacet,0);
 }
 
 
 void triDEngine::doTransformations(renderSetup* setup,STLFacet* aFacet) {
-	
-	setScale(setup,aFacet);
+ST	
+	setScale(setup,aFacet);			// Need to be first so offsets are set to correct center point.
 	setLocation(aFacet);
 	setRotation(setup,aFacet);
 	
 }
 
-// Pass in the scaling factor and this sets the scaledOrigin point for doing translations.
-// void triDEngine::scaleOrigin(float scale) {
-// 
-// 	scaledOrigin.x = objOrg.x * scale;
-// 	scaledOrigin.y = objOrg.y * scale;
-// 	scaledOrigin.z = objOrg.z * scale;
-// }
-
 	
 // We check to see if this facet is facing the viewer or away from the viewer. We don't
 // draw ones that are facing away.
-float triDEngine::inView(renderSetup* setup,STLFacet* aFacet) {
-
+float triDEngine::inView(renderSetup* setup,STLFacet* fileFacet) {
+ST
 	triDVector		facetNormal;
 	triDVector		cameraVect;
 	triDTriangle	triangle;
@@ -462,24 +485,24 @@ float triDEngine::inView(renderSetup* setup,STLFacet* aFacet) {
 	float				maxDist;
 	
 	maxDist = 0;
-	doTransformations(setup,aFacet);
-	facetNormal.setFreeVector(aFacet->normVect[0],aFacet->normVect[1],aFacet->normVect[2]);
-	triangle.corners[0].x = aFacet->vertex1[0];
-	triangle.corners[0].y = aFacet->vertex1[1];
-	triangle.corners[0].z = aFacet->vertex1[2];
-	triangle.corners[1].x = aFacet->vertex2[0];
-	triangle.corners[1].y = aFacet->vertex2[1];
-	triangle.corners[1].z = aFacet->vertex2[2];
-	triangle.corners[2].x = aFacet->vertex3[0];
-	triangle.corners[2].y = aFacet->vertex3[1];
-	triangle.corners[2].z = aFacet->vertex3[2];
+	doTransformations(setup,fileFacet);
+	facetNormal.setFreeVector(fileFacet->normVect[0],fileFacet->normVect[1],fileFacet->normVect[2]);
+	triangle.corners[0].x = fileFacet->vertex1[0];
+	triangle.corners[0].y = fileFacet->vertex1[1];
+	triangle.corners[0].z = fileFacet->vertex1[2];
+	triangle.corners[1].x = fileFacet->vertex2[0];
+	triangle.corners[1].y = fileFacet->vertex2[1];
+	triangle.corners[1].z = fileFacet->vertex2[2];
+	triangle.corners[2].x = fileFacet->vertex3[0];
+	triangle.corners[2].y = fileFacet->vertex3[1];
+	triangle.corners[2].z = fileFacet->vertex3[2];
 	facetCenter = getCentPt(&triangle);
 	cameraVect.setVector(&facetCenter,&(setup->camera));
 	angle = cameraVect.angleBetween(&facetNormal);
 	if (angle <= M_PI/2.0) {
-		maxDist = aFacet->vertex1[2];
-		maxDist = max(maxDist,aFacet->vertex2[2]);
-		maxDist = max(maxDist,aFacet->vertex3[2]);
+		maxDist = fileFacet->vertex1[2];
+		maxDist = max(maxDist,fileFacet->vertex2[2]);
+		maxDist = max(maxDist,fileFacet->vertex3[2]);
 	}
 	return maxDist;
 }
@@ -493,7 +516,7 @@ float triDEngine::inView(renderSetup* setup,STLFacet* aFacet) {
 
 stlObj::stlObj(int inX,int inY,int inWidth,int inHeight,const char* stlPath)
 	: drawObj(inX,inY,inWidth,inHeight) {
-	
+ST	
 	savedPath = NULL;
 	heapStr(&savedPath,stlPath);
 	init = false;
@@ -502,7 +525,7 @@ stlObj::stlObj(int inX,int inY,int inWidth,int inHeight,const char* stlPath)
 	
 stlObj::stlObj(rect* inRect,const char* stlPath)
 	: drawObj(inRect) {
-	
+ST	
 	savedPath = NULL;
 	heapStr(&savedPath,stlPath);
 	init = false;
@@ -510,19 +533,19 @@ stlObj::stlObj(rect* inRect,const char* stlPath)
 	
 
 // Destructor, just in case no one else recycles the path..	
-stlObj::~stlObj(void) { freeStr(&savedPath); }
+stlObj::~stlObj(void) { ST freeStr(&savedPath); }
 
 
 // Setup all the initial and default values.
 void stlObj::begin(void) {
-	
+ST	
 	ourFacetList.begin(savedPath);				// Load up the path into the triDEngine.
 	setupChange	= false;								// Cause' really there's nothing useful here, just defaults.
-	ambientColor.setColor(LC_GREY);				// Grey is a good ambiant color to start with.
+	ambientColor.setColor(LC_CHARCOAL);			// Grey is a good ambiant color to start with.
 	spotPos.x	= 0;									// Default location of the spot light.
 	spotPos.y	= 0;
 	spotPos.z	= -20;
-	spotColor.setColor(&blue);						// Default spot light color.
+	spotColor.setColor(&white);					// Default spot light color.
 	calcLightMapper();								// lIghts are all setup. We can do the light mapper now.
 	setup.location.x			= x + width/2;		// Set the side to side location of the 3D object in our rect.
 	setup.location.y			= y + height/2;	// Set the height location of the 3D object in our rect.
@@ -542,7 +565,7 @@ void stlObj::begin(void) {
 
 // Set the light that you see when there is no light source shining on whatever.	
 void stlObj::setAmbiantlight(colorObj* inColor) {
-
+ST
 	ambientColor.setColor(inColor);
 	calcLightMapper();
 	setNeedRefresh();
@@ -552,7 +575,7 @@ void stlObj::setAmbiantlight(colorObj* inColor) {
 // At this moment we get one Point light source. Here is the location, and where its
 // pointing..
 void stlObj::setlightLoc(triDPoint* lightLoc) {
-
+ST
 	spotPos = *lightLoc;
 	calcLightMapper();
 	setNeedRefresh();
@@ -561,7 +584,7 @@ void stlObj::setlightLoc(triDPoint* lightLoc) {
 
 // And it's color.
 void stlObj::setlightColor(colorObj* color) {
-
+ST
 	spotColor.setColor(color);
 	calcLightMapper();
 	setNeedRefresh();
@@ -570,7 +593,7 @@ void stlObj::setlightColor(colorObj* color) {
 				
 // Set the scale of the 3D model.	
 void stlObj::setObjScale(float scale) {
-
+ST
 	setup.scale = scale;
 	setupChange = true;
 }
@@ -578,7 +601,7 @@ void stlObj::setObjScale(float scale) {
 
 // Set the location of the 3D model.
 void stlObj::setObjLoc(triDPoint* loc) {
-
+ST
 	setup.location.x	= loc->x;
 	setup.location.y	= loc->y;
 	setup.location.z	= loc->z;
@@ -588,7 +611,7 @@ void stlObj::setObjLoc(triDPoint* loc) {
 
 // Set the angle that the 3D modle is held.
 void stlObj::setObjAngle(triDRotation* angle) {
-
+ST
 	setup.orientation.xRad	= angle->xRad;
 	setup.orientation.yRad	= angle->yRad;
 	setup.orientation.zRad	= angle->zRad;
@@ -598,7 +621,7 @@ void stlObj::setObjAngle(triDRotation* angle) {
 
 // Set the location of the camera.
 void stlObj::setCamera(triDPoint* cam) {
-
+ST
 	setup.camera.x	= cam->x;
 	setup.camera.y	= cam->y;
 	setup.camera.z	= cam->z;
@@ -607,7 +630,7 @@ void stlObj::setCamera(triDPoint* cam) {
 
 
 void stlObj::drawSelf(void) {
-
+ST
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
@@ -623,6 +646,7 @@ void stlObj::drawSelf(void) {
 		do {
 			aFacet = ourFacetList.getNextViewFacet(&setup);
 			if (aFacet.normalVect.isNullVector()) {
+				Serial.println("In the end, got null facet!");
 				done = true;
 			} else {
 				aColor = calcColor(&aFacet);
@@ -638,7 +662,7 @@ void stlObj::drawSelf(void) {
 
 
 void stlObj::calcLightMapper() {
-	
+ST	
 	lightMapper.clearMap();
 	lightMapper.addColor(2*M_PI,&spotColor);
 	lightMapper.addColor(M_PI/2.0,&ambientColor);
@@ -647,7 +671,7 @@ void stlObj::calcLightMapper() {
 
 // Calcualate the color to paint this one triangle.
 colorObj  stlObj::calcColor(viewFacet* aFacet) {
-	
+ST	
 	float			deltaAngle;
 	colorObj		aColor;
 	triDVector	spotVect;

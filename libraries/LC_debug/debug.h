@@ -2,7 +2,6 @@
 #define debug_h
 
 #include "Arduino.h"
-#include <RamMonitor.h>
 #include <idlers.h>
 #include <timeObj.h>
 
@@ -44,7 +43,9 @@ extern traceLoop	traceList[];
 
 //#define RAM_MONITOR
 
-//#ifdef RAM_MONITOR
+#ifdef RAM_MONITOR
+
+#include <RamMonitor.h>
 
 class RAMMonitor :	public idler,
 							public timeObj {
@@ -61,6 +62,6 @@ class RAMMonitor :	public idler,
   				RamMonitor ram;
 };
 
-//#endif //RAM_MONITOR
+#endif //RAM_MONITOR
 	
 #endif

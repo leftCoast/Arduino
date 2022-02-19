@@ -76,7 +76,7 @@ struct viewFacet {
 
 	triDVector		normalVect;
 	triDTriangle	original;
-	point				cornerA;
+	point				cornerA;			// These three are int points, ready to draw.
 	point				cornerB;
 	point				cornerC;
 };
@@ -178,7 +178,7 @@ class triDEngine :	public linkList,
 				void			resetList(void);								// Reset the viewFacet list to the back for a new read.
 				viewFacet	getNextViewFacet(renderSetup* setup);	// Get the next facet off the visible list. (visible list index)
 				
-	protected:
+	//protected:
 	
 	//virtual	STLFacet		getFacet(int32_t index);
 				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
