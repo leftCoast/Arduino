@@ -46,10 +46,10 @@ panel* ourOSObj::createPanel(int panelID) {
    switch (panelID) {
       case homeApp      : result = new homeScr();                    break;
       case calcApp      : result = new rpnCalc(this,panelID);        break;
-      case iconEditApp : result = new iconEdit(this,panelID);       break;
+      case iconEditApp  : result = new iconEdit(this,panelID);       break;
       case breakoutApp  : result = new breakout(this,panelID);       break;
       //case starTrekApp  : result = new starTrekPanel(this,panelID);  break;
-      case testAppID      : result = new testApp(this,panelID);  break;
+      case testAppID    : result = new testApp(this,panelID);  break;
       default           : result = NULL;
    }
    return(result);
