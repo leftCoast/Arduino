@@ -114,6 +114,7 @@ void homeScr::drawSelf(void) {
 
    
    //bmpObj   theScreenImage(0,0,240,282,"/system/images/lake.bmp");
+   bmpObj   theScreenImage(0,0,240,282,"/system/images/solitude.bmp");
    colorObj lineColor;
    colorObj scrFadeColor;
 
@@ -121,10 +122,10 @@ void homeScr::drawSelf(void) {
    lineColor.blend(&blue,20);
    screen->fillRectGradient(0,282,240,38,&lineColor,&black);
    
-   //theScreenImage.draw();
+   theScreenImage.draw();
   
-   scrFadeColor.setColor(LC_LIGHT_BLUE);
-   scrFadeColor.blend(&blue,50);
-   screen->fillRectGradient(0,0,240,282,&black,&scrFadeColor);
-   doStarField();
+//   scrFadeColor.setColor(LC_LIGHT_BLUE);
+//   scrFadeColor.blend(&blue,50);
+//   screen->fillRectGradient(0,0,240,282,&black,&scrFadeColor);
+//   doStarField();
 }
