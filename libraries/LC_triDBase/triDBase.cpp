@@ -2,15 +2,15 @@
 
 
 // This rotates a point by angle radians around the x,y axis.
-void rotate(twoDPoint* ptA,float angle) {
+void rotate(twoDPoint* ptA,double angle) {
 
-	float	x;
-	float	y;
-	float	mag;
+	double	mag;
 	
-	mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));
-	ptA->x = mag * cos(acos(ptA->x/mag)+angle);
-	ptA->y = mag * sin(asin(ptA->y/mag)+angle);
+	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
+		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
+		ptA->x = mag * cos(acos(ptA->x/mag)+angle);				// Calc new x.
+		ptA->y = mag * sin(asin(ptA->y/mag)+angle);				// Clac new y.
+	}
 }
 
 
@@ -49,7 +49,7 @@ triDPoint	triDPointMult(triDPoint* ptA,triDPoint* ptB) {
 }
 
 // res = ptA * scale
-triDPoint	triDPointScale(triDPoint* ptA,float scale) {
+triDPoint	triDPointScale(triDPoint* ptA,double scale) {
 
 	triDPoint	res;
 	

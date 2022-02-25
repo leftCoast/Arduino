@@ -44,7 +44,7 @@ struct renderSetup {
 
 	triDPoint		location;
 	triDRotation	orientation;
-	float				scale;
+	double				scale;
 	triDPoint		camera;
 	int				viewWidth;
 	int				viewHeight;
@@ -82,6 +82,7 @@ struct viewFacet {
 };
 
 viewFacet loadViewFacet(STLFacet* fileFacet);
+void offset2DFacet(viewFacet* aFacet,int x,int y);
 void printViewFacet(viewFacet* aFacet);
 
 //****************************************************************************************
@@ -100,17 +101,17 @@ class objCenter {
 	virtual	~objCenter(void);
 	
 				void			addSTLFacet(STLFacet* aFacet);
-				void			addItem(float x,float y,float z);
+				void			addItem(double x,double y,double z);
 				triDPoint	getCenterPt(void);
 				void			printObjCenter(void);
 				
 				bool	pointSet;
-				float	xMin;
-				float	xMax;
-				float	yMin;
-				float	yMax;
-				float	zMin;
-				float	zMax;	
+				double	xMin;
+				double	xMax;
+				double	yMin;
+				double	yMax;
+				double	zMin;
+				double	zMax;	
 };
 	
 	
@@ -133,13 +134,13 @@ class objCenter {
 class indexItem : public linkListObj {
 
 	public:
-				indexItem(uint32_t index,float distance);
+				indexItem(uint32_t index,double distance);
 	virtual	~indexItem(void);
 	
 	uint32_t	getIndex(void);
 	
 				uint32_t	facetIndex;
-				float		zDistance;
+				double		zDistance;
 };
 
 
@@ -180,23 +181,18 @@ class triDEngine :	public linkList,
 				
 	//protected:
 	
-	//virtual	STLFacet		getFacet(int32_t index);
 				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
 				void			addIndexItem(indexItem* newItem);
 				void			setScale(renderSetup* setup,STLFacet* aFacet);
 				void			setRotation(renderSetup* setup,STLFacet* aFacet);
-				void			setLocation(STLFacet* aFacet);
+				void			setLocation(renderSetup* setup,STLFacet* fileFacet);
 				void			doTransformations(renderSetup* setup,STLFacet* aFacet);
-				//void 			scaleOrigin(float scale);
-				float			inView(renderSetup* setup,STLFacet* aFacet);
+				double		inView(renderSetup* setup,STLFacet* aFacet);
 	
 				bool			init;				// We ready to go?
 				bool			haveList;		// Is list current to orientation?
 				indexItem*	currItem;		// Tracks the next facet handed back.
-				triDPoint	objOrg;			// The one matching our inputted file.
-				triDPoint	scaledOrigin;	// The one matching our current object scale.
-				triDPoint	offset;			// Calculated offset to each point by user.
-				mapper		ptMapper;		// mapper for doing.. I forget what.
+				mapper		ptMapper;		// mapper for doing? Mapping points to 2D.
 };
 
 
@@ -224,7 +220,7 @@ class stlObj :	public drawObj {
 				void			setAmbiantlight(colorObj* inColor);
 				void			setlightLoc(triDPoint* lightLoc);
 				void			setlightColor(colorObj* color);
-				void			setObjScale(float scale);
+				void			setObjScale(double scale);
 				void			setObjLoc(triDPoint* loc);
 				void			setObjAngle(triDRotation* angle);
 				void			setCamera(triDPoint* cam);

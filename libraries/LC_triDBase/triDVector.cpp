@@ -4,286 +4,166 @@
 
 
 // Constructor for no vector at all.
-triDVector::triDVector(void) {
-
-	setVector(0,0,0,0,0,0);
-	saveX	= 0;
-	saveY	= 0;
-	saveZ	= 0;
-}
+triDVector::triDVector(void) { setVector(0,0,0); }
 
 
-// Constructor for a "free" vector. Meaning: Given an end point, the start point is set
-// to 0,0,0.
-triDVector::triDVector(float inEndX,float inEndY,float inEndZ) {
-
-	setFreeVector(inEndX,inEndY,inEndZ);
-	saveX	= 0;
-	saveY	= 0;
-	saveZ	= 0;
-}
+// Constructor given a triDPoint in space.
+triDVector::triDVector(triDPoint* inPt) { setVector(inPt); }
 
 
-// Given a 6 point vector. Basically a vector between two points in three space.
-triDVector::triDVector(float startX,float startY,float startZ,float inEndX,float inEndY,float inEndZ) {
+// Constructor given three values.
+triDVector::triDVector(double inX,double inY,double inZ) { setVector(inX,inY,inZ); }
 
-	setVector(startX,startY,startZ,inEndX,inEndY,inEndZ);
-	saveX	= 0;
-	saveY	= 0;
-	saveZ	= 0;
-}
-	
-
-// Same as the 6 point vector but the points come in as addresses to triDPoint structs.
-triDVector::triDVector(triDPoint* startPt,triDPoint* endPt) {
-	
-	setVector(startPt,endPt);
-	saveX	= 0;
-	saveY	= 0;
-	saveZ	= 0;
-}
 
 
 // The lonely destructor. Nothing's been allocated, so there is nothing for us to do here.		
 triDVector::~triDVector(void) {  }
 
 
-void triDVector::setVector(triDPoint* startPt,triDPoint* endPt) {
+// Set to a point.
+void triDVector::setVector(triDPoint* inPt) {
 	
-	setVector(startPt->x,startPt->y,startPt->z,endPt->x,endPt->y,endPt->z);
+	x = inPt->x;
+	y = inPt->y;
+	z = inPt->z;
 }
 
 
 // Set all of 'em..
-void triDVector::setVector(float startX,float startY,float startZ,float inEndX,float inEndY,float inEndZ) {
+void triDVector::setVector(double inX,double inY,double inZ) {
 	
-	setStartpoint(startX,startY,startZ); 
-	setEndpoint(inEndX,inEndY,inEndZ);
+	x = inX;
+	y = inY;
+	z = inZ;
 }
 
 
-// Fill end the end point and clear out the start point.
-void triDVector::setFreeVector(float inEndX,float inEndY,float inEndZ) {
-
-	setVector(0,0,0,inEndX,inEndY,inEndZ);
-}
-
-
-void triDVector::setFreeVector(triDPoint* inPoint) {
+// Set to, two points.
+void triDVector::setVector(triDPoint* stPt,triDPoint* endPt) {
 	
-	setFreeVector(inPoint->x,inPoint->y,inPoint->z);
-}
-
-
-// Only set the start point ones..
-void triDVector::setStartpoint(float startX,float startY,float startZ) {
-
-	stX	= startX;
-	stY	= startY;
-	stZ	= startZ;
-}
-
-
-// Only set the start point ones..
-void triDVector::setStartpoint(triDPoint* inPt) {
-
-	stX	= inPt->x;
-	stY	= inPt->y;
-	stZ	= inPt->z;
-}
-
-
-// Only set the endpoint ones..	
-void triDVector::setEndpoint(float inEndX,float inEndY,float inEndZ) {
-
-	endX	= inEndX;
-	endY	= inEndY;
-	endZ	= inEndZ;
-}
-
-
-// Only set the endpoint ones..
-void triDVector::setEndpoint(triDPoint* inPt) {
-
-	endX	= inPt->x;
-	endY	= inPt->y;
-	endZ	= inPt->z;
+	x = endPt->x - stPt->x;
+	y = endPt->y - stPt->y;
+	z = endPt->z - stPt->z;
 }
 
 
 // Stuff the start point into a triDPoint struct and pass it back.
-triDPoint  triDVector::getStartpoint(void) {
+triDPoint  triDVector::getPoint(void) {
 
 	triDPoint	aPoint;
 	
-	aPoint.x = stX;
-	aPoint.y = stY;
-	aPoint.z = stZ;
+	aPoint.x = x;
+	aPoint.y = y;
+	aPoint.z = z;
 	return aPoint;
 }
 
-
-// Stuff the end point into a triDPoint struct and pass it back.	
-triDPoint  triDVector::getEndpoint(void) {
-
-	triDPoint	aPoint;
+// Grab each value..
+double  triDVector::getX(void) { return x; }
+double  triDVector::getY(void) { return y; }
+double  triDVector::getZ(void) { return z; }
 	
-	aPoint.x = endX;
-	aPoint.y = endY;
-	aPoint.z = endZ;
-	return aPoint;
-}
-
-
-// Get our representation as a free vector. Basically, three values calculated by what we
-// would get as an endpoint if our start pont was offset to 0,0,0. Hence the return value
-// as a triDPoint.
-triDPoint triDVector::getFreeVect(void) {
+		
+// Magnitude This is calculated using the formula :  Root (x^2 + y^2 + z^2)
+double triDVector::magnitude(void) {
 	
-	triDPoint	aPoint;
+	double			sumSquares;
 	
-	aPoint.x = endX - stX;
-	aPoint.y = endY - stY;
-	aPoint.z = endZ - stZ;
-	return aPoint;
+	sumSquares = x*x + y*y + z*z;
+	return sqrt(sumSquares);
+}
+
+void triDVector::scaleBy(double scaler) {
+
+	x = x * scaler;
+	y = y * scaler;
+	z = z * scaler;
 }
 
 
-// Actually, move this vector to the origin so that it becomes a fee vector. BUT we'll
-// save off the offsets so that..
-void triDVector::moveToOrigin(void) {
+// Do the cross produxt between this and another vector. Return the results.
+triDVector triDVector::crossProd(triDVector* aVect) {
 
-	saveX	= stX;
-	saveY	= stY;
-	saveZ	= stZ;
-	endX	=  endX - stX;
-	endY	=  endY - stY;
-	endZ	=  endZ - stZ;
-	stX	= 0;
-	stY	= 0;
-	stZ	= 0;
+	triDVector result;
+	
+	result.x = y * aVect->z - aVect->y * z;
+	result.y = z * aVect->x - aVect->z * x;
+	result.z = x * aVect->y - aVect->x * y;
+	return result;
 }
 
 
-// When we've moved to the origin to become a free vector. This will shift us back to
-// where we were to begin with. So we can jump to the origin, do free vector math, then
-// jump back to see the results in our "real vector" world.
-void triDVector::moveBack(void) {
-
-	stX 	= saveX;
-	stY 	= saveY;
-	stZ 	= saveZ;
-	endX	= endX + saveX;
-	endY	= endY + saveY;
-	endZ	= endZ + saveZ;
-	saveX	= 0;
-	saveY	= 0;
-	saveZ	= 0;
+// Normalize this vector. IE foce it to have magnitude of 1.
+void triDVector::normalize(void) {
+	
+	double mag;
+ 
+	mag = magnitude();
+	x = x/mag;
+	y = y/mag;
+	z = z/mag;
 }
-				
 
-// Basically asking if all points are 0,0,0. NULL vector.
-bool triDVector::isNullVector(void) {
 
-	if (endX==0 && endY==0 && endZ==0) {
-		if (stX==0 && stY==0 && stZ==0)	{
-			return true;
-		}
-	}
-	return false;
-}
+// Basically asking if all values are 0,0,0. NULL vector.
+bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }
 
 	
-// If we are a free vector, see above. Do the pitch roll yaw transform on our end
-// point. If NOT a free vector? Do it on BOTH points. IE we transverse sideways as if we
-// were the end of a free vector in 3Space. THE INPUTTED ANGLE IS A DISPLACEMENT FROM THE
-// CURRENT ANGLE.
+// Do the pitch roll yaw transforms on each axis.
 void  triDVector::rotateVect(triDRotation* rotation) {
 	
 	twoDPoint	rotatPt;
-	triDVector	shorty;
-	triDPoint	shortyEndPt;
-	
 	
 	if (rotation->xRad) {											// Rotate around x
-		db.trace("Rotate x: ");
-		rotatPt.x = endY;
-		rotatPt.y = endZ;
+		rotatPt.x = y;
+		rotatPt.y = z;
 		rotate(&rotatPt,rotation->xRad);
-		endY = rotatPt.x;
-		endZ = rotatPt.y;
+		y = rotatPt.x;
+		z = rotatPt.y;
 	}
 	if (rotation->yRad) {											// Rotate around y
-		db.trace("Rotate y: ");
-		rotatPt.x = endZ;
-		rotatPt.y = endX;
+		rotatPt.x = z;
+		rotatPt.y = x;
 		rotate(&rotatPt,rotation->yRad);
-		endZ = rotatPt.x;
-		endX = rotatPt.y;
+		z = rotatPt.x;
+		x = rotatPt.y;
 	}
 	if (rotation->zRad) {											// Rotate around z
-		db.trace("Rotate z: ");
-		rotatPt.x = endX;
-		rotatPt.y = endY;
+		rotatPt.x = x;
+		rotatPt.y = y;
 		rotate(&rotatPt,rotation->zRad);
-		endX = rotatPt.x;
-		endY = rotatPt.y;
+		x = rotatPt.x;
+		y = rotatPt.y;
 	}																		//
-	if (stX!=0||stY!=0||stZ!=0) {									// If we have a start point, oh lord..
-		db.trace("Rotate SHORTY!: ");
-		shorty.setFreeVector(stX,stY,stZ);						// No problem! Create a free vector from our start point.
-		shorty.rotateVect(rotation);								// And recursively rotate THAT vector using whata we did here.
-		shortyEndPt = shorty.getEndpoint();						// Grab the resulting endpoint.
-		setStartpoint(&shortyEndPt);								// And stuff that into our starting point.
-	}
 }
 
 
 // You're standard dot product between us and an inputted vector.
-float triDVector::dotProduct(triDVector* inVect) {
+double triDVector::dotProduct(triDVector* inVect) {
 
-	triDPoint	ptA;
-	triDPoint	ptB;
-	float			xVal;
-	float			yVal;
-	float			zVal;
-	float			result;
+	double			xVal;
+	double			yVal;
+	double			zVal;
+	double			result;
 	
 	result = 0;
 	if (inVect) {
-		ptA = getFreeVect();
-		ptB = inVect->getFreeVect();
-		xVal		= ptA.x * ptB.x;
-		yVal		= ptA.y * ptB.y;
-		zVal		= ptA.z * ptB.z;
+		xVal		= x * inVect->x;
+		yVal		= y * inVect->y;
+		zVal		= z * inVect->z;
 		result	=  xVal+yVal+zVal;
 	}
 	return result;
 }
 
 
-// Magnitude This is calculated by finding out free vector valuers and using the formula : 
-// Root (x^2 + y^2 + z^2)
-float triDVector::magnitude(void) {
-	
-	triDPoint	aPt;
-	float			sumSquares;
-	float			result;
-	
-	aPt = getFreeVect();
-	sumSquares = aPt.x * aPt.x + aPt.y * aPt.y + aPt.z * aPt.z;
-	result = sqrt(sumSquares);
-	return result;
-}
-
-
-// Angle between us (As a free vector) and a passed in vector. The calculation is given by
+// Angle between us and a passed in vector. The calculation is given by
 // the formula : A•B = ||A|| ||B|| cos Angle
-float triDVector::angleBetween(triDVector* inVect) {
+double triDVector::angleBetween(triDVector* inVect) {
 	
-	float dotProd;
-	float magA;
-	float magB;
+	double dotProd;
+	double magA;
+	double magB;
 	
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
@@ -294,16 +174,12 @@ float triDVector::angleBetween(triDVector* inVect) {
 
 void triDVector::printVector(void) {
 
-	Serial.print("stPt x,y,z: ");
-	Serial.print(stX);Serial.print(", ");
-	Serial.print(stY);Serial.print(", ");
-	Serial.print(stZ);
-	
-	Serial.print("        endPt x,y,z: ");
-	Serial.print(endX);Serial.print(", ");
-	Serial.print(endY);Serial.print(", ");
-	Serial.println(endZ);
+	Serial.print("Point x,y,z: ");
+	Serial.print(x);Serial.print(", ");
+	Serial.print(y);Serial.print(", ");
+	Serial.print(z);
+	Serial.print("   Magnitude: ");
+	Serial.println(magnitude());
 }
-
 
 

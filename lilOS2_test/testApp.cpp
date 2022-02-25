@@ -197,13 +197,13 @@ void testApp::setup(void) {
    stlObj* theModel = new stlObj(20,100,180,180,"/teensyM.STL");
    //stlObj* theModel = new stlObj(20,100,180,180,"/test.stl");
    theModel->begin();
-   theModel->setObjScale(12);
+   theModel->setObjScale(10);
    angle.xRad = deg_2_rad(0);
-   angle.yRad = deg_2_rad(0);
-   angle.zRad = deg_2_rad(0);
+   angle.yRad = deg_2_rad(40);
+   angle.zRad = deg_2_rad(120);
    theModel->setObjAngle(&angle);
-   location.x = 140;
-   location.y = 400;
+   location.x = 160;
+   location.y = 80;
    location.z = 420;
    theModel->setObjLoc(&location);
    addObj(theModel);

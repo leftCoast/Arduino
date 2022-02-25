@@ -8,50 +8,39 @@ class triDVector {
 
 	public:
 				triDVector(void);
-				triDVector(float endX,float endY,float endZ);
-				triDVector(float startX,float startY,float startZ,float endX,float endY,float endZ);
-				triDVector(triDPoint* startPt,triDPoint* endPt);
-			
+				triDVector(triDPoint* inPt);
+				triDVector(double inX,double inY,double inZ);
 	virtual	~triDVector(void);
 				
-				void			setVector(triDPoint* startPt,triDPoint* endPt);
-				void			setVector(float startX,float startY,float startZ,float inEndX,float inEndY,float inEndZ);
-				void			setFreeVector(float inEndX,float inEndY,float inEndZ);
-				void			setFreeVector(triDPoint* inPoint);
-				void			setStartpoint(float startX,float startY,float startZ);
-				void			setStartpoint(triDPoint* inPoint);
-				void			setEndpoint(float inEndX,float inEndY,float inEndZ);
-				void			setEndpoint(triDPoint* inPt);
-				triDPoint	getStartpoint(void);
-				triDPoint	getEndpoint(void);
-				triDPoint	getFreeVect(void);
-				void			moveToOrigin(void);
-				void			moveBack(void);
+				void			setVector(triDPoint* inPt);
+				void			setVector(double inX,double inY,double inZ);
+				void			setVector(triDPoint* stPt,triDPoint* endPt);
+				triDPoint	getPoint(void);
+				double			getX(void);
+				double			getY(void);
+				double			getZ(void);
+				double			magnitude(void);
+				void			scaleBy(double scaler);
+				triDVector	crossProd(triDVector* aVect);
+				void			normalize(void);
 				bool			isNullVector(void);
 				void			rotateVect(triDRotation* rotation);
-				float			dotProduct(triDVector* inVect);
-				float			magnitude(void);
-				float			angleBetween(triDVector* inVect);
+				double			dotProduct(triDVector* inVect);
+				double			angleBetween(triDVector* inVect);
 				void			printVector(void);
 				
 	protected:
 	
-				float stX;
-				float	stY;
-				float	stZ;
-				float endX;
-				float endY;
-				float endZ;
-				float saveX;
-				float saveY;
-				float saveZ;
+				double x;
+				double	y;
+				double	z;
 };
 
 
-struct triDFacet {
-	triDVector		normVect;
-	triDTriangle	corners;
-};
+// struct triDFacet {
+// 	triDVector		normVect;
+// 	triDTriangle	corners;
+// };
 
 
 #endif

@@ -16,12 +16,12 @@
 
 struct twoDPoint {
 	
-	float	x;
-	float y;
+	double	x;
+	double y;
 };
 
 
-void rotate(twoDPoint* ptA,float angle);
+void rotate(twoDPoint* ptA,double angle);
 
 
 //****************************************************************************************
@@ -33,9 +33,9 @@ void rotate(twoDPoint* ptA,float angle);
 
 struct triDPoint {
 	
-	float	x;
-	float	y;
-	float	z;
+	double	x;
+	double	y;
+	double	z;
 };
 
 // res = ptA + ptB
@@ -48,7 +48,7 @@ triDPoint triDPointSub(triDPoint* ptA,triDPoint* ptB);
 triDPoint triDPointMult(triDPoint* ptA,triDPoint* ptB);
 
 // res = ptA * scale
-triDPoint triDPointScale(triDPoint* ptA,float scale);
+triDPoint triDPointScale(triDPoint* ptA,double scale);
 
 
 // Show us what you got.
@@ -84,9 +84,9 @@ void printTriDTriangle(triDTriangle* triangle);
 
 struct triDRotation{
 	
-	float	xRad;	// Pitch
-	float	yRad;	// Yaw
-	float	zRad;	// Roll
+	double	xRad;	// Pitch
+	double	yRad;	// Yaw
+	double	zRad;	// Roll
 };
 			
 #endif
