@@ -7,6 +7,10 @@
 triDVector::triDVector(void) { setVector(0,0,0); }
 
 
+// Copy Constructor.
+triDVector::triDVector(triDVector* aVector) { setVector(aVector); }
+
+
 // Constructor given a triDPoint in space.
 triDVector::triDVector(triDPoint* inPt) { setVector(inPt); }
 
@@ -18,6 +22,15 @@ triDVector::triDVector(double inX,double inY,double inZ) { setVector(inX,inY,inZ
 
 // The lonely destructor. Nothing's been allocated, so there is nothing for us to do here.		
 triDVector::~triDVector(void) {  }
+
+
+// Copy another vector;
+void triDVector::setVector(triDVector* aVector) {
+
+	x = aVector->getX();
+	y = aVector->getY();
+	z = aVector->getZ();
+}
 
 
 // Set to a point.
@@ -135,6 +148,18 @@ void  triDVector::rotateVect(triDRotation* rotation) {
 		x = rotatPt.x;
 		y = rotatPt.y;
 	}																		//
+}
+
+
+// Do the pitch roll yaw transforms on each axis.
+void  triDVector::rotateVect(double xRad,double yRad,double zRad) {
+
+	triDRotation rotation;
+	
+	rotation.xRad	= xRad;
+	rotation.yRad	= yRad;
+	rotation.zRad	= zRad;
+	rotateVect(&rotation);
 }
 
 

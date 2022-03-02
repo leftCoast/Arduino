@@ -83,7 +83,7 @@ triDPoint getCentPt(triDTriangle* triangle) {
 void printTriDTriangle(triDTriangle* triangle) {
 
 	Serial.println("-------");
-	Serial.println("triDTriangle, corners[3]");
+	Serial.println("triDTriangle");
 	Serial.print("corners[0]: ");
 	printTriDPt(&(triangle->corners[0]));
 	Serial.print("corners[1]: ");

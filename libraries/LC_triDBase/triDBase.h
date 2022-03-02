@@ -15,7 +15,6 @@
 
 
 struct twoDPoint {
-	
 	double	x;
 	double y;
 };
@@ -32,7 +31,6 @@ void rotate(twoDPoint* ptA,double angle);
 
 
 struct triDPoint {
-	
 	double	x;
 	double	y;
 	double	z;
@@ -65,7 +63,6 @@ void printTriDPt(triDPoint* pt);
 
 
 struct triDTriangle {
-	
 	triDPoint corners[3];
 };
 
@@ -75,6 +72,8 @@ triDPoint getCentPt(triDTriangle* triangle);
 // Show us what you got.
 void printTriDTriangle(triDTriangle* triangle);
 
+
+
 //****************************************************************************************
 // triDRotation:
 //
@@ -83,10 +82,11 @@ void printTriDTriangle(triDTriangle* triangle);
 
 
 struct triDRotation{
-	
 	double	xRad;	// Pitch
 	double	yRad;	// Yaw
 	double	zRad;	// Roll
 };
+
+
 			
 #endif

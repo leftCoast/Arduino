@@ -3,6 +3,7 @@
 #include <colorRect.h>
 #include <label.h>
 #include <stlObj.h>
+#include <facetList.h>
 
 #define BOUND_X      20
 #define BOUND_Y      40

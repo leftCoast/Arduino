@@ -2,7 +2,7 @@
 #define stlObj_h
 
 #include <triDBase.h>
-#include <stlFile.h>
+#include <facetList.h>
 #include <triDVector.h>
 #include <lists.h>
 #include <drawObj.h>
@@ -81,7 +81,7 @@ struct viewFacet {
 	point				cornerC;
 };
 
-viewFacet loadViewFacet(STLFacet* fileFacet);
+viewFacet loadViewFacet(triDFacet* aFacet);
 void offset2DFacet(viewFacet* aFacet,int x,int y);
 void printViewFacet(viewFacet* aFacet);
 
@@ -100,7 +100,7 @@ class objCenter {
 				objCenter(void);
 	virtual	~objCenter(void);
 	
-				void			addSTLFacet(STLFacet* aFacet);
+				void			addFacet(triDFacet* aFacet);
 				void			addItem(double x,double y,double z);
 				triDPoint	getCenterPt(void);
 				void			printObjCenter(void);
@@ -134,13 +134,13 @@ class objCenter {
 class indexItem : public linkListObj {
 
 	public:
-				indexItem(uint32_t index,double distance);
+				indexItem(long index,double distance);
 	virtual	~indexItem(void);
 	
-	uint32_t	getIndex(void);
+				long	getIndex(void);
 	
-				uint32_t	facetIndex;
-				double		zDistance;
+				long		facetIndex;
+				double	zDistance;
 };
 
 
@@ -169,25 +169,25 @@ class indexItem : public linkListObj {
 
 
 class triDEngine :	public linkList,
-							public stlFile {
+							public facetList {
 	public:
 				triDEngine(void);
 	virtual	~triDEngine(void);
 	
 				bool			begin(const char* stlPath);
 				bool			createList(renderSetup* setup);			// Build the list of visible facets.						
-				void			resetList(void);								// Reset the viewFacet list to the back for a new read.
+				void			resetList(void);								// Reset the viewFacet list for a new read.
 				viewFacet	getNextViewFacet(renderSetup* setup);	// Get the next facet off the visible list. (visible list index)
 				
 	//protected:
 	
-				viewFacet	calcViewFacet(renderSetup* setup,STLFacet* fileFacet);
+				viewFacet	calcViewFacet(renderSetup* setup,triDFacet* aFacet);
 				void			addIndexItem(indexItem* newItem);
-				void			setScale(renderSetup* setup,STLFacet* aFacet);
-				void			setRotation(renderSetup* setup,STLFacet* aFacet);
-				void			setLocation(renderSetup* setup,STLFacet* fileFacet);
-				void			doTransformations(renderSetup* setup,STLFacet* aFacet);
-				double		inView(renderSetup* setup,STLFacet* aFacet);
+				void			setScale(renderSetup* setup,triDFacet* aFacet);
+				void			setRotation(renderSetup* setup,triDFacet* aFacet);
+				void			setLocation(renderSetup* setup,triDFacet* fileFacet);
+				void			doTransformations(renderSetup* setup,triDFacet* aFacet);
+				double		inView(renderSetup* setup,triDFacet* aFacet);
 	
 				bool			init;				// We ready to go?
 				bool			haveList;		// Is list current to orientation?
