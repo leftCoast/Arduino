@@ -5,18 +5,49 @@
 #include <triDVector.h>
 
 
+
 //****************************************************************************************
-// triDFacet:
+// facetPack:
 //
 // Holds the normal vector, for direction, and the the triD triangle that is the facet
 // itself.
 //****************************************************************************************
 
 
-struct triDFacet {
+struct facetPack {
 	triDVector		normVect;
 	triDTriangle	facet;
 };
+
+
+
+//****************************************************************************************
+// triDFacet:
+//
+// The triDFacet class. This is your facet that is able to do trasformations. on itself.
+//****************************************************************************************
+
+
+class triDFacet {
+
+	public :
+					triDFacet(facetPack* facet);
+	virtual		~triDFacet(void);
+	
+					void				setFacet(facetPack* facet);
+					triDTriangle	getFacet(void);
+					triDVector		getNormVect(void);
+					facetPack		getFacetPack(void);
+					void				scale(double scaler);
+					void				offset(triDPoint* offsetPt);
+					void				offset(triDVector* offsetVect);
+					void				offset(double x,double y,double z);
+					void				rotate(triDRotation* rotation);
+					
+					triDVector		normVect;
+					triDTriangle	facet;
+};
+	
 
 
 

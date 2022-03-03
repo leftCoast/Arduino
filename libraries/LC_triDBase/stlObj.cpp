@@ -310,91 +310,11 @@ void triDEngine::addIndexItem(indexItem* newItem) {
 }
 
 
-// Scale seems to work.
-void triDEngine::setScale(renderSetup* setup,triDFacet* aFacet) {
-
-	aFacet->facet.corners[0].x = aFacet->facet.corners[0].x * setup->scale;
-	aFacet->facet.corners[0].y = aFacet->facet.corners[0].y * setup->scale;
-	aFacet->facet.corners[0].z = aFacet->facet.corners[0].z * setup->scale;
-	
-	aFacet->facet.corners[1].x = aFacet->facet.corners[1].x * setup->scale;
-	aFacet->facet.corners[1].y = aFacet->facet.corners[1].y * setup->scale;
-	aFacet->facet.corners[1].z = aFacet->facet.corners[1].z * setup->scale;
-	
-	aFacet->facet.corners[2].x = aFacet->facet.corners[2].x * setup->scale;
-	aFacet->facet.corners[2].y = aFacet->facet.corners[2].y * setup->scale;
-	aFacet->facet.corners[2].z = aFacet->facet.corners[2].z * setup->scale;
-}
-
-
-void triDEngine::setRotation(renderSetup* setup,triDFacet* aFacet) {
-
-	triDVector	aVect;
-	triDVector	bVect;
-	triDVector	nVect;
-	triDPoint	ptA;
-	triDPoint	ptB;
-	triDPoint	ptC;
-	
-	aVect.setVector(aFacet->facet.corners[0].x,aFacet->facet.corners[0].y,aFacet->facet.corners[0].z);
-	aVect.rotateVect(&(setup->orientation));
-	aFacet->facet.corners[0].x	= aVect.getX();
-	aFacet->facet.corners[0].y	= aVect.getY();
-	aFacet->facet.corners[0].z	= aVect.getZ();
-	
-	aVect.setVector(aFacet->facet.corners[1].x,aFacet->facet.corners[1].y,aFacet->facet.corners[1].z);
-	aVect.rotateVect(&(setup->orientation));
-	aFacet->facet.corners[1].x	= aVect.getX();
-	aFacet->facet.corners[1].y	= aVect.getY();
-	aFacet->facet.corners[1].z	= aVect.getZ();
-	
-	aVect.setVector(aFacet->facet.corners[2].x,aFacet->facet.corners[2].y,aFacet->facet.corners[2].z);
-	aVect.rotateVect(&(setup->orientation));
-	aFacet->facet.corners[2].x	= aVect.getX();
-	aFacet->facet.corners[2].y	= aVect.getY();
-	aFacet->facet.corners[2].z	= aVect.getZ();
-	
-	ptA.x = aFacet->facet.corners[0].x;
-	ptA.y = aFacet->facet.corners[0].y;
-	ptA.z = aFacet->facet.corners[0].z;
-	
-	ptA.x = aFacet->facet.corners[1].x;
-	ptA.y = aFacet->facet.corners[1].y;
-	ptA.z = aFacet->facet.corners[1].z;
-	
-	ptA.x = aFacet->facet.corners[2].x;
-	ptA.y = aFacet->facet.corners[2].y;
-	ptA.z = aFacet->facet.corners[2].z;
-	
-	aVect.setVector(&ptA,&ptB);
-	bVect.setVector(&ptB,&ptC);
-	nVect = aVect.crossProd(&bVect);
-	nVect.normalize();
-	aFacet->normVect.setVector(&nVect);
-}
-
-
-void triDEngine::setLocation(renderSetup* setup,triDFacet* aFacet) {
-
-	aFacet->facet.corners[0].x += setup->location.x;
-	aFacet->facet.corners[0].y += setup->location.y;
-	aFacet->facet.corners[0].z += setup->location.z;
-	
-	aFacet->facet.corners[1].x += setup->location.x;
-	aFacet->facet.corners[1].y += setup->location.y;
-	aFacet->facet.corners[1].z += setup->location.z;
-	
-	aFacet->facet.corners[2].x += setup->location.x;
-	aFacet->facet.corners[2].y += setup->location.y;
-	aFacet->facet.corners[2].z += setup->location.z;
-}
-
-
 void triDEngine::doTransformations(renderSetup* setup,triDFacet* aFacet) {
 	
-	setRotation(setup,aFacet);
-	setScale(setup,aFacet);
-	setLocation(setup,aFacet);
+	aFacet->rotate(&(setup.orientation));
+	aFacet->scale(setup->scale);
+	aFacet->offset(setup->location.x,setup->location.y,setup->location.z);
 }
 
 
@@ -402,11 +322,10 @@ void triDEngine::doTransformations(renderSetup* setup,triDFacet* aFacet) {
 // draw ones that are facing away.
 double triDEngine::inView(renderSetup* setup,triDFacet* aFacet) {
 
-	triDVector		facetNormal;
 	triDVector		cameraVect;
 	viewFacet 		theFacet;
 	triDPoint		midPt;
-	double				maxDist;
+	double			maxDist;
 	
 	maxDist = 0;
 	doTransformations(setup,aFacet);
@@ -414,7 +333,7 @@ double triDEngine::inView(renderSetup* setup,triDFacet* aFacet) {
 	theFacet = loadViewFacet(aFacet);
 	midPt = getCentPt(aFacet);
 	cameraVect.setVector(&midPt,&(setup->camera));
-	if (cameraVect.dotProduct(&facetNormal)>0) {
+	if (cameraVect.dotProduct(&(aFacet->normVect))>0) {
 		maxDist = aFacet->facet.corners[0].z
 		maxDist = max(maxDist,aFacet->facet.corners[1].z);
 		maxDist = max(maxDist,aFacet->facet.corners[2].z);

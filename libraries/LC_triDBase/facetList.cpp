@@ -2,8 +2,139 @@
 #include <resizeBuff.h>
 
 
+
+//****************************************************************************************
+// facetPack:
+//
+// Holds the normal vector, for direction, and the the triD triangle that is the facet
+// itself.
+//****************************************************************************************
+
+
+struct facetPack {
+	triDVector		normVect;
+	triDTriangle	facet;
+};
+
+
+
+//****************************************************************************************
+// triDFacet:
+//
+// The triDFacet class. This is your facet that is able to do trasformations. on itself.
+//****************************************************************************************
+
+
+triDFacet::triDFacet(facetPack* facet) { setFacet(facet); }
+
+
+triDFacet::~triDFacet(void) {  }
+
+	
+void triDFacet::setFacet(facetPack* facet) {
+
+	normVect.setVector(facet->normVect);
+	facet = facet->facet;
+}
+
+
+triDTriangle triDFacet::getFacet(void) { return facet; }
+
+triDVector triDFacet::getNormVect(void) { return normVect; }
+
+facetPack triDFacet::getFacetPack(void) {
+	
+	facetPack aPack;
+	
+	aPack.normVect = normVect;
+	aPack.facet = facet;
+	return aPack;
+}
+	
+	
+void triDFacet::scale(double scaler) {
+	
+	facet.corners[0].x *= scaler;
+	facet.corners[0].y *= scaler;
+	facet.corners[0].z *= scaler;
+	
+	facet.corners[1].x *= scaler;
+	facet.corners[1].y *= scaler;
+	facet.corners[1].z *= scaler;
+	
+	facet.corners[2].x *= scaler;
+	facet.corners[2].y *= scaler;
+	facet.corners[2].z *= scaler;
+}
+
+
+void triDFacet::offset(triDPoint* offsetPt) { offset(offsetPt.x,offsetPt.y,offsetPt.z); }
+
+
+void triDFacet::offset(triDVector* offsetVect) { offset(offsetVect.x,offsetVect.y,offsetVect.z); }
+
+
+void triDFacet::offset(double x,double y,double z) {
+
+	facet.corners[0].x += x;
+	facet.corners[0].y += y;
+	facet.corners[0].z += z;
+	
+	facet.corners[1].x += x;
+	facet.corners[1].y += y;
+	facet.corners[1].z += z;
+	
+	facet.corners[2].x += x;
+	facet.corners[2].y += y;
+	facet.corners[2].z += z;
+
+}
+
+
+void triDFacet::rotate(triDRotation* rotation) {
+
+	triDVector	aVect;
+	triDVector	bVect;
+	triDVector	nVect;
+	
+	aVect.setVector(facet.corners[0].x,facet.corners[0].y,facet.corners[0].z);
+	aVect.rotateVect(&(setup->orientation));
+	facet.corners[0].x	= aVect.getX();
+	facet.corners[0].y	= aVect.getY();
+	facet.corners[0].z	= aVect.getZ();
+	
+	aVect.setVector(facet.corners[1].x,facet.corners[1].y,facet.corners[1].z);
+	aVect.rotateVect(&(setup->orientation));
+	facet.corners[1].x	= aVect.getX();
+	facet.corners[1].y	= aVect.getY();
+	facet.corners[1].z	= aVect.getZ();
+	
+	aVect.setVector(facet.corners[2].x,facet.corners[2].y,facet.corners[2].z);
+	aVect.rotateVect(&(setup->orientation));
+	facet.corners[2].x	= aVect.getX();
+	facet.corners[2].y	= aVect.getY();
+	facet.corners[2].z	= aVect.getZ();
+	
+	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]);
+	bVect.setVector(&(facet.corners[1]),&(facet.corners[2]));
+	nVect = aVect.crossProd(&bVect);
+	nVect.normalize();
+	normVect.setVector(&nVect);
+}
+
+
+//****************************************************************************************
+// facetList
+//
+// This is a purely virtual base class for a facet list. The idea is to make it not matter
+// where facets come from or go to. But this is the interface that we can use to stuff
+// them into a list or display them.
+//****************************************************************************************
+
+
 triDFacet*	passingFacet 	= NULL;
 int			facetUsers		= 0;
+
 
 facetList::facetList(void) {
 
