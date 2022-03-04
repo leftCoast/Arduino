@@ -11,10 +11,10 @@
 //****************************************************************************************
 
 
-struct facetPack {
-	triDVector		normVect;
-	triDTriangle	facet;
-};
+// struct facetPack {
+// 	triDVector		normVect;
+// 	triDTriangle	facet;
+// };
 
 
 
@@ -24,6 +24,22 @@ struct facetPack {
 // The triDFacet class. This is your facet that is able to do trasformations. on itself.
 //****************************************************************************************
 
+triDFacet::triDFacet(void) {
+	
+	facetPack aNULLFacet;
+	aNULLFacet.normVect.setVector(1,1,1);
+	aNULLFacet.facet.corners[0].x = 0;
+	aNULLFacet.facet.corners[0].y = 0;
+	aNULLFacet.facet.corners[0].z = 0;
+	aNULLFacet.facet.corners[1].x = 0;
+	aNULLFacet.facet.corners[1].y = 0;
+	aNULLFacet.facet.corners[1].z = 0;
+	aNULLFacet.facet.corners[2].x = 0;
+	aNULLFacet.facet.corners[2].y = 0;
+	aNULLFacet.facet.corners[2].z = 0;
+	setFacet(&aNULLFacet);
+}
+
 
 triDFacet::triDFacet(facetPack* facet) { setFacet(facet); }
 
@@ -31,10 +47,10 @@ triDFacet::triDFacet(facetPack* facet) { setFacet(facet); }
 triDFacet::~triDFacet(void) {  }
 
 	
-void triDFacet::setFacet(facetPack* facet) {
+void triDFacet::setFacet(facetPack* inFacet) {
 
-	normVect.setVector(facet->normVect);
-	facet = facet->facet;
+	normVect.setVector(&(inFacet->normVect));
+	facet = inFacet->facet;
 }
 
 
@@ -50,8 +66,11 @@ facetPack triDFacet::getFacetPack(void) {
 	aPack.facet = facet;
 	return aPack;
 }
-	
-	
+
+
+triDPoint triDFacet::getCenterPt(void) { return getCentPt(&facet); }
+
+
 void triDFacet::scale(double scaler) {
 	
 	facet.corners[0].x *= scaler;
@@ -68,10 +87,10 @@ void triDFacet::scale(double scaler) {
 }
 
 
-void triDFacet::offset(triDPoint* offsetPt) { offset(offsetPt.x,offsetPt.y,offsetPt.z); }
+void triDFacet::offset(triDPoint* offsetPt) { offset(offsetPt->x,offsetPt->y,offsetPt->z); }
 
 
-void triDFacet::offset(triDVector* offsetVect) { offset(offsetVect.x,offsetVect.y,offsetVect.z); }
+void triDFacet::offset(triDVector* offsetVect) { offset(offsetVect->getX(),offsetVect->getY(),offsetVect->getZ()); }
 
 
 void triDFacet::offset(double x,double y,double z) {
@@ -98,24 +117,24 @@ void triDFacet::rotate(triDRotation* rotation) {
 	triDVector	nVect;
 	
 	aVect.setVector(facet.corners[0].x,facet.corners[0].y,facet.corners[0].z);
-	aVect.rotateVect(&(setup->orientation));
+	aVect.rotateVect(rotation);
 	facet.corners[0].x	= aVect.getX();
 	facet.corners[0].y	= aVect.getY();
 	facet.corners[0].z	= aVect.getZ();
 	
 	aVect.setVector(facet.corners[1].x,facet.corners[1].y,facet.corners[1].z);
-	aVect.rotateVect(&(setup->orientation));
+	aVect.rotateVect(rotation);
 	facet.corners[1].x	= aVect.getX();
 	facet.corners[1].y	= aVect.getY();
 	facet.corners[1].z	= aVect.getZ();
 	
 	aVect.setVector(facet.corners[2].x,facet.corners[2].y,facet.corners[2].z);
-	aVect.rotateVect(&(setup->orientation));
+	aVect.rotateVect(rotation);
 	facet.corners[2].x	= aVect.getX();
 	facet.corners[2].y	= aVect.getY();
 	facet.corners[2].z	= aVect.getZ();
 	
-	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]);
+	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]));
 	bVect.setVector(&(facet.corners[1]),&(facet.corners[2]));
 	nVect = aVect.crossProd(&bVect);
 	nVect.normalize();
@@ -154,12 +173,15 @@ facetList::~facetList(void) {
 }
 	
 
+bool facetList::begin(void) { return true; }
+
+
 // Pass back the total number facets we hold/offer.
 long facetList::getNumFacets(void) { }
 
 
 // Pass back a temporary pointer to the info on facet given by index.
-triDFacet* facetList::getFacet(long index) { }
+triDFacet facetList::getFacet(long index) { }
 
 
 // Reset the internal index to the first facet. Used for..
@@ -167,7 +189,7 @@ void facetList::resetIndex(void) { }
 
 
 // Passes back the next unread facet on our list.
-triDFacet* facetList::getNextFacet(void) { }
+triDFacet facetList::getNextFacet(void) { }
 
 
 // Take this inputted facet data and save it in the location given by index.

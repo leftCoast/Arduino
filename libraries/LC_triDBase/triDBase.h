@@ -16,7 +16,7 @@
 
 struct twoDPoint {
 	double	x;
-	double y;
+	double	y;
 };
 
 

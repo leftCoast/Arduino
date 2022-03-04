@@ -174,7 +174,7 @@ class triDEngine :	public linkList,
 				triDEngine(void);
 	virtual	~triDEngine(void);
 	
-				bool			begin(const char* stlPath);
+				bool			begin(void);
 				bool			createList(renderSetup* setup);			// Build the list of visible facets.						
 				void			resetList(void);								// Reset the viewFacet list for a new read.
 				viewFacet	getNextViewFacet(renderSetup* setup);	// Get the next facet off the visible list. (visible list index)
@@ -209,14 +209,14 @@ class triDEngine :	public linkList,
 //****************************************************************************************
 
 
-class stlObj :	public drawObj {
+class triDObj :	public drawObj {
 					
 	public:
-				stlObj(int inX,int inY,int inWidth,int inHeight,const char* stlPath);
-				stlObj(rect* inRect,const char* stlPath);
-	virtual	~stlObj(void);
+				triDObj(int inX,int inY,int inWidth,int inHeight);
+				triDObj(rect* inRect);
+	virtual	~triDObj(void);
 				
-				void			begin(void);
+				void			begin(triDEngine* inTriDEngine);
 				void			setAmbiantlight(colorObj* inColor);
 				void			setlightLoc(triDPoint* lightLoc);
 				void			setlightColor(colorObj* color);
@@ -238,7 +238,7 @@ class stlObj :	public drawObj {
 				triDPoint		spotPos;
 				colorObj 		spotColor;
 				colorMultiMap	lightMapper;
-				triDEngine		ourFacetList;
+				triDEngine*		ourTriDEngine;
 };
 
 

@@ -1,13 +1,13 @@
-#include <stlObj.h>
+#include <triDObj.h>
 //#include <math.h>
 
 #include <debug.h>
 
-triDVector		normalVect;
-	triDTriangle	original;
-	point				cornerA;
-	point				cornerB;
-	point				cornerC;
+// triDVector		normalVect;
+// triDTriangle	original;
+// point				cornerA;
+// point				cornerB;
+// point				cornerC;
 	
 	
 void print2DPt(point* aPt) {
@@ -22,9 +22,9 @@ void print2DPt(point* aPt) {
 viewFacet loadViewFacet(triDFacet* aFacet) {
 
 	viewFacet	res;
-	
-	res.normalVect.setVector(&(aFacet.normVect));
-	res.original.corners = aFacet->facet.corners;
+
+	res.normalVect.setVector(&(aFacet->getNormVect()));
+	res.original = aFacet->getFacet();
 	res.cornerA.x = 0;
 	res.cornerA.y = 0;
 	res.cornerB.x = 0;
@@ -262,27 +262,26 @@ viewFacet  triDEngine::calcViewFacet(renderSetup* setup,triDFacet* aTriDFacet) {
 	int			x;
 	int			y;
 	
-	aTriDFacet
-	ptMapper.setValues(aTriDFacet->facet.corners[0].z,setup->camera.z,fileFacet->vertex1[0],setup->camera.x);
+	ptMapper.setValues(aTriDFacet->facet.corners[0].z,setup->camera.z,aTriDFacet->facet.corners[0].x,setup->camera.x);
 	x = round(ptMapper.map(0));
-	ptMapper.setValues(aTriDFacet->facet.corners[0].z,setup->camera.z,fileFacet->vertex1[1],setup->camera.y);
+	ptMapper.setValues(aTriDFacet->facet.corners[0].z,setup->camera.z,aTriDFacet->facet.corners[0].y,setup->camera.y);
 	y = round(ptMapper.map(0));
-	aFacet.corner[0].x = x;
-	aFacet.corner[0].y = y;
+	aFacet.cornerA.x = x;
+	aFacet.cornerA.y = y;
 		
-	ptMapper.setValues(aTriDFacet->facet.corners[1].z,setup->camera.z,fileFacet->vertex2[0],setup->camera.x);
+	ptMapper.setValues(aTriDFacet->facet.corners[1].z,setup->camera.z,aTriDFacet->facet.corners[1].x,setup->camera.x);
 	x = round(ptMapper.map(0));
-	ptMapper.setValues(aTriDFacet->facet.corners[1].z,setup->camera.z,fileFacet->vertex2[1],setup->camera.y);
+	ptMapper.setValues(aTriDFacet->facet.corners[1].z,setup->camera.z,aTriDFacet->facet.corners[1].y,setup->camera.y);
 	y = round(ptMapper.map(0));
-	aFacet.corner[1].x = x;
-	aFacet.corner[1].y = y;
+	aFacet.cornerB.x = x;
+	aFacet.cornerB.y = y;
 	
-	ptMapper.setValues(fileFacet->vertex3[2],setup->camera.z,fileFacet->vertex3[0],setup->camera.x);
+	ptMapper.setValues(aTriDFacet->facet.corners[2].z,setup->camera.z,aTriDFacet->facet.corners[2].x,setup->camera.x);
 	x = round(ptMapper.map(0));
-	ptMapper.setValues(fileFacet->vertex3[2],setup->camera.z,fileFacet->vertex3[1],setup->camera.y);
+	ptMapper.setValues(aTriDFacet->facet.corners[2].z,setup->camera.z,aTriDFacet->facet.corners[2].y,setup->camera.y);
 	y = round(ptMapper.map(0));
-	aFacet.corner[2].x = x;
-	aFacet.corner[2].y = y;
+	aFacet.cornerC.x = x;
+	aFacet.cornerC.y = y;
 
 	return aFacet;
 }
@@ -312,7 +311,7 @@ void triDEngine::addIndexItem(indexItem* newItem) {
 
 void triDEngine::doTransformations(renderSetup* setup,triDFacet* aFacet) {
 	
-	aFacet->rotate(&(setup.orientation));
+	aFacet->rotate(&(setup->orientation));
 	aFacet->scale(setup->scale);
 	aFacet->offset(setup->location.x,setup->location.y,setup->location.z);
 }
@@ -323,18 +322,15 @@ void triDEngine::doTransformations(renderSetup* setup,triDFacet* aFacet) {
 double triDEngine::inView(renderSetup* setup,triDFacet* aFacet) {
 
 	triDVector		cameraVect;
-	viewFacet 		theFacet;
 	triDPoint		midPt;
 	double			maxDist;
 	
 	maxDist = 0;
 	doTransformations(setup,aFacet);
-	facetNormal.setVector(aFacet->normVect);
-	theFacet = loadViewFacet(aFacet);
-	midPt = getCentPt(aFacet);
+	midPt = aFacet->getCenterPt();
 	cameraVect.setVector(&midPt,&(setup->camera));
 	if (cameraVect.dotProduct(&(aFacet->normVect))>0) {
-		maxDist = aFacet->facet.corners[0].z
+		maxDist = aFacet->facet.corners[0].z;
 		maxDist = max(maxDist,aFacet->facet.corners[1].z);
 		maxDist = max(maxDist,aFacet->facet.corners[2].z);
 	}
@@ -345,61 +341,54 @@ double triDEngine::inView(renderSetup* setup,triDFacet* aFacet) {
 
 
 //****************************************************************************************
-// stlObj:
+// triDObj:
 //
 //****************************************************************************************
 
-stlObj::stlObj(int inX,int inY,int inWidth,int inHeight,const char* stlPath)
-	: drawObj(inX,inY,inWidth,inHeight) {
-	
-	savedPath = NULL;
-	heapStr(&savedPath,stlPath);
-	init = false;
-}
+triDObj::triDObj(int inX,int inY,int inWidth,int inHeight)
+	: drawObj(inX,inY,inWidth,inHeight) { init = false; }
 	
 	
-stlObj::stlObj(rect* inRect,const char* stlPath)
-	: drawObj(inRect) {
-	
-	savedPath = NULL;
-	heapStr(&savedPath,stlPath);
-	init = false;
-}
+triDObj::triDObj(rect* inRect)
+	: drawObj(inRect) { init = false; }
 	
 
 // Destructor, just in case no one else recycles the path..	
-stlObj::~stlObj(void) {  freeStr(&savedPath); }
+triDObj::~triDObj(void) {  freeStr(&savedPath); }
 
 
 // Setup all the initial and default values.
-void stlObj::begin(void) {
+void triDObj::begin(triDEngine* inFacetList) {
 	
-	ourFacetList.begin();							// Load up the path into the triDEngine.
-	setupChange	= false;								// Cause' really there's nothing useful here, just defaults.
-	ambientColor.setColor(LC_CHARCOAL);			// Grey is a good ambiant color to start with.
-	spotPos.x	= 0;									// Default location of the spot light.
-	spotPos.y	= 0;
-	spotPos.z	= -200;
-	spotColor.setColor(&white);					// Default spot light color.
-	calcLightMapper();								// lIghts are all setup. We can do the light mapper now.
-	setup.location.x			= width/2;		// Set the side to side location of the 3D object in our rect.
-	setup.location.y			= height/2;	// Set the height location of the 3D object in our rect.
-	setup.location.z			= 220;				// Set the z location. Now, bigger numbers are further "back".
-	setup.orientation.xRad	= 0;					// Set PITCH angle of the 3D object.
-	setup.orientation.yRad	= 0;					// Set YAW angle of the 3D object.
-	setup.orientation.zRad	= 0;					// Set ROLL angle of the 3D object.
-	setup.scale					= 1;					// Multiplier for dimensions. Sets objet size.
-	setup.camera.x				= width/2;			// Camera, view point center of screen in x.
-	setup.camera.y				= height/2;			// Center of screen in y.
-	setup.camera.z				= -300;				// Back out of screen 300 pts. (Basically pixels.)
-	setup.viewWidth			= width;				// Width of the drawObj that we are.
-	setup.viewHeight			= height;			// Height of the drawObj that we are.
-	init = true;										// And now, we are initialized.
+	ourTriDEngine = inFacetList;
+	if (ourTriDEngine) {
+		ourTriDEngine->begin();							// Load up the path into the triDEngine.
+		setupChange	= false;								// Cause' really there's nothing useful here, just defaults.
+		ambientColor.setColor(LC_CHARCOAL);			// Grey is a good ambiant color to start with.
+		spotPos.x	= 0;									// Default location of the spot light.
+		spotPos.y	= 0;
+		spotPos.z	= -200;
+		spotColor.setColor(&white);					// Default spot light color.
+		calcLightMapper();								// lIghts are all setup. We can do the light mapper now.
+		setup.location.x			= width/2;			// Set the side to side location of the 3D object in our rect.
+		setup.location.y			= height/2;			// Set the height location of the 3D object in our rect.
+		setup.location.z			= 220;				// Set the z location. Now, bigger numbers are further "back".
+		setup.orientation.xRad	= 0;					// Set PITCH angle of the 3D object.
+		setup.orientation.yRad	= 0;					// Set YAW angle of the 3D object.
+		setup.orientation.zRad	= 0;					// Set ROLL angle of the 3D object.
+		setup.scale					= 1;					// Multiplier for dimensions. Sets objet size.
+		setup.camera.x				= width/2;			// Camera, view point center of screen in x.
+		setup.camera.y				= height/2;			// Center of screen in y.
+		setup.camera.z				= -300;				// Back out of screen 300 pts. (Basically pixels.)
+		setup.viewWidth			= width;				// Width of the drawObj that we are.
+		setup.viewHeight			= height;			// Height of the drawObj that we are.
+		init = true;										// And now, we are initialized.
+	}
 }
 
 
 // Set the light that you see when there is no light source shining on whatever.	
-void stlObj::setAmbiantlight(colorObj* inColor) {
+void triDObj::setAmbiantlight(colorObj* inColor) {
 
 	ambientColor.setColor(inColor);
 	calcLightMapper();
@@ -409,7 +398,7 @@ void stlObj::setAmbiantlight(colorObj* inColor) {
 
 // At this moment we get one Point light source. Here is the location, and where its
 // pointing..
-void stlObj::setlightLoc(triDPoint* lightLoc) {
+void triDObj::setlightLoc(triDPoint* lightLoc) {
 
 	spotPos = *lightLoc;
 	calcLightMapper();
@@ -418,7 +407,7 @@ void stlObj::setlightLoc(triDPoint* lightLoc) {
 
 
 // And it's color.
-void stlObj::setlightColor(colorObj* color) {
+void triDObj::setlightColor(colorObj* color) {
 
 	spotColor.setColor(color);
 	calcLightMapper();
@@ -427,7 +416,7 @@ void stlObj::setlightColor(colorObj* color) {
 				
 				
 // Set the scale of the 3D model.	
-void stlObj::setObjScale(double scale) {
+void triDObj::setObjScale(double scale) {
 
 	setup.scale = scale;
 	setupChange = true;
@@ -435,7 +424,7 @@ void stlObj::setObjScale(double scale) {
 
 
 // Set the location of the 3D model.
-void stlObj::setObjLoc(triDPoint* loc) {
+void triDObj::setObjLoc(triDPoint* loc) {
 
 	setup.location.x	= loc->x;
 	setup.location.y	= loc->y;
@@ -445,7 +434,7 @@ void stlObj::setObjLoc(triDPoint* loc) {
 
 
 // Set the angle that the 3D modle is held.
-void stlObj::setObjAngle(triDRotation* angle) {
+void triDObj::setObjAngle(triDRotation* angle) {
 
 	setup.orientation.xRad	= angle->xRad;
 	setup.orientation.yRad	= angle->yRad;
@@ -455,7 +444,7 @@ void stlObj::setObjAngle(triDRotation* angle) {
 
 
 // Set the location of the camera.
-void stlObj::setCamera(triDPoint* cam) {
+void triDObj::setCamera(triDPoint* cam) {
 
 	setup.camera.x	= cam->x;
 	setup.camera.y	= cam->y;
@@ -464,23 +453,26 @@ void stlObj::setCamera(triDPoint* cam) {
 }
 
 
-void stlObj::drawSelf(void) {
+void triDObj::drawSelf(void) {
 
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
 	
-	screen->drawRect(this,&blue);
-	if (ourFacetList.openForBatchRead()) {
+	if (!init) {
+		screen->drawRect(this,&red);
+		return;
+	}
+	if (ourTriDEngine->openForBatchRead()) {
 		if (setupChange) {
-			if (ourFacetList.createList(&setup)) {
+			if (ourTriDEngine->createList(&setup)) {
 				setupChange = false;
 			}
 		}
-		ourFacetList.resetList();
+		ourTriDEngine->resetList();
 		done = false;
 		do {
-			aFacet = ourFacetList.getNextViewFacet(&setup);
+			aFacet = ourTriDEngine->getNextViewFacet(&setup);
 			if (aFacet.normalVect.isNullVector()) {
 				done = true;
 			} else {
@@ -489,13 +481,13 @@ void stlObj::drawSelf(void) {
 				screen->fillTriangle(&(aFacet.cornerA),&(aFacet.cornerB),&(aFacet.cornerC),&aColor);
 			}
 		} while(!done);
-		ourFacetList.closeBatchRead();
+		ourTriDEngine->closeBatchRead();
 		screen->drawRect(this,&yellow);
 	}
 }
 
 
-void stlObj::calcLightMapper() {
+void triDObj::calcLightMapper() {
 	
 	lightMapper.clearMap();
 	lightMapper.addColor(2*M_PI,&spotColor);
@@ -504,7 +496,7 @@ void stlObj::calcLightMapper() {
 
 
 // Calcualate the color to paint this one triangle.
-colorObj  stlObj::calcColor(viewFacet* aFacet) {
+colorObj  triDObj::calcColor(viewFacet* aFacet) {
 	
 	double		deltaAngle;
 	colorObj		aColor;

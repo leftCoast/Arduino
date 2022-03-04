@@ -31,6 +31,7 @@ struct facetPack {
 class triDFacet {
 
 	public :
+					triDFacet(void);
 					triDFacet(facetPack* facet);
 	virtual		~triDFacet(void);
 	
@@ -38,6 +39,7 @@ class triDFacet {
 					triDTriangle	getFacet(void);
 					triDVector		getNormVect(void);
 					facetPack		getFacetPack(void);
+					triDPoint		getCenterPt(void);
 					void				scale(double scaler);
 					void				offset(triDPoint* offsetPt);
 					void				offset(triDVector* offsetVect);
@@ -65,10 +67,11 @@ class facetList {
 					facetList(void);
 	virtual		~facetList(void);
 	
+	virtual		bool			begin(void);
 	virtual		long			getNumFacets(void)=0;
-	virtual		triDFacet*	getFacet(long index);
+	virtual		triDFacet	getFacet(long index);
 	virtual		void			resetIndex(void);
-	virtual		triDFacet*	getNextFacet(void);
+	virtual		triDFacet	getNextFacet(void);
 	virtual		void			setFacet(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetAfter(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetBefore(triDFacet* facetPtr,long index);
