@@ -4,21 +4,6 @@
 
 
 //****************************************************************************************
-// facetPack:
-//
-// Holds the normal vector, for direction, and the the triD triangle that is the facet
-// itself.
-//****************************************************************************************
-
-
-// struct facetPack {
-// 	triDVector		normVect;
-// 	triDTriangle	facet;
-// };
-
-
-
-//****************************************************************************************
 // triDFacet:
 //
 // The triDFacet class. This is your facet that is able to do trasformations. on itself.
@@ -73,17 +58,11 @@ triDPoint triDFacet::getCenterPt(void) { return getCentPt(&facet); }
 
 void triDFacet::scale(double scaler) {
 	
-	facet.corners[0].x *= scaler;
-	facet.corners[0].y *= scaler;
-	facet.corners[0].z *= scaler;
-	
-	facet.corners[1].x *= scaler;
-	facet.corners[1].y *= scaler;
-	facet.corners[1].z *= scaler;
-	
-	facet.corners[2].x *= scaler;
-	facet.corners[2].y *= scaler;
-	facet.corners[2].z *= scaler;
+	for (byte i=0;i<3;i++) {
+		facet.corners[i].x *= scaler;
+		facet.corners[i].y *= scaler;
+		facet.corners[i].z *= scaler;
+	}
 }
 
 
@@ -95,18 +74,11 @@ void triDFacet::offset(triDVector* offsetVect) { offset(offsetVect->getX(),offse
 
 void triDFacet::offset(double x,double y,double z) {
 
-	facet.corners[0].x += x;
-	facet.corners[0].y += y;
-	facet.corners[0].z += z;
-	
-	facet.corners[1].x += x;
-	facet.corners[1].y += y;
-	facet.corners[1].z += z;
-	
-	facet.corners[2].x += x;
-	facet.corners[2].y += y;
-	facet.corners[2].z += z;
-
+	for (byte i=0;i<3;i++) {
+		facet.corners[i].x += x;
+		facet.corners[i].y += y;
+		facet.corners[i].z += z;
+	}
 }
 
 
@@ -116,24 +88,13 @@ void triDFacet::rotate(triDRotation* rotation) {
 	triDVector	bVect;
 	triDVector	nVect;
 	
-	aVect.setVector(facet.corners[0].x,facet.corners[0].y,facet.corners[0].z);
-	aVect.rotateVect(rotation);
-	facet.corners[0].x	= aVect.getX();
-	facet.corners[0].y	= aVect.getY();
-	facet.corners[0].z	= aVect.getZ();
-	
-	aVect.setVector(facet.corners[1].x,facet.corners[1].y,facet.corners[1].z);
-	aVect.rotateVect(rotation);
-	facet.corners[1].x	= aVect.getX();
-	facet.corners[1].y	= aVect.getY();
-	facet.corners[1].z	= aVect.getZ();
-	
-	aVect.setVector(facet.corners[2].x,facet.corners[2].y,facet.corners[2].z);
-	aVect.rotateVect(rotation);
-	facet.corners[2].x	= aVect.getX();
-	facet.corners[2].y	= aVect.getY();
-	facet.corners[2].z	= aVect.getZ();
-	
+	for (byte i=0;i<3;i++) {
+		aVect.setVector(facet.corners[i].x,facet.corners[i].y,facet.corners[i].z);
+		aVect.rotateVect(rotation);
+		facet.corners[i].x	= aVect.getX();
+		facet.corners[i].y	= aVect.getY();
+		facet.corners[i].z	= aVect.getZ();
+	}
 	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]));
 	bVect.setVector(&(facet.corners[1]),&(facet.corners[2]));
 	nVect = aVect.crossProd(&bVect);
@@ -155,11 +116,6 @@ facetList::facetList(void) { }
 
 
 facetList::~facetList(void) { }
-	
-
-// IF there's anything that needs starting up after starting of code-time. This can be
-// used.
-//bool facetList::begin(void) { return true; }
 
 
 // Some lists may need to be opend (ex:SD card files) before use.

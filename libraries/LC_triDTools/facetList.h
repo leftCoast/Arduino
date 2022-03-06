@@ -70,7 +70,7 @@ class facetList {
 	virtual		bool			begin(void)=0;
 	virtual		bool			openList(void);
 	virtual		void			closeList(void);
-	virtual		long			getNumFacets(void)=0;
+	virtual		long			getNumFacets(void);
 	virtual		void			resetIndex(void);
 	virtual		triDFacet	getTriDFacet(long index);
 	virtual		triDFacet	getNextTriDFacet(void);
