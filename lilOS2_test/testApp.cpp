@@ -2,8 +2,10 @@
 #include <runningAvg.h>
 #include <colorRect.h>
 #include <label.h>
-#include <stlObj.h>
+#include <triDRender.h>
 #include <facetList.h>
+#include <stlList.h>
+
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -185,6 +187,7 @@ void testApp::setup(void) {
    int      offset;
    label*   aLabel;
    mapper   deg(0,2*M_PI,0,360);
+   stlList* STLModel;
       
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
@@ -195,19 +198,19 @@ void testApp::setup(void) {
 
    triDRotation angle;
    triDPoint   location;
-   stlObj* theModel = new stlObj(20,100,180,180,"/teensyM.STL");
-   //stlObj* theModel = new stlObj(20,100,180,180,"/test.stl");
-   theModel->begin();
-   theModel->setObjScale(10);
-   angle.xRad = deg_2_rad(0);
-   angle.yRad = deg_2_rad(40);
-   angle.zRad = deg_2_rad(120);
-   theModel->setObjAngle(&angle);
-   location.x = 160;
-   location.y = 80;
+   triDRender* renderMan = new triDRender(20,100,180,180);
+   STLModel = new stlList("/teensyM.STL");
+   renderMan->begin(STLModel);
+   renderMan->setObjScale(10);
+   angle.xRad = deg_2_rad(-140);
+   angle.yRad = deg_2_rad(0);
+   angle.zRad = deg_2_rad(0);
+   renderMan->setObjAngle(&angle);
+   location.x = -40;
+   location.y = -50;
    location.z = 420;
-   theModel->setObjLoc(&location);
-   addObj(theModel);
+   renderMan->setObjLoc(&location);
+   addObj(renderMan);
    
    /*
    theGrid = new grid(BOUND_CX,BOUND_CY);

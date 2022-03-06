@@ -54,9 +54,13 @@ void triDVector::setVector(double inX,double inY,double inZ) {
 // Set to, two points.
 void triDVector::setVector(triDPoint* stPt,triDPoint* endPt) {
 	
-	x = endPt->x - stPt->x;
-	y = endPt->y - stPt->y;
-	z = endPt->z - stPt->z;
+	triDPoint res;
+	
+	res = triDPointSub(endPt,stPt);
+	setVector(&res);
+//x = endPt->x - stPt->x;
+//y = endPt->y - stPt->y;
+//z = endPt->z - stPt->z;
 }
 
 
@@ -85,6 +89,7 @@ double triDVector::magnitude(void) {
 	sumSquares = x*x + y*y + z*z;
 	return sqrt(sumSquares);
 }
+
 
 void triDVector::scaleBy(double scaler) {
 
@@ -125,28 +130,28 @@ bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }
 // Do the pitch roll yaw transforms on each axis.
 void  triDVector::rotateVect(triDRotation* rotation) {
 	
-	twoDPoint	rotatPt;
+	twoDPoint	rotatePt;
 	
 	if (rotation->xRad) {											// Rotate around x
-		rotatPt.x = y;
-		rotatPt.y = z;
-		rotate(&rotatPt,rotation->xRad);
-		y = rotatPt.x;
-		z = rotatPt.y;
+		rotatePt.x = y;
+		rotatePt.y = z;
+		rotate(&rotatePt,rotation->xRad);
+		y = rotatePt.x;
+		z = rotatePt.y;
 	}
 	if (rotation->yRad) {											// Rotate around y
-		rotatPt.x = z;
-		rotatPt.y = x;
-		rotate(&rotatPt,rotation->yRad);
-		z = rotatPt.x;
-		x = rotatPt.y;
+		rotatePt.x = z;
+		rotatePt.y = x;
+		rotate(&rotatePt,rotation->yRad);
+		z = rotatePt.x;
+		x = rotatePt.y;
 	}
 	if (rotation->zRad) {											// Rotate around z
-		rotatPt.x = x;
-		rotatPt.y = y;
-		rotate(&rotatPt,rotation->zRad);
-		x = rotatPt.x;
-		y = rotatPt.y;
+		rotatePt.x = x;
+		rotatePt.y = y;
+		rotate(&rotatePt,rotation->zRad);
+		x = rotatePt.x;
+		y = rotatePt.y;
 	}																		//
 }
 

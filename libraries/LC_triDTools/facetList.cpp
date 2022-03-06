@@ -146,42 +146,36 @@ void triDFacet::rotate(triDRotation* rotation) {
 // facetList
 //
 // This is a purely virtual base class for a facet list. The idea is to make it not matter
-// where facets come from or go to. But this is the interface that we can use to stuff
+// where facets come from or go to. So this is the interface that we can use to stuff
 // them into a list or display them.
 //****************************************************************************************
 
 
-triDFacet*	passingFacet 	= NULL;
-int			facetUsers		= 0;
+facetList::facetList(void) { }
 
 
-facetList::facetList(void) {
-
-	if (!facetUsers) {													// If no one is using the facet ptr..
-		resizeBuff(sizeof(triDFacet),(byte**)&passingFacet);	// We'll allocate it for use.
-	}																			//
-	facetUsers++;															// And add ourselves to the user count.
-}
-
-
-facetList::~facetList(void) {
-
-	facetUsers--;										// Drop ourselves from the facet ptr count.
-	if (!facetUsers) {								// If no one is left using this pointer..
-		resizeBuff(0,(byte**)&passingFacet);	// We'll recycle it.
-	}
-}
+facetList::~facetList(void) { }
 	
 
-bool facetList::begin(void) { return true; }
+// IF there's anything that needs starting up after starting of code-time. This can be
+// used.
+//bool facetList::begin(void) { return true; }
 
 
+// Some lists may need to be opend (ex:SD card files) before use.
+bool facetList::openList(void) { return true; }
+ 
+ 
+// And those that do need to be opened for use need to be closed after use.
+void facetList::closeList(void) {  }
+	
+	
 // Pass back the total number facets we hold/offer.
 long facetList::getNumFacets(void) { }
 
 
 // Pass back a temporary pointer to the info on facet given by index.
-triDFacet facetList::getFacet(long index) { }
+triDFacet facetList::getTriDFacet(long index) { }
 
 
 // Reset the internal index to the first facet. Used for..
@@ -189,7 +183,7 @@ void facetList::resetIndex(void) { }
 
 
 // Passes back the next unread facet on our list.
-triDFacet facetList::getNextFacet(void) { }
+triDFacet facetList::getNextTriDFacet(void) { }
 
 
 // Take this inputted facet data and save it in the location given by index.
