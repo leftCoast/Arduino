@@ -7,24 +7,9 @@
 
 
 //****************************************************************************************
-// facetPack:
-//
-// Holds the normal vector, for direction, and the the triD triangle that is the facet
-// itself.
-//****************************************************************************************
-
-
-struct facetPack {
-	triDVector		normVect;
-	triDTriangle	facet;
-};
-
-
-
-//****************************************************************************************
 // triDFacet:
 //
-// The triDFacet class. This is your facet that is able to do trasformations. on itself.
+// The triDFacet class. This is your facet that is able to do trasformations. On itself.
 //****************************************************************************************
 
 
@@ -32,22 +17,24 @@ class triDFacet {
 
 	public :
 					triDFacet(void);
-					triDFacet(facetPack* facet);
+					triDFacet(triDTriangle* orderdCorners);
+					triDFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC);
 	virtual		~triDFacet(void);
 	
-					void				setFacet(facetPack* facet);
+					void				setFacet(triDTriangle* orderdCorners);
+					void				setFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC);
 					triDTriangle	getFacet(void);
 					triDVector		getNormVect(void);
-					facetPack		getFacetPack(void);
 					triDPoint		getCenterPt(void);
 					void				scale(double scaler);
 					void				offset(triDPoint* offsetPt);
 					void				offset(triDVector* offsetVect);
 					void				offset(double x,double y,double z);
 					void				rotate(triDRotation* rotation);
-					
-					triDVector		normVect;
+					void				calcNormal(void);
+				
 					triDTriangle	facet;
+					triDVector		normVect;
 };
 	
 

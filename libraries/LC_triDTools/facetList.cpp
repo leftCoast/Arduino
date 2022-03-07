@@ -9,53 +9,65 @@
 // The triDFacet class. This is your facet that is able to do trasformations. on itself.
 //****************************************************************************************
 
+
+// Default we make up a NULL facet.
 triDFacet::triDFacet(void) {
 	
-	facetPack aNULLFacet;
-	aNULLFacet.normVect.setVector(1,1,1);
-	aNULLFacet.facet.corners[0].x = 0;
-	aNULLFacet.facet.corners[0].y = 0;
-	aNULLFacet.facet.corners[0].z = 0;
-	aNULLFacet.facet.corners[1].x = 0;
-	aNULLFacet.facet.corners[1].y = 0;
-	aNULLFacet.facet.corners[1].z = 0;
-	aNULLFacet.facet.corners[2].x = 0;
-	aNULLFacet.facet.corners[2].y = 0;
-	aNULLFacet.facet.corners[2].z = 0;
-	setFacet(&aNULLFacet);
+	triDPoint aPt;
+	
+	aPt.x = 0;
+	aPt.y = 0;
+	aPt.z = 0;
+	setFacet(&aPt,&aPt,&aPt);
 }
 
 
-triDFacet::triDFacet(facetPack* facet) { setFacet(facet); }
+// Create a facet using a triangle with ordered corners. The order gives the direction of
+// the normal vector.
+triDFacet::triDFacet(triDTriangle* orderdCorners) { setFacet(orderdCorners); }
 
 
+// Create a facet with just three separate corners. And these need to be in order to
+// successfully calculate the normal vector.
+triDFacet::triDFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC) { setFacet(cornerA,cornerB,cornerC); } 
+
+
+// Dump a facet. And there's nothing we need to do here.
 triDFacet::~triDFacet(void) {  }
 
-	
-void triDFacet::setFacet(facetPack* inFacet) {
 
-	normVect.setVector(&(inFacet->normVect));
-	facet = inFacet->facet;
+// Set these values to the ones in this ordered triangle. Then calculate our normal
+// vector.
+void triDFacet::setFacet(triDTriangle* orderdCorners) {
+
+	setFacet(&(orderdCorners->corners[0]),&(orderdCorners->corners[1]),&(orderdCorners->corners[2]));
 }
 
 
+// Set this facet to these three points in 3 space. Then calculate our normal vector.
+void triDFacet::setFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC) {
+	
+	facet.corners[0] = *cornerA;
+	facet.corners[1] = *cornerB;
+	facet.corners[2] = *cornerC;
+	calcNormal();
+}
+
+
+// Hand back our facet triangle.
 triDTriangle triDFacet::getFacet(void) { return facet; }
 
+
+// Hand back our normal vector.
 triDVector triDFacet::getNormVect(void) { return normVect; }
 
-facetPack triDFacet::getFacetPack(void) {
-	
-	facetPack aPack;
-	
-	aPack.normVect = normVect;
-	aPack.facet = facet;
-	return aPack;
-}
 
-
+// Calculate and hand back the center point of our facet triangle.
 triDPoint triDFacet::getCenterPt(void) { return getCentPt(&facet); }
 
 
+// Scale the size of our facet. Will also tend to shift the size to match other scaled
+// facets.
 void triDFacet::scale(double scaler) {
 	
 	for (byte i=0;i<3;i++) {
@@ -66,12 +78,15 @@ void triDFacet::scale(double scaler) {
 }
 
 
+// Move the facet by adding this offset point to it.
 void triDFacet::offset(triDPoint* offsetPt) { offset(offsetPt->x,offsetPt->y,offsetPt->z); }
 
 
+// Move the facet by adding this offset vector to it. 
 void triDFacet::offset(triDVector* offsetVect) { offset(offsetVect->getX(),offsetVect->getY(),offsetVect->getZ()); }
 
 
+// Do the actual calculation for the offsetting calls.
 void triDFacet::offset(double x,double y,double z) {
 
 	for (byte i=0;i<3;i++) {
@@ -82,11 +97,10 @@ void triDFacet::offset(double x,double y,double z) {
 }
 
 
+// Rotate this facet around the origin point using these radian values.
 void triDFacet::rotate(triDRotation* rotation) {
 
 	triDVector	aVect;
-	triDVector	bVect;
-	triDVector	nVect;
 	
 	for (byte i=0;i<3;i++) {
 		aVect.setVector(facet.corners[i].x,facet.corners[i].y,facet.corners[i].z);
@@ -95,6 +109,17 @@ void triDFacet::rotate(triDRotation* rotation) {
 		facet.corners[i].y	= aVect.getY();
 		facet.corners[i].z	= aVect.getZ();
 	}
+	calcNormal();
+}
+
+
+// Given that the corners of the facet are set and in order.. Calculate our normal vector.
+void triDFacet::calcNormal(void) {
+
+	triDVector	aVect;
+	triDVector	bVect;
+	triDVector	nVect;
+	
 	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]));
 	bVect.setVector(&(facet.corners[1]),&(facet.corners[2]));
 	nVect = aVect.crossProd(&bVect);

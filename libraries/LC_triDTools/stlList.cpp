@@ -53,20 +53,19 @@ long stlList::getNumFacets(void) { return (long)stlFile::getNumFacets(); }
 // Takes an STLFacet, and sets those values into the passing facet pointer;
 triDFacet stlList::readFileFacet(STLFacet* fileFacet) {
 	
-	facetPack	aFacet;
 	triDFacet	res;
+
+	res.normVect.setVector(fileFacet->normVect[0],fileFacet->normVect[1],fileFacet->normVect[2]);
+	res.facet.corners[0].x = fileFacet->vertex1[0];
+	res.facet.corners[0].y = fileFacet->vertex1[1];
+	res.facet.corners[0].z = fileFacet->vertex1[2];
+	res.facet.corners[1].x = fileFacet->vertex2[0];
+	res.facet.corners[1].y = fileFacet->vertex2[1];
+	res.facet.corners[1].z = fileFacet->vertex2[2];
+	res.facet.corners[2].x = fileFacet->vertex3[0];
+	res.facet.corners[2].y = fileFacet->vertex3[1];
+	res.facet.corners[2].z = fileFacet->vertex3[2];
 	
-	aFacet.normVect.setVector(fileFacet->normVect[0],fileFacet->normVect[1],fileFacet->normVect[2]);
-	aFacet.facet.corners[0].x = fileFacet->vertex1[0];
-	aFacet.facet.corners[0].y = fileFacet->vertex1[1];
-	aFacet.facet.corners[0].z = fileFacet->vertex1[2];
-	aFacet.facet.corners[1].x = fileFacet->vertex2[0];
-	aFacet.facet.corners[1].y = fileFacet->vertex2[1];
-	aFacet.facet.corners[1].z = fileFacet->vertex2[2];
-	aFacet.facet.corners[2].x = fileFacet->vertex3[0];
-	aFacet.facet.corners[2].y = fileFacet->vertex3[1];
-	aFacet.facet.corners[2].z = fileFacet->vertex3[2];
-	res.setFacet(&aFacet);
 	return res;
 }
 //
