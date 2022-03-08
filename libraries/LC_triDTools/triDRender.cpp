@@ -158,9 +158,10 @@ bool triDRender::begin(facetList* inModel) {
 		ourModel = inModel;
 		if (ourModel->begin()) {
 			setupChange	= false;						// Cause' really there's nothing useful here, just defaults.
-			ambientColor.setColor(LC_CHARCOAL);	// Grey is a good ambiant color to start with.
-			spotPos.x	= 0;							// Default location of the spot light.
-			spotPos.y	= 0;
+			//ambientColor.setColor(LC_CHARCOAL);	// Grey is a good ambiant color to start with.
+			ambientColor.setColor(LC_BLACK);
+			spotPos.x	= -100;							// Default location of the spot light.
+			spotPos.y	= -200;
 			spotPos.z	= -200;
 			spotColor.setColor(&white);			// Default spot light color.
 			calcLightMapper();						// lIghts are all  We can do the light mapper now.

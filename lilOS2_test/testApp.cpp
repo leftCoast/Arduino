@@ -6,6 +6,8 @@
 #include <facetList.h>
 #include <stlList.h>
 #include <arrayList.h>
+#include <resizeBuff.h>
+
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -180,59 +182,27 @@ testApp::~testApp(void) {
    if (bno) delete(bno);
 }
 
-triDTriangle   facets[37];
-
-void createCircleThing(void) {
+triDTriangle* createCircleThing(int slices,double zAngle,double radius) {
    
-   triDPoint      iPt;
-   triDPoint      aPt;
-   triDPoint      bPt;
-   triDPoint      cPt;
-   triDVector     aVect;
    double         yAngle;
-   double         zAngle;
-   int            numSlices;
    double         slice;
-   uint32_t       idx;
-   numSlices   = 12;
-   slice      = deg_2_rad(360/numSlices);
-   zAngle      = deg_2_rad(30);
-   iPt.x       = 0;
-   iPt.y       = 100;
-   iPt.z       = 0;
-
-   idx = 0;
-   for(int i=0;i<numSlices;i++) {
-      yAngle = i * slice;
-      aVect.setVector(&iPt);
-      aVect.rotateVect(0,0,-zAngle);
-      cPt = aVect.getPoint();
-      aVect.rotateVect(0,yAngle,0);
-      bPt = aVect.getPoint();
-      facets[idx].corners[0] = iPt;
-      facets[idx].corners[1] = bPt;
-      facets[idx].corners[2] = cPt;
-      idx++;
-   }
-   for(int i=0;i<numSlices;i++) {
-      yAngle = i * slice;
-      aVect.setVector(&iPt);
-      aVect.rotateVect(0,0,-zAngle);
-      aPt = aVect.getPoint();
-      aVect.rotateVect(0,0,-zAngle);
-      cPt = aVect.getPoint();
-      aVect.rotateVect(0,yAngle,0);
-      bPt = aVect.getPoint();
-      facets[idx].corners[0] = aPt;
-      facets[idx].corners[1] = bPt;
-      facets[idx].corners[2] = cPt;
-      idx++;
-      aVect.rotateVect(0,0,zAngle);
-      cPt = aVect.getPoint();
-      facets[idx].corners[0] = cPt;
-      facets[idx].corners[1] = bPt;
-      facets[idx].corners[2] = aPt;
-      idx++;
+   triDVector     vectA;
+   triDVector     vectB;
+   triDTriangle*  facets;
+   int            count;
+   while(!Serial) { delay(10); }
+   
+   facets = NULL;
+   resizeBuff(sizeof(triDTriangle),(byte**)&facets);
+   slice = (2*M_PI)/slices;
+   vectA.setVector(0,radius*sin(zAngle),radius*cos(zAngle));
+   count = 1;
+   for (int i=0;i<slices;i++) {
+      vectB.setVector(&vectA);
+      vectB.rotateVect(0,count*slice,0);
+      count++;
+      //facets[i].corner[0] = 
+      
    }
 }
 
@@ -258,17 +228,18 @@ void testApp::setup(void) {
    triDRotation angle;
    triDPoint   location;
    triDRender* renderMan = new triDRender(20,100,180,180);
-   STLModel = new stlList("/teensyM.STL");
-   arrayModel = new arrayList(facets,37);
+   //STLModel = new stlList("/teensyM.STL");
+    STLModel = new stlList("/hemi.STL");
+   //arrayModel = new arrayList(facets,37);
    renderMan->begin(STLModel);
    //renderMan->begin(arrayModel);
-   renderMan->setObjScale(6);
-   angle.xRad = deg_2_rad(-40);
-   angle.yRad = deg_2_rad(180);
-   angle.zRad = deg_2_rad(0);
+   renderMan->setObjScale(4);
+   angle.xRad = deg_2_rad(-10);
+   angle.yRad = deg_2_rad(150);
+   angle.zRad = deg_2_rad(180);
    renderMan->setObjAngle(&angle);
-   location.x = 140;
-   location.y = 0;
+   location.x = 50;
+   location.y = 120;
    location.z = 250;
    renderMan->setObjLoc(&location);
    addObj(renderMan);
