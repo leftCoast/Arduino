@@ -132,6 +132,10 @@ void  triDVector::rotateVect(triDRotation* rotation) {
 	
 	twoDPoint	rotatePt;
 	
+	//Serial.print("Rad x,y,z: ");
+	//Serial.print(rotation->xRad);Serial.print(", ");
+	//Serial.print(rotation->yRad);Serial.print(", ");
+	//Serial.println(rotation->zRad);
 	if (rotation->xRad) {											// Rotate around x
 		rotatePt.x = y;
 		rotatePt.y = z;
@@ -204,7 +208,7 @@ double triDVector::angleBetween(triDVector* inVect) {
 
 void triDVector::printVector(void) {
 
-	Serial.print("Point x,y,z: ");
+	Serial.print("Vector x,y,z: ");
 	Serial.print(x);Serial.print(", ");
 	Serial.print(y);Serial.print(", ");
 	Serial.print(z);

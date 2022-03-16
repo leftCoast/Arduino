@@ -1,7 +1,7 @@
 #include <facetList.h>
 #include <resizeBuff.h>
 
-
+#include <debug.h>
 
 //****************************************************************************************
 // triDFacet:
@@ -12,7 +12,7 @@
 
 // Default we make up a NULL facet.
 triDFacet::triDFacet(void) {
-	
+ST	
 	triDPoint aPt;
 	
 	aPt.x = 0;
@@ -38,19 +38,17 @@ triDFacet::~triDFacet(void) {  }
 
 // Set these values to the ones in this ordered triangle. Then calculate our normal
 // vector.
-void triDFacet::setFacet(triDTriangle* orderdCorners) {
-
-	setFacet(&(orderdCorners->corners[0]),&(orderdCorners->corners[1]),&(orderdCorners->corners[2]));
-}
+void triDFacet::setFacet(triDTriangle* orderdCorners) { setFacet(&(orderdCorners->corners[0]),&(orderdCorners->corners[1]),&(orderdCorners->corners[2])); }
 
 
 // Set this facet to these three points in 3 space. Then calculate our normal vector.
 void triDFacet::setFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC) {
 	
-	facet.corners[0] = *cornerA;
-	facet.corners[1] = *cornerB;
-	facet.corners[2] = *cornerC;
+	facet.corners[0] = (*cornerA);
+	facet.corners[1] = (*cornerB);
+	facet.corners[2] = (*cornerC);
 	calcNormal();
+	//normVect.printVector();
 }
 
 
@@ -127,6 +125,19 @@ void triDFacet::calcNormal(void) {
 	normVect.setVector(&nVect);
 }
 
+
+void triDFacet::printFacet(void) {
+
+	Serial.print("Corner A: ");
+	printTriDPt(&(facet.corners[0]));
+	Serial.print("Corner B: ");
+	printTriDPt(&(facet.corners[1]));
+	Serial.print("Corner C: ");
+	printTriDPt(&(facet.corners[2]));
+	Serial.print("Normal: ");
+	normVect.printVector();
+	Serial.println("-----------");
+}
 
 //****************************************************************************************
 // facetList

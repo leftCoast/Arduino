@@ -1,5 +1,7 @@
 #include <arrayList.h>
 
+#include <debug.h>
+
 
 arrayList::arrayList(triDTriangle* inList,long numItems)
 	: facetList() { 
@@ -22,8 +24,8 @@ long arrayList::getNumFacets(void) { return numFacets; }
 
 
 // Pass back this facet given by index. Does NOT increment index
-triDFacet arrayList::getTriDFacet(long inIndex) {
-
+triDFacet arrayList::getTriDFacet(long inIndex) { 
+	
 	triDFacet	aFacet(&(ourList[inIndex]));
 	
 	return aFacet;

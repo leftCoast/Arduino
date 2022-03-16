@@ -146,8 +146,8 @@ void clearAngleBtn::doAction(void) { ourApp->setOffsets(false); }
 runningAvg smootherX(5);
 runningAvg smootherY(5);
 
-float rad_2_deg(float x) { return x*180/M_PI; }
-float deg_2_rad(double x) { return x*M_PI/180; }
+float rad_2_deg(float x) { return x*180.0/PI; }
+float deg_2_rad(double x) { return (x*PI/180.0); }
 
 
 testApp::testApp(lilOS* ourOS,int ourAppID)
@@ -182,29 +182,50 @@ testApp::~testApp(void) {
    if (bno) delete(bno);
 }
 
+
 triDTriangle* createCircleThing(int slices,double zAngle,double radius) {
    
-   double         yAngle;
+   //double         yAngle;
    double         slice;
+   double         deltaAngle;
+   double         twoPi;
+   triDVector     vectI;
    triDVector     vectA;
-   triDVector     vectB;
    triDTriangle*  facets;
-   int            count;
-   while(!Serial) { delay(10); }
-   
+
    facets = NULL;
-   resizeBuff(sizeof(triDTriangle),(byte**)&facets);
-   slice = (2*M_PI)/slices;
-   vectA.setVector(0,radius*sin(zAngle),radius*cos(zAngle));
-   count = 1;
+   resizeBuff(sizeof(triDTriangle)*slices,(byte**)&facets);
+   twoPi = 2*M_PI;
+   slice = twoPi/(float)slices;
+   Serial.println(slice,5);
+   vectI.setVector(0,0,radius);
+   vectI.rotateVect(0,zAngle,0);
    for (int i=0;i<slices;i++) {
-      vectB.setVector(&vectA);
-      vectB.rotateVect(0,count*slice,0);
-      count++;
-      //facets[i].corner[0] = 
       
+      facets[i].corners[0].x = 0;                     // 
+      facets[i].corners[0].y = 0;
+      facets[i].corners[0].z = radius;
+
+      deltaAngle  = i*slice;              // How far we'll need to shift the vector..
+      vectA.setVector(&vectI);            // Initial vector.
+      vectA.rotateVect(0,0,deltaAngle);   // Add this much to the rotation.
+      facets[i].corners[2].x = vectA.getX();
+      facets[i].corners[2].y = vectA.getY();
+      facets[i].corners[2].z = vectA.getZ();
+      
+      deltaAngle  = slice;                // We've aleready added i*slice. We need one more slice.
+      vectA.rotateVect(0,0,slice);
+      facets[i].corners[1].x = vectA.getX();
+      facets[i].corners[1].y = vectA.getY();
+      facets[i].corners[1].z = vectA.getZ();
+
+      //printTriDTriangle(&(facets[i]));
    }
+   return facets;
 }
+
+
+
 
 
 void testApp::setup(void) {
@@ -223,24 +244,23 @@ void testApp::setup(void) {
       sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
    }
    
-   createCircleThing();
-   
+   triDTriangle* theModel = createCircleThing(12,deg_2_rad(15),100);
    triDRotation angle;
    triDPoint   location;
    triDRender* renderMan = new triDRender(20,100,180,180);
-   //STLModel = new stlList("/teensyM.STL");
-    STLModel = new stlList("/hemi.STL");
-   //arrayModel = new arrayList(facets,37);
+   STLModel = new stlList("/teensyM.STL");
+   //STLModel = new stlList("/hemi.STL");
+   //arrayModel = new arrayList(theModel,12);
    renderMan->begin(STLModel);
-   //renderMan->begin(arrayModel);
-   renderMan->setObjScale(4);
-   angle.xRad = deg_2_rad(-10);
-   angle.yRad = deg_2_rad(150);
-   angle.zRad = deg_2_rad(180);
+   renderMan->begin(arrayModel);
+   renderMan->setObjScale(10);
+   angle.xRad = deg_2_rad(-60);
+   angle.yRad = deg_2_rad(0);
+   angle.zRad = deg_2_rad(0);
    renderMan->setObjAngle(&angle);
-   location.x = 50;
-   location.y = 120;
-   location.z = 250;
+   location.x = 0;
+   location.y = -40;
+   location.z = 100;
    renderMan->setObjLoc(&location);
    addObj(renderMan);
    

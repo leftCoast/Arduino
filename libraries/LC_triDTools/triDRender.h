@@ -33,7 +33,7 @@ struct viewFacet {
 };
 
 void offset2DFacet(viewFacet* aFacet,int x,int y);
-//void printViewFacet(viewFacet* aFacet);
+void printViewFacet(viewFacet* aFacet);
 
 
 

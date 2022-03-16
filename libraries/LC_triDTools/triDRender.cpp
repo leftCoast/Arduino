@@ -104,7 +104,24 @@ void offset2DFacet(viewFacet* aFacet,int x,int y) {
 	}
 }
 
-
+/*
+triDVector	normalVect;
+	triDPoint	midPoint;		
+	point			corner[3];
+*/	
+	
+void printViewFacet(viewFacet* aFacet) {
+	
+	Serial.print("Corner A: (");
+	Serial.print(aFacet->corner[0].x);Serial.print(", ");Serial.print(aFacet->corner[0].y);Serial.println(")");
+	
+	Serial.print("Corner B: (");
+	Serial.print(aFacet->corner[1].x);Serial.print(", ");Serial.print(aFacet->corner[1].y);Serial.println(")");
+	
+	Serial.print("Corner B: (");
+	Serial.print(aFacet->corner[2].x);Serial.print(", ");Serial.print(aFacet->corner[2].y);Serial.println(")");
+	Serial.println("---------------------------");
+}
 
 //
 //
@@ -224,6 +241,7 @@ void triDRender::setObjLoc(triDPoint* loc) {
 	setupChange = true;
 }
 
+
 // Sets up the orientation of the model.
 void triDRender::setObjAngle(triDRotation* angle) {
 
@@ -245,7 +263,13 @@ void triDRender::drawSelf(void) {
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
+	//colorMapper	rainbow(&green,&red);
+	//mapper		percent;
+	//long			count;
+	//float			pecentVal;
 	
+	//percent.setValues(0,ourModel->getNumFacets()-1,0,100);
+	//count = 0;
 	if (!init) {
 		screen->drawRect(this,&red);
 		return;
@@ -264,8 +288,15 @@ void triDRender::drawSelf(void) {
 				done = true;
 			} else {
 				aColor = calcColor(&aFacet);
+				//pecentVal = percent.map(count);
+				//Serial.print("Count: ");Serial.println(count);
+				//count++;
+				//Serial.print("Percent: ");Serial.println(pecentVal);
+				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
+				//printViewFacet(&aFacet);
+				//db.trace("click me",true);
 			}
 		} while(!done);
 		ourModel->closeList();

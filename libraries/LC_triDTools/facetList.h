@@ -32,7 +32,8 @@ class triDFacet {
 					void				offset(double x,double y,double z);
 					void				rotate(triDRotation* rotation);
 					void				calcNormal(void);
-				
+					void				printFacet(void);
+					
 					triDTriangle	facet;
 					triDVector		normVect;
 };
