@@ -3,6 +3,103 @@
 
 #include <debug.h>
 
+
+
+//****************************************************************************************
+// objCenter:
+//
+// Tool for calculating the center point of a list of facets.
+//****************************************************************************************
+
+
+objCenter::objCenter(void) {  pointSet = false; }
+
+				
+objCenter::~objCenter(void) { }
+	
+	
+void objCenter::addFacet(triDFacet* aFacet) {
+
+	double	x;
+	double	y;
+	double	z;
+	
+	x = aFacet->facet.corners[0].x;
+	y = aFacet->facet.corners[0].y;
+	z = aFacet->facet.corners[0].z;
+	addItem(x,y,z);
+	x = aFacet->facet.corners[1].x;
+	y = aFacet->facet.corners[1].y;
+	z = aFacet->facet.corners[1].z;
+	addItem(x,y,z);
+	x = aFacet->facet.corners[2].x;
+	y = aFacet->facet.corners[2].y;
+	z = aFacet->facet.corners[2].z;
+	addItem(x,y,z);
+}
+
+
+void objCenter::addItem(double x,double y,double z) {
+
+	if (!pointSet) {
+		xMin = x;
+		xMax = x;
+		yMin = y;
+		yMax = y;
+		zMin = z;
+		zMax = z;
+		pointSet = true;
+	} else {
+		if (x < xMin) xMin = x;
+		else if (x > xMax) xMax = x;
+		if (y < yMin) yMin = y;
+		else if (y > yMax) yMax = y;
+		if (z < zMin) zMin = z;
+		else if (z > zMax) zMax = z;
+	}
+}
+
+
+triDPoint objCenter::getCenterPt(void) {
+
+	triDPoint	aCenter;
+	
+	aCenter.x = (xMin+xMax)/2.0;
+	aCenter.y = (yMin+yMax)/2.0;
+	aCenter.z = (zMin+zMax)/2.0;
+	return aCenter;
+}
+
+	
+void objCenter::printObjCenter(void) {
+
+	triDPoint	aCenter;
+	
+	Serial.println("----------  objCenter  ----------");
+	Serial.print("x min, max   : ");
+	Serial.print(xMin);Serial.print(", ");
+	Serial.print(xMax);Serial.println();
+	Serial.print("y min, max   : ");
+	Serial.print(yMin);Serial.print(", ");
+	Serial.print(yMax);Serial.println();	
+	Serial.print("z min, max   : ");
+	Serial.print(zMin);Serial.print(", ");
+	Serial.print(zMax);Serial.println();
+	aCenter = getCenterPt();
+	Serial.print("Center x,y,z : ");
+	Serial.print(aCenter.x);Serial.print(", ");
+	Serial.print(aCenter.y);Serial.print(", ");
+	Serial.print(aCenter.z);Serial.println();
+	Serial.println("---------------------------------");
+}
+
+
+
+
+
+
+
+
 //****************************************************************************************
 // triDFacet:
 //
@@ -12,7 +109,7 @@
 
 // Default we make up a NULL facet.
 triDFacet::triDFacet(void) {
-ST	
+	
 	triDPoint aPt;
 	
 	aPt.x = 0;
@@ -44,11 +141,10 @@ void triDFacet::setFacet(triDTriangle* orderdCorners) { setFacet(&(orderdCorners
 // Set this facet to these three points in 3 space. Then calculate our normal vector.
 void triDFacet::setFacet(triDPoint* cornerA,triDPoint* cornerB,triDPoint* cornerC) {
 	
-	facet.corners[0] = (*cornerA);
-	facet.corners[1] = (*cornerB);
-	facet.corners[2] = (*cornerC);
+	facet.corners[0] = *cornerA;
+	facet.corners[1] = *cornerB;
+	facet.corners[2] = *cornerC;
 	calcNormal();
-	//normVect.printVector();
 }
 
 
@@ -96,13 +192,13 @@ void triDFacet::offset(double x,double y,double z) {
 
 
 // Rotate this facet around the origin point using these radian values.
-void triDFacet::rotate(triDRotation* rotation) {
+void triDFacet::rotate(triDRotation* rotation,triDPoint* centerPt) {
 
 	triDVector	aVect;
 	
 	for (byte i=0;i<3;i++) {
 		aVect.setVector(facet.corners[i].x,facet.corners[i].y,facet.corners[i].z);
-		aVect.rotateVect(rotation);
+		aVect.rotateVect(rotation,centerPt);
 		facet.corners[i].x	= aVect.getX();
 		facet.corners[i].y	= aVect.getY();
 		facet.corners[i].z	= aVect.getZ();
@@ -139,6 +235,8 @@ void triDFacet::printFacet(void) {
 	Serial.println("-----------");
 }
 
+
+
 //****************************************************************************************
 // facetList
 //
@@ -148,7 +246,12 @@ void triDFacet::printFacet(void) {
 //****************************************************************************************
 
 
-facetList::facetList(void) { }
+facetList::facetList(void) {
+
+	centerPt.x = 0;
+	centerPt.y = 0;
+	centerPt.z = 0;
+}
 
 
 facetList::~facetList(void) { }
@@ -164,6 +267,16 @@ void facetList::closeList(void) {  }
 	
 // Pass back the total number facets we hold/offer.
 long facetList::getNumFacets(void) { }
+
+
+// Calculate the center point of the model. This is planned to be used for rotations.
+triDPoint facetList::getModelCenter(void) {
+
+	if (centerPt.x==0&&centerPt.y==0&&centerPt.z==0) {
+		calculateCenter();
+	}
+	return centerPt;
+}
 
 
 // Pass back a temporary pointer to the info on facet given by index.
@@ -188,3 +301,20 @@ void facetList::insertFacetAfter(triDFacet* facetPtr,long index) { }
 
 // Take this inputted facet data and insert it BEFORE the location given by index. (Makes the list longer)
 void facetList::insertFacetBefore(triDFacet* facetPtr,long index) { }
+
+
+// Do the actual calculation for finding the center point of the model.
+void  facetList::calculateCenter(void) {
+
+	objCenter	centerTool;
+	triDFacet	aFacet;
+	long			numFacets;
+	
+	numFacets = getNumFacets();
+	for(long i=0;i<numFacets;i++) {
+		aFacet = getTriDFacet(i);
+		centerTool.addFacet(&aFacet);
+	}
+	centerTool.printObjCenter();
+	centerPt = centerTool.getCenterPt();
+}

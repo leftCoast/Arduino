@@ -4,97 +4,19 @@
 
 
 
-// objCenter::objCenter(void) {  pointSet = false; }
-// 
-// 				
-// objCenter::~objCenter(void) { }
-// 	
-// 	
-// void objCenter::addFacet(triDFacet* aFacet) {
-// 
-// 	double	x;
-// 	double	y;
-// 	double	z;
-// 	
-// 	x = aFacet->facet.corners[0].x;
-// 	y = aFacet->facet.corners[0].y;
-// 	z = aFacet->facet.corners[0].z;
-// 	addItem(x,y,z);
-// 	x = aFacet->facet.corners[1].x;
-// 	y = aFacet->facet.corners[1].y;
-// 	z = aFacet->facet.corners[1].z;
-// 	addItem(x,y,z);
-// 	x = aFacet->facet.corners[2].x;
-// 	y = aFacet->facet.corners[2].y;
-// 	z = aFacet->facet.corners[2].z;
-// 	addItem(x,y,z);
-// }
-// 
-// 
-// void objCenter::addItem(double x,double y,double z) {
-// 
-// 	if (!pointSet) {
-// 		xMin = x;
-// 		xMax = x;
-// 		yMin = y;
-// 		yMax = y;
-// 		zMin = z;
-// 		zMax = z;
-// 		pointSet = true;
-// 	} else {
-// 		if (x < xMin) xMin = x;
-// 		else if (x > xMax) xMax = x;
-// 		if (y < yMin) yMin = y;
-// 		else if (y > yMax) yMax = y;
-// 		if (z < zMin) zMin = z;
-// 		else if (z > zMax) zMax = z;
-// 	}
-// }
-// 
-// 
-// triDPoint objCenter::getCenterPt(void) {
-// 
-// 	triDPoint	aCenter;
-// 	
-// 	aCenter.x = (xMin+xMax)/2.0;
-// 	aCenter.y = (yMin+yMax)/2.0;
-// 	aCenter.z = (zMin+zMax)/2.0;
-// 	return aCenter;
-// }
-// 
-// 	
-// void objCenter::printObjCenter(void) {
-// 
-// 	triDPoint	aCenter;
-// 	
-// 	Serial.println("----------  objCenter  ----------");
-// 	Serial.print("x min, max   : ");
-// 	Serial.print(xMin);Serial.print(", ");
-// 	Serial.print(xMax);Serial.println();
-// 	Serial.print("y min, max   : ");
-// 	Serial.print(yMin);Serial.print(", ");
-// 	Serial.print(yMax);Serial.println();	
-// 	Serial.print("z min, max   : ");
-// 	Serial.print(zMin);Serial.print(", ");
-// 	Serial.print(zMax);Serial.println();
-// 	aCenter = getCenterPt();
-// 	Serial.print("Center x,y,z : ");
-// 	Serial.print(aCenter.x);Serial.print(", ");
-// 	Serial.print(aCenter.y);Serial.print(", ");
-// 	Serial.print(aCenter.z);Serial.println();
-// 	Serial.println("---------------------------------");
-// }
+
 			
 				
 
-//****************************************************************************************
+
 
 
 //****************************************************************************************
 // offset2DFacet
 //
 // Move your result triangle by "this much".
-//
+//****************************************************************************************
+
 
 void offset2DFacet(viewFacet* aFacet,int x,int y) {
 
@@ -104,11 +26,6 @@ void offset2DFacet(viewFacet* aFacet,int x,int y) {
 	}
 }
 
-/*
-triDVector	normalVect;
-	triDPoint	midPoint;		
-	point			corner[3];
-*/	
 	
 void printViewFacet(viewFacet* aFacet) {
 	
@@ -123,11 +40,13 @@ void printViewFacet(viewFacet* aFacet) {
 	Serial.println("---------------------------");
 }
 
-//
-//
+
+
 //****************************************************************************************
 // indexItem:
 //
+//****************************************************************************************
+
 
 indexItem::indexItem(long index,double distance)
 	: linkListObj() {
@@ -142,10 +61,11 @@ indexItem::~indexItem(void) {  }
 long indexItem::getIndex(void) {  return facetIndex; }
 
 
-//
+
 //****************************************************************************************
 // triDRender:
 //
+//****************************************************************************************
 
 
 triDRender::triDRender(int inX,int inY,int inWidth,int inHeight)
@@ -188,6 +108,9 @@ bool triDRender::begin(facetList* inModel) {
 			orientation.xRad	= 0;					// Set PITCH angle of the 3D object.
 			orientation.yRad	= 0;					// Set YAW angle of the 3D object.
 			orientation.zRad	= 0;					// Set ROLL angle of the 3D object.
+			rotationCenter.x	= 0;					// Set rotation around the x,y,z axis.
+			rotationCenter.y	= 0;
+			rotationCenter.z	= 0;
 			scale					= 1;					// Multiplier for dimensions. Sets objet size.
 			camera.x				= width/2;			// Camera, view point center of screen in x.
 			camera.y				= height/2;			// Center of screen in y.
@@ -243,9 +166,16 @@ void triDRender::setObjLoc(triDPoint* loc) {
 
 
 // Sets up the orientation of the model.
-void triDRender::setObjAngle(triDRotation* angle) {
+void triDRender::setObjAngle(triDRotation* angle,triDPoint* centerPt) {
 
 	orientation = *angle;
+	if (centerPt) {
+		rotationCenter = *centerPt;
+	} else {
+		rotationCenter.x = 0;
+		rotationCenter.y = 0;
+		rotationCenter.z = 0;
+	}
 	setupChange = true;
 }
 
@@ -263,13 +193,13 @@ void triDRender::drawSelf(void) {
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
-	//colorMapper	rainbow(&green,&red);
-	//mapper		percent;
-	//long			count;
-	//float			pecentVal;
+	colorMapper	rainbow(&green,&red);
+	mapper		percent;
+	long			count;
+	float			pecentVal;
 	
-	//percent.setValues(0,ourModel->getNumFacets()-1,0,100);
-	//count = 0;
+	percent.setValues(0,ourModel->getNumFacets()-1,0,100);
+	count = 0;
 	if (!init) {
 		screen->drawRect(this,&red);
 		return;
@@ -287,16 +217,16 @@ void triDRender::drawSelf(void) {
 			if (aFacet.normalVect.isNullVector()) {
 				done = true;
 			} else {
-				aColor = calcColor(&aFacet);
-				//pecentVal = percent.map(count);
-				//Serial.print("Count: ");Serial.println(count);
-				//count++;
-				//Serial.print("Percent: ");Serial.println(pecentVal);
-				//aColor = rainbow.map(pecentVal);
+				//aColor = calcColor(&aFacet);
+				pecentVal = percent.map(count);
+				Serial.print("Count: ");Serial.println(count);
+				count++;
+				Serial.print("Percent: ");Serial.println(pecentVal);
+				aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
 				//printViewFacet(&aFacet);
-				//db.trace("click me",true);
+				db.trace("click me",true);
 			}
 		} while(!done);
 		ourModel->closeList();
@@ -424,7 +354,11 @@ void triDRender::addIndexItem(indexItem* newItem) {
 
 void triDRender::doTransformations(triDFacet* aFacet) {
 
-	aFacet->rotate(&(orientation));
+	if (rotationCenter.x||rotationCenter.y||rotationCenter.z) {
+		aFacet->rotate(&(orientation),&(rotationCenter));
+	} else {
+		aFacet->rotate(&(orientation));
+	}
 	aFacet->scale(scale);
 	aFacet->offset(location.x,location.y,location.z);
 }

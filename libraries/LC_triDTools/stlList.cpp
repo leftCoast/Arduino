@@ -1,6 +1,8 @@
 #include <stlList.h>
 #include <SDTools.h>
 
+
+
 stlList::stlList(const char* inPath)
 	: stlFile(inPath),
 	facetList() { index = 0; }

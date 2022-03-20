@@ -94,7 +94,7 @@ class triDRender :	public linkList,
 				void	setlightColor(colorObj* color);
 				void	setObjScale(double inScale);
 				void	setObjLoc(triDPoint* loc);
-				void	setObjAngle(triDRotation* angle);
+				void	setObjAngle(triDRotation* angle,triDPoint* centerPt=NULL);
 				void	setCamera(triDPoint* cam);
 	virtual	void	drawSelf(void);
 	
@@ -117,6 +117,7 @@ class triDRender :	public linkList,
 				bool				setupChange;
 				triDPoint		location;
 				triDRotation	orientation;
+				triDPoint		rotationCenter;
 				double			scale;
 				triDPoint		camera;
 				colorObj			ambientColor;

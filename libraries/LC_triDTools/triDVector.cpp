@@ -128,48 +128,81 @@ bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }
 
 	
 // Do the pitch roll yaw transforms on each axis.
-void  triDVector::rotateVect(triDRotation* rotation) {
+void  triDVector::rotateVect(triDRotation* rotation,triDPoint* centerPt) {
 	
 	twoDPoint	rotatePt;
-	
-	//Serial.print("Rad x,y,z: ");
-	//Serial.print(rotation->xRad);Serial.print(", ");
-	//Serial.print(rotation->yRad);Serial.print(", ");
-	//Serial.println(rotation->zRad);
-	if (rotation->xRad) {											// Rotate around x
-		rotatePt.x = y;
-		rotatePt.y = z;
-		rotate(&rotatePt,rotation->xRad);
-		y = rotatePt.x;
-		z = rotatePt.y;
-	}
-	if (rotation->yRad) {											// Rotate around y
-		rotatePt.x = z;
-		rotatePt.y = x;
-		rotate(&rotatePt,rotation->yRad);
-		z = rotatePt.x;
-		x = rotatePt.y;
-	}
-	if (rotation->zRad) {											// Rotate around z
-		rotatePt.x = x;
-		rotatePt.y = y;
-		rotate(&rotatePt,rotation->zRad);
-		x = rotatePt.x;
-		y = rotatePt.y;
+	Serial.print("Vect x,y,z: ");
+	Serial.print(x);Serial.print(", ");
+	Serial.print(y);Serial.print(", ");
+	Serial.println(z);
+	if (centerPt) {
+		Serial.print("Cent x,y,z: ");
+		Serial.print(centerPt->x);Serial.print(", ");
+		Serial.print(centerPt->y);Serial.print(", ");
+		Serial.println(centerPt->z);
+		x = x - centerPt->x;
+ 		y = y - centerPt->y;
+ 		z = z - centerPt->z;
+ 		rotateVect(rotation,NULL);
+ 		x = x + centerPt->x;
+		y = y + centerPt->y;
+		z = z + centerPt->z;
+ 		return;
+	} else {
+		Serial.println("Cent x,y,z: 0,0,0");
+		Serial.println("-----------------");
+		if (rotation->xRad) {											// Rotate around x
+			rotatePt.x = y;
+			rotatePt.y = z;
+			rotate(&rotatePt,rotation->xRad);
+			y = rotatePt.x;
+			z = rotatePt.y;
+			Serial.println("Rot x");
+			Serial.print("Vect x,y,z: ");
+			Serial.print(x);Serial.print(", ");
+			Serial.print(y);Serial.print(", ");
+			Serial.println(z);
+		}
+		if (rotation->yRad) {											// Rotate around y
+			rotatePt.x = z;
+			rotatePt.y = x;
+			rotate(&rotatePt,rotation->yRad);
+			z = rotatePt.x;
+			x = rotatePt.y;
+			Serial.println("Rot y");
+			Serial.print("Vect x,y,z: ");
+			Serial.print(x);Serial.print(", ");
+			Serial.print(y);Serial.print(", ");
+			Serial.println(z);
+		}
+		if (rotation->zRad) {											// Rotate around z
+			rotatePt.x = x;
+			rotatePt.y = y;
+			rotate(&rotatePt,rotation->zRad);
+			x = rotatePt.x;
+			y = rotatePt.y;
+			Serial.println("Rot z");
+			Serial.print("Vect x,y,z: ");
+			Serial.print(x);Serial.print(", ");
+			Serial.print(y);Serial.print(", ");
+			Serial.println(z);
+		}
+		Serial.println("-----------------");
+		Serial.println("-----------------");
 	}																		//
 }
 
 
 // Do the pitch roll yaw transforms on each axis.
-void  triDVector::rotateVect(double xRad,double yRad,double zRad) {
-
-	triDRotation rotation;
-	
-	rotation.xRad	= xRad;
-	rotation.yRad	= yRad;
-	rotation.zRad	= zRad;
-	rotateVect(&rotation);
-}
+// void  triDVector::rotateVect(double xRad,double yRad,double zRad) {
+// 
+// 	triDRotation rotation;
+// 	
+// 	rotation.xRad	= xRad;
+// 	rotation.yRad	= yRad;
+// 	rotation.zRad	= zRad;
+// 	rotateVect(&rotation);
+// }
 
 
 // You're standard dot product between us and an inputted vector.

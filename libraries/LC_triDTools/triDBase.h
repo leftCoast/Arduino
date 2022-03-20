@@ -20,7 +20,7 @@ struct twoDPoint {
 };
 
 
-void rotate(twoDPoint* ptA,double angle);
+void rotate(twoDPoint* ptA,double angle,twoDPoint* center=NULL);
 
 
 //****************************************************************************************
@@ -87,6 +87,6 @@ struct triDRotation{
 	double	zRad;	// Roll
 };
 
-
+triDRotation setRotation(double xVal,double yVal,double zVal);
 			
 #endif

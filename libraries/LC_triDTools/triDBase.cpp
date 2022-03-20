@@ -1,15 +1,30 @@
 #include <triDBase.h>
 
 
-// This rotates a point by angle radians around the x,y axis.
-void rotate(twoDPoint* ptA,double angle) {
+// This rotates a point by angle radians around the x,y axis. It's been checked out and it
+// works!
+void rotate(twoDPoint* ptA,double angle,twoDPoint* center) {
 
 	double	mag;
+	double	radF;
 	
+	if (center) {
+		ptA->x = ptA->x - center->x;
+		ptA->y = ptA->y - center->y;
+		rotate(ptA,angle,NULL);
+		ptA->x = ptA->x + center->x;
+		ptA->y = ptA->y + center->y;
+		return;
+	}
 	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
 		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
-		ptA->x = mag * cos(acos(ptA->x/mag)+angle);				// Calc new x.
-		ptA->y = mag * sin(asin(ptA->y/mag)+angle);				// Clac new y.
+		if (ptA->x<0.001&&ptA->x>-0.001) {							// As y/x->infinity..
+			radF = M_PI/2.0 + angle;									// Angle goes to Pi/2 Radians.
+		} else {
+			radF = atan(ptA->y/ptA->x)+angle;							// Calc resulting angle.
+		}
+		ptA->x = mag * cos(radF);				// Calc new x.
+		ptA->y = mag * sin(radF);				// Clac new y.
 	}
 }
 
@@ -91,4 +106,15 @@ void printTriDTriangle(triDTriangle* triangle) {
 	Serial.print("corners[2]: ");
 	printTriDPt(&(triangle->corners[2]));
 	Serial.println("-------");
+}
+
+
+triDRotation setRotation(double xVal,double yVal,double zVal) {
+
+	triDRotation	res;
+	
+	res.xRad = xVal;
+	res.yRad = yVal;
+	res.zRad = zVal;
+	return res;
 }

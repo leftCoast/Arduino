@@ -30,7 +30,7 @@ class triDFacet {
 					void				offset(triDPoint* offsetPt);
 					void				offset(triDVector* offsetVect);
 					void				offset(double x,double y,double z);
-					void				rotate(triDRotation* rotation);
+					void				rotate(triDRotation* rotation,triDPoint* centerPt=NULL);
 					void				calcNormal(void);
 					void				printFacet(void);
 					
@@ -39,6 +39,34 @@ class triDFacet {
 };
 	
 
+
+//****************************************************************************************
+// objCenter:
+//
+// 
+//****************************************************************************************
+
+
+class objCenter {
+
+	public :
+					objCenter(void);
+					~objCenter(void);
+	
+	
+					void				addFacet(triDFacet* aFacet);
+					void				addItem(double x,double y,double z);
+					triDPoint		getCenterPt(void);
+					void				printObjCenter(void);
+					
+					bool		pointSet;
+					double	xMax;
+					double	xMin;
+					double	yMax;
+					double	yMin;
+					double	zMax;
+					double	zMin;
+};
 
 
 //****************************************************************************************
@@ -49,6 +77,7 @@ class triDFacet {
 // them into a list or display them.
 //****************************************************************************************
 
+
 class facetList {
 
 	public :
@@ -56,6 +85,7 @@ class facetList {
 	virtual		~facetList(void);
 	
 	virtual		bool			begin(void)=0;
+	virtual		triDPoint	getModelCenter(void);
 	virtual		bool			openList(void);
 	virtual		void			closeList(void);
 	virtual		long			getNumFacets(void);
@@ -65,7 +95,13 @@ class facetList {
 	virtual		void			setFacet(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetAfter(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetBefore(triDFacet* facetPtr,long index);
+		
+	virtual		void			calculateCenter(void);
+	
+					triDPoint	centerPt;
 };
+
+
 
 #endif
 	

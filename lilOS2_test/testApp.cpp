@@ -8,6 +8,8 @@
 #include <arrayList.h>
 #include <resizeBuff.h>
 
+#include <debug.h>
+
 
 #define BOUND_X      20
 #define BOUND_Y      40
@@ -183,38 +185,39 @@ testApp::~testApp(void) {
 }
 
 
-triDTriangle* createCircleThing(int slices,double zAngle,double radius) {
+triDTriangle* createCircleThing(int slices,double coneAngle,double radius) {
    
-   //double         yAngle;
+
    double         slice;
-   double         deltaAngle;
    double         twoPi;
    triDVector     vectI;
    triDVector     vectA;
    triDTriangle*  facets;
-
+   triDRotation   rotation;
+   
    facets = NULL;
    resizeBuff(sizeof(triDTriangle)*slices,(byte**)&facets);
    twoPi = 2*M_PI;
    slice = twoPi/(float)slices;
    Serial.println(slice,5);
    vectI.setVector(0,0,radius);
-   vectI.rotateVect(0,zAngle,0);
+   rotation = setRotation(0,coneAngle,0);
+   vectI.rotateVect(&rotation);
    for (int i=0;i<slices;i++) {
       
       facets[i].corners[0].x = 0;                     // 
       facets[i].corners[0].y = 0;
       facets[i].corners[0].z = radius;
-
-      deltaAngle  = i*slice;              // How far we'll need to shift the vector..
-      vectA.setVector(&vectI);            // Initial vector.
-      vectA.rotateVect(0,0,deltaAngle);   // Add this much to the rotation.
+                
+      vectA.setVector(&vectI);                     // Initial vector.
+      rotation = setRotation(0,0,i*slice);      // How far we'll need to shift the vector..
+      vectA.rotateVect(&rotation);                 // Add this much to the rotation.
       facets[i].corners[2].x = vectA.getX();
       facets[i].corners[2].y = vectA.getY();
       facets[i].corners[2].z = vectA.getZ();
       
-      deltaAngle  = slice;                // We've aleready added i*slice. We need one more slice.
-      vectA.rotateVect(0,0,slice);
+      rotation = setRotation(0,0,slice);  // We've aleready added i*slice. We need one more slice.
+      vectA.rotateVect(&rotation);
       facets[i].corners[1].x = vectA.getX();
       facets[i].corners[1].y = vectA.getY();
       facets[i].corners[1].z = vectA.getZ();
@@ -233,10 +236,30 @@ void testApp::setup(void) {
    int      yVal;
    int      offset;
    label*   aLabel;
-   mapper   deg(0,2*M_PI,0,360);
-   stlList* STLModel;
-   arrayList* arrayModel;
-      
+
+   twoDPoint   centerPt;
+   twoDPoint   initPt;
+   twoDPoint   tracePt;
+   float       radians;
+   float       twoPi = 2*M_PI;
+
+//   int         slices = 24;
+//   centerPt.x = 120;
+//   centerPt.y = 200;
+//   
+//   initPt.x = centerPt.x;
+//   initPt.y = centerPt.y - 50;
+//   
+//   screen->drawCircle(round(centerPt.x),round(centerPt.y),5,&red);
+//   for (int i=0;i<slices;i++) {
+//      radians = i * (twoPi/slices);
+//      tracePt = initPt;
+//      rotate(&tracePt,radians,&centerPt);
+//      screen->drawCircle(round(tracePt.x),round(tracePt.y),5,&blue);
+//      db.trace("Slice: ",i,true);
+//   }
+   
+     
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
    } else {
@@ -244,23 +267,31 @@ void testApp::setup(void) {
       sinMult = (BOUND_DIA/2.0)-(BUBBLE_RAD);
    }
    
-   triDTriangle* theModel = createCircleThing(12,deg_2_rad(15),100);
+   
    triDRotation angle;
    triDPoint   location;
+   triDPoint   center;
    triDRender* renderMan = new triDRender(20,100,180,180);
-   STLModel = new stlList("/teensyM.STL");
-   //STLModel = new stlList("/hemi.STL");
-   //arrayModel = new arrayList(theModel,12);
+   
+//   arrayList* arrayModel;
+//   triDTriangle* theModel = createCircleThing(12,deg_2_rad(15),100);
+//   arrayModel = new arrayList(theModel,12);
+//   renderMan->begin(arrayModel);
+   
+   stlList* STLModel;
+   STLModel = new stlList("/Test3D.STL");
+//   //STLModel = new stlList("/teensyM.STL");
+//   //STLModel = new stlList("/hemi.STL");
+   center = STLModel->getModelCenter();
    renderMan->begin(STLModel);
-   renderMan->begin(arrayModel);
-   renderMan->setObjScale(10);
-   angle.xRad = deg_2_rad(-60);
+   renderMan->setObjScale(5);
+   angle.xRad = deg_2_rad(0);
    angle.yRad = deg_2_rad(0);
-   angle.zRad = deg_2_rad(0);
-   renderMan->setObjAngle(&angle);
-   location.x = 0;
-   location.y = -40;
-   location.z = 100;
+   angle.zRad = deg_2_rad(10);
+   renderMan->setObjAngle(&angle,&center);
+   location.x = 45;
+   location.y = 40;
+   location.z = 30;
    renderMan->setObjLoc(&location);
    addObj(renderMan);
    
