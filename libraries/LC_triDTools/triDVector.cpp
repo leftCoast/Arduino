@@ -131,65 +131,49 @@ bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }
 void  triDVector::rotateVect(triDRotation* rotation,triDPoint* centerPt) {
 	
 	twoDPoint	rotatePt;
-	Serial.print("Vect x,y,z: ");
-	Serial.print(x);Serial.print(", ");
-	Serial.print(y);Serial.print(", ");
-	Serial.println(z);
-	if (centerPt) {
-		Serial.print("Cent x,y,z: ");
-		Serial.print(centerPt->x);Serial.print(", ");
-		Serial.print(centerPt->y);Serial.print(", ");
-		Serial.println(centerPt->z);
-		x = x - centerPt->x;
- 		y = y - centerPt->y;
- 		z = z - centerPt->z;
- 		rotateVect(rotation,NULL);
- 		x = x + centerPt->x;
-		y = y + centerPt->y;
-		z = z + centerPt->z;
- 		return;
-	} else {
-		Serial.println("Cent x,y,z: 0,0,0");
-		Serial.println("-----------------");
-		if (rotation->xRad) {											// Rotate around x
-			rotatePt.x = y;
-			rotatePt.y = z;
+	twoDPoint	center2D;
+	
+	if (rotation->xRad) {											// Rotate around x
+		rotatePt.x = y;
+		rotatePt.y = z;
+		if (centerPt) {
+			center2D.x = centerPt->y;
+			center2D.y = centerPt->z;
+			rotate(&rotatePt,rotation->xRad,&center2D);
+		} else {
 			rotate(&rotatePt,rotation->xRad);
-			y = rotatePt.x;
-			z = rotatePt.y;
-			Serial.println("Rot x");
-			Serial.print("Vect x,y,z: ");
-			Serial.print(x);Serial.print(", ");
-			Serial.print(y);Serial.print(", ");
-			Serial.println(z);
 		}
-		if (rotation->yRad) {											// Rotate around y
-			rotatePt.x = z;
-			rotatePt.y = x;
-			rotate(&rotatePt,rotation->yRad);
-			z = rotatePt.x;
-			x = rotatePt.y;
-			Serial.println("Rot y");
-			Serial.print("Vect x,y,z: ");
-			Serial.print(x);Serial.print(", ");
-			Serial.print(y);Serial.print(", ");
-			Serial.println(z);
+		y = rotatePt.x;
+		z = rotatePt.y;
+	}
+	if (rotation->yRad) {											// Rotate around y
+		rotatePt.x = z;
+		rotatePt.y = x;
+		if (centerPt) {
+			center2D.x = centerPt->z;
+			center2D.y = centerPt->x;
+			rotate(&rotatePt,rotation->xRad,&center2D);
+		} else {
+			rotate(&rotatePt,rotation->xRad);
 		}
-		if (rotation->zRad) {											// Rotate around z
-			rotatePt.x = x;
-			rotatePt.y = y;
-			rotate(&rotatePt,rotation->zRad);
-			x = rotatePt.x;
-			y = rotatePt.y;
-			Serial.println("Rot z");
-			Serial.print("Vect x,y,z: ");
-			Serial.print(x);Serial.print(", ");
-			Serial.print(y);Serial.print(", ");
-			Serial.println(z);
+		rotate(&rotatePt,rotation->yRad);
+		z = rotatePt.x;
+		x = rotatePt.y;
+	}
+	if (rotation->zRad) {											// Rotate around z
+		rotatePt.x = x;
+		rotatePt.y = y;
+		if (centerPt) {
+			center2D.x = centerPt->x;
+			center2D.y = centerPt->y;
+			rotate(&rotatePt,rotation->xRad,&center2D);
+		} else {
+			rotate(&rotatePt,rotation->xRad);
 		}
-		Serial.println("-----------------");
-		Serial.println("-----------------");
-	}																		//
+		rotate(&rotatePt,rotation->zRad);
+		x = rotatePt.x;
+		y = rotatePt.y;
+	}																	//
 }
 
 
