@@ -192,13 +192,13 @@ void triDFacet::offset(double x,double y,double z) {
 
 
 // Rotate this facet around the origin point using these radian values.
-void triDFacet::rotate(triDRotation* rotation,triDPoint* centerPt) {
+void triDFacet::rotate(triDRotation* rotation) {
 
 	triDVector	aVect;
 	
 	for (byte i=0;i<3;i++) {
 		aVect.setVector(facet.corners[i].x,facet.corners[i].y,facet.corners[i].z);
-		aVect.rotateVect(rotation,centerPt);
+		aVect.rotateVect(rotation);
 		facet.corners[i].x	= aVect.getX();
 		facet.corners[i].y	= aVect.getY();
 		facet.corners[i].z	= aVect.getZ();

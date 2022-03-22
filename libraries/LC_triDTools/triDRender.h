@@ -94,7 +94,7 @@ class triDRender :	public linkList,
 				void	setlightColor(colorObj* color);
 				void	setObjScale(double inScale);
 				void	setObjLoc(triDPoint* loc);
-				void	setObjAngle(triDRotation* angle,triDPoint* centerPt=NULL);
+				void	setObjAngle(triDRotation* angle);
 				void	setCamera(triDPoint* cam);
 	virtual	void	drawSelf(void);
 	
@@ -104,6 +104,7 @@ class triDRender :	public linkList,
 				viewFacet	getNextViewFacet(void);								// Get the next facet off the visible list. (visible list index)
 				viewFacet	calcViewFacet(triDFacet* aFacet);
 				void			addIndexItem(indexItem* newItem);
+				void			setRotationOffset(void);
 				void			doTransformations(triDFacet* aFacet);
 				double		inView(triDFacet* aFacet);
 				void			calcLightMapper(void);
@@ -117,7 +118,7 @@ class triDRender :	public linkList,
 				bool				setupChange;
 				triDPoint		location;
 				triDRotation	orientation;
-				triDPoint		rotationCenter;
+				triDPoint		adjLocation;
 				double			scale;
 				triDPoint		camera;
 				colorObj			ambientColor;

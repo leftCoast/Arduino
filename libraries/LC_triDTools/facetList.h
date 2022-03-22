@@ -30,7 +30,7 @@ class triDFacet {
 					void				offset(triDPoint* offsetPt);
 					void				offset(triDVector* offsetVect);
 					void				offset(double x,double y,double z);
-					void				rotate(triDRotation* rotation,triDPoint* centerPt=NULL);
+					void				rotate(triDRotation* rotation);
 					void				calcNormal(void);
 					void				printFacet(void);
 					

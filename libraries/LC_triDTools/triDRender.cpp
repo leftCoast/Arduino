@@ -108,9 +108,9 @@ bool triDRender::begin(facetList* inModel) {
 			orientation.xRad	= 0;					// Set PITCH angle of the 3D object.
 			orientation.yRad	= 0;					// Set YAW angle of the 3D object.
 			orientation.zRad	= 0;					// Set ROLL angle of the 3D object.
-			rotationCenter.x	= 0;					// Set rotation around the x,y,z axis.
-			rotationCenter.y	= 0;
-			rotationCenter.z	= 0;
+			adjLocation.x	= 0;						// Place holder for the final location given the rotation.
+			adjLocation.y	= 0;
+			adjLocation.z	= 0;
 			scale					= 1;					// Multiplier for dimensions. Sets objet size.
 			camera.x				= width/2;			// Camera, view point center of screen in x.
 			camera.y				= height/2;			// Center of screen in y.
@@ -166,16 +166,9 @@ void triDRender::setObjLoc(triDPoint* loc) {
 
 
 // Sets up the orientation of the model.
-void triDRender::setObjAngle(triDRotation* angle,triDPoint* centerPt) {
+void triDRender::setObjAngle(triDRotation* angle) {
 
 	orientation = *angle;
-	if (centerPt) {
-		rotationCenter = *centerPt;
-	} else {
-		rotationCenter.x = 0;
-		rotationCenter.y = 0;
-		rotationCenter.z = 0;
-	}
 	setupChange = true;
 }
 
@@ -193,13 +186,13 @@ void triDRender::drawSelf(void) {
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
-	colorMapper	rainbow(&green,&red);
-	mapper		percent;
-	long			count;
-	float			pecentVal;
+	//colorMapper	rainbow(&green,&red);
+	//mapper		percent;
+	//long			count;
+	//float			pecentVal;
 	
-	percent.setValues(0,ourModel->getNumFacets()-1,0,100);
-	count = 0;
+	//percent.setValues(0,ourModel->getNumFacets()-1,0,100);
+	//count = 0;
 	if (!init) {
 		screen->drawRect(this,&red);
 		return;
@@ -217,16 +210,12 @@ void triDRender::drawSelf(void) {
 			if (aFacet.normalVect.isNullVector()) {
 				done = true;
 			} else {
-				//aColor = calcColor(&aFacet);
-				pecentVal = percent.map(count);
-				Serial.print("Count: ");Serial.println(count);
-				count++;
-				Serial.print("Percent: ");Serial.println(pecentVal);
-				aColor = rainbow.map(pecentVal);
+				aColor = calcColor(&aFacet);
+				//pecentVal = percent.map(count);
+				//count++;
+				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
-				//printViewFacet(&aFacet);
-				db.trace("click me",true);
 			}
 		} while(!done);
 		ourModel->closeList();
@@ -249,21 +238,22 @@ bool triDRender::createList(void) {
 	triDFacet	aFacet;
 	long			numFacets;
 	
-	if (init) {
-		linkList::dumpList();
-		haveList = false;
-		numFacets = ourModel->getNumFacets();
-		for(long i=0;i<numFacets;i++) {
-			aFacet = ourModel->getTriDFacet(i);
-			zDist = inView(&aFacet);
-			if (zDist>0) {
-				newItem = new indexItem(i,zDist);
-				addIndexItem(newItem);
-			}
-		}
-		haveList = true;
-	}
-	return haveList;
+	if (init) {													// If we have been initialized..
+		linkList::dumpList();								// Dump any sorted index list we may have.
+		haveList = false;										// We have no list now.
+		numFacets = ourModel->getNumFacets();			// Grab the number of facets.
+		setRotationOffset();									// Recalculate the location, after rotation.
+		for(long i=0;i<numFacets;i++) {					// For each available facet..
+			aFacet = ourModel->getTriDFacet(i);			// Grab a "raw" facet.
+			zDist = inView(&aFacet);						// Do the transitions then return distance. (If any)
+			if (zDist>0) {										// If distance is >0, it's possibly visible..
+				newItem = new indexItem(i,zDist);		// Create a link to this facet.
+				addIndexItem(newItem);						// Add it into the list sorted by distance to camera.
+			}														//
+		}															//
+		haveList = true;										// We have a current list of facets ready to render.
+	}																//
+	return haveList;											// User may be too lazy to check, we'll pass it back as well.
 }	
 
 
@@ -352,15 +342,27 @@ void triDRender::addIndexItem(indexItem* newItem) {
 }
 
 
-void triDRender::doTransformations(triDFacet* aFacet) {
+void  triDRender::setRotationOffset(void) {
 
-	if (rotationCenter.x||rotationCenter.y||rotationCenter.z) {
-		aFacet->rotate(&(orientation),&(rotationCenter));
-	} else {
-		aFacet->rotate(&(orientation));
-	}
+	triDVector	aVector;
+	triDPoint	rotationCenter;
+	triDPoint	newPt;
+	
+	rotationCenter = ourModel->getModelCenter();
+	aVector.setVector(&rotationCenter);
+	aVector.rotateVect(&orientation);
+	newPt = aVector.getPoint();
+	adjLocation.x = rotationCenter.x - newPt.x + location.x;
+	adjLocation.y = rotationCenter.y - newPt.y + location.y;
+	adjLocation.z = rotationCenter.z - newPt.z + location.z;
+}
+
+
+void triDRender::doTransformations(triDFacet* aFacet) {
+	
+	aFacet->rotate(&orientation);
+	aFacet->offset(adjLocation.x,adjLocation.y,adjLocation.z);
 	aFacet->scale(scale);
-	aFacet->offset(location.x,location.y,location.z);
 }
 
 

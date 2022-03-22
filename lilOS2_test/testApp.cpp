@@ -286,11 +286,11 @@ void testApp::setup(void) {
    renderMan->begin(STLModel);
    renderMan->setObjScale(5);
    angle.xRad = deg_2_rad(0);
-   angle.yRad = deg_2_rad(0);
-   angle.zRad = deg_2_rad(10);
-   renderMan->setObjAngle(&angle,&center);
-   location.x = 45;
-   location.y = 40;
+   angle.yRad = deg_2_rad(180);
+   angle.zRad = deg_2_rad(0);
+   renderMan->setObjAngle(&angle);
+   location.x = 0;
+   location.y = 0;
    location.z = 30;
    renderMan->setObjLoc(&location);
    addObj(renderMan);

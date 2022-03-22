@@ -128,34 +128,20 @@ bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }
 
 	
 // Do the pitch roll yaw transforms on each axis.
-void  triDVector::rotateVect(triDRotation* rotation,triDPoint* centerPt) {
+void  triDVector::rotateVect(triDRotation* rotation) {
 	
 	twoDPoint	rotatePt;
-	twoDPoint	center2D;
-	
+
 	if (rotation->xRad) {											// Rotate around x
 		rotatePt.x = y;
 		rotatePt.y = z;
-		if (centerPt) {
-			center2D.x = centerPt->y;
-			center2D.y = centerPt->z;
-			rotate(&rotatePt,rotation->xRad,&center2D);
-		} else {
-			rotate(&rotatePt,rotation->xRad);
-		}
+		rotate(&rotatePt,rotation->xRad);
 		y = rotatePt.x;
 		z = rotatePt.y;
 	}
 	if (rotation->yRad) {											// Rotate around y
 		rotatePt.x = z;
 		rotatePt.y = x;
-		if (centerPt) {
-			center2D.x = centerPt->z;
-			center2D.y = centerPt->x;
-			rotate(&rotatePt,rotation->xRad,&center2D);
-		} else {
-			rotate(&rotatePt,rotation->xRad);
-		}
 		rotate(&rotatePt,rotation->yRad);
 		z = rotatePt.x;
 		x = rotatePt.y;
@@ -163,13 +149,6 @@ void  triDVector::rotateVect(triDRotation* rotation,triDPoint* centerPt) {
 	if (rotation->zRad) {											// Rotate around z
 		rotatePt.x = x;
 		rotatePt.y = y;
-		if (centerPt) {
-			center2D.x = centerPt->x;
-			center2D.y = centerPt->y;
-			rotate(&rotatePt,rotation->xRad,&center2D);
-		} else {
-			rotate(&rotatePt,rotation->xRad);
-		}
 		rotate(&rotatePt,rotation->zRad);
 		x = rotatePt.x;
 		y = rotatePt.y;
