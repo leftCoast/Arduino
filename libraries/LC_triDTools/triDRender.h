@@ -17,7 +17,7 @@
 //
 // normalVect, used to compare with light sources to choose facet color.
 //
-// Corners A,B,C These are the three points of a 3D triangle mapped to a 2D image of a
+// Corner[3] These are the three points of a 3D triangle mapped to a 2D image of a
 // triangle ready to be drawn to the display. Meaning, that they are already in view
 // coordinates, rounded to integers with 0,0 as the upper left hand corner of the view.
 // Ready to go!
@@ -110,21 +110,21 @@ class triDRender :	public linkList,
 				void			calcLightMapper(void);
 				colorObj		calcColor(viewFacet* aFacet);
 				
-				bool				init;
-				facetList*		ourModel;
+				bool				init;				// We make it through our fire up checklist?
+				facetList*		ourModel;		// The dumb thing we're supposed to draw.
 				bool				haveList;		// Is list current to orientation?
 				indexItem*		currItem;		// Tracks the next facet handed back.
-				mapper			ptMapper;		// mapper for doing? Mapping points to 2D.
-				bool				setupChange;
-				triDPoint		location;
-				triDRotation	orientation;
-				triDPoint		adjLocation;
-				double			scale;
-				triDPoint		camera;
-				colorObj			ambientColor;
-				triDPoint		spotPos;
-				colorObj 		spotColor;
-				colorMultiMap	lightMapper;
+				mapper			ptMapper;		// mapper for? Mapping 3D points to 2D.
+				bool				setupChange;	// Something has changed. refresh the list.
+				triDPoint		location;		// Inputted location offset.
+				triDRotation	orientation;	// Inputted rotation.
+				triDPoint		adjLocation;	// Calculated location offset.
+				double			scale;			// Inputted scale factor.
+				triDPoint		camera;			// Inputted viewpoint location.
+				colorObj			ambientColor;	//	The color of "shade".
+				triDPoint		spotPos;			// Single floodlight position.
+				colorObj 		spotColor;		// Single floodlight color.
+				colorMultiMap	lightMapper;	// Maps light stuff & angles to facet color.
 };
 
 				

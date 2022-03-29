@@ -135,7 +135,10 @@ triDFacet::~triDFacet(void) {  }
 
 // Set these values to the ones in this ordered triangle. Then calculate our normal
 // vector.
-void triDFacet::setFacet(triDTriangle* orderdCorners) { setFacet(&(orderdCorners->corners[0]),&(orderdCorners->corners[1]),&(orderdCorners->corners[2])); }
+void triDFacet::setFacet(triDTriangle* orderdCorners) {
+
+	setFacet(&(orderdCorners->corners[0]),&(orderdCorners->corners[1]),&(orderdCorners->corners[2]));
+}
 
 
 // Set this facet to these three points in 3 space. Then calculate our normal vector.
@@ -160,8 +163,7 @@ triDVector triDFacet::getNormVect(void) { return normVect; }
 triDPoint triDFacet::getCenterPt(void) { return getCentPt(&facet); }
 
 
-// Scale the size of our facet. Will also tend to shift the size to match other scaled
-// facets.
+// Scale the size of our facet. IE multiply each value by the same scaler value.
 void triDFacet::scale(double scaler) {
 	
 	for (byte i=0;i<3;i++) {
@@ -246,12 +248,7 @@ void triDFacet::printFacet(void) {
 //****************************************************************************************
 
 
-facetList::facetList(void) {
-
-	centerPt.x = 0;
-	centerPt.y = 0;
-	centerPt.z = 0;
-}
+facetList::facetList(void) { haveCenter = false; }
 
 
 facetList::~facetList(void) { }
@@ -271,9 +268,19 @@ long facetList::getNumFacets(void) { }
 
 // Calculate the center point of the model. This is planned to be used for rotations.
 triDPoint facetList::getModelCenter(void) {
-
-	if (centerPt.x==0&&centerPt.y==0&&centerPt.z==0) {
-		calculateCenter();
+	
+	objCenter	centerTool;
+	triDFacet	aFacet;
+	long			numFacets;
+	
+	if (!haveCenter) {
+		numFacets = getNumFacets();
+		for(long i=0;i<numFacets;i++) {
+			aFacet = getTriDFacet(i);
+			centerTool.addFacet(&aFacet);
+		}
+		centerPt = centerTool.getCenterPt();
+		haveCenter = true;
 	}
 	return centerPt;
 }
@@ -291,6 +298,13 @@ void facetList::resetIndex(void) { }
 triDFacet facetList::getNextTriDFacet(void) { }
 
 
+
+// ***************************************************************************************
+// NOTE : Once the facet list is changed, set haveCenter to false so the next call to
+// getModelCenter() will recalculate it.
+// ***************************************************************************************
+
+
 // Take this inputted facet data and save it in the location given by index.
 void facetList::setFacet(triDFacet* facetPtr,long index) { }
 
@@ -302,19 +316,3 @@ void facetList::insertFacetAfter(triDFacet* facetPtr,long index) { }
 // Take this inputted facet data and insert it BEFORE the location given by index. (Makes the list longer)
 void facetList::insertFacetBefore(triDFacet* facetPtr,long index) { }
 
-
-// Do the actual calculation for finding the center point of the model.
-void  facetList::calculateCenter(void) {
-
-	objCenter	centerTool;
-	triDFacet	aFacet;
-	long			numFacets;
-	
-	numFacets = getNumFacets();
-	for(long i=0;i<numFacets;i++) {
-		aFacet = getTriDFacet(i);
-		centerTool.addFacet(&aFacet);
-	}
-	centerTool.printObjCenter();
-	centerPt = centerTool.getCenterPt();
-}

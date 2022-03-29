@@ -212,10 +212,11 @@ void triDRender::drawSelf(void) {
 			} else {
 				aColor = calcColor(&aFacet);
 				//pecentVal = percent.map(count);
-				//count++;
 				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
+				//db.trace("Facet: ",(int)count,true);
+				//count++;
 			}
 		} while(!done);
 		ourModel->closeList();

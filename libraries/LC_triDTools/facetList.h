@@ -92,12 +92,15 @@ class facetList {
 	virtual		void			resetIndex(void);
 	virtual		triDFacet	getTriDFacet(long index);
 	virtual		triDFacet	getNextTriDFacet(void);
+	
+// NOTE : These last three. Once the facet list is changed, set haveCenter to false so the
+// next call to getModelCenter() will recalculate it.
+
 	virtual		void			setFacet(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetAfter(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetBefore(triDFacet* facetPtr,long index);
-		
-	virtual		void			calculateCenter(void);
 	
+					bool			haveCenter;
 					triDPoint	centerPt;
 };
 
