@@ -180,13 +180,17 @@ double triDVector::angleBetween(triDVector* inVect) {
 	double magA;
 	double magB;
 	double magMult;
+	double value;
 	
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
 	magB = inVect->magnitude();
 	magMult = magA * magB;
 	if (magMult<.0001 && magMult>-0.0001) return 0;
-	return acos(dotProd/(magA * magB));
+	value = dotProd/magMult;
+	if (value<-1) return PI;
+	if (value>1) return 0;
+	return acos(value);
 }
 
 

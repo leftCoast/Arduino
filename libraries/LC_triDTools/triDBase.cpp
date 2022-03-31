@@ -18,7 +18,7 @@ void rotate(twoDPoint* ptA,double angle,twoDPoint* center) {
 	}
 	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
 		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
-		if (ptA->x<0.001&&ptA->x>-0.001) {							// As y/x->infinity..
+		if (ptA->x<0.0001&&ptA->x>-0.0001) {						// As y/x->infinity..
 			radF = M_PI/2.0 + angle;									// Angle goes to Pi/2 Radians.
 		} else {
 			radF = atan(ptA->y/ptA->x)+angle;							// Calc resulting angle.
