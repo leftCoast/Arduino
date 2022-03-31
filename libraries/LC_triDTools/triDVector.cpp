@@ -58,9 +58,6 @@ void triDVector::setVector(triDPoint* stPt,triDPoint* endPt) {
 	
 	res = triDPointSub(endPt,stPt);
 	setVector(&res);
-//x = endPt->x - stPt->x;
-//y = endPt->y - stPt->y;
-//z = endPt->z - stPt->z;
 }
 
 
@@ -156,18 +153,6 @@ void  triDVector::rotateVect(triDRotation* rotation) {
 }
 
 
-// Do the pitch roll yaw transforms on each axis.
-// void  triDVector::rotateVect(double xRad,double yRad,double zRad) {
-// 
-// 	triDRotation rotation;
-// 	
-// 	rotation.xRad	= xRad;
-// 	rotation.yRad	= yRad;
-// 	rotation.zRad	= zRad;
-// 	rotateVect(&rotation);
-// }
-
-
 // You're standard dot product between us and an inputted vector.
 double triDVector::dotProduct(triDVector* inVect) {
 
@@ -194,10 +179,13 @@ double triDVector::angleBetween(triDVector* inVect) {
 	double dotProd;
 	double magA;
 	double magB;
+	double magMult;
 	
 	dotProd = dotProduct(inVect);
 	magA = magnitude();
 	magB = inVect->magnitude();
+	magMult = magA * magB;
+	if (magMult<.0001 && magMult>-0.0001) return 0;
 	return acos(dotProd/(magA * magB));
 }
 

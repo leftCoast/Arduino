@@ -94,6 +94,60 @@ triDPoint getCentPt(triDTriangle* triangle) {
 	return res;
 }
 
+
+// What's the smallest x y & z values in this thing?
+triDPoint leastValues(triDTriangle* triangle) {
+
+	triDPoint	res;
+	
+	res.x = triangle->corners[0].x;
+	if (triangle->corners[1].x < res.x) {
+		res.x = triangle->corners[1].x;
+	}
+	if (triangle->corners[2].x < res.x) {
+		res.x = triangle->corners[2].x;
+	}
+	
+	res.y = triangle->corners[0].y;
+	if (triangle->corners[1].y < res.y) {
+		res.y = triangle->corners[1].y;
+	}
+	if (triangle->corners[2].y < res.y) {
+		res.y = triangle->corners[2].y;
+	}
+	
+	res.z = triangle->corners[0].z;
+	if (triangle->corners[1].z < res.z) {
+		res.z = triangle->corners[1].z;
+	}
+	if (triangle->corners[2].z < res.z) {
+		res.z = triangle->corners[2].z;
+	}
+	return res;
+}
+
+
+// Offset this triangle by subbing this point to each vertex.
+void subtractPoint(triDTriangle* triangle,triDPoint* pt) {
+	
+	for (byte i=0;i<3;i++) {
+		triangle->corners[i].x = triangle->corners[i].x - pt->x;
+		triangle->corners[i].y = triangle->corners[i].y - pt->y;
+		triangle->corners[i].z = triangle->corners[i].z - pt->z;
+	}
+}
+
+
+// Offset this triangle by adding this point to each vertex.
+void addPoint(triDTriangle* triangle,triDPoint* pt) {
+
+	for (byte i=0;i<3;i++) {
+		triangle->corners[i].x = triangle->corners[i].x + pt->x;
+		triangle->corners[i].y = triangle->corners[i].y + pt->y;
+		triangle->corners[i].z = triangle->corners[i].z + pt->z;
+	}
+}
+
 	
 void printTriDTriangle(triDTriangle* triangle) {
 

@@ -242,23 +242,14 @@ void testApp::setup(void) {
    twoDPoint   tracePt;
    float       radians;
    float       twoPi = 2*M_PI;
-
-//   int         slices = 24;
-//   centerPt.x = 120;
-//   centerPt.y = 200;
-//   
-//   initPt.x = centerPt.x;
-//   initPt.y = centerPt.y - 50;
-//   
-//   screen->drawCircle(round(centerPt.x),round(centerPt.y),5,&red);
-//   for (int i=0;i<slices;i++) {
-//      radians = i * (twoPi/slices);
-//      tracePt = initPt;
-//      rotate(&tracePt,radians,&centerPt);
-//      screen->drawCircle(round(tracePt.x),round(tracePt.y),5,&blue);
-//      db.trace("Slice: ",i,true);
-//   }
    
+  
+   label* ourLabel = new label(40,40,100,18,"Test");
+   Serial.println((long)ourLabel);
+   ourLabel->setTextSize(2);
+   ourLabel->setColors(&red,&scrColor);
+   addObj(ourLabel);
+
      
    if (!bno->begin()) {
       Serial.print("No BNO055 detected");
@@ -285,9 +276,9 @@ void testApp::setup(void) {
    center = STLModel->getModelCenter();
    renderMan->begin(STLModel);
    renderMan->setObjScale(5);
-   angle.xRad = deg_2_rad(0);
-   angle.yRad = deg_2_rad(45);
-   angle.zRad = deg_2_rad(0);
+   angle.xRad = deg_2_rad(-140);
+   angle.yRad = deg_2_rad(0);
+   angle.zRad = deg_2_rad(20);
    renderMan->setObjAngle(&angle);
    location.x = 0;
    location.y = 0;

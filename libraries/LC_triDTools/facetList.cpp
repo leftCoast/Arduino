@@ -192,11 +192,14 @@ void triDFacet::offset(double x,double y,double z) {
 	}
 }
 
+float xrad_2_deg(float x) { return x*180.0/PI; }
 
 // Rotate this facet around the origin point using these radian values.
 void triDFacet::rotate(triDRotation* rotation) {
 
 	triDVector	aVect;
+	//triDPoint	leastPt;
+	triDVector	xVect;
 	
 	for (byte i=0;i<3;i++) {
 		aVect.setVector(facet.corners[i].x,facet.corners[i].y,facet.corners[i].z);
@@ -205,7 +208,18 @@ void triDFacet::rotate(triDRotation* rotation) {
 		facet.corners[i].y	= aVect.getY();
 		facet.corners[i].z	= aVect.getZ();
 	}
+	normVect.rotateVect(rotation);
+	normVect.printVector();
+	xVect.setVector(&normVect);
 	calcNormal();
+	normVect.printVector();
+	Serial.print("Angle : ");
+	Serial.println(xrad_2_deg(normVect.angleBetween(&xVect)));
+	Serial.println("------------------------");
+	//leastPt = leastValues(&facet);
+	//subtractPoint(&facet,&leastPt);
+	//calcNormal();
+	//addPoint(&facet,&leastPt);
 }
 
 
@@ -215,6 +229,7 @@ void triDFacet::calcNormal(void) {
 	triDVector	aVect;
 	triDVector	bVect;
 	triDVector	nVect;
+	
 	
 	aVect.setVector(&(facet.corners[0]),&(facet.corners[1]));
 	bVect.setVector(&(facet.corners[1]),&(facet.corners[2]));
