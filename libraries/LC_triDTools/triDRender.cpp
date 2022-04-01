@@ -201,13 +201,7 @@ void triDRender::drawSelf(void) {
 	colorObj		aColor;
 	bool			done;
 	bool			first;
-	//colorMapper	rainbow(&green,&red);
-	//mapper		percent;
-	//long			count;
-	//float			pecentVal;
-	
-	//percent.setValues(0,ourModel->getNumFacets()-1,0,100);
-	//count = 0;
+
 	if (!init) {
 		screen->drawRect(this,&red);
 		return;
@@ -227,20 +221,13 @@ void triDRender::drawSelf(void) {
 				done = true;
 			} else {
 				aColor = calcColor(&aFacet);
-				//pecentVal = percent.map(count);
-				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
 				add2DPointToRect(&aFacet,first);
 				first = false;
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
-				
-				
-				//db.trace("Facet: ",(int)count,true);
-				//count++;
 			}
 		} while(!done);
 		ourModel->closeList();
-		screen->drawRect(this,&yellow);
 	}
 }
 
@@ -257,16 +244,19 @@ void triDRender::add2DPointToRect(viewFacet* aFacet,bool firstFacet) {
 
 	if (firstFacet) {
 		topLeft = aFacet->corner[0];
+		botRight = aFacet->corner[0];
 	}
 	for (byte i=0;i<3;i++) {
 		if (aFacet->corner[i].x < topLeft.x) {
-			topLeft.x = aFacet->corner[0].x;
-		} else if (aFacet->corner[i].x > botRight.x) {
+			topLeft.x = aFacet->corner[i].x;
+		} 
+		if (aFacet->corner[i].x > botRight.x) {
 			botRight.x = aFacet->corner[i].x;
 		}
-		if (aFacet->corner[i].y > topLeft.y) {
-			topLeft.y = aFacet->corner[0].y;
-		} else if (aFacet->corner[i].y < botRight.y) {
+		if (aFacet->corner[i].y < topLeft.y) {
+			topLeft.y = aFacet->corner[i].y;
+		}
+		if (aFacet->corner[i].y > botRight.y) {
 			botRight.y = aFacet->corner[i].y;
 		}
 	}

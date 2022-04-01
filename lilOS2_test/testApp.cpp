@@ -209,7 +209,7 @@ triDTriangle* createCircleThing(int slices,double coneAngle,double radius) {
       facets[i].corners[0].y = 0;
       facets[i].corners[0].z = radius;
                 
-      vectA.setVector(&vectI);                     // Initial vector.
+      vectA.setVector(&vectI);                  // Initial vector.
       rotation = setRotation(0,0,i*slice);      // How far we'll need to shift the vector..
       vectA.rotateVect(&rotation);                 // Add this much to the rotation.
       facets[i].corners[2].x = vectA.getX();
@@ -261,28 +261,27 @@ void testApp::setup(void) {
    
    triDRotation angle;
    triDPoint   location;
-   triDPoint   center;
    triDRender* renderMan = new triDRender(20,100,180,180);
    
-//   arrayList* arrayModel;
-//   triDTriangle* theModel = createCircleThing(12,deg_2_rad(15),100);
-//   arrayModel = new arrayList(theModel,12);
-//   renderMan->begin(arrayModel);
+   arrayList* arrayModel;
+   triDTriangle* theModel = createCircleThing(12,deg_2_rad(15),100);
+   arrayModel = new arrayList(theModel,12);
+   renderMan->begin(arrayModel);
    
-   stlList* STLModel;
-   STLModel = new stlList("/Test3D.STL");
+ //  stlList* STLModel;
+//   STLModel = new stlList("/Test3D.STL");
 //   //STLModel = new stlList("/teensyM.STL");
 //   //STLModel = new stlList("/hemi.STL");
-   center = STLModel->getModelCenter();
-   renderMan->begin(STLModel);
-   renderMan->setObjScale(5);
-   angle.xRad = deg_2_rad(-140);
-   angle.yRad = deg_2_rad(30);
-   angle.zRad = deg_2_rad(20);
+//   renderMan->begin(STLModel);
+   renderMan->begin(arrayModel);
+   renderMan->setObjScale(1);
+   angle.xRad = deg_2_rad(0);
+   angle.yRad = deg_2_rad(0);
+   angle.zRad = deg_2_rad(0);
    renderMan->setObjAngle(&angle);
-   location.x = 0;
-   location.y = 0;
-   location.z = 30;
+   location.x = 90;
+   location.y = 90;
+   location.z = 0;
    renderMan->setObjLoc(&location);
    addObj(renderMan);
    
