@@ -3,29 +3,61 @@
 
 // This rotates a point by angle radians around the x,y axis. It's been checked out and it
 // works!
-void rotate(twoDPoint* ptA,double angle,twoDPoint* center) {
+// void rotate(twoDPoint* ptA,double angle,twoDPoint* center) {
+// 
+// 	double	mag;
+// 	double	radF;
+// 	
+// 	if (center) {
+// 		ptA->x = ptA->x - center->x;
+// 		ptA->y = ptA->y - center->y;
+// 		rotate(ptA,angle,NULL);
+// 		ptA->x = ptA->x + center->x;
+// 		ptA->y = ptA->y + center->y;
+// 		return;
+// 	}
+// 	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
+// 		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
+// 		if (ptA->x<0.0001&&ptA->x>-0.0001) {						// As y/x->infinity..
+// 			radF = M_PI/2.0 + angle;									// Angle goes to Pi/2 Radians.
+// 		} else {
+// 			radF = atan(ptA->y/ptA->x)+angle;							// Calc resulting angle.
+// 		}
+// 		ptA->x = mag * cos(radF);				// Calc new x.
+// 		ptA->y = mag * sin(radF);				// Clac new y.
+// 	}
+// }
 
-	double	mag;
-	double	radF;
-	
-	if (center) {
-		ptA->x = ptA->x - center->x;
-		ptA->y = ptA->y - center->y;
-		rotate(ptA,angle,NULL);
-		ptA->x = ptA->x + center->x;
-		ptA->y = ptA->y + center->y;
-		return;
-	}
-	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
-		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
-		if (ptA->x<0.0001&&ptA->x>-0.0001) {						// As y/x->infinity..
-			radF = M_PI/2.0 + angle;									// Angle goes to Pi/2 Radians.
-		} else {
-			radF = atan(ptA->y/ptA->x)+angle;							// Calc resulting angle.
-		}
-		ptA->x = mag * cos(radF);				// Calc new x.
-		ptA->y = mag * sin(radF);				// Clac new y.
-	}
+// rotatePolar Got this from Tim2000 on the Wokwi server of Discord.
+void rotate(twoDPoint *point,double angle_rad, twoDPoint *center) {
+  
+  double magnitude;
+  double theta_rad;
+
+  // Subtract the offset if available.
+  if (center != nullptr)
+  {
+    point->x -= center->x;
+    point->y -= center->y;
+  }
+
+  // Convert from Cartesian to Polar form.
+  magnitude = sqrt((point->x * point->x) + (point->y * point->y));
+  theta_rad = atan2(point->y, point->x);
+
+  // Add the angle
+  theta_rad += angle_rad;
+
+  // Convert back to Cartesian form.
+  point->x = magnitude * cos(theta_rad);
+  point->y = magnitude * sin(theta_rad);
+
+  // Add the offset if available.
+  if (center != nullptr)
+  {
+    point->x += center->x;
+    point->y += center->y;
+  }
 }
 
 
