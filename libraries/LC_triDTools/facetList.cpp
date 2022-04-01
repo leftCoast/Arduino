@@ -208,14 +208,14 @@ void triDFacet::rotate(triDRotation* rotation) {
 		facet.corners[i].y	= aVect.getY();
 		facet.corners[i].z	= aVect.getZ();
 	}
-	normVect.rotateVect(rotation);
-	normVect.printVector();
-	xVect.setVector(&normVect);
+	//normVect.rotateVect(rotation);
+	//normVect.printVector();
+	//xVect.setVector(&normVect);
 	calcNormal();
-	normVect.printVector();
-	Serial.print("Angle : ");
-	Serial.println(xrad_2_deg(normVect.angleBetween(&xVect)));
-	Serial.println("------------------------");
+	//normVect.printVector();
+	//Serial.print("Angle : ");
+	//Serial.println(xrad_2_deg(normVect.angleBetween(&xVect)));
+	//Serial.println("------------------------");
 	//leastPt = leastValues(&facet);
 	//subtractPoint(&facet,&leastPt);
 	//calcNormal();

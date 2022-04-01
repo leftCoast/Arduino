@@ -96,9 +96,11 @@ class triDRender :	public linkList,
 				void	setObjLoc(triDPoint* loc);
 				void	setObjAngle(triDRotation* angle);
 				void	setCamera(triDPoint* cam);
+				rect	getLastRect(void);
 	virtual	void	drawSelf(void);
 	
 	protected:
+				void			add2DPointToRect(viewFacet* aFacet,bool firstFacet);
 				bool			createList(void);										// Build the list of visible facets.						
 				void			resetList(void);										// Reset the viewFacet list for a new read.
 				viewFacet	getNextViewFacet(void);								// Get the next facet off the visible list. (visible list index)
@@ -125,6 +127,8 @@ class triDRender :	public linkList,
 				triDPoint		spotPos;			// Single floodlight position.
 				colorObj 		spotColor;		// Single floodlight color.
 				colorMultiMap	lightMapper;	// Maps light stuff & angles to facet color.
+				point				topLeft;			// Of our drawing. (For erasing)
+				point				botRight;		// Of our drawing. (For erasing)
 };
 
 				

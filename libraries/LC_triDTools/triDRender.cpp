@@ -155,6 +155,7 @@ void triDRender::setObjScale(double inScale) {
 
 	scale = inScale;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -162,6 +163,7 @@ void triDRender::setObjScale(double inScale) {
 void triDRender::setObjLoc(triDPoint* loc) {
 	location = *loc;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -170,6 +172,7 @@ void triDRender::setObjAngle(triDRotation* angle) {
 
 	orientation = *angle;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -177,6 +180,17 @@ void triDRender::setObjAngle(triDRotation* angle) {
 void triDRender::setCamera(triDPoint* cam) {
 	camera = *cam;
 	setupChange = true;
+	setNeedRefresh();
+}
+
+
+// give back the rect that spans the last 3D render. Used for erasing display for redraw.
+rect triDRender::getLastRect(void) {
+
+	rect result;
+	
+	result.setRect(&topLeft,&botRight);
+	return result;
 }
 
 
@@ -186,6 +200,7 @@ void triDRender::drawSelf(void) {
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
+	bool			first;
 	//colorMapper	rainbow(&green,&red);
 	//mapper		percent;
 	//long			count;
@@ -204,6 +219,7 @@ void triDRender::drawSelf(void) {
 			}
 		}
 		resetList();
+		first = true;
 		done = false;
 		do {
 			aFacet = getNextViewFacet();
@@ -214,7 +230,11 @@ void triDRender::drawSelf(void) {
 				//pecentVal = percent.map(count);
 				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
+				add2DPointToRect(&aFacet,first);
+				first = false;
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
+				
+				
 				//db.trace("Facet: ",(int)count,true);
 				//count++;
 			}
@@ -229,6 +249,28 @@ void triDRender::drawSelf(void) {
 	
 //protected
 
+
+
+// While drawing, keep track of the x,y span of the drawing. This way we can easily blank
+// out the background for another drawing. 
+void triDRender::add2DPointToRect(viewFacet* aFacet,bool firstFacet) {
+
+	if (firstFacet) {
+		topLeft = aFacet->corner[0];
+	}
+	for (byte i=0;i<3;i++) {
+		if (aFacet->corner[i].x < topLeft.x) {
+			topLeft.x = aFacet->corner[0].x;
+		} else if (aFacet->corner[i].x > botRight.x) {
+			botRight.x = aFacet->corner[i].x;
+		}
+		if (aFacet->corner[i].y > topLeft.y) {
+			topLeft.y = aFacet->corner[0].y;
+		} else if (aFacet->corner[i].y < botRight.y) {
+			botRight.y = aFacet->corner[i].y;
+		}
+	}
+}
 
 
 // Build the list of visible facets.
