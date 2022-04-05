@@ -17,7 +17,7 @@
 #include "bubbleTools.h"
 
 
-#define BUBBLE_MS    50
+#define BUBBLE_MS    20
 
 
 mapper            rawToRadians(0,1023,0,2*PI);
@@ -27,7 +27,7 @@ Adafruit_BNO055*  bno = new Adafruit_BNO055(55, 0x28);
 timeObj           bubbleTimer(BUBBLE_MS);
 float             offsetX;
 float             offsetY;
-grid*             theGrid;
+
 
 void setup() {
    
@@ -70,13 +70,11 @@ bool angleChange(void) {
 }
 
 
-void loop() {
+void checkBubble(void) {
 
    sensors_event_t   event;
    
-   idle();
    if (bubbleTimer.ding()) {
-      bubbleTimer.stepTime();
       bno->getEvent(&event);
       new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetY));
       new_angle.yRad = degToRad(smootherY.addData(-event.orientation.z - offsetY));
@@ -84,7 +82,14 @@ void loop() {
       if (angleChange()) {
          renderMan->setObjAngle(&new_angle);
          my_angle = new_angle;
-         theGrid->setNeedRefresh();
+         bubbleTimer.start();
       }
    }
+}
+
+
+void loop() {
+
+   idle();
+   checkBubble();
 }

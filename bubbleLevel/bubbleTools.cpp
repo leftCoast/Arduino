@@ -4,13 +4,14 @@
 
 
 
+colorObj       backColor;
+bubbleRender*  renderMan;                          // triDRender is the engine that reads the model to do the 2D drawing.
+triDRotation   new_angle;                          // This sets the oreantation of the model's drwaing on the screen.
+triDRotation   my_angle;                           // Saves the last location.
+bitmap         bubbleMap(TARGET_DIA,TARGET_DIA);   // A bitmap for offscreen drawing.
+
 double radToDeg(double x) { return x*(180.0/PI); }  // Humans like degrees. These two do the traslantions.
 double degToRad(double x) { return x*(PI/180.0); }
-
-colorObj       backColor;
-bubbleRender*  renderMan;     // triDRender is the engine that reads the model to do the 2D drawing.
-triDRotation   new_angle;     // This sets the oreantation of the model's drwaing on the screen.
-triDRotation   my_angle;      // Saves the last location.
 
 
 triDTriangle* createCircleThing(int slices,double coneAngle,double radius) {
@@ -56,9 +57,9 @@ triDTriangle* createCircleThing(int slices,double coneAngle,double radius) {
 
 void setupModel(void) {
    
-   triDPoint      location;   // This sets the location of the model's drawing on the screen.
-   triDTriangle*  theModel = createCircleThing(10,degToRad(15),100);
-   bubble*        arrayModel = new bubble(theModel,10);
+   triDPoint      location;                                                   // This sets the location of the model's drawing on the screen.
+   triDTriangle*  theModel = createCircleThing(SLICES,degToRad(15),RADIUS);   // This hand crafts the list of triangles.
+   bubble*        arrayModel = new bubble(theModel,SLICES);                   // Use the hand crafted list to make an array model.
       
    renderMan = new bubbleRender(BOUND_X,BOUND_Y,BOUND_DIA,BOUND_DIA);  // Create the render engine with its screen location. (x,y,w,h)
    renderMan->begin(arrayModel);                // Slot the model into the render enegine.
@@ -95,12 +96,53 @@ bubbleRender::bubbleRender(int inX,int inY,int inWidth,int inHeight)
 bubbleRender::~bubbleRender(void) {  }
 
 void bubbleRender::drawSelf(void) {
-   rect   aRect;
    
-   aRect = getLastRect();
-   aRect.insetRect(-1);
-   screen->fillRect(&aRect,&backColor);
-   triDRender::drawSelf();
+   viewFacet   aFacet;
+   rect        eraseRect;
+   rect        renderRect;
+   offscreen   oSDisp;
+   bool        first;
+   bool        done;
+
+     
+   if (!init) {
+      screen->drawRect(this,&red);
+      return;
+   }
+   
+   eraseRect = getLastRect();
+   eraseRect.insetRect(-1);
+   
+   if (ourModel->openList()) {
+      if (setupChange) {
+         if (createList()) {
+            setupChange = false;
+         }
+      }
+      resetList();
+      first = true;
+      done = false;
+      do {
+         aFacet = getNextViewFacet();
+         if (aFacet.normalVect.isNullVector()) {
+            done = true;
+         } else {
+            offset2DFacet(&aFacet,x,y);
+            add2DPointToRect(&aFacet,first);
+            first = false;
+         }
+      } while(!done);
+      ourModel->closeList();
+      renderRect = getLastRect();
+      renderRect.insetRect(-1);
+      oSDisp.beginDraw(&bubbleMap,renderRect.minX(),renderRect.minY());
+      oSDisp.fillRect(&renderRect,&backColor);
+      triDRender::drawSelf();
+      oSDisp.endDraw();
+      screen->fillRect(&eraseRect,&backColor);
+      screen->blit(renderRect.minX(),renderRect.minY(),&bubbleMap);
+      theGrid->setNeedRefresh();
+   }
 }
 
 
@@ -130,8 +172,10 @@ void grid::drawSelf(void) {
 
    screen->drawCircle(BOUND_X,BOUND_Y,BOUND_DIA,&gridColor);
    screen->drawCircle(TARGET_X,TARGET_Y,TARGET_DIA,&gridColor);
-   screen->drawHLine(BOUND_X,BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   screen->drawHLine(BOUND_CX+(TARGET_DIA/2),BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   screen->drawVLine(BOUND_CX,BOUND_Y,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   screen->drawVLine(BOUND_CX,BOUND_CY+(TARGET_DIA/2),(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   //screen->drawHLine(BOUND_X,BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   //screen->drawHLine(BOUND_CX+(TARGET_DIA/2),BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   //screen->drawVLine(BOUND_CX,BOUND_Y,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   //screen->drawVLine(BOUND_CX,BOUND_CY+(TARGET_DIA/2),(BOUND_DIA-TARGET_DIA)/2,&gridColor);
 }
+
+grid* theGrid;
