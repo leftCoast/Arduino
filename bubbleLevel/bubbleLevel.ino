@@ -15,18 +15,17 @@
 #include <facetList.h>
 
 #include "bubbleTools.h"
+#include "UI.h"
 
+#define BUBBLE_MS    10
+#define NUM_DATA_AVG 10
 
-#define BUBBLE_MS    20
-
-
-mapper            rawToRadians(0,1023,0,2*PI);
-runningAvg        smootherX(5);
-runningAvg        smootherY(5);
+runningAvg        smootherX(NUM_DATA_AVG);
+runningAvg        smootherY(NUM_DATA_AVG);
+runningAvg        smootherZ(NUM_DATA_AVG);
 Adafruit_BNO055*  bno = new Adafruit_BNO055(55, 0x28); 
 timeObj           bubbleTimer(BUBBLE_MS);
-float             offsetX;
-float             offsetY;
+
 
 
 void setup() {
@@ -49,14 +48,35 @@ void setup() {
       bno->setExtCrystalUse(true);
    }
    backColor.setColor(&black);
-   screen->fillScreen(&backColor);                                    // Lets set the screen to the back color.
-   setupModel();                                                  // This fires up the 3D rendering stuff. BUT seeing
-   //Serial.println("The end of the beginning.");
-   offsetX = 0;
-   offsetY = 0;
+   screen->fillScreen(&backColor);                                // Lets set the screen to the back color.
+   ourEventMgr.begin();                                           // Startup our event manager.
    
+   setupModel();                                                  // This fires up the 3D rendering stuff. BUT seeing
    theGrid = new grid(BOUND_CX,BOUND_CY);
    viewList.addObj(theGrid);
+   setupUI();
+   ourSAngleBtn->setCallback(setAngleClk);
+   ourCAngleBtn->setCallback(clearAngleClk);
+   clearAngleClk();
+}
+
+
+void setAngleClk(void) {
+   
+   sensors_event_t   event;
+
+   bno->getEvent(&event);
+   offsetX = -event.orientation.y;
+   offsetY = -event.orientation.z;
+   offsetZ = -event.orientation.x;
+}
+
+
+void clearAngleClk(void) {
+
+   offsetX = 0;
+   offsetY = 0;
+   offsetZ = 0;
 }
 
 
@@ -75,9 +95,9 @@ void checkBubble(void) {
    
    if (bubbleTimer.ding()) {
       bno->getEvent(&event);
-      new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetY));
+      new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetX));
       new_angle.yRad = degToRad(smootherY.addData(-event.orientation.z - offsetY));
-      new_angle.zRad = 0;
+      new_angle.zRad = degToRad(smootherZ.addData(-event.orientation.x - offsetZ));
       if (angleChange()) {
          renderMan->setObjAngle(&new_angle);
          my_angle = new_angle;

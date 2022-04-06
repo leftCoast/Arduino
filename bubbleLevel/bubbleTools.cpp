@@ -6,7 +6,7 @@
 
 colorObj       backColor;
 bubbleRender*  renderMan;                          // triDRender is the engine that reads the model to do the 2D drawing.
-triDRotation   new_angle;                          // This sets the oreantation of the model's drwaing on the screen.
+triDRotation   new_angle;                          // This sets the oreantation of the model's drawing on the screen.
 triDRotation   my_angle;                           // Saves the last location.
 bitmap         bubbleMap(TARGET_DIA,TARGET_DIA);   // A bitmap for offscreen drawing.
 
@@ -88,9 +88,22 @@ bubble::bubble(triDTriangle* inList,long numItems)
 
 bubble::~bubble(void) {  }
 
-point pt[SLICES*3];
 
-void clearPtList(void) {
+
+//****************************************************************************************
+// bubbleRender:
+// 
+// A It renders the model but also deals with erasing it and drawing it.
+//****************************************************************************************
+
+bubbleRender::bubbleRender(int inX,int inY,int inWidth,int inHeight)
+   : triDRender(inX,inY,inWidth,inHeight) { clearPtList(); }
+
+
+bubbleRender::~bubbleRender(void) {  }
+
+
+void bubbleRender::clearPtList(void) {
 
    for (int i=0;i<SLICES*3;i++) {
       pt[i].x = -1;
@@ -99,7 +112,7 @@ void clearPtList(void) {
 }
 
 
-void addTriangle(viewFacet* aFacet) {
+void bubbleRender::addTriangle(viewFacet* aFacet) {
 
    int   i;
    bool done;
@@ -122,7 +135,7 @@ void addTriangle(viewFacet* aFacet) {
 }
 
 
-void erasePoints(void) {
+void bubbleRender::erasePoints(void) {
    
    int   i;
    bool done;
@@ -138,14 +151,6 @@ void erasePoints(void) {
       }
    }
 }
-
-bubbleRender::bubbleRender(int inX,int inY,int inWidth,int inHeight)
-   : triDRender(inX,inY,inWidth,inHeight) { clearPtList(); }
-
-bubbleRender::~bubbleRender(void) {  }
-
-
-
 
 
 // This is where it all gets put together. Can we actually draw this thing?
@@ -187,70 +192,6 @@ void bubbleRender::drawSelf(void) {
 }
 
 
-/*
-void bubbleRender::drawSelf(void) {
-   
-   rect        eraseRect;
-
-   theGrid->setNeedRefresh();
-   eraseRect = getLastRect();
-   eraseRect.insetRect(-1);
-   screen->fillRect(&eraseRect,&backColor);
-   triDRender::drawSelf();  
-}
-*/
-
-/*
-void bubbleRender::drawSelf(void) {
-   
-   viewFacet   aFacet;
-   rect        eraseRect;
-   rect        renderRect;
-   offscreen   oSDisp;
-   bool        first;
-   bool        done;
-
-     
-   if (!init) {
-      screen->drawRect(this,&red);
-      return;
-   }
-   
-   eraseRect = getLastRect();
-   eraseRect.insetRect(-1);
-   
-   if (ourModel->openList()) {
-      if (setupChange) {
-         if (createList()) {
-            setupChange = false;
-         }
-      }
-      resetList();
-      first = true;
-      done = false;
-      do {
-         aFacet = getNextViewFacet();
-         if (aFacet.normalVect.isNullVector()) {
-            done = true;
-         } else {
-            offset2DFacet(&aFacet,x,y);
-            add2DPointToRect(&aFacet,first);
-            first = false;
-         }
-      } while(!done);
-      ourModel->closeList();
-      renderRect = getLastRect();
-      renderRect.insetRect(-1);
-      oSDisp.beginDraw(&bubbleMap,renderRect.minX(),renderRect.minY());
-      oSDisp.fillRect(&renderRect,&backColor);
-      triDRender::drawSelf();
-      oSDisp.endDraw();
-      screen->fillRect(&eraseRect,&backColor);
-      screen->blit(renderRect.minX(),renderRect.minY(),&bubbleMap);
-      theGrid->setNeedRefresh();
-   }
-}
-*/
 
 //****************************************************************************************
 // grid:

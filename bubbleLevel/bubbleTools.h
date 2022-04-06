@@ -51,8 +51,13 @@ class bubbleRender :   public triDRender {
    public :
             bubbleRender(int inX,int inY,int inWidth,int inHeight);
    virtual  ~bubbleRender(void);
-   
+
+            void clearPtList(void);
+            void addTriangle(viewFacet* aFacet);
+            void erasePoints(void);
    virtual  void  drawSelf(void);
+
+            point pt[SLICES*3];
 };
 
 
