@@ -58,7 +58,7 @@ triDTriangle* createCircleThing(int slices,double coneAngle,double radius) {
 void setupModel(void) {
    
    triDPoint      location;                                                   // This sets the location of the model's drawing on the screen.
-   triDTriangle*  theModel = createCircleThing(SLICES,degToRad(15),RADIUS);   // This hand crafts the list of triangles.
+   triDTriangle*  theModel = createCircleThing(SLICES,degToRad(15),RADIUS-2);   // This hand crafts the list of triangles.
    bubble*        arrayModel = new bubble(theModel,SLICES);                   // Use the hand crafted list to make an array model.
       
    renderMan = new bubbleRender(BOUND_X,BOUND_Y,BOUND_DIA,BOUND_DIA);  // Create the render engine with its screen location. (x,y,w,h)
@@ -88,13 +88,119 @@ bubble::bubble(triDTriangle* inList,long numItems)
 
 bubble::~bubble(void) {  }
 
+point pt[SLICES*3];
 
+void clearPtList(void) {
+
+   for (int i=0;i<SLICES*3;i++) {
+      pt[i].x = -1;
+      pt[i].y = -1;
+   }
+}
+
+
+void addTriangle(viewFacet* aFacet) {
+
+   int   i;
+   bool done;
+
+   for (byte j=1;j<3;j++) {
+      i = 0;
+      done = false;
+      while(!done) {
+         if (aFacet->corner[j].x==pt[i].x && aFacet->corner[j].y==pt[i].y) {
+            done = true;
+         } else if (pt[i].x == -1) {
+            pt[i].x = aFacet->corner[j].x;
+            pt[i].y = aFacet->corner[j].y;
+            done = true;
+         } else {
+            i++;
+         }
+      }
+   }
+}
+
+
+void erasePoints(void) {
+   
+   int   i;
+   bool done;
+
+   i = 0;
+   done = false;
+   while(!done) {
+      if (pt[i].x == -1) {
+         done = true;
+      } else {
+         screen->drawPixel(pt[i].x,pt[i].y,&backColor);
+         i++;
+      }
+   }
+}
 
 bubbleRender::bubbleRender(int inX,int inY,int inWidth,int inHeight)
-   : triDRender(inX,inY,inWidth,inHeight) {  }
+   : triDRender(inX,inY,inWidth,inHeight) { clearPtList(); }
 
 bubbleRender::~bubbleRender(void) {  }
 
+
+
+
+
+// This is where it all gets put together. Can we actually draw this thing?
+void bubbleRender::drawSelf(void) {
+
+   viewFacet   aFacet;
+   colorObj    aColor;
+   bool        done;
+
+   if (!init) {
+      screen->drawRect(this,&red);
+      return;
+   }
+   if (ourModel->openList()) {
+      theGrid->setNeedRefresh();
+      if (setupChange) {
+         if (createList()) {
+            setupChange = false;
+         }
+      }
+      resetList();
+      erasePoints();
+      clearPtList();
+      done = false;
+      do {
+         aFacet = getNextViewFacet();
+         if (aFacet.normalVect.isNullVector()) {
+            done = true;
+         } else {
+            offset2DFacet(&aFacet,x,y);
+            addTriangle(&aFacet);
+            //screen->drawPixel(aFacet.corner[0].x,aFacet.corner[0].y,&cyan);
+            screen->drawPixel(aFacet.corner[1].x,aFacet.corner[1].y,&cyan);
+            screen->drawPixel(aFacet.corner[2].x,aFacet.corner[2].y,&cyan);
+         }
+      } while(!done);
+      ourModel->closeList();
+   }
+}
+
+
+/*
+void bubbleRender::drawSelf(void) {
+   
+   rect        eraseRect;
+
+   theGrid->setNeedRefresh();
+   eraseRect = getLastRect();
+   eraseRect.insetRect(-1);
+   screen->fillRect(&eraseRect,&backColor);
+   triDRender::drawSelf();  
+}
+*/
+
+/*
 void bubbleRender::drawSelf(void) {
    
    viewFacet   aFacet;
@@ -144,7 +250,7 @@ void bubbleRender::drawSelf(void) {
       theGrid->setNeedRefresh();
    }
 }
-
+*/
 
 //****************************************************************************************
 // grid:
@@ -158,7 +264,9 @@ grid::grid(int centerX,int centerY)
 
    center.x = centerX;
    center.y = centerY;
-   gridColor.setColor(LC_CYAN);
+   //gridColor.setColor(LC_CYAN);
+   gridColor.setColor(&red);
+   gridColor.blend(&black,50);
 }
 
 
@@ -172,10 +280,10 @@ void grid::drawSelf(void) {
 
    screen->drawCircle(BOUND_X,BOUND_Y,BOUND_DIA,&gridColor);
    screen->drawCircle(TARGET_X,TARGET_Y,TARGET_DIA,&gridColor);
-   //screen->drawHLine(BOUND_X,BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   //screen->drawHLine(BOUND_CX+(TARGET_DIA/2),BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   //screen->drawVLine(BOUND_CX,BOUND_Y,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
-   //screen->drawVLine(BOUND_CX,BOUND_CY+(TARGET_DIA/2),(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   screen->drawHLine(BOUND_X,BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   screen->drawHLine(BOUND_CX+(TARGET_DIA/2),BOUND_CY,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   screen->drawVLine(BOUND_CX,BOUND_Y,(BOUND_DIA-TARGET_DIA)/2,&gridColor);
+   screen->drawVLine(BOUND_CX,BOUND_CY+(TARGET_DIA/2),(BOUND_DIA-TARGET_DIA)/2,&gridColor);
 }
 
 grid* theGrid;

@@ -32,7 +32,7 @@ float             offsetY;
 void setup() {
    
    Serial.begin(115200);                                          // Fire up serial for debugging.
-   Serial.println("We begin..");
+   //Serial.println("We begin..");
    if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // Init screen.
       Serial.println("NO SCREEN!");                               // Screen init failed. Tell user.
       Serial.flush();                                             // Make sure the message gets out.
@@ -48,11 +48,10 @@ void setup() {
    } else {
       bno->setExtCrystalUse(true);
    }
-   backColor.setColor(LC_OLIVE);
-   backColor.blend(&green,20);
+   backColor.setColor(&black);
    screen->fillScreen(&backColor);                                    // Lets set the screen to the back color.
    setupModel();                                                  // This fires up the 3D rendering stuff. BUT seeing
-   Serial.println("The end of the beginning.");
+   //Serial.println("The end of the beginning.");
    offsetX = 0;
    offsetY = 0;
    
