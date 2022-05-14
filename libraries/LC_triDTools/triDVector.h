@@ -27,7 +27,6 @@ class triDVector {
 				void			normalize(void);
 				bool			isNullVector(void);
 				void			rotateVect(triDRotation* rotation);
-				void			rotateVect(double xRad,double yRad,double zRad);
 				double		dotProduct(triDVector* inVect);
 				double		angleBetween(triDVector* inVect);
 				void			printVector(void);

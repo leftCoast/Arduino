@@ -4,97 +4,19 @@
 
 
 
-// objCenter::objCenter(void) {  pointSet = false; }
-// 
-// 				
-// objCenter::~objCenter(void) { }
-// 	
-// 	
-// void objCenter::addFacet(triDFacet* aFacet) {
-// 
-// 	double	x;
-// 	double	y;
-// 	double	z;
-// 	
-// 	x = aFacet->facet.corners[0].x;
-// 	y = aFacet->facet.corners[0].y;
-// 	z = aFacet->facet.corners[0].z;
-// 	addItem(x,y,z);
-// 	x = aFacet->facet.corners[1].x;
-// 	y = aFacet->facet.corners[1].y;
-// 	z = aFacet->facet.corners[1].z;
-// 	addItem(x,y,z);
-// 	x = aFacet->facet.corners[2].x;
-// 	y = aFacet->facet.corners[2].y;
-// 	z = aFacet->facet.corners[2].z;
-// 	addItem(x,y,z);
-// }
-// 
-// 
-// void objCenter::addItem(double x,double y,double z) {
-// 
-// 	if (!pointSet) {
-// 		xMin = x;
-// 		xMax = x;
-// 		yMin = y;
-// 		yMax = y;
-// 		zMin = z;
-// 		zMax = z;
-// 		pointSet = true;
-// 	} else {
-// 		if (x < xMin) xMin = x;
-// 		else if (x > xMax) xMax = x;
-// 		if (y < yMin) yMin = y;
-// 		else if (y > yMax) yMax = y;
-// 		if (z < zMin) zMin = z;
-// 		else if (z > zMax) zMax = z;
-// 	}
-// }
-// 
-// 
-// triDPoint objCenter::getCenterPt(void) {
-// 
-// 	triDPoint	aCenter;
-// 	
-// 	aCenter.x = (xMin+xMax)/2.0;
-// 	aCenter.y = (yMin+yMax)/2.0;
-// 	aCenter.z = (zMin+zMax)/2.0;
-// 	return aCenter;
-// }
-// 
-// 	
-// void objCenter::printObjCenter(void) {
-// 
-// 	triDPoint	aCenter;
-// 	
-// 	Serial.println("----------  objCenter  ----------");
-// 	Serial.print("x min, max   : ");
-// 	Serial.print(xMin);Serial.print(", ");
-// 	Serial.print(xMax);Serial.println();
-// 	Serial.print("y min, max   : ");
-// 	Serial.print(yMin);Serial.print(", ");
-// 	Serial.print(yMax);Serial.println();	
-// 	Serial.print("z min, max   : ");
-// 	Serial.print(zMin);Serial.print(", ");
-// 	Serial.print(zMax);Serial.println();
-// 	aCenter = getCenterPt();
-// 	Serial.print("Center x,y,z : ");
-// 	Serial.print(aCenter.x);Serial.print(", ");
-// 	Serial.print(aCenter.y);Serial.print(", ");
-// 	Serial.print(aCenter.z);Serial.println();
-// 	Serial.println("---------------------------------");
-// }
+
 			
 				
 
-//****************************************************************************************
+
 
 
 //****************************************************************************************
 // offset2DFacet
 //
 // Move your result triangle by "this much".
-//
+//****************************************************************************************
+
 
 void offset2DFacet(viewFacet* aFacet,int x,int y) {
 
@@ -104,11 +26,6 @@ void offset2DFacet(viewFacet* aFacet,int x,int y) {
 	}
 }
 
-/*
-triDVector	normalVect;
-	triDPoint	midPoint;		
-	point			corner[3];
-*/	
 	
 void printViewFacet(viewFacet* aFacet) {
 	
@@ -123,11 +40,13 @@ void printViewFacet(viewFacet* aFacet) {
 	Serial.println("---------------------------");
 }
 
-//
-//
+
+
 //****************************************************************************************
 // indexItem:
 //
+//****************************************************************************************
+
 
 indexItem::indexItem(long index,double distance)
 	: linkListObj() {
@@ -142,10 +61,11 @@ indexItem::~indexItem(void) {  }
 long indexItem::getIndex(void) {  return facetIndex; }
 
 
-//
+
 //****************************************************************************************
 // triDRender:
 //
+//****************************************************************************************
 
 
 triDRender::triDRender(int inX,int inY,int inWidth,int inHeight)
@@ -188,6 +108,9 @@ bool triDRender::begin(facetList* inModel) {
 			orientation.xRad	= 0;					// Set PITCH angle of the 3D object.
 			orientation.yRad	= 0;					// Set YAW angle of the 3D object.
 			orientation.zRad	= 0;					// Set ROLL angle of the 3D object.
+			adjLocation.x	= 0;						// Place holder for the final location given the rotation.
+			adjLocation.y	= 0;
+			adjLocation.z	= 0;
 			scale					= 1;					// Multiplier for dimensions. Sets objet size.
 			camera.x				= width/2;			// Camera, view point center of screen in x.
 			camera.y				= height/2;			// Center of screen in y.
@@ -232,6 +155,7 @@ void triDRender::setObjScale(double inScale) {
 
 	scale = inScale;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -239,6 +163,7 @@ void triDRender::setObjScale(double inScale) {
 void triDRender::setObjLoc(triDPoint* loc) {
 	location = *loc;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -247,6 +172,7 @@ void triDRender::setObjAngle(triDRotation* angle) {
 
 	orientation = *angle;
 	setupChange = true;
+	setNeedRefresh();
 }
 
 
@@ -254,6 +180,17 @@ void triDRender::setObjAngle(triDRotation* angle) {
 void triDRender::setCamera(triDPoint* cam) {
 	camera = *cam;
 	setupChange = true;
+	setNeedRefresh();
+}
+
+
+// give back the rect that spans the last 3D render. Used for erasing display for redraw.
+rect triDRender::getLastRect(void) {
+
+	rect result;
+	
+	result.setRect(&topLeft,&botRight);
+	return result;
 }
 
 
@@ -263,13 +200,8 @@ void triDRender::drawSelf(void) {
 	viewFacet	aFacet;
 	colorObj		aColor;
 	bool			done;
-	//colorMapper	rainbow(&green,&red);
-	//mapper		percent;
-	//long			count;
-	//float			pecentVal;
-	
-	//percent.setValues(0,ourModel->getNumFacets()-1,0,100);
-	//count = 0;
+	bool			first;
+
 	if (!init) {
 		screen->drawRect(this,&red);
 		return;
@@ -281,6 +213,7 @@ void triDRender::drawSelf(void) {
 			}
 		}
 		resetList();
+		first = true;
 		done = false;
 		do {
 			aFacet = getNextViewFacet();
@@ -288,19 +221,13 @@ void triDRender::drawSelf(void) {
 				done = true;
 			} else {
 				aColor = calcColor(&aFacet);
-				//pecentVal = percent.map(count);
-				//Serial.print("Count: ");Serial.println(count);
-				//count++;
-				//Serial.print("Percent: ");Serial.println(pecentVal);
-				//aColor = rainbow.map(pecentVal);
 				offset2DFacet(&aFacet,x,y);
+				add2DPointToRect(&aFacet,first);
+				first = false;
 				screen->fillTriangle(&(aFacet.corner[0]),&(aFacet.corner[1]),&(aFacet.corner[2]),&aColor);
-				//printViewFacet(&aFacet);
-				//db.trace("click me",true);
 			}
 		} while(!done);
 		ourModel->closeList();
-		screen->drawRect(this,&yellow);
 	}
 }
 
@@ -311,6 +238,31 @@ void triDRender::drawSelf(void) {
 
 
 
+// While drawing, keep track of the x,y span of the drawing. This way we can easily blank
+// out the background for another drawing. 
+void triDRender::add2DPointToRect(viewFacet* aFacet,bool firstFacet) {
+
+	if (firstFacet) {
+		topLeft = aFacet->corner[0];
+		botRight = aFacet->corner[0];
+	}
+	for (byte i=0;i<3;i++) {
+		if (aFacet->corner[i].x < topLeft.x) {
+			topLeft.x = aFacet->corner[i].x;
+		} 
+		if (aFacet->corner[i].x > botRight.x) {
+			botRight.x = aFacet->corner[i].x;
+		}
+		if (aFacet->corner[i].y < topLeft.y) {
+			topLeft.y = aFacet->corner[i].y;
+		}
+		if (aFacet->corner[i].y > botRight.y) {
+			botRight.y = aFacet->corner[i].y;
+		}
+	}
+}
+
+
 // Build the list of visible facets.
 bool triDRender::createList(void) {
 
@@ -319,21 +271,22 @@ bool triDRender::createList(void) {
 	triDFacet	aFacet;
 	long			numFacets;
 	
-	if (init) {
-		linkList::dumpList();
-		haveList = false;
-		numFacets = ourModel->getNumFacets();
-		for(long i=0;i<numFacets;i++) {
-			aFacet = ourModel->getTriDFacet(i);
-			zDist = inView(&aFacet);
-			if (zDist>0) {
-				newItem = new indexItem(i,zDist);
-				addIndexItem(newItem);
-			}
-		}
-		haveList = true;
-	}
-	return haveList;
+	if (init) {													// If we have been initialized..
+		linkList::dumpList();								// Dump any sorted index list we may have.
+		haveList = false;										// We have no list now.
+		numFacets = ourModel->getNumFacets();			// Grab the number of facets.
+		setRotationOffset();									// Recalculate the location, after rotation.
+		for(long i=0;i<numFacets;i++) {					// For each available facet..
+			aFacet = ourModel->getTriDFacet(i);			// Grab a "raw" facet.
+			zDist = inView(&aFacet);						// Do the transitions then return distance. (If any)
+			if (zDist>0) {										// If distance is >0, it's possibly visible..
+				newItem = new indexItem(i,zDist);		// Create a link to this facet.
+				addIndexItem(newItem);						// Add it into the list sorted by distance to camera.
+			}														//
+		}															//
+		haveList = true;										// We have a current list of facets ready to render.
+	}																//
+	return haveList;											// User may be too lazy to check, we'll pass it back as well.
 }	
 
 
@@ -422,11 +375,27 @@ void triDRender::addIndexItem(indexItem* newItem) {
 }
 
 
-void triDRender::doTransformations(triDFacet* aFacet) {
+void  triDRender::setRotationOffset(void) {
 
-	aFacet->rotate(&(orientation));
+	triDVector	aVector;
+	triDPoint	rotationCenter;
+	triDPoint	newPt;
+	
+	rotationCenter = ourModel->getModelCenter();
+	aVector.setVector(&rotationCenter);
+	aVector.rotateVect(&orientation);
+	newPt = aVector.getPoint();
+	adjLocation.x = rotationCenter.x - newPt.x + location.x;
+	adjLocation.y = rotationCenter.y - newPt.y + location.y;
+	adjLocation.z = rotationCenter.z - newPt.z + location.z;
+}
+
+
+void triDRender::doTransformations(triDFacet* aFacet) {
+	
+	aFacet->rotate(&orientation);
+	aFacet->offset(adjLocation.x,adjLocation.y,adjLocation.z);
 	aFacet->scale(scale);
-	aFacet->offset(location.x,location.y,location.z);
 }
 
 

@@ -20,7 +20,7 @@ struct twoDPoint {
 };
 
 
-void rotate(twoDPoint* ptA,double angle);
+void rotate(twoDPoint* ptA,double angle,twoDPoint* center=NULL);
 
 
 //****************************************************************************************
@@ -73,6 +73,18 @@ triDPoint getCentPt(triDTriangle* triangle);
 void printTriDTriangle(triDTriangle* triangle);
 
 
+// What's the smallest x y & z values in this thing?
+triDPoint leastValues(triDTriangle* triangle);
+
+
+// Offset this triangle by subbing this point to each vertex.
+void subtractPoint(triDTriangle* triangle,triDPoint* pt);
+
+
+// Offset this triangle by adding this point to each vertex.
+void addPoint(triDTriangle* triangle,triDPoint* pt);
+
+
 
 //****************************************************************************************
 // triDRotation:
@@ -87,6 +99,6 @@ struct triDRotation{
 	double	zRad;	// Roll
 };
 
-
+triDRotation setRotation(double xVal,double yVal,double zVal);
 			
 #endif

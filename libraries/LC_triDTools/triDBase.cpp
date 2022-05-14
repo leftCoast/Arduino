@@ -1,16 +1,37 @@
 #include <triDBase.h>
 
 
-// This rotates a point by angle radians around the x,y axis.
-void rotate(twoDPoint* ptA,double angle) {
 
-	double	mag;
-	
-	if (ptA->x||ptA->y) {												// IF its not a 0,0 point..
-		mag = sqrt((ptA->x * ptA->x) + (ptA->y * ptA->y));		// Calc magnatude.
-		ptA->x = mag * cos(acos(ptA->x/mag)+angle);				// Calc new x.
-		ptA->y = mag * sin(asin(ptA->y/mag)+angle);				// Clac new y.
-	}
+// rotatePolar Got this from Tim2000 on the Wokwi server of Discord.
+void rotate(twoDPoint *point,double angle_rad, twoDPoint *center) {
+  
+  double magnitude;
+  double theta_rad;
+
+  // Subtract the offset if available.
+  if (center != nullptr)
+  {
+    point->x -= center->x;
+    point->y -= center->y;
+  }
+
+  // Convert from Cartesian to Polar form.
+  magnitude = sqrt((point->x * point->x) + (point->y * point->y));
+  theta_rad = atan2(point->y, point->x);
+
+  // Add the angle
+  theta_rad += angle_rad;
+
+  // Convert back to Cartesian form.
+  point->x = magnitude * cos(theta_rad);
+  point->y = magnitude * sin(theta_rad);
+
+  // Add the offset if available.
+  if (center != nullptr)
+  {
+    point->x += center->x;
+    point->y += center->y;
+  }
 }
 
 
@@ -79,6 +100,60 @@ triDPoint getCentPt(triDTriangle* triangle) {
 	return res;
 }
 
+
+// What's the smallest x y & z values in this thing?
+triDPoint leastValues(triDTriangle* triangle) {
+
+	triDPoint	res;
+	
+	res.x = triangle->corners[0].x;
+	if (triangle->corners[1].x < res.x) {
+		res.x = triangle->corners[1].x;
+	}
+	if (triangle->corners[2].x < res.x) {
+		res.x = triangle->corners[2].x;
+	}
+	
+	res.y = triangle->corners[0].y;
+	if (triangle->corners[1].y < res.y) {
+		res.y = triangle->corners[1].y;
+	}
+	if (triangle->corners[2].y < res.y) {
+		res.y = triangle->corners[2].y;
+	}
+	
+	res.z = triangle->corners[0].z;
+	if (triangle->corners[1].z < res.z) {
+		res.z = triangle->corners[1].z;
+	}
+	if (triangle->corners[2].z < res.z) {
+		res.z = triangle->corners[2].z;
+	}
+	return res;
+}
+
+
+// Offset this triangle by subbing this point to each vertex.
+void subtractPoint(triDTriangle* triangle,triDPoint* pt) {
+	
+	for (byte i=0;i<3;i++) {
+		triangle->corners[i].x = triangle->corners[i].x - pt->x;
+		triangle->corners[i].y = triangle->corners[i].y - pt->y;
+		triangle->corners[i].z = triangle->corners[i].z - pt->z;
+	}
+}
+
+
+// Offset this triangle by adding this point to each vertex.
+void addPoint(triDTriangle* triangle,triDPoint* pt) {
+
+	for (byte i=0;i<3;i++) {
+		triangle->corners[i].x = triangle->corners[i].x + pt->x;
+		triangle->corners[i].y = triangle->corners[i].y + pt->y;
+		triangle->corners[i].z = triangle->corners[i].z + pt->z;
+	}
+}
+
 	
 void printTriDTriangle(triDTriangle* triangle) {
 
@@ -91,4 +166,15 @@ void printTriDTriangle(triDTriangle* triangle) {
 	Serial.print("corners[2]: ");
 	printTriDPt(&(triangle->corners[2]));
 	Serial.println("-------");
+}
+
+
+triDRotation setRotation(double xVal,double yVal,double zVal) {
+
+	triDRotation	res;
+	
+	res.xRad = xVal;
+	res.yRad = yVal;
+	res.zRad = zVal;
+	return res;
 }

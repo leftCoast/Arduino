@@ -1,6 +1,8 @@
 #include <stlList.h>
 #include <SDTools.h>
 
+
+
 stlList::stlList(const char* inPath)
 	: stlFile(inPath),
 	facetList() { index = 0; }
@@ -38,11 +40,6 @@ long stlList::getNumFacets(void) { return (long)stlFile::getNumFacets(); }
 // };
 //
 //
-// struct facetPack {
-// 	triDVector		normVect;
-// 	triDTriangle	facet;
-// };
-//
 //
 // struct triDTriangle {
 // 	triDPoint corners[3];
@@ -50,7 +47,7 @@ long stlList::getNumFacets(void) { return (long)stlFile::getNumFacets(); }
 //
 //
 //
-// Takes an STLFacet, and sets those values into the passing facet pointer;
+// Takes an STLFacet, and sets those values into the triDFacet.
 triDFacet stlList::readFileFacet(STLFacet* fileFacet) {
 	
 	triDFacet	res;

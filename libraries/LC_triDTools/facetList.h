@@ -40,6 +40,34 @@ class triDFacet {
 	
 
 
+//****************************************************************************************
+// objCenter:
+//
+// 
+//****************************************************************************************
+
+
+class objCenter {
+
+	public :
+					objCenter(void);
+					~objCenter(void);
+	
+	
+					void				addFacet(triDFacet* aFacet);
+					void				addItem(double x,double y,double z);
+					triDPoint		getCenterPt(void);
+					void				printObjCenter(void);
+					
+					bool		pointSet;
+					double	xMax;
+					double	xMin;
+					double	yMax;
+					double	yMin;
+					double	zMax;
+					double	zMin;
+};
+
 
 //****************************************************************************************
 // facetList
@@ -49,6 +77,7 @@ class triDFacet {
 // them into a list or display them.
 //****************************************************************************************
 
+
 class facetList {
 
 	public :
@@ -56,16 +85,26 @@ class facetList {
 	virtual		~facetList(void);
 	
 	virtual		bool			begin(void)=0;
+	virtual		triDPoint	getModelCenter(void);
 	virtual		bool			openList(void);
 	virtual		void			closeList(void);
 	virtual		long			getNumFacets(void);
 	virtual		void			resetIndex(void);
 	virtual		triDFacet	getTriDFacet(long index);
 	virtual		triDFacet	getNextTriDFacet(void);
+	
+// NOTE : These last three. Once the facet list is changed, set haveCenter to false so the
+// next call to getModelCenter() will recalculate it.
+
 	virtual		void			setFacet(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetAfter(triDFacet* facetPtr,long index);
 	virtual		void			insertFacetBefore(triDFacet* facetPtr,long index);
+	
+					bool			haveCenter;
+					triDPoint	centerPt;
 };
+
+
 
 #endif
 	

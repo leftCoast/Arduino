@@ -1,7 +1,7 @@
 #ifndef stlFile_h
 #define stlFile_h
 
-#include <triDbase.h>
+#include <triDBase.h>
 #include <triDVector.h>
 #include <SD.h>
 
