@@ -16,14 +16,19 @@
 
 enum        mainComs  { noCommand,
                         help,
+                        time,
+                        stime,
+                        sdate,
                         setHour,
                         setMin,
                         setSec,
                         reset,
-                        cEdit,
                         gColor,
-                        sColor
+                        sColor,
+                        gCode
                       };
+
+                      
 lilParser   mParser;
 RTC_PCF8523 rtc;
 DateTime    drawtime;
@@ -35,7 +40,7 @@ neoPixel    theNeoPixel(NUM_LEDS,LED_PIN);
 void setup() {
   
   Serial.begin(57600);  
-  while (!Serial);
+  //while (!Serial);
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     Serial.flush();
@@ -48,13 +53,19 @@ void setup() {
   theNeoPixel.show();
 
   mParser.addCmd(help,"?");
+  mParser.addCmd(time,"time");
+  mParser.addCmd(stime,"settime");
+  mParser.addCmd(sdate,"setdate");
   mParser.addCmd(setHour,"hour");
   mParser.addCmd(setMin,"minute");
   mParser.addCmd(setSec,"sec");
   mParser.addCmd(reset,"reset");
-  mParser.addCmd(cEdit,"cedit");
   mParser.addCmd(gColor,"gcolor");
   mParser.addCmd(sColor,"scolor");
+  mParser.addCmd(gCode,"gcode");
+  
+  readParams();
+  checkTime(true);
 }
 
 
@@ -65,10 +76,10 @@ void setup() {
 
 void readParams(void) {
 
-  RGBpack paramBlock[24];
+  RGBpack paramBlock[NUM_COLORS];
   
   EEPROM.get(0,paramBlock);
-  for (int i=0;i<24;i++) {
+  for (int i=0;i<NUM_COLORS;i++) {
     colors[i].setColor(&(paramBlock[i]));
   }
 }
@@ -76,9 +87,9 @@ void readParams(void) {
 
 void saveParams(void)  {
   
-  RGBpack paramBlock[24];
+  RGBpack paramBlock[NUM_COLORS];
 
-  for (int i=0;i<24;i++) {
+  for (int i=0;i<NUM_COLORS;i++) {
     paramBlock[i] = colors[i].packColor();
   }
   EEPROM.put(0,paramBlock);
@@ -91,19 +102,37 @@ void saveParams(void)  {
 // **********************************************************************
 
 
-void checkTime(void) {
+// So, taking a page from Dash's code book.. I decide to use my first multi dimensional array as a hash table.
+//
+//                      0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 <- hour number / index
+//                      B  P  R  O  Y  G  B  P  R  O  Y  G  B  P  R  O  Y  G  B  P  R  O  Y  G  <- hour color
+
+byte hashTable[6][24] { 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 12,12,12,12,12,12,18,18,18,18,18,18,0, 0,    /* blue     */
+                        1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 7, 13,13,13,13,13,13,19,19,19,19,19,19,1,    /* purple   */
+                        2, 2, 2, 2, 2, 2, 8, 8, 8, 8, 8, 8, 14,14,14,14,14,14,20,20,20,20,20,20,   /* red      */
+                        21,3, 3, 3, 3, 3, 3, 9, 9, 9, 9, 9, 9, 15,15,15,15,15,15,21,21,21,21,21,   /* orange   */
+                        22,22,4, 4, 4, 4, 4, 4, 10,10,10,10,10,10,16,16,16,16,16,16,22,22,22,22,   /* yellow   */
+                        23,23,23,5, 5, 5, 5, 5, 5, 11,11,11,11,11,11,17,17,17,17,17,17,23,23,23    /* green    */
+                      };
+
+
+void checkTime(bool justDoIt) {
   
   DateTime  now;
-  int       index;
+  byte      decaMin;
+  byte      decaMinIndex;
   
   now = rtc.now();
-  if((now.minute()!=drawtime.minute())||(now.hour()!=drawtime.hour())) {  // If times have changed..
-    index = now.hour();
-    theNeoPixel.setPixelColor(HOUR_LED,&(colors[index]));
-    theNeoPixel.setPixelColor(DECMIN_LED,&black);
+  if((now.minute()!=drawtime.minute())||(now.hour()!=drawtime.hour())||justDoIt) {  // If times have changed, or need to..
+    decaMin = now.minute()/10;
+    decaMinIndex = hashTable[decaMin][now.hour()];
+    theNeoPixel.setPixelColor(HOUR_LED,&(colors[now.hour()]));
+    theNeoPixel.setPixelColor(DECMIN_LED,&(colors[decaMinIndex]));
+    theNeoPixel.show();
     drawtime = now;
   }
 }
+
 
 
 // **********************************************************************
@@ -111,15 +140,63 @@ void checkTime(void) {
 // **********************************************************************
 
 
+void doShowTime(void) {
+
+   DateTime now = rtc.now();
+   Serial.print("\tDate : ");
+   Serial.print(now.month());Serial.print("/");
+   Serial.print(now.day());Serial.print("/");
+   Serial.print(now.year());Serial.print("    ");
+   Serial.print("Time : ");
+   Serial.print(now.hour());Serial.print(":");
+   Serial.print(now.minute());Serial.print(":");
+   Serial.println(now.second());
+}
+
+
+void doSetTime() {
+
+   byte  newHour;
+   byte  newMin;
+   byte  newSec;
+   
+   if (mParser.numParams()==3) {
+      newHour = atoi(mParser.getParam());
+      newMin = atoi(mParser.getParam());
+      newSec = atoi(mParser.getParam());
+      DateTime now = rtc.now();
+      rtc.adjust(DateTime(now.year(),now.month(),now.day(),newHour,newMin,newSec));
+      checkTime(true);
+   }
+}
+
+
+void doSetDate() {
+
+   int   newYear;
+   byte  newMonth;
+   byte  newDay;
+   
+   if (mParser.numParams()==3) {
+      newYear = atoi(mParser.getParam());
+      Serial.println(newYear);
+      newMonth = atoi(mParser.getParam());
+      newDay = atoi(mParser.getParam());
+      DateTime now = rtc.now();
+      rtc.adjust(DateTime(newYear,newMonth,newDay,now.hour(),now.minute(),now.second()));
+   }
+}
+
+
 void doSetHour() {
 
   byte  newVal;
   
   if (mParser.numParams()) {
-    mParser.getParam();
-    newVal = atoi (returnStr);
+    newVal = atoi(mParser.getParam());
     DateTime now = rtc.now();
     rtc.adjust(DateTime(now.year(),now.month(),now.day(),newVal,now.minute(),now.second()));
+    checkTime(true);
   }
 }
 
@@ -129,10 +206,10 @@ void doSetMin() {
   byte  newVal;
   
   if (mParser.numParams()) {
-    mParser.getParam();
-    newVal = atoi (returnStr);
+    newVal = atoi(mParser.getParam());
     DateTime now = rtc.now();
     rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),newVal,now.second()));
+    checkTime(true);
   }
 }
 
@@ -142,49 +219,51 @@ void doSetSec() {
   byte  newVal;
   
   if (mParser.numParams()) {
-    mParser.getParam();
-    newVal = atoi (returnStr);
+    newVal = atoi(mParser.getParam());
     DateTime now = rtc.now();
     rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),now.minute(),newVal));
+    checkTime(true);
   }
 }
 
 
 void doReset() {
 
-  DateTime  now;
-
-  colors[0].setColor(LC_RED);
-  colors[1].setColor(LC_ORANGE);
-  colors[2].setColor(LC_YELLOW);
-  colors[3].setColor(LC_GREEN);
-  colors[4].setColor(LC_BLUE);
-  colors[5].setColor(100,100,0);
-  colors[6].setColor(LC_RED);
-  colors[7].setColor(LC_ORANGE);
-  colors[8].setColor(LC_YELLOW);
-  colors[9].setColor(LC_GREEN);
-  colors[10].setColor(LC_BLUE);
-  colors[11].setColor(100,100,0);   // Brown.
-  for(int i=0;i<12;i++) {
-    colors[12+i].setColor(&(colors[i]));
-  }
-  saveParams();
-  //Wire.beginTransmission(0x68);   // address DS3231
-  //Wire.write(0x0E);               // select register
-  //Wire.write(0b00011100);         // write register bitmap, bit 7 is /EOSC
-  //Wire.endTransmission();
-  now = rtc.now();
+   colors[0].setColor(0,0,255);
+   colors[1].setColor(140,0,255);
+   colors[2].setColor(255,0,0);
+   colors[3].setColor(255,100,0);
+   colors[4].setColor(255,255,0);
+   colors[5].setColor(0,255,0);
+   colors[6].setColor(0,0,255);
+   colors[7].setColor(140,0,255);
+   colors[8].setColor(255,0,0);
+   colors[9].setColor(255,100,0);
+   colors[10].setColor(255,255,0);
+   colors[11].setColor(0,255,0);
+   colors[12].setColor(0,0,255);
+   colors[13].setColor(140,0,255);
+   colors[14].setColor(255,0,0);
+   colors[15].setColor(255,100,0);
+   colors[16].setColor(255,255,0);
+   colors[17].setColor(0,255,0);
+   colors[18].setColor(0,0,255);
+   colors[19].setColor(140,0,255);
+   colors[20].setColor(255,0,0);
+   colors[21].setColor(255,100,0);
+   colors[22].setColor(255,255,0);
+   colors[23].setColor(0,255,0);
+   saveParams();
+   checkTime(true);
 }
 
 
-void doGetColor(void) {
+void doGetHourColor(void) {
 
   int   hourVal;
   
   if (mParser.numParams()==1) {
-    mParser.getParam();
-    hourVal = atoi (returnStr);
+    hourVal = atoi(mParser.getParam());
   } else {
     hourVal = drawtime.hour();
   }
@@ -199,7 +278,7 @@ void doGetColor(void) {
 }
 
 
-void doSetColor(void) {
+void doSetHourColor(void) {
 
   int   hourVal;
   int   redVal;
@@ -207,33 +286,40 @@ void doSetColor(void) {
   int   blueVal;
   
   if (mParser.numParams()==4) {
-    mParser.getParam();
-    hourVal = atoi (returnStr);
-    
+    hourVal = atoi(mParser.getParam());
     if (hourVal>=0 && hourVal<24) {
-      mParser.getParam();
-      redVal = atoi (returnStr);
-      
-  
-      mParser.getParam();
-      greenVal = atoi (returnStr);
-      
-  
-      mParser.getParam();
-      blueVal = atoi (returnStr);
-      
+      redVal = atoi(mParser.getParam());
+      greenVal = atoi(mParser.getParam());
+      blueVal = atoi(mParser.getParam());
       colors[hourVal].setColor(redVal,greenVal,blueVal);
-      ourOS.saveParams();
-      if (hourVal==drawtime.hour()) {
-        //mBacground->setColor(&(colors[hourVal]));
-        //We'll need to set the LEDs here.
-      }
+      saveParams();
+      checkTime(true);
     } else {
-      Serial.println("No, values between 0..23 please.");
+      Serial.println("No. Values between 0..23 please.");
     }
   }
 }
 
+
+void doGetColorList(void) {
+
+   Serial.println();
+   Serial.println("// ******** Auto generated code listing ********");
+   Serial.println();
+   for (byte i=0;i<NUM_COLORS;i++) {
+      Serial.print("\tcolors[");
+      Serial.print(i);
+      Serial.print("].setColor(");
+      Serial.print(colors[i].getRed());
+      Serial.print(",");
+      Serial.print(colors[i].getGreen());
+      Serial.print(",");
+      Serial.print(colors[i].getBlue());
+      Serial.println(");");
+   }
+   Serial.println();
+   Serial.println("// ********         End listing         ********");
+}
 
 
 void checkParse(void) {
@@ -249,21 +335,27 @@ void checkParse(void) {
       case noCommand      : break;
       case help           : 
         Serial.println("Commands:");
+        Serial.println("   time prints the currnet time.");
+        Serial.println("   settime followed by 3 numbers hour, minute, second, sets the curnent time.");
+        Serial.println("   setdate followed by 3 numbers year, month, day, sets the curnent date.");
         Serial.println("   hour followed by a number 0..23. Sets the hour.");
         Serial.println("   minute followed by a number 0..59. Sets the minutes.");
         Serial.println("   sec followed by a number 0..59. Sets the seconds.");
-        Serial.println("   cedit takes you to the color editor.");
         Serial.println("   reset will reset all colors to defaults.");
         Serial.println("   gcolor reads back the current hour's color.");
         Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
+        Serial.println("   gcode will print a listing of your color settings to be used as the new defualt color list.");
       break;
+      case time     : doShowTime();   break;
+      case stime    : doSetTime();    break;
+      case sdate    : doSetDate();    break;
       case setHour  : doSetHour();    break;
       case setMin   : doSetMin();     break;
       case setSec   : doSetSec();     break;
-      case cEdit    : nextPanel = colorEditApp; break;
       case reset    : doReset();      break;
-      case gColor   : doGetColor();   break;
-      case sColor   : doSetColor();   break;
+      case gColor   : doGetHourColor();   break;
+      case sColor   : doSetHourColor();   break;
+      case gCode    : doGetColorList();   break;
       default       : 
         Serial.println("I really don't know what your looking for.");
         Serial.println("Try typing ? for a list of commands.");
@@ -281,6 +373,6 @@ void checkParse(void) {
 
 void loop() {     // During loop..
    
-   checkTime();
+   checkTime(false);
    checkParse();
 }
