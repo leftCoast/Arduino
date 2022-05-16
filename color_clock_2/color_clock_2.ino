@@ -4,7 +4,7 @@
 #include <neoPixel.h>
 #include <lilParser.h>
 #include <colorObj.h>
-
+#include <blinker.h>
 
 #define NUM_COLORS  24
 
@@ -36,20 +36,20 @@ DateTime    drawtime;
 colorObj    colors[NUM_COLORS];
 neoPixel    theNeoPixel(NUM_LEDS,LED_PIN);
 
+blinker  aBlinker;
 
 void setup() {
-  
+
   Serial.begin(57600);  
-  //while (!Serial);
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     Serial.flush();
-    while (1) delay(10);
+    while (1);
   }
   
   theNeoPixel.begin();
-  theNeoPixel.setPixelColor(0,&red);
-  theNeoPixel.setPixelColor(1,&blue);
+  theNeoPixel.setPixelColor(0,&black);
+  theNeoPixel.setPixelColor(1,&black);
   theNeoPixel.show();
 
   mParser.addCmd(help,"?");
@@ -63,7 +63,8 @@ void setup() {
   mParser.addCmd(gColor,"gcolor");
   mParser.addCmd(sColor,"scolor");
   mParser.addCmd(gCode,"gcode");
-  
+
+  aBlinker.setOnOff(true);
   readParams();
   checkTime(true);
 }
@@ -143,14 +144,15 @@ void checkTime(bool justDoIt) {
 void doShowTime(void) {
 
    DateTime now = rtc.now();
-   Serial.print("\tDate : ");
-   Serial.print(now.month());Serial.print("/");
-   Serial.print(now.day());Serial.print("/");
-   Serial.print(now.year());Serial.print("    ");
-   Serial.print("Time : ");
+   Serial.print("\tTime : ");
    Serial.print(now.hour());Serial.print(":");
    Serial.print(now.minute());Serial.print(":");
-   Serial.println(now.second());
+   Serial.print(now.second());
+   Serial.print("    ");
+   Serial.print("Date : ");
+   Serial.print(now.month());Serial.print("/");
+   Serial.print(now.day());Serial.print("/");
+   Serial.print(now.year());
 }
 
 
@@ -164,9 +166,15 @@ void doSetTime() {
       newHour = atoi(mParser.getParam());
       newMin = atoi(mParser.getParam());
       newSec = atoi(mParser.getParam());
-      DateTime now = rtc.now();
-      rtc.adjust(DateTime(now.year(),now.month(),now.day(),newHour,newMin,newSec));
-      checkTime(true);
+      if ((newHour>=0 && newHour< 24)&&(newMin>=0 && newMin< 59)&&(newSec>=0 && newSec< 59)) {
+         DateTime now = rtc.now();
+         rtc.adjust(DateTime(now.year(),now.month(),now.day(),newHour,newMin,newSec));
+         checkTime(true);
+      } else {
+         Serial.println("Error: One of your entered parameters is out of whack. I'm too lazy to figure out which one though.");
+      }
+   } else {
+      Serial.println("Error: You need to add three values to this command, hour minutes seconds.");
    }
 }
 
@@ -179,25 +187,38 @@ void doSetDate() {
    
    if (mParser.numParams()==3) {
       newYear = atoi(mParser.getParam());
-      Serial.println(newYear);
       newMonth = atoi(mParser.getParam());
       newDay = atoi(mParser.getParam());
-      DateTime now = rtc.now();
-      rtc.adjust(DateTime(newYear,newMonth,newDay,now.hour(),now.minute(),now.second()));
+      if (newMonth>0&&newMonth<=12) {
+         DateTime now = rtc.now();
+         rtc.adjust(DateTime(newYear,newMonth,newDay,now.hour(),now.minute(),now.second()));
+      } else {
+         Serial.print("Error: C'mon! What kind of month number is ");
+         Serial.print(newMonth);
+         Serial.println(" ?");
+      }
+   } else {
+      Serial.println("Error: You need to enter year month day, three values, to set the date.");
    }
 }
 
 
 void doSetHour() {
 
-  byte  newVal;
+   byte  newVal;
   
-  if (mParser.numParams()) {
-    newVal = atoi(mParser.getParam());
-    DateTime now = rtc.now();
-    rtc.adjust(DateTime(now.year(),now.month(),now.day(),newVal,now.minute(),now.second()));
-    checkTime(true);
-  }
+   if (mParser.numParams()) {
+      newVal = atoi(mParser.getParam());
+      if (newVal>=0&&newVal<24) {
+         DateTime now = rtc.now();
+         rtc.adjust(DateTime(now.year(),now.month(),now.day(),newVal,now.minute(),now.second()));
+         checkTime(true);
+      } else {
+         Serial.println("Error: You need to enter an hour vlaue from 0..23 to set an hour.");
+      }
+   } else {
+      Serial.println("Error: You also need to tell me what hour to set the clock..");
+   }
 }
 
 
@@ -205,25 +226,37 @@ void doSetMin() {
 
   byte  newVal;
   
-  if (mParser.numParams()) {
-    newVal = atoi(mParser.getParam());
-    DateTime now = rtc.now();
-    rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),newVal,now.second()));
-    checkTime(true);
-  }
+   if (mParser.numParams()) {
+      newVal = atoi(mParser.getParam());
+      if (newVal>=0&&newVal<60) {
+         DateTime now = rtc.now();
+         rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),newVal,now.second()));
+         checkTime(true);
+      } else {
+         Serial.println("Error: Minutes go from 0..59.");
+      }
+   } else {
+      Serial.println("Error: You forgot to tell me what minute to set this to.");
+   }
 }
 
 
 void doSetSec() {
   
-  byte  newVal;
+   byte  newVal;
   
-  if (mParser.numParams()) {
-    newVal = atoi(mParser.getParam());
-    DateTime now = rtc.now();
-    rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),now.minute(),newVal));
-    checkTime(true);
-  }
+   if (mParser.numParams()) {
+      newVal = atoi(mParser.getParam());
+      if (newVal>=0&&newVal<60) {
+         DateTime now = rtc.now();
+         rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),now.minute(),newVal));
+         checkTime(true);
+      } else {
+         Serial.println("Error: Seconds go from 0..59.");
+      }
+   } else {
+      Serial.println("Error: You forgot to tell me what second to set this to.");
+   }
 }
 
 
@@ -273,30 +306,32 @@ void doGetHourColor(void) {
     Serial.print(" ");Serial.print(colors[hourVal].getGreen());
     Serial.print(" ");Serial.println(colors[hourVal].getBlue());
   } else {
-    Serial.print("Hour is out of bounds : ");Serial.println(hourVal);
+    Serial.print("Error: Hour number is out of bounds : ");Serial.println(hourVal);
   }
 }
 
 
 void doSetHourColor(void) {
 
-  int   hourVal;
-  int   redVal;
-  int   greenVal;
-  int   blueVal;
+   int   hourVal;
+   int   redVal;
+   int   greenVal;
+   int   blueVal;
   
-  if (mParser.numParams()==4) {
-    hourVal = atoi(mParser.getParam());
-    if (hourVal>=0 && hourVal<24) {
-      redVal = atoi(mParser.getParam());
-      greenVal = atoi(mParser.getParam());
-      blueVal = atoi(mParser.getParam());
-      colors[hourVal].setColor(redVal,greenVal,blueVal);
-      saveParams();
-      checkTime(true);
-    } else {
-      Serial.println("No. Values between 0..23 please.");
-    }
+   if (mParser.numParams()==4) {
+      hourVal = atoi(mParser.getParam());
+      if (hourVal>=0 && hourVal<24) {
+         redVal = atoi(mParser.getParam());
+         greenVal = atoi(mParser.getParam());
+         blueVal = atoi(mParser.getParam());
+         colors[hourVal].setColor(redVal,greenVal,blueVal);
+         saveParams();
+         checkTime(true);
+      } else {
+         Serial.println("Error: Only values between 0..23 please.");
+      }
+   } else {
+      Serial.println("Error: This comand is looking for four values. hour red green blue. (colors got fro 0..255)");
   }
 }
 
@@ -345,6 +380,7 @@ void checkParse(void) {
         Serial.println("   gcolor reads back the current hour's color.");
         Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
         Serial.println("   gcode will print a listing of your color settings to be used as the new defualt color list.");
+        Serial.println();
       break;
       case time     : doShowTime();   break;
       case stime    : doSetTime();    break;
@@ -359,6 +395,7 @@ void checkParse(void) {
       default       : 
         Serial.println("I really don't know what your looking for.");
         Serial.println("Try typing ? for a list of commands.");
+        Serial.println();
       break;
     }
   } 
@@ -372,7 +409,8 @@ void checkParse(void) {
 
 
 void loop() {     // During loop..
-   
+
+   idle();
    checkTime(false);
    checkParse();
 }
