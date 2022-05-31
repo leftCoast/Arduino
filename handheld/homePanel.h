@@ -1,10 +1,10 @@
 #ifndef homePanel_h
 #define homePanel_h
 
-#include <panel.h>
+//#include <panel.h>
 #include <lilOS.h> 
 #include <bmpObj.h> 
-#include <bmpPipe.h>
+//#include <bmpPipe.h>
 
 
 // *****************************************************

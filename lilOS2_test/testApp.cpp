@@ -387,6 +387,9 @@ void testApp::setup(void) {
    aLabel->setJustify(TEXT_RIGHT);
    aLabel->setValue("Offset x :");
    addObj(aLabel);
+*/
+
+  yVal = LBL_Y_BEGIN + (4 *LINE_H);
 
    offsetXLabel = new label(VAL_X,yVal,VAL_W,TXT_H);
    offsetXLabel->setColors(&cyan,&scrColor);
@@ -394,7 +397,7 @@ void testApp::setup(void) {
    offsetXLabel->setPrecision(1);
    offsetXLabel->setValue(offsetX);
    addObj(offsetXLabel);
-
+/*
     yVal = yVal + offset;
 
    aLabel = new label(LBL_X,yVal,LBL_W,TXT_H);
@@ -441,11 +444,11 @@ void testApp::showValues(float x,float y,float z) {
 
 
 void testApp::showOffsets(float x,float y,float z) {
-   /*
+   
    offsetXLabel->setValue(x);
    offsetYLabel->setValue(y);
    offsetZLabel->setValue(z);
-   */
+   
 }
 
 

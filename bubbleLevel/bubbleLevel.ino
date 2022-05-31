@@ -1,4 +1,4 @@
-#include <SD.h>
+ #include <SD.h>
 #include <adafruit_1947_Obj.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
@@ -66,9 +66,9 @@ void setAngleClk(void) {
    sensors_event_t   event;
 
    bno->getEvent(&event);
-   offsetX = -event.orientation.y;
-   offsetY = -event.orientation.z;
-   offsetZ = -event.orientation.x;
+   offsetX = -event.orientation.x;
+   offsetY = -event.orientation.y;
+   offsetZ = -event.orientation.z;
 }
 
 
@@ -95,11 +95,17 @@ void checkBubble(void) {
    
    if (bubbleTimer.ding()) {
       bno->getEvent(&event);
-      new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetX));
-      new_angle.yRad = degToRad(smootherY.addData(-event.orientation.z - offsetY));
-      new_angle.zRad = degToRad(smootherZ.addData(-event.orientation.x - offsetZ));
+      rotationAngleX->setValue(event.orientation.x);
+      rotationAngleY->setValue(event.orientation.y);
+      rotationAngleZ->setValue(event.orientation.z);
+      new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetY));
+      new_angle.yRad = degToRad(smootherY.addData(-event.orientation.z - offsetZ));
+      new_angle.zRad = degToRad(smootherZ.addData(-event.orientation.x - offsetX));
       if (angleChange()) {
          renderMan->setObjAngle(&new_angle);
+         modelAngleX->setValue(radToDeg(new_angle.xRad));
+         modelAngleY->setValue(radToDeg(new_angle.yRad));
+         modelAngleZ->setValue(radToDeg(new_angle.zRad));
          my_angle = new_angle;
          bubbleTimer.start();
       }

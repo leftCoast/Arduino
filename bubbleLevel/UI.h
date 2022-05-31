@@ -1,5 +1,5 @@
 #include <iconButton.h>
-
+#include <label.h> 
 
 void setupUI(void);
 
@@ -25,3 +25,9 @@ extern setAngleBtn*     ourSAngleBtn;
 extern float            offsetX;
 extern float            offsetY;
 extern float            offsetZ;
+extern label*           rotationAngleX;
+extern label*           rotationAngleY;
+extern label*           rotationAngleZ;
+extern label*           modelAngleX;
+extern label*           modelAngleY;
+extern label*           modelAngleZ;

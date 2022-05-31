@@ -2,7 +2,7 @@
 #define handheldOS_h
 
 #include <lilOS.h>
-#include <panel.h>
+//#include <panel.h>
 
 #define SCREEN_PIN   25
 #define BEEP_PIN     23
