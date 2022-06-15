@@ -119,6 +119,14 @@ void triDVector::normalize(void) {
 	z = z/mag;
 }
 
+// If I recall correctly. To invert a vector you ojust multiply the three values by -1.
+void triDVector::invert(void) {
+
+	x = -x;
+	y = -y;
+	z = -z;
+}
+
 
 // Basically asking if all values are 0,0,0. NULL vector.
 bool triDVector::isNullVector(void) { return x==0 && y==0 && z==0; }

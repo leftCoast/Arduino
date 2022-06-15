@@ -17,16 +17,15 @@
 #include "bubbleTools.h"
 #include "UI.h"
 
-#define BUBBLE_MS    10
-#define NUM_DATA_AVG 10
+#define BUBBLE_MS    250
 
-runningAvg        smootherX(NUM_DATA_AVG);
-runningAvg        smootherY(NUM_DATA_AVG);
-runningAvg        smootherZ(NUM_DATA_AVG);
-Adafruit_BNO055*  bno = new Adafruit_BNO055(55, 0x28); 
+
+Adafruit_BNO055   bno = Adafruit_BNO055(55, 0x28); 
 timeObj           bubbleTimer(BUBBLE_MS);
-
-
+timeObj           readTimer(100);
+float             offsetX;
+float             offsetY;
+float             offsetZ;
 
 void setup() {
    
@@ -42,10 +41,10 @@ void setup() {
       Serial.flush();                                             // Make sure the message gets out.
       while(true);                                                // Lock the process here.
    }
-   if (!bno->begin()) {
+   if (!bno.begin()) {
       Serial.print("No BNO055 detected");
    } else {
-      bno->setExtCrystalUse(true);
+      bno.setExtCrystalUse(true);
    }
    backColor.setColor(&black);
    screen->fillScreen(&backColor);                                // Lets set the screen to the back color.
@@ -61,14 +60,44 @@ void setup() {
 }
 
 
+// Get rotation by radians..
+triDRotation getRotation(void) {
+
+   triDVector     gravVect;
+   triDVector     gravXVect;
+   triDVector     gravYVect;
+   triDVector     zVector(0,0,1);
+   triDRotation   result;
+   
+   imu::Vector<3> Grav = bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
+   gravVect.setVector(Grav.y(),Grav.x(),Grav.z());
+   
+   gravVect.printVector();
+   gravVect.normalize();
+   gravVect.invert();
+   gravVect.printVector();
+   
+   gravXVect.setVector(0,gravVect.getY(),gravVect.getZ());
+   gravYVect.setVector(gravVect.getX(),0,gravVect.getZ());
+   result.yRad = gravYVect.angleBetween(&zVector);
+   result.xRad = gravXVect.angleBetween(&zVector);
+   result.zRad = 0;
+   
+   Serial.print("xRad : ");Serial.print(result.xRad);Serial.print("   Deg : ");Serial.println(radToDeg(result.xRad));
+   Serial.print("yRad : ");Serial.print(result.yRad);Serial.print("   Deg : ");Serial.println(radToDeg(result.yRad));
+   Serial.println("-----------");
+   return result;
+}
+
+
 void setAngleClk(void) {
    
-   sensors_event_t   event;
-
-   bno->getEvent(&event);
-   offsetX = -event.orientation.x;
-   offsetY = -event.orientation.y;
-   offsetZ = -event.orientation.z;
+   triDRotation ourRotation;
+   
+   ourRotation = getRotation();
+   offsetX = -ourRotation.xRad;
+   offsetY = -ourRotation.yRad;
+   offsetZ = -ourRotation.zRad;
 }
 
 
@@ -91,30 +120,68 @@ bool angleChange(void) {
 
 void checkBubble(void) {
 
-   sensors_event_t   event;
-   
-   if (bubbleTimer.ding()) {
-      bno->getEvent(&event);
-      rotationAngleX->setValue(event.orientation.x);
-      rotationAngleY->setValue(event.orientation.y);
-      rotationAngleZ->setValue(event.orientation.z);
-      new_angle.xRad = degToRad(smootherX.addData(-event.orientation.y - offsetY));
-      new_angle.yRad = degToRad(smootherY.addData(-event.orientation.z - offsetZ));
-      new_angle.zRad = degToRad(smootherZ.addData(-event.orientation.x - offsetX));
+   triDRotation rot;
+      
+   if (readTimer.ding()) {
+      rot = getRotation();
+      rotationAngleX->setValue(radToDeg(rot.xRad));
+      rotationAngleY->setValue(radToDeg(rot.yRad));
+      rotationAngleZ->setValue(radToDeg(rot.zRad));
+
+      // Offset * transpose
+      new_angle.xRad = rot.xRad - offsetX;
+      new_angle.yRad = rot.yRad - offsetY;
+      new_angle.zRad = rot.zRad - offsetZ;
+      
       if (angleChange()) {
          renderMan->setObjAngle(&new_angle);
+         
          modelAngleX->setValue(radToDeg(new_angle.xRad));
          modelAngleY->setValue(radToDeg(new_angle.yRad));
          modelAngleZ->setValue(radToDeg(new_angle.zRad));
+         
          my_angle = new_angle;
-         bubbleTimer.start();
+         readTimer.start();
       }
+   }
+}
+
+float    degrees = -90;
+timeObj  scanTimer(20);
+bool     neg = false;
+float    yVal;
+void backAndForth(void) {
+
+   if (scanTimer.ding()) {
+      new_angle.xRad = degToRad(degrees);
+      if (neg) {yVal = -degrees;} else {yVal = degrees;}
+      new_angle.yRad = degToRad(yVal);
+      new_angle.zRad = 0; //degToRad(degrees);
+      renderMan->setObjAngle(&new_angle);
+      if (neg) {
+         if (degrees>-90) {
+            degrees--;
+         } else {
+            neg = false;
+            degrees++;
+         }
+      } else {
+         if (degrees<90) {
+            degrees++;
+         } else {
+            neg = true;
+            degrees--;
+         }
+      }
+      scanTimer.start();
    }
 }
 
 
 void loop() {
-
+   
    idle();
-   checkBubble();
+   backAndForth();
+   //checkBubble();
+   
 }

@@ -25,6 +25,7 @@ class triDVector {
 				void			scaleBy(double scaler);
 				triDVector	crossProd(triDVector* aVect);
 				void			normalize(void);
+				void			invert(void);
 				bool			isNullVector(void);
 				void			rotateVect(triDRotation* rotation);
 				double		dotProduct(triDVector* inVect);

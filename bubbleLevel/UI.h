@@ -22,9 +22,6 @@ class clearAngleBtn :  public iconButton {
 
 extern clearAngleBtn*   ourCAngleBtn;
 extern setAngleBtn*     ourSAngleBtn;
-extern float            offsetX;
-extern float            offsetY;
-extern float            offsetZ;
 extern label*           rotationAngleX;
 extern label*           rotationAngleY;
 extern label*           rotationAngleZ;

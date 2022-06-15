@@ -6,9 +6,6 @@
 
 bmpMask        icon32Mask;
 
-float          offsetX;
-float          offsetY;
-float          offsetZ;
 clearAngleBtn* ourCAngleBtn;
 setAngleBtn*   ourSAngleBtn;
 label*         rotationAngleX;
