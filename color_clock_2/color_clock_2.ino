@@ -264,6 +264,33 @@ void doSetSec() {
 
 void doReset() {
 
+    /*
+    Tycho's numbers.
+    colors[0].setColor(0,0,3);
+    colors[1].setColor(1,0,2);
+    colors[2].setColor(2,0,0);
+    colors[3].setColor(2,1,0);
+    colors[4].setColor(1,1,0);
+    colors[5].setColor(0,1,0);
+    colors[6].setColor(0,0,5);
+    colors[7].setColor(2,0,4);
+    colors[8].setColor(4,0,0);
+    colors[9].setColor(8,4,0);
+    colors[10].setColor(10,10,0);
+    colors[11].setColor(0,10,0);
+    colors[12].setColor(0,0,20);
+    colors[13].setColor(9,0,18);
+    colors[14].setColor(10,0,0);
+    colors[15].setColor(10,5,0);
+    colors[16].setColor(8,8,0);
+    colors[17].setColor(0,5,0);
+    colors[18].setColor(0,0,10);
+    colors[19].setColor(3,0,6);
+    colors[20].setColor(3,0,0);
+    colors[21].setColor(2,1,0);
+    colors[22].setColor(1,1,0);
+    colors[23].setColor(0,1,0);
+    */
    colors[0].setColor(0,0,255);
    colors[1].setColor(140,0,255);
    colors[2].setColor(255,0,0);
@@ -420,7 +447,7 @@ void checkParse(void) {
         Serial.println("   gcolor reads back the current hour's color.");
         Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
         Serial.println("   gcode will print a listing of your color settings to be used as the new defualt color list.");
-        Serial.println("   soffset followed by mode 0..1 and offset -64..63 will set the calibration offset. see : https://www.nxp.com/docs/en/application-note/AN11247.pdf");
+        Serial.println("   soffset followed by mode 0..1 and offset -64..63 will set the calibration offset. Your chip is #PCF8523 see : https://www.nxp.com/docs/en/application-note/AN11247.pdf");
         Serial.println();
       break;
       case time     : doShowTime();   break;
