@@ -25,7 +25,8 @@ enum        mainComs  { noCommand,
                         reset,
                         gColor,
                         sColor,
-                        gCode
+                        gCode,
+                        sOffset
                       };
 
                       
@@ -63,6 +64,7 @@ void setup() {
   mParser.addCmd(gColor,"gcolor");
   mParser.addCmd(sColor,"scolor");
   mParser.addCmd(gCode,"gcode");
+  mParser.addCmd(sOffset,"soffset");
 
   aBlinker.setOnOff(true);
   readParams();
@@ -357,6 +359,44 @@ void doGetColorList(void) {
 }
 
 
+void doSetOffset() {
+
+   int  mode;
+   int  newVal;
+  
+   if (mParser.numParams()==2) {
+      mode = atoi(mParser.getParam());
+      newVal = atoi(mParser.getParam());
+      if (newVal>=-64 && newVal<64) {
+         switch(mode) {
+            case 0 : 
+               Serial.print("Offset set to ");
+               Serial.print(newVal);
+               Serial.println(" updated every two hours.");
+               rtc.calibrate(PCF8523_OneMinute, newVal);
+            break;
+            case 1 : 
+               Serial.print("Offset set to ");
+               Serial.print(newVal);
+               Serial.println(" updated once a minute.");
+               rtc.calibrate(PCF8523_TwoHours, newVal); break;
+            default  : 
+               Serial.print("Error: mode needs to be 0 or 1. Not ");
+               Serial.print(mode);
+               Serial.println(".");
+            break;
+         }
+      } else {
+         Serial.print("Error: Offset needs to be between -64 & 63, inclusive. Not ");
+         Serial.print(newVal);
+         Serial.println(".");
+      }
+   } else {
+      Serial.println("Error: You need two params mode and offset.");
+   }
+}
+
+
 void checkParse(void) {
 
   char  inChar;
@@ -380,6 +420,7 @@ void checkParse(void) {
         Serial.println("   gcolor reads back the current hour's color.");
         Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
         Serial.println("   gcode will print a listing of your color settings to be used as the new defualt color list.");
+        Serial.println("   soffset followed by mode 0..1 and offset -64..63 will set the calibration offset. see : https://www.nxp.com/docs/en/application-note/AN11247.pdf");
         Serial.println();
       break;
       case time     : doShowTime();   break;
@@ -392,6 +433,7 @@ void checkParse(void) {
       case gColor   : doGetHourColor();   break;
       case sColor   : doSetHourColor();   break;
       case gCode    : doGetColorList();   break;
+      case sOffset  : doSetOffset();      break;
       default       : 
         Serial.println("I really don't know what your looking for.");
         Serial.println("Try typing ? for a list of commands.");
