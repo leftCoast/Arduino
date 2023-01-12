@@ -168,7 +168,7 @@ void doSetTime() {
       newHour = atoi(mParser.getParam());
       newMin = atoi(mParser.getParam());
       newSec = atoi(mParser.getParam());
-      if ((newHour>=0 && newHour< 24)&&(newMin>=0 && newMin< 59)&&(newSec>=0 && newSec< 59)) {
+      if ((newHour>=0 && newHour< 24)&&(newMin >= 0 && newMin < 60)&&(newSec >= 0 && newSec < 60)) {
          DateTime now = rtc.now();
          rtc.adjust(DateTime(now.year(),now.month(),now.day(),newHour,newMin,newSec));
          checkTime(true);
@@ -447,7 +447,8 @@ void checkParse(void) {
         Serial.println("   gcolor reads back the current hour's color.");
         Serial.println("   scolor followed by 4 numbers hour,R,G,B sets that hour's color.");
         Serial.println("   gcode will print a listing of your color settings to be used as the new defualt color list.");
-        Serial.println("   soffset followed by mode 0..1 and offset -64..63 will set the calibration offset. Your chip is #PCF8523 see : https://www.nxp.com/docs/en/application-note/AN11247.pdf");
+        Serial.println("   soffset followed by mode 0..1 and offset -64..63 will set the calibration offset.");
+        Serial.println("   Your chip is #PCF8523 see : https://www.nxp.com/docs/en/application-note/AN11247.pdf");
         Serial.println();
       break;
       case time     : doShowTime();   break;
