@@ -34,6 +34,7 @@ void setup() {
   tempTimer.start();
 }
 
+
 void writeStr(char* inStr) {
   
   matrixL.clear();
