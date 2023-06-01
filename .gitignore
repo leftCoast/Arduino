@@ -24,6 +24,7 @@ libraries/LC_offscreen
 libraries/LC_RCTools
 libraries/LC_SPI
 libraries/LC_GUITextTools
+libraries/LC_slowServo
 libraries/AnimatedGIF
 libraries/starTrekArduino/
 forum_post/forum_post.ino
