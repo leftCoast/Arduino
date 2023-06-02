@@ -64,7 +64,7 @@ class rootItem : public	pathItem {
 class fileItem : public	pathItem {
 	
 	public:
-				fileItem(char* fileName);
+				fileItem(const char* fileName);
 	virtual	~fileItem(void);
 	
 	virtual	void addNameToPath(char* path);
@@ -82,7 +82,7 @@ class fileItem : public	pathItem {
 class folderItem : public	pathItem {
 	
 	public:
-				folderItem(char* folderName);
+				folderItem(const char* folderName);
 	virtual	~folderItem(void);
 	
 	virtual	int	getNumPathChars(void);
@@ -108,16 +108,16 @@ class filePath {
 	
 	virtual	void				reset(void);
 				int				numPathBytes(void);
-				pathItemType	checkPathPlus(char* name);
-	virtual	bool				setPath(char* inPath);
+				pathItemType	checkPathPlus(const char* name);
+	virtual	bool				setPath(const char* inPath);
 	virtual	char*				getPath(void);
 				pathItem*		getCurrItem(void);
 				char*				getCurrItemName(void);
 				void				dumpChildList(void);
 				void				refreshChildList(void);
 				int				numChildItems(void);
-				pathItem*		getChildItemByName(char* name);
-				bool				pushChildItemByName(char* name);
+				pathItem*		getChildItemByName(const char* name);
+				bool				pushChildItemByName(const char* name);
 	virtual	bool				pushItem(pathItem* theNewGuy);
 	virtual	void				popItem(void);
 				bool				deleteCurrentItem(void);

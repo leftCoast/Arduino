@@ -40,7 +40,7 @@ char* numberedFilePath(const char* folderPath,const char* baseName,const char* e
 
 
 // TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
-File TRUNCATE_FILE(char* path);
+File TRUNCATE_FILE(const char* path);
 
 
 // fcpy() : The file version of strcpy(). The dest file must be open for writing. The src

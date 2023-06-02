@@ -1,7 +1,7 @@
 #include  "regionTest.h"
 #include  "label.h"
 #include <bmpObj.h>
-#include <bmpPipe.h>
+//#include <bmpPipe.h>
 
 rect	aRect;
 bool	first = true;
@@ -107,7 +107,7 @@ regionTest::~regionTest(void) { }
 
 // setup() & loop() panel style.
 void regionTest::setup(void) {
-	
+	/*
 	bmpObj* theTestFile = new bmpObj(20,175,12,12,"/neoPixel.bmp");
 	theTestFile->begin();
 	addObj(theTestFile);
@@ -148,7 +148,7 @@ void regionTest::setup(void) {
 	aBlock = new LCDCharBlock(100,200);
 	aBlock->setMap(frame1);
 	addObj(aBlock);
-	
+	*/
 }
 
 

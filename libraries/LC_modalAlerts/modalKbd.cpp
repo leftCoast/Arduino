@@ -103,9 +103,9 @@ kbdUser::~kbdUser(void) {
 
 
 // This is just for switching edit fields. We don't save the last one here.
-void kbdUser::setEditField(editLabel* inEditable) {
+void kbdUser::setEditField(editable* inEditable) {
 
-	editLabel*	oldEditable;
+	editable*	oldEditable;
 	
 	if (theKbd) {									// If we have a keyboard..
 		oldEditable = theKbd->getEditField();

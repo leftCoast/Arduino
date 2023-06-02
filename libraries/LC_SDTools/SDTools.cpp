@@ -140,7 +140,7 @@ char* numberedFilePath(const char* folderPath,const char* baseName,const char* e
 
 
 // TOTAL HACK TO GET AROUND NO FILE truncate() CALL..
-File TRUNCATE_FILE(char* path) {
+File TRUNCATE_FILE(const char* path) {
 	
 	SD.remove(path);							// Delete the file. So now it has zero bytes of data.
 	return SD.open(path,FILE_WRITE);		// Re-open the file. Now its been truncated. (Sigh..)
@@ -168,7 +168,7 @@ void fcpy(File dest,File src) {
 	remaingBytes = src.size();
 	for (int i=0;i<cpyBuff.numPasses;i++) {
 		numBytes = min(cpyBuff.numBuffBytes,remaingBytes);
-		src.read(cpyBuff.theBuff,numBytes);
+		src.read((uint8_t*)(cpyBuff.theBuff),numBytes);
 		dest.write((char*)(cpyBuff.theBuff),numBytes);
 		remaingBytes = remaingBytes - numBytes;
 	}
@@ -192,7 +192,7 @@ void fcat(File dest,File src) {
 	remaingBytes = src.size();											// Get the remaining bytes to copy.
 	for (int i=0;i<cpyBuff.numPasses;i++) {						// For every pass through..
 		numBytes = min(cpyBuff.numBuffBytes,remaingBytes);		// Use buffer size or remaining bytes.
-		src.read(cpyBuff.theBuff,numBytes);							// Fill the buffer.
+		src.read((uint8_t*)(cpyBuff.theBuff),numBytes);			// Fill the buffer.
 		dest.write((char*)(cpyBuff.theBuff),numBytes);			// Write out the buffer.
 		remaingBytes = remaingBytes - numBytes;					// Recalculate the remaining bytes.
 	}																			// 

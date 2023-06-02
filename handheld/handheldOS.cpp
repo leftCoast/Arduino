@@ -1,12 +1,12 @@
 
 #include "handheldOS.h"
 #include "homePanel.h"
-#include "src/breakout/breakout.h"
-#include "src/starTrek/starTrek.h"
-#include "src/rpnCalc/rpnCalc.h"
-#include "src/regionTest/regionTest.h"
-#include "src/iconEdit/iconEdit.h"
-#include "src/fileDBox/fileDBox.h"
+//#include <breakout.h>
+#include <starTrek.h>
+//#include <rpnCalc.h>
+//#include "src/regionTest/regionTest.h"
+//#include <iconEdit.h>
+//#include "src/fileDBox/fileDBox.h"
 
 
 #define RAMPUP_START  0
@@ -53,13 +53,13 @@ panel* handheldOS::createPanel(int panelID) {
    beep();
    switch (panelID) {
       case homeApp      : return new homeScreen();
-      case fileOpenApp  : return new fileOpen();
-      case fileSaveApp  : return new fileSave();
-      case calcApp      : return new rpnCalc();
-      case starTrekApp  : return new starTrekPanel();
-      case breakoutApp  : return new breakout();
-      case rgnTestApp   : return new regionTest();
-      case iconEditApp  : return new iconEdit();
+      //case fileOpenApp  : return new fileOpen();
+      //case fileSaveApp  : return new fileSave();
+      //case calcApp      : return new rpnCalc(&ourOS,calcApp);
+      case starTrekApp  : return new starTrekPanel(&ourOS,starTrekApp);
+      //case breakoutApp  : return new breakout(&ourOS,breakoutApp);
+      //case rgnTestApp   : return new regionTest();
+      //case iconEditApp  : return new iconEdit();
       default           : return NULL;
    }
 }
@@ -103,10 +103,16 @@ void handheldOS::idle(void) {
 
   if (mDimScreen) {
     if (mScreenTimer.ding()) {
-      analogWrite(SCREEN_PIN,screenMap.Map(mNowTime));
+      analogWrite(SCREEN_PIN,screenMap.map(mNowTime));
       mNowTime = mNowTime + STEPTIME;
       mDimScreen = mNowTime < mEndTime;
     }
     if (!mDimScreen) analogWrite(SCREEN_PIN,255);
   }
 }
+
+// Calls to be overwritten by used version.
+int  handheldOS::getTonePin(void) { return BEEP_PIN; }
+void  handheldOS::setBrightness(byte brightness) {  }
+char*  handheldOS::getSystemFolder() { return NULL; }
+char*  handheldOS::getPanelFolder(int panelID) { return NULL; }

@@ -99,7 +99,7 @@ void rootItem::addNameToPath(char* path) { strcpy(path,name); }
 
 
 // Create a file item..
-fileItem::fileItem(char* fileName)
+fileItem::fileItem(const char* fileName)
 	:pathItem() {
 	
 	ourType = fileType;		// Our type will be file type.
@@ -125,7 +125,7 @@ void fileItem::addNameToPath(char* path) { strcat(path,name); }
 
 
 // Create a file item..	
-folderItem::folderItem(char* folderName)
+folderItem::folderItem(const char* folderName)
 	:pathItem() {
 	
 	ourType = folderType;		// Our type will be folder type.
@@ -139,7 +139,7 @@ folderItem::~folderItem(void) {  }
 	
 
 // Folders in paths have trailing '/'. So we add this in.	
-void folderItem::addNameToPath(char* path) {  
+void folderItem::addNameToPath( char* path) {  
 
 	strcat(path,name);
 	strcat(path,"/");
@@ -204,7 +204,7 @@ int filePath::numPathBytes(void) {
 
 // Ok, kinda' a special here. -IF- we were to add this name to our current pathList.. What
 // do we end up with? A file? A folder? Nothing at all? Find out and return the answer.
-pathItemType filePath::checkPathPlus(char* name) {
+pathItemType filePath::checkPathPlus(const char* name) {
 
 	File				testFile;
 	int				numBytes;
@@ -245,7 +245,7 @@ pathItemType filePath::checkPathPlus(char* name) {
 // brain dead and we're stuck with it for now. If the path is NOT found on the SD card,
 // this fails and gives back a false. This does NOT fill out the childList. Only the
 // pathList
-bool filePath::setPath(char* inPath) {
+bool filePath::setPath(const char* inPath) {
 
 	rootItem*	theRoot;
 	folderItem*	aFolder;
@@ -456,7 +456,7 @@ int filePath::numChildItems(void) {
 
 // We want to SEE the child with this name. This does NOT unhook the child. It just gives
 // you a pointer to it. You can look, but don't mess with it!
-pathItem*  filePath::getChildItemByName(char* name) {
+pathItem*  filePath::getChildItemByName(const char* name) {
 
 	pathItem*	trace;
 	int			numBytes;
@@ -491,7 +491,7 @@ pathItem*  filePath::getChildItemByName(char* name) {
 	
 // If one has a list of child items to choose from. This grabs the one with this passed
 // in name, copies it, then adds the copy to the end of the path list.	
-bool   filePath::pushChildItemByName(char* name) {
+bool   filePath::pushChildItemByName(const char* name) {
 	
 	tempStr		theName(name);
 	pathItem*	theChild;

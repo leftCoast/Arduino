@@ -40,11 +40,11 @@ class kbdUser {
 				kbdUser(listener* inListener);
 	virtual	~kbdUser(void);
 	
-				void			setEditField(editLabel* inEditable);
+				void			setEditField(editable* inEditable);
 				void			checkKbdEvent(event* inEvent,point* globalPt);
 				
 				listener*	lastListener;
-				editLabel*	lastEditObj;
+				editable*	lastEditObj;
 };
 
 #endif

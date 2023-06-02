@@ -9,7 +9,7 @@
 #define	NO_PANEL_ID		0		// You have to have this guy.
 #define	HOME_PANEL_ID	1
 
-#define STD_ICON_FLDR		"icons/standard/"
+#define STD_ICON_FLDR		"system/icons/standard/"
 
 
 

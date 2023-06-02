@@ -34,7 +34,7 @@ editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight, char* inT
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(rect* inRect,char* inText,int textSize=1)
+editLabel::editLabel(rect* inRect,char* inText,int textSize)
 	: label(inRect,inText,textSize),
 	timeObj(CURSOR_BLINK) { init(); }
 

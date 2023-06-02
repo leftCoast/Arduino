@@ -41,9 +41,9 @@
 starTrekKeyboard::starTrekKeyboard(starTrekPanel* inPanel,editLabel* inEditLabel,textView* inTextView,bool modal)
   : bmpKeyboard(inEditLabel,modal) { 
 
-  mPanel			= inPanel;			// THe panel we're living on.
-  mEditLabel	= inEditLabel; // The display we live in will kill these two off.
-  mTextView		= inTextView;   // So don't delete them.
+  mPanel			= inPanel;			// The panel we're living on.
+  mEditLabel	= inEditLabel; 	// The display we live in will kill these two off.
+  mTextView		= inTextView;		// So don't delete them.
 }
 
   

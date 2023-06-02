@@ -1,10 +1,8 @@
 #ifndef homePanel_h
 #define homePanel_h
 
-//#include <panel.h>
 #include <lilOS.h> 
 #include <bmpObj.h> 
-//#include <bmpPipe.h>
 
 
 // *****************************************************
@@ -18,11 +16,11 @@ class homeScreen : public homePanel {
           homeScreen(void);
   virtual ~homeScreen(void);
   
-  virtual void  setup(void);
-  virtual void  loop(void);
-  virtual void  drawSelf(void);
+  virtual void    setup(void);
+  virtual void    loop(void);
+  virtual void    drawSelf(void);
 
-          bmpPipe*   mBackImage;
+         bmpObj*  mBackImage;
 };
 
 

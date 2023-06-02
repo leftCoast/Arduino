@@ -44,7 +44,7 @@
 #define NOTE_A4  220
 #define NOTE_AS4 233
 #define NOTE_B4  247
-#define NOTE_C4  262
+#define NOTE_C4  262	// I think this is middle C.
 #define NOTE_CS4 277
 #define NOTE_D4  294
 #define NOTE_DS4 311
