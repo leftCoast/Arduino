@@ -10,7 +10,7 @@
 #include "label.h"
 #include "lilParser.h"
 #include "mechButton.h"
-
+#include <Adafruit_LEDBackpack.h>
 
 // *****************************************************
 //                      litleClk
@@ -20,7 +20,7 @@
 class litleClk :  public label {
 
   public:
-          litleClk::litleClk(int x,int y,int w, int h);
+          litleClk(int x,int y,int w, int h);
   virtual ~litleClk(void);
 
           void  setTime(int hour,int minute);
@@ -84,10 +84,10 @@ void litleClk::set24(bool trueFalse) {
 bool litleClk::get24(void) { return m24; }
 
 
+
 // *****************************************************
 //                         main()
 // *****************************************************
-
 
 
 RTC_DS3231    rtc;
@@ -96,16 +96,28 @@ DateTime      drawtime;
 mechButton    ourClicker(POT_BTN);
 litleClk*     ourDisplay;
 lilParser     ourParser;
+Adafruit_8x8matrix   matrix[4];
 
 enum        mainComs { noCommand, help, setHour, setMin, setSec, toggle24 };
 
 
 void setup() {
 
+   /*
   if (!initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
     while (1);
   }
   Serial.println("got screen");
+  */
+  for (int i=0;i<4;i++) {
+     matrix[i].begin(0x70+i);              // pass in the address
+     matrix[i].setRotation(2);
+     matrix[i].setTextSize(1);
+     matrix[i].setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
+     matrix[i].setTextColor(LED_ON);
+     matrix[i].setBrightness(15);
+  }
+  matrixPrint("Hello there!");
   haveClock = rtc.begin();
   if (haveClock) {                  // If we have the clock, make sure it runs on battery when unplugged.
     Wire.beginTransmission(0x68);   // address DS3231
@@ -121,19 +133,30 @@ void setup() {
   
   ourDisplay = new litleClk(20,20,100,24);
   viewList.addObj(ourDisplay);
-  screen->fillScreen(&black);
+  // ********** screen->fillScreen(&black);
 
-  ourClicker.setCallback(btnClick);
+ // **********  ourClicker.setCallback(btnClick);
+
 }
 
+void matrixPrint(char* inStr) {
 
+   for (int i=0;i<4;i++) {
+      matrix[i].clear();
+      matrix[i].setCursor(-i*8,0);
+      matrix[i].print(inStr);
+      matrix[i].writeDisplay();
+   }
+}
+
+/*
 void btnClick(void) {
 
   if (!ourClicker.trueFalse()) {
     ourDisplay->setVisable(!ourDisplay->getVisable());
   }
 }
-
+*/
 
 void checkParse(void) {
 
@@ -192,7 +215,7 @@ void doSetMin(void) {
     newVal = atoi (paramBuff);
     DateTime now = rtc.now();
     rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),newVal,now.second()));
-    ourDisplay->setTime(now.hour(),newVal);
+    // ********** ourDisplay->setTime(now.hour(),newVal);
     drawtime = now;
   }
 }
@@ -208,7 +231,7 @@ void doSetSec(void) {
     newVal = atoi (paramBuff);
     DateTime now = rtc.now();
     rtc.adjust(DateTime(now.year(),now.month(),now.day(),now.hour(),now.minute(),newVal));
-    ourDisplay->setTime(now.hour(),now.minute());
+    // ********** ourDisplay->setTime(now.hour(),now.minute());
     drawtime = now;
   }
 }
@@ -218,10 +241,10 @@ void do24(void) {
 
   DateTime  now;
   
-  ourDisplay->set24(!ourDisplay->get24());
+  // ********** ourDisplay->set24(!ourDisplay->get24());
   if (haveClock) {
     now = rtc.now();
-    ourDisplay->setTime(now.hour(),now.minute());
+    // ********** ourDisplay->setTime(now.hour(),now.minute());
     drawtime = now;
   }
 }
@@ -247,5 +270,5 @@ void loop() {
   
   idle();
   checkParse();
-  checkScreen();
+  //checkScreen();
 }
