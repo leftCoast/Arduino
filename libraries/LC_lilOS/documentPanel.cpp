@@ -1,6 +1,6 @@
 #include <documentPanel.h>
 #include <resizeBuff.h>
-
+#include <strTools.h>
 //#include <debug.h>
 
 #define SAVE_BEFORE_CLOSE "Continue and loose unsaved changes?"

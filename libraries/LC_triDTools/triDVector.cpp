@@ -108,7 +108,7 @@ triDVector triDVector::crossProd(triDVector* aVect) {
 }
 
 
-// Normalize this vector. IE foce it to have magnitude of 1.
+// Normalize this vector. IE force it to have magnitude of 1.
 void triDVector::normalize(void) {
 	
 	double mag;
