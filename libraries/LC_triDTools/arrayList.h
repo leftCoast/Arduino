@@ -8,7 +8,7 @@
 //****************************************************************************************
 // arrayList
 //
-// This assumes that the list ia an array of triDTriangle.  Pass in the array, and the
+// This assumes that the list is an array of triDTriangle.  Pass in the array, and the
 // number of triangles, then let it do its stuff.
 //****************************************************************************************
 
