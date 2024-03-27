@@ -1,8 +1,9 @@
 #include "lilParser.h"
 #include "textBuff.h"
+#include "strTools.h"
 
-lilParser mParser;
-textBuff*  ourRingBuff;
+lilParser   mParser(80);
+textBuff*   ourRingBuff;
 
 enum textBuffComSet  {
                       noCommand,
@@ -11,23 +12,86 @@ enum textBuffComSet  {
                       ringStats,
                       pushChar,
                       popChar,
-                      clearBuff
+                      writeStr,
+                      readStr,
+                      strLen,
+                      clearBuff,
+                      paramX,
+                      commands
                     };
 
 
                   
 void setup() {
 
-  ourRingBuff = new textBuff(5);      // We'll start off with 5 chars.
-  
-  mParser.addCmd(createRing, "new");
-  mParser.addCmd(deleteRing,"dump");
-  mParser.addCmd(ringStats,"see");
-  mParser.addCmd(pushChar,"push");
-  mParser.addCmd(popChar,"pop");
-  mParser.addCmd(clearBuff,"clear");
-  
-  Serial.println("ready!");
+   Serial.begin(115200);
+   
+   ourRingBuff = new textBuff(5);      // We'll start off with 5 chars.
+   
+   mParser.addCmd(createRing, "new");
+   mParser.addCmd(deleteRing,"dump");
+   mParser.addCmd(ringStats,"see");
+   mParser.addCmd(pushChar,"push");
+   mParser.addCmd(popChar,"pop");
+   mParser.addCmd(writeStr,"writeStr");
+   mParser.addCmd(readStr,"readStr");
+   mParser.addCmd(strLen,"strlen");
+   mParser.addCmd(clearBuff,"clear");
+   mParser.addCmd(paramX,"params");
+   mParser.addCmd(commands,"???");
+   
+   showCommands();
+   Serial.println("ready!");
+}
+
+
+void loop() {
+
+  char  inChar;
+  int   command;
+
+   if (Serial.available()) {     // We have something in the queue?
+      inChar = Serial.read();    // Read out a data charactor.
+      Serial.print(inChar);      // If using development machine, echo the charactor.
+      command = mParser.addChar(inChar);
+      switch (command) {
+         case noCommand    : break;
+         case createRing   : doCreateRing(); break;
+         case deleteRing   : doDeleteRing(); break;
+         case ringStats    : doRingStats();  break;
+         case pushChar     : doPushChar();   break;
+         case popChar      : doPopChar();    break;
+         case writeStr     : doWriteStr();   break;
+         case readStr      : doReadStr();    break;
+         case strLen       : doStrlen();     break;
+         case clearBuff    : doClearBuff();  break;
+         case paramX       : doParams();     break;
+         case commands     : showCommands(); break;
+         case PARAM_ERR    : Serial.println("Param string is too long.");           break;
+         case CONFIG_ERR   : Serial.println("Config error, coudn't set up shop.");  break;
+         default           : 
+            Serial.println();
+            Serial.println("Sorry, have no idea what you want. Type ??? for the list.");
+      }
+   }
+}
+
+void showCommands(void) {
+   
+   Serial.println( "                           Command list");
+   Serial.println("     --------------------------------------------------------------");
+   Serial.println("new & NUMBER  : Gives you a new textBuff of size NUMBER.");
+   Serial.println("dump          : Deletes the current textBuff.");
+   Serial.println("see           : Outputs info on the current textBuff.");
+   Serial.println("push CHAR     : Pushes the charactor CHAR into the current textBuff.");
+   Serial.println("pop           : Pops and displays the next charactor out of the textBuff.");
+   Serial.println("writeStr TEXT : Writes TEXT as a string into the current textBuff.");
+   Serial.println("readStr       : Reads a string out of the current textBuff.");
+   Serial.println("strlen        : Returns the number of chars for the next string.");
+   Serial.println("clear         : Clears the textBuff.");
+   Serial.println("params        : Returns a count of its following params.");
+   Serial.println("     --------------------------------------------------------------");
+   Serial.println();
 }
 
 
@@ -37,9 +101,8 @@ void doCreateRing() {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     newVal = atoi (paramBuff);
-    free(paramBuff);
     if (newVal>0) {
       if (ourRingBuff) delete ourRingBuff;
       ourRingBuff = new textBuff(newVal);
@@ -81,19 +144,18 @@ void doRingStats() {
 }
 
 
-void doPushChar() {
+void doPushChar(void) {
 
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     if (ourRingBuff) {
       if (ourRingBuff->addChar(paramBuff[0])) {
         Serial.print("Pushed in [");Serial.print(paramBuff[0]);Serial.println("]");
       } else {
         Serial.println("Seems like its full.");
       }
-    free(paramBuff);
     } else {
       Serial.println("No param buff to push into.");
     }
@@ -103,7 +165,7 @@ void doPushChar() {
 }
 
 
-void doPopChar() {
+void doPopChar(void) {
 
   char  aChar;
   
@@ -120,41 +182,68 @@ void doPopChar() {
 }
 
 
+void doWriteStr(void) {
+    
+   if (mParser.numParams()) {
+      if (ourRingBuff) {
+         if (!ourRingBuff->addStr(mParser.getParamBuff())) {
+            Serial.println("Problem, probably ran out of buffer space?");
+         }
+      } else {
+         Serial.println("Sorry, no ring buffer at all!");
+      }
+   } else {
+      Serial.println("You need to type in a string after \"writeStr\"");
+   }
+ }
+
+ 
+void doReadStr(void) {
+   
+   if (ourRingBuff) {
+      Serial.print("Read [");
+      Serial.print(ourRingBuff->readStr());
+      Serial.println("]");
+   }
+}
+
+      
 void doClearBuff(void) {
 
   if (ourRingBuff) {
     ourRingBuff->clear();
-    Serial.println("BUff cleared.");
+    Serial.println("Buff cleared.");
   } else {
     Serial.println("No buff to clear!");
   }
 }
 
 
-void loop() {
+void doStrlen(void) {
 
-  char  inChar;
-  int   command;
+   if (ourRingBuff) {
+      Serial.print("strlen() next read = ");
+      Serial.print(ourRingBuff->strlen());
+      Serial.println(" chars");
+   } else {
+      Serial.println("Umm.. No buffer to read from.");
+   }
+}
 
-  if (Serial.available()) {     // We have something in the queue?
-    inChar = Serial.read();   // Read out a data charactor.
-    Serial.print(inChar);   // If using development machine, echo the charactor.
-    command = mParser.addChar(inChar);
-    switch (command) {
-      case noCommand    : break;
-      case createRing   : doCreateRing(); break;
-      case deleteRing   : doDeleteRing(); break;
-      case ringStats    : doRingStats();  break;
-      case pushChar     : doPushChar();   break;
-      case popChar      : doPopChar();    break;
-      case clearBuff    : doClearBuff();    break;
-      default           : 
-        Serial.println("Sorry, have no idea what you want.");
-        Serial.println("new NUMBER gives you a new textBuff of size NUMBER.");
-        Serial.println("dump deletes the current textBuff.");
-        Serial.println("see outputs info on the current textBuff.");
-        Serial.println("push CHAR pusing the charactor CHAR into the current textBuff.");
-        Serial.println("pop pops the next charactor out of the current textBuff. Then prints it to the screen.");
-    }
-  }
+
+void doParams(void) {
+
+   int num;
+
+   num = (mParser.numParams());
+   Serial.print("Reading ");
+   Serial.print(num);
+   Serial.println(" params.");
+   for (int i=1;i<=num;i++) {
+      Serial.print("param ");
+      Serial.print(i);
+      Serial.print(" -- ");
+      Serial.println(mParser.getNextParam());
+   }
+   Serial.println();
 }
