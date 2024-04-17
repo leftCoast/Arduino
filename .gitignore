@@ -35,7 +35,3 @@ libraries/Teensy-RAM-Monitor
 libraries/ANSI/
 libraries/LC_lilOS/
 libraries/LC_SDTools/
-libraries/LC_lilOS/lilOS.cpp
-*.cpp
-libraries/LC_SDTools/SDTools.h
-libraries/LC_SDTools/SDTools.cpp
