@@ -33,3 +33,5 @@ libraries/LC_FONA
 libraries/LC_handheld
 libraries/Teensy-RAM-Monitor
 libraries/ANSI/
+libraries/LC_lilOS/
+libraries/LC_SDTools/

@@ -10,10 +10,10 @@
 
 
 #define RAMPUP_START  0
-#define RAMPUP_END    1500
+#define RAMPUP_END    2000
 #define RAMPDN_START  RAMPUP_END
-#define RAMPDN_END    RAMPDN_START + 100
-#define STEPTIME      20 //ms
+#define RAMPDN_END    RAMPDN_START + 500
+#define STEPTIME      10 //ms
 
 // *****************************************************
 //                     handheldOS
@@ -70,15 +70,16 @@ void handheldOS::beep() { tone(BEEP_PIN, 500,35); }
 
 void handheldOS::launchPanel(void) {
 
-  //hideRedraw();
+  hideRedraw();
   lilOS::launchPanel();
 }
 
 
 void handheldOS::hideRedraw() {
 
-  for(int i=RAMPDN_START;i<RAMPDN_END;i=i+STEPTIME) {
-    analogWrite(SCREEN_PIN,screenMap.Map(i));
+  for(int i=RAMPDN_START;i<=RAMPDN_END;i=i+STEPTIME) {
+   //Serial.print("^ ");Serial.println(screenMap.map(i));
+    analogWrite(SCREEN_PIN,screenMap.map(i));
     delay(STEPTIME);
   }
   analogWrite(SCREEN_PIN,0);

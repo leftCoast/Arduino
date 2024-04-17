@@ -54,20 +54,20 @@ void homeScreen::setup(void) {
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    addObj(calc);
    */
-   liveText*   header = new liveText(0,7,240,8,50,true);
+   liveText*   header = new liveText(0,7,240,8,100,true);
    header->setValue("Left Coast classic code machine");
    header->setTextSize(1);
    header->setJustify(TEXT_CENTER);
-   header->setColors(&red);
+   header->setColors(&yellow);
    
    aColor.setColor(&yellow);
    aColor.blend(&black,75);
    header->addAColor(0,&aColor);
-   header->addAColor(1500,&aColor);
+   header->addAColor(2000,&aColor);
    
    aColor.setColor(&yellow);
-   aColor.blend(&white,50);
-   header->addAColor(750,&aColor);
+   aColor.blend(&white,60);
+   header->addAColor(1000,&aColor);
    
    addObj(header);
 
