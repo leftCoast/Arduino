@@ -5,6 +5,13 @@
 //#include <debug.h>
 
 
+// The string that is passed back when asking for a numbered file name. 
+char* filePathStr = NULL;
+
+
+// Once you copy or use the file path string, you can safely call this to recycle it's
+// memory.
+void freePathStr(void) { resizeBuff(0,&filePathStr); }
 
 
 //****************************************************************************************
@@ -103,39 +110,39 @@ char* numberedFilePath(const char* folderPath,const char* baseName,const char* e
 	char	numStr[8];
 	bool	done;
 	
-	if (strlen(baseName)<8 												// If the params make sense..
-		&& strlen(extension)<=4 										//
-		&& folderPath[0]=='/') {										//
-		if (createFolder(folderPath)) {								// If we can find/create the folder..
-			maxNum = pow(10,8 - strlen(baseName));					// How many chars we got for a value?
-			maxNum--;														// Actually, you get one too many.
-			numBytes = strlen(folderPath) + 8 + 4 + 1;			// Path, max name, max extension, '\0'.
-			if (resizeBuff(numBytes,&returnStr)) {					// If we can get the RAM..
-				fileNum = 1;												// Starting at one.
-				done = false;												// 'Cause we ain't.
-				do {															// Do for each..
-					itoa(fileNum++,numStr,7);							// Setup a number string.
-					strcpy(returnStr,folderPath);						// Build up the test path.
-					strcat(returnStr,baseName);							// Add the base name.
-					strcat(returnStr,numStr);							// Add the number string.
-					strcat(returnStr,extension);						// Add the extension.
-					tempFile = SD.open(returnStr,FILE_READ);		//	Try to open this file for reading.
-					if (tempFile) {										// If the file opened..
-						tempFile.close();									// We just close it and move on.
-					} else {													// Else, we have a possible candidate here.
-						done = true;										// Either its the real deal or an error. In any case, we are done. 
-						tempFile = SD.open(returnStr,FILE_WRITE);	// Try to create the file we couldn't open.
-						if (tempFile) {									// If we were able to create the file..
-							tempFile.close();								// Close it.
-							return returnStr;								// And We'll call that a success!
-						}														//
-					}															//
-				} while(!done && fileNum<maxNum);					// Loop while we are not done. (And have numbers to go.)
-				resizeBuff(0,&returnStr);								// If we get here, its a failure so recycle the RAM.
-			}																	//
-		}																		//
-	}																			//
-	return returnStr;														// And this'll be returning a NULL.
+	if (strlen(baseName)<8 													// If the params make sense..
+		&& strlen(extension)<=4 											//
+		&& folderPath[0]=='/') {											//
+		if (createFolder(folderPath)) {									// If we can find/create the folder..
+			maxNum = pow(10,8 - strlen(baseName));						// How many chars we got for a value?
+			maxNum--;															// Actually, you get one too many.
+			numBytes = strlen(folderPath) + 8 + 4 + 1;				// Path, max name, max extension, '\0'.
+			if (resizeBuff(numBytes,&filePathStr)) {					// If we can get the RAM..
+				fileNum = 1;													// Starting at one.
+				done = false;													// 'Cause we ain't.
+				do {																// Do for each..
+					itoa(fileNum++,numStr,7);								// Setup a number string.
+					strcpy(filePathStr,folderPath);						// Build up the test path.
+					strcat(filePathStr,baseName);							// Add the base name.
+					strcat(filePathStr,numStr);							// Add the number string.
+					strcat(filePathStr,extension);						// Add the extension.
+					tempFile = SD.open(filePathStr,FILE_READ);		//	Try to open this file for reading.
+					if (tempFile) {											// If the file opened..
+						tempFile.close();										// We just close it and move on.
+					} else {														// Else, we have a possible candidate here.
+						done = true;											// Either its the real deal or an error. In any case, we are done. 
+						tempFile = SD.open(filePathStr,FILE_WRITE);	// Try to create the file we couldn't open.
+						if (tempFile) {										// If we were able to create the file..
+							tempFile.close();									// Close it.
+							return filePathStr;								// And We'll call that a success!
+						}															//
+					}																//
+				} while(!done && fileNum<maxNum);						// Loop while we are not done. (And have numbers to go.)
+				resizeBuff(0,&filePathStr);								// If we get here, its a failure so recycle the RAM.
+			}																		//
+		}																			//
+	}																				//
+	return filePathStr;														// And this'll be returning a NULL.
 }
 
 

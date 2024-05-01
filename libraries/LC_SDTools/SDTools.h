@@ -34,7 +34,7 @@ bool createFolder(const char* folderPath);
 
 // Given a path, baseName and extension this hands back a string with a path to an unused
 // numbered file. For example "/docs/NoName5.doc". IF it can not allocated this file it
-// will return NULL. IF THIS IS A SUCCESS, YOU MUST COPY THE RETURNED STRING. I won't last
+// will return NULL. IF THIS IS A SUCCESS, YOU MUST COPY THE RETURNED STRING. It won't last
 // very long before being recycled.
 char* numberedFilePath(const char* folderPath,const char* baseName,const char* extension);
 
