@@ -101,7 +101,7 @@ bool triDRender::begin(facetList* inModel) {
 			spotPos.y	= -200;
 			spotPos.z	= -200;
 			spotColor.setColor(&white);			// Default spot light color.
-			calcLightMapper();						// lIghts are all  We can do the light mapper now.
+			calcLightMapper();						// lights are all we can do the light mapper now.
 			location.x			= width/2;			// Set the side to side location of the 3D object in our rect.
 			location.y			= height/2;			// Set the height location of the 3D object in our rect.
 			location.z			= 220;				// Set the z location. Now, bigger numbers are further "back".
