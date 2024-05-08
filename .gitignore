@@ -35,3 +35,4 @@ libraries/Teensy-RAM-Monitor
 libraries/ANSI/
 libraries/LC_lilOS/
 libraries/LC_SDTools/
+libraries/WaveHC/
