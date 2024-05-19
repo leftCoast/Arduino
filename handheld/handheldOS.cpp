@@ -1,8 +1,9 @@
 
 #include "handheldOS.h"
 #include "homePanel.h"
-//#include <breakout.h>
-#include <starTrek.h>
+#include <breakout.h>
+#include <grenade.h>
+//#include <starTrek.h>
 //#include <rpnCalc.h>
 //#include "src/regionTest/regionTest.h"
 //#include <iconEdit.h>
@@ -56,8 +57,9 @@ panel* handheldOS::createPanel(int panelID) {
       //case fileOpenApp  : return new fileOpen();
       //case fileSaveApp  : return new fileSave();
       //case calcApp      : return new rpnCalc(&ourOS,calcApp);
-      case starTrekApp  : return new starTrekPanel(&ourOS,starTrekApp);
-      //case breakoutApp  : return new breakout(&ourOS,breakoutApp);
+      //case starTrekApp  : return new starTrekPanel(&ourOS,starTrekApp);
+      case breakoutApp  : return new breakout(&ourOS,breakoutApp);
+      case grenadeApp  : return new grenade(&ourOS,grenadeApp);
       //case rgnTestApp   : return new regionTest();
       //case iconEditApp  : return new iconEdit();
       default           : return NULL;
@@ -116,4 +118,14 @@ void handheldOS::idle(void) {
 int  handheldOS::getTonePin(void) { return BEEP_PIN; }
 void  handheldOS::setBrightness(byte brightness) {  }
 char*  handheldOS::getSystemFolder() { return NULL; }
-char*  handheldOS::getPanelFolder(int panelID) { return NULL; }
+
+
+
+char*  handheldOS::getPanelFolder(int panelID) {
+  
+  switch(panelID) {
+    case breakoutApp  : return "/system/appFiles/breakout/"; break;
+    case grenadeApp   : return "/system/appFiles/grenade/"; break;
+    default           : return NULL;
+  }
+}

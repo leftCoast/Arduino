@@ -37,7 +37,7 @@ colorObj baseImage::getPixel(int x,int y) {
 }
 
 
-// Given a colorObj, set this pixel to that color. (n the editing file)
+// Given a colorObj, set this pixel to that color. (In the editing file)
 bool baseImage::setPixel(int x,int y,colorObj* aColor) {
 
 	RGBpack	aPack;

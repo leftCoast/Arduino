@@ -1,6 +1,5 @@
 
 #include <lilOS.h>
-#include <screen.h>
 #include <resizeBuff.h>
 
 //#include <debug.h>

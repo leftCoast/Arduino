@@ -7,7 +7,7 @@
 //                      homeScreen
 // *****************************************************
 
-
+/*
 #define STARTREK_X   55
 #define STARTREK_Y   140
 #define BREAKOUT_X   STARTREK_X - 15
@@ -18,10 +18,21 @@
 #define TEST_Y       BREAKOUT_Y
 #define EDIT_X       BREAKOUT_X + 148
 #define EDIT_Y       BREAKOUT_Y+55
-#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
+*/
+
+#define BREAKOUT_X  40
+#define BREAKOUT_Y  283 
+#define GRENADE_X   80
+#define GRENADE_Y   283
+
+#define SPLASH_SCR_BMP        "/system/images/sunset.bmp"
+//#define SPLASH_SCR_BMP        "/system/images/lake.bmp"
+//#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
+//#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
 //#define CALC_PANEL_BMP        "/system/appFiles/RPNCalc/calc32.bmp"
-//#define BREAKOUT_PANEL_BMP    "/system/appFiles/breakout/breakout.bmp"
-#define STAR_TREK_PANEL_BMP   "/system/appFiles/starTrek/sTrek32.bmp"
+#define BREAKOUT_PANEL_BMP    "/system/appFiles/breakout/breakout.bmp"
+#define GRENADE_PANEL_BMP    "/system/appFiles/grenade/grenade.bmp"
+//#define STAR_TREK_PANEL_BMP   "/system/appFiles/starTrek/sTrek32.bmp"
 //#define REGION_TEST_PANEL_BMP	"/system/appFiles/rgnTest/test32.bmp"
 //#define ICON_EDIT_PANEL_BMP   "/system/appFiles/iconEdit/iconEd32.bmp"
 
@@ -37,14 +48,18 @@ void homeScreen::setup(void) {
    
    imageRect.setRect(0,0,240,280);
    mBackImage = new bmpObj(&imageRect,SPLASH_SCR_BMP);
+  
+   //appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
+   //addObj(starTrek);
 
-   appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
-   addObj(starTrek);
-
-   /*
+   
    appIcon*  breakOut = new appIcon(BREAKOUT_X,BREAKOUT_Y,breakoutApp,BREAKOUT_PANEL_BMP);
    addObj(breakOut);
+
+   appIcon*  grenade = new appIcon(GRENADE_X,GRENADE_Y,grenadeApp,GRENADE_PANEL_BMP);
+   addObj(grenade);
    
+   /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
    addObj(rgnTest);
 
@@ -53,7 +68,7 @@ void homeScreen::setup(void) {
 
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    addObj(calc);
-   */
+   
    liveText*   header = new liveText(0,7,240,8,100,true);
    header->setValue("Left Coast classic code machine");
    header->setTextSize(1);
@@ -70,7 +85,7 @@ void homeScreen::setup(void) {
    header->addAColor(1000,&aColor);
    
    addObj(header);
-
+   */
 }
 
 

@@ -1,18 +1,17 @@
-#include <Adafruit_GFX.h>
-#include <adafruit_1947_Obj.h>
-
+/////#include <teensy_1947.h>
+#include <adafruit_1947.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
 #include <mapper.h>
 
 #include <drawObj.h>
-#include <screen.h>
 #include <lilOS.h>
 #include "handheldOS.h"
 
+#define DSP_CS      10
+#define SD_CS       4
 
-#define SD_CS        4
 
 void bootError(const char* errStr) {
     
@@ -29,18 +28,28 @@ void bootError(const char* errStr) {
 // Setup, get the hardware running then fire up the UI & OS.
 void setup() {
 
-   //analogWrite(SCREEN_PIN,0);                                      // Turn off backlight.
-  
-   if (!initScreen(ADAFRUIT_1947,ADA_1947_SHIELD_CS,PORTRAIT)) {  // If we can't get the screen running..
+   bool haveScreen;
+
+   haveScreen = false;
+   analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
+   screen = (displayObj*) new adafruit_1947(DSP_CS,-1);
+   //screen = (displayObj*) new teensy_1947(DSP_CS,-1);
+   if (screen) {
+      if (screen->begin()) {
+         screen->setRotation(PORTRAIT);
+         haveScreen = true;
+      }
+   }
+   if (!haveScreen) {
       Serial.println("NO SCREEN!");                               // Send an error out the serial port.
       Serial.flush();                                             // Make sure it goes out!
       while(true);                                                // Lock processor here forever.
    }
-   screen->fillScreen(&black);                                    // Looks like we have a screen, fill it with black.
    if (!SD.begin(SD_CS)) {                                        // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
       Serial.flush();                                             // Make sure it goes out!
       bootError("No SD card.");                                   // Since we have a display, display the error.
+      analogWrite(SCREEN_PIN,255);                                // Turn on backlight.
    }
    
    // If we get here, looks like we have hardware running.

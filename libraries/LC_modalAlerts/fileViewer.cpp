@@ -1,6 +1,5 @@
 #include <fileViewer.h>
 #include <resizeBuff.h>
-#include <adafruit_1947_Obj.h>
 #include <stdComs.h>
 
 //#include <debug.h>

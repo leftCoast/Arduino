@@ -119,7 +119,11 @@ bool createNewBMPFile(const char* newPath,int inWidth,int inHeight) {
 
 
 bmpImage::bmpImage(const char* filePath)
-	: baseImage(filePath) { newImgPath = NULL; }
+	: baseImage(filePath) { 
+	
+	Serial.print("New image : ");
+	Serial.println(filePath);
+	newImgPath = NULL; }
 
 
 bmpImage::~bmpImage(void) { freeStr(&newImgPath); }
@@ -223,6 +227,8 @@ bool bmpImage::checkDoc(File bmpFile) {
 			}
 		}
 	}
+	Serial.print("checkDoc says image is : ");
+	if (success) Serial.println("Good!"); else Serial.println("Bad!");
 	return success;
 }
 
