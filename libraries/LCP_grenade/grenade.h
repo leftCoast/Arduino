@@ -19,7 +19,6 @@ class grenade :  public panel {
 				grenade(lilOS* ourOS,int ourAppID);
 	virtual	~grenade(void);
 				
-				bool	setFilePath(char* inName);
 	virtual	void	setup(void);
 				void	createSounds(void);
 	virtual	void	drawSelf(void);
@@ -108,34 +107,6 @@ class blueBtn :	public bmpObj {
 	
 				grenade*	ourGrenadePtr;
 };
-
-
-
-class indexObj : public linkListObj {
-
-	public:
-				indexObj(int inIndex);
-	virtual	~indexObj(void);
-	
-				int getIndex(void);
-				
-				int index;
-};
-	
-		
-class cardIndex :	public linkList {
-
-	public:
-				cardIndex(int inNumCards);
-	virtual	~cardIndex(void);
-	
-				void	loadList(void);
-				int	dealCard(void);
-				
-				int	numCards;
-				int	numRemain;
-};
-
 
 
 class alarmBeeper :	public squareWave {

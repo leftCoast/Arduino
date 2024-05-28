@@ -30,6 +30,7 @@ void setup() {
 
    bool haveScreen;
 
+  Serial.begin(9600);
    haveScreen = false;
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    screen = (displayObj*) new adafruit_1947(DSP_CS,-1);
@@ -54,7 +55,8 @@ void setup() {
    
    // If we get here, looks like we have hardware running.
    ourEventMgr.begin();                                           // Kickstart our event manager.
-   ourOS.begin();                                                 // Fire up our OS sevices.
+   //ourOS.begin();                                                 // Fire up our OS sevices.
+   ourOSPtr->begin();
 }
 
 
@@ -62,5 +64,6 @@ void setup() {
 void loop() {
       
   idle();         // Idlers get their time.
-  ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
+  ourOSPtr->loop();
+  //ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
 }

@@ -2,6 +2,7 @@
 #include <resizeBuff.h>
 #include <SD.h>
 #include <strTools.h>
+#include <cardIndex.h>
 
 
 #define UNCONNECTED_ANALOG_PIN	A1
@@ -80,22 +81,12 @@
 #define	EXP_SND_MS	1000
 
 
-#define Q_NOTE			250.0
-
-#define H_NOTE			2 * Q_NOTE
-#define DH_NOTE		3 * Q_NOTE
-#define W_NOTE			4 * Q_NOTE
-#define E_NOTE			Q_NOTE/2.0
-#define S_NOTE			Q_NOTE/4.0
-
-
 grenade::grenade(lilOS* ourOS,int ourAppID)
 	: panel(ourAppID) {
 	
 	theWord		= NULL;
 	wordIndex	= NULL;
 	nextButton	= NULL;
-	filePath		= NULL;
 	ourBeeper	= NULL;
 	ourPlayer	= NULL;
 	wordCount	= 0;
@@ -109,31 +100,8 @@ grenade::grenade(lilOS* ourOS,int ourAppID)
 grenade::~grenade(void) {
 
 	if (wordIndex) delete wordIndex;
-	resizeBuff(0,&filePath);
 	if (ourBeeper) delete ourBeeper;
 	if (ourPlayer) delete ourPlayer;
-}
-
-
-// Given a filename from our folder, generate the fullpath to it.
-bool grenade::setFilePath(char* inName) {
-	
-	char*			folderPtr;
-	int			pathLen;
-	bool			success;
-	
-	success = false;
-	folderPtr = ourOSPtr->getPanelFolder(mPanelID);			// Ask the OS for our folder path.
-	if (folderPtr) {
-		pathLen = strlen(folderPtr);									// Num chars in this path..
-		pathLen = pathLen + strlen(inName) + 1;					// Add more for the file name.
-		if (resizeBuff(pathLen,&filePath)) {
-			strcpy(filePath,folderPtr);
-			strcat(filePath,inName);
-			success = true;
-		}
-	}
-	return success;
 }
 
 
@@ -142,10 +110,10 @@ void grenade::setup(void) {
 	long int	seed;
 	
 	seed = analogRead(UNCONNECTED_ANALOG_PIN);	// Tired of playing the same old game every time?
-	randomSeed(seed);	
+	randomSeed(seed);
 	
 	setFilePath(BLUE_CROSS);
-	blueCross = new blueBtn(B_BTN_X,B_BTN_Y,B_BTN_W,B_BTN_H,filePath);
+	blueCross = new blueBtn(B_BTN_X,B_BTN_Y,B_BTN_W,B_BTN_H,mFilePath);
 	if (blueCross) {
 		blueCross->setGreyedOut(true);
 		blueCross->setGrenade(this);
@@ -182,14 +150,15 @@ void grenade::setup(void) {
 		greenScoreLbl->setColors(&white,BACK_COLOR);
 		addObj(greenScoreLbl);
 	}
-	
-	if(setFilePath(NEXT_BTN_N)) {
-		nextButton = new nextBtn(NEXT_BTN_X,NEXT_BTN_Y,NEXT_BTN_W,NEXT_BTN_H,filePath);
+	Serial.println("***** going after the next button. *****");
+	Serial.flush();
+	//if(setFilePath(NEXT_BTN_N)) {
+		nextButton = new nextBtn(NEXT_BTN_X,NEXT_BTN_Y,NEXT_BTN_W,NEXT_BTN_H,"/system/icons/standard/cross32.bmp");
 		if (nextButton) {
 			nextButton->setGrenade(this);
 			addObj(nextButton);
 		}
-	}
+	//}
 	wordCount = countWordList();
 	theWord = new quickLabel(THE_WORD_X,THE_WORD_Y,THE_WORD_W,THE_WORD_H);
 	if (wordCount && theWord) {
@@ -524,6 +493,9 @@ nextBtn::nextBtn(int inX,int inY,int inWidth,int inHeight,const char* bmpPath)
 	
 	ourGrenadePtr	= NULL;
 	setEventSet(touchLift);
+	Serial.println("in next button");
+	Serial.println(bmpPath);
+	Serial.flush();
 }
 	
 	 
@@ -589,76 +561,6 @@ void blueBtn::doAction(void) {
 		ourGrenadePtr->blueBtnClick();
 	}
 }
-
-
-
-// *************** indexObj ***************
-	
-	
-//	indexObj basically a link list node that carries an int representing where it fell in
-// the initial filling of it's linked list. As cards are delt, gaps appear in this list.
-indexObj::indexObj(int inIndex) { index = inIndex; }
-
-
-// Destructor, nothing to do here. Ancestors do it all.
-indexObj::~indexObj(void) {  }
-
-
-// Pass back your index. You been delt.
-int indexObj::getIndex(void) { return index; }
-
-
-
-// *************** cardIndex ***************
-
-
-// Creator, give us a deck size and away we go.
-cardIndex::cardIndex(int inNumCards)
-	: linkList() {
-	
-	numCards = inNumCards;		// Save off our deck size.
-	loadList();						// Load up a new list of car indexes.
-}
-
-
-// Destructor, nothing for us to do.
-cardIndex::~cardIndex(void) { }
-
-
-// Your basic reshuffle. Dump this list, reload a fresh one.
-void cardIndex::loadList(void) {
-	
-	indexObj*	newIndex;
-	
-	dumpList();									// Dump out remaining card indexes.
-	for (int i=1;i<=numCards;i++) {		// For the amount of cards we have..
-		newIndex = new indexObj(i);		// Create a new card index node.
-		addToTop(newIndex);					// Add it to the top of the list (very fast)
-	}												//
-	numRemain = numCards;					// Reset the amount of cards we have left to deal.
-}
-	
-
-// Like it says, we deal a card. Returns the index of the card we delt. Or -1 for no card.	
-int cardIndex::dealCard(void) {
-
-	int			select;
-	indexObj*	theNode;
-	int			theIndex;
-	
-	theIndex = -1;												// Return -1 for fail.		
-	if (numRemain) {											// If we have cards to deal..
-		select = random(0,numRemain);						// Choose a random card.
-		theNode = (indexObj*)getByIndex(select);		// Grab this one out of the list.
-		if (theNode) {											// If we actually got one..
-			unlinkObj(theNode);								// Unlink it from the deck.
-			theIndex = theNode->getIndex();				// Save off the index value.
-			delete(theNode);									// Recycle the card.
-			numRemain--;										// Bump down our deck count.
-		}															//
-	}																//
-	return theIndex;											// Return the card's index. Or -1 for no card.
-}			
 
 
 

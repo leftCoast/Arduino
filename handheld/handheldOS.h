@@ -3,10 +3,11 @@
 
 #include <lilOS.h>
 
-#define SCREEN_PIN   25
-#define BEEP_PIN     23
+#define SCREEN_PIN              25
+#define BEEP_PIN                23
 
-enum  apps { homeApp = HOME_PANEL_ID, fileOpenApp, fileSaveApp, starTrekApp, breakoutApp, calcApp, rgnTestApp, iconEditApp, grenadeApp, nextApp };
+
+enum  apps { homeApp = HOME_PANEL_ID, fileOpenApp, fileSaveApp, starTrekApp, breakoutApp, calcApp, rgnTestApp, iconEditApp, grenadeApp, nextApp }; // settApp,
 
 
 
@@ -42,7 +43,7 @@ class handheldOS : public lilOS {
           timeObj     mScreenTimer;
 };
 
-extern handheldOS  ourOS;
+//extern handheldOS  ourOS;
 
 
 #endif

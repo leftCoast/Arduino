@@ -33,8 +33,9 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
   : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
   
-	mPanelID = panelID;								// Save what "kind" of panel we are.
-	mMenuBar = NULL;									// Default to NULL.
+	mPanelID		= panelID;							// Save what "kind" of panel we are.
+	mMenuBar		= NULL;								// Default to NULL.
+	mFilePath	= NULL;								// This too.
 	switch (menuBarChoice) {						// Lets see what kind of bar they wish for?
 		case noMenuBar			: break;				// None? Fine, we go now.
 		case emptyMenuBar		: 						// Now, panels are created by the O.S. during runtime.
@@ -51,12 +52,44 @@ panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
 
 
 // The world as you know it, is ending..
-panel::~panel(void) { ourPanel = NULL; }
+panel::~panel(void) { 
+	
+	resizeBuff(0,&mFilePath);
+	ourPanel = NULL;
+}
 
 
 // Whom ever is managing panels can assign IDs to us for
 // their nefarious plans. Here's where we hand it back.
 int panel::getPanelID(void) { return mPanelID; }
+
+
+// Given a filename from our folder, generate the fullpath to it.
+bool panel::setFilePath(char* inName) {
+	
+	char*			folderPtr;
+	int			pathLen;
+	bool			success;
+	
+	Serial.print("***** looking for :");
+	Serial.println(inName);
+	success = false;
+	folderPtr = ourOSPtr->getPanelFolder(mPanelID);	// Ask the OS for our folder path.
+	Serial.println(folderPtr);
+	if (folderPtr) {											// If we got a folder path..
+		pathLen = strlen(folderPtr);						// Num chars in this path..
+		pathLen = pathLen + strlen(inName) + 1;		// Add more for the file name and '\0'.
+		Serial.print("pathLen : ");
+		Serial.println(pathLen);
+		if (resizeBuff(pathLen,&mFilePath)) {			// If we can get the RAM for the path..
+			strcpy(mFilePath,folderPtr);					// Our folder path goes in.
+			strcat(mFilePath,inName);						// File name goes in.
+			Serial.println(mFilePath);
+			success = true;									// Looks good!
+		}															//
+	}																//
+	return success;											// Return our result.
+}
 
 
 // setup() & loop() panel style.

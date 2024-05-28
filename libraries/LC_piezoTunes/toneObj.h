@@ -97,7 +97,13 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+#define Q_NOTE			250.0
 
+#define H_NOTE			2 * Q_NOTE
+#define DH_NOTE		3 * Q_NOTE
+#define W_NOTE			4 * Q_NOTE
+#define E_NOTE			Q_NOTE/2.0
+#define S_NOTE			Q_NOTE/4.0
 
 // ***************************************************************************************
 // Your classic tone playing object. This can tell you when the tone is finished.

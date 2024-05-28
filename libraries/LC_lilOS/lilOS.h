@@ -9,7 +9,7 @@
 #define	NO_PANEL_ID		0		// You have to have this guy.
 #define	HOME_PANEL_ID	1
 
-#define STD_ICON_FLDR		"system/icons/standard/"
+#define STD_ICON_FLDR		"icons/standard/"
 
 
 
@@ -66,6 +66,7 @@ class panel :	public drawGroup,
 	virtual	~panel(void);
 	
 				int	getPanelID();
+				bool	setFilePath(char* inName);
 	virtual	void	setup(void);
 	virtual	void	loop(void);
 	virtual	void	drawSelf(void);
@@ -75,6 +76,7 @@ class panel :	public drawGroup,
 	
 				int		mPanelID;   // What panal am I?
 				menuBar*	mMenuBar;	// My menu bar, if so desired.
+				char*		mFilePath;	// Temp file path to a named file.
 };
 
 

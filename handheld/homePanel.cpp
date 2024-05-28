@@ -24,14 +24,16 @@
 #define BREAKOUT_Y  283 
 #define GRENADE_X   80
 #define GRENADE_Y   283
+#define SETT_X      120
+#define SETT_Y      283
 
-#define SPLASH_SCR_BMP        "/system/images/sunset.bmp"
+#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 //#define SPLASH_SCR_BMP        "/system/images/lake.bmp"
 //#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
-//#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
 //#define CALC_PANEL_BMP        "/system/appFiles/RPNCalc/calc32.bmp"
-#define BREAKOUT_PANEL_BMP    "/system/appFiles/breakout/breakout.bmp"
-#define GRENADE_PANEL_BMP    "/system/appFiles/grenade/grenade.bmp"
+#define BREAKOUT_PANEL_BMP      "/system/appFiles/breakout/breakout.bmp"
+#define GRENADE_PANEL_BMP       "/system/appFiles/grenade/grenade.bmp"
+//#define SETT_PANEL_BMP          "/system/appFiles/sett/sett.bmp"
 //#define STAR_TREK_PANEL_BMP   "/system/appFiles/starTrek/sTrek32.bmp"
 //#define REGION_TEST_PANEL_BMP	"/system/appFiles/rgnTest/test32.bmp"
 //#define ICON_EDIT_PANEL_BMP   "/system/appFiles/iconEdit/iconEd32.bmp"
@@ -58,6 +60,9 @@ void homeScreen::setup(void) {
 
    appIcon*  grenade = new appIcon(GRENADE_X,GRENADE_Y,grenadeApp,GRENADE_PANEL_BMP);
    addObj(grenade);
+
+   //appIcon*  sett = new appIcon(SETT_X,SETT_Y,settApp,SETT_PANEL_BMP);
+   //addObj(sett);
    
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);

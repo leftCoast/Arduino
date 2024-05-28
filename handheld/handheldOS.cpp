@@ -1,8 +1,11 @@
 
+#include <lilOS.h>
 #include "handheldOS.h"
 #include "homePanel.h"
 #include <breakout.h>
 #include <grenade.h>
+//#include <sett.h>
+
 //#include <starTrek.h>
 //#include <rpnCalc.h>
 //#include "src/regionTest/regionTest.h"
@@ -22,8 +25,8 @@
 
 
 // Our global OS.
-handheldOS ourOS;
-
+//handheldOS ourOS;
+ourOSPtr = new handheldOS;
 
 // Create it..
 handheldOS::handheldOS(void) { }
@@ -34,7 +37,7 @@ handheldOS::~handheldOS(void) { }
 
 
 // Possibly we'll need to do something during startup.
-// cellOS uses this to tweak its color pallette.
+// cellOS used this to tweak its color pallette.
 int handheldOS::begin(void) { 
 
   pinMode(BEEP_PIN, OUTPUT);
@@ -53,16 +56,17 @@ panel* handheldOS::createPanel(int panelID) {
 
    beep();
    switch (panelID) {
-      case homeApp      : return new homeScreen();
+      case homeApp        : return new homeScreen();
       //case fileOpenApp  : return new fileOpen();
       //case fileSaveApp  : return new fileSave();
       //case calcApp      : return new rpnCalc(&ourOS,calcApp);
       //case starTrekApp  : return new starTrekPanel(&ourOS,starTrekApp);
-      case breakoutApp  : return new breakout(&ourOS,breakoutApp);
-      case grenadeApp  : return new grenade(&ourOS,grenadeApp);
+      case breakoutApp    : return new breakout(&ourOS,breakoutApp);
+      case grenadeApp     : return new grenade(&ourOS,grenadeApp);
+      //case settApp        : return new sett(&ourOS,settApp);
       //case rgnTestApp   : return new regionTest();
       //case iconEditApp  : return new iconEdit();
-      default           : return NULL;
+      default             : return NULL;
    }
 }
 
@@ -114,18 +118,20 @@ void handheldOS::idle(void) {
   }
 }
 
-// Calls to be overwritten by used version.
-int  handheldOS::getTonePin(void) { return BEEP_PIN; }
-void  handheldOS::setBrightness(byte brightness) {  }
-char*  handheldOS::getSystemFolder() { return NULL; }
 
+// Calls to be overwritten by user version.
+int     handheldOS::getTonePin(void) { return BEEP_PIN; }
 
+void    handheldOS::setBrightness(byte brightness) {  }
 
-char*  handheldOS::getPanelFolder(int panelID) {
+char*   handheldOS::getSystemFolder() { return "/system/"; }
+
+char* handheldOS::getPanelFolder(int panelID) {
   
   switch(panelID) {
-    case breakoutApp  : return "/system/appFiles/breakout/"; break;
-    case grenadeApp   : return "/system/appFiles/grenade/"; break;
+    case breakoutApp  : return "/system/appFiles/breakout/";
+    case grenadeApp   : return "/system/appFiles/grenade/";
+    //case settApp      : return "/system/appFiles/sett/";
     default           : return NULL;
   }
 }

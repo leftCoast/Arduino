@@ -10,6 +10,12 @@
 // A docFile object MUST have a path to exist. 	
 docFileObj::docFileObj(const char* filePath) {
 		
+	Serial.print("docFileObj got : [");
+	Serial.flush();
+	Serial.print(filePath);
+	Serial.flush();
+	Serial.println("]");
+	Serial.flush();
 	docFilePath		= NULL;									// Dynamic things start at NULL.
 	editFilePath	= NULL;									// Dynamic things start at NULL.
 	returnBuffer	= NULL;									// Someone wants..  Say.. a path? Store it here. Pass this back.
@@ -45,8 +51,7 @@ bool docFileObj::openDocFile(int openMode) {
 
 	File	tempFile;
 	bool	success;
-	Serial.println("Going to open this doc file..");
-	Serial.println(docFilePath);
+
 	success = false;																// Not a success yet..
 	if (docFilePath) {															// If we have a non-NULL path..
 		if (openMode==FILE_WRITE) {											// If they want to edit this file..
@@ -74,7 +79,6 @@ bool docFileObj::openDocFile(int openMode) {
 				tempFile.close();													// Close the doc file.
 			}
 		} else if (openMode==FILE_READ) {									// If they just want to read this file..
-			Serial.println("Mode is READ");
 			if (mode==fOpenToRead) {											// If we're already open to read..
 				ourFile.seek(0);													// Opening to READ assumes you start at the beginning of the file.
 				return true;														// We're all set, lets go.
@@ -82,16 +86,11 @@ bool docFileObj::openDocFile(int openMode) {
 				closeDocFile();													// We close the file.
 				ourFile = SD.open(docFilePath,FILE_READ);					// Have a go at opening the doc file path.
 				if (ourFile) {														// If we were able to open the file..
-					Serial.print("Opened fine : ");
-					Serial.println(docFilePath);
 					if (checkDoc(ourFile)) {									// If the file passed the acid test..
 						ourFile.seek(0);											// Point at first byte of the file.
 						mode = fOpenToRead;										// We are open for reading.
 						success = true;											// Success! The file is open and ready to read.
 					}
-				} else {
-					Serial.print("Inable to open : ");
-					Serial.println(docFilePath);
 				}
 			}
 		}
