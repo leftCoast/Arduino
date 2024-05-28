@@ -47,7 +47,7 @@ class appIcon : public iconButton {
 // different apps. Each panel has its own setup() and loop() functions you can
 // fill in to pretend your in a "real" sketch. Wow, just like a real boy!
 
-enum menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
+enum  menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
 
 
 // These two have to go. Need to bring these out from

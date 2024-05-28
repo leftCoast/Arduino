@@ -48,7 +48,7 @@ panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
 		break;
 	}
 	ourPanel = this;
-}
+ }
 
 
 // The world as you know it, is ending..
