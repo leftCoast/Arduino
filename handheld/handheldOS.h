@@ -43,7 +43,7 @@ class handheldOS : public lilOS {
           timeObj     mScreenTimer;
 };
 
-//extern handheldOS  ourOS;
+extern handheldOS  ourOS;
 
 
 #endif

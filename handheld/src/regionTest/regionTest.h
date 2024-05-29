@@ -51,7 +51,7 @@ class LCDCharBlock	: public drawObj {
 class regionTest	: public panel {
 
 	public:
-					regionTest(void);
+					regionTest(lilOS* ourOS);
 	virtual		~regionTest(void);
 	
 	virtual void  		setup(void);

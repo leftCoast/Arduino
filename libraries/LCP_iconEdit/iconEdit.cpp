@@ -76,7 +76,7 @@ void colorBtnObj::doAction(void) {  ourEditor->openColorPicker(); }
 	
 // And it all starts up again..
 iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
-	: documentPanel(ourAppID) {
+	: documentPanel(ourOS,ourAppID) {
 	
 	strBuff = NULL;
 	setDefaultPath(ICON_FLDR);
@@ -177,6 +177,17 @@ void iconEdit::drawSelf(void) {
 	screen->fillRect(&aRect,&aColor);	// Draw it!
 }
 
+/* 
+
+  
+!  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !
+********************************************************************************************
+********************************************************************************************
+THIS NEEDS TO BE REPLACED BY setFilePath(char* inName); and use the panel variable mFilePath
+********************************************************************************************
+********************************************************************************************
+!  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  !  ! 
+
 
 // This is used to find the color picker button graphic we use on our screen.
 char* iconEdit::getLocalFilePath(const char* fileName) {
@@ -184,7 +195,7 @@ char* iconEdit::getLocalFilePath(const char* fileName) {
 	tempStr	ourFolder;
 	int		numChars;
 	
-	ourFolder.setStr(ourOSPtr->getPanelFolder(getPanelID()));	// Path to our folder on this system.
+	ourFolder.setStr(mOSPtr->getPanelFolder(getPanelID()));		// Path to our folder on this system.
 	numChars = ourFolder.numChars();										// Count the chars.
 	numChars = numChars + strlen(fileName);							// Add the chars of the file name.
 	numChars++;																	// And one for '\0'.
@@ -194,7 +205,7 @@ char* iconEdit::getLocalFilePath(const char* fileName) {
 	}																				// Take a deep breath..
 	return strBuff;															// And pass back the string buffer.
 }
-
+*/
 
 void iconEdit::openColorPicker(void) {
 	

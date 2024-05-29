@@ -10,8 +10,8 @@ char*		fileDBResult	= NULL;
 
 
 // And it all starts up again..
-fileOpen::fileOpen()
-  : panel(fileOpenApp) { }
+fileOpen::fileOpen(lilOS* ourOS)
+  : panel(ourOS,fileOpenApp) { }
 
 
 // The world as you know it, is ending..
@@ -48,8 +48,8 @@ void fileOpen::closing(void) {  }
 
 
 // And it all starts up again..
-fileSave::fileSave()
-  : panel(fileSaveApp) { }
+fileSave::fileSave(lilOS* ourOS)
+  : panel(ourOS,fileSaveApp) { }
 
 
 // The world as you know it, is ending..

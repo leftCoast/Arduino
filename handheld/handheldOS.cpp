@@ -25,8 +25,8 @@
 
 
 // Our global OS.
-//handheldOS ourOS;
-ourOSPtr = new handheldOS;
+handheldOS ourOS;
+
 
 // Create it..
 handheldOS::handheldOS(void) { }

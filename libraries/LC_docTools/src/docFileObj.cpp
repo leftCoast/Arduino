@@ -10,12 +10,6 @@
 // A docFile object MUST have a path to exist. 	
 docFileObj::docFileObj(const char* filePath) {
 		
-	Serial.print("docFileObj got : [");
-	Serial.flush();
-	Serial.print(filePath);
-	Serial.flush();
-	Serial.println("]");
-	Serial.flush();
 	docFilePath		= NULL;									// Dynamic things start at NULL.
 	editFilePath	= NULL;									// Dynamic things start at NULL.
 	returnBuffer	= NULL;									// Someone wants..  Say.. a path? Store it here. Pass this back.

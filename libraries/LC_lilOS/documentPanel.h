@@ -117,7 +117,7 @@ class askOkObj :	public alertObj,
 class documentPanel :	public panel {
 
 	public :
-				documentPanel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+				documentPanel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~documentPanel(void);
 	
 	virtual	void	createDocObj(void)=0;	

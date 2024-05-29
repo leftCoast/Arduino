@@ -55,8 +55,7 @@ void setup() {
    
    // If we get here, looks like we have hardware running.
    ourEventMgr.begin();                                           // Kickstart our event manager.
-   //ourOS.begin();                                                 // Fire up our OS sevices.
-   ourOSPtr->begin();
+   ourOS.begin();                                                 // Fire up our OS sevices.
 }
 
 
@@ -64,6 +63,5 @@ void setup() {
 void loop() {
       
   idle();         // Idlers get their time.
-  ourOSPtr->loop();
-  //ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
+  ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
 }

@@ -39,7 +39,7 @@
 //#define ICON_EDIT_PANEL_BMP   "/system/appFiles/iconEdit/iconEd32.bmp"
 
 homeScreen::homeScreen(void)
-   : homePanel() { }
+   : homePanel(&ourOS) { }
 
 homeScreen::~homeScreen(void) { }
   

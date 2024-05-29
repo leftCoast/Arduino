@@ -4,8 +4,8 @@
 
 //#include <debug.h>
 
-int		nextPanel	= NO_PANEL_ID;   // What panel do we want showing now?
-lilOS*	ourOSPtr		= NULL;	
+int		nextPanel	= NO_PANEL_ID;	// What panel do we want showing now?
+lilOS*	ourOSPtr		= NULL;			// Used by "packages" that need to access the OS's stuff.
 panel*	ourPanel		= NULL;
 
 // *****************************************************
@@ -30,10 +30,11 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 	
 	
 // And it all starts up again..
-panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
+panel::panel(lilOS* OSPtr,int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
   : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
   
 	mPanelID		= panelID;							// Save what "kind" of panel we are.
+	mOSPtr		= OSPtr;								// Save off our copy to the OS.
 	mMenuBar		= NULL;								// Default to NULL.
 	mFilePath	= NULL;								// This too.
 	switch (menuBarChoice) {						// Lets see what kind of bar they wish for?
@@ -71,20 +72,15 @@ bool panel::setFilePath(char* inName) {
 	int			pathLen;
 	bool			success;
 	
-	Serial.print("***** looking for :");
-	Serial.println(inName);
+
 	success = false;
-	folderPtr = ourOSPtr->getPanelFolder(mPanelID);	// Ask the OS for our folder path.
-	Serial.println(folderPtr);
+	folderPtr = mOSPtr->getPanelFolder(mPanelID);	// Ask the OS for our folder path.
 	if (folderPtr) {											// If we got a folder path..
 		pathLen = strlen(folderPtr);						// Num chars in this path..
 		pathLen = pathLen + strlen(inName) + 1;		// Add more for the file name and '\0'.
-		Serial.print("pathLen : ");
-		Serial.println(pathLen);
 		if (resizeBuff(pathLen,&mFilePath)) {			// If we can get the RAM for the path..
 			strcpy(mFilePath,folderPtr);					// Our folder path goes in.
 			strcat(mFilePath,inName);						// File name goes in.
-			Serial.println(mFilePath);
 			success = true;									// Looks good!
 		}															//
 	}																//
@@ -131,8 +127,8 @@ void panel::handleCom(stdComs comID) {
 // *****************************************************
 
 
-homePanel::homePanel(void)
-  : panel(HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
+homePanel::homePanel(lilOS* OSPtr)
+  : panel(OSPtr,HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
 
 
 homePanel::~homePanel(void) {  }
@@ -150,7 +146,7 @@ void homePanel::drawSelf(void) {
 	screen->setCursor(5,25);
 	screen->setTextColor(&black,&white);
 	screen->drawText("Default home panel");
-	}
+}
 
 
 
@@ -164,7 +160,6 @@ lilOS::lilOS(void) {
 	pathBuff = NULL;
 	mPanel = NULL;
 	nextPanel = HOME_PANEL_ID;
-	ourOSPtr = this;
 }
 
 
@@ -172,27 +167,27 @@ lilOS::lilOS(int homeID) {
 
   mPanel			= NULL;
   nextPanel		= homeID;
-  ourOSPtr = this;
 }
 
 
-lilOS::~lilOS(void) { ourOSPtr = NULL; }
+lilOS::~lilOS(void) { }
 
 
 // A good plan would be to inherit, do your begin
 // then at some point during that, call this one.
 int lilOS::begin(void) {
-
-  hookup();													// Want to use idle()? Its ready.
-  icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
-  icon22Mask.readFromBMP(stdIconPath(mask22));	// Read out and setup the standard 22x22 icon mask.
-  nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
-  return 0;													// 0 means no error right? Or does it mean false, fail?
+	
+	ourOSPtr = this;										// Hookup the global pointer to ourselves.
+	hookup();												// Want to use idle()? Its ready.
+	icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
+	icon22Mask.readFromBMP(stdIconPath(mask22));	// Read out and setup the standard 22x22 icon mask.
+	nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
+	return 0;													// 0 means no error right? Or does it mean false, fail?
 }
 
 
 // This is the guy you inherit and use to create your custom panels.
-panel* lilOS::createPanel(int panelID) { return new homePanel(); }
+panel* lilOS::createPanel(int panelID) { return new homePanel(this); }
 
 
 void lilOS::launchPanel(void) {
@@ -218,6 +213,7 @@ void lilOS::launchPanel(void) {
 
 // Tell the current panel its loop time.
 void lilOS::loop(void) {
+	
 	
 	if(!mPanel && nextPanel!=(unsigned int)mPanel) {	// If have no panel and we want one.
 		launchPanel();												// Launch a new panel.

@@ -121,7 +121,7 @@ void soundStartBall(void) {
 // ******************************
 
 breakout::breakout(lilOS* ourOS,int ourAppID)
-  : panel(ourAppID) {
+  : panel(ourOS,ourAppID) {
 
 	if (ourOS) {
 		tonePin = ourOS->getTonePin();

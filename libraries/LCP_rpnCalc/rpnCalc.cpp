@@ -57,7 +57,7 @@ extern      bool            gSecondFx;
 				lilOS* calcOS = NULL;
           
 rpnCalc::rpnCalc(lilOS* ourOS,int panelID)
-	: panel(panelID) {
+	: panel(ourOS,panelID) {
 	
 	calcOS = ourOS;	// Set up our global OS pointer (For the buttons)
 	degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);

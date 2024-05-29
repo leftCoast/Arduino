@@ -62,7 +62,7 @@ class panel :	public drawGroup,
 					public listener {
 
 	public:
-				panel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+				panel(lilOS* OSPtr,int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~panel(void);
 	
 				int	getPanelID();
@@ -77,6 +77,7 @@ class panel :	public drawGroup,
 				int		mPanelID;   // What panal am I?
 				menuBar*	mMenuBar;	// My menu bar, if so desired.
 				char*		mFilePath;	// Temp file path to a named file.
+				lilOS*	mOSPtr;		// Handy pointer to our OS object.
 };
 
 
@@ -84,7 +85,7 @@ class panel :	public drawGroup,
 class homePanel : public panel {
 
   public:
-          homePanel(void);
+          homePanel(lilOS* OSPtr);
   virtual ~homePanel(void);
   
   virtual void  setup(void);
@@ -128,7 +129,7 @@ class lilOS :  public idler {
 };
 
 extern int		nextPanel;
-extern lilOS*	ourOSPtr;
+extern lilOS*	ourOSPtr;		// Used by "packages" that need to access the OS's stuff.
 extern panel*	ourPanel;
 
 #endif

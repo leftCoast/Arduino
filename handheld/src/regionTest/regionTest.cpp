@@ -97,8 +97,8 @@ bool	firstFrame = true;
 
 
 // And it all starts up again..
-regionTest::regionTest()
-  : panel(rgnTestApp) { }
+regionTest::regionTest(lilOS* ourOS)
+  : panel(ourOS,rgnTestApp) { }
 
 
 // The world as you know it, is ending..

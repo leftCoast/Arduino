@@ -38,7 +38,6 @@ class grenade :  public panel {
 				quickLabel*		theWord;
 				int				wordCount;
 				cardIndex*		wordIndex;
-				char*				filePath;
 				alarmBeeper*	ourBeeper;
 				label*			message;
 				blueBtn*			blueCross;

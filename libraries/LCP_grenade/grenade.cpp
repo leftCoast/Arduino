@@ -82,7 +82,7 @@
 
 
 grenade::grenade(lilOS* ourOS,int ourAppID)
-	: panel(ourAppID) {
+	: panel(ourOS,ourAppID) {
 	
 	theWord		= NULL;
 	wordIndex	= NULL;
@@ -132,17 +132,19 @@ void grenade::setup(void) {
 		addObj(blueScoreLbl);
 	}
 	
-	greenCross = new greenBtn(G_BTN_X,G_BTN_Y,G_BTN_W,G_BTN_H,ourOSPtr->stdIconPath(cross32));
+	greenCross = new greenBtn(G_BTN_X,G_BTN_Y,G_BTN_W,G_BTN_H,mOSPtr->stdIconPath(cross32));
 	if (greenCross) {
 		greenCross->setGreyedOut(true);
 		greenCross->setGrenade(this);
 		addObj(greenCross);
 	}
+	
 	label* greenLbl = new label(G_LBL_X,G_LBL_Y,G_LBL_W,G_LBL_H,G_LBL_T);
 	if (greenLbl) {
 		greenLbl->setColors(&green,BACK_COLOR);
 		addObj(greenLbl);
 	}
+	
 	greenScoreLbl = new label(GS_LBL_X,GS_LBL_Y,GS_LBL_W,GS_LBL_H,"0");
 	if (greenScoreLbl) {
 		greenScoreLbl->setTextSize(2);
@@ -150,15 +152,14 @@ void grenade::setup(void) {
 		greenScoreLbl->setColors(&white,BACK_COLOR);
 		addObj(greenScoreLbl);
 	}
-	Serial.println("***** going after the next button. *****");
-	Serial.flush();
-	//if(setFilePath(NEXT_BTN_N)) {
-		nextButton = new nextBtn(NEXT_BTN_X,NEXT_BTN_Y,NEXT_BTN_W,NEXT_BTN_H,"/system/icons/standard/cross32.bmp");
+	
+	if(setFilePath(NEXT_BTN_N)) {
+		nextButton = new nextBtn(NEXT_BTN_X,NEXT_BTN_Y,NEXT_BTN_W,NEXT_BTN_H,mFilePath);
 		if (nextButton) {
 			nextButton->setGrenade(this);
 			addObj(nextButton);
 		}
-	//}
+	}
 	wordCount = countWordList();
 	theWord = new quickLabel(THE_WORD_X,THE_WORD_Y,THE_WORD_W,THE_WORD_H);
 	if (wordCount && theWord) {
@@ -171,7 +172,8 @@ void grenade::setup(void) {
 			addObj(theWord);
 		}
 	}
-	ourBeeper = new alarmBeeper(ourOSPtr->getTonePin(),GAME_MS,NOTE_A3,NOTE_G2);
+	
+	ourBeeper = new alarmBeeper(mOSPtr->getTonePin(),GAME_MS,NOTE_A3,NOTE_G2);
 	playTimer.setTime(GAME_MS,false);
 	message = new label(MESS_X,MESS_Y,MESS_W,MESS_H,MESS_START);
 	if (message) {
@@ -179,7 +181,7 @@ void grenade::setup(void) {
 		message->setColors(&white,BACK_COLOR);
 		addObj(message);
 	}
-	ourPlayer = new toneObj(ourOSPtr->getTonePin());
+	ourPlayer = new toneObj(mOSPtr->getTonePin());
 	createSounds();
 	if (
 		blueCross
@@ -235,14 +237,21 @@ int grenade::countWordList(void) {
 	File			wordList;
 	char			theChar;
 	int			count;
+	bool			done;
 	
 	count = 0;
 	if(setFilePath(THE_WORD_N)) {
-		wordList = SD.open(filePath,FILE_READ);
+		wordList = SD.open(mFilePath,FILE_READ);
 		if (wordList) {
-			while(wordList.read(&theChar,1)) {
-				if (theChar=='\n') {
-					count++;
+			done = false;
+			while(!done) {
+				theChar = wordList.read();
+				if (theChar==(char)-1) {
+					done = true;
+				} else {
+					if (theChar=='\n') {
+						count++;
+					}
 				}
 			}
 			if (count && theChar!='\n') {
@@ -276,7 +285,7 @@ void grenade::nextBtnClick(void) {
 	switch(ourState) {
 		case pregame	: break;						// Do nothing.
 		case waiting	:								// Start a game.
-			ourOSPtr->beep();							// Hear the beep.
+			mOSPtr->beep();							// Hear the beep.
 			message->setValue(MESS_PLAY);			// Tell 'em what to do.
 			chooseWord();								// Choose the first word.
 			ourBeeper->setOnOff(true);				// Fire up beeper.
@@ -284,7 +293,7 @@ void grenade::nextBtnClick(void) {
 			ourState = playing;						// Now we're playing.
 		break;											//
 		case playing	:								// Game in process.
-			ourOSPtr->beep();							// Hear the beep.
+			mOSPtr->beep();							// Hear the beep.
 			chooseWord();								// Next word.
 		break;											//
 		case exploding	: 								// All of these.. Do nothing.
@@ -299,7 +308,7 @@ void grenade::nextBtnClick(void) {
 void grenade::greenBtnClick(void) {
 
 	if (ourState==scoring) {
-		ourOSPtr->beep();								// Hear the beep.
+		mOSPtr->beep();								// Hear the beep.
 		greenScore++;									// Bump the score.
 		greenScoreLbl->setValue(greenScore);	// Show the score.
 		if (greenScore>=MAX_SCORE) {				// If we won..
@@ -318,7 +327,7 @@ void grenade::greenBtnClick(void) {
 void grenade::blueBtnClick(void) {
 	
 	if (ourState==scoring) {
-		ourOSPtr->beep();								// Hear the beep.
+		mOSPtr->beep();								// Hear the beep.
 		blueScore++;									// Bump the score.
 		blueScoreLbl->setValue(blueScore);		// Update the score.
 		if (blueScore>=MAX_SCORE) {				// If we won..
@@ -345,7 +354,7 @@ void grenade::chooseWord(void) {
 	int			count;
 	
 	if(setFilePath(THE_WORD_N)) {									// Calc. the path to the word list file.
-		wordList = SD.open(filePath,FILE_READ);				// See if we can open this file.
+		wordList = SD.open(mFilePath,FILE_READ);				// See if we can open this file.
 		if (wordList) {												// If we got the file open..
 			wordNum = wordIndex->dealCard();						// Get a word index from the card index.
 			if (wordNum==-1) {										// If we ran out of choices..
@@ -493,9 +502,6 @@ nextBtn::nextBtn(int inX,int inY,int inWidth,int inHeight,const char* bmpPath)
 	
 	ourGrenadePtr	= NULL;
 	setEventSet(touchLift);
-	Serial.println("in next button");
-	Serial.println(bmpPath);
-	Serial.flush();
 }
 	
 	 

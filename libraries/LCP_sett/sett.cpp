@@ -17,7 +17,7 @@
 
 
 sett::sett(lilOS* ourOS,int ourAppID)
-	: panel(ourAppID) { }
+	: panel(ourOS,ourAppID) { }
 
 
 sett::~sett(void) {  }
@@ -32,7 +32,7 @@ void sett::setup(void) {
 	cardList = new cardIndex(81);
 	if (cardList) {
 		dealCards(GRID_X,GRID_Y);
-		ourPlayer = new toneObj(ourOSPtr->getTonePin());
+		ourPlayer = new toneObj(mOSPtr->getTonePin());
 		createSounds();
 		ourState = playing;						// Got all the bits? Then we wait.
 	} else {
