@@ -1,11 +1,15 @@
 #include "dice.h"
 #include <tapSensor.h>
+#include <squareWave.h>
+#include <timeObj.h>
+#include <mapper.h>
 
 #define  THINK_MS 1000
 #define  SHOW_MS  5000
 #define  TAP_MIN  20
 
 
+Adafruit_8x8matrix   matrix;
 
 enum        states { waiting, thinking, showing };
 states      ourState;
@@ -15,7 +19,11 @@ dice        ourDie;
 
 void setup(void) {
    
-  Serial.begin(9600);
+   timeObj  serialTimeout(5000);
+   
+   Serial.begin(57600);
+   while(!Serial&&!serialTimeout.ding());
+   Serial.println("Hello?");
   ourDie.begin(0x70);
   ourDie.clearDie();
   ourTapSensor.begin();
@@ -25,8 +33,9 @@ void setup(void) {
 
 
 void loop(void) {
-
+   
    idle();
+   
    switch(ourState) {
       case waiting   :
          if (ourTapSensor.getTapVal()>TAP_MIN) {
@@ -43,10 +52,12 @@ void loop(void) {
          }
       break;
       case showing   :
-         if (ourDie.isWaiting()) {
-            ourDie.clearDie();
+         if (ourTapSensor.getTapVal()>TAP_MIN) {
+            ourDie.doFuzz(THINK_MS);
+            ourState = thinking;
+         } else if (ourDie.isWaiting()) {
             ourState = waiting;
          }
       break;
-   }
+   } 
 }
