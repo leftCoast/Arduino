@@ -4,7 +4,7 @@
 #include "homePanel.h"
 #include <breakout.h>
 #include <grenade.h>
-//#include <sett.h>
+#include <sett.h>
 
 //#include <starTrek.h>
 //#include <rpnCalc.h>
@@ -37,17 +37,16 @@ handheldOS::~handheldOS(void) { }
 
 
 // Possibly we'll need to do something during startup.
-// cellOS used this to tweak its color pallette.
 int handheldOS::begin(void) { 
 
-  pinMode(BEEP_PIN, OUTPUT);
-  digitalWrite(BEEP_PIN, HIGH); //Means off.
-  mScreenTimer.setTime(STEPTIME);
-  screenMap.addPoint(RAMPUP_START,0);
-  screenMap.addPoint(RAMPUP_END,255);
-  screenMap.addPoint(RAMPDN_START,255);
-  screenMap.addPoint(RAMPDN_END,0);
-  return lilOS::begin();
+   lilOS::begin();                        // Sets up the global OSPtr.
+   pinMode(BEEP_PIN, OUTPUT);
+   digitalWrite(BEEP_PIN, HIGH);          // Means off.
+   mScreenTimer.setTime(STEPTIME);
+   screenMap.addPoint(RAMPUP_START,0);
+   screenMap.addPoint(RAMPUP_END,255);
+   screenMap.addPoint(RAMPDN_START,255);
+   screenMap.addPoint(RAMPDN_END,0);
 }
 
   
@@ -59,11 +58,11 @@ panel* handheldOS::createPanel(int panelID) {
       case homeApp        : return new homeScreen();
       //case fileOpenApp  : return new fileOpen();
       //case fileSaveApp  : return new fileSave();
-      //case calcApp      : return new rpnCalc(&ourOS,calcApp);
-      //case starTrekApp  : return new starTrekPanel(&ourOS,starTrekApp);
-      case breakoutApp    : return new breakout(&ourOS,breakoutApp);
-      case grenadeApp     : return new grenade(&ourOS,grenadeApp);
-      //case settApp        : return new sett(&ourOS,settApp);
+      //case calcApp      : return new rpnCalc(calcApp);
+      //case starTrekApp  : return new starTrekPanel(starTrekApp);
+      case breakoutApp    : return new breakout(breakoutApp);
+      case grenadeApp     : return new grenade(grenadeApp);
+      case settApp        : return new sett(settApp);
       //case rgnTestApp   : return new regionTest();
       //case iconEditApp  : return new iconEdit();
       default             : return NULL;
@@ -84,7 +83,6 @@ void handheldOS::launchPanel(void) {
 void handheldOS::hideRedraw() {
 
   for(int i=RAMPDN_START;i<=RAMPDN_END;i=i+STEPTIME) {
-   //Serial.print("^ ");Serial.println(screenMap.map(i));
     analogWrite(SCREEN_PIN,screenMap.map(i));
     delay(STEPTIME);
   }
@@ -120,18 +118,23 @@ void handheldOS::idle(void) {
 
 
 // Calls to be overwritten by user version.
-int     handheldOS::getTonePin(void) { return BEEP_PIN; }
 
-void    handheldOS::setBrightness(byte brightness) {  }
+int handheldOS::getPanelWidth(void) { return 240; }
 
-char*   handheldOS::getSystemFolder() { return "/system/"; }
+int handheldOS::getPanelHeight(void) { return 320; }
+
+int handheldOS::getTonePin(void) { return BEEP_PIN; }
+
+void handheldOS::setBrightness(byte brightness) {  }
+
+char* handheldOS::getSystemFolder() { return "/system/"; }
 
 char* handheldOS::getPanelFolder(int panelID) {
   
   switch(panelID) {
     case breakoutApp  : return "/system/appFiles/breakout/";
     case grenadeApp   : return "/system/appFiles/grenade/";
-    //case settApp      : return "/system/appFiles/sett/";
+    case settApp      : return "/system/appFiles/sett/";
     default           : return NULL;
   }
 }

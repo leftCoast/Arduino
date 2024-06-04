@@ -16,8 +16,8 @@
 #define UNCONNECTED_ANALOG_PIN  A1
 
 
-sett::sett(lilOS* ourOS,int ourAppID)
-	: panel(ourOS,ourAppID) { }
+sett::sett(int ourAppID)
+	: panel(ourAppID) { }
 
 
 sett::~sett(void) {  }

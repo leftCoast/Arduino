@@ -41,7 +41,7 @@ class iconEdit	:	public documentPanel {
 	
 	enum iEditStates { editing, getColor };
 	 				
-				iconEdit(lilOS* ourOS,int ourAppID);
+				iconEdit(int ourAppID);
 	virtual	~iconEdit(void);
 	
 	virtual	void	createDocObj(void);

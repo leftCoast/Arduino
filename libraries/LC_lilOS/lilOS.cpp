@@ -5,8 +5,11 @@
 //#include <debug.h>
 
 int		nextPanel	= NO_PANEL_ID;	// What panel do we want showing now?
-lilOS*	ourOSPtr		= NULL;			// Used by "packages" that need to access the OS's stuff.
+lilOS*	OSPtr			= NULL;			// Used by "packages" that need to access the OS's stuff.
 panel*	ourPanel		= NULL;
+int		panelWith	= 0;
+int		panelHeight	= 0;
+
 
 // *****************************************************
 // ********************   appIcon  *********************
@@ -30,8 +33,8 @@ void appIcon::doAction(void) { nextPanel = mMessage; }
 	
 	
 // And it all starts up again..
-panel::panel(lilOS* OSPtr,int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
-  : drawGroup(0,0,PANEL_WIDTH,PANEL_HEIGHT,inEventSet) {
+panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
+  : drawGroup(0,0,panelWith,panelHeight,inEventSet) {
   
 	mPanelID		= panelID;							// Save what "kind" of panel we are.
 	mOSPtr		= OSPtr;								// Save off our copy to the OS.
@@ -127,8 +130,8 @@ void panel::handleCom(stdComs comID) {
 // *****************************************************
 
 
-homePanel::homePanel(lilOS* OSPtr)
-  : panel(OSPtr,HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
+homePanel::homePanel(void)
+  : panel(HOME_PANEL_ID,noMenuBar) { } // Home panels have no panel to return to.
 
 
 homePanel::~homePanel(void) {  }
@@ -157,37 +160,38 @@ void homePanel::drawSelf(void) {
  
 lilOS::lilOS(void) {
 
-	pathBuff = NULL;
-	mPanel = NULL;
-	nextPanel = HOME_PANEL_ID;
+	pathBuff 	= NULL;
+	mPanel		= NULL;
+	nextPanel	= HOME_PANEL_ID;
 }
 
 
 lilOS::lilOS(int homeID) {
 
-  mPanel			= NULL;
-  nextPanel		= homeID;
+  mPanel		= NULL;
+  nextPanel	= homeID;
 }
 
 
 lilOS::~lilOS(void) { }
 
 
-// A good plan would be to inherit, do your begin
-// then at some point during that, call this one.
+// A good plan would be to inherit, call this, the do your begin.
 int lilOS::begin(void) {
 	
-	ourOSPtr = this;										// Hookup the global pointer to ourselves.
+	OSPtr			= this;									// Hookup the global pointer to ourselves.
+	panelWith	= getPanelWidth();					// Ask our child how wide their panels are.
+	panelHeight	= getPanelHeight();					// Ask our child how high their panels are.
 	hookup();												// Want to use idle()? Its ready.
 	icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
 	icon22Mask.readFromBMP(stdIconPath(mask22));	// Read out and setup the standard 22x22 icon mask.
 	nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
-	return 0;													// 0 means no error right? Or does it mean false, fail?
+	return 0;												// 0 means no error right? Or does it mean false, fail?
 }
 
 
 // This is the guy you inherit and use to create your custom panels.
-panel* lilOS::createPanel(int panelID) { return new homePanel(this); }
+panel* lilOS::createPanel(int panelID) { return new homePanel(); }
 
 
 void lilOS::launchPanel(void) {

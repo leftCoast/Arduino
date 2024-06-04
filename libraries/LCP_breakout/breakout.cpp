@@ -120,13 +120,11 @@ void soundStartBall(void) {
 
 // ******************************
 
-breakout::breakout(lilOS* ourOS,int ourAppID)
-  : panel(ourOS,ourAppID) {
+breakout::breakout(int ourAppID)
+  : panel(ourAppID) {
 
-	if (ourOS) {
-		tonePin = ourOS->getTonePin();
-		setupBrickBitmaps();
-	}
+	tonePin = OSPtr->getTonePin();
+	setupBrickBitmaps();
 	frameTimer    = new timeObj(FRAME_MS);
 	paddleTimer   = new timeObj(PADDLE_MS);
 	textTimer     = new timeObj(TEXT_MS);
@@ -161,7 +159,7 @@ void breakout::setupBrickBitmaps(void) {
 	purpBmp	= new bitmap(BRICK_W,BRICK_H);
 	redBmp	= new bitmap(BRICK_W,BRICK_H);
 	if (greenBmp && purpBmp && redBmp) {							// If we got all three..
-		folderPtr = ourOSPtr->getPanelFolder(mPanelID);			// Ask the OS for our folder path.
+		folderPtr = OSPtr->getPanelFolder(mPanelID);				// Ask the OS for our folder path.
 		pathLen = strlen(folderPtr);									// Num chars in this path..
 		pathLen = pathLen + 13;											// Add about 13 more for the file name.
 		if (resizeBuff(pathLen,&pathPtr)) {							// If we can allocate room for the full pathname.

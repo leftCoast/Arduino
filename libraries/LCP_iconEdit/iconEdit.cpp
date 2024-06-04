@@ -75,8 +75,8 @@ void colorBtnObj::doAction(void) {  ourEditor->openColorPicker(); }
 
 	
 // And it all starts up again..
-iconEdit::iconEdit(lilOS* ourOS,int ourAppID)
-	: documentPanel(ourOS,ourAppID) {
+iconEdit::iconEdit(int ourAppID)
+	: documentPanel(ourAppID) {
 	
 	strBuff = NULL;
 	setDefaultPath(ICON_FLDR);

@@ -81,8 +81,8 @@
 #define	EXP_SND_MS	1000
 
 
-grenade::grenade(lilOS* ourOS,int ourAppID)
-	: panel(ourOS,ourAppID) {
+grenade::grenade(int ourAppID)
+	: panel(ourAppID) {
 	
 	theWord		= NULL;
 	wordIndex	= NULL;

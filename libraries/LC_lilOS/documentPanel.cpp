@@ -125,8 +125,8 @@ askOkObj::~askOkObj(void) {  }
 
 
 // Our handy dandy constructor.
-documentPanel::documentPanel(lilOS* ourOS,int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
-	: panel(ourOS,panelID,menuBarChoice,inEventSet) {
+documentPanel::documentPanel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
+	: panel(panelID,menuBarChoice,inEventSet) {
 	
 	askAlert		= NULL;							// NULL out all the dynamic stuff for starters.
 	selectAlert	= NULL;							// NULL

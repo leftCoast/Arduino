@@ -97,8 +97,8 @@ bool	firstFrame = true;
 
 
 // And it all starts up again..
-regionTest::regionTest(lilOS* ourOS)
-  : panel(ourOS,rgnTestApp) { }
+regionTest::regionTest(void)
+  : panel(rgnTestApp) { }
 
 
 // The world as you know it, is ending..
@@ -209,7 +209,7 @@ void regionTest::drawSelf(void) {
 		trace = mRegion->getFirstRectObj();
 		while(trace) {
 			screen->drawRect(trace,&blue);
-			trace = trace->getNext();
+			trace = (regionRectObj*)trace->getNext();
 		}
 	}
 }

@@ -41,7 +41,7 @@ extern char*	fileDBResult;
 class fileOpen : public panel {
 
 	public:
-					fileOpen(lilOS* ourOS);
+					fileOpen(void);
 	virtual		~fileOpen(void);
 	
 	virtual void  		setup(void);
@@ -62,7 +62,7 @@ class fileOpen : public panel {
 class fileSave : public panel {
 
 	public:
-					fileSave(lilOS* ourOS);
+					fileSave(void);
 	virtual		~fileSave(void);
 	
 	virtual void  		setup(void);

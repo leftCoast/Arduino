@@ -51,15 +51,14 @@
 #define BTN_COL_4    175
 
 
-extern      bool            gSecondFx;
-            calculator      mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
-            bool            buttonPressed;
-				lilOS* calcOS = NULL;
+extern      bool			gSecondFx;
+            calculator	mCalc;           // The calculator object. Feed it key strokes and it gives calculations.
+            bool			buttonPressed;
+
           
-rpnCalc::rpnCalc(lilOS* ourOS,int panelID)
-	: panel(ourOS,panelID) {
+rpnCalc::rpnCalc(int panelID)
+	: panel(panelID) {
 	
-	calcOS = ourOS;	// Set up our global OS pointer (For the buttons)
 	degRad = new degRadButton(DEG_RAD_X,DEG_RAD_Y,DEG_RAD_WIDTH,DEG_RAD_HEIGHT);
 		
 	XReg = new label(BTN_COL_1, DISP_Y, (BTN_COL_4 + BTN_WIDTH1) - BTN_COL_1, 18, "0");

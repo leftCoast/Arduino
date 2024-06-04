@@ -16,7 +16,7 @@ class settCard;
 class sett :  public panel {
 
 	public:
-				sett(lilOS* ourOS,int ourAppID);
+				sett(int ourAppID);
 	virtual	~sett(void);
 				
 	virtual	void	setup(void);

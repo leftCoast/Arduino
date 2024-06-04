@@ -184,8 +184,8 @@ void	starTrekText::appendText(char aChar) {
 // *****************************************************
 
 
-starTrekPanel::starTrekPanel(lilOS* inOS,int ourAppID)
-  : panel(inOS,ourAppID) {
+starTrekPanel::starTrekPanel(int ourAppID)
+  : panel(ourAppID) {
   
   mUpdater = new starTrekUpdater(this);
   quickExit = false;

@@ -74,7 +74,7 @@ class breakout :  public panel {
 
 	enum		gameStates { preGame, inPLay, lostBall, gameOver, gameWin };
 
-				breakout(lilOS* ourOS,int ourAppID);
+				breakout(int ourAppID);
 	virtual	~breakout(void);
 
 	virtual	void setup(void);

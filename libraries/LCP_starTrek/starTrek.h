@@ -80,7 +80,7 @@ class starTrekText :	public textView {
 class starTrekPanel :  public panel {
 
   public:
-          starTrekPanel(lilOS* inOS,int ourAppID);
+          starTrekPanel(int ourAppID);
   virtual ~starTrekPanel(void);
           
   virtual void  setup(void);

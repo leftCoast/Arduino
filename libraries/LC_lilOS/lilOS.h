@@ -49,12 +49,6 @@ class appIcon : public iconButton {
 
 enum  menuBarChoices { noMenuBar, emptyMenuBar, closeBoxMenuBar };
 
-
-// These two have to go. Need to bring these out from
-// the displayObj. But, I'm in a hurry and I'm lazy.
-#define PANEL_WIDTH   240
-#define PANEL_HEIGHT  320
-
 class menuBar;
 class lilOS;
 
@@ -62,7 +56,7 @@ class panel :	public drawGroup,
 					public listener {
 
 	public:
-				panel(lilOS* OSPtr,int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
+				panel(int panelID,menuBarChoices menuBarChoice=closeBoxMenuBar,eventSet inEventSet=noEvents);
 	virtual	~panel(void);
 	
 				int	getPanelID();
@@ -85,7 +79,7 @@ class panel :	public drawGroup,
 class homePanel : public panel {
 
   public:
-          homePanel(lilOS* OSPtr);
+          homePanel(void);
   virtual ~homePanel(void);
   
   virtual void  setup(void);
@@ -95,12 +89,10 @@ class homePanel : public panel {
 };
 
 
-// Our base class for a little OS that switches "panels"
-// for user interaction. These panels can be thought of
-// as virtual Arduino sketches. Meaning? Everything on
-// them must be able to "survive" being deleted when the
-// user switches functions. You'll be able to get more
-// info in the "panel" files.
+// Our base class for a little OS that switches "panels" for user interaction. These
+// panels can be thought of as virtual Arduino sketches. Meaning? Everything on them must
+// be able to "survive" being deleted when the user switches functions. You'll be able to
+//get more info in the "panel" files.
 class lilOS :  public idler {
 
 	public:
@@ -114,6 +106,8 @@ class lilOS :  public idler {
 	virtual	void		loop(void);						// Tell the current panel its loop time.
 	
 	// Calls to be overwritten by used version.
+	virtual	int		getPanelWidth(void) = 0;
+	virtual	int		getPanelHeight(void) = 0;
 	virtual	void		beep(void) = 0;
 	virtual	int		getTonePin(void) = 0;
 	virtual	void		setBrightness(byte brightness) = 0;
@@ -129,7 +123,8 @@ class lilOS :  public idler {
 };
 
 extern int		nextPanel;
-extern lilOS*	ourOSPtr;		// Used by "packages" that need to access the OS's stuff.
+extern lilOS*	OSPtr;			// Need OS things? Here's the address.
 extern panel*	ourPanel;
-
+extern int		panelWith;
+extern int		panelHeight;
 #endif

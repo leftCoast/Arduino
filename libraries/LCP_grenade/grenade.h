@@ -16,7 +16,7 @@ class alarmBeeper;
 class grenade :  public panel {
 
 	public:
-				grenade(lilOS* ourOS,int ourAppID);
+				grenade(int ourAppID);
 	virtual	~grenade(void);
 				
 	virtual	void	setup(void);

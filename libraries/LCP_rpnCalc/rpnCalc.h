@@ -6,12 +6,11 @@
 #include "calcButton.h"
 #include <lilOS.h>
 
-extern	lilOS* calcOS;
 
 class rpnCalc : public panel {
 
   public:
-          rpnCalc(lilOS* ourOS,int panelID);
+          rpnCalc(int panelID);
   virtual ~rpnCalc(void);
 
           void	loadScreen(void);

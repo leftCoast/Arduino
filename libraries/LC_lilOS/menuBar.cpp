@@ -11,7 +11,7 @@ colorObj	menuBarColor(LC_BLACK);
 
 
 menuBar::menuBar(panel* inPanel,bool closeBox)
-  : drawGroup(0,0,PANEL_WIDTH,MENU_BAR_H) {
+  : drawGroup(0,0,panelWith,MENU_BAR_H) {
     
   stdComBtn*   ourCloseBtn;
   
