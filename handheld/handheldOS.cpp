@@ -5,9 +5,9 @@
 #include <breakout.h>
 #include <grenade.h>
 #include <sett.h>
+#include <rpnCalc.h>
 
 //#include <starTrek.h>
-//#include <rpnCalc.h>
 //#include "src/regionTest/regionTest.h"
 //#include <iconEdit.h>
 //#include "src/fileDBox/fileDBox.h"
@@ -37,16 +37,20 @@ handheldOS::~handheldOS(void) { }
 
 
 // Possibly we'll need to do something during startup.
-int handheldOS::begin(void) { 
+bool handheldOS::begin(void) { 
 
-   lilOS::begin();                        // Sets up the global OSPtr.
-   pinMode(BEEP_PIN, OUTPUT);
-   digitalWrite(BEEP_PIN, HIGH);          // Means off.
-   mScreenTimer.setTime(STEPTIME);
-   screenMap.addPoint(RAMPUP_START,0);
-   screenMap.addPoint(RAMPUP_END,255);
-   screenMap.addPoint(RAMPDN_START,255);
-   screenMap.addPoint(RAMPDN_END,0);
+   if (lilOS::begin()) {                        // Sets up the global OSPtr.
+      pinMode(BEEP_PIN, OUTPUT);
+      digitalWrite(BEEP_PIN, HIGH);          // Means off.
+      mScreenTimer.setTime(STEPTIME);
+      screenMap.addPoint(RAMPUP_START,0);
+      screenMap.addPoint(RAMPUP_END,255);
+      screenMap.addPoint(RAMPDN_START,255);
+      screenMap.addPoint(RAMPDN_END,0);
+   } else {
+      Serial.println("OS begin() fail.");
+      while(true);
+   }
 }
 
   
@@ -55,17 +59,17 @@ panel* handheldOS::createPanel(int panelID) {
 
    beep();
    switch (panelID) {
-      case homeApp        : return new homeScreen();
-      //case fileOpenApp  : return new fileOpen();
-      //case fileSaveApp  : return new fileSave();
-      //case calcApp      : return new rpnCalc(calcApp);
-      //case starTrekApp  : return new starTrekPanel(starTrekApp);
-      case breakoutApp    : return new breakout(breakoutApp);
-      case grenadeApp     : return new grenade(grenadeApp);
-      case settApp        : return new sett(settApp);
-      //case rgnTestApp   : return new regionTest();
-      //case iconEditApp  : return new iconEdit();
-      default             : return NULL;
+      case homeApp         : return new homeScreen();
+      //case fileOpenApp   : return new fileOpen();
+      //case fileSaveApp   : return new fileSave();
+      case calcApp         : return new rpnCalc(calcApp);
+      //case starTrekApp   : return new starTrekPanel(starTrekApp);
+      case breakoutApp     : return new breakout(breakoutApp);
+      case grenadeApp      : return new grenade(grenadeApp);
+      case settApp         : return new sett(settApp);
+      //case rgnTestApp    : return new regionTest();
+      //case iconEditApp   : return new iconEdit();
+      default              : return NULL;
    }
 }
 
@@ -135,6 +139,7 @@ char* handheldOS::getPanelFolder(int panelID) {
     case breakoutApp  : return "/system/appFiles/breakout/";
     case grenadeApp   : return "/system/appFiles/grenade/";
     case settApp      : return "/system/appFiles/sett/";
+    case calcApp      : return "/system/appFiles/rpnCalc/";
     default           : return NULL;
   }
 }

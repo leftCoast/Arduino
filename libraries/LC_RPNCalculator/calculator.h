@@ -9,7 +9,11 @@
 #ifndef Mr_Snorts_calculator_h
 #define Mr_Snorts_calculator_h
 
-#define NUM_STO_REG 10
+#define NUM_STO_REG 	10
+#define MAX_BTN_ID	10		// Max num chars for button ID.
+
+// NOTE: Button IDs are NOT case sensitive.
+
 
 class calculator {
 	

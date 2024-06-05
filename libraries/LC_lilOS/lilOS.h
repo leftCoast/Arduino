@@ -100,7 +100,7 @@ class lilOS :  public idler {
 				lilOS(int homeID);
 	virtual	~lilOS(void);
 
-	virtual	int		begin(void);					// The global world is online, do hookups. Returns 0, always
+	virtual	bool		begin(void);					// The global world is online, do hookups. Returns success.
 	virtual	panel*	createPanel(int panelID);	// INHERIT THIS GUY AND CREATE YUR OWN CUSTOM PANELS.
 	virtual	void		launchPanel(void);			// Dispose of current and launch a newly created panel.
 	virtual	void		loop(void);						// Tell the current panel its loop time.

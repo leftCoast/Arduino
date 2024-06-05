@@ -1,4 +1,4 @@
-#include "calculator.h"
+#include <calculator.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -11,12 +11,12 @@ calculator::calculator(void) {
 	z = 0;
 	t = 0;
 	for (int i=0;i<10;i++) { sto[i] = 0; }
-    fix = 2;
-	degrees = true;
-    enter = false;
-	fixPressed = false;
-	stoPressed = false;
-	rclPressed = false;
+	fix = 2;
+	degrees		= true;
+	enter			= false;
+	fixPressed	= false;
+	stoPressed	= false;
+	rclPressed	= false;
 	startEditing();
 }
 
@@ -26,8 +26,8 @@ calculator::~calculator(void) { }
 
 void calculator::buttonClick(const char* inButtonID) {
 	
-	char buttonID[100];
-	int i=0;
+	char	buttonID[MAX_BTN_ID+1];
+	int	i=0;
 	
 	strcpy(buttonID,inButtonID);
 	while (buttonID[i]) {
@@ -53,32 +53,32 @@ void calculator::buttonClick(const char* inButtonID) {
 	// This is why, once called we immedialy exit. Every other keypress
 	// will exit out the bottom and clear this flag.
 	else if (!strcmp(buttonID,"ENTER")) {
-        pushStack();
-		point = false;
-		editing = false;
-        enter = true;
-        return;
-    }
+		pushStack();
+		point		= false;
+		editing	= false;
+		enter		= true;
+		return;
+	}
 	
 	// Like "ENTER", "FIX" sets a boolean for the next keystroke.
 	// So we set boolean flag and bail out.
 	// (Its cleared at the end of this function.)
 	else if (!strcmp(buttonID,"FIX")) {
-        fixPressed = true;
-        return;
-    }
+		fixPressed = true;
+		return;
+	}
 	
 	// Actually, "STO" acts exactly like "FIX" so..
 	// Oh, "RCL" too..
 	else if (!strcmp(buttonID,"STO")) {
-        stoPressed = true;
-        return;
-    } else if (!strcmp(buttonID,"RCL")) {
-        rclPressed = true;
-        return;
-    }
+		stoPressed = true;
+		return;
+	} else if (!strcmp(buttonID,"RCL")) {
+		rclPressed = true;
+		return;
+	}
 	
-    else if (!strcmp(buttonID,"CLX")||!strcmp(buttonID,"CX")) { handleClx();}
+	else if (!strcmp(buttonID,"CLX")||!strcmp(buttonID,"CX")) { handleClx();}
 	else if (!strcmp(buttonID,"RDN")) { handleRollDown();}
 	else if (!strcmp(buttonID,"+")) { xyFunction(y+x); }
 	else if (!strcmp(buttonID,"-")) { xyFunction(y-x); }
@@ -90,17 +90,17 @@ void calculator::buttonClick(const char* inButtonID) {
 		xyFunction(intX % intY);
 	}
 	//else if (!strcmp(buttonID,"√X")) { xFunction(sqrt(x)); }
-    else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
+	else if (!strcmp(buttonID,"SRT")) { xFunction(sqrt(x)); }   //Arduino
 	else if (!strcmp(buttonID,"Y^X")) { xyFunction(pow(y,x)); }
-    else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
+	else if (!strcmp(buttonID,"X^2")) { xFunction(pow(x,2)); }
 	else if (!strcmp(buttonID,"1/X")) { xFunction(1/x); }
 	else if (!strcmp(buttonID,"π")) { xFunction(M_PI); }
-    else if (!strcmp(buttonID,"PI")) { xFunction(M_PI); }   // arduino
+	else if (!strcmp(buttonID,"PI")) { xFunction(M_PI); }   // arduino
 	else if (!strcmp(buttonID,"Y<>X")||(!strcmp(buttonID,"Y~X"))) {
 		double temp;
-		temp = x;
-		x = y;
-		y = temp;
+		temp	= x;
+		x		= y;
+		y		= temp;
 		editing = false;
 	}
 	else if (!strcmp(buttonID,"SIN")) {
@@ -109,7 +109,7 @@ void calculator::buttonClick(const char* inButtonID) {
 		} else {
 			xFunction(sin(x));
 		}
-    }
+	}
 	else if (!strcmp(buttonID,"COS")) {
 		if (degrees) {
 			xFunction(cos(deg_2_rad(x)));
@@ -151,7 +151,7 @@ void calculator::buttonClick(const char* inButtonID) {
 	else if (!strcmp(buttonID,"E^X")) { xFunction(exp(x)); }
 	
 	// To rectangular..
-    else if (!strcmp(buttonID,"»R")||!strcmp(buttonID,">R")) {
+	else if (!strcmp(buttonID,"»R")||!strcmp(buttonID,">R")) {
 		double radians;
 		double distance;
 		
@@ -188,7 +188,7 @@ void calculator::buttonClick(const char* inButtonID) {
 	}
 	
 	// Enter is wierd!
-	// From the HP11C calculator manual, it diables the stack for the -next- keypress.
+	// From the HP11C calculator manual, it pushes the stack for the -next- keypress.
 	// So, we're going to set it when the enter key is pressed, then exit immediatly.
 	// On every other keypress, we exit through this route.
 	// So it'll be checked cleared automatically.
@@ -197,18 +197,18 @@ void calculator::buttonClick(const char* inButtonID) {
 	//
 	// Well actually, so is Sto. And Rcl
 	
-    enter = false;  // And away we go!
-	fixPressed = false;
-	stoPressed = false;
-	rclPressed = false;
+	enter			= false;			
+	fixPressed	= false;
+	stoPressed	= false;
+	rclPressed	= false;	// And away we go!
 }
 
 
 void calculator::startEditing() {
 	
-	editing = true;
-	point = false;
-	multiplyer = 0.1;
+	editing		= true;
+	point			= false;
+	multiplyer	= 0.1;
 }
 
 
@@ -279,7 +279,7 @@ void calculator::handleRollDown(void) {
 
 void calculator::pushStack(void) {
     
-    t = z;
+	t = z;
 	z = y;
 	y = x;
 }
@@ -340,14 +340,14 @@ double calculator::deg_2_rad(double x) { return x*M_PI/180; }
 
 int  calculator::getFixVal(void) {
     
-    if(editing) {
-        if (!point) {
-            return 0;
-        } else {
-            return (-log10(multiplyer));
-        }
-    } else
-        return fix;
+	if(editing) {
+		if (!point) {
+			return 0;
+		} else {
+			return (-log10(multiplyer));
+		}
+	} else
+		return fix;
 }
 
 

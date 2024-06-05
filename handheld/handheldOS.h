@@ -22,7 +22,7 @@ class handheldOS : public lilOS {
             handheldOS(void);
    virtual  ~handheldOS(void);
   
-   virtual  int      begin(void);              // The global world is online, do hookups.
+   virtual  bool      begin(void);              // The global world is online, do hookups.
    virtual  panel*   createPanel(int panelID);
    virtual  void     launchPanel(void);        // Dispose of current and launch a newly created panel.
             void     beep(void);

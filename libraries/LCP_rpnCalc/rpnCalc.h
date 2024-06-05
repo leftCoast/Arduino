@@ -2,57 +2,45 @@
 #define rpnCalc_h
 
 #include <label.h>
-#include <lineObj.h>
-#include "calcButton.h"
+#include <calculator.h>
 #include <lilOS.h>
+#include <calcButton.h>
+
 
 
 class rpnCalc : public panel {
 
-  public:
-          rpnCalc(int panelID);
-  virtual ~rpnCalc(void);
+	public:
+				rpnCalc(int panelID);
+	virtual	~rpnCalc(void);
 
-          void	loadScreen(void);
-  virtual void	setup(void);
-  virtual void	loop(void);
-  
-          label*          XReg;
-          lineObj*        aLine;
-          lineObj*        aLine2;
-          lineObj*        aLine3;
-          degRadButton*   degRad;
-          calcButton*     btn1;
-          calcButton*     btn2;
-          calcButton*     btn3;
-          calcButton*     btn4;
-          calcButton*     btn5;
-          calcButton*     btn6;
-          calcButton*     btn7;
-          calcButton*     btn8;
-          calcButton*     btn9;
-          calcButton*     btn0; 
-          calcButton*     btnPlus;
-          calcButton*     btnMinus;
-          calcButton*     btnTimes;
-          calcButton*     btnDivide;
-          calcButton*     btnEnter;
-          calcButton*     btnChSgn;
-          calcButton*     btnClrX;
-          calcButton*     btnPt;
-          calcButton*     btnPi;
-          calcButton*     btnInvrse;
-          calcButton*     btnRoot;
-          calcButton*     btnFix;
-          calcButton*     btnSwapXY;
-          calcButton*     btnSto;
-          calcButton*     btnRcl;
-          calcButton*     btnSin;
-          calcButton*     btnCos;
-          calcButton*     btnTan;    
-          calcButton*     btnASin;
-          calcButton*     btnACos;
-          secondfxButton* btnATan;
+				void	setupButtonColors(void);
+	virtual	void	setup(void);
+	virtual	void	loop(void);
+				
+				void	buttonClick(const char* btnID);
+				bool	getDegrees(void);
+  				void	toggleDegrees(void);
+  				void	toggle2ndFx(void);
+  				
+				calculator	calc;           // The calculator object. Feed it key strokes and it gives calculations.
+				label*		XReg;
+				bool			secondFx; 
+				bool			btnPressed;
+				colorObj		numberActiveBColor;
+				colorObj		numberActiveTColor;
+				colorObj		numberClickedBColor;
+				colorObj		numberClickedTColor;
+
+				colorObj		editActiveBColor;
+				colorObj		editActiveTColor;
+				colorObj		editClickedBColor;
+				colorObj		editClickedTColor;
+
+				colorObj		fxActiveBColor;
+				colorObj		fxActiveTColor;
+				colorObj		fxClickedBColor;
+				colorObj		fxClickedTColor;
 };
 
 

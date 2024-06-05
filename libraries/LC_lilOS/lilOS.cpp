@@ -177,7 +177,7 @@ lilOS::~lilOS(void) { }
 
 
 // A good plan would be to inherit, call this, the do your begin.
-int lilOS::begin(void) {
+bool lilOS::begin(void) {
 	
 	OSPtr			= this;									// Hookup the global pointer to ourselves.
 	panelWith	= getPanelWidth();					// Ask our child how wide their panels are.
@@ -186,7 +186,7 @@ int lilOS::begin(void) {
 	icon32Mask.readFromBMP(stdIconPath(mask32));	// Read out and setup the standard 32x32 icon mask.
 	icon22Mask.readFromBMP(stdIconPath(mask22));	// Read out and setup the standard 22x22 icon mask.
 	nextPanel = HOME_PANEL_ID;							// Set to the default home panel.
-	return 0;												// 0 means no error right? Or does it mean false, fail?
+	return true;											// True means good to go!
 }
 
 
