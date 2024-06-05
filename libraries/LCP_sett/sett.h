@@ -8,7 +8,7 @@
 
 #define	X_CARDS	3
 #define	Y_CARDS	4
-
+#define	CARD_H	74
 
 class settCard;
 
@@ -33,6 +33,7 @@ class sett :  public panel {
 				states			ourState;
 				toneObj*			ourPlayer;
 				tune				winTune;
+				
 };
 
 

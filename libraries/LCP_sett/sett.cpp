@@ -3,13 +3,18 @@
 
 #define CARD_IMAGE	"card.bmp"
 #define CARD_W			60
-#define CARD_H			80
+#define CARD_H			74
 #define SYMBOL_W		40
 #define SYMBOL_H		16
 #define GRID_X			25
 #define GRID_Y			20
 #define GRID_SPACE_X	5
 #define GRID_SPACE_Y	5
+
+#define SWISHY_MASK	"swshMask.bmp"
+#define OVAL_MASK		"ovalMask.bmp"
+#define DIAMOND_MASK	"diaMask.bmp"
+
 
 #define BACK_COLOR	&black
 
@@ -20,15 +25,15 @@ sett::sett(int ourAppID)
 	: panel(ourAppID) { }
 
 
-sett::~sett(void) {  }
+sett::~sett(void) { }
 
 
 void sett::setup(void) {
 	
 	long int	seed;
 	
-	seed = analogRead(UNCONNECTED_ANALOG_PIN);	// Tired of playing the same old game every time?
-	randomSeed(seed);	
+	seed = analogRead(UNCONNECTED_ANALOG_PIN);				// Tired of playing the same old game every time?
+	randomSeed(seed);													// It's an antenna. Very random.	
 	cardList = new cardIndex(81);
 	if (cardList) {
 		dealCards(GRID_X,GRID_Y);
@@ -193,19 +198,19 @@ settCard::~settCard(void) {  }
 void settCard::drawSelf(void) {
 
 	char		fName[8];
-	char*		symbolFilePath;
 	bmpObj*	symbolBmp;
 	int		symX;
-	int		symY[3];
+	int		symY[5];
 	
 	bmpObj::drawSelf();
 	
 	// Calculate different placements of symbols.
 	symX = x + ((CARD_W - SYMBOL_W)/2);					
 	symY[1] = y + (CARD_H/2) - (SYMBOL_H/2);
-	symY[0] = symY[1] - (SYMBOL_H*2);
-	symY[2] = symY[1] + (SYMBOL_H*2);
-	
+	symY[0] = symY[1] - (SYMBOL_H*2)+10;
+	symY[2] = symY[1] + (SYMBOL_H*2)-10;
+	symY[3] = symY[0] + 10;
+	symY[4] = symY[2] - 10;
 	// Calculate our shape's file name.
 	switch(ourShape) {
 		case Diamond	: fName[0] = 'd'; break;
@@ -235,9 +240,9 @@ void settCard::drawSelf(void) {
 					symbolBmp->drawSelf();
 				break;
 				case 2 	:
-					symbolBmp->setLocation(symX,symY[0]);
+					symbolBmp->setLocation(symX,symY[3]);
 					symbolBmp->drawSelf();
-					symbolBmp->setLocation(symX,symY[2]);
+					symbolBmp->setLocation(symX,symY[4]);
 					symbolBmp->drawSelf();
 				break;
 				default	:

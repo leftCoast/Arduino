@@ -51,6 +51,7 @@ bool handheldOS::begin(void) {
       Serial.println("OS begin() fail.");
       while(true);
    }
+   return true;
 }
 
   
