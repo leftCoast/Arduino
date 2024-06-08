@@ -20,7 +20,7 @@ void bootError(const char* errStr) {
    screen->setTextColor(&white); // Drawing in white..
    screen->setTextSize(2);       // Big enought to notice.
    screen->drawText(errStr);     // Draw the error message.
-   analogWrite(SCREEN_PIN,255);   // Bring up the screen.
+   analogWrite(SCREEN_PIN,255);  // Bring up the screen.
    while(1);                     // Lock down.
 }
 

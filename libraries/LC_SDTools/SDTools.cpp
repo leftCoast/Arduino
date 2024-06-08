@@ -14,56 +14,73 @@ char* filePathStr = NULL;
 void freePathStr(void) { resizeBuff(0,&filePathStr); }
 
 
-//****************************************************************************************
-// little indian integers:
-// Many files have the 2 & 4 byte integers stored in reverse byte order than what we use
-// here in Arduinoland. These routines swap 'em back.
-//
-//****************************************************************************************
+// This sets if we flip integer bytes or not.
+bool flipBytes = false;	
+
+
+// Stack based class thata flips the byte order for the calls while it's in scope.
+// Automatically flips them back when going out of scope. NOT reentrant!
+
+bigIndian::bigIndian(void) { flipBytes=true; }
+bigIndian::~bigIndian(void) { flipBytes=false; }
 
 
 // For reading two byte numbers.
 uint16_t read16(File f) {
 
-    uint16_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read(); // MSB
-    return result;
-  }
+	uint16_t result;
+	
+	if (flipBytes) {
+		((uint8_t *)&result)[1] = f.read();
+		((uint8_t *)&result)[0] = f.read();
+	} else {
+		f.read(&result,2);
+	}
+	return result;
+}
 
 
 // For writing two byte numbers.
 void write16(uint16_t val, File f) {
-  
-   f.write(((uint8_t *)&val)[0]);
-	f.write(((uint8_t *)&val)[1]);
+
+	if (flipBytes) { 
+   	f.write(((uint8_t *)&val)[1]);
+		f.write(((uint8_t *)&val)[0]);
+	} else {
+		f.write(&val,2);
+	}
 }
 
 
 // For reading four byte numbers.
 uint32_t read32(File f) {
   
-    uint32_t result;
-  
-    ((uint8_t *)&result)[0] = f.read(); // LSB
-    ((uint8_t *)&result)[1] = f.read();
-    ((uint8_t *)&result)[2] = f.read();
-    ((uint8_t *)&result)[3] = f.read(); // MSB
-    return result;
-  }
+	uint32_t result;
+	
+	if (flipBytes) { 
+		((uint8_t *)&result)[3] = f.read(); 
+		((uint8_t *)&result)[2] = f.read();
+		((uint8_t *)&result)[1] = f.read();
+		((uint8_t *)&result)[0] = f.read();
+	} else {
+		f.read(&result,4);
+	}
+	return result;
+}
   
   
 // For writing four byte numbers.  
 void write32(uint32_t val, File f) {
   
-	f.write(((uint8_t *)&val)[0]);
-	f.write(((uint8_t *)&val)[1]);
-	f.write(((uint8_t *)&val)[2]);
-	f.write(((uint8_t *)&val)[3]);
+	if (flipBytes) {
+		f.write(((uint8_t *)&val)[3]);
+		f.write(((uint8_t *)&val)[2]);
+		f.write(((uint8_t *)&val)[1]);
+		f.write(((uint8_t *)&val)[0]);
+	} else {
+		f.write(&val,4);
+	}
 }  
-
-
 
 
 // Returns true if this folderPath can be found, or created.

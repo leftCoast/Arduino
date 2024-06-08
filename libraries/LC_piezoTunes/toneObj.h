@@ -106,7 +106,7 @@
 #define S_NOTE			Q_NOTE/4.0
 
 // ***************************************************************************************
-// Your classic tone playing object. This can tell you when the tone is finished.
+// Your classic tone playing object. This can tell you when this one tone is finished.
 // ***************************************************************************************
 
 class toneObj : public	timeObj {
