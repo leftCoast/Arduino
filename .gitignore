@@ -39,3 +39,4 @@ libraries/WaveHC/
 libraries/LC_teensy_1947
 libraries/MD_MIDIFile*
 libraries/MidiDmxB*
+libraries/RPN_Calculator*
