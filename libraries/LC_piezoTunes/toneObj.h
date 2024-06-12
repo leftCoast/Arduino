@@ -1,11 +1,13 @@
 #ifndef toneObj_h
 #define toneObj_h
 
-#include "timeObj.h"
-#include "lists.h"
-#include "idlers.h"
+#include <SD.h>
+#include <timeObj.h>
+#include <lists.h>
+#include <idlers.h>
 
 // The notes!
+#define REST		0
 
 #define NOTE_B0  31
 #define NOTE_C1  33
@@ -97,6 +99,7 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
+
 #define Q_NOTE			250.0
 
 #define H_NOTE			2 * Q_NOTE
@@ -106,7 +109,7 @@
 #define S_NOTE			Q_NOTE/4.0
 
 // ***************************************************************************************
-// Your classic tone playing object. This can tell you when the tone is finished.
+// Your classic tone playing object. This can tell you when this one tone is finished.
 // ***************************************************************************************
 
 class toneObj : public	timeObj {
@@ -162,6 +165,25 @@ class tune :   public idler,
             float    mTimeMult;
             toneObj*	mTone;
             note*    mPlaying;
+};
+
+
+
+// ***************************************************************************************
+// Basically the same as a tune but.. Build from a MIDI file. (Single voice)
+// ***************************************************************************************
+
+
+class MIDItune :	public tune {
+
+   public:
+            MIDItune(const char* filePath);
+   virtual  ~MIDItune(void);
+
+           void createTune(void);
+           
+           char*	filePath;
+           File	MIDIFile;
 };
 
 #endif

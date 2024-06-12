@@ -4,11 +4,30 @@
 #include <SD.h>
 
 //****************************************************************************************
-// little indian integers:
-// Many files have the 2 & 4 byte integers stored in reverse byte order than what we use
-// here in Arduinoland. These routines swap 'em back.
+//
+// Little indian, big indian?
+// Some files have the 2 & 4 byte integers stored in reverse byte order than what we use
+// here in Arduinoland. These routines swap 'em back. (We use little indian)
 //
 //****************************************************************************************
+
+// Put this at top of function, and for the duration of the function, all intergers will
+// be swapped both reading and writing to files.
+#define	BYTE_SWAP	bigIndian swap;
+
+
+// This sets if we flip or not.
+extern bool flipBytes;								
+
+
+// Stack based class thata flips the byte order for the calls while it's in scope.
+// Automatically flips them back when going out of scope. NOT reentrant!
+class bigIndian {
+
+	public:
+				bigIndian(void);
+	virtual	~bigIndian(void);
+};
 
 
 // For reading two byte numbers.

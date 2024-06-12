@@ -11,7 +11,7 @@
 
 // .bmp files have the 2 & 4 byte numbers stored in reverse byte order than what we use
 // here in Arduinoland. These routines swap 'em back. (Sure seems like they aren't doing
-// anything to me though..
+// anything to me though.. Turns out they didn't do anything.
 // 
 // For 2 byte numbers.
 // uint16_t read16(File f) {
