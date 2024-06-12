@@ -41,19 +41,17 @@ uint32_t varLenToValue(File MIDIFile) {
    result = 0;
    done = false;
    while (!done) {
-      if (MIDIFile.read(&readByte, 1) != 1) {	// If we can't read a byte from the file..
-         done = true;                        	// Something broke, we're done.
-      } else {                               	// Esle, we did get a byte..
-         if (!bitRead(readByte, 7)) {        	// If high bit was 0.. (Last byte)
-            result = readByte & 0x000000FF;  	// Stamp in these bits.
-            done = true;                     	// We are done!
-         } else {                            	// Else, high bit was set! Oh ohh..
-            result = readByte & 0x0000007F;  	// Stamp in these bits.
-            result = result << 7;            	// Move 'em over.
-         }													//
-      }														//
-   }															//
-   return result;											// Pass back the resulting value.
+      MIDIFile.read(&readByte, 1);				// Read a byte from the file..
+      if (!bitRead(readByte, 7)) {        	// If high bit was 0.. (Last byte)
+         result = result | readByte;			// Stamp in these bits.			
+         done = true;                     	// We are done!
+      } else {                            	// Else, high bit was set! Oh ohh..
+			readByte = readByte & 0b01111111;	// Clip off high bit.
+         result = result | readByte;			// 
+         result = result << 7;            	// Move 'em over.
+      }													//
+   }														//
+   return result;										// Pass back the resulting value.
 }
 
 
@@ -196,8 +194,6 @@ void decodeFile(const char* filePath) {
    bool        done;
    
    MIDIFile = SD.open(filePath, FILE_READ);
-   Serial.print("Opening : ");
-   Serial.print(filePath);
    if (MIDIFile) {
 
       readMIDIHeader(&theMIDIHeader, MIDIFile);

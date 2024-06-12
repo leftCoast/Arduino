@@ -61,8 +61,12 @@ void setup() {
    //theTune.createTune("fithSet.mid");
    //theTune.adjustSpeed(2);
    //theTune.startTune(&theVoice);
-   Serial.println("Calling decode");
+   //Serial.println("Calling decode");
    decodeFile("fithSet.mid");
+   //Serial.println(0x82,BIN);
+   //Serial.println(0x68,BIN);
+   //Serial.println(0b10101000,DEC);
+
 }
 
 
