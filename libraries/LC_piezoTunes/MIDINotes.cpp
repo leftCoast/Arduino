@@ -42,13 +42,13 @@ uint32_t varLenToValue(File MIDIFile) {
    done = false;
    while (!done) {
       MIDIFile.read(&readByte, 1);				// Read a byte from the file..
-      if (!bitRead(readByte, 7)) {        	// If high bit was 0.. (Last byte)
-         result = result | readByte;			// Stamp in these bits.			
-         done = true;                     	// We are done!
-      } else {                            	// Else, high bit was set! Oh ohh..
-			readByte = readByte & 0b01111111;	// Clip off high bit.
-         result = result | readByte;			// 
+      if (bitRead(readByte, 7)) {        		// If high bit was set! Oh ohh..
+         readByte = readByte & 0b01111111;	// Clip off high bit.
+         result = result | readByte;			// Set the lower 7 bits..
          result = result << 7;            	// Move 'em over.
+      } else {                            	// Else, high bit was 0.. (Last byte)
+      	result = result | readByte;			// Stamp in these last 7 bits.			
+         done = true;                     	// We are done!
       }													//
    }														//
    return result;										// Pass back the resulting value.
