@@ -81,6 +81,7 @@ class sett :  public panel {
 				selectQ*		selectList;
 				states		ourState;
 				toneObj*		ourPlayer;
+				MIDItune		oneSet;
 				tune			winTune;
 };
 

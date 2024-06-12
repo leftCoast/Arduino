@@ -395,7 +395,7 @@ void filePath::refreshChildList(void) {
 	File			entry;
 	pathItem*	newItem;
 	bool			done;
-	bool			error;
+	//bool			error;
 	
 	dumpChildList();																		// Clear out the child list.
 	ourPath.setStr(getPath());															// Save off a copy of our current path.
@@ -404,7 +404,7 @@ void filePath::refreshChildList(void) {
 		if (dir) {																			// If our directory exists..
 			if (dir.isDirectory()) {													// If it is a directory..
 				dir.rewindDirectory();                 							// Rewind it to the first entry.
-				error = false;
+				//error = false;
 				done = false;                          							// We ain't done yet.
 				do {                                   							// Start looping through the entries.
 					entry = dir.openNextFile();										// Grab an entry.
@@ -526,7 +526,6 @@ bool   filePath::pushChildItemByName(const char* name) {
 // Have a fileItem? This will add it to the end of your path list. (If possible)	
 bool filePath::pushItem(pathItem* theNewGuy) {
 
-	rootItem*	aRoot;
 	pathItem*	theLastGuy;
 	bool			success;
 	

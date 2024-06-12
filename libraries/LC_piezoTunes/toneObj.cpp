@@ -16,18 +16,18 @@
 toneObj::toneObj(int inPin) {
 
 	mPin = inPin;
-	setTime(.01,true);	// A bit of a hack. Currently timeObj has three states, preset, running and expired. This forces expired.
+	setTime(.001,true);	// A bit of a hack. Currently timeObj has three states, preset, running and expired. This forces expired.
 }
 
 
 toneObj::~toneObj(void) {  }
 				
 				
-void toneObj::play(int inHz,int inMs) {
+void toneObj::play(int inHz,float inMs) {
 	
 	if (mPin>=0) {
 		if (inHz>0) {
-			tone(mPin,inHz,inMs);
+			tone(mPin,inHz,round(inMs));
 		} else {
 			noTone(mPin);
 		}
@@ -46,7 +46,7 @@ bool toneObj::isPlaying(void) { return !ding(); }
 // ***************************************************************************************
 
 
-note::note(int inHz,int inMs)
+note::note(int inHz,float inMs)
 	: linkListObj() {
 	
 	mHz = inHz;
@@ -82,7 +82,7 @@ tune::~tune(void) {  }
  
  
 
-void tune::addNote(int inHz,int inMs) {
+void tune::addNote(int inHz,float inMs) {
 
 	hookup();
 	note* newNote = new note(inHz,inMs);
@@ -137,17 +137,56 @@ void tune::idle(void) {
 // ***************************************************************************************
 
 
-MIDItune::MIDItune(const char* inFilePath)
+MIDItune::MIDItune(void)
 	: tune() {
 	
-	filePath = NULL;
-	heapStr(&filePath,inFilePath);
+	absTimeMs	= 0;
+	MsPerTick	= 1;
+	holding		= false;
 }
 
 
-MIDItune::~MIDItune(void) { MIDIFile.close(); }
+MIDItune::~MIDItune(void) { }
 
-void MIDItune::createTune(void) {
+
+void show(char* msg,float absTime, float deltaTime) {
+
+	Serial.print(msg);
+	Serial.print("\tAbs time : ");
+	Serial.print(absTime,1);
+	Serial.print("\tDelta time : ");
+	Serial.println(deltaTime,1);
+}
+
+
+void MIDItune::addMIDINote(bool Dn,int MIDIKey,float deltaTime) {
+	
+	if (Dn) {													// If we got a key down event..
+		if (holding) {											// If we still have a note down..
+			//show("Chopping",absTimeMs,deltaTime);
+			addNote(MIDI2Freq(heldNote),deltaTime);	// Single voice, cut off holding note here.
+		} else if (deltaTime) {								// If there is a delta time..
+			//show("Rest    ",absTimeMs,deltaTime);
+			addNote(REST,deltaTime);						// Then we add a rest to fill the time.
+		} else {
+			//show("starting?",absTimeMs,deltaTime);
+		}															//
+		heldNote = MIDIKey;									// Update the new holding MIDI note.
+		holding = true;										// Make a note of that.
+	} else {														// 
+		if (holding) {											// If we have a note down..
+			//show("Adding  ",absTimeMs,deltaTime);
+			addNote(MIDI2Freq(heldNote),deltaTime);	// Add the held note.
+			holding = false;
+		} else {
+			//show("Ignoring",absTimeMs,deltaTime);
+		}															//
+	}																//
+	absTimeMs = absTimeMs+deltaTime;						// In EVERY case we move absTimeMs up.
+}
+
+
+void MIDItune::createTune(const char*	filePath) {
 
 	BYTE_SWAP
 	
@@ -159,18 +198,15 @@ void MIDItune::createTune(void) {
    byte        aByte;
    uint32_t		temp;
    uint32_t    microsPerBeat;
-   float			MsPerTick;
+   float			deltaMs;
    bool        done;
-   int			DnNote;
-   uint32_t		StTime;
-   uint32_t		EndTime;
-   
-   DnNote	= 0;	
-   StTime	= 0;
-   EndTime	= 0;			
+		
 	MIDIFile = SD.open(filePath, FILE_READ);
 	if (MIDIFile) {
-		
+		dumpList();	
+		absTimeMs	= 0;
+		MsPerTick	= 1;
+		holding		= false;										
 		readMIDIHeader(&theMIDIHeader, MIDIFile);
 		readTrackHeader(&theTrackHeader, MIDIFile);
 		done = false;
@@ -202,24 +238,13 @@ void MIDItune::createTune(void) {
             }
          } else {
          	switch(anEventHeader.eventType) {
-         		case MIDI_KEY_DN : 
-         			if (DnNote) {
-         				EndTime = StTime + anEventHeader.deltaTime;
-         				addNote(MIDI2Freq(DnNote),anEventHeader.deltaTime);
-         				DnNote = anEventHeader.param1;
-         				StTime = EndTime;
-         			} else {
-         				EndTime = StTime + anEventHeader.deltaTime;
-         				addNote(REST,anEventHeader.deltaTime);
-         				DnNote = anEventHeader.param1;
-         				StTime = EndTime;
-         			}
+         		case MIDI_KEY_DN :
+						deltaMs = anEventHeader.deltaTime * MsPerTick;
+         			addMIDINote(true,anEventHeader.param1,deltaMs);
          		break;	
          		case MIDI_KEY_UP :
-         			if (DnNote) {
-         				addNote(MIDI2Freq(DnNote),anEventHeader.deltaTime);
-         				EndTime = StTime + anEventHeader.deltaTime;
-         			}
+         			deltaMs = anEventHeader.deltaTime * MsPerTick;
+         			addMIDINote(false,anEventHeader.param1,deltaMs);
          		break;
          	}		
          }

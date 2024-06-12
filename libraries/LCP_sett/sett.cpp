@@ -126,6 +126,11 @@ void sett::createSounds(void) {
 		winTune.addNote(NOTE_C4,E_NOTE);
 	}
 	winTune.addNote(NOTE_C4,W_NOTE);
+	
+	setFilePath("ONESET.MID");
+   oneSet.createTune(mFilePath);
+   oneSet.adjustSpeed(4);
+
 }
 
 
@@ -225,7 +230,7 @@ void sett::selectMe(settCard* inCard) {
 				strcat(buffs,buffi);
 				strcat(buffs," of 6");
 				setMsg(buffs,MSG_MS);
-				winTune.startTune(ourPlayer);
+				oneSet.startTune(ourPlayer);
 				ourState = scoring;
 			}
 		} else {
@@ -258,7 +263,7 @@ void sett::loop(void) {
 			
 		break;								
 		case scoring	:
-			if (!winTune.playing()) {
+			if (!oneSet.playing()) {
 				clearSelect();
 				ourState = playing;
 			}

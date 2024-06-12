@@ -196,6 +196,8 @@ void decodeFile(const char* filePath) {
    bool        done;
    
    MIDIFile = SD.open(filePath, FILE_READ);
+   Serial.print("Opening : ");
+   Serial.print(filePath);
    if (MIDIFile) {
 
       readMIDIHeader(&theMIDIHeader, MIDIFile);

@@ -1,3 +1,4 @@
+
 #include <toneObj.h>
 
 #include <autoPOT.h>
@@ -29,14 +30,15 @@
 
 //https://www.music.mcgill.ca/~ich/classes/mumt306/StandardMIDIfileformat.html
 
-toneObj theVoice(BEEP_PIN);
-MIDItune* theTunePtr;
+toneObj   theVoice(BEEP_PIN);
+MIDItune  theTune;
 
 void setup() {
 
    bool haveScreen;
 
    Serial.begin(57600);
+   Serial.println("Hello!");
    haveScreen = false;
    screen = (displayObj*) new adafruit_1947(DSP_CS, -1);
    if (screen) {
@@ -55,11 +57,12 @@ void setup() {
       Serial.flush();
       while (true);
    }
-   theTunePtr = new MIDItune("ditty.MID");
-   theTunePtr->createTune();
-   theTunePtr->adjustSpeed(3 );
-   theTunePtr->startTune(&theVoice);
-   //decodeFile("MIDI.MID");
+   
+   //theTune.createTune("fithSet.mid");
+   //theTune.adjustSpeed(2);
+   //theTune.startTune(&theVoice);
+   Serial.println("Calling decode");
+   decodeFile("fithSet.mid");
 }
 
 

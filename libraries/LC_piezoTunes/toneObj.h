@@ -118,7 +118,7 @@ class toneObj : public	timeObj {
 				toneObj(int inPin);
 	virtual	~toneObj(void);
 				
-	virtual	void	play(int inHz,int inMs);
+	virtual	void	play(int inHz,float inMs);
 	virtual	bool	isPlaying(void);
 				
 				int	mPin;
@@ -133,14 +133,14 @@ class toneObj : public	timeObj {
 class note :	public linkListObj {
 
 	public:
-				note(int inHz,int inMs);
+				note(int inHz,float inMs);
 				~note(void);
 			
 				note* getNext(void);
 				void	playSelf(toneObj* inTone,float timeMult);
 				
 				int	mHz;
-				int	mMs;
+				float	mMs;
 };
 
 				
@@ -148,14 +148,14 @@ class note :	public linkListObj {
 // And here is the note list, or tune. Single voice.
 // ***************************************************************************************
 
-class tune :   public idler,
+class tune :	public idler,
                public linkList {
 
    public:
             tune();
    virtual  ~tune(void);
 
-            void  addNote(int inHz,int inMs);
+   virtual  void  addNote(int inHz,float inMs);
             void	adjustSpeed(float inTimeMult=1);
             void  startTune(toneObj* inTone,int inIndex=0);
             int  	stopTune(void);
@@ -176,14 +176,19 @@ class tune :   public idler,
 
 class MIDItune :	public tune {
 
-   public:
-            MIDItune(const char* filePath);
-   virtual  ~MIDItune(void);
+	public:
+				MIDItune(void);
+	virtual	~MIDItune(void);
 
-           void createTune(void);
+   virtual  void	createTune(const char* filePath);
            
-           char*	filePath;
-           File	MIDIFile;
+	protected :
+				void	addMIDINote(bool Dn,int MIDIKey,float inDeltaMs);
+	
+				float	absTimeMs;
+				float	MsPerTick;
+				bool	holding;
+				int 	heldNote;
 };
 
 #endif
