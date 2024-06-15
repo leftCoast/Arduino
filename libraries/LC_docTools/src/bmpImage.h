@@ -28,7 +28,7 @@ class bmpImage :	public baseImage {
 				int		newW;
 				int		newH;
 				bool		rightSideUp;
-				int32_t	imageOffset;
+				uint32_t	imageOffset;
 				int16_t	pixBytes;
 				int32_t	bytesPerRow;
 };

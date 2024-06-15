@@ -4,26 +4,42 @@
 
 #define CARD_IMAGE	"card.bmp"
 #define SELECT_IMAGE	"select.bmp"
+#define QCARD_IMAGE	"qcard.bmp"
+
 #define CARD_W			60
 #define CARD_H			74
 #define SYMBOL_W		40
 #define SYMBOL_H		16
-#define GRID_X			55
-#define GRID_Y			20
+#define GRID_X			0
+#define GRID_Y			23
 #define GRID_SPACE_X	5
 #define GRID_SPACE_Y	5
 
-#define RELOAD_IMAGE	"reload.bmp"
-#define RELOAD_X		10
-#define RELOAD_Y		40
+#define EXTRA_X		180
+#define EXTRA_Y		GRID_Y + CARD_H
 
+#define RELOAD_IMAGE	"reload.bmp"
+#define RELOAD_X		194
+#define RELOAD_Y		23
+
+#define EXTRA_BTN_X	RELOAD_X
+#define EXTRA_BTN_Y	RELOAD_Y + 40
+
+#define TUNE_SET1		"set1.mid"
+#define TUNE_SET2		"set2.mid"
+#define TUNE_SET3		"set3.mid"
+#define TUNE_SET4		"set4.mid"
+#define TUNE_SET5		"set5.mid"
 #define MSG_MS			5000
 #define LBL_X			30
 #define LBL_Y			3
-#define LBL_W			260
+#define LBL_W			200
 #define LBL_H			10
 
-
+#define PTS_X			200
+#define PTS_Y			LBL_Y
+#define PTS_W			40
+#define PTS_H			10
 
 
 
@@ -53,8 +69,12 @@ sett::sett(int ourAppID)
 	for(int i=0;i<MAX_CARDS;i++) {
 		cardPtrs[i] = NULL;
 	}
+	for(int i=0;i<NUM_EXTRAS;i++) {
+		theBlanks[i] = NULL;
+	}
 	ourPlayer	= new toneObj(OSPtr->getTonePin());
 	groupIndex = 0;
+	points = 0;
 }
 
 
@@ -75,15 +95,25 @@ void sett::setup(void) {
 	seed = analogRead(UNCONNECTED_ANALOG_PIN);								// Tired of playing the same old game every time?
 	randomSeed(seed);																	// It's an antenna. Very random.	
 	mesgPtr = new label(LBL_X,LBL_Y,LBL_W,LBL_H);							// Create the message label.
-	if (mesgPtr) {																		// If we got a label..
+	ptsPtr = new label(PTS_X,PTS_Y,PTS_W,PTS_H);								// Create the points message.
+	if (mesgPtr && ptsPtr) {														// If we got a label..
 		mesgPtr->setColors(&yellow,&black);										// Set it's colors.
 		mesgPtr->setJustify(TEXT_LEFT);											// Set the text justify.
 		mesgPtr->setTextSize(1);													// Size.
 		addObj(mesgPtr);																// Add it to our screen.
+		ptsPtr->setColors(&white,&black);										// Set point's colors.
+		ptsPtr->setJustify(TEXT_RIGHT);											// Set the text justify.
+		ptsPtr->setTextSize(1);														// And size.
+		addObj(ptsPtr);
 		if (setFilePath(RELOAD_IMAGE)) {											// Ask for the file path to the button icon.
 			theBtn = new reloadBtn(RELOAD_X,RELOAD_Y,mFilePath,this);	// Create the reload button.
 			if (theBtn) {																// If we got it..
 				addObj(theBtn);														// Add it to the screen.
+				dealExtrasBtn* dealBtn = new dealExtrasBtn(EXTRA_BTN_X,EXTRA_BTN_Y,32,32,OSPtr->stdIconPath(cross32));
+				if (dealBtn) {
+					dealBtn->setGame(this);
+					addObj(dealBtn);
+				}
 				cardIndexList = new cardIndex(TOTAL_CARDS);					// Create the card index list.
 				if (cardIndexList) {													// If we got it..
 					ourPlayer = new toneObj(mOSPtr->getTonePin());			// Set up the beeper stuff.
@@ -92,10 +122,10 @@ void sett::setup(void) {
 					ourState = playing;												// Got all the bits? We play!
 					return;																// Bail out now to see what user does.
 				}																			//
-			}																				//
-		}																					//
-	}																						//
-	ourState = error;																	// Our state is.. We have an error.
+			}																					//
+		}																						//
+	}																							//
+	ourState = error;																		// Our state is.. We have an error.
 }
 
 
@@ -127,9 +157,16 @@ void sett::createSounds(void) {
 	}
 	winTune.addNote(NOTE_C4,W_NOTE);
 	
-	setFilePath("ONESET.MID");
-   oneSet.createTune(mFilePath);
-   oneSet.adjustSpeed(4);
+	setFilePath(TUNE_SET1);
+   sets[0].createTune(mFilePath);
+   setFilePath(TUNE_SET2);
+   sets[1].createTune(mFilePath);
+   setFilePath(TUNE_SET3);
+   sets[2].createTune(mFilePath);
+   setFilePath(TUNE_SET4);
+   sets[3].createTune(mFilePath);
+   setFilePath(TUNE_SET5);
+   sets[4].createTune(mFilePath);
 
 }
 
@@ -137,13 +174,26 @@ void sett::createSounds(void) {
 void sett::drawSelf(void) { screen->fillScreen(BACK_COLOR); }
 
 
+void sett::setPoints(int pts) {
+
+	points = pts;
+	ptsPtr->setValue(points);
+}
+
+
+int sett::getPoints(void) { return points; }
+
 
 void sett::dealCards(int srtX,int srtY) {
 	
 	int			cardNum;
 	int			i;
 	settCard*	aCard;
+	bmpObj*		qcard;
+	int			extraY;
 	
+	setPoints(0);																	// Player starts at 0 points.
+	haveExtras = false;															// No longer have extras, if we had any.
 	groupIndex = 0;																// Clear out the count of pairs.
 	clearSelect();																	// Clear out the select list. If any.
 	for(i=0;i<MAX_GROUPS;i++) {												// For all the saved card groups..
@@ -155,6 +205,9 @@ void sett::dealCards(int srtX,int srtY) {
 			cardPtrs[i] = NULL;													// NULL out the item as a flag.
 		}																				//
 	}																					//
+	if (cardIndexList->getNumRemain()<=14) {								// If we don't have enough left..
+		cardIndexList->loadList();												// Re-stack and shuffle the cards.
+	}																					// Thanks Ma, for finding this one.
 	i = 0;																			// Reset the card count.
 	for (int row=0;row<Y_CARDS;row++) {										// For every row..
 		for (int col=0;col<X_CARDS;col++) {									// For every column..
@@ -167,8 +220,42 @@ void sett::dealCards(int srtX,int srtY) {
 			}
 		}
 	}
+	if (setFilePath(QCARD_IMAGE)) {									// Setup for the extra card markers.
+		extraY = EXTRA_Y;
+		for (int i=0;i<NUM_EXTRAS;i++) {
+			theBlanks[i] = new bmpObj(EXTRA_X,extraY,CARD_W,CARD_H,mFilePath);
+			if (theBlanks[i]) addObj(theBlanks[i]);
+			extraY = extraY + CARD_H;
+		}
+	}
 }
-				
+
+
+// We need to deal in 3 more cards.
+void sett::dealExtrasBtnClick(void) {
+
+	int			cardNum;
+	settCard*	aCard;
+	rect			location;
+	
+	if (!haveExtras) {
+		for (int i=0;i<NUM_EXTRAS;i++) {
+			location.setRect(theBlanks[i]);									// Grab the location of the marker.
+			delete(theBlanks[i]);												// Delte the blank card.
+			theBlanks[i] = NULL;													// Flag it.
+			cardNum = cardIndexList->dealCard();							// Get a card index from the card list.
+			aCard = new settCard(cardNum,cardPath,selectPath,this);	// Create the card.
+			if (aCard) {															// If we got a card.
+				cardPtrs[12+i] = aCard;											// Add it to our list.
+				aCard->setRect(&location);										// Set the location;
+				addObj(aCard);														// Set into the display list.
+			}	
+		}
+		setPoints(points-2);
+		haveExtras = true;
+	}
+}			
+	
 				
 // We need to clear them.
 void sett::clearSelect(void) { selectList->dumpList(); };
@@ -222,19 +309,26 @@ void sett::selectMe(settCard* inCard) {
 		if (!duplicate()) {
 			addSet();
 			if (groupIndex==6) {
+				setMsg("CONGRATS YOU WIN!!",MSG_MS);
+				setPoints(points+2);
 				winTune.startTune(ourPlayer);
 				ourState = winning;
 			} else {
-				strcpy(buffs,"Congrats on sett # ");
+				strcpy(buffs,"Congrats on set ");
 				itoa(groupIndex,buffi,10);
 				strcat(buffs,buffi);
 				strcat(buffs," of 6");
 				setMsg(buffs,MSG_MS);
-				oneSet.startTune(ourPlayer);
-				ourState = scoring;
+				setPoints(points+1);
+				if (groupIndex<=5) {
+					sets[groupIndex-1].startTune(ourPlayer);
+					ourState = scoring;
+				}
 			}
 		} else {
 			setMsg("Already got that one.",MSG_MS);
+			setPoints(points-1);
+			clearSelect();
 		}
 	}
 }
@@ -263,13 +357,18 @@ void sett::loop(void) {
 			
 		break;								
 		case scoring	:
-			if (!oneSet.playing()) {
-				clearSelect();
-				ourState = playing;
+			if (groupIndex<=5) {
+				if (!sets[groupIndex-1].playing()) {
+					clearSelect();
+					ourState = playing;
+				}
 			}
 		break;
 		case winning	:
-			
+			if (!winTune.playing()) {
+				reloadGame();
+				ourState = playing;
+			}
 		break;	
 		case error		: 
 		
@@ -285,9 +384,38 @@ void sett::loop(void) {
 void sett::closing(void) {  }
 
 
+// **************************************************
+// ***************** dealExtrasBtn ******************
+// **************************************************	
+
+
+dealExtrasBtn::dealExtrasBtn(int inX,int inY,int inWidth,int inHeight,const char* bmpPath)
+	: bmpObj(inX,inY,inWidth,inHeight,bmpPath) {
+	
+	gamePtr = NULL;
+	setEventSet(touchLift);
+}
+	
+	 
+dealExtrasBtn::~dealExtrasBtn(void) { }
+
+
+void dealExtrasBtn::setGame(sett* inPtr) { gamePtr = inPtr; }
+
+
+void dealExtrasBtn::doAction(void) {
+
+	OSPtr->beep();
+	if (gamePtr) {
+		gamePtr->dealExtrasBtnClick();
+	}
+}
+
+
+
 
 // **************************************************
-// ******************* reloadBtn *******************
+// ******************* reloadBtn ********************
 // **************************************************	
 
 

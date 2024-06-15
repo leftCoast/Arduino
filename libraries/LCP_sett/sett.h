@@ -8,12 +8,14 @@
 #include <label.h>
 
 
-#define	X_CARDS		3
-#define	Y_CARDS		4
-#define	CARD_H		74
-#define	TOTAL_CARDS	81
-#define	MAX_CARDS	15
-#define	MAX_GROUPS	6
+#define X_CARDS		3
+#define Y_CARDS		4
+#define CARD_H		74
+#define TOTAL_CARDS	81
+#define MAX_CARDS	15
+#define MAX_GROUPS	6
+
+#define NUM_EXTRAS	3
 
 class selectQ;
 class settCard;
@@ -56,7 +58,10 @@ class sett :  public panel {
 				void	reloadGame(void);
 				void	createSounds(void);
 	virtual	void	drawSelf(void);
+				void	setPoints(int points);
+				int	getPoints(void);
 				void	dealCards(int srtX,int srtY);
+				void	dealExtrasBtnClick(void);
 				void	clearSelect(void);
 				bool	duplicate(void);
 				void	addSet(void);
@@ -72,23 +77,46 @@ class sett :  public panel {
 	protected:
 				enum states { pregame, waiting, playing, scoring, winning, error };
 				
+				int			points;
+				label*		ptsPtr;
 				label*		mesgPtr;
 				timeObj		msgTimer;
 				settCard*	cardPtrs[MAX_CARDS];	// The guys on the screen.
 				cardIndex*	cardIndexList;
-				cardGroup	groupList[MAX_GROUPS];
+				bool			haveExtras;
+				bmpObj*		theBlanks[NUM_EXTRAS];
+				cardGroup	groupList[MAX_GROUPS];			
 				int			groupIndex;
 				selectQ*		selectList;
 				states		ourState;
 				toneObj*		ourPlayer;
-				MIDItune		oneSet;
+				MIDItune		sets[5];
 				tune			winTune;
+};
+
+
+
+// **************************************************
+// ***************** dealExtrasBtn ******************
+// **************************************************	
+
+
+class dealExtrasBtn :	public bmpObj {
+
+	public:
+				dealExtrasBtn(int inX,int inY,int inWidth,int inHeight,const char* bmpPath);
+	virtual	~dealExtrasBtn(void);
+
+				void	setGame(sett* inPtr);
+	virtual	void	doAction(void);
+	
+				sett*	gamePtr;
 };
 
 
 				
 // **************************************************
-// ******************* reloadBtn *******************
+// ******************* reloadBtn ********************
 // **************************************************	
 
 

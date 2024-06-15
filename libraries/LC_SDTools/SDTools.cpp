@@ -2,7 +2,7 @@
 #include <resizeBuff.h>
 #include <strTools.h>
 
-//#include <debug.h>
+
 
 
 // The string that is passed back when asking for a numbered file name. 
@@ -12,6 +12,12 @@ char* filePathStr = NULL;
 // Once you copy or use the file path string, you can safely call this to recycle it's
 // memory.
 void freePathStr(void) { resizeBuff(0,&filePathStr); }
+
+
+
+// ***************************************************
+//         Big indian, little indian land.
+// ***************************************************
 
 
 // This sets if we flip integer bytes or not.
@@ -25,62 +31,92 @@ bigIndian::bigIndian(void) { flipBytes=true; }
 bigIndian::~bigIndian(void) { flipBytes=false; }
 
 
-// For reading two byte numbers.
-uint16_t read16(File f) {
+// If one of these big/little indian number readers/writers has an error. This will be set
+// to true. The idea is to clear it before doing your reads/writes. Then check it to see
+// if everything went ok.
+bool	SDFileErr = false;
 
-	uint16_t result;
+
+// For reading two byte numbers.
+bool read16(uint16_t* result,File f) {
+
+	uint8_t	tempByte;
 	
-	if (flipBytes) {
-		((uint8_t *)&result)[1] = f.read();
-		((uint8_t *)&result)[0] = f.read();
-	} else {
-		f.read(&result,2);
+	if (f.read(result,2)==2) {
+		if (flipBytes) {
+			tempByte = ((uint8_t *)result)[1];
+			((uint8_t *)result)[1] = ((uint8_t *)result)[0];
+			((uint8_t *)result)[0] = tempByte;
+		}
+		return true;
 	}
-	return result;
+	SDFileErr = true;
+	return false;
 }
 
 
 // For writing two byte numbers.
-void write16(uint16_t val, File f) {
+bool write16(uint16_t val, File f) {
 
+	uint8_t	tempByte;
+	
 	if (flipBytes) { 
-   	f.write(((uint8_t *)&val)[1]);
-		f.write(((uint8_t *)&val)[0]);
-	} else {
-		f.write(&val,2);
+		tempByte = ((uint8_t *)&val)[1];
+		((uint8_t *)&val)[1] = ((uint8_t *)&val)[0];
+		((uint8_t *)&val)[0] = tempByte;
 	}
-}
+	if (f.write(&val,4)==4) {
+		return true;
+	}
+	SDFileErr = true;
+	return false;
+}  
 
 
 // For reading four byte numbers.
-uint32_t read32(File f) {
+bool read32(uint32_t* result,File f) {
   
-	uint32_t result;
-	
-	if (flipBytes) { 
-		((uint8_t *)&result)[3] = f.read(); 
-		((uint8_t *)&result)[2] = f.read();
-		((uint8_t *)&result)[1] = f.read();
-		((uint8_t *)&result)[0] = f.read();
-	} else {
-		f.read(&result,4);
+  	uint8_t	tempByte;
+  	
+	if (f.read(result,4)==4) {
+		if (flipBytes) {
+			tempByte = ((uint8_t *)result)[3];
+			((uint8_t *)result)[3] = ((uint8_t *)result)[0];
+			((uint8_t *)result)[2] = ((uint8_t *)result)[1];
+			((uint8_t *)result)[1] = ((uint8_t *)result)[2];
+			((uint8_t *)result)[0] = tempByte;
+		}
+		return true;
 	}
-	return result;
+	SDFileErr = true;
+	return false;
 }
   
   
 // For writing four byte numbers.  
-void write32(uint32_t val, File f) {
+bool write32(uint32_t val, File f) {
   
+  	uint8_t	tempByte;
+  	
 	if (flipBytes) {
-		f.write(((uint8_t *)&val)[3]);
-		f.write(((uint8_t *)&val)[2]);
-		f.write(((uint8_t *)&val)[1]);
-		f.write(((uint8_t *)&val)[0]);
-	} else {
-		f.write(&val,4);
+		tempByte = ((uint8_t *)&val)[3];
+		((uint8_t*)&val)[3] = ((uint8_t*)&val)[0];
+		((uint8_t*)&val)[2] = ((uint8_t*)&val)[1];
+		((uint8_t*)&val)[1] = ((uint8_t*)&val)[2];
+		((uint8_t*)&val)[0] = tempByte;
 	}
+	if(f.write(&val,4)==4) {
+		return true;
+	}
+	SDFileErr = true;
+	return false;
 }  
+
+
+// ***************************************************
+//                End of reservation.
+// ***************************************************
+
 
 
 // Returns true if this folderPath can be found, or created.

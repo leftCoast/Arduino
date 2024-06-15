@@ -58,11 +58,11 @@ void setup() {
       while (true);
    }
    
-   //theTune.createTune("fithSet.mid");
+   theTune.createTune("set5.mid");
    //theTune.adjustSpeed(2);
-   //theTune.startTune(&theVoice);
+   theTune.startTune(&theVoice);
    //Serial.println("Calling decode");
-   decodeFile("fithSet.mid");
+   //decodeFile("fith2.mid");
    //Serial.println(0x82,BIN);
    //Serial.println(0x68,BIN);
    //Serial.println(0b10101000,DEC);

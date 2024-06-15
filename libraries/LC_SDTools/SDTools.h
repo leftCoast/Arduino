@@ -20,6 +20,10 @@
 extern bool flipBytes;								
 
 
+// This is set if an big/small indian function has a file error.
+extern bool	SDFileErr;
+
+
 // Stack based class thata flips the byte order for the calls while it's in scope.
 // Automatically flips them back when going out of scope. NOT reentrant!
 class bigIndian {
@@ -31,19 +35,19 @@ class bigIndian {
 
 
 // For reading two byte numbers.
-uint16_t read16(File f);
+bool read16(uint16_t* result,File f);
 
 
 // For writing two byte numbers.
-void write16(uint16_t val, File f);
+bool write16(uint16_t val, File f);
 
 
 // For reading four byte numbers.
-uint32_t read32(File f);
+bool read32(uint32_t* result,File f);
   
   
 // For writing four byte numbers.  
-void write32(uint32_t val, File f);
+bool write32(uint32_t val, File f);
 
 
 

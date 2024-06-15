@@ -340,13 +340,13 @@ struct metaEvent {
 // ***************************************************************************************
 
 
-extern void readMIDIHeader(MIDIHeader* theHeader, File MIDIFile);
-extern void readEventHeader(eventHeader* header, File MIDIFile);
-extern void readTrackHeader(trackHeader* theHeader, File MIDIFile);
+extern bool readMIDIHeader(MIDIHeader* theHeader, File MIDIFile);
+extern bool readEventHeader(eventHeader* header, File MIDIFile);
+extern bool readTrackHeader(trackHeader* theHeader, File MIDIFile);
 extern void readMetaEvent(eventHeader* theHeader, metaEvent* theEvent, File MIDIFile);
 extern bool jumpMetaEvent(metaEvent* theEvent, File MIDIFile);
 
-extern void readAndShowMetaData(metaEvent* theEvent, File MIDIFile);
+extern bool readAndShowMetaData(metaEvent* theEvent, File MIDIFile);
 
 extern void showMIDIHeader(MIDIHeader* theMIDIHeader);
 extern void showTrackHeader(trackHeader* theHeader);

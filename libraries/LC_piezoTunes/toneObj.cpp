@@ -161,28 +161,28 @@ void show(char* msg,float absTime, float deltaTime) {
 
 void MIDItune::addMIDINote(bool Dn,int MIDIKey,float deltaTime) {
 	
-	if (Dn) {													// If we got a key down event..
-		if (holding) {											// If we still have a note down..
+	if (Dn) {														// If we got a key down event..
+		if (holding) {												// If we still have a note down..
 			//show("Chopping",absTimeMs,deltaTime);
-			addNote(MIDI2Freq(heldNote),deltaTime);	// Single voice, cut off holding note here.
-		} else if (deltaTime) {								// If there is a delta time..
+			addNote(MIDI2Freq(heldNote),deltaTime);		// Single voice, cut off holding note here.
+		} else if (deltaTime) {									// If there is a delta time..
 			//show("Rest    ",absTimeMs,deltaTime);
-			addNote(REST,deltaTime);						// Then we add a rest to fill the time.
+			addNote(REST,deltaTime);							// Then we add a rest to fill the time.
 		} else {
 			//show("starting?",absTimeMs,deltaTime);
-		}															//
-		heldNote = MIDIKey;									// Update the new holding MIDI note.
-		holding = true;										// Make a note of that.
-	} else {														// 
-		if (holding) {											// If we have a note down..
-			//show("Adding  ",absTimeMs,deltaTime);
-			addNote(MIDI2Freq(heldNote),deltaTime);	// Add the held note.
-			holding = false;
-		} else {
-			//show("Ignoring",absTimeMs,deltaTime);
-		}															//
-	}																//
-	absTimeMs = absTimeMs+deltaTime;						// In EVERY case we move absTimeMs up.
+		}																//
+		heldNote = MIDIKey;										// Update the new holding MIDI note.
+		holding = true;											// Make a note of that.
+	} else {															// Else we got a lift..
+		if (holding) {												// If we have a note down..
+			if (MIDIKey==heldNote) {							// If the lift even matches what we are holding..
+				addNote(MIDI2Freq(heldNote),deltaTime);	// Add the held note.
+				holding = false;									// Clear the holding flag.
+				heldNote = 0;										// Clear the holding note.
+			}															//
+		}																//
+	}																	//
+	absTimeMs = absTimeMs+deltaTime;							// In EVERY case we move absTimeMs up.
 }
 
 
@@ -201,6 +201,7 @@ void MIDItune::createTune(const char*	filePath) {
    float			deltaMs;
    bool        done;
 		
+	SDFileErr = false;
 	MIDIFile = SD.open(filePath, FILE_READ);
 	if (MIDIFile) {
 		dumpList();	
@@ -210,44 +211,45 @@ void MIDItune::createTune(const char*	filePath) {
 		readMIDIHeader(&theMIDIHeader, MIDIFile);
 		readTrackHeader(&theTrackHeader, MIDIFile);
 		done = false;
-		while(!done) {
-			readEventHeader(&anEventHeader, MIDIFile);
-			if (isMetaTag(&anEventHeader)) {
-            readMetaEvent(&anEventHeader, &aMetaEvent, MIDIFile);
-            switch(aMetaEvent.metaType) {
-               case 0x2F : done = true; break;
-               case 0x51 :
-						microsPerBeat = 0;
-                  MIDIFile.read(&aByte, 1);
-                  microsPerBeat = aByte;
-                  microsPerBeat = microsPerBeat << 16;
-                  MIDIFile.read(&aByte, 1);
-                  temp = 0;
-                  temp = aByte;
-                  temp = temp << 8;
-                  microsPerBeat = microsPerBeat | temp;
-                  MIDIFile.read(&aByte, 1);
-                  temp = 0;
-                  temp = aByte;
-                  microsPerBeat = microsPerBeat | aByte;
-                  MsPerTick = (microsPerBeat/1000.0)/theMIDIHeader.timeDiv;
-               break;
-               default :
-                  done = !jumpMetaEvent(&aMetaEvent, MIDIFile);
-               break;
-            }
-         } else {
-         	switch(anEventHeader.eventType) {
-         		case MIDI_KEY_DN :
-						deltaMs = anEventHeader.deltaTime * MsPerTick;
-         			addMIDINote(true,anEventHeader.param1,deltaMs);
-         		break;	
-         		case MIDI_KEY_UP :
-         			deltaMs = anEventHeader.deltaTime * MsPerTick;
-         			addMIDINote(false,anEventHeader.param1,deltaMs);
-         		break;
-         	}		
-         }
+		while(!done && !SDFileErr) {
+			if (readEventHeader(&anEventHeader, MIDIFile)) {
+				if (isMetaTag(&anEventHeader)) {
+					readMetaEvent(&anEventHeader, &aMetaEvent, MIDIFile);
+					switch(aMetaEvent.metaType) {
+						case 0x2F : done = true; break;
+						case 0x51 :
+							microsPerBeat = 0;
+							MIDIFile.read(&aByte, 1);
+							microsPerBeat = aByte;
+							microsPerBeat = microsPerBeat << 16;
+							MIDIFile.read(&aByte, 1);
+							temp = 0;
+							temp = aByte;
+							temp = temp << 8;
+							microsPerBeat = microsPerBeat | temp;
+							MIDIFile.read(&aByte, 1);
+							temp = 0;
+							temp = aByte;
+							microsPerBeat = microsPerBeat | aByte;
+							MsPerTick = (microsPerBeat/1000.0)/theMIDIHeader.timeDiv;
+						break;
+						default :
+							done = !jumpMetaEvent(&aMetaEvent, MIDIFile);
+						break;
+					}
+				} else {
+					switch(anEventHeader.eventType) {
+						case MIDI_KEY_DN :
+							deltaMs = anEventHeader.deltaTime * MsPerTick;
+							addMIDINote(true,anEventHeader.param1,deltaMs);
+						break;	
+						case MIDI_KEY_UP :
+							deltaMs = anEventHeader.deltaTime * MsPerTick;
+							addMIDINote(false,anEventHeader.param1,deltaMs);
+						break;
+					}		
+         	}
+         } else done = true;
 		}
 		MIDIFile.close();
 	}

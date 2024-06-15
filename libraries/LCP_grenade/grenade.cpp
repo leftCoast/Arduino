@@ -132,7 +132,7 @@ void grenade::setup(void) {
 		addObj(blueScoreLbl);
 	}
 	
-	greenCross = new greenBtn(G_BTN_X,G_BTN_Y,G_BTN_W,G_BTN_H,mOSPtr->stdIconPath(cross32));
+	greenCross = new greenBtn(G_BTN_X,G_BTN_Y,G_BTN_W,G_BTN_H,OSPtr->stdIconPath(cross32));
 	if (greenCross) {
 		greenCross->setGreyedOut(true);
 		greenCross->setGrenade(this);

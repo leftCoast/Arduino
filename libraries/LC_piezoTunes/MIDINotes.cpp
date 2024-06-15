@@ -15,11 +15,19 @@
 // Odd that.
 
 
+void fileError(const char* function) {
+
+	Serial.print("File error in : ");
+	Serial.print(function);
+	Serial.println("()");
+}
+
 
 char  buff[5];	// Used by the file rippers to do the 4 char strings stuff.
 
 
-// Take a raw 4 char text buffer and output a 4 char c string WITH '\0'.
+// Take a raw 4 char text buffer and output a 4 char c string WITH '\0'. This doesn't
+// change the ID, it's just for showing it. You need the trialing '\0' to print it.
 char* chunkID(char* rawBytes) {
 
    for (int i = 0; i < 4; i++) {
@@ -32,64 +40,97 @@ char* chunkID(char* rawBytes) {
 
 // MIDI has Bizzarre multi byte encoding. Point this at one. It decodes it for you. But, 
 // Don't bother in Meta tags because it seems they forgot to encode those. I roll my eyes..
-uint32_t varLenToValue(File MIDIFile) {
+bool varLenToValue(uint32_t* result,File MIDIFile) {
 
    bool     done;
    byte     readByte;
-   uint32_t result;
 
-   result = 0;
-   done = false;
-   while (!done) {
-      MIDIFile.read(&readByte, 1);				// Read a byte from the file..
-      if (bitRead(readByte, 7)) {        		// If high bit was set! Oh ohh..
-         readByte = readByte & 0b01111111;	// Clip off high bit.
-         result = result | readByte;			// Set the lower 7 bits..
-         result = result << 7;            	// Move 'em over.
-      } else {                            	// Else, high bit was 0.. (Last byte)
-      	result = result | readByte;			// Stamp in these last 7 bits.			
-         done = true;                     	// We are done!
-      }													//
-   }														//
-   return result;										// Pass back the resulting value.
+   *result = 0;											// Clear result bits.
+   done = false;											// Not done yet.
+   while (!done) {										// And while we're not done..
+      if (!MIDIFile.available()) {					// If we DON'T have a byte to read..
+      	fileError(__func__);							// Show error..
+			return false;									// Bail out.
+		}														//
+      if (MIDIFile.read(&readByte, 1)==1) {		// If we can grab a byte..
+			if (bitRead(readByte, 7)) {        		// If high bit was set! Oh ohh..
+				readByte = readByte & 0b01111111;	// Clip off high bit.
+				*result = *result | readByte;			// Set the lower 7 bits..
+				*result = *result << 7;            	// Move 'em over.
+			} else {                            	// Else, high bit was 0.. (Last byte)
+				*result = *result | readByte;			// Stamp in these last 7 bits.			
+				done = true;                     	// We are done!
+			}													//
+		} else {												// Else, we got a file problem.
+			fileError(__func__);							// Pass in our function name.
+			return false;									// Return a fail.
+		}														//
+   }															//
+   return true;											// Pass back success.
 }
 
 
 // First thing I found in the MIDI files was a header. This reads and decodes it.
-void readMIDIHeader(MIDIHeader* theHeader, File MIDIFile) {
+bool readMIDIHeader(MIDIHeader* theHeader, File MIDIFile) {
 
-   MIDIFile.read(&theHeader->chunkID, 4);
-   theHeader->chunkSize = read32(MIDIFile);
-   theHeader->formatType = read16(MIDIFile);
-   theHeader->numTracks = read16(MIDIFile);
-   theHeader->timeDiv = read16(MIDIFile);
+	if (MIDIFile.available()) {											// If we have any bytes left..
+		if (MIDIFile.read(&theHeader->chunkID, 4)==4) {				// If we can grab the bytes..
+			if (read32(&theHeader->chunkSize,MIDIFile)) {			// Chunk size.
+				if (read16(&theHeader->formatType,MIDIFile)) {		// Format type.
+					if (read16(&theHeader->numTracks,MIDIFile)) {	// Num tracks.
+						if (read16(&theHeader->timeDiv,MIDIFile)) {	// Read time divider.
+							return true;										// We get all these? return success!
+						}															//
+					}																//
+				}																	//
+			}																		//
+		}																			//
+	}																				//
+	fileError(__func__);														// We got an error, note it here.								
+	return false;																// And return a fail.
 }
 
 
 // Next in line is tracks. The files we can deal with have (1) track. (So far)
-void readTrackHeader(trackHeader* theHeader, File MIDIFile) {
+bool readTrackHeader(trackHeader* theHeader, File MIDIFile) {
 
-   MIDIFile.read(&theHeader->chunkID, 4);
-   theHeader->chunkSize = read32(MIDIFile);
+   if (MIDIFile.available()) {									// If we have any bytes left..
+		if (MIDIFile.read(&theHeader->chunkID, 4)==4) {		// If we can grab the bytes..
+			if (read32(&theHeader->chunkSize,MIDIFile)) {	// Can we grab chink size?
+				return true;											// If we made it here, we're a success!
+			}																//
+		}																	//
+	}																		//
+	fileError(__func__);												// We got an error, note it here.
+	return false;														// And return a fail.
 }
 
 
 // Tracks are made up of a list of events. This decodes an event.
-void readEventHeader(eventHeader* header, File MIDIFile) {
+bool readEventHeader(eventHeader* header, File MIDIFile) {
 
    byte twoNibbles;
-
-   header->deltaTime = varLenToValue(MIDIFile);
-   MIDIFile.read(&twoNibbles, 1);
-   header->eventType = twoNibbles;
-   header->eventType = header->eventType >> 4;
-   header->eventType = header->eventType & 0x0F;
-   header->channel = 0;
-   header->channel = twoNibbles & 0x0F;
-   MIDIFile.read(&twoNibbles, 1);
-   header->param1 = twoNibbles;
-   MIDIFile.read(&twoNibbles, 1);
-   header->param2 = twoNibbles;
+   
+	if (MIDIFile.available()) {									// If we have any bytes left..
+		if (varLenToValue(&header->deltaTime,MIDIFile)) {		// Get the packed delta time.
+			if (MIDIFile.read(&twoNibbles, 1)==1) {				// Grab a byte for event & channel.
+				header->eventType = twoNibbles;						// Start unpacking the nibbles.
+				header->eventType = header->eventType >> 4;		// I guess we want the high nibble.
+				header->eventType = header->eventType & 0x0F;	// Clear the high nibble.
+				header->channel = 0;										// Clear channel.
+				header->channel = twoNibbles & 0x0F;				// Stamp the lower nibble here.
+				if (MIDIFile.read(&twoNibbles, 1)==1) {			// Grab another byte.
+					header->param1 = twoNibbles;						// Stuff it into param1.
+					if (MIDIFile.read(&twoNibbles, 1)==1) {		// Grab our lasy byte..
+						header->param2 = twoNibbles;					// Stuff it into param1.
+						return true;										// If we got here, it's a success!
+					}															//
+				}																//
+			}																	//
+		}																		//
+	}																			//
+	fileError(__func__);													// Show error here.
+	return false;															// And return a fail.
 }
 
 // There are basically note events and Meta events. And a third I've not seen. This looks
@@ -125,15 +166,16 @@ bool jumpMetaEvent(metaEvent* theEvent, File MIDIFile) {
 
 // This basically drags you through the meta event's data. Some have data, some of it's
 // readable text. Some is binary. This will show you what it found. Byte by grueling byte.
-void readAndShowMetaData(metaEvent* theEvent, File MIDIFile) {
+bool readAndShowMetaData(metaEvent* theEvent, File MIDIFile) {
 
    char  metaByte;
    
    for(uint32_t i=0;i<theEvent->numBytes;i++) {
-      MIDIFile.read(&metaByte, 1);
+      if (MIDIFile.read(&metaByte, 1)!=1) return false;
       Serial.print(metaByte);
    }
    Serial.println();
+   return true;
 }
 
 
@@ -196,19 +238,33 @@ void decodeFile(const char* filePath) {
    MIDIFile = SD.open(filePath, FILE_READ);
    if (MIDIFile) {
 
-      readMIDIHeader(&theMIDIHeader, MIDIFile);
-      showMIDIHeader(&theMIDIHeader);
-      Serial.println();
-      readTrackHeader(&theTrackHeader, MIDIFile);
-      showTrackHeader(&theTrackHeader);
-      Serial.println();
+      if (readMIDIHeader(&theMIDIHeader, MIDIFile)) {
+      	showMIDIHeader(&theMIDIHeader);
+      	Serial.println();
+      } else {
+      	Serial.println("fail MIDI header.");
+      }
+      if (readTrackHeader(&theTrackHeader, MIDIFile)) {
+      	showTrackHeader(&theTrackHeader);
+      	Serial.println();
+      } else {
+      	Serial.println("fail track header.");
+      }
       done = false;
-      while(!done) {
-         readEventHeader(&anEventHeader, MIDIFile);
-         showEventHeader(&anEventHeader);
-         Serial.println();
+      SDFileErr = false;
+      while(!done && !SDFileErr) {
+      	while(!Serial.available());
+      	char x = Serial.read();
+         if (readEventHeader(&anEventHeader, MIDIFile)) {
+         	showEventHeader(&anEventHeader);
+         	Serial.println();
+         } else {
+      		Serial.println("fail event header.");
+      	}
          if (isMetaTag(&anEventHeader)) {
             readMetaEvent(&anEventHeader, &aMetaEvent, MIDIFile);
+            showMetaEvent(&aMetaEvent);
+            Serial.println();
             switch(aMetaEvent.metaType) {
                case 0x2F : done = true; break;
                case 0x51 :
@@ -238,7 +294,9 @@ void decodeFile(const char* filePath) {
          } else {
             Serial.println();
          }
+         //delay(2000);
       }
+      Serial.println(SDFileErr);
       MIDIFile.close();
    }
 }

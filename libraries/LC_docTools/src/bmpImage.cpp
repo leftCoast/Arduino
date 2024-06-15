@@ -197,28 +197,34 @@ bool bmpImage::checkDoc(File bmpFile) {
 	uint32_t	creatorBits;	// A thing that seems to always be zero.
 	uint32_t	DIBHeaderSize;	// And so is this thing.
 	int32_t	imageHeight;	// Used as a temp. Can be negative.
-	int32_t	fileSize;
+	uint32_t	fileSize;
 	int16_t	imageDepth;
+	uint16_t	aWord;
+	int32_t	aLong;
 	bool		success;
 	
 	success = false;													// Ok, assume failure..									
-	if (read16(bmpFile) == 0x4D42) {								// If we have something or other..
-		fileSize = read32(bmpFile);								// We grab the file size.
-		creatorBits = read32(bmpFile);							// Creator bits
-		imageOffset = read32(bmpFile);							// image offset.
-		DIBHeaderSize = read32(bmpFile);							// read DIB header size?
-		width = read32(bmpFile);									// width? Good thing to save for later.
-		imageHeight = read32(bmpFile);							// Height? Negative means the data is right side up. Go figure..
-		rightSideUp = imageHeight<0;								// Set a bool about that bit.
-		height = abs(imageHeight);									// Bloody weird encrypting.
-		if (read16(bmpFile) == 1) {								// if the next word is 1? What's this mean? Needs to be though.
-			imageDepth = read16(bmpFile);							// color depth.
-			if (imageDepth == 24 || imageDepth == 32) {		// We can do 24 or 32 bits..
-				pixBytes = imageDepth / 8;							// Bytes / pixel
-				if (!read32(bmpFile)) {								// And no compression!
-					bytesPerRow = width * pixBytes;				// Data takes up this much, but..
-					while(bytesPerRow % 4) bytesPerRow++;		// We need to pad it to a multiple of 4.
-					success = true;									// Made it this far? We can do this!
+	if (read16(&aWord,bmpFile)) {									// If we can we read a word..
+		if (aWord == 0x4D42) {										// If we have something or other..
+			read32(&fileSize,bmpFile);								// We grab the file size.
+			read32(&creatorBits,bmpFile);							// Creator bits
+			read32(&imageOffset,bmpFile);							// image offset.
+			read32(&DIBHeaderSize,bmpFile);						// read DIB header size?
+			read32(&width,bmpFile);									// width? Good thing to save for later.
+			read32(&imageHeight,bmpFile);							// Height? Negative means the data is right side up. Go figure..
+			rightSideUp = imageHeight<0;							// Set a bool about that bit.
+			height = abs(imageHeight);								// Bloody weird encrypting.
+			read16(&aWord,bmpFile);									// Grab a couple bytes.
+			if (aWord == 1) {											// if the next word is 1? What's this mean? Needs to be though.
+				read16(&imageDepth,bmpFile);						// color depth.
+				if (imageDepth == 24 || imageDepth == 32) {	// We can do 24 or 32 bits..
+					pixBytes = imageDepth / 8;						// Bytes / pixel
+					read32(&aLong,bmpFile);							// Grab 4 bytes.
+					if (!aLong) {										// And no compression!
+						bytesPerRow = width * pixBytes;			// Data takes up this much, but..
+						while(bytesPerRow % 4) bytesPerRow++;	// We need to pad it to a multiple of 4.
+						success = true;								// Made it this far? We can do this!
+					}
 				}
 			}
 		}
