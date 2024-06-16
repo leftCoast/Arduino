@@ -34,7 +34,7 @@ libraries/LC_handheld
 libraries/Teensy-RAM-Monitor
 libraries/ANSI/
 libraries/LC_lilOS/
-libraries/LC_SDTools*
+libraries/LC_SDTools/
 libraries/WaveHC/
 libraries/LC_teensy_1947
 libraries/MD_MIDIFile*
