@@ -108,9 +108,13 @@
 #define E_NOTE			Q_NOTE/2.0
 #define S_NOTE			Q_NOTE/4.0
 
+
+
+
 // ***************************************************************************************
-// Your classic tone playing object. This can tell you when this one tone is finished.
+// Your classic tone playing object. This can tell you when (this one) tone is finished.
 // ***************************************************************************************
+
 
 class toneObj : public	timeObj {
 
@@ -125,10 +129,12 @@ class toneObj : public	timeObj {
 };
 
 
+
 // ***************************************************************************************
-// Play a tune. basically a list of notes and rests. Use a toneObj above to play them.
-// This would be a note..
+// A tune is basically a list of notes and rests. This is a note or a rest. Basically a
+// chunk of time.
 // ***************************************************************************************
+
 
 class note :	public linkListObj {
 
@@ -143,10 +149,13 @@ class note :	public linkListObj {
 				float	mMs;
 };
 
+
 				
 // ***************************************************************************************
-// And here is the note list, or tune. Single voice.
+// And here is the note list, or tune. Single voice. This object will feed notes, (above)
+// to the toneOBj, (above that) to create your melody.
 // ***************************************************************************************
+
 
 class tune :	public idler,
                public linkList {
@@ -170,7 +179,8 @@ class tune :	public idler,
 
 
 // ***************************************************************************************
-// Basically the same as a tune but.. Build from a MIDI file. (Single voice)
+// Basically the same as a tune (above) but.. Instead of adding notes by hand.. Build from
+// reading in a MIDI file. (Single voice)
 // ***************************************************************************************
 
 

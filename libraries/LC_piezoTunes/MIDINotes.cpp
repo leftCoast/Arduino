@@ -23,7 +23,7 @@ void fileError(const char* function) {
 }
 
 
-char  buff[5];	// Used by the file rippers to do the 4 char strings stuff.
+char  buff[5];	// Used by the file rippers to do the 4 char string stuff.
 
 
 // Take a raw 4 char text buffer and output a 4 char c string WITH '\0'. This doesn't
@@ -96,7 +96,7 @@ bool readTrackHeader(trackHeader* theHeader, File MIDIFile) {
 
    if (MIDIFile.available()) {									// If we have any bytes left..
 		if (MIDIFile.read(&theHeader->chunkID, 4)==4) {		// If we can grab the bytes..
-			if (read32(&theHeader->chunkSize,MIDIFile)) {	// Can we grab chink size?
+			if (read32(&theHeader->chunkSize,MIDIFile)) {	// Can we grab chunk size?
 				return true;											// If we made it here, we're a success!
 			}																//
 		}																	//
@@ -111,7 +111,7 @@ bool readEventHeader(eventHeader* header, File MIDIFile) {
 
    byte twoNibbles;
    
-	if (MIDIFile.available()) {									// If we have any bytes left..
+	if (MIDIFile.available()) {										// If we have any bytes left..
 		if (varLenToValue(&header->deltaTime,MIDIFile)) {		// Get the packed delta time.
 			if (MIDIFile.read(&twoNibbles, 1)==1) {				// Grab a byte for event & channel.
 				header->eventType = twoNibbles;						// Start unpacking the nibbles.
@@ -121,8 +121,8 @@ bool readEventHeader(eventHeader* header, File MIDIFile) {
 				header->channel = twoNibbles & 0x0F;				// Stamp the lower nibble here.
 				if (MIDIFile.read(&twoNibbles, 1)==1) {			// Grab another byte.
 					header->param1 = twoNibbles;						// Stuff it into param1.
-					if (MIDIFile.read(&twoNibbles, 1)==1) {		// Grab our lasy byte..
-						header->param2 = twoNibbles;					// Stuff it into param1.
+					if (MIDIFile.read(&twoNibbles, 1)==1) {		// Grab our last byte..
+						header->param2 = twoNibbles;					// Stuff it into param2.
 						return true;										// If we got here, it's a success!
 					}															//
 				}																//
@@ -132,6 +132,7 @@ bool readEventHeader(eventHeader* header, File MIDIFile) {
 	fileError(__func__);													// Show error here.
 	return false;															// And return a fail.
 }
+
 
 // There are basically note events and Meta events. And a third I've not seen. This looks
 // at an event Header, and says whether its Meta or not.
@@ -198,7 +199,7 @@ void showTrackHeader(trackHeader* theHeader) {
 }
 
 
-// Just like the others. Just read the track header and wonder what it has in it? This'll
+// Just like the others. Just read the event header and wonder what it has in it? This'll
 // print it out.
 void showEventHeader(eventHeader* theHeader) {
 
@@ -220,7 +221,7 @@ void showMetaEvent(metaEvent* theEvent) {
 
 
 // This'll read through a MIDI file. And, using the functions above, show you what it
-// thinks is in there.
+// thinks is in there. Basically a debugging tool
 void decodeFile(const char* filePath) {
 
    BYTE_SWAP

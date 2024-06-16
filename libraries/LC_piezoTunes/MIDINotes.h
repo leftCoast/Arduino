@@ -1,7 +1,7 @@
 #ifndef MIDINotes_h
 #define MIDINotes_h
 
-#include <Arduino.h>
+
 #include <SD.h>
 
 

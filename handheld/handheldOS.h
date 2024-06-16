@@ -4,7 +4,7 @@
 #include <lilOS.h>
 
 #define SCREEN_PIN              25
-#define BEEP_PIN                23
+#define BEEP_PIN                A14
 
 
 enum  apps { homeApp = HOME_PANEL_ID, fileOpenApp, fileSaveApp, starTrekApp, breakoutApp, calcApp, rgnTestApp, iconEditApp, grenadeApp, settApp, nextApp }; // settApp,
