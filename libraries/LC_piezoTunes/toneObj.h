@@ -109,22 +109,23 @@
 #define S_NOTE			Q_NOTE/4.0
 
 
+// **** TO READ : SET YOUR EDITOR TAB TO 3 SPACES, OR THIS'LL LOOK LIKE A MESS. ****
 
-
+ 
 // ***************************************************************************************
-// Your classic tone playing object. This can lay a tone and tell you when (this one) tone
-// is finished.
+// Your classic tone playing object. This can play a tone and tell you when (this one)
+// tone is finished.
 //
-// This takes a pin number and will play a tone on this pin. (Needs to be able to play a 
-// tone). Now, added to this, it can tell you when it's tone has ended. An that's the
-// important bit. If we have a list of tones along with times that they should last.. We
-// can do a tune.
+// This takes a pin number and will play a tone on this pin. (The pin needs to be able to
+// play a tone). Now, added to this, it can tell you when it's tone has ended. An that's
+// the important bit. If we have a list of tones along with times that they should last..
+// We can play a tune.
 //
 // Take a tone & time from our list, pop it in here and watch 'till this says it's done,
 // them pop in the next tone. 
 //
 // So we need a list of tones : class tune is our list.
-// And we need notes to plat  : class note is our note.
+// And we need notes to play  : class note is our note.
 // ***************************************************************************************
 
 
@@ -179,21 +180,41 @@ class note :	public linkListObj {
 // Probably during setup(). And you have already created your toneObj "mrTone" with it's
 // pin number.
 //
-// The start would look like..
+// To create and play a song called "Winner" on pin "tonePin"..
+// 
+// Create the objects. Most likely global.
+//
+// toneObj	mrTone(tonePin);
+// tune		WinnerTune;
+//
+//
+// Fill the notes, Typically during setup(). for example..
+//
+// WinnerTune.addNote(NOTE_E6,Q_NOTE);
+// WinnerTune.addNote(NOTE_E6,Q_NOTE);
+// WinnerTune.addNote(NOTE_C6,E_NOTE);
+// WinnerTune.addNote(NOTE_D6,E_NOTE);
+//
+//
+// Start the tune playing..
 //
 // WinnerTune.startTune(&mrTone);
+//	
+// NOTE: See the '&' up ^^ there? You are not handing WinnerTune the actual MrTone. You
+// are just telling WinnerTune where MrTone is. This is pointers. And some Arduino people
+// fear them like nuclear winter. Don't fear the pointers.
+//
 //
 // And in loop(), you could tell when the tune is completed by asking..
 //
 // WinnerTune.playing();
 //
-// Tells if it's playing or not.
 //
 // And that's about it.
 // 
 // No wait, ONE LAST THING. As in ALL Left Coast things. Make the first function call in 
-// loop() be  idle(); This will run everything in the background like these tunes. While
-// your code can do other things.
+// loop() be  idle(); This will run everything in the background, like these tunes. While
+// your code can be doing other things.
 // ***************************************************************************************
 
 
@@ -219,8 +240,9 @@ class tune :	public idler,
 
 
 // ***************************************************************************************
-// Basically the same as a tune (above) but.. Instead of adding notes by hand.. Build your
-// note list by reading in a MIDI file. (Single voice) Ain't that fancy? A LOT easer too!
+// MIDItune inherits from tune. This means everything you could do with tune, you can do
+// with MIDItune. But, MIDItune adds the ability of building it's list of notes from a
+// MIDI file from your SD card. (Single voice) Ain't that fancy? A LOT easer too!
 //
 // To use this? First you'll need to create your MIDI file with basically a one finger
 // tune. How you do that is completely up to you.
