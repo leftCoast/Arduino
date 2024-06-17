@@ -10,7 +10,7 @@ cardIndex::cardIndex(int inNumCards)
 }
 
 
-// Destructor, nothing for us to do.
+// Destructor, nothing for us to do. Ancestors do it all.
 cardIndex::~cardIndex(void) { }
 
 
@@ -28,14 +28,14 @@ void cardIndex::loadList(void) {
 }
 	
 
-// Like it says, we deal a card. Returns the index of the card we delt. Or -1 for no card.	
+// Like it says, we deal a card. Returns the index of the card we delt. Or 0 for no card.	
 int cardIndex::dealCard(void) {
 
 	int			select;
 	indexObj*	theNode;
 	int			theIndex;
 	
-	theIndex = NO_CARD;										// Default for fail. Or no cards left.
+	theIndex = NO_CARD;										// Default for fail. Or, no cards left.
 	if (numRemain) {											// If we have cards to deal..
 		select = random(0,numRemain);						// Choose a random card.
 		theNode = (indexObj*)getByIndex(select);		// Grab this one out of the list.
@@ -46,7 +46,7 @@ int cardIndex::dealCard(void) {
 			numRemain--;										// Bump down our deck count.
 		}															//
 	}																//
-	return theIndex;											// Return the card's index. Or -1 for no card.
+	return theIndex;											// Return the card's index. Or 0 for no card.
 }			
 
 

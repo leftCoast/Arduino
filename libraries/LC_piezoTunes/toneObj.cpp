@@ -8,14 +8,14 @@
 
 
 // ***************************************************************************************
-// Your classic tone playing object. This can tell you when the tone is finished.
+// Your classic tone playing object. This can tell you when it's tone is finished.
 // ***************************************************************************************
 
 
 toneObj::toneObj(int inPin) {
 
 	mPin = inPin;
-	setTime(.001,true);	// A bit of a hack. Currently timeObj has three states, preset, running and expired. This forces expired.
+	setTime(.001,true);	// A bit of a hack. - This forces a quick expired state.
 }
 
 
@@ -148,6 +148,8 @@ MIDItune::MIDItune(void)
 MIDItune::~MIDItune(void) { }
 
 
+/*
+// Debugging..
 void show(char* msg,float absTime, float deltaTime) {
 
 	Serial.print(msg);
@@ -156,6 +158,7 @@ void show(char* msg,float absTime, float deltaTime) {
 	Serial.print("\tDelta time : ");
 	Serial.println(deltaTime,1);
 }
+*/
 
 
 void MIDItune::addMIDINote(bool Dn,int MIDIKey,float deltaTime) {
@@ -163,7 +166,7 @@ void MIDItune::addMIDINote(bool Dn,int MIDIKey,float deltaTime) {
 	if (Dn) {														// If we got a key down event..
 		if (holding) {												// If we still have a note down..
 			addNote(MIDI2Freq(heldNote),deltaTime);		// Single voice, cut off holding note here.
-		} else if (deltaTime) {									// If there is a delta time..
+		} else if (deltaTime) {									// Else NOT holding a note. AND there IS a delta time..
 			addNote(REST,deltaTime);							// Then we add a rest to fill the time.
 		}																//
 		heldNote = MIDIKey;										// Update the new holding MIDI note.
@@ -196,60 +199,59 @@ void MIDItune::createTune(const char*	filePath) {
    float			deltaMs;
    bool        done;
 		
-	SDFileErr = false;																							// Clear the global file error.
-	MIDIFile = SD.open(filePath, FILE_READ);																// See if we can open the MIDI file.
-	if (MIDIFile) {																								// If we got the MIDI file..
-		dumpList();																									// Dump any list of notes we already have.
-		absTimeMs	= 0;																							// Time starts at zero.
-		MsPerTick	= 1;																							// One is a good default for this.
-		holding		= false;																						// Clear the holding flag.			
-		if (readMIDIHeader(&theMIDIHeader, MIDIFile)) {													// If we can read the MIDI header..
-			if (readTrackHeader(&theTrackHeader, MIDIFile)) {											// If we can read the track header..
-				done = false;																						// Ok, but we're not done.
-				while(!done && !SDFileErr) {																	// Loop 'till we're done, or hit a file error.
-					if (readEventHeader(&anEventHeader, MIDIFile)) {									// If we can read an event header..
-						if (isMetaTag(&anEventHeader)) {														// If this is a Meta event..
-							if (readMetaEvent(&anEventHeader, &aMetaEvent, MIDIFile)) {				// If we can read the meta event.. (sheesh!)
-								switch(aMetaEvent.metaType) {													// Let's see if it's a type we need to deal with.
-									case 0x2F : done = true; break;											// 0x2F : End of file, we're done!
-									case 0x51 :																		// 0x51 : The info. for doing tempo math.
-										microsPerBeat = 0;														// Ok, zero out Micros per beat.
-										MIDIFile.read(&aByte, 1);												// Grab a byte.
-										microsPerBeat = aByte;													// This byte should be micros per beat.
-										microsPerBeat = microsPerBeat << 16;								// Well actually The high byte is.
-										MIDIFile.read(&aByte, 1);												// So we grab the next byte..
-										temp = 0;																	// Zero out temp. (Probably not necessary)
-										temp = aByte;																// Stuff that byte into (unsigned long) temp.
-										temp = temp << 8;															// Now slide out over 8 bits.
-										microsPerBeat = microsPerBeat | temp;								// Stomp these 8 bits into the 2nd byte of this mircos thing.
-										MIDIFile.read(&aByte, 1);												// Grab another byte.
-										temp = 0;																	// Zero out temp again.
-										temp = aByte;																// Stuff this read byte into the low i8 bits of temp.
-										microsPerBeat = microsPerBeat | aByte;								// Stuff this value into the low 8 bits of the micros thing.
-										MsPerTick = (microsPerBeat/1000.0)/theMIDIHeader.timeDiv;	// Calculate the Ms per tick.
-									break;																			// Ok done, let's bolt!
-									default :																		// In all other cases..
-										done = !jumpMetaEvent(&aMetaEvent, MIDIFile);					// We just jump past the event.
-									break;																			// And bail.
-								}																						//
-							}																							//
-						} else {																						// Else? else what? Oh yeah. Else it's NOT a Meta tag.
-							switch(anEventHeader.eventType) {												// Check the event type..
-								case MIDI_KEY_DN :																// A key down event..
-									deltaMs = anEventHeader.deltaTime * MsPerTick;						// Calculate the delta time in milliseconds.
-									addMIDINote(true,anEventHeader.param1,deltaMs);						// Pass in the midi note to the assembly people.
-								break;																				// Bolt!
-								case MIDI_KEY_UP :																// Key up event..
-									deltaMs = anEventHeader.deltaTime * MsPerTick;						// Again, calculate the delta time in milliseconds. 
-									addMIDINote(false,anEventHeader.param1,deltaMs);					// And pass the midi note off to the assembly people.
-								break;																				// And we bolt.
-							}																							//
-						}																								//
-					}																									//
-				}																										//
-			}																											//
-		}																												//
-		MIDIFile.close();																							// The last thing we do, is close the file.
-	}																													//
+	SDFileErr = false;																						// Clear the global file error.
+	MIDIFile = SD.open(filePath, FILE_READ);															// See if we can open the MIDI file.
+	if (MIDIFile) {																							// If we got the MIDI file..
+		dumpList();																								// Dump any list of notes we already have.
+		absTimeMs	= 0;																						// Time starts at zero.
+		MsPerTick	= 1;																						// One is a good default for this.
+		holding		= false;																					// Clear the holding flag.			
+		if (readMIDIHeader(&theMIDIHeader, MIDIFile)) {												// If we can read the MIDI header..
+			if (readTrackHeader(&theTrackHeader, MIDIFile)) {										// If we can read the track header..
+				done = false;																					// Ok, but we're not done.
+				while(!done && !SDFileErr) {																// Loop 'till we're done, or hit a file error.
+					if (readEventHeader(&anEventHeader, MIDIFile)) {								// If we can read an event header..
+						if (isMetaTag(&anEventHeader)) {													// If this is a Meta event..
+							readMetaEvent(&anEventHeader, &aMetaEvent, MIDIFile);					// Read the meta event.. (sheesh!)
+							switch(aMetaEvent.metaType) {													// Let's see if it's a type we need to deal with.
+								case 0x2F : done = true; break;											// 0x2F : End of file, we're done!
+								case 0x51 :																		// 0x51 : The info. for doing tempo math.
+									microsPerBeat = 0;														// Ok, zero out Micros per beat.
+									MIDIFile.read(&aByte, 1);												// Grab a byte.
+									microsPerBeat = aByte;													// This byte should be micros per beat.
+									microsPerBeat = microsPerBeat << 16;								// Well actually The high byte is.
+									MIDIFile.read(&aByte, 1);												// So we grab the next byte..
+									temp = 0;																	// Zero out temp. (Probably not necessary)
+									temp = aByte;																// Stuff that byte into (unsigned long) temp.
+									temp = temp << 8;															// Now slide out over 8 bits.
+									microsPerBeat = microsPerBeat | temp;								// Stomp these 8 bits into the 2nd byte of this mircos thing.
+									MIDIFile.read(&aByte, 1);												// Grab another byte.
+									temp = 0;																	// Zero out temp again.
+									temp = aByte;																// Stuff this read byte into the low i8 bits of temp.
+									microsPerBeat = microsPerBeat | aByte;								// Stuff this value into the low 8 bits of the micros thing.
+									MsPerTick = (microsPerBeat/1000.0)/theMIDIHeader.timeDiv;	// Calculate the Ms per tick.
+								break;																			// Ok done, let's bolt!
+								default :																		// In all other cases..
+									done = !jumpMetaEvent(&aMetaEvent, MIDIFile);					// We just jump past the event.
+								break;																			// And bail.
+							}																						//
+						} else {																					// Else? else what? Oh yeah. Else it's NOT a Meta tag.
+							switch(anEventHeader.eventType) {											// Check the event type..
+								case MIDI_KEY_DN :															// A key down event..
+									deltaMs = anEventHeader.deltaTime * MsPerTick;					// Calculate the delta time in milliseconds.
+									addMIDINote(true,anEventHeader.param1,deltaMs);					// Pass in the midi note to the assembly people.
+								break;																			// Bolt!
+								case MIDI_KEY_UP :															// Key up event..
+									deltaMs = anEventHeader.deltaTime * MsPerTick;					// Again, calculate the delta time in milliseconds. 
+									addMIDINote(false,anEventHeader.param1,deltaMs);				// And pass the midi note off to the assembly people.
+								break;																			// And we bolt.
+							}																						//
+						}																							//
+					}																								//
+				}																									//
+			}																										//
+		}																											//
+		MIDIFile.close();																						// The last thing we do? Close the file.
+	}																												//
 }
            

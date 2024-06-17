@@ -112,7 +112,19 @@
 
 
 // ***************************************************************************************
-// Your classic tone playing object. This can tell you when (this one) tone is finished.
+// Your classic tone playing object. This can lay a tone and tell you when (this one) tone
+// is finished.
+//
+// This takes a pin number and will play a tone on this pin. (Needs to be able to play a 
+// tone). Now, added to this, it can tell you when it's tone has ended. An that's the
+// important bit. If we have a list of tones along with times that they should last.. We
+// can do a tune.
+//
+// Take a tone & time from our list, pop it in here and watch 'till this says it's done,
+// them pop in the next tone. 
+//
+// So we need a list of tones : class tune is our list.
+// And we need notes to plat  : class note is our note.
 // ***************************************************************************************
 
 
@@ -131,8 +143,11 @@ class toneObj : public	timeObj {
 
 
 // ***************************************************************************************
-// A tune is basically a list of notes and rests. This is a note or a rest. Basically a
-// chunk of time.
+// This is a note or a rest.
+//
+// Basically a chunk of time, either playing a note or NOT playing a note. class note is
+// designed to be strung into a list by class tune. Then class tune can read down it's 
+// list of notes, one by one, feeding notes to class toneObj.
 // ***************************************************************************************
 
 
@@ -152,8 +167,33 @@ class note :	public linkListObj {
 
 				
 // ***************************************************************************************
-// And here is the note list, or tune. Single voice. This object will feed notes, (above)
-// to the toneOBj, (above that) to create your melody.
+// And here is the note list, or tune. Single voice.
+//
+// This object will feed notes, (above) to the toneOBj, (above that) to create your
+// melody. You build this list by feeding notes into it through the addNote() method. The
+// idea is that when you create one of these tune objects, you'll give it the name of the
+// tune it contains. You can have as many saved tunes as you like, as long as you have
+// enough memory to hold them.
+//
+// When you want to play a tune, say.. WinnerTune. You have already loaded in the notes.
+// Probably during setup(). And you have already created your toneObj "mrTone" with it's
+// pin number.
+//
+// The start would look like..
+//
+// WinnerTune.startTune(&mrTone);
+//
+// And in loop(), you could tell when the tune is completed by asking..
+//
+// WinnerTune.playing();
+//
+// Tells if it's playing or not.
+//
+// And that's about it.
+// 
+// No wait, ONE LAST THING. As in ALL Left Coast things. Make the first function call in 
+// loop() be  idle(); This will run everything in the background like these tunes. While
+// your code can do other things.
 // ***************************************************************************************
 
 
@@ -179,8 +219,44 @@ class tune :	public idler,
 
 
 // ***************************************************************************************
-// Basically the same as a tune (above) but.. Instead of adding notes by hand.. Build from
-// reading in a MIDI file. (Single voice)
+// Basically the same as a tune (above) but.. Instead of adding notes by hand.. Build your
+// note list by reading in a MIDI file. (Single voice) Ain't that fancy? A LOT easer too!
+//
+// To use this? First you'll need to create your MIDI file with basically a one finger
+// tune. How you do that is completely up to you.
+//
+// Next get the MIDI file onto an SD card that you can read with your Arduino. Again, this
+// is something you'll have to solve.
+//
+// Create your toneObj just like before.
+//
+// Instead of creating a tune object, create a MIDItune object.
+//
+// Instead of filling it with notes by hand, call createTune(MIDIFilePath); To create the
+// list of tones and rests.
+//
+// Then play the tune just like you played tune above. I'll look like..
+//
+// Create the objects..
+//
+// toneObj mrTone(tonePin);
+// MIDItune	WinnerTune;
+//
+//
+// Fill the notes..
+//
+// WinnerTune.createTune("winner.mid");
+//
+// 
+// Start the tune playing..
+//
+// WinnerTune.startTune(&mrTone);
+//
+//
+// Check when done..
+//
+// WinnerTune.playing();
+//
 // ***************************************************************************************
 
 

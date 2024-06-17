@@ -20,17 +20,18 @@
 //
 // 4) When the hand is over, just call loadList() to reshuffle the cards.
 //
-// 5) myCards.getNumRemain(); Will return the number of cards remaining tobe delt.
+// 5) myCards.getNumRemain(); Will return the number of cards remaining to be delt.
 //
 // That's all there is to it. 
 //
 // But it doesn't have to be playing cards. It could be custom game cards. It could be
-// picking words from a list? Whatever list of things you need to be chosen one by one.
+// picking words from a list? Whatever list of things you need to be chosen from, one by
+// one.
 
 
 #include <lists.h>
 
-#define NO_CARD	0	// What to pass back if there are no more cards when asked.
+#define NO_CARD	0	// What to pass back if there are no more cards.
 
 
 // Ignore this class, its used by the class you actually will interact with.
