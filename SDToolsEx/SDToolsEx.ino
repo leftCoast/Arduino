@@ -18,6 +18,8 @@
 #define PATH_CHARS   255   // Could be less, depending on how deep into the SD drive you look.
 
 
+enum pathPrefix { setRoot, upOne, upNPath, fullPath, relPath };  // Prefixes people typically use for entering path paramiters.
+
 enum commands {   noCommand,  // ALWAYS start with noCommand. Or something simlar.
                   printWD,    // The rest is up to you. help would be a good one. Have it list
                   changeDir,  // What the other commands are, how they work and what they do.
@@ -41,7 +43,7 @@ void setup() {
 		while (true);                                         // Lock processor here forever.
 	}
   screen->begin();
-	screen->fillScreen(&blue);                                    // Looks like we have a screen, fill it with ??.
+	screen->fillScreen(&green);                                    // Looks like we have a screen, fill it with ??.
 
 	if (!SD.begin(SD_CS)) {             // If we can not initialze a SD drive.
 		Serial.println("No SD Drive!");  // Tell the user.
@@ -111,16 +113,15 @@ bool checkFile(pathItem*	item) {
 void listDirectory(void) {
 
   pathItem*		trace;
-  pathItem*		curItem;
 
-  curItem = wd.getCurrItem();
-  if (curItem->getType()==fileType) {
+  Serial.println("list dir");
+  if (wd.getPathType()==fileType) {
      Serial.println("Sorry, this is a file, not a directory.");
      return;
   } else {
     wd.refreshChildList();
     if (wd.numChildItems()==0) {
-      Serial.println("Tmkdir dog cathis directory is empty.");
+      Serial.println("This directory is empty.");
       return;
     } else {
       trace = wd.childList;																	// Grab a pointer to the first child.
@@ -143,15 +144,13 @@ void listDirectory(void) {
 void makeDirectory(void) {
 
   tempStr       param;
-  pathItemType  typeResult;
   char*         pathBuff;
   int           numBytes;
 
   pathBuff = NULL;                                                              // Start all these at NULL.
   if (ourParser.numParams()==1) {                                               // If they typed in something past the command.
     param.setStr(ourParser.getParamBuff());                                     // We get the first parameter, assume its the new folder's name.
-    typeResult = wd.checkPathPlus(param.getStr());                                 // We'll go have a look.
-    switch (typeResult) {                                                       // IF we did this, what would happen?
+    switch (wd.getPathType()) {                                                 // IF we did this, what would happen?
       case rootType     : Serial.println("Root? Not possible.");      break;    // Not possible, insaine.
       case folderType   : Serial.println("Foler already exists.");    break;    // Can't alreadey there.
       case fileType     : Serial.println("That's a file already.");   break;    // There's a file there by that name.
@@ -177,63 +176,88 @@ void makeDirectory(void) {
   }
 }
 
+//enum pathPrefix { setRoot, upOne, upNPath, fullPath, relPath };
 
-// [cd] Change the working directory.
-//          /  -> Set to root.
-//          .. -> Go up one.
-//     /name.. -> Full path.
-//        name -> Local folder.
 
+//      /  -> Set to root.
+//      .. -> Go up one.
+//      /name.. -> Full path.
+//      name -> Local folder.
+pathPrefix decodePrefix(const char* param) {
+
+  if (!strcmp(param,"/")) return setRoot;                   // Just "/" alone means root. setRoot.
+  else if (param[0]=='/') return fullPath;                  // Starts with '/' + more..   fillPath.
+  else if (!strcmp(param,"..")) return upOne;               // Just ".." means go up one. upOne.
+  else if (param[0]=='.' && param[1]=='.') return upNPath;  // Starts with ".." + more..  upNPath.
+  else return relPath;                                      // Default, relitive path.    relPath.
+}
+
+
+// [cd] Change the working directory. (See prefix commands above.)
 void changeDirectory(void) {
 
-  tempStr       param;                              // TempStr, auto allocates and holds strings during function.
+  tempStr       param;                                      // TempStr, auto allocates and holds strings during function.
   tempStr       savedPath;
-  pathItem*     curItem;
-  int           numBytes;
-  char*         pathBuff;
-
-  pathBuff = NULL;                                                // These pointer things start at NULL.
-  savedPath.setStr(wd.getPath());                                 // Save the path we have, just in case.
-  curItem = wd.getCurrItem();                                     // Nice to know what we're looking at.
-  if (ourParser.numParams()==1) {                                 // If they typed in a parameter (name).
-    param.setStr(ourParser.getParamBuff());                       // We grab the name.
-    if (!strcmp("..",param.getStr())) {                           // If they want to go back up a click..
-      if (curItem->getType()==rootType) {                         // If we're at the root already..
-        Serial.println("Sorry, already at root.");                // Send error. Can't one up root.
-      } else {                                                    // Else, not root?
-        wd.popItem();                                             // Go ahead and pop off the item.
-      }                                                           //
-    } else if (!strcmp("/",param.getStr())) {                     // Else if they handed us the root itself.
-      wd.setPath("/");                                            // Whatever, just set it at root and be dne wih it.
-    } else if (param.getStr()[0]=='/') {                          // Else, not root, but starts with /? Full path.
-      if (!wd.setPath(param.getStr())) {                          // If we can't set this path..
-        wd.setPath(savedPath.getStr());                           // Put it back..
-        Serial.println("Path not found.");                        // Error.
-      } else {                                                    // Else, we got a path, check it out.
-        if (wd.getCurrItem()->getType()==fileType) {              // If this is pointing to a folder..
-          wd.setPath(savedPath.getStr());                         // Put it back..
-          Serial.println("Path is not a directory.");             // Working DIRECTORY can't be a file.
-        }                                                         //
-      }                                                           //
-    } else {                                                      // Else, this is a relitive path.
-      numBytes = wd.numPathBytes();                               // Num Bytes..
-      numBytes = numBytes + param.numChars() + 1;                 // Plus these and one.
-      if (resizeBuff(numBytes,&pathBuff)) {                       // If we can grab some RAM..
-        strcpy(pathBuff,wd.getPath());                            // Stuff in our path.
-        strcat(pathBuff,param.getStr());                          // Add the param text.
-        if (!wd.setPath(pathBuff)) {                              // If it doesn't work..
-          wd.setPath(savedPath.getStr());                         // Put it all back..
-          Serial.println("Path not found.");                      // Let 'em know.
-        } else {                                                  // Else we have a valid path..
-          if (wd.getCurrItem()->getType()==fileType) {            // If this is pointing to a file..
-            wd.setPath(savedPath.getStr());                       // Put it all back..
-            Serial.println("Path is not a directory.");           // Let 'em know.
-          }                                                       //
-        } 
-        resizeBuff(0,&pathBuff);                                  // Recycle the RAM.
-      } else {                                                    //
-        Serial.println("Memory error.");                          // Not enough RAM. WOW!
-      }
+ 
+  savedPath.setStr(wd.getPath());                           // Save the path we have, just in case.
+  if (ourParser.numParams()==1) {                           // If they typed in a parameter (name/path).
+    param.setStr(ourParser.getParamBuff());                 // We grab the name.
+    switch(decodePrefix(param.getStr())) {                  // Decide on how the param is prefixed..
+      case setRoot  :                                       // Just set to root..
+        Serial.println("setRoot");
+        wd.setPath("/");                                    // Easy peasy!
+      break;                                                //
+      case upOne    :                                       // Want to go up one deirectory..
+        Serial.println("upOne");
+        if (wd.getPathType()==rootType) {                   // If we're at the root already..
+          Serial.println("Sorry, already at root.");        // Send error. Can't one up more root.
+        } else {                                            // Else, not root?
+          Serial.println("Popping");
+          wd.popItem();                                     // Go ahead and pop off the item.
+        }                                                   //
+      break;                                                //
+      case upNPath  :                                       // Up then, relitive path..
+        Serial.println("upNPath");
+        if (wd.getPathType()==rootType) {                   // If we're at the root already..
+          Serial.println("Sorry, already at root.");        // Send error. Can't one up more root.
+        } else {                                            // Else, not root?
+          wd.popItem();                                     // Go ahead and pop off the item.
+          if (!wd.addPath(&(param.getStr()[2]))) {          // If we can't set this concatinated path..
+            wd.setPath(savedPath.getStr());                 // Put it all back..
+            Serial.println("Path not found.");              // Error.
+          } else {                                          // Else, we got a path. Check it out.
+            if (wd.getPathType()==fileType) {               // If this is pointing to a file..
+              wd.setPath(savedPath.getStr());               // Put it all back..
+              Serial.println("Path is not a directory.");   // Working DIRECTORY can't be a file.
+            }                                               //
+          }                                                 //
+        }                                                   //
+      break;                                                // Done!
+      case fullPath :                                       // Full path..
+         Serial.println("fullPath");
+        if (!wd.setPath(param.getStr())) {                  // If we can't set this path..
+          wd.setPath(savedPath.getStr());                   // Put it all back..
+          Serial.println("Path not found.");                // Error.
+        } else {                                            // Else, we got a path, check it out.
+          if (wd.getPathType()==fileType) {                 // If this is pointing to a file..
+            wd.setPath(savedPath.getStr());                 // Put it all back..
+            Serial.println("Path is not a directory.");     // Working DIRECTORY can't be a file.
+          }                                                 //
+        }                                                   //
+      break;                                                // Skipping off..
+      case relPath  :                                       // Relitive path..
+        Serial.println("relPath");
+        if (wd.addPath(param.getStr())) {                   // If we can add this relitive path bit..
+          if (wd.getCurrItem()->getType()==fileType) {      // If this is pointing to a file..
+            wd.setPath(savedPath.getStr());                 // Put it all back..
+            Serial.println("Path is not a directory.");     // Let 'em know.
+          }                                                 //
+          Serial.println("success!");
+        } else {                                            // Else, couldin't find the file.
+          wd.setPath(savedPath.getStr());                   // Put it all back..
+          Serial.println("Path not found.");                // Let 'em know.
+        }                                                   //
+      break;                                                // We're off..
     }
   }
 }
@@ -247,6 +271,7 @@ void deleteItem(void) {
 
   if (ourParser.numParams()==1) {                 // If they typed in a parameter (name).
     param.setStr(ourParser.getParamBuff());       // We grab the name.
+    
     if (condemmed.setPath(wd.getPath())) {
       if (!condemmed.deleteCurrentItem()) {
         Serial.println("File error deleting item.");
