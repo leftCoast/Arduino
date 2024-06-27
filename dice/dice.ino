@@ -9,23 +9,26 @@
 #define  TAP_MIN  20
 
 
-Adafruit_8x8matrix   matrix;
+//Adafruit_8x8matrix1   matrix1;
+
 
 enum        states { waiting, thinking, showing };
 states      ourState;
 tapSensor   ourTapSensor(3);
-dice        ourDie;
+dice        ourDie[2];
 
 
 void setup(void) {
    
    timeObj  serialTimeout(5000);
    
-   Serial.begin(57600);
-   while(!Serial&&!serialTimeout.ding());
-   Serial.println("Hello?");
-  ourDie.begin(0x70);
-  ourDie.clearDie();
+  Serial.begin(57600);
+  while(!Serial&&!serialTimeout.ding());
+  Serial.println("Hello?");
+  ourDie[0].begin(0x70);
+  ourDie[0].clearDie();
+  ourDie[1].begin(0x71);
+  ourDie[1].clearDie();
   ourTapSensor.begin();
   ourState = waiting;
 }
@@ -33,29 +36,35 @@ void setup(void) {
 
 
 void loop(void) {
+
+   int  num;
    
    idle();
-   
    switch(ourState) {
       case waiting   :
          if (ourTapSensor.getTapVal()>TAP_MIN) {
-            ourDie.doFuzz(THINK_MS);
+            ourDie[0].doFuzz(THINK_MS);
+            ourDie[1].doFuzz(THINK_MS);
             ourState = thinking;
          }
       break;
       case thinking  :
          if (ourTapSensor.getTapVal()>TAP_MIN) {
-            ourDie.doFuzz(THINK_MS);
-         } else if (ourDie.isWaiting()) {
-            ourDie.showNum(random(1,7),SHOW_MS);
+            ourDie[0].doFuzz(THINK_MS);
+            ourDie[1].doFuzz(THINK_MS);
+         } else if (ourDie[0].isWaiting()) {
+            num = random(1,7);
+            ourDie[0].showNum(num,SHOW_MS);
+            ourDie[1].showNum(num,SHOW_MS);
             ourState = showing;
          }
       break;
       case showing   :
          if (ourTapSensor.getTapVal()>TAP_MIN) {
-            ourDie.doFuzz(THINK_MS);
+            ourDie[0].doFuzz(THINK_MS);
+            ourDie[1].doFuzz(THINK_MS);
             ourState = thinking;
-         } else if (ourDie.isWaiting()) {
+         } else if (ourDie[0].isWaiting()) {
             ourState = waiting;
          }
       break;
