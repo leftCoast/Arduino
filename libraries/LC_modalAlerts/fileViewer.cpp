@@ -90,6 +90,7 @@ void fileListItem::drawSelf(void) {
 	colorObj aColor(LC_LIGHT_BLUE);
 	bmpObj*	ourIcon;
 	
+	ourIcon = NULL;
 	if (haveFocus()) {
 		screen->fillRect(this,&aColor);
 	} else {

@@ -132,9 +132,9 @@ int handheldOS::getTonePin(void) { return BEEP_PIN; }
 
 void handheldOS::setBrightness(byte brightness) {  }
 
-char* handheldOS::getSystemFolder() { return "/system/"; }
+const char* handheldOS::getSystemFolder() { return "/system/"; }
 
-char* handheldOS::getPanelFolder(int panelID) {
+const char* handheldOS::getPanelFolder(int panelID) {
   
   switch(panelID) {
     case breakoutApp  : return "/system/appFiles/breakout/";

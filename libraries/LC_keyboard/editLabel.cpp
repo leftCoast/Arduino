@@ -9,12 +9,12 @@ editLabel::editLabel()
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(char* inText)
+editLabel::editLabel(const char* inText)
 	: label(inText),
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(char* inText, int inSize)
+editLabel::editLabel(const char* inText, int inSize)
 	: label(inText,inSize),
 	timeObj(CURSOR_BLINK) { init(); }
 
@@ -24,17 +24,17 @@ editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight)
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight, char* inText)
+editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight,const char* inText)
 	: label(inLocX,inLocY,inWidth,inHeight,inText),
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize)
+editLabel::editLabel(int inLocX, int inLocY, int inWidth,int inHeight,const char* inText,int textSize)
 	: label(inLocX,inLocY,inWidth,inHeight,inText,textSize),
 	timeObj(CURSOR_BLINK) { init(); }
 
 
-editLabel::editLabel(rect* inRect,char* inText,int textSize)
+editLabel::editLabel(rect* inRect,const char* inText,int textSize)
 	: label(inRect,inText,textSize),
 	timeObj(CURSOR_BLINK) { init(); }
 

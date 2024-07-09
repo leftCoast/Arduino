@@ -1,4 +1,5 @@
 #include <resizeBuff.h>
+#include <strTools.h>
 #include <drawObj.h>
 #include <offscreen.h>
 #include "breakout.h"
@@ -159,38 +160,40 @@ void breakout::setupBrickBitmaps(void) {
 	purpBmp	= new bitmap(BRICK_W,BRICK_H);
 	redBmp	= new bitmap(BRICK_W,BRICK_H);
 	if (greenBmp && purpBmp && redBmp) {							// If we got all three..
-		folderPtr = OSPtr->getPanelFolder(mPanelID);				// Ask the OS for our folder path.
-		pathLen = strlen(folderPtr);									// Num chars in this path..
-		pathLen = pathLen + 13;											// Add about 13 more for the file name.
-		if (resizeBuff(pathLen,&pathPtr)) {							// If we can allocate room for the full pathname.
-			strcpy(pathPtr,folderPtr);									// Start with the folder path.
-			strcat(pathPtr,"grnBar.bmp");								// Add the file name.
-			BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);	// Create the bmpObj.
-			if (BMPobj) {													// If we can read this file..
-				vPort.beginDraw(greenBmp);								// Set up to offscreen drawing to the bitmap.
-				BMPobj->draw(); 											// Draw to it..
-				vPort.endDraw();											// Restore normal drawing.
-				delete(BMPobj);											// Recycle the .bmp file object.
-			}
-			strcpy(pathPtr,folderPtr);									// Restart with the folder path.
-			strcat(pathPtr,"purpBar.bmp");							// Add the file name.
-			BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);
-			if (BMPobj) {													// If we can read this file..
-				vPort.beginDraw(purpBmp);								// Set up to offscreen drawing to the bitmap.
-				BMPobj->draw(); 											// Draw to it..
-				vPort.endDraw();											// Restore normal drawing.
-				delete(BMPobj);											// Recycle the .bmp file object.
-			}
-			strcpy(pathPtr,folderPtr);									// Restart with the folder path. Again, sigh..
-			strcat(pathPtr,"redBar.bmp");								// Add the file name.
-			BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);
-			if (BMPobj) {													// If we can read this file..
-				vPort.beginDraw(redBmp);								// Set up to offscreen drawing to the bitmap.
-				BMPobj->draw(); 											// Draw to it..
-				vPort.endDraw();											// Restore normal drawing.
-				delete(BMPobj);											// Recycle the .bmp file object.
-			}
-			resizeBuff(0,&pathPtr);										// Recycle reuse.
+		if (heapStr(&folderPtr,OSPtr->getPanelFolder(mPanelID))) {				// Ask the OS for our folder path.
+			pathLen = strlen(folderPtr);									// Num chars in this path..
+			pathLen = pathLen + 13;											// Add about 13 more for the file name.
+			if (resizeBuff(pathLen,&pathPtr)) {							// If we can allocate room for the full pathname.
+				strcpy(pathPtr,folderPtr);									// Start with the folder path.
+				strcat(pathPtr,"grnBar.bmp");								// Add the file name.
+				BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);	// Create the bmpObj.
+				if (BMPobj) {													// If we can read this file..
+					vPort.beginDraw(greenBmp);								// Set up to offscreen drawing to the bitmap.
+					BMPobj->draw(); 											// Draw to it..
+					vPort.endDraw();											// Restore normal drawing.
+					delete(BMPobj);											// Recycle the .bmp file object.
+				}																	//
+				strcpy(pathPtr,folderPtr);									// Restart with the folder path.
+				strcat(pathPtr,"purpBar.bmp");							// Add the file name.
+				BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);	// Grab another..
+				if (BMPobj) {													// If we can read this file..
+					vPort.beginDraw(purpBmp);								// Set up to offscreen drawing to the bitmap.
+					BMPobj->draw(); 											// Draw to it.
+					vPort.endDraw();											// Restore normal drawing.
+					delete(BMPobj);											// Recycle the .bmp file object.
+				}																	//
+				strcpy(pathPtr,folderPtr);									// Restart with the folder path. Again, sigh..
+				strcat(pathPtr,"redBar.bmp");								// Add the file name.
+				BMPobj = new bmpObj(0,0,BRICK_W,BRICK_H,pathPtr);	// Grab the last one.
+				if (BMPobj) {													// If we can read this file..
+					vPort.beginDraw(redBmp);								// Set up to offscreen drawing to the bitmap.
+					BMPobj->draw(); 											// Draw to it..
+					vPort.endDraw();											// Restore normal drawing.
+					delete(BMPobj);											// Recycle the .bmp file object.
+				}
+				resizeBuff(0,&pathPtr);										// Recycle reuse.
+			}																		// 
+			freeStr(&folderPtr);												// Recycle local path buff.
 		}
 	}
 }

@@ -41,7 +41,7 @@ class listener {
 class stdComBtn : public iconButton {
 
 	public:
-				stdComBtn(int xLoc,int yLoc,char* path,stdComs iconType,listener* inListener,int pixles);
+				stdComBtn(int xLoc,int yLoc,const char* path,stdComs iconType,listener* inListener,int pixles);
 	virtual	~stdComBtn(void);
 	
 	virtual	void	doAction(void);

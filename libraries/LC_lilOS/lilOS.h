@@ -106,15 +106,14 @@ class lilOS :  public idler {
 	virtual	void		loop(void);						// Tell the current panel its loop time.
 	
 	// Calls to be overwritten by used version.
-	virtual	int		getPanelWidth(void) = 0;
-	virtual	int		getPanelHeight(void) = 0;
-	virtual	void		beep(void) = 0;
-	virtual	int		getTonePin(void) = 0;
-	virtual	void		setBrightness(byte brightness) = 0;
-	virtual	char*		getSystemFolder() = 0;
-	virtual	char*		getPanelFolder(int panelID) = 0;
-	virtual	char*		stdIconPath(stdIcons theIcon);
-	
+	virtual	int			getPanelWidth(void) = 0;
+	virtual	int			getPanelHeight(void) = 0;
+	virtual	void			beep(void) = 0;
+	virtual	int			getTonePin(void) = 0;
+	virtual	void			setBrightness(byte brightness) = 0;
+	virtual	const char*	getSystemFolder() = 0;
+	virtual	const char*	getPanelFolder(int panelID) = 0;
+	virtual	const char*	stdIconPath(stdIcons theIcon);
 	
 				char*		pathBuff;			// Workspace for building up file paths.
 				panel*	mPanel;

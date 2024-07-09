@@ -29,6 +29,7 @@ alertObj::alertObj(const char* msg,listener* inListener,alertType inType,bool us
 	
 	bmpObj*	ourLabel;
 	
+	ourLabel = NULL;
 	ourListener = inListener;
 	theMsg = new textView(MSG_X,MSG_Y,MSG_W,MSG_H);
 	if (theMsg) {
@@ -97,11 +98,12 @@ void alertObj::drawSelf(void) {
 void alertObj::handleCom(stdComs comID) {
 
 	switch(comID) {
-		case okCmd		:  								//setSuccess(true); break;
-		case cancelCmd	: done = true; break;		// setSuccess(false); break;
-	}
-	if (ourListener) {
-		ourListener->handleCom(comID);
+		case okCmd		:  							//setSuccess(true); break;
+		case cancelCmd	: done = true; break;	// setSuccess(false); break;
+		default			: break;						// Should never happen, let it slide.		
+	}														//
+	if (ourListener) {								// Got a listener?
+		ourListener->handleCom(comID);			// Pass it on.
 	}
 }
 

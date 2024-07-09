@@ -105,8 +105,9 @@ void colorPicker::idle(void) {
 void colorPicker::handleCom(stdComs comID) {
 
 	switch(comID) {
-		case okCmd		:
-		case cancelCmd	: done = true; break;
+		case okCmd		:								// We see ok..
+		case cancelCmd	: done = true; break;	// We see cancel.. But do nothing?
+		default			: break;						// Should never get here.
 	}
 	if (ourListener) {
 		ourListener->handleCom(comID);

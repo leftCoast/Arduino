@@ -1,7 +1,7 @@
 
 #include <lilOS.h>
 #include <resizeBuff.h>
-
+#include <strTools.h>
 //#include <debug.h>
 
 int		nextPanel	= NO_PANEL_ID;	// What panel do we want showing now?
@@ -68,6 +68,7 @@ panel::~panel(void) {
 int panel::getPanelID(void) { return mPanelID; }
 
 
+
 // Given a filename from our folder, generate the fullpath to it.
 bool panel::setFilePath(char* inName) {
 	
@@ -77,17 +78,18 @@ bool panel::setFilePath(char* inName) {
 	
 
 	success = false;
-	folderPtr = mOSPtr->getPanelFolder(mPanelID);	// Ask the OS for our folder path.
-	if (folderPtr) {											// If we got a folder path..
-		pathLen = strlen(folderPtr);						// Num chars in this path..
-		pathLen = pathLen + strlen(inName) + 1;		// Add more for the file name and '\0'.
-		if (resizeBuff(pathLen,&mFilePath)) {			// If we can get the RAM for the path..
-			strcpy(mFilePath,folderPtr);					// Our folder path goes in.
-			strcat(mFilePath,inName);						// File name goes in.
-			success = true;									// Looks good!
-		}															//
-	}																//
-	return success;											// Return our result.
+	folderPtr = NULL;
+	if (heapStr(&folderPtr,mOSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
+		pathLen = strlen(folderPtr);										// Num chars in this path..
+		pathLen = pathLen + strlen(inName) + 1;						// Add more for the file name and '\0'.
+		if (resizeBuff(pathLen,&mFilePath)) {							// If we can get the RAM for the path..
+			strcpy(mFilePath,folderPtr);									// Our folder path goes in.
+			strcat(mFilePath,inName);										// File name goes in.
+			success = true;													// Looks good!
+		}																			//
+		freeStr(&folderPtr);													// Recycle our local copy.
+	}																				//
+	return success;															// Return our result.
 }
 
 
@@ -219,16 +221,16 @@ void lilOS::launchPanel(void) {
 void lilOS::loop(void) {
 	
 	
-	if(!mPanel && nextPanel!=(unsigned int)mPanel) {	// If have no panel and we want one.
-		launchPanel();												// Launch a new panel.
-	} else if(nextPanel!=mPanel->getPanelID()) {			// Else, if we just want a change of panels.
-		launchPanel();												// Launch the new panel.
-	}
-	if (mPanel) { mPanel->loop(); }							// As always, if there is a panel, let it have some loop time.
+	if(!mPanel && nextPanel != NO_PANEL_ID) {		// If have no panel and we want one.
+		launchPanel();										// Launch a new panel.
+	} else if(nextPanel!=mPanel->getPanelID()) {	// Else, if we just want a change of panels.
+		launchPanel();										// Launch the new panel.
+	}															//
+	if (mPanel) { mPanel->loop(); }					// As always, if there is a panel, let it have some loop time.
 }
 
 
-char* lilOS::stdIconPath(stdIcons theIcon) {
+const char* lilOS::stdIconPath(stdIcons theIcon) {
 	
 	int	numBytes;
 	

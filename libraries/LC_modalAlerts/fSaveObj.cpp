@@ -123,17 +123,18 @@ void deleteAlert::deleteItem(void) {
 void deleteAlert::handleCom(stdComs comID) {
 	
 	switch(comID) {						// Check what we got as a command..
-		case okCmd			:				// We got an ok click..
+		case okCmd		:					// We got an ok click..
 			deleteItem();					// Have a shot at deleting the item.
 			done = true;					// This alert is done!
-		break;
-		case cancelCmd		:				// Both okCmd & cancelCmd land here.
+		break;								// Zoop! We're gone!
+		case cancelCmd	:					// Both okCmd & cancelCmd land here.
 			if (ourSelectName) {			// If we had a name to add..
 				ourPath->popItem();		// We need to loose it.
-			}
+			}									//
 			done = true;					// This alert is done!
 		break;								// And these case statements are done!
-	}
+		default			: break;			// Just to shut up the compiler.
+	}											//
 	ourListener->handleCom(comID);	// Let our listener have a shot.		
 }
 
@@ -209,12 +210,13 @@ void folderAlert::createFolder(void) {
 void folderAlert::handleCom(stdComs comID) {
 	
 	switch(comID) {						// Check what we got as a command..
-		case okCmd			:				// We got an ok click..
+		case okCmd		:					// We got an ok click..
 			createFolder();				// Have a shot at creating a folder.
-		case cancelCmd		:				// Both okCmd & cancelCmd land here.
+		case cancelCmd	:					// Both okCmd & cancelCmd land here.
 			done = true;					// This alert is done!
 		break;								// And these case statements are done!
-	}
+		default			: break;			// Error, pass through I guess..
+	}											//
 	ourListener->handleCom(comID);	// Let our listener have a shot.		
 }
 

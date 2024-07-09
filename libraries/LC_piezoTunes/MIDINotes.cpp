@@ -254,8 +254,8 @@ void decodeFile(const char* filePath) {
       done = false;
       SDFileErr = false;
       while(!done && !SDFileErr) {
-      	while(!Serial.available());
-      	char x = Serial.read();
+      	while(!Serial.available());		// I think I recall this was basically a break point.
+      	Serial.read();
          if (readEventHeader(&anEventHeader, MIDIFile)) {
          	showEventHeader(&anEventHeader);
          	Serial.println();

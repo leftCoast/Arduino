@@ -16,12 +16,12 @@ class editLabel : public label,
 
 	public:
 				editLabel();
-  				editLabel(char* inText);
-  				editLabel(char* inText, int inSize);
+  				editLabel(const char* inText);
+  				editLabel(const char* inText, int inSize);
   				editLabel(int inLocX, int inLocY, int inWidth,int inHeight);
-  				editLabel(int inLocX, int inLocY, int inWidth,int inHeight, char* inText);
-  				editLabel(int inLocX, int inLocY, int inWidth,int inHeight, char* inText,int textSize);
-  				editLabel(rect* inRect,char* inText,int textSize=1);
+  				editLabel(int inLocX, int inLocY, int inWidth,int inHeight,const char* inText);
+  				editLabel(int inLocX, int inLocY, int inWidth,int inHeight,const char* inText,int textSize);
+  				editLabel(rect* inRect,const char* inText,int textSize=1);
   				editLabel(label* aLabel);
 	virtual	~editLabel(void);
 

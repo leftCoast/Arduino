@@ -20,7 +20,7 @@ void listener::handleCom(stdComs comID) {  }
 // **************************************************************
 
 
-stdComBtn::stdComBtn(int xLoc,int yLoc,char* path,stdComs iconType,listener* inListener,int pixles)
+stdComBtn::stdComBtn(int xLoc,int yLoc,const char* path,stdComs iconType,listener* inListener,int pixles)
 	:iconButton(xLoc,yLoc,path,pixles) { 
 	
 	ourListener = inListener;
