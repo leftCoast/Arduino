@@ -1,17 +1,17 @@
 #include <blinker.h>
 #include <serialStr.h>
 #include <wiring_private.h> // For pinPeripheral() function
-#include "nmeaParser.h"
+#include "GPS_NMEA_Parser.h"
 
 
 Uart GPSPort (&sercom1, 11, 10, SERCOM_RX_PAD_0, UART_TX_PAD_2);
-
+                         
 void SERCOM1_Handler(void) {
   GPSPort.IrqHandler();
 }
 
 blinker   heartbeat;
-serialStr nmeaMgr(&GPSPort,'\n',200);
+serialStr GPSMgr(&GPSPort,'\n',200);
 timeObj   outputTimer(1000);
 
 void setup() {
@@ -23,15 +23,15 @@ void setup() {
   pinPeripheral(10, PIO_SERCOM);
   pinPeripheral(11, PIO_SERCOM);
 
-  nmeaMgr.setCallback(nemaMsg);
+  GPSMgr.setCallback(GPSMsg);
 }
 
 
-void nemaMsg(char* nemaStr) { 
+void GPSMsg(char* GPSStr) { 
 
-  if (nemaStr[0]=='$') {
-    //Serial.println(nemaStr);
-    addMessage(nemaStr);
+  if (GPSStr[0]=='$') {
+    //Serial.println(GPSStr);
+    addMessage(GPSStr);
   }
 }
 

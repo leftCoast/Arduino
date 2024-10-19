@@ -43,3 +43,4 @@ libraries/RPN_Calculator*
 libraries/SD
 libraries/LC_SD/
 libraries/LC_docTools/
+libraries/CAN*

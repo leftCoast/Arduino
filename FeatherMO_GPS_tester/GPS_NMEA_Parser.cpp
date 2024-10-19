@@ -1,4 +1,4 @@
-#include "nmeaParser.h"
+#include "GPS_NMEA_Parser.h"
 
 
 void addMessage(char* inStr) {
@@ -31,6 +31,45 @@ dataTypes getType(char* inStr) {
   return noType;
 }
 
+
+
+// *******************************************
+//               latLonAngle
+// *******************************************
+
+
+latLonAngle::latLonAngle(void) {
+
+  deg     = 0;
+  min     = 0;
+  decDeg  = 0;
+}
+
+
+latLonAngle::~latLonAngle(void) {  }
+
+
+void latLonAngle::parseLatLon(char* token) {
+
+  int   index;
+  char  temp[10];
+  int   i;
+  
+  deg   = 0;
+  min   = 0;
+  decDeg  = 0;
+  index = 0;
+  while(token[index]&&token[index]!='.') index++;
+  if (token[index]=='.') {
+    index = index-2;
+    strcpy(temp,&(token[index]));
+    min = atof(temp);
+    for(i=0;i<index;i++) temp[i]=token[i];
+    temp[i] = '\0';
+    deg = atoi(temp);
+    decDeg = deg + (min/60);
+  }
+}
 
 
 // *******************************************
@@ -118,17 +157,15 @@ bool GPRMCParser::doParse(char* inStr) {
    }
    token = strtok(NULL,",");        // Check data status (A = OK, V = warning)
    if (token) {                     // If we got a token..
-      valid = !strcmp(token,"A");   // Lets just chekc for an A, meaning OK. Otherwise fail.
+      valid = !strcmp(token,"A");   // Lets just check for an A, meaning OK. Otherwise fail.
    }
    if (!valid) return false;        // If its not ok, why bother? Bail.
    token = strtok(NULL,",");        // Parse out Latitude of fix.
    if (token) {                     // If we got a token..
-      temp[0] = token[0];
-      temp[1] = token[1];
-      temp[2] = '\0';
-      degLat = atoi(temp);
-      strcpy(temp,&(token[2]));
-      minLat = atof(temp);
+      latLonParser.parseLatLon(token);
+      degLat = latLonParser.deg;
+      minLat = latLonParser.min;
+      decDegLat = latLonParser.decDeg;
    }
    token = strtok(NULL,",");        // N or S
    if (token) {                     // If we got a token..
@@ -140,12 +177,10 @@ bool GPRMCParser::doParse(char* inStr) {
    }
    token = strtok(NULL,",");        // Longitude of fix
    if (token) {                     // If we got a token..
-      temp[0] = token[0];
-      temp[1] = token[1];
-      temp[2] = '\0';
-      degLon = atoi(temp);
-      strcpy(temp,&(token[2]));
-      minLon = atof(temp);
+      latLonParser.parseLatLon(token);
+      degLon = latLonParser.deg;
+      minLon = latLonParser.min;
+      decDegLon = latLonParser.decDeg;
    }
    token = strtok(NULL,",");                    // E or W
    if (token) {                                 // If we got a token..
@@ -208,7 +243,15 @@ void GPRMCParser::showData(void) {
        Serial.println("False");
    }
    
+   Serial.print("Decimal Lattitude  : ");
+   Serial.print(decDegLat,4);
+   if (latQuad==north) {
+      Serial.println(" North");
+   } else {
+       Serial.println(" South");
+   }
    Serial.print("Lattitude          : ");
+   Serial.print(degLat);
    Serial.print(degLat);
    Serial.print(":");
    Serial.print(minLat,4);
@@ -219,6 +262,13 @@ void GPRMCParser::showData(void) {
        Serial.println("South");
    }
    
+   Serial.print("Decimal Longitute  : ");
+   Serial.print(decDegLon,4);
+   if (latQuad==east) {
+      Serial.println(" East");
+   } else {
+       Serial.println(" West");
+   }
    Serial.print("Longitute          : ");
    Serial.print(degLon);
    Serial.print(":");
