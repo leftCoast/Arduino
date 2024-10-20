@@ -44,3 +44,4 @@ libraries/SD
 libraries/LC_SD/
 libraries/LC_docTools/
 libraries/CAN*
+libraries/LC_lama_NMEA2000
