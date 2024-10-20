@@ -1,8 +1,9 @@
 // Copyright (c) Sandeep Mistry. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <CAN.h>
-#include <mapper.h>
+//#include <CAN.h>
+//#include <mapper.h>
+#include "LC_lama_NMEA200.h"
 
 #define SPI_CS 10
 #define INT 2
@@ -26,20 +27,21 @@ msg_t msg;
 byte    dataPack[8];
 mapper  speedMap(0,1024,0,(1024*1.943844)*0.01);
 
+lama_NMEA200  NMEABus;
 bytes* bytePtr;
 
 void setup() {
   bytePtr = (bytes*)&theID;
-  pinMode(RESET_PIN, OUTPUT);
-  delay(50);
-  digitalWrite(RESET_PIN, LOW);
-  delay(50);
-  digitalWrite(RESET_PIN, HIGH);
+  //pinMode(RESET_PIN, OUTPUT);
+  //delay(50);
+  //digitalWrite(RESET_PIN, LOW);
+  //delay(50);
+  //digitalWrite(RESET_PIN, HIGH);
 
   Serial.begin(115200);
-  delay(1000);
+  delay(100);
   Serial.println("CAN Receiver");
-
+  /*
   Serial.print("CLK ");
   Serial.println(PIN_SPI_SCK);
   Serial.print("MISO ");
@@ -47,9 +49,14 @@ void setup() {
   Serial.print("MOSI ");
   Serial.println(PIN_SPI_MOSI);
   Serial.println("-----");
-
+ 
   // start the CAN bus at 500 kbps
   if (!CAN.begin(500E3)) {
+    Serial.println("Starting CAN failed!");
+    while (1);
+  }
+  */
+   if (!NMEABus.begin(SPI_CS)) {
     Serial.println("Starting CAN failed!");
     while (1);
   }
