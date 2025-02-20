@@ -1,42 +1,40 @@
 
-#include "LC_llama_NMEA2000.h"
+#include "LC_llama2000.h"
 #include <serialStr.h>
 
 #define SPI_CS 10
 
-llama_NMEA2000  llamaBrd;
-waterSpeedObj*  knotMeter;
-waterTempObj*   thermometer;
-fluidLevelObj*  fuelSender;
-serialStr       serialMgr;
+llama2000         llamaBrd;
+waterSpeedObj*    knotMeter;
+waterTempObj*     thermometer;
+fluidLevelObj*    fuelSender;
+airTempBarometer* barometer;
+serialStr         serialMgr;
+byte              nameBytes[8] = { 170, 6, 32, 9, 0, 170, 160, 64 };
 
 void setup() {
-  
+
+
   Serial.begin(115200);
-  delay(100);
-  serialMgr.setCallback(gotCmd);
-  llamaBrd.addMsgObj(0x1F503);
-  llamaBrd.addMsgObj(0x1F50B);
-  llamaBrd.addMsgObj(0x1FD08);
-  llamaBrd.addMsgObj(0x1F211);
+  delay(10);
   
-  knotMeter = (waterSpeedObj*) llamaBrd.getMsgObj(0x1F503);
-  thermometer = (waterTempObj*) llamaBrd.getMsgObj(0x1FD08);
-  fuelSender = (fluidLevelObj*)  llamaBrd.getMsgObj(0x1F211);
 
- 
-  if (knotMeter) Serial.println("Have knotMeter");
-  if (thermometer) Serial.println("Have thermometer");
-  if (fuelSender) Serial.println("Have fuelSender");    
-
-  llamaBrd.setAddrCat(nonConfig);
-  llamaBrd.setAddr(20);
-  llamaBrd.setIndGroup(Marine);
-   
+  knotMeter   = new waterSpeedObj(&llamaBrd);
+  thermometer = new waterTempObj(&llamaBrd);
+  fuelSender  = new fluidLevelObj(&llamaBrd);
+  barometer   = new airTempBarometer(&llamaBrd);
+  
+  llamaBrd.addMsgHandler(knotMeter);
+  llamaBrd.addMsgHandler(thermometer);
+  llamaBrd.addMsgHandler(fuelSender);
+  llamaBrd.addMsgHandler(barometer);
+  
   if (!llamaBrd.begin(SPI_CS)) {
     Serial.println("Starting llama failed!");
     while (1);
   }
+  serialMgr.setCallback(gotCmd);
+  Serial.println("Up and running");
 }
 
 
@@ -44,11 +42,30 @@ void gotCmd(char* inStr) {
 
   float     value;
   
-  if (!strcmp(inStr,"go")) {
-    llamaBrd.requestForAddressClaim(255);
+  if (!strcmp(inStr,"refresh")) {
+    llamaBrd.sendRequestForAddressClaim(255);
   } else if (!strcmp(inStr,"see")) {
     llamaBrd.showName();
     Serial.println();
+  } else if (!strcmp(inStr,"show")) {
+    showValues();
+  } else if (!strcmp(inStr,"list")) {
+    llamaBrd.showAddrList(true);
+  } else if (!strcmp(inStr,"bar")) {
+    Serial.print(barometer->getInHg(),3);
+  } else if (!strcmp(inStr,"find")) {
+    netName aName;
+    aName = llamaBrd.findName(117);
+   aName.showName();
+   Serial.println();
+   Serial.print("And address : ");
+   Serial.println(llamaBrd.findAddr(&aName));
+  } else if (!strcmp(inStr,"change")) {
+
+    netName aName;
+
+    aName.setName(nameBytes);
+    llamaBrd.addrCom(&aName,120);
   } else {
     value = atof(inStr);
     Serial.print("Setting fuel level to ");
@@ -57,19 +74,34 @@ void gotCmd(char* inStr) {
     fuelSender->setTankType(fuel);
     fuelSender->setLevel(value);
     fuelSender->setCapacity(20);
-    fuelSender->sendMsg();
+    fuelSender->newMsg();
   } 
 }
 
+void showValues(void) {
+
+  Serial.print(knotMeter->getSpeed(),1);
+  Serial.print("\tKnots\t\t");
+  Serial.print(barometer->getInHg(),3);
+  Serial.print("\tinHg\t\t");
+  Serial.print(thermometer->getTemp(),1);
+  Serial.println("\tDeg F.");
+}
+
+//timeObj graphTime(15 * 1000);
 
 void loop() {
   
   idle();
-  //Serial.print(knotMeter->getSpeed(),1);
-  //Serial.print("\tKnots\t\t");
-  //thermometer->showDataBytes();
-  //Serial.print(thermometer->getTemp(),1);
-  //Serial.println("\tDeg F.");
-  //sleep(2000);
+  sleep(2000);
+  if (barometer->getInHg()>31) {
+    showValues();
+  }
+  /*
+  if (graphTime.ding()) {
+    Serial.println(barometer->getInHg(),3);
+    graphTime.stepTime();
+  }
+  */
 }
   
