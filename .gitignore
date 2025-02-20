@@ -49,3 +49,4 @@ libraries/lvgl*
 libraries/SdFat*
 libraries/LC_llama2000*
 libraries/LC_cardIndex*
+libraries/arduino-CAN*
