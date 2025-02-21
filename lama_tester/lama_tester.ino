@@ -98,13 +98,18 @@ void loop() {
   
   idle();
   sleep(2000);
-  if (barometer->getInHg()>31) {
+  /*
+   if (barometer->getInHg()>31) {
     showValues();
   }
+<<<<<<< Updated upstream
   if (waitTimer.ding()) {
     llamaBrd.showAddrList(true);
     waitTimer.reset();
   }
+=======
+  */
+>>>>>>> Stashed changes
   /*
   if (graphTime.ding()) {
     Serial.println(barometer->getInHg(),3);
