@@ -11,6 +11,8 @@ fluidLevelObj*    fuelSender;
 airTempBarometer* barometer;
 serialStr         serialMgr;
 byte              nameBytes[8] = { 170, 6, 32, 9, 0, 170, 160, 64 };
+timeObj           waitTimer(10,false);
+
 
 void setup() {
 
@@ -43,7 +45,9 @@ void gotCmd(char* inStr) {
   float     value;
   
   if (!strcmp(inStr,"refresh")) {
-    llamaBrd.sendRequestForAddressClaim(255);
+    llamaBrd.refreshAddrList();
+    waitTimer.setTime(BCAST_T1_MS);
+    Serial.println("Refreshing address list.");
   } else if (!strcmp(inStr,"see")) {
     llamaBrd.showName();
     Serial.println();
@@ -96,6 +100,10 @@ void loop() {
   sleep(2000);
   if (barometer->getInHg()>31) {
     showValues();
+  }
+  if (waitTimer.ding()) {
+    llamaBrd.showAddrList(true);
+    waitTimer.reset();
   }
   /*
   if (graphTime.ding()) {
