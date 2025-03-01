@@ -1,6 +1,7 @@
 
 #include "LC_llama2000.h"
 #include <serialStr.h>
+#include "handlers.h"
 
 #define SPI_CS 10
 
@@ -9,6 +10,7 @@ waterSpeedObj*    knotMeter;
 waterTempObj*     thermometer;
 fluidLevelObj*    fuelSender;
 airTempBarometer* barometer;
+LC_ChatObj*       chatObj;
 serialStr         serialMgr;
 byte              nameBytes[8] = { 170, 6, 32, 9, 0, 170, 160, 64 };
 timeObj           waitTimer(10,false);
@@ -25,11 +27,12 @@ void setup() {
   thermometer = new waterTempObj(&llamaBrd);
   fuelSender  = new fluidLevelObj(&llamaBrd);
   barometer   = new airTempBarometer(&llamaBrd);
-  
+  chatObj      = new LC_ChatObj(&llamaBrd);
   llamaBrd.addMsgHandler(knotMeter);
   llamaBrd.addMsgHandler(thermometer);
   llamaBrd.addMsgHandler(fuelSender);
   llamaBrd.addMsgHandler(barometer);
+  llamaBrd.addMsgHandler(chatObj);
   
   if (!llamaBrd.begin(SPI_CS)) {
     Serial.println("Starting llama failed!");
@@ -42,7 +45,7 @@ void setup() {
 
 void gotCmd(char* inStr) {
 
-  float     value;
+  //float     value;
 
   
   if (!strcmp(inStr,"refresh")) {
@@ -72,6 +75,8 @@ void gotCmd(char* inStr) {
     aName.setName(nameBytes);
     llamaBrd.addrCom(&aName,120);
   } else {
+    chatObj->setOutStr(inStr);
+    /*
     value = atof(inStr);
     Serial.print("Setting fuel level to ");
     Serial.print(value,1);
@@ -80,6 +85,7 @@ void gotCmd(char* inStr) {
     fuelSender->setLevel(value);
     fuelSender->setCapacity(20);
     fuelSender->newMsg();
+    */
   } 
 }
 
@@ -113,4 +119,3 @@ void loop() {
   }
   */
 }
-  
