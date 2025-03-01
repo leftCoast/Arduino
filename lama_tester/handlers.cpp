@@ -251,8 +251,8 @@ bool LC_ChatObj::handleMsg(message* inMsg) {
   
   success = false;
   if (inMsg) {                                        // Sanity, not NULL.
-    if (inMsg->getPGN()==0x00EF00) {                  // The PGN we're looking for?
-      if (inMsg->getPDUs()==ourNetObj->getAddr()) {   // And it's addressed to us!
+    if (inMsg->getPDUf()==0x00E1) {                   // If it's our stolen peer to peer PDUf.
+      if (inMsg->getPDUs()==ourNetObj->getAddr()) {   // And it's adressed to us!
         numBytes = inMsg->getNumBytes();              // Grab the number of data bytes.
         for(int i=0;i<numBytes;i++) {                 // For each byte..
           Serial.print(inMsg->getDataByte(i));        // Print it out.
@@ -278,11 +278,14 @@ void LC_ChatObj::newMsg(void) {
   int     numChars;
 
   if (outStr) {                                     // Non NULL outstring means we have one to send.
+    Serial.print("Got string : [");
+    Serial.print(outStr);
+    Serial.println("]");
     numChars = strlen(outStr);                      // Count the chars we need to send out.
     outMsg.setNumBytes(numChars);                   // Grab the RAM for the meesage to hold them.
     if (outMsg.getNumBytes()==numChars) {           // If we got the RAM to store them..
-      outMsg.setPGN(0x00EF00);                      // Start setting up our message. PGN goes in.
-      outMsg.setPDUs(OTHER_ADDR);                   // This PGN is a peer to peer so typcially their addr goes here.
+      outMsg.setPGN(0x00E100);                      // Start setting up our message. Stolen PGN goes in.
+      outMsg.setPDUs(OTHER_ADDR);                   // This PGN is a peer to peer, so typcially their addr goes here.
       outMsg.setPriority(DEF_PRIORITY);             // Set priority.                       
       outMsg.setSourceAddr(ourNetObj->getAddr());   // Our address..
       for (int i=0;i<numChars;i++) {                // For each char in our string..
