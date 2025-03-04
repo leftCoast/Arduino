@@ -255,7 +255,7 @@ bool LC_ChatObj::handleMsg(message* inMsg) {
       if (inMsg->getPDUs()==ourNetObj->getAddr()) {   // And it's adressed to us!
         numBytes = inMsg->getNumBytes();              // Grab the number of data bytes.
         for(int i=0;i<numBytes;i++) {                 // For each byte..
-          Serial.print(inMsg->getDataByte(i));        // Print it out.
+          Serial.print((char)inMsg->getDataByte(i));        // Print it out.
         }                                             //
         Serial.println();                             // Line feed to make it pretty.
         success = true;                               // We are a complete success!
@@ -291,6 +291,7 @@ void LC_ChatObj::newMsg(void) {
       for (int i=0;i<numChars;i++) {                // For each char in our string..
         outMsg.setDataByte(i,outStr[i]);            // Stuff it into the data section of the message.
       }                                             //
+      outMsg.showMessage();
       sendMsg(&outMsg);                             // Send in this message to be transmitted over the wire.
       clearOutStr();                                // Clear the string as a flag. (Recycles it and makes it a NULL string.)
     }
