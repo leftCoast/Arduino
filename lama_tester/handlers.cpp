@@ -291,7 +291,7 @@ void LC_ChatObj::newMsg(void) {
       for (int i=0;i<numChars;i++) {                // For each char in our string..
         outMsg.setDataByte(i,outStr[i]);            // Stuff it into the data section of the message.
       }                                             //
-      outMsg.showMessage();
+      //outMsg.showMessage();
       sendMsg(&outMsg);                             // Send in this message to be transmitted over the wire.
       clearOutStr();                                // Clear the string as a flag. (Recycles it and makes it a NULL string.)
     }
