@@ -1,9 +1,13 @@
 
-#include "LC_llama2000.h"
-#include <serialStr.h>
+#include "setup.h"
 #include "handlers.h"
+#include <lilParser.h>
+
 
 #define SPI_CS 10
+#define LIST_MS   30000    // How long before we decide we need to refresh address list?
+#define MAX_DEC   10       // Max digits beyond decimal point.
+
 
 llama2000         llamaBrd;
 waterSpeedObj*    knotMeter;
@@ -11,111 +15,293 @@ waterTempObj*     thermometer;
 fluidLevelObj*    fuelSender;
 airTempBarometer* barometer;
 LC_ChatObj*       chatObj;
-serialStr         serialMgr;
-byte              nameBytes[8] = { 170, 6, 32, 9, 0, 170, 160, 64 };
-timeObj           waitTimer(10,false);
+lilParser         cmdParser;
+timeObj           devListTimer(LIST_MS);
+bool              gettingDevList;
+bool              devListNeedsRefresh;
+unsigned long     listTime;
+netName           ourName;
+byte              ourAddr;
+netName           aName;
+
+enum commands {
+   noCommand,
+   devList,
+   setFuel,
+   showName,
+   showValues,
+   showHg,
+   findName,
+   copyName,
+   pasteName,
+   changeAddr,
+   reset,
+   help
+};
 
 
 void setup() {
 
 
-  Serial.begin(115200);
-  delay(10);
+   Serial.begin(115200);
+   delay(10);
   
+   knotMeter   = new waterSpeedObj(&llamaBrd);
+   thermometer = new waterTempObj(&llamaBrd);
+   fuelSender  = new fluidLevelObj(&llamaBrd);
+   barometer   = new airTempBarometer(&llamaBrd);
+   chatObj      = new LC_ChatObj(&llamaBrd);
+   llamaBrd.addMsgHandler(knotMeter);
+   llamaBrd.addMsgHandler(thermometer);
+   llamaBrd.addMsgHandler(fuelSender);
+   llamaBrd.addMsgHandler(barometer);
+   llamaBrd.addMsgHandler(chatObj);
+   if (!llamaBrd.begin(SPI_CS)) {
+   Serial.println("Starting llama failed!");
+      while (1);
+   }
+   cmdParser.addCmd(devList,"list");
+   cmdParser.addCmd(setFuel,"fuel");
+   cmdParser.addCmd(showName,"seename");
+   cmdParser.addCmd(showName,"showname");
+   cmdParser.addCmd(showName,"name");
+   cmdParser.addCmd(showValues,"seevalues");
+   cmdParser.addCmd(showValues,"showvalues");
+   cmdParser.addCmd(showValues,"values");
+   cmdParser.addCmd(showHg,"hg");
+   cmdParser.addCmd(findName,"findname");
+   cmdParser.addCmd(copyName,"copyname");
+   cmdParser.addCmd(copyName,"copy");
+   cmdParser.addCmd(pasteName,"paste");
+   cmdParser.addCmd(pasteName,"pastename");
+   cmdParser.addCmd(changeAddr,"changeaddr");
+   cmdParser.addCmd(reset,"reset");
+   cmdParser.addCmd(help,"help");
+   cmdParser.addCmd(help,"?");
 
-  knotMeter   = new waterSpeedObj(&llamaBrd);
-  thermometer = new waterTempObj(&llamaBrd);
-  fuelSender  = new fluidLevelObj(&llamaBrd);
-  barometer   = new airTempBarometer(&llamaBrd);
-  chatObj      = new LC_ChatObj(&llamaBrd);
-  llamaBrd.addMsgHandler(knotMeter);
-  llamaBrd.addMsgHandler(thermometer);
-  llamaBrd.addMsgHandler(fuelSender);
-  llamaBrd.addMsgHandler(barometer);
-  llamaBrd.addMsgHandler(chatObj);
-  
-  if (!llamaBrd.begin(SPI_CS)) {
-    Serial.println("Starting llama failed!");
-    while (1);
-  }
-  serialMgr.setCallback(gotCmd);
+   gettingDevList = false;
+   devListNeedsRefresh = true;
+   ourName.copyName(&llamaBrd);
+   ourAddr = llamaBrd.getAddr();
+   
   Serial.println("Up and running");
 }
 
-
-void gotCmd(char* inStr) {
-
-  //float     value;
-
+// chatObj->setOutStr(inStr);
   
-  if (!strcmp(inStr,"refresh")) {
-    llamaBrd.refreshAddrList();
-    waitTimer.setTime(BCAST_T1_MS);
-    Serial.println("Refreshing address list.");
-  } else if (!strcmp(inStr,"see")) {
-    llamaBrd.showName();
-    Serial.println();
-  } else if (!strcmp(inStr,"show")) {
-    showValues();
-  } else if (!strcmp(inStr,"list")) {
-    llamaBrd.showAddrList(true);
-  } else if (!strcmp(inStr,"bar")) {
-    Serial.print(barometer->getInHg(),3);
-  } else if (!strcmp(inStr,"find")) {
-    netName aName;
-    aName = llamaBrd.findName(117);
-   aName.showName();
-   Serial.println();
-   Serial.print("And address : ");
-   Serial.println(llamaBrd.findAddr(&aName));
-  } else if (!strcmp(inStr,"change")) {
-
-    netName aName;
-
-    aName.setName(nameBytes);
-    llamaBrd.addrCom(&aName,120);
-  } else {
-    chatObj->setOutStr(inStr);
-    /*
-    value = atof(inStr);
-    Serial.print("Setting fuel level to ");
-    Serial.print(value,1);
-    Serial.println(" %");
-    fuelSender->setTankType(fuel);
-    fuelSender->setLevel(value);
-    fuelSender->setCapacity(20);
-    fuelSender->newMsg();
-    */
-  } 
-}
-
-void showValues(void) {
-
-  Serial.print(knotMeter->getSpeed(),1);
-  Serial.print("\tKnots\t\t");
-  Serial.print(barometer->getInHg(),3);
-  Serial.print("\tinHg\t\t");
-  Serial.print(thermometer->getTemp(),1);
-  Serial.println("\tDeg F.");
-}
-
-//timeObj graphTime(15 * 1000);
 
 void loop() {
+
+   char   aChar;
+   
+   idle();
+   checkDeviceList();
+   if (devListTimer.ding()) {
+      devListNeedsRefresh = true;
+      devListTimer.reset();
+   }
+   if (Serial.available()) {   // If we have a char..
+      aChar = Serial.read();
+      Serial.print(aChar);
+      aChar = tolower(aChar);
+      switch(cmdParser.addChar(aChar)) {
+         case noCommand       :                          break;
+         case devList         : showDeviceList();        break;
+         case setFuel         : setFuelLevel();          break;
+         case showName        : showDeviceName();        break;
+         case showValues      : showBroadcastValues();   break;
+         case showHg          : showAirPressure();       break;
+         case findName        : findNameFromAddr();      break;
+         case copyName        : copyNameFromAddr();      break;
+         case pasteName       : pasteNameToSelf();       break;
+         case changeAddr      : changeAnAddr();          break;
+         case reset           : resetNameNAddr();        break;
+         case -1              : error(-1);               break;
+         case -2              : error(-2);               break;
+         case -3              : error(-3);               break;
+         default              : printHelp();             break;
+      }
+   }
+}
   
-  idle();
-  sleep(2000);
-  if (barometer->getInHg()>31) {
-    showValues();
-  }
-  if (waitTimer.ding()) {
-    llamaBrd.showAddrList(true);
-    waitTimer.reset();
-  }
-  /*
-  if (graphTime.ding()) {
-    Serial.println(barometer->getInHg(),3);
-    graphTime.stepTime();
-  }
-  */
+ // ******* Commands  *******
+
+
+
+void showDeviceList(void) {
+
+   if (!gettingDevList) {
+      Serial.println("Refreshing device list.\nThis will take a second or so.");
+      Serial.println();
+      llamaBrd.refreshAddrList();
+      gettingDevList = true;
+   }
+}
+
+
+void checkDeviceList(void) {
+
+   if (gettingDevList) {
+      if (!llamaBrd.isBusy()) {
+         gettingDevList = false;
+         devListNeedsRefresh = false;
+         devListTimer.start();
+         llamaBrd.showAddrList(true);
+      }
+   }
+}
+
+
+void setFuelLevel(void) {
+
+   float value;
+   
+   if (cmdParser.numParams()==1) {
+      value = atof(cmdParser.getNextParam());
+      Serial.print("Setting fuel level to ");
+      Serial.print(value,1);
+      Serial.println(" %");
+      fuelSender->setTankType(fuel);
+      fuelSender->setLevel(value);
+      fuelSender->setCapacity(20);
+      fuelSender->newMsg();
+   }
+}
+
+
+void showDeviceName(void) {
+   
+
+   if (cmdParser.numParams()==0) {
+      llamaBrd.showName();
+   }
+}
+
+
+void showBroadcastValues(void) {
+
+    if (cmdParser.numParams()==0) {
+      Serial.print(knotMeter->getSpeed(),1);
+      Serial.print("\tKnots\t\t");
+      Serial.print(barometer->getInHg(),3);
+      Serial.print("\tinHg\t\t");
+      Serial.print(thermometer->getTemp(),1);
+      Serial.println("\tDeg F.");
+    }
+}
+
+
+void showAirPressure(void) {
+
+   int   dec;
+
+   dec = 2;
+   if (cmdParser.numParams()==1) {
+      dec = atoi(cmdParser.getNextParam());
+      if (dec<0) {
+         dec = 0;
+      } else if (dec>MAX_DEC) {
+         Serial.println("Oh come on, get real.");
+         dec = MAX_DEC;
+      }
+   }
+   Serial.print(barometer->getInHg(),dec);
+   Serial.println(" in Hg");
+}
+
+
+void findNameFromAddr(void) {
+   
+   int      addr;
+   netName  aName;
+   
+   if (cmdParser.numParams()==1) {
+      addr = atoi(cmdParser.getNextParam());
+      aName = llamaBrd.findName(addr);
+      Serial.println("Address search result.");
+      aName.showName();
+   } else {
+      Serial.println("looking for one parameter. The address.");
+   }
+}
+
+
+void copyNameFromAddr(void) {
+  
+   int      addr;
+   netName  tempName;
+   netName  blankName;
+   
+   if (cmdParser.numParams()==1) {
+      addr = atoi(cmdParser.getNextParam());
+      tempName = llamaBrd.findName(addr);
+      blankName.clearName(false);
+      if (!tempName.sameName(&blankName)) {
+         aName.copyName(&tempName);
+         Serial.println("Name copied");
+         aName.showName();
+      } else {
+         Serial.println("Name was blank Not copied. Probably the address was not found.");
+      }
+   } else {
+      Serial.println("Was looking for an addre to be passed in.");
+   }
+}
+
+
+void pasteNameToSelf(void) {
+
+   if (cmdParser.numParams()==0) {
+      llamaBrd.copyName(&aName);
+   }
+}
+
+
+void changeAnAddr(void) {
+
+   byte  addr;
+   
+   if (cmdParser.numParams()==1) {
+      addr = atoi(cmdParser.getNextParam());
+      llamaBrd.setAddr(addr);
+   }
+}
+
+
+// Reset the name and address back to what we started with.
+void resetNameNAddr() {
+   
+   if (cmdParser.numParams()==0) {
+      llamaBrd.setAddr(ourAddr);
+      llamaBrd.copyName(&ourName);
+   }
+}
+
+
+void error(int errNum) {
+
+   
+   switch(errNum) {
+      case PARSE_ERR    : Serial.println("Something went wrong, I can't parse that.");       break;
+      case CONFIG_ERR   : Serial.println("I think I ran out of RAM during startup.");        break;
+      case PARAM_ERR    : Serial.println("The Param buffer is too small for that string.");  break;
+   }
+}
+
+
+void printHelp(void) {
+
+   Serial.println("The list of commands available.");
+   Serial.println("The commands don't care what case you type in.");
+   Serial.println("list - Gives a list of the connected devices on the network.");
+   Serial.println("fuel followed by a number 0..100 sets the percentage of fuel to be broadcast.");
+   Serial.println("seeName,showName or just name - This will display our device name.");
+   Serial.println("seeValues, showValues or just values - Shows the broadcast information we can read");
+   Serial.println("Hg - Shows the current broadcast barometer reading.");
+   Serial.println("findName folowed by a network address - If found, this returns the name of the item at that address.");
+   Serial.println("copyName folowed by a network address - If found, copies the name of the item at that address.");
+   Serial.println("pasteName or paste - Changes our name to the last one we copied.");
+   Serial.println("changeAddr folowed by one value - Changes our address to that value.\nfolowed by two values - tells the device at the first address to chnage to the second value.");
+   Serial.println("reset - This resets your name and address to what it was when the program started.");
+   Serial.println("help, or ? - Well that's this. The command list.");
 }
