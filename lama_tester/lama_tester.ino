@@ -4,7 +4,7 @@
 #include <lilParser.h>
 
 
-#define SPI_CS 10
+#define CAN_CS 10          // The chip select for the SPI connection to the CAN board.
 #define LIST_MS   30000    // How long before we decide we need to refresh address list?
 #define MAX_DEC   10       // Max digits beyond decimal point.
 
@@ -31,6 +31,7 @@ enum commands {
    showName,
    showValues,
    showHg,
+   showMb,
    findName,
    copyName,
    pasteName,
@@ -41,7 +42,6 @@ enum commands {
 
 
 void setup() {
-
 
    Serial.begin(115200);
    delay(10);
@@ -56,7 +56,7 @@ void setup() {
    llamaBrd.addMsgHandler(fuelSender);
    llamaBrd.addMsgHandler(barometer);
    llamaBrd.addMsgHandler(chatObj);
-   if (!llamaBrd.begin(SPI_CS)) {
+   if (!llamaBrd.begin(CAN_CS)) {
    Serial.println("Starting llama failed!");
       while (1);
    }
@@ -69,6 +69,7 @@ void setup() {
    cmdParser.addCmd(showValues,"showvalues");
    cmdParser.addCmd(showValues,"values");
    cmdParser.addCmd(showHg,"hg");
+   cmdParser.addCmd(showMb,"mb");
    cmdParser.addCmd(findName,"findname");
    cmdParser.addCmd(copyName,"copyname");
    cmdParser.addCmd(copyName,"copy");
@@ -84,7 +85,8 @@ void setup() {
    ourName.copyName(&llamaBrd);
    ourAddr = llamaBrd.getAddr();
    
-  Serial.println("Up and running");
+   Serial.println("Up and running");
+   printHelp();
 }
 
 // chatObj->setOutStr(inStr);
@@ -111,6 +113,7 @@ void loop() {
          case showName        : showDeviceName();        break;
          case showValues      : showBroadcastValues();   break;
          case showHg          : showAirPressure();       break;
+         case showMb          : showAirPressureInMb();   break;
          case findName        : findNameFromAddr();      break;
          case copyName        : copyNameFromAddr();      break;
          case pasteName       : pasteNameToSelf();       break;
@@ -206,7 +209,27 @@ void showAirPressure(void) {
       }
    }
    Serial.print(barometer->getInHg(),dec);
-   Serial.println(" in Hg");
+   Serial.println(" inHg");
+}
+
+
+void showAirPressureInMb(void) {
+
+   int   dec;
+
+   dec = 2;
+   if (cmdParser.numParams()==1) {
+      dec = atoi(cmdParser.getNextParam());
+      if (dec<0) {
+         dec = 0;
+      } else if (dec>MAX_DEC) {
+         Serial.println("Oh come on, get real.");
+         dec = MAX_DEC;
+      }
+   }
+   
+   Serial.print(barometer->getInHg()*33.8639,dec);
+   Serial.println(" mb");
 }
 
 
@@ -282,26 +305,31 @@ void error(int errNum) {
 
    
    switch(errNum) {
-      case PARSE_ERR    : Serial.println("Something went wrong, I can't parse that.");       break;
-      case CONFIG_ERR   : Serial.println("I think I ran out of RAM during startup.");        break;
-      case PARAM_ERR    : Serial.println("The Param buffer is too small for that string.");  break;
+      case PARSE_ERR    : Serial.println("Something went wrong, I can't parse that. Type ? for help.");  break;
+      case CONFIG_ERR   : Serial.println("I think I ran out of RAM during startup.");                    break;
+      case PARAM_ERR    : Serial.println("The Param buffer is too small for that string.");              break;
    }
 }
 
 
 void printHelp(void) {
-
-   Serial.println("The list of commands available.");
-   Serial.println("The commands don't care what case you type in.");
+   
+   Serial.println();
+   Serial.println("                             The list of commands available.");
+   Serial.println("           ----------------------------------------------------------------------");
    Serial.println("list - Gives a list of the connected devices on the network.");
-   Serial.println("fuel followed by a number 0..100 sets the percentage of fuel to be broadcast.");
+   Serial.println("fuel followed by a number 0..100 - sets the percentage of fuel to be broadcast.");
    Serial.println("seeName,showName or just name - This will display our device name.");
    Serial.println("seeValues, showValues or just values - Shows the broadcast information we can read");
-   Serial.println("Hg - Shows the current broadcast barometer reading.");
+   Serial.println("Hg - Shows the current broadcast barometer reading in inHg.");
+   Serial.println("Mb - Shows the current broadcast barometer reading in mb.");
    Serial.println("findName folowed by a network address - If found, this returns the name of the item at that address.");
    Serial.println("copyName folowed by a network address - If found, copies the name of the item at that address.");
    Serial.println("pasteName or paste - Changes our name to the last one we copied.");
-   Serial.println("changeAddr folowed by one value - Changes our address to that value.\nfolowed by two values - tells the device at the first address to chnage to the second value.");
+   Serial.println("changeAddr folowed by one value - Changes our address to that value.");
+   Serial.println("changeAddr folowed by two values - tells the device at the first address to chnage to the second value.");
    Serial.println("reset - This resets your name and address to what it was when the program started.");
    Serial.println("help, or ? - Well that's this. The command list.");
+   Serial.println("           ----------------------------------------------------------------------");
+   Serial.println();
 }
