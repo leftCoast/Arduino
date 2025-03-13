@@ -9,22 +9,22 @@
 #define MAX_DEC   10       // Max digits beyond decimal point.
 
 
-llama2000         llamaBrd;
-waterSpeedObj*    knotMeter;
-waterTempObj*     thermometer;
-fluidLevelObj*    fuelSender;
-airTempBarometer* barometer;
-LC_ChatObj*       chatObj;
-lilParser         cmdParser;
-timeObj           devListTimer(LIST_MS);
-bool              gettingDevList;
-bool              devListNeedsRefresh;
-unsigned long     listTime;
-netName           ourName;
-byte              ourAddr;
-netName           aName;
+llama2000         llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
+waterSpeedObj*    knotMeter;     // Handler to read boatspeed.
+waterTempObj*     thermometer;   // Handler to read water tempature.
+fluidLevelObj*    fuelSender;    // Handler that sends out fuel level messages.
+airTempBarometer* barometer;     // Handler to read atmisphereic pressure.
+LC_ChatObj*       chatObj;       // Hanlder that implements, with a clone of ourselves, a text message service.
 
-enum commands {
+lilParser         cmdParser;              // Toolkit for implementing a command line interface.
+bool              gettingDevList;         // Getting a device list takes time. This says we're waiting.
+timeObj           devListTimer(LIST_MS);  // A timer to time how long we allow before calling the list "stale".
+bool              devListNeedsRefresh;    // This holds the current state of the device list.
+netName           ourName;                // We save a copt of our net name when starting up.
+byte              ourAddr;                // And our address.
+netName           aName;                  // A place to save a net name. (For copy/paste)
+
+enum commands {                           // Our command list declrations.
    noCommand,
    devList,
    setFuel,
@@ -36,6 +36,7 @@ enum commands {
    copyName,
    pasteName,
    changeAddr,
+   toggleBugs,
    reset,
    help
 };
@@ -43,9 +44,11 @@ enum commands {
 
 void setup() {
 
+   // Standardopening of serial port.
    Serial.begin(115200);
    delay(10);
-  
+
+   // Creating and adding the message handlers.
    knotMeter   = new waterSpeedObj(&llamaBrd);
    thermometer = new waterTempObj(&llamaBrd);
    fuelSender  = new fluidLevelObj(&llamaBrd);
@@ -56,10 +59,14 @@ void setup() {
    llamaBrd.addMsgHandler(fuelSender);
    llamaBrd.addMsgHandler(barometer);
    llamaBrd.addMsgHandler(chatObj);
+
+   // Resetting the hanrdware.
    if (!llamaBrd.begin(CAN_CS)) {
    Serial.println("Starting llama failed!");
       while (1);
    }
+
+   // Associating the commands with typed user commands.
    cmdParser.addCmd(devList,"list");
    cmdParser.addCmd(setFuel,"fuel");
    cmdParser.addCmd(showName,"seename");
@@ -76,20 +83,23 @@ void setup() {
    cmdParser.addCmd(pasteName,"paste");
    cmdParser.addCmd(pasteName,"pastename");
    cmdParser.addCmd(changeAddr,"changeaddr");
+   cmdParser.addCmd(toggleBugs,"bugs");
    cmdParser.addCmd(reset,"reset");
    cmdParser.addCmd(help,"help");
    cmdParser.addCmd(help,"?");
 
+   // State setup for the program.
    gettingDevList = false;
    devListNeedsRefresh = true;
    ourName.copyName(&llamaBrd);
    ourAddr = llamaBrd.getAddr();
-   
+
+   // And away we go!
    Serial.println("Up and running");
    printHelp();
 }
 
-// chatObj->setOutStr(inStr);
+// chatObj->setOutStr(inStr); // Not using the chat thing yet.
   
 
 void loop() {
@@ -118,6 +128,7 @@ void loop() {
          case copyName        : copyNameFromAddr();      break;
          case pasteName       : pasteNameToSelf();       break;
          case changeAddr      : changeAnAddr();          break;
+         case toggleBugs      : showReq = !showReq;      break;
          case reset           : resetNameNAddr();        break;
          case -1              : error(-1);               break;
          case -2              : error(-2);               break;
@@ -282,11 +293,24 @@ void pasteNameToSelf(void) {
 
 void changeAnAddr(void) {
 
-   byte  addr;
+   byte     addr1;
+   byte     addr2;
+   netName  tempName;
    
    if (cmdParser.numParams()==1) {
-      addr = atoi(cmdParser.getNextParam());
-      llamaBrd.setAddr(addr);
+      addr1 = atoi(cmdParser.getNextParam());
+      llamaBrd.setAddr(addr1);
+   } else if (cmdParser.numParams()==2) {
+      addr1 = atoi(cmdParser.getNextParam());
+      addr2 = atoi(cmdParser.getNextParam());
+      Serial.print("Address to move : ");Serial.print(addr1);
+      Serial.print("\nTo new location : ");Serial.println(addr2);
+      tempName = llamaBrd.findName(addr1);
+      Serial.println("Name of device to be moved.");
+      tempName.showName();
+      Serial.println("Calling the move command now.");
+      llamaBrd.addrCom(&tempName,addr2);
+      Serial.println("Call complete.");
    }
 }
 
@@ -328,6 +352,7 @@ void printHelp(void) {
    Serial.println("pasteName or paste - Changes our name to the last one we copied.");
    Serial.println("changeAddr folowed by one value - Changes our address to that value.");
    Serial.println("changeAddr folowed by two values - tells the device at the first address to chnage to the second value.");
+   Serial.println("bugs - Toggle whatever bug tracking messages currently in there on or off.");
    Serial.println("reset - This resets your name and address to what it was when the program started.");
    Serial.println("help, or ? - Well that's this. The command list.");
    Serial.println("           ----------------------------------------------------------------------");
