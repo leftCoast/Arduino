@@ -7,7 +7,7 @@
 //
 // Now, there are a few different ways to do this.
 //
-// Fist is the pushPotGUI. The pushPotGUI is a simple rotating
+// First is the pushPotGUI. The pushPotGUI is a simple rotating
 // potentiometer that you can push to click. A very simple GUI
 // that is only really suited to really simple applications.
 //
