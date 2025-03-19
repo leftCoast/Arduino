@@ -1,40 +1,28 @@
-#include <DFRobot_0995_Obj.h>
-#include <idlers.h>
-//#include "FreeSans9pt7b.h"
 
+#include <wristDisp.h>
 
-#define TFT_DC  9
 #define TFT_CS  10
 #define TFT_RST 3
 #define TFT_BL  5
+#define TFT_DC  9
 
+wristDisp   ourDisp(TFT_CS,TFT_RST,TFT_BL,TFT_DC);
 
 void setup() {
-   
-   Serial.begin(9600);
-      while(!Serial) {
-      delay(100);
-   }
-   analogWrite(TFT_BL,255);                                     // Turn on backlight.
-   screen = (displayObj*) new DFRobot_0995_Obj(TFT_CS,TFT_RST);
-   if (screen) {
-      if (screen->begin()) {
-         screen->setRotation(PORTRAIT);
-         screen->fillScreen(&black);
-         screen->setTextColor(&yellow);
-         screen->setTextSize(3);
-         screen->setCursor(5,10);
-         screen->drawText("Hi there!");
-      } else {
-         Serial.println("Failed to start display.");
+   if (!ourDisp.begin()) {
+      switch(ourDisp.errMsg()) {
+         case noErr     : Serial.println("Odd. Failed to start but shows no error.");  break;
+         case initErr   : Serial.println("Failed to start display.");                  break;
+         case memErr    : Serial.println("No Display at all!");                        break;
+         default        : Serial.println("Unknown error!");                            break;
       }
-   } else {
-      Serial.println("No Display at all!");
+      while(1);
    }
 }
 
   
 void loop() {
    
-  idle();         // Idlers get their time.
+  idle();            // Idlers get their time.
+  ourDisp.checkDisp();   // displayTime.
 }
