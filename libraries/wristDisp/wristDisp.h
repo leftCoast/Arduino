@@ -6,6 +6,7 @@
 #include <drawObj.h>
 #include <idlers.h>
 #include <label.h>
+#include <fontLabel.h>
 
 
 #define TFT_DC  9
@@ -102,12 +103,12 @@ class valueBox :	public dataBox {
 	
 	virtual	void	setup(void);
 				
-				label*	typeLabel;
-				label*	valueLabel;
-				label* 	unitsLabel;
-				float		value;
-				int		precision;
-				char*		noValueStr;
+				fontLabel*	typeLabel;
+				fontLabel*	valueLabel;
+				fontLabel* 	unitsLabel;
+				float			value;
+				int			precision;
+				char*			noValueStr;
 };
 
 

@@ -2,10 +2,9 @@
 
 #include <DFRobot_0995_Obj.h>
 #include <idlers.h>
-#include <label.h>
 #include <strTools.h>
-
-
+#include <Fonts/FreeSansBoldOblique12pt7b.h>
+#include <Fonts/FreeSans18pt7b.h>
 // **************************************************
 // *****************   wristDisp    ***************** 
 // **************************************************
@@ -71,7 +70,7 @@ void wristDisp::setupDisp() {
    
    depthBox = new valueBox(&dBoxRect);
    depthBox->setTypeText("Depth");
-   depthBox->setUnitText("F");
+   depthBox->setUnitText("Ftm");
    depthBox->setPrecision(0);
    depthBox->setValue(32.2);
    viewList.addObj(depthBox);
@@ -130,13 +129,12 @@ void dataBox::drawSelf(void) {
 	
 	colorObj startColor;
 	colorObj endColor;
-	
+	//return;
 	startColor.setColor(&black);
 	endColor.setColor(LC_NAVY);
 	endColor.blend(&blue,50);
 	screen->fillRectGradient(x,y,width,height,&startColor,&endColor);
 }
-
 
 
 // **************************************************
@@ -161,33 +159,35 @@ void valueBox::setup(void) {
 	
 	colorObj	blueText(LC_LIGHT_BLUE);
 	
-	typeLabel = new label();
-	typeLabel->setTextSize(2);
+	typeLabel = new fontLabel();
+	//typeLabel->setTextSize(0);
+	typeLabel->setFont(&FreeSansBoldOblique12pt7b,0,18);
    typeLabel->setColors(&blueText);
    typeLabel->setLocation(10,10);
    typeLabel->setSize(150,20);
-   typeLabel->setJustify(TEXT_CENTER);
+   //typeLabel->setJustify(TEXT_CENTER);
    //screen->drawRect(typeLabel,&green);
    addObj(typeLabel);
 
-	valueLabel = new label;
-   valueLabel->setTextSize(3);
+	valueLabel = new fontLabel();
+   valueLabel->setFont(&FreeSans18pt7b,0,25);
    valueLabel->setColors(&yellow);
    valueLabel->setLocation(10,45);
    valueLabel->setSize(100,30);
-   valueLabel->setJustify(TEXT_RIGHT);
+   //valueLabel->setJustify(TEXT_RIGHT);
    valueLabel->setPrecision(1);
    valueLabel->setValue(10.3);
    valueLabel->setPrecision(precision);
    //screen->drawRect(valueLabel,&yellow);
    addObj(valueLabel);
    
-   unitsLabel = new label();
-   unitsLabel->setTextSize(3);
+   unitsLabel = new fontLabel();
+   //unitsLabel->setTextSize(3);
+   unitsLabel->setFont(&FreeSansBoldOblique12pt7b,0,18);
    unitsLabel->setColors(&blueText);
    unitsLabel->setLocation(120,45);
-   unitsLabel->setSize(60,30);
-   unitsLabel->setJustify(TEXT_LEFT);
+   unitsLabel->setSize(30,30);
+   //unitsLabel->setJustify(TEXT_LEFT);
    //screen->drawRect(unitsLabel,&yellow);
    addObj(unitsLabel);
 }
