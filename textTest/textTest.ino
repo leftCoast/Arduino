@@ -44,26 +44,18 @@ void setup() {
    theTFT->init(TFT_WIDTH, TFT_HEIGHT);
    theTFT->fillScreen(black.getColor16());
 
-   // Try the different ways to draw
-   // ORiginal with size 3
-   theTFT->drawRect(X,yPos,W,H,yellow.getColor16());
-   theTFT->setTextColor(red.getColor16());
-   theTFT->setTextSize(3); // Makes it a bit bigger.
-   theTFT->setCursor(X,yPos);
-   theTFT->print("Red gum");
-   yPos = yPos + STEP;
    
    // Same but using Free fonts.
    // Using size 0 to get the sizes to be close.
-   //theTFT->drawRect(X,yPos,W,H,yellow.getColor16());
+   theTFT->drawRect(X,yPos,W,H,yellow.getColor16());
    theTFT->setTextColor(blue.getColor16());
    theTFT->setTextSize(0); // Has odd effects with fonts
    theTFT->setFont(&FreeSansBoldOblique12pt7b);
-   theTFT->setCursor(X,yPos);
+   theTFT->setCursor(X,yPos+21);
    theTFT->print("Red jam");
    yPos = yPos + STEP;
 
-   
+   /*
    // Back to the original
    theTFT->drawRect(X,yPos,W,H,yellow.getColor16());
    theTFT->setTextColor(green.getColor16());
@@ -72,6 +64,7 @@ void setup() {
    theTFT->setCursor(X,yPos);
    theTFT->print("Ol' tug!");
    yPos = yPos + STEP;
+   */
 }
 
 

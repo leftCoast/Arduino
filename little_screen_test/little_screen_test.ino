@@ -9,6 +9,7 @@
 wristDisp   ourDisp(TFT_CS,TFT_RST,TFT_BL,TFT_DC);
 
 void setup() {
+   Serial.begin(57900);
    if (!ourDisp.begin()) {
       switch(ourDisp.errMsg()) {
          case noErr     : Serial.println("Odd. Failed to start but shows no error.");  break;

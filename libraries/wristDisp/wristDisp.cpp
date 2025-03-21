@@ -2,6 +2,7 @@
 
 #include <DFRobot_0995_Obj.h>
 #include <idlers.h>
+#include <timeObj.h>
 #include <strTools.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
@@ -9,6 +10,7 @@
 // *****************   wristDisp    ***************** 
 // **************************************************
 
+timeObj	screenTimer(1000);
 
 wristDisp::wristDisp(int inChipSelect,int inReset,int inBacklight,int inDataCommand) {  
 
@@ -29,7 +31,7 @@ bool wristDisp::begin(void) {
 	
 	success = false;
 	pinMode(backlight,OUTPUT);													// Setup backlight pin.
-	analogWrite(backlight,255);                                    // Turn on backlight.
+	analogWrite(backlight,0);                                    // Turn on backlight.
    screen = (displayObj*) new DFRobot_0995_Obj(TFT_CS,TFT_RST);	// Create our display object.
    if (screen) {																	// If we allocated one.
       if (screen->begin()) {													// If we can initialize it.
@@ -96,7 +98,17 @@ void wristDisp::setupDisp() {
 }
 
 
-void wristDisp::checkDisp(void) {  }
+void wristDisp::checkDisp(void) {
+    
+	if (screenTimer.ding()) {
+		for(int i=0;i<256;i++) {
+			analogWrite(backlight,i);
+			sleep(5);
+		}
+		screenTimer.reset();
+	}
+}
+
 
 
 
@@ -160,35 +172,26 @@ void valueBox::setup(void) {
 	colorObj	blueText(LC_LIGHT_BLUE);
 	
 	typeLabel = new fontLabel();
-	//typeLabel->setTextSize(0);
-	typeLabel->setFont(&FreeSansBoldOblique12pt7b,0,18);
+	typeLabel->setFont(&FreeSansBoldOblique12pt7b,-8);
    typeLabel->setColors(&blueText);
    typeLabel->setLocation(10,10);
    typeLabel->setSize(150,20);
-   //typeLabel->setJustify(TEXT_CENTER);
-   //screen->drawRect(typeLabel,&green);
    addObj(typeLabel);
 
 	valueLabel = new fontLabel();
-   valueLabel->setFont(&FreeSans18pt7b,0,25);
+   valueLabel->setFont(&FreeSans18pt7b,-8);
    valueLabel->setColors(&yellow);
    valueLabel->setLocation(10,45);
    valueLabel->setSize(100,30);
-   //valueLabel->setJustify(TEXT_RIGHT);
-   valueLabel->setPrecision(1);
    valueLabel->setValue(10.3);
    valueLabel->setPrecision(precision);
-   //screen->drawRect(valueLabel,&yellow);
    addObj(valueLabel);
    
    unitsLabel = new fontLabel();
-   //unitsLabel->setTextSize(3);
-   unitsLabel->setFont(&FreeSansBoldOblique12pt7b,0,18);
+   unitsLabel->setFont(&FreeSansBoldOblique12pt7b,-8);
    unitsLabel->setColors(&blueText);
    unitsLabel->setLocation(120,45);
    unitsLabel->setSize(30,30);
-   //unitsLabel->setJustify(TEXT_LEFT);
-   //screen->drawRect(unitsLabel,&yellow);
    addObj(unitsLabel);
 }
 
@@ -222,13 +225,13 @@ void valueBox::setValue(float inValue) {
 	}
 }
 
+
 void valueBox::setPrecision(int inPrecision) {
 	
 	if (valueLabel) {
 		precision = inPrecision;
 		valueLabel->setPrecision(precision);
 		valueLabel->setValue(value);
-		//setNeedRefresh();
 	}
 }
 

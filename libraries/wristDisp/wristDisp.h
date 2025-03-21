@@ -38,7 +38,8 @@ class wristDisp {
 	
 	virtual	bool		begin(void);
 	virtual	dispErr	errMsg(void);
-	virtual	void		setupDisp(void);			
+	virtual	void		setupDisp(void);
+				void		light(bool onOff);		
 	virtual	void		checkDisp(void);
 	
 	protected:
