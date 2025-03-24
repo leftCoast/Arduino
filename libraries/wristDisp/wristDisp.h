@@ -7,6 +7,7 @@
 #include <idlers.h>
 #include <label.h>
 #include <fontLabel.h>
+#include "offscreen.h"
 
 
 #define TFT_DC  9
@@ -78,7 +79,11 @@ class dataBox :	public drawGroup {
 	
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
+	virtual	void  draw(void);
 	
+				colorObj 	startColor;
+				colorObj 	endColor;
+				offscreen	vPort;
 };
 
 
@@ -94,11 +99,11 @@ class valueBox :	public dataBox {
 				valueBox(rect* inRect);
 	virtual	~valueBox(void);
 	
-				void	setTypeText(const char* inStr);
+	virtual	void	setTypeText(const char* inStr);
 				void	setUnitText(const char* inStr);
 				void	setValue(float inValue);
 				void	setPrecision(int inPrecision);
-				void	setNoValueStr(const char* inStr);				
+				void	setNoValueStr(const char* inStr);
 			
 	protected:
 	
@@ -110,12 +115,40 @@ class valueBox :	public dataBox {
 				float			value;
 				int			precision;
 				char*			noValueStr;
+				
 };
 
 
+// **************************************************
+// *****************   valueBarBox   **************** 
+// **************************************************	
 	
 	
+class valueBarBox :	public dataBox {
+
+	public:
+				valueBarBox(rect* inRect);
+	virtual	~valueBarBox(void);
 	
+	virtual	void	setTypeText(const char* inStr);
+				void	setUnitText(const char* inStr);
+				void	setValue(float inValue);
+				void	setPrecision(int inPrecision);
+				void	setNoValueStr(const char* inStr);
+			
+	protected:
+	
+	virtual	void	setup(void);
+				
+				fontLabel*	typeLabel;
+				fontLabel*	valueLabel;
+				fontLabel* 	unitsLabel;
+				float			value;
+				int			precision;
+				char*			noValueStr;
+				
+};
+
 
 
 #endif

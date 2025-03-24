@@ -1,16 +1,22 @@
 #include <wristDisp.h>
-
 #include <DFRobot_0995_Obj.h>
 #include <idlers.h>
 #include <timeObj.h>
 #include <strTools.h>
+#include <runningAvg.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
+#include "debug.h"
+
+
 // **************************************************
 // *****************   wristDisp    ***************** 
 // **************************************************
 
-timeObj	screenTimer(1000);
+timeObj		screenTimer(1000);
+timeObj		dataTimer(2000);
+runningAvg	speedSmoother(100);
+runningAvg	fuelSmoother(100);
 
 wristDisp::wristDisp(int inChipSelect,int inReset,int inBacklight,int inDataCommand) {  
 
@@ -28,7 +34,7 @@ wristDisp::~wristDisp(void) {  }
 bool wristDisp::begin(void) {
 
 	bool success;
-	
+
 	success = false;
 	pinMode(backlight,OUTPUT);													// Setup backlight pin.
 	analogWrite(backlight,0);                                    // Turn on backlight.
@@ -100,6 +106,9 @@ void wristDisp::setupDisp() {
 
 void wristDisp::checkDisp(void) {
     
+   float randomNum;
+   float aSmoothedNum;
+   
 	if (screenTimer.ding()) {
 		for(int i=0;i<256;i++) {
 			analogWrite(backlight,i);
@@ -107,6 +116,18 @@ void wristDisp::checkDisp(void) {
 		}
 		screenTimer.reset();
 	}
+	
+	if (dataTimer.ding()) {
+		randomNum = random(0,9.5);
+		aSmoothedNum = speedSmoother.addData(randomNum);
+		speedBox->setValue(aSmoothedNum);
+		
+		randomNum = random(0,100);
+		aSmoothedNum = fuelSmoother.addData(randomNum);
+		fuelBox->setValue(aSmoothedNum);
+		dataTimer.start();
+	}
+	
 }
 
 
@@ -117,9 +138,10 @@ void wristDisp::checkDisp(void) {
 // **************************************************
 
 
-colorObj	labelColor;
-colorObj	valueColor;
-colorObj	unitsColor;
+colorObj		labelColor;
+colorObj		valueColor;
+colorObj		unitsColor;
+//bitmap		dataBoxBitmap(DBOX_W,DBOX_H);
 
 dataBox::dataBox(rect* inRect)
 	: drawGroup(1,1,screen->width(),screen->height()) {
@@ -127,26 +149,32 @@ dataBox::dataBox(rect* inRect)
 	if (inRect) {
 		setRect(inRect);
 	}
+	startColor.setColor(&black);
+	endColor.setColor(LC_NAVY);
+	endColor.blend(&blue,50);
 	setup();
 }
 	
 	
-dataBox::~dataBox(void) {  }
+dataBox::~dataBox(void) { }
 
 
 void dataBox::setup(void) { }
-
-
-void dataBox::drawSelf(void) {
 	
-	colorObj startColor;
-	colorObj endColor;
-	//return;
-	startColor.setColor(&black);
-	endColor.setColor(LC_NAVY);
-	endColor.blend(&blue,50);
-	screen->fillRectGradient(x,y,width,height,&startColor,&endColor);
+
+void dataBox::drawSelf(void) { screen->fillRectGradient(this,&startColor,&endColor); }
+
+
+void dataBox::draw(void) {
+
+	bitmap aBitmap(width,height);
+	
+	vPort.beginDraw(&aBitmap,x,y);
+	drawGroup::draw();
+	vPort.endDraw();
+	screen->blit(x,y,&aBitmap);
 }
+
 
 
 // **************************************************
@@ -176,6 +204,7 @@ void valueBox::setup(void) {
    typeLabel->setColors(&blueText);
    typeLabel->setLocation(10,10);
    typeLabel->setSize(150,20);
+   typeLabel->setJustify(TEXT_CENTER);
    addObj(typeLabel);
 
 	valueLabel = new fontLabel();
@@ -185,13 +214,14 @@ void valueBox::setup(void) {
    valueLabel->setSize(100,30);
    valueLabel->setValue(10.3);
    valueLabel->setPrecision(precision);
+   valueLabel->setJustify(TEXT_CENTER);
    addObj(valueLabel);
    
    unitsLabel = new fontLabel();
    unitsLabel->setFont(&FreeSansBoldOblique12pt7b,-8);
    unitsLabel->setColors(&blueText);
    unitsLabel->setLocation(120,45);
-   unitsLabel->setSize(30,30);
+   unitsLabel->setSize(45,30);
    addObj(unitsLabel);
 }
 
@@ -200,7 +230,6 @@ void valueBox::setTypeText(const char* inStr) {
 	
 	if (typeLabel) {
 		typeLabel->setValue(inStr);
-
 	}
 }
 
@@ -222,6 +251,7 @@ void valueBox::setValue(float inValue) {
 		} else {
 			valueLabel->setValue(value);
 		}
+		setNeedRefresh();
 	}
 }
 

@@ -11,6 +11,8 @@
 #include <Fonts/FreeSerifItalic12pt7b.h>
 #include <Fonts/FreeSerifBoldItalic12pt7b.h>
 
+
+
 #include <Fonts/Picopixel.h>
 
 #include <colorObj.h>
@@ -26,15 +28,22 @@
 #define X      10
 #define Y      50
 #define STEP   50
-#define W      145
+#define W      300
 #define H      23
 
 Adafruit_ST7789* theTFT;
 
 void setup() {
+   char text[] = {"Red jam at night"};
+   int16_t  yPos = Y;
+   int16_t  bX;
+   int16_t  bY;
+   int16_t  bW;
+   int16_t  bH;
+   int      offset;
 
-   int   yPos = Y;
 
+   Serial.begin(9600);
    /// Fire up the screen
    theTFT = new Adafruit_ST7789(TFT_CS,TFT_DC,TFT_RST);
    if (theTFT==NULL) {
@@ -42,6 +51,7 @@ void setup() {
       while(1);
    }
    theTFT->init(TFT_WIDTH, TFT_HEIGHT);
+   theTFT->setRotation(1);
    theTFT->fillScreen(black.getColor16());
 
    
@@ -49,10 +59,19 @@ void setup() {
    // Using size 0 to get the sizes to be close.
    theTFT->drawRect(X,yPos,W,H,yellow.getColor16());
    theTFT->setTextColor(blue.getColor16());
-   theTFT->setTextSize(0); // Has odd effects with fonts
-   theTFT->setFont(&FreeSansBoldOblique12pt7b);
-   theTFT->setCursor(X,yPos+21);
-   theTFT->print("Red jam");
+   theTFT->setTextSize(1); // Has odd effects with fonts
+   theTFT->setFont(&FreeSans18pt7b);
+   theTFT->setCursor(X,yPos+H);
+   theTFT->getTextBounds(text,0,0,&bX,&bY,&bW,&bH);
+   //theTFT->getTextBounds(text,X,yPos+H,&bX,&bY,&bW,&bH);
+   theTFT->drawRect(bX,bY,bW,bH,green.getColor16());
+   offset = (W-bW)/2;
+   Serial.println(W);
+   Serial.println(bW);
+   Serial.println(W-bW);
+   Serial.println(offset);
+   theTFT->setCursor(X+offset,yPos+H);
+   theTFT->print(text);
    yPos = yPos + STEP;
 
    /*

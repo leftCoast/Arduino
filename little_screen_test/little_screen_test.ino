@@ -1,5 +1,6 @@
 
 #include <wristDisp.h>
+#include "offscreen.h"
 
 #define TFT_CS  10
 #define TFT_RST 3
@@ -10,6 +11,9 @@ wristDisp   ourDisp(TFT_CS,TFT_RST,TFT_BL,TFT_DC);
 
 void setup() {
    Serial.begin(57900);
+   while(!Serial) delay(10);
+   delay(25);
+   Serial.println("Running");
    if (!ourDisp.begin()) {
       switch(ourDisp.errMsg()) {
          case noErr     : Serial.println("Odd. Failed to start but shows no error.");  break;
