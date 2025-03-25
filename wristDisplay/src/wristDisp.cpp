@@ -39,7 +39,7 @@ void	gotStr(char* cmdStr) {
 	heapStr(&aStr,cmdStr);		// Allocates and stuffs it in.
 	char*	token;
 	
-	Serial.println(cmdStr);
+	//Serial.println(cmdStr);
 	token = strtok(aStr,DELEM_STR);
 	if (!strcmp(token,"speed")) {
 		token = strtok(NULL,DELEM_STR);
