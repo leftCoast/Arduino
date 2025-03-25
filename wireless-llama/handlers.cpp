@@ -51,10 +51,13 @@ waterDepthObj::~waterDepthObj(void) {  }
 bool waterDepthObj::handleMsg(message* inMsg) {
 
   unsigned int rawDepth;
+  
   if (inMsg->getPGN()==0x1F50B) {
     rawDepth = inMsg->getLongFromData(1);
     rawDepth = rawDepth / 100.0;    // Give meters.
     feet = rawDepth * 3.28084;      // Give feet
+    Serial1.print("depth ");
+    Serial1.println(feet/6.0);
     return true;
   }
   return false;
@@ -84,6 +87,8 @@ bool waterTempObj::handleMsg(message* inMsg) {
       rawTemp = inMsg->getUIntFromData(3);   // Grab the data.
       kelvan = rawTemp / 100.0;              // Gives kelvan.
       degF  = (kelvan * 1.8) - 459.67;       // Gives degF. uPdate the value.
+      Serial1.print("watertemp ");
+      Serial1.println(degF);
       return true;                           // Success we handled that one. return true.
    }                                         //
    return false;                             // Not ours, return false.
@@ -123,7 +128,12 @@ float fluidLevelObj::getLevel(void) { return level; }
 
 
 // Level is passed in as a percentage full.
-void fluidLevelObj::setLevel(float inLevel) { level = inLevel; }
+void fluidLevelObj::setLevel(float inLevel) {
+   
+   level = inLevel;
+   Serial1.print("fuel ");
+   Serial1.println(level);
+ }
 
 
 // If you want to know the value you set in there. 
