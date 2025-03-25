@@ -3,9 +3,12 @@
 #include <idlers.h>
 #include <timeObj.h>
 #include <strTools.h>
+#include <serialStr.h>
 #include <runningAvg.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
+
+
 //#include "debug.h"
 
 
@@ -18,9 +21,21 @@ timeObj		dataTimer(300);
 timeObj		speedTimer(3000);
 timeObj		fuelTimer(6000);
 runningAvg	speedSmoother(100);
-runningAvg	fuelSmoother(100);
+runningAvg	fuelSmoother(20);
 float			fuelNum;
 float			speedNum;
+colorObj		blueText(LC_LIGHT_BLUE);
+serialStr	cmdMgr;
+
+
+void	gotStr(char* cmdStr) {
+
+	fuelNum = atof(cmdStr);
+}
+
+void startSerial(void) { cmdMgr.setCallback(gotStr); }
+
+
 
 wristDisp::wristDisp(int inChipSelect,int inReset,int inBacklight,int inDataCommand) {  
 
@@ -118,7 +133,6 @@ void wristDisp::setupDisp() {
 
 void wristDisp::checkDisp(void) {
     
-   float randomNum;
    float aSmoothedNum;
    
 	if (screenTimer.ding()) {
@@ -136,10 +150,12 @@ void wristDisp::checkDisp(void) {
 		fuelBox->setValue(aSmoothedNum);
 		dataTimer.start();
 	} 
+	/*
 	if (fuelTimer.ding()) {
 		fuelNum = random(0,100);
 		fuelTimer.start();
 	}
+	*/
 	if (speedTimer.ding()) {
 		speedNum = random(0,9.5);
 		speedTimer.start();
@@ -327,7 +343,6 @@ void	valueBarBox::setValue(float inValue) {
 
 void	valueBarBox::setup(void) { 
 
-	colorObj	blueText(LC_LIGHT_BLUE);
 	rect		location;
 	
 	typeLabel = new fontLabel();
@@ -339,7 +354,7 @@ void	valueBarBox::setup(void) {
    addObj(typeLabel);
    
    location.setRect(BAR_X-1,BAR_Y,BAR_W,BAR_H);
-   valueBar = new colorBargraph(&location,leftRight); //
+   valueBar = new fuelBargraph(&location,leftRight); 
    valueBar->addColor(0,&red);
    valueBar->addColor(10,&red);
    valueBar->addColor(12.5,&yellow);
@@ -364,5 +379,56 @@ void	valueBarBox::setup(void) {
    theF->setValue("F");
    addObj(theF);
 };
-		
-		
+	
+
+	
+// **************************************************
+// *****************  fuelBargraph   **************** 
+// **************************************************	
+
+
+fuelBargraph::fuelBargraph(rect* inRect,orientation inOrientation)
+	: colorBargraph(inRect,inOrientation) {  }
+	
+fuelBargraph::~fuelBargraph(void) {  }	
+	
+
+void  fuelBargraph::drawSelf(void) {
+
+	colorObj	scaleColor(LC_LIGHT_BLUE);
+	float		lineHeight;
+	float		qWidth;
+	point		lineEnds[3];
+	
+	lineHeight = (height*0.75);
+	qWidth = width/4.0;
+	lineEnds[0].x = round(x+qWidth);
+	lineEnds[1].x = round(x+qWidth*2);
+	lineEnds[2].x = round(x+qWidth*3);
+	lineEnds[0].y = round(y+height-(lineHeight/2.0));
+	lineEnds[1].y = round(y+height-lineHeight);
+	lineEnds[2].y = round(y+height-(lineHeight/2.0));
+	colorBargraph::drawSelf();
+	screen->drawRect(this,&scaleColor);
+	
+	if (lineEnds[0].x<=drawRect.x) {
+		screen->drawVLine(lineEnds[0].x,lineEnds[0].y,lineHeight/2.0,&black);
+	} else {
+		screen->drawVLine(lineEnds[0].x,lineEnds[0].y,lineHeight/2.0,&scaleColor);
+	}
+	if (lineEnds[1].x<=drawRect.x) {
+		screen->drawVLine(lineEnds[1].x,lineEnds[1].y,lineHeight,&black);
+	} else {
+		screen->drawVLine(lineEnds[1].x,lineEnds[1].y,lineHeight,&scaleColor);
+	}
+	if (lineEnds[2].x<=drawRect.x) {
+		screen->drawVLine(lineEnds[2].x,lineEnds[2].y,lineHeight/2.0,&black);
+	} else {
+		screen->drawVLine(lineEnds[2].x,lineEnds[2].y,lineHeight/2.0,&scaleColor);
+	}
+	
+}
+
+
+
+

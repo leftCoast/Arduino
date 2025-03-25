@@ -9,10 +9,13 @@
 #include <fontLabel.h>
 #include <colorBargraph.h>
 #include <offscreen.h>
-
+#include <serialStr.h>
 
 class valueBox;
 class valueBarBox;
+class fuelBargraph;
+
+extern void startSerial(void);
 
 // **************************************************
 // *****************   wristDisp    ***************** 
@@ -129,13 +132,14 @@ class valueBarBox :	public dataBox {
 	virtual	void	setTypeText(const char* inStr);
 	virtual	void	setUnitText(const char* inStr);
 	virtual	void	setValue(float inValue);
-			
+	//virtual	void  drawSelf(void);
+	
 	protected:
 	
 	virtual	void	setup(void);
 				
 				fontLabel*		typeLabel;
-				colorBargraph*	valueBar;
+				fuelBargraph*	valueBar;
 				fontLabel*		theE;
 				fontLabel*		theF;
 				float				value;
@@ -143,5 +147,19 @@ class valueBarBox :	public dataBox {
 
 
 
+// **************************************************
+// *****************  fuelBargraph   **************** 
+// **************************************************	
+
+
+class fuelBargraph :	public colorBargraph {
+
+	public:
+				fuelBargraph(rect* inRect,orientation inOrientation=bottomUp);
+	virtual	~fuelBargraph(void);
+	
+	virtual	void drawSelf(void);
+
+};
 
 #endif
