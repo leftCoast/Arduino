@@ -7,17 +7,12 @@
 #include <idlers.h>
 #include <label.h>
 #include <fontLabel.h>
-#include "offscreen.h"
+#include <colorBargraph.h>
+#include <offscreen.h>
 
-
-#define TFT_DC  9
-#define TFT_CS  10
-#define TFT_RST 3
-#define TFT_BL  5
 
 class valueBox;
-
-
+class valueBarBox;
 
 // **************************************************
 // *****************   wristDisp    ***************** 
@@ -53,7 +48,8 @@ class wristDisp {
 				valueBox*	speedBox;
 				valueBox*	depthBox;
 				valueBox*	COGBox;
-				valueBox*	fuelBox;
+				//valueBox*	fuelBox;
+				valueBarBox*	fuelBox;
 };
 
 
@@ -100,10 +96,10 @@ class valueBox :	public dataBox {
 	virtual	~valueBox(void);
 	
 	virtual	void	setTypeText(const char* inStr);
-				void	setUnitText(const char* inStr);
-				void	setValue(float inValue);
-				void	setPrecision(int inPrecision);
-				void	setNoValueStr(const char* inStr);
+	virtual	void	setUnitText(const char* inStr);
+	virtual	void	setValue(float inValue);
+	virtual	void	setPrecision(int inPrecision);
+	virtual	void	setNoValueStr(const char* inStr);
 			
 	protected:
 	
@@ -131,23 +127,20 @@ class valueBarBox :	public dataBox {
 	virtual	~valueBarBox(void);
 	
 	virtual	void	setTypeText(const char* inStr);
-				void	setUnitText(const char* inStr);
-				void	setValue(float inValue);
-				void	setPrecision(int inPrecision);
-				void	setNoValueStr(const char* inStr);
+	virtual	void	setUnitText(const char* inStr);
+	virtual	void	setValue(float inValue);
 			
 	protected:
 	
 	virtual	void	setup(void);
 				
-				fontLabel*	typeLabel;
-				fontLabel*	valueLabel;
-				fontLabel* 	unitsLabel;
-				float			value;
-				int			precision;
-				char*			noValueStr;
-				
+				fontLabel*		typeLabel;
+				colorBargraph*	valueBar;
+				fontLabel*		theE;
+				fontLabel*		theF;
+				float				value;
 };
+
 
 
 

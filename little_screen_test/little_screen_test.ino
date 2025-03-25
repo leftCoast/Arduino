@@ -1,6 +1,6 @@
 
 #include <wristDisp.h>
-#include "offscreen.h"
+#include <offscreen.h>
 
 #define TFT_CS  10
 #define TFT_RST 3

@@ -6,7 +6,7 @@
 #include <runningAvg.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
-#include "debug.h"
+//#include "debug.h"
 
 
 // **************************************************
@@ -14,9 +14,13 @@
 // **************************************************
 
 timeObj		screenTimer(1000);
-timeObj		dataTimer(2000);
+timeObj		dataTimer(300);
+timeObj		speedTimer(3000);
+timeObj		fuelTimer(6000);
 runningAvg	speedSmoother(100);
 runningAvg	fuelSmoother(100);
+float			fuelNum;
+float			speedNum;
 
 wristDisp::wristDisp(int inChipSelect,int inReset,int inBacklight,int inDataCommand) {  
 
@@ -37,8 +41,8 @@ bool wristDisp::begin(void) {
 
 	success = false;
 	pinMode(backlight,OUTPUT);													// Setup backlight pin.
-	analogWrite(backlight,0);                                    // Turn on backlight.
-   screen = (displayObj*) new DFRobot_0995_Obj(TFT_CS,TFT_RST);	// Create our display object.
+	analogWrite(backlight,0);                                    	// Turn on backlight.
+   screen = (displayObj*) new DFRobot_0995_Obj(chipSelect,reset);	// Create our display object.
    if (screen) {																	// If we allocated one.
       if (screen->begin()) {													// If we can initialize it.
          setupDisp();															// Setup the display for viewing.
@@ -93,14 +97,22 @@ void wristDisp::setupDisp() {
    viewList.addObj(COGBox);
    dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    
+   /*
 	fuelBox = new valueBox(&dBoxRect);
    fuelBox->setTypeText("Fuel");
    fuelBox->setUnitText("%");
    fuelBox->setPrecision(0);
    fuelBox->setValue(NAN);
    viewList.addObj(fuelBox);
-    
-   //screen->drawRect(firstBox,&red);
+   */
+   fuelBox = new valueBarBox(&dBoxRect);
+   if (fuelBox) {
+   fuelBox->setTypeText("Fuel");
+   fuelBox->setUnitText("%");
+   fuelBox->setValue(5);
+   viewList.addObj(fuelBox);
+   }
+   
 }
 
 
@@ -118,16 +130,20 @@ void wristDisp::checkDisp(void) {
 	}
 	
 	if (dataTimer.ding()) {
-		randomNum = random(0,9.5);
-		aSmoothedNum = speedSmoother.addData(randomNum);
+		aSmoothedNum = speedSmoother.addData(speedNum);
 		speedBox->setValue(aSmoothedNum);
-		
-		randomNum = random(0,100);
-		aSmoothedNum = fuelSmoother.addData(randomNum);
+		aSmoothedNum = fuelSmoother.addData(fuelNum);
 		fuelBox->setValue(aSmoothedNum);
 		dataTimer.start();
+	} 
+	if (fuelTimer.ding()) {
+		fuelNum = random(0,100);
+		fuelTimer.start();
 	}
-	
+	if (speedTimer.ding()) {
+		speedNum = random(0,9.5);
+		speedTimer.start();
+	}
 }
 
 
@@ -270,5 +286,83 @@ void valueBox::setNoValueStr(const char* inStr) { heapStr(&noValueStr,inStr); }
 		
 		
 		
+// **************************************************
+// *****************   valueBarBox   **************** 
+// **************************************************	
+	
+#define	BAR_X	25
+#define	BAR_Y	40
+#define	BAR_W TFT_WIDTH-50
+#define	BAR_H 20
+
+	
+valueBarBox::valueBarBox(rect* inRect)
+	: dataBox(inRect) {  
+	
+	setup();
+}
+	
+	
+valueBarBox::~valueBarBox(void) {  }
+
+	
+void	valueBarBox::setTypeText(const char* inStr) {
+
+	if (typeLabel) {
+			typeLabel->setValue(inStr);
+			setNeedRefresh();
+		}
+	}
+	
+	
+void	valueBarBox::setUnitText(const char* inStr) { }
+
+
+void	valueBarBox::setValue(float inValue) {
+
+	valueBar->setValue(inValue);
+	setNeedRefresh();
+}
+
+
+void	valueBarBox::setup(void) { 
+
+	colorObj	blueText(LC_LIGHT_BLUE);
+	rect		location;
+	
+	typeLabel = new fontLabel();
+	typeLabel->setFont(&FreeSansBoldOblique12pt7b,-8);
+   typeLabel->setColors(&blueText);
+   typeLabel->setLocation(10,10);
+   typeLabel->setSize(150,20);
+   typeLabel->setJustify(TEXT_CENTER);
+   addObj(typeLabel);
+   
+   location.setRect(BAR_X-1,BAR_Y,BAR_W,BAR_H);
+   valueBar = new colorBargraph(&location,leftRight); //
+   valueBar->addColor(0,&red);
+   valueBar->addColor(10,&red);
+   valueBar->addColor(12.5,&yellow);
+   valueBar->addColor(15,&yellow);
+   valueBar->addColor(25,&green);
+   valueBar->addColor(100,&green);
+   addObj(valueBar);
+
+   theE = new fontLabel();
+   theE->setFont(&FreeSansBoldOblique12pt7b,0);
+   theE->setColors(&blueText);
+   theE->setLocation(0,BAR_Y);
+   theE->setSize(20,20);
+   theE->setValue("E");
+   addObj(theE);
+   
+   theF = new fontLabel();
+   theF->setFont(&FreeSansBoldOblique12pt7b,0);
+   theF->setColors(&blueText);
+   theF->setLocation(BAR_X+BAR_W,BAR_Y);
+   theF->setSize(20,20);
+   theF->setValue("F");
+   addObj(theF);
+};
 		
 		
