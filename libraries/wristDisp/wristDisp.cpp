@@ -17,9 +17,8 @@
 // **************************************************
 
 timeObj		screenTimer(1000);
-timeObj		dataTimer(300);
+timeObj		dataTimer(100);
 timeObj		speedTimer(3000);
-timeObj		fuelTimer(6000);
 runningAvg	speedSmoother(100);
 runningAvg	fuelSmoother(20);
 float			fuelNum;
@@ -85,7 +84,7 @@ void wristDisp::setupDisp() {
 	
 	boxHeight = screen->height()/4; 
 	screen->setRotation(PORTRAIT);		// Set orientation.
-   screen->fillScreen(&black);			// Black is a good background.
+   //screen->fillScreen(&black);			// Black is a good background.
    
    speedBox = new valueBox(&dBoxRect);
    speedBox->setTypeText("Speed");
@@ -112,14 +111,7 @@ void wristDisp::setupDisp() {
    viewList.addObj(COGBox);
    dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    
-   /*
-	fuelBox = new valueBox(&dBoxRect);
-   fuelBox->setTypeText("Fuel");
-   fuelBox->setUnitText("%");
-   fuelBox->setPrecision(0);
-   fuelBox->setValue(NAN);
-   viewList.addObj(fuelBox);
-   */
+   
    fuelBox = new valueBarBox(&dBoxRect);
    if (fuelBox) {
    fuelBox->setTypeText("Fuel");
@@ -134,7 +126,7 @@ void wristDisp::setupDisp() {
 void wristDisp::checkDisp(void) {
     
    float aSmoothedNum;
-   
+   int anInt;
 	if (screenTimer.ding()) {
 		for(int i=0;i<256;i++) {
 			analogWrite(backlight,i);
@@ -147,15 +139,12 @@ void wristDisp::checkDisp(void) {
 		aSmoothedNum = speedSmoother.addData(speedNum);
 		speedBox->setValue(aSmoothedNum);
 		aSmoothedNum = fuelSmoother.addData(fuelNum);
+		anInt = round(aSmoothedNum * 10);
+		aSmoothedNum = anInt/10.0;
 		fuelBox->setValue(aSmoothedNum);
 		dataTimer.start();
 	} 
-	/*
-	if (fuelTimer.ding()) {
-		fuelNum = random(0,100);
-		fuelTimer.start();
-	}
-	*/
+
 	if (speedTimer.ding()) {
 		speedNum = random(0,9.5);
 		speedTimer.start();
@@ -173,7 +162,6 @@ void wristDisp::checkDisp(void) {
 colorObj		labelColor;
 colorObj		valueColor;
 colorObj		unitsColor;
-//bitmap		dataBoxBitmap(DBOX_W,DBOX_H);
 
 dataBox::dataBox(rect* inRect)
 	: drawGroup(1,1,screen->width(),screen->height()) {
@@ -220,6 +208,7 @@ valueBox::valueBox(rect* inRect)
 	noValueStr = NULL;
 	setNoValueStr("---");
 	precision = 1;
+	sawNAN = false;
 	setup();
 }
 	
@@ -276,16 +265,31 @@ void valueBox::setUnitText(const char* inStr) {
 
 void valueBox::setValue(float inValue) {
 	
-	if (valueLabel) {
-		value = inValue;
-		if (isnan(value)) {
+	int intVal1;
+	int intVal2;
+	
+	if (isnan(value)) {
+		if (!sawNAN) {
 			valueLabel->setValue(noValueStr);
-		} else {
-			valueLabel->setValue(value);
+			sawNAN = true;
+			setNeedRefresh();
 		}
-		setNeedRefresh();
+	} else {
+		if (sawNAN) {
+			value = inValue;
+			sawNAN = false;
+			setNeedRefresh();
+		} else {
+			intVal1 = round(value*10);
+			intVal2 = round(inValue*10);
+			if (intVal1!=intVal2) {
+				value = inValue;
+				setNeedRefresh();
+			}
+		}
 	}
 }
+
 
 
 void valueBox::setPrecision(int inPrecision) {
@@ -330,14 +334,22 @@ void	valueBarBox::setTypeText(const char* inStr) {
 		}
 	}
 	
-	
+
+// We don't do units on this one so we do nothing.	
 void	valueBarBox::setUnitText(const char* inStr) { }
 
 
 void	valueBarBox::setValue(float inValue) {
 
-	valueBar->setValue(inValue);
-	setNeedRefresh();
+	int intVal1;
+	int intVal2;
+	
+	intVal1 = round(valueBar->getValue()*10);
+	intVal2 = round(inValue*10);
+	if (intVal1!=intVal2) {
+		valueBar->setValue(inValue);
+		setNeedRefresh();
+	}
 }
 
 
@@ -411,17 +423,17 @@ void  fuelBargraph::drawSelf(void) {
 	colorBargraph::drawSelf();
 	screen->drawRect(this,&scaleColor);
 	
-	if (lineEnds[0].x<=drawRect.x) {
+	if (lineEnds[0].x<=drawRect.x+drawRect.width) {
 		screen->drawVLine(lineEnds[0].x,lineEnds[0].y,lineHeight/2.0,&black);
 	} else {
 		screen->drawVLine(lineEnds[0].x,lineEnds[0].y,lineHeight/2.0,&scaleColor);
 	}
-	if (lineEnds[1].x<=drawRect.x) {
+	if (lineEnds[1].x<=drawRect.x+drawRect.width) {
 		screen->drawVLine(lineEnds[1].x,lineEnds[1].y,lineHeight,&black);
 	} else {
 		screen->drawVLine(lineEnds[1].x,lineEnds[1].y,lineHeight,&scaleColor);
 	}
-	if (lineEnds[2].x<=drawRect.x) {
+	if (lineEnds[2].x<=drawRect.x+drawRect.width) {
 		screen->drawVLine(lineEnds[2].x,lineEnds[2].y,lineHeight/2.0,&black);
 	} else {
 		screen->drawVLine(lineEnds[2].x,lineEnds[2].y,lineHeight/2.0,&scaleColor);

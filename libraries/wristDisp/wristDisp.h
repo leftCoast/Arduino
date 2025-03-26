@@ -114,7 +114,7 @@ class valueBox :	public dataBox {
 				float			value;
 				int			precision;
 				char*			noValueStr;
-				
+				bool			sawNAN;			
 };
 
 
