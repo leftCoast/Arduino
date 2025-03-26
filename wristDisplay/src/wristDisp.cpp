@@ -19,6 +19,7 @@ bool			newVal = false;
 float			fuelVal;
 float			speedVal;
 float			depthVal;
+float			airPVal;
 colorObj		blueText(LC_LIGHT_BLUE);
 serialStr	cmdMgr(&Serial1);
 
@@ -27,7 +28,8 @@ serialStr	cmdMgr(&Serial1);
 enum valueType {
 	speed,
 	depth,
-	fuel
+	fuel,
+	inHg
 };
 
 
@@ -53,6 +55,10 @@ void	gotStr(char* cmdStr) {
 		token = strtok(NULL,DELEM_STR);
 		fuelVal = atof(token);
 		newValueType = fuel;
+	} else if (!strcmp(token,"barometer")) {
+		token = strtok(NULL,DELEM_STR);
+		airPVal = atof(token);
+		newValueType = inHg;
 	}
 	newVal = true;
 	freeStr(&aStr);
@@ -107,7 +113,7 @@ void wristDisp::setupDisp() {
 	
 	rect			dBoxRect(0,0,screen->width(),screen->height()/4);
 	int			boxHeight;
-	
+
 	boxHeight = screen->height()/4; 
 	screen->setRotation(PORTRAIT);		// Set orientation.
    
@@ -117,32 +123,40 @@ void wristDisp::setupDisp() {
    speedBox->setPrecision(1);
    speedBox->setValue(NAN);
    viewList.addObj(speedBox);
-   dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    
+   dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    depthBox = new valueBox(&dBoxRect);
    depthBox->setTypeText("Depth");
    depthBox->setUnitText("Ftm");
    depthBox->setPrecision(0);
    depthBox->setValue(NAN);
    viewList.addObj(depthBox);
-	dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
-    
 	
-	COGBox = new valueBox(&dBoxRect);
+	/*
+	dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
+   COGBox = new valueBox(&dBoxRect);
    COGBox->setTypeText("Bearing");
    COGBox->setUnitText("Deg");
    COGBox->setPrecision(0);
    COGBox->setValue(NAN);
    viewList.addObj(COGBox);
+   */
+   
    dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
+   barometerBox = new valueBox(&dBoxRect);
+   barometerBox->setTypeText("Barometer");
+   barometerBox->setUnitText("\"Hg");
+   barometerBox->setPrecision(1);
+   barometerBox->setValue(NAN);
+   viewList.addObj(barometerBox);
    
-   
+   dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    fuelBox = new valueBarBox(&dBoxRect);
    if (fuelBox) {
-   fuelBox->setTypeText("Fuel");
-   fuelBox->setUnitText("%");
-   fuelBox->setValue(5);
-   viewList.addObj(fuelBox);
+   	fuelBox->setTypeText("Fuel");
+   	fuelBox->setUnitText("%");
+   	fuelBox->setValue(5);
+   	viewList.addObj(fuelBox);
    }
    
 }
@@ -160,9 +174,10 @@ void wristDisp::checkDisp(void) {
 	}
 	if (newVal) {
 		switch(newValueType) {
-			case speed	: speedBox->setValue(speedVal);	break;
-			case depth	: depthBox->setValue(depthVal);	break;
-			case fuel	: fuelBox->setValue(fuelVal);		break;
+			case speed	: speedBox->setValue(speedVal);		break;
+			case depth	: depthBox->setValue(depthVal);		break;
+			case fuel	: fuelBox->setValue(fuelVal);			break;
+			case inHg	: barometerBox->setValue(airPVal);	break;
 		}
 		newVal = false;
 	}

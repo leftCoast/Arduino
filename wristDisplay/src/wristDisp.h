@@ -42,15 +42,15 @@ class wristDisp {
 	
 	protected:
 				
-				int			chipSelect;
-				int			reset;
-				int			backlight;
-				int			dataCommand;
-				dispErr		currentErr;
-				valueBox*	speedBox;
-				valueBox*	depthBox;
-				valueBox*	COGBox;
-				//valueBox*	fuelBox;
+				int				chipSelect;
+				int				reset;
+				int				backlight;
+				int				dataCommand;
+				dispErr			currentErr;
+				valueBox*		speedBox;
+				valueBox*		depthBox;
+				valueBox*		COGBox;
+				valueBox*		barometerBox;
 				valueBarBox*	fuelBox;
 };
 
