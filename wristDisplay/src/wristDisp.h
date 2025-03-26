@@ -1,7 +1,6 @@
 #ifndef wristDisp_h
 #define wristDisp_h
 
-
 #include <DFRobot_0995_Obj.h>
 #include <drawObj.h>
 #include <idlers.h>

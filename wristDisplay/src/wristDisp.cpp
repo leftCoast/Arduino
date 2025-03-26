@@ -1,4 +1,4 @@
-#include <wristDisp.h>
+#include "wristDisp.h"
 #include <DFRobot_0995_Obj.h>
 #include <idlers.h>
 #include <timeObj.h>
@@ -8,28 +8,51 @@
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
 
-
-//#include "debug.h"
-
+#define DELEM_STR " \t\n\r"
 
 // **************************************************
 // *****************   wristDisp    ***************** 
 // **************************************************
 
 timeObj		screenTimer(1000);
-timeObj		dataTimer(100);
-timeObj		speedTimer(3000);
-runningAvg	speedSmoother(100);
-runningAvg	fuelSmoother(20);
-float			fuelNum;
-float			speedNum;
+bool			newVal = false;
+float			fuelVal;
+float			speedVal;
+float			depthVal;
 colorObj		blueText(LC_LIGHT_BLUE);
 serialStr	cmdMgr;
 
+enum valueType {
+	speed,
+	depth,
+	fuel
+};
+
+valueType newValueType;
 
 void	gotStr(char* cmdStr) {
 
-	fuelNum = atof(cmdStr);
+	char* aStr = NULL;			
+	heapStr(&aStr,cmdStr);		// Allocates and stuffs it in.
+	char*	token;
+	
+	Serial.println(cmdStr);
+	token = strtok(aStr,DELEM_STR);
+	if (!strcmp(token,"speed")) {
+		token = strtok(NULL,DELEM_STR);
+		speedVal = atof(token);
+		newValueType = speed;
+	} else if (!strcmp(token,"depth")) {
+		token = strtok(NULL,DELEM_STR);
+		depthVal = atof(token);
+		newValueType = depth;
+	} else if (!strcmp(token,"fuel")) {
+		token = strtok(NULL,DELEM_STR);
+		fuelVal = atof(token);
+		newValueType = fuel;
+	}
+	newVal = true;
+	freeStr(&aStr);
 }
 
 void startSerial(void) { cmdMgr.setCallback(gotStr); }
@@ -84,13 +107,12 @@ void wristDisp::setupDisp() {
 	
 	boxHeight = screen->height()/4; 
 	screen->setRotation(PORTRAIT);		// Set orientation.
-   //screen->fillScreen(&black);			// Black is a good background.
    
    speedBox = new valueBox(&dBoxRect);
    speedBox->setTypeText("Speed");
    speedBox->setUnitText("kn");
    speedBox->setPrecision(1);
-   speedBox->setValue(8.49);
+   speedBox->setValue(NAN);
    viewList.addObj(speedBox);
    dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    
@@ -98,7 +120,7 @@ void wristDisp::setupDisp() {
    depthBox->setTypeText("Depth");
    depthBox->setUnitText("Ftm");
    depthBox->setPrecision(0);
-   depthBox->setValue(32.2);
+   depthBox->setValue(NAN);
    viewList.addObj(depthBox);
 	dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
     
@@ -125,8 +147,7 @@ void wristDisp::setupDisp() {
 
 void wristDisp::checkDisp(void) {
     
-   float aSmoothedNum;
-   int anInt;
+   
 	if (screenTimer.ding()) {
 		for(int i=0;i<256;i++) {
 			analogWrite(backlight,i);
@@ -134,20 +155,13 @@ void wristDisp::checkDisp(void) {
 		}
 		screenTimer.reset();
 	}
-	
-	if (dataTimer.ding()) {
-		aSmoothedNum = speedSmoother.addData(speedNum);
-		speedBox->setValue(aSmoothedNum);
-		aSmoothedNum = fuelSmoother.addData(fuelNum);
-		anInt = round(aSmoothedNum * 10);
-		aSmoothedNum = anInt/10.0;
-		fuelBox->setValue(aSmoothedNum);
-		dataTimer.start();
-	} 
-
-	if (speedTimer.ding()) {
-		speedNum = random(0,9.5);
-		speedTimer.start();
+	if (newVal) {
+		switch(newValueType) {
+			case speed	: speedBox->setValue(speedVal);	break;
+			case depth	: depthBox->setValue(depthVal);	break;
+			case fuel	: fuelBox->setValue(fuelVal);		break;
+		}
+		newVal = false;
 	}
 }
 
@@ -268,7 +282,7 @@ void valueBox::setValue(float inValue) {
 	int intVal1;
 	int intVal2;
 	
-	if (isnan(value)) {
+	if (isnan(inValue)) {
 		if (!sawNAN) {
 			valueLabel->setValue(noValueStr);
 			sawNAN = true;
@@ -276,14 +290,16 @@ void valueBox::setValue(float inValue) {
 		}
 	} else {
 		if (sawNAN) {
-			value = inValue;
 			sawNAN = false;
+			value = inValue;
+			valueLabel->setValue(value);
 			setNeedRefresh();
 		} else {
 			intVal1 = round(value*10);
 			intVal2 = round(inValue*10);
 			if (intVal1!=intVal2) {
 				value = inValue;
+				valueLabel->setValue(value);
 				setNeedRefresh();
 			}
 		}
