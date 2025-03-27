@@ -351,7 +351,6 @@ void error(int errNum) {
 
 // Like it says, prints help text.
 void printHelp(void) {
-   
    Serial.println();
    Serial.println("                             The list of commands available.");
    Serial.println("           ----------------------------------------------------------------------");
