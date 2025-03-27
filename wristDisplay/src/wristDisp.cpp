@@ -20,13 +20,16 @@ float			fuelVal;
 float			speedVal;
 float			depthVal;
 colorObj		blueText(LC_LIGHT_BLUE);
-serialStr	cmdMgr;
+serialStr	cmdMgr(&Serial1);
+
+
 
 enum valueType {
 	speed,
 	depth,
 	fuel
 };
+
 
 valueType newValueType;
 
@@ -126,7 +129,7 @@ void wristDisp::setupDisp() {
     
 	
 	COGBox = new valueBox(&dBoxRect);
-   COGBox->setTypeText("COG");
+   COGBox->setTypeText("Bearing");
    COGBox->setUnitText("Deg");
    COGBox->setPrecision(0);
    COGBox->setValue(NAN);
