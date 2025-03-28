@@ -220,7 +220,7 @@ bool airTempBarometer::handleMsg(message* inMsg) {
    }
    if (success) {
       Serial1.print("barometer ");
-      Serial1.println(inHg);
+      Serial1.println(inHg,2);
    }
    return success;
 }
