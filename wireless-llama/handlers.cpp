@@ -218,6 +218,10 @@ bool airTempBarometer::handleMsg(message* inMsg) {
       success = true;
     }
    }
+   if (success) {
+      Serial1.print("barometer ");
+      Serial1.println(inHg);
+   }
    return success;
 }
 
