@@ -128,7 +128,7 @@ void wristDisp::setupDisp() {
    depthBox = new valueBox(&dBoxRect);
    depthBox->setTypeText("Depth");
    depthBox->setUnitText("Ftm");
-   depthBox->setPrecision(0);
+   depthBox->setPrecision(1);
    depthBox->setValue(NAN);
    viewList.addObj(depthBox);
 	
@@ -146,7 +146,7 @@ void wristDisp::setupDisp() {
    barometerBox = new valueBox(&dBoxRect);
    barometerBox->setTypeText("Barometer");
    barometerBox->setUnitText("\"Hg");
-   barometerBox->setPrecision(1);
+   barometerBox->setPrecision(2);
    barometerBox->setValue(NAN);
    viewList.addObj(barometerBox);
    
