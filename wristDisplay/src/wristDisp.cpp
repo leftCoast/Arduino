@@ -7,6 +7,7 @@
 #include <runningAvg.h>
 #include <Fonts/FreeSansBoldOblique12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
+#include <debug.h>
 
 #define DELEM_STR " \t\n\r"
 
@@ -20,6 +21,7 @@ float			fuelVal;
 float			speedVal;
 float			depthVal;
 float			airPVal;
+float			airDelta;
 colorObj		blueText(LC_LIGHT_BLUE);
 serialStr	cmdMgr(&Serial1);
 
@@ -57,7 +59,11 @@ void	gotStr(char* cmdStr) {
 		newValueType = fuel;
 	} else if (!strcmp(token,"barometer")) {
 		token = strtok(NULL,DELEM_STR);
+		//Serial.println(token);
 		airPVal = atof(token);
+		token = strtok(NULL,DELEM_STR);
+		//Serial.println(token);
+		airDelta = atof(token);
 		newValueType = inHg;
 	}
 	newVal = true;
@@ -378,8 +384,8 @@ void	valueBarBox::setValue(float inValue) {
 	int intVal1;
 	int intVal2;
 	
-	intVal1 = round(valueBar->getValue()*10);
-	intVal2 = round(inValue*10);
+	intVal1 = round(valueBar->getValue()*100);
+	intVal2 = round(inValue*100);
 	if (intVal1!=intVal2) {
 		valueBar->setValue(inValue);
 		setNeedRefresh();

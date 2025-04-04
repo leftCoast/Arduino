@@ -9,7 +9,7 @@
 wristDisp   ourDisp(TFT_CS,TFT_RST,TFT_BL,TFT_DC);
 
 void setup() {
-   Serial.begin(9600);
+   Serial.begin(57600);
    startSerial();
    Serial1.begin(9600);
    if (!ourDisp.begin()) {

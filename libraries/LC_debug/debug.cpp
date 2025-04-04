@@ -2,6 +2,10 @@
 #include <resizeBuff.h>
 
 
+// ******************************************
+// ***************   debug    ***************
+// ******************************************
+
 debug::debug(void) { }
 debug::~debug(void) { }
 
@@ -120,11 +124,34 @@ bool traceLoopActive = false;
 traceLoop traceList[5];
 
 
-#ifdef RAM_MONITOR
+// ******************************************
+// ***************   fxTimer  ***************
+// ******************************************
+
+
+fxTimer::fxTimer(const char* fxName) {
+
+  name = NULL;              // Let's not time ourselves..
+  heapStr(&name,fxName);    // 
+  startMicros = micros();   // So we start here.
+}
+
+
+fxTimer::~fxTimer(void) {
+
+  Serial.print(micros()-startMicros); // Grab time as the first of the last..
+  Serial.print(" micros\t");          // And then just close down shop.
+  Serial.println(name);               //
+  freeStr(&name);                     //
+}
+
+
 
 // ******************************************
 // *************** RAMMonitor ***************
 // ******************************************
+
+#ifdef RAM_MONITOR
 
 
 RAMMonitor::RAMMonitor(float reportMs)

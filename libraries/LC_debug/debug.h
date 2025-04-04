@@ -4,8 +4,16 @@
 #include "Arduino.h"
 #include <idlers.h>
 #include <timeObj.h>
+#include <strTools.h>
 
+
+
+// ******************************************
+// ***************   debug    ***************
+// ******************************************
 		
+// Debug class : Prints out a message and optionally stops the process there.
+
 
 class debug {
 
@@ -21,6 +29,13 @@ class debug {
 
 extern debug db;
 #define ST db.trace(__func__,false);
+
+
+
+
+// ******************************************
+// *************   traceLoop   **************
+// ******************************************
 
 
 class traceLoop {
@@ -40,6 +55,48 @@ class traceLoop {
 
 extern bool			traceLoopActive;
 extern traceLoop	traceList[];
+
+
+
+// ******************************************
+// ***************  fxTimer   ***************
+// ******************************************
+
+// fxTimer; This spits out the amount of time a function takes to execute. Add TIME as the
+// first line of any function you would like to time.  And..
+
+/*
+void function1(void) {
+  TIME  // This makes the magic happen!
+
+  delay(20);
+}
+*/
+
+
+class fxTimer {
+
+  public:
+    fxTimer(const char* fxName);
+    ~fxTimer(void);
+
+  private:
+    char*         name;
+    unsigned long startMicros;
+};
+
+
+
+
+//Handy define to put in your functions..
+#define TIME fxTimer time(__func__);
+
+
+
+// ******************************************
+// *************  RAMMonitor  ***************
+// ******************************************
+
 
 //#define RAM_MONITOR
 
