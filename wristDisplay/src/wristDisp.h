@@ -112,6 +112,7 @@ class valueBox :	public dataBox {
 				fontLabel* 	unitsLabel;
 				float			value;
 				int			precision;
+				int			decMult;
 				char*			noValueStr;
 				bool			sawNAN;			
 };

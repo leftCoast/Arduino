@@ -1,13 +1,12 @@
 #include "setup.h"
 #include <strTools.h>
 
-
 class serialHandler : public msgHandler {
 
    public :
             enum states {
-               spendHoldTime,    // We only send every X seconds. Wait for that.
-               waitForChange,    // We're only sending changes. Wait for a change.
+               doingHoldTime,    // We only send every X seconds. Wait for that.
+               watchForChange,   // We're only sending changes. Watch for a change.
                claimingPort,     // Only one handler gets the port at a time. See if it's clear.
                waitPortReady,    // We need to wait a time after the last transmisson is complete.
                waitPortDone      // We need to wait 'till our transmission is complete to start timer.
@@ -24,6 +23,7 @@ class serialHandler : public msgHandler {
             states      ourState;
             Stream*     ourPort;
             timeObj     ourHoldTimer;
+            timeObj     blindSendTimer;
             float       holdTime;
             float       lastValue;
 };

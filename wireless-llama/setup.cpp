@@ -1,4 +1,5 @@
 #include "setup.h"
+#include "serialHandler.h"
 #include <resizeBuff.h>
 
 

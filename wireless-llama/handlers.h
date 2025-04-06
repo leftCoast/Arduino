@@ -1,4 +1,5 @@
 #include "setup.h"
+#include "serialHandler.h"
 //                                                                                        |
 // Each type of device that comunicates with the network needs to be able to perform
 // certain functions. We try to automate most of these using the J1939 library. BUT, the
@@ -75,7 +76,7 @@ class msgHandler :   public linkListObj {
 // This listens for boat speed messages and outputs a boatspeed in knots. The transducer
 // used for this test was an AIRMAR DST810
 
-class waterSpeedObj  : public msgHandler {
+class waterSpeedObj  : public serialHandler {
 
    public:
             waterSpeedObj(netObj* inNetObj);
@@ -83,9 +84,12 @@ class waterSpeedObj  : public msgHandler {
    
             float getSpeed(void);
    virtual  bool  handleMsg(message* inMsg);
+   virtual  bool  valueChanged(void);
+   virtual  void  sendMessage(void);
    
-            mapper  speedMap;
-            float   knots;
+            mapper   speedMap;
+            int      sentSpeed;
+            float    knots;
   };
 
 
@@ -95,7 +99,7 @@ class waterSpeedObj  : public msgHandler {
 // This listens for water depth messages and outputs a depth in feet. The transducer
 // used for this test was an AIRMAR DST810
 
-class waterDepthObj  : public msgHandler {
+class waterDepthObj  : public serialHandler {
 
    public:
             waterDepthObj(netObj* inNetObj);
@@ -103,8 +107,11 @@ class waterDepthObj  : public msgHandler {
    
             float getDepth(void);
    virtual  bool  handleMsg(message* inMsg);
+   virtual  bool  valueChanged(void);
+   virtual  void  sendMessage(void);
    
             float feet;
+            int   sentDepth;
         
 };
 
@@ -115,7 +122,7 @@ class waterDepthObj  : public msgHandler {
 // This listens for water depth messages and outputs a depth in feet. The transducer
 // used for this test was an AIRMAR DST810
 
-class waterTempObj  : public msgHandler {
+class waterTempObj  : public serialHandler {
 
    public:
             waterTempObj(netObj* inNetObj);
@@ -123,8 +130,11 @@ class waterTempObj  : public msgHandler {
           
             float getTemp(void);
    virtual  bool  handleMsg(message* inMsg);
+   virtual  bool  valueChanged(void);
+   virtual  void  sendMessage(void);
    
-            float   degF;
+            float degF;
+            int   sentTemp;
 };
 
 
@@ -151,7 +161,7 @@ enum tankType {
 };
 
 
-class fluidLevelObj  : public msgHandler {
+class fluidLevelObj  : public serialHandler {
 
    public:
             fluidLevelObj(netObj* inNetObj);
@@ -165,37 +175,45 @@ class fluidLevelObj  : public msgHandler {
             void     setCapacity(float inCapacity);
    virtual  bool     handleMsg(message* inMsg);
    virtual  void     newMsg(void);
+   virtual  bool     valueChanged(void);
+   virtual  void     sendMessage(void);
    
             tankType fluidType;
             float    level;
+            int      sentLevel;
             float    capacity;
             int      tankID;
 };
 
 
 
-// ************* airTempBarometer *************
+// ************* barometerObj *************
 
-//runningAvg inHgSmooth(6);
 
-class airTempBarometer  : public msgHandler {
+class barometerObj  : public serialHandler {
 
    public:
-            airTempBarometer(netObj* inNetObj);
-            ~airTempBarometer(void);
+            barometerObj(netObj* inNetObj);
+            ~barometerObj(void);
           
    virtual  bool  handleMsg(message* inMsg);
-        float getAirTemp(void);
-        float getInHg(void);
-   
-        float       degF;
-        runningAvg* inHgSmooth;
+            float getAirTemp(void);
+            float getInHg(void);
+   virtual  bool  valueChanged(void);
+   virtual  void  sendMessage(void);
+    
+            float       degF;
+            runningAvg* inHgSmooth;
             float       inHg;
+            float       deltaHg;
+            int         sentDegF;
+            int         sentHg;
+            int         sentDelta;
 };
 
 
 // ************* LC_ChatObj *************
-
+/*
 class LC_ChatObj  : public msgHandler {
 
    public:
@@ -209,3 +227,5 @@ class LC_ChatObj  : public msgHandler {
 
             char* outStr;
 };
+
+*/

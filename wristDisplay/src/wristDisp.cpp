@@ -21,7 +21,7 @@ float			fuelVal;
 float			speedVal;
 float			depthVal;
 float			airPVal;
-float			airDelta;
+float			a_pDelta;
 colorObj		blueText(LC_LIGHT_BLUE);
 serialStr	cmdMgr(&Serial1);
 
@@ -31,7 +31,8 @@ enum valueType {
 	speed,
 	depth,
 	fuel,
-	inHg
+	inHg,
+	deltaHg
 };
 
 
@@ -43,7 +44,7 @@ void	gotStr(char* cmdStr) {
 	heapStr(&aStr,cmdStr);		// Allocates and stuffs it in.
 	char*	token;
 	
-	//Serial.println(cmdStr);
+	Serial.println(cmdStr);
 	token = strtok(aStr,DELEM_STR);
 	if (!strcmp(token,"speed")) {
 		token = strtok(NULL,DELEM_STR);
@@ -57,14 +58,16 @@ void	gotStr(char* cmdStr) {
 		token = strtok(NULL,DELEM_STR);
 		fuelVal = atof(token);
 		newValueType = fuel;
-	} else if (!strcmp(token,"barometer")) {
+	} else if (!strcmp(token,"a_pressure")) {
 		token = strtok(NULL,DELEM_STR);
-		//Serial.println(token);
 		airPVal = atof(token);
-		token = strtok(NULL,DELEM_STR);
-		//Serial.println(token);
-		airDelta = atof(token);
 		newValueType = inHg;
+		Serial.print("NEW PESSURE! : ");
+		Serial.println(airPVal);
+	} else if (!strcmp(token,"a_pdelta")) {
+		token = strtok(NULL,DELEM_STR);
+		a_pDelta = atof(token);
+		newValueType = deltaHg;
 	}
 	newVal = true;
 	freeStr(&aStr);
@@ -183,7 +186,11 @@ void wristDisp::checkDisp(void) {
 			case speed	: speedBox->setValue(speedVal);		break;
 			case depth	: depthBox->setValue(depthVal);		break;
 			case fuel	: fuelBox->setValue(fuelVal);			break;
-			case inHg	: barometerBox->setValue(airPVal);	break;
+			case inHg	: 
+				Serial.print("*** Sending : ");
+				Serial.println(airPVal);
+				barometerBox->setValue(airPVal);	break;
+			//case deltaHg	: barometerBox->setDValue(airPVal);
 		}
 		newVal = false;
 	}
@@ -246,6 +253,7 @@ valueBox::valueBox(rect* inRect)
 	noValueStr = NULL;
 	setNoValueStr("---");
 	precision = 1;
+	decMult = 10;
 	sawNAN = false;
 	setup();
 }
@@ -319,8 +327,8 @@ void valueBox::setValue(float inValue) {
 			valueLabel->setValue(value);
 			setNeedRefresh();
 		} else {
-			intVal1 = round(value*10);
-			intVal2 = round(inValue*10);
+			intVal1 = round(value*decMult);
+			intVal2 = round(inValue*decMult);
 			if (intVal1!=intVal2) {
 				value = inValue;
 				valueLabel->setValue(value);
@@ -336,6 +344,7 @@ void valueBox::setPrecision(int inPrecision) {
 	
 	if (valueLabel) {
 		precision = inPrecision;
+		decMult = pow(10, precision);
 		valueLabel->setPrecision(precision);
 		valueLabel->setValue(value);
 	}
@@ -381,15 +390,8 @@ void	valueBarBox::setUnitText(const char* inStr) { }
 
 void	valueBarBox::setValue(float inValue) {
 
-	int intVal1;
-	int intVal2;
-	
-	intVal1 = round(valueBar->getValue()*100);
-	intVal2 = round(inValue*100);
-	if (intVal1!=intVal2) {
-		valueBar->setValue(inValue);
-		setNeedRefresh();
-	}
+	valueBar->setValue(inValue);
+	setNeedRefresh();
 }
 
 

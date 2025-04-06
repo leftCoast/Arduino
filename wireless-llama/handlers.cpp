@@ -6,9 +6,10 @@
 
 
 waterSpeedObj::waterSpeedObj(netObj* inNetObj)
-   : msgHandler(inNetObj) {
-
-  knots   = 0;
+   : serialHandler(inNetObj,&Serial1) {
+      
+  knots     = 0;
+  sentSpeed = 0;
   speedMap.setValues(0,1023,0,(1023*1.943844)*0.01);
 }
 
@@ -23,8 +24,6 @@ bool waterSpeedObj::handleMsg(message* inMsg) {
   if (inMsg->getPGN()==0x1F503) {
     rawSpeed = inMsg->getIntFromData(1);
     knots = speedMap.map(rawSpeed);
-    Serial1.print("speed ");
-    Serial1.println(knots);
     return true;
   }
   return false;
@@ -34,14 +33,25 @@ bool waterSpeedObj::handleMsg(message* inMsg) {
 float waterSpeedObj::getSpeed(void) { return knots; }
 
 
+bool waterSpeedObj::valueChanged(void) { return sentSpeed != round(knots*10); }
+
+
+void waterSpeedObj::sendMessage(void) {
+
+   ourPort->print("speed ");
+   ourPort->println(knots,1);
+   sentSpeed = round(knots*10);
+}
+   
 
 // ************* waterDepthObj *************
 
 
 waterDepthObj::waterDepthObj(netObj* inNetObj)
-   : msgHandler(inNetObj) {
+   : serialHandler(inNetObj,&Serial1) {
 
-  feet   = 0;
+  feet      = 0;
+  sentDepth = 0;
 }
 
 
@@ -56,8 +66,6 @@ bool waterDepthObj::handleMsg(message* inMsg) {
     rawDepth = inMsg->getLongFromData(1);
     rawDepth = rawDepth / 100.0;    // Give meters.
     feet = rawDepth * 3.28084;      // Give feet
-    Serial1.print("depth ");
-    Serial1.println(feet/6.0);
     return true;
   }
   return false;
@@ -67,12 +75,25 @@ bool waterDepthObj::handleMsg(message* inMsg) {
 float waterDepthObj::getDepth(void) { return feet; }
 
 
+bool waterDepthObj::valueChanged(void) { return sentDepth!= round(feet*10); }
+
+
+void waterDepthObj::sendMessage(void) {
+
+   ourPort->print("depth ");
+   ourPort->println(feet,1);
+   sentDepth = round(feet*10);
+}
 
 // ************* waterTempObj *************
 
 
 waterTempObj::waterTempObj(netObj* inNetObj)
-   : msgHandler(inNetObj) { degF     = 0; }
+   : serialHandler(inNetObj,&Serial1) {
+
+   sentTemp = 0;
+   degF     = 0;
+}
 
 
 waterTempObj::~waterTempObj(void) {  }
@@ -87,8 +108,6 @@ bool waterTempObj::handleMsg(message* inMsg) {
       rawTemp = inMsg->getUIntFromData(3);   // Grab the data.
       kelvan = rawTemp / 100.0;              // Gives kelvan.
       degF  = (kelvan * 1.8) - 459.67;       // Gives degF. uPdate the value.
-      Serial1.print("watertemp ");
-      Serial1.println(degF);
       return true;                           // Success we handled that one. return true.
    }                                         //
    return false;                             // Not ours, return false.
@@ -98,11 +117,22 @@ bool waterTempObj::handleMsg(message* inMsg) {
 float waterTempObj::getTemp(void) { return degF; }
 
 
+bool waterTempObj::valueChanged(void) { return sentTemp != round(degF); }
+
+
+void waterTempObj::sendMessage(void) {
+
+   ourPort->print("w_temp ");
+   ourPort->println(round(degF));
+   sentTemp = round(degF);
+}
+
+
 // ************* fluidLevelObj *************
 
 
- fluidLevelObj::fluidLevelObj(netObj* inNetObj) 
-   : msgHandler(inNetObj) {
+fluidLevelObj::fluidLevelObj(netObj* inNetObj) 
+   : serialHandler(inNetObj,&Serial1) {
    
    fluidType = fuel;       // This is 0.
    level       = 0;        // Good as any for a default.
@@ -128,12 +158,7 @@ float fluidLevelObj::getLevel(void) { return level; }
 
 
 // Level is passed in as a percentage full.
-void fluidLevelObj::setLevel(float inLevel) {
-   
-   level = inLevel;
-   Serial1.print("fuel ");
-   Serial1.println(level);
- }
+void fluidLevelObj::setLevel(float inLevel) { level = inLevel; }
 
 
 // If you want to know the value you set in there. 
@@ -173,67 +198,119 @@ void fluidLevelObj::newMsg(void) {
 }
 
 
-// ************* airTempBarometer *************
+bool fluidLevelObj::valueChanged(void) { return sentLevel != round(level); }
 
 
-airTempBarometer::airTempBarometer(netObj* inNetObj)
-   : msgHandler(inNetObj) {
+void fluidLevelObj::sendMessage(void) {
 
-   degF = 0;
-   inHg = 0;
-   inHgSmooth = new runningAvg(6);
+   ourPort->print("fuel ");
+   ourPort->println(round(level));
+   sentLevel = round(level);
+}
+
+// ************* barometerObj *************
+
+
+barometerObj::barometerObj(netObj* inNetObj)
+   : serialHandler(inNetObj,&Serial1) {
+
+   degF        = 0;
+   inHg        = 0;
+   deltaHg     = 0;
+   sentDegF    = 0;
+   sentHg      = 0;
+   sentDelta   = 0;
+   inHgSmooth  = new runningAvg(6);
 }
 
 
-airTempBarometer::~airTempBarometer(void) { if (inHgSmooth) delete inHgSmooth; }
+barometerObj::~barometerObj(void) { if (inHgSmooth) delete inHgSmooth; }
 
 
-bool airTempBarometer::handleMsg(message* inMsg) {
+bool barometerObj::handleMsg(message* inMsg) {
 
    uint32_t rawPa32;
    uint16_t rawPa16;
+   uint16_t rawTmp16;
    float    Pa;
-  bool    success;
-  
-  success = false;
-  if (inMsg->getPGN()==0x1FD0A) {
-    rawPa32  = pack32(inMsg->getDataByte(6),inMsg->getDataByte(5),inMsg->getDataByte(4),inMsg->getDataByte(3));
-    if (!isBlank(rawPa32)) {                // Make sure the data we want is actually there.
-      Pa  = rawPa32 * 0.1;
-      inHg = inHgSmooth->addData(Pa*0.0002953);
-      success = true;
-    }
-   } else if (inMsg->getPGN()==0x1FD06) {
-    rawPa16  = pack16(inMsg->getDataByte(6),inMsg->getDataByte(5));
-    if (!isBlank(rawPa16)) {                // Make sure the data we want is actually there.
-      Pa  = rawPa16 * 100;
-      inHg = inHgSmooth->addData(Pa*0.0002953);
-      success = true;
-    }
-   } else if (inMsg->getPGN()==0x1FD07) {
-    rawPa16  =  pack16(inMsg->getDataByte(7),inMsg->getDataByte(6));
-    if (!isBlank(rawPa16)) {                // Make sure the data we want is actually there.
-      Pa  = rawPa16 * 100;
-      inHg = inHgSmooth->addData(Pa*0.0002953);
-      success = true;
-    }
-   }
-   if (success) {
-      Serial1.print("barometer ");
-      Serial1.println(inHg,2);
-   }
-   return success;
+   bool     gotPressure;
+   bool     gotTemp;
+   float    kelvan;
+   
+   gotPressure = false;
+   gotTemp = false;
+   if (inMsg->getPGN()==0x1FD0A) {                    // For this PGN version..
+      rawPa32 = inMsg->getULongFromData(3);           // Grab the data.
+      if (!isBlank(rawPa32)) {                        // Make sure the data we want is actually there.
+         Pa  = rawPa32 * 0.1;                         // Math
+         inHg = inHgSmooth->addData(Pa*0.0002953);    // Math
+         gotPressure = true;                              // Good enough!
+      }                                               //
+   } else if (inMsg->getPGN()==0x1FD06) {             // For this PGN version..
+      rawPa16  = inMsg->getIntFromData(5);            // Grab the pressure data.
+      if (!isBlank(rawPa16)) {                        // Make sure the data we want is actually there.
+         Pa  = rawPa16 * 100;                         // Math
+         inHg = inHgSmooth->addData(Pa*0.0002953);    // Math
+         gotPressure = true;                              // Good so far,
+      }                                               // 
+      rawTmp16 = inMsg->getIntFromData(3);            // This one also gives air temp, grab that.
+      if (!isBlank(rawTmp16)) {                       // Make sure the data we want is actually there.
+         kelvan = rawTmp16 / 100.0;                    // Gives kelvan.
+         degF  = (kelvan * 1.8) - 459.67;             // Gives degF. uPdate the value.
+         gotTemp = true;                              // Success we handled that one.
+      }                                               //
+   } else if (inMsg->getPGN()==0x1FD07) {             // For this PGN version..
+      rawPa16  = inMsg->getIntFromData(6);            // Grab the data.
+      if (!isBlank(rawPa16)) {                        // Make sure the data we want is actually there.
+         Pa  = rawPa16 * 100;                         // More math
+         inHg = inHgSmooth->addData(Pa*0.0002953);    // And more math
+         gotPressure = true;                              // There, have presssure.
+      }                                               //
+      rawTmp16 = inMsg->getIntFromData(2);           // This one also goves air temp, so we grab that.
+      if (!isBlank(rawTmp16)) {                       // Make sure the data we want is actually there.
+         kelvan = rawTmp16 / 100.0;                    // Gives kelvan.
+         degF  = (kelvan * 1.8) - 459.67;             // Gives degF. uPdate the value.
+         gotTemp = true;                              // Success we handled that one.
+      }                                               //
+   }                                                  //
+   if (gotPressure) {                                 // If we got a pressure reading..
+      deltaHg = inHgSmooth->getEndpointDelta();       // We'll calcualte the rate of change. (FIX THIS)
+   }                                                  //
+   return gotTemp || gotPressure;                     // We'll call either a sccess.
 }
 
   
-float airTempBarometer::getAirTemp(void) { return degF; }
+float barometerObj::getAirTemp(void) { return degF; }
 
-float airTempBarometer::getInHg(void) { return inHg; }
+float barometerObj::getInHg(void) { return inHg; }
 
 
+bool barometerObj::valueChanged(void) {
+
+   if (sentDegF != round(degF*10)) return true;
+   if (sentHg != round(inHg*100)) return true;
+   if (sentDelta != round(deltaHg*100)) return true;
+   return false;
+}
+
+
+void barometerObj::sendMessage(void) {
+
+   ourPort->print("a_temp ");
+   ourPort->println(degF);
+   sentDegF = round(degF*10);
+   
+   ourPort->print("a_pressure ");
+   ourPort->println(inHg);
+   sentHg = round(inHg*100);
+
+   ourPort->print("a_pdelta ");
+   ourPort->println(deltaHg);
+   sentDelta = round(deltaHg*100);
+}
 
 // ************* LC_ChatObj *************
-
+/*
 LC_ChatObj::LC_ChatObj(netObj* inNetObj)
    : msgHandler(inNetObj) {
    
@@ -298,3 +375,5 @@ void LC_ChatObj::newMsg(void) {
     }
   }
 }
+
+*/

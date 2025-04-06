@@ -9,12 +9,12 @@
 #define MAX_DEC   10       // Max digits beyond decimal point.
 
 
-llama2000         llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
-waterSpeedObj*    knotMeter;     // Handler to read boatspeed.
-waterTempObj*     thermometer;   // Handler to read water tempature.
-fluidLevelObj*    fuelSender;    // Handler that sends out fuel level messages.
-airTempBarometer* barometer;     // Handler to read atmisphereic pressure.
-LC_ChatObj*       chatObj;       // Hanlder that implements, with a clone of ourselves, a text message service.
+llama2000      llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
+waterSpeedObj* knotMeter;     // Handler to read boatspeed.
+waterTempObj*  thermometer;   // Handler to read water tempature.
+fluidLevelObj* fuelSender;    // Handler that sends out fuel level messages.
+barometerObj*  barometer;     // Handler to read atmisphereic pressure.
+//LC_ChatObj*       chatObj;       // Hanlder that implements, with a clone of ourselves, a text message service.
 
 lilParser         cmdParser;              // Toolkit for implementing a command line interface.
 bool              gettingDevList;         // Getting a device list takes time. This says we're waiting.
@@ -53,13 +53,13 @@ void setup() {
    knotMeter   = new waterSpeedObj(&llamaBrd);
    thermometer = new waterTempObj(&llamaBrd);
    fuelSender  = new fluidLevelObj(&llamaBrd);
-   barometer   = new airTempBarometer(&llamaBrd);
-   chatObj      = new LC_ChatObj(&llamaBrd);
+   barometer   = new barometerObj(&llamaBrd);
+   //chatObj      = new LC_ChatObj(&llamaBrd);
    llamaBrd.addMsgHandler(knotMeter);
    llamaBrd.addMsgHandler(thermometer);
    llamaBrd.addMsgHandler(fuelSender);
    llamaBrd.addMsgHandler(barometer);
-   llamaBrd.addMsgHandler(chatObj);
+   //llamaBrd.addMsgHandler(chatObj);
 
    // Resetting the hardware.
    if (!llamaBrd.begin(CAN_CS)) {
@@ -193,7 +193,6 @@ void setFuelLevel(void) {
 // Shows our device name.
 void showDeviceName(void) {
    
-
    if (cmdParser.numParams()==0) {
       llamaBrd.showName();
    }
