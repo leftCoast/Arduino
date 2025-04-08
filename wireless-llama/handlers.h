@@ -22,7 +22,7 @@
 // Now, all that being said. The J1939/NMEA2000 spec. tries to lay out every conceivable
 // data type message that will ever be. At first passs this seems like a futile and
 // absurd idea. But, if it's a finite set of data types. And all of them are pre-defined.
-// This makes it paossible for diffrent systems to share data and workk together. (Yeah..)
+// This makes it possible for diffrent systems to share data and workk together. (Yeah..)
 //
 // Like I said. A futile and absurd idea. Even more so because, as far as I can find out
 // reading about it, it costs tens of thousands of dollars to see and/or use the "offical"
@@ -61,7 +61,7 @@ class msgHandler :   public linkListObj {
  */
 //                                                                                       |
 // So, what I have here is some example handlers I wrote for devices I could fing "cheap"
-// on Amazon. And a nifty chat handler to type messages between devices. Like do ing text
+// on Amazon. And a nifty chat handler to type messages between devices. Like doing text
 // but down the NMEA2000 network.
 
 
@@ -204,8 +204,10 @@ class barometerObj  : public serialHandler {
     
             float       degF;
             runningAvg* inHgSmooth;
+            runningAvg* inHg20Min;
+            timeObj*    minuteTimer;
             float       inHg;
-            float       deltaHg;
+            float       deltaHg;       // Change in inHg per hour.
             int         sentDegF;
             int         sentHg;
             int         sentDelta;

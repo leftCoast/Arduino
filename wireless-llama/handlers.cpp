@@ -221,6 +221,8 @@ barometerObj::barometerObj(netObj* inNetObj)
    sentHg      = 0;
    sentDelta   = 0;
    inHgSmooth  = new runningAvg(6);
+   inHg20Min   = new runningAvg(20);
+   minuteTimer = new timeObj(60 * 1000);
 }
 
 
@@ -264,17 +266,24 @@ bool barometerObj::handleMsg(message* inMsg) {
       if (!isBlank(rawPa16)) {                        // Make sure the data we want is actually there.
          Pa  = rawPa16 * 100;                         // More math
          inHg = inHgSmooth->addData(Pa*0.0002953);    // And more math
-         gotPressure = true;                              // There, have presssure.
+         gotPressure = true;                          // There, have presssure.
       }                                               //
-      rawTmp16 = inMsg->getIntFromData(2);           // This one also goves air temp, so we grab that.
+      rawTmp16 = inMsg->getIntFromData(2);            // This one also goves air temp, so we grab that.
       if (!isBlank(rawTmp16)) {                       // Make sure the data we want is actually there.
-         kelvan = rawTmp16 / 100.0;                    // Gives kelvan.
+         kelvan = rawTmp16 / 100.0;                   // Gives kelvan.
          degF  = (kelvan * 1.8) - 459.67;             // Gives degF. uPdate the value.
          gotTemp = true;                              // Success we handled that one.
       }                                               //
    }                                                  //
-   if (gotPressure) {                                 // If we got a pressure reading..
-      deltaHg = inHgSmooth->getEndpointDelta();       // We'll calcualte the rate of change. (FIX THIS)
+   if (gotPressure && minuteTimer->ding()) {          // If we got a pressure reading AND the timer went off..
+      inHg20Min->addData(inHg);                       // Stuff the smoothed reading into the 20 minute list.
+      if (inHg20Min->getNumValues()==20) {            // If we been at this for at least twenty minutes.
+         deltaHg = inHg20Min->getEndpointDelta();     // We calcualte the rate of change over 20 minutes.
+         deltaHg = deltaHg * 3.0;                     // The deal is 0.06 inHg per hour, for at least 20 minutes, to call it rapid.
+      } else {                                        // Else not full yet..
+         deltaHg = NAN;                               // Then we call it a NAN.
+      }                                               // 
+      minuteTimer->stepTime();                        // Restart the timer for the next minute reading.
    }                                                  //
    return gotTemp || gotPressure;                     // We'll call either a sccess.
 }
