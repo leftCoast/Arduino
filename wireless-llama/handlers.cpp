@@ -136,7 +136,7 @@ fluidLevelObj::fluidLevelObj(netObj* inNetObj)
    
    fluidType = fuel;       // This is 0.
    level       = 0;        // Good as any for a default.
-   setSendInterval(2500);  // Refresh the outgoing data every 2.5 seconds.
+   //setSendInterval(2500);  // Refresh the outgoing data every 2.5 seconds.
 }
 
  
@@ -170,7 +170,37 @@ void fluidLevelObj::setCapacity(float inCapacity) { capacity = inCapacity; }
 
 
 // We can't currently disply the fluid level others send out.
-bool fluidLevelObj::handleMsg(message* inMsg) { return false; }
+bool fluidLevelObj::handleMsg(message* inMsg) {
+
+   byte        firstByte;
+   byte        instance;
+   uint16_t    rawLevel;
+   uint32_t    rawCap;
+   float       liters;
+   
+   if (inMsg->getPGN()==0x1F211) {
+      firstByte = inMsg->getDataByte(0);
+      instance = firstByte;
+      instance = 0x0F & instance;
+      fluidType = firstByte;
+      fluidType = fluidType >> 4;
+      rawLevel = inMsg->getUIntFromData(1);
+      level = rawLevel/250.0;
+      rawCap = inMsg->getULongFromData(3);
+      liters = rawCap/10.0;
+      
+      Serial.print("instance : ");
+      Serial.println(instance);
+      Serial.print("fluid Type : ");
+      Serial.println(fluidType);
+      
+      Serial.print("level : ");
+      Serial.print(level);
+      Serial.println(" %");
+      return true;
+   }
+   return false;
+}
   
 
 // Every set amount of time a new set of values will be sent out.

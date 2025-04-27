@@ -9,7 +9,7 @@
 #define MAX_DEC   10       // Max digits beyond decimal point.
 
 
-llama2000      llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
+llama2000*     llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
 waterSpeedObj* knotMeter;     // Handler to read boatspeed.
 waterTempObj*  thermometer;   // Handler to read water tempature.
 fluidLevelObj* fuelSender;    // Handler that sends out fuel level messages.
@@ -44,26 +44,29 @@ enum commands {                           // Our command list declrations.
 
 void setup() {
 
-   // Standardopening of serial port.
+   // Standard opening of serial port.
    Serial.begin(9600);
    delay(100);
    Serial1.begin(9600);
    delay(100);
+   //Serial3.begin(9600);
+   //  delay(100);
+   llamaBrd = new llama2000();
    // Creating and adding the message handlers.
-   knotMeter   = new waterSpeedObj(&llamaBrd);
-   thermometer = new waterTempObj(&llamaBrd);
-   fuelSender  = new fluidLevelObj(&llamaBrd);
-   barometer   = new barometerObj(&llamaBrd);
-   //chatObj      = new LC_ChatObj(&llamaBrd);
-   llamaBrd.addMsgHandler(knotMeter);
-   llamaBrd.addMsgHandler(thermometer);
-   llamaBrd.addMsgHandler(fuelSender);
-   llamaBrd.addMsgHandler(barometer);
-   //llamaBrd.addMsgHandler(chatObj);
+   knotMeter   = new waterSpeedObj(llamaBrd);
+   thermometer = new waterTempObj(llamaBrd);
+   fuelSender  = new fluidLevelObj(llamaBrd);
+   barometer   = new barometerObj(llamaBrd);
+   //chatObj      = new LC_ChatObj(llamaBrd);
+   llamaBrd->addMsgHandler(knotMeter);
+   llamaBrd->addMsgHandler(thermometer);
+   llamaBrd->addMsgHandler(fuelSender);
+   llamaBrd->addMsgHandler(barometer);
+   //llamaBrd->addMsgHandler(chatObj);
 
    // Resetting the hardware.
-   if (!llamaBrd.begin(CAN_CS)) {
-   Serial.println("Starting llama failed!");
+   if (!llamaBrd->begin(CAN_CS)) {
+      Serial.println("Starting llama failed!");
       while (1);
    }
 
@@ -92,8 +95,8 @@ void setup() {
    // State setup for the program.
    gettingDevList = false;
    devListNeedsRefresh = true;
-   ourName.copyName(&llamaBrd);
-   ourAddr = llamaBrd.getAddr();
+   ourName.copyName(llamaBrd);
+   ourAddr = llamaBrd->getAddr();
 
    // And away we go!
    Serial.println("Up and running");
@@ -101,7 +104,17 @@ void setup() {
 }
 
 // chatObj->setOutStr(inStr); // Not using the chat thing yet.
-  
+/*
+void loop() {
+
+   char  aChar;
+   
+   if (Serial3.available()) {                                     // If the GPS sent a char..
+      aChar = Serial3.read();                                      // Read and save it.
+      Serial.print(aChar);                                        // Echo it back to the serial monitor.
+   }
+}
+*/
 
 void loop() {
 
@@ -152,7 +165,7 @@ void showDeviceList(void) {
       Serial.println("Refreshing device list.");
       Serial.println("This will take a second or so.");
       Serial.println();
-      llamaBrd.refreshAddrList();
+      llamaBrd->refreshAddrList();
       gettingDevList = true;
    }
 }
@@ -162,11 +175,11 @@ void showDeviceList(void) {
 void checkDeviceList(void) {
 
    if (gettingDevList) {
-      if (!llamaBrd.isBusy()) {
+      if (!llamaBrd->isBusy()) {
          gettingDevList = false;
          devListNeedsRefresh = false;
          devListTimer.start();
-         llamaBrd.showAddrList(true);
+         llamaBrd->showAddrList(true);
       }
    }
 }
@@ -194,7 +207,7 @@ void setFuelLevel(void) {
 void showDeviceName(void) {
    
    if (cmdParser.numParams()==0) {
-      llamaBrd.showName();
+      llamaBrd->showName();
    }
 }
 
@@ -262,7 +275,7 @@ void findNameFromAddr(void) {
    
    if (cmdParser.numParams()==1) {
       addr = atoi(cmdParser.getNextParam());
-      aName = llamaBrd.findName(addr);
+      aName = llamaBrd->findName(addr);
       Serial.println("Address search result.");
       aName.showName();
    } else {
@@ -280,7 +293,7 @@ void copyNameFromAddr(void) {
    
    if (cmdParser.numParams()==1) {
       addr = atoi(cmdParser.getNextParam());
-      tempName = llamaBrd.findName(addr);
+      tempName = llamaBrd->findName(addr);
       blankName.clearName(false);
       if (!tempName.sameName(&blankName)) {
          aName.copyName(&tempName);
@@ -299,7 +312,7 @@ void copyNameFromAddr(void) {
 void pasteNameToSelf(void) {
 
    if (cmdParser.numParams()==0) {
-      llamaBrd.copyName(&aName);
+      llamaBrd->copyName(&aName);
    }
 }
 
@@ -314,14 +327,14 @@ void changeAnAddr(void) {
    
    if (cmdParser.numParams()==1) {
       addr1 = atoi(cmdParser.getNextParam());
-      llamaBrd.setAddr(addr1);
+      llamaBrd->setAddr(addr1);
    } else if (cmdParser.numParams()==2) {
       addr1 = atoi(cmdParser.getNextParam());
       addr2 = atoi(cmdParser.getNextParam());
       Serial.print("Address to move : ");Serial.print(addr1);
       Serial.print("\nTo new location : ");Serial.println(addr2);
-      tempName = llamaBrd.findName(addr1);
-      llamaBrd.addrCom(&tempName,addr2);
+      tempName = llamaBrd->findName(addr1);
+      llamaBrd->addrCom(&tempName,addr2);
    }
 }
 
@@ -330,8 +343,8 @@ void changeAnAddr(void) {
 void resetNameNAddr() {
    
    if (cmdParser.numParams()==0) {
-      llamaBrd.setAddr(ourAddr);
-      llamaBrd.copyName(&ourName);
+      llamaBrd->setAddr(ourAddr);
+      llamaBrd->copyName(&ourName);
    }
 }
 

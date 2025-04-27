@@ -17,6 +17,9 @@
 
 timeObj		screenTimer(1000);
 bool			newVal = false;
+bool			ct_alarm;
+bool			op_alarm;
+int			rpm;
 float			fuelVal;
 float			speedVal;
 float			depthVal;
@@ -30,9 +33,12 @@ serialStr	cmdMgr(&Serial1);
 enum valueType {
 	speed,
 	depth,
-	fuel,
 	inHg,
-	deltaHg
+	deltaHg,
+	overTempAlarm,
+	oilPsiAlarm,
+	engineRPM,
+	fuel
 };
 
 
@@ -44,7 +50,7 @@ void	gotStr(char* cmdStr) {
 	heapStr(&aStr,cmdStr);		// Allocates and stuffs it in.
 	char*	token;
 	
-	Serial.println(cmdStr);
+	//Serial.println(cmdStr);
 	token = strtok(aStr,DELEM_STR);
 	if (!strcmp(token,"speed")) {
 		token = strtok(NULL,DELEM_STR);
@@ -54,21 +60,31 @@ void	gotStr(char* cmdStr) {
 		token = strtok(NULL,DELEM_STR);
 		depthVal = atof(token);
 		newValueType = depth;
-	} else if (!strcmp(token,"fuel")) {
-		token = strtok(NULL,DELEM_STR);
-		fuelVal = atof(token);
-		newValueType = fuel;
 	} else if (!strcmp(token,"a_pressure")) {
 		token = strtok(NULL,DELEM_STR);
 		airPVal = atof(token);
 		newValueType = inHg;
-		Serial.print("NEW PESSURE! : ");
-		Serial.println(airPVal);
 	} else if (!strcmp(token,"a_pdelta")) {
 		token = strtok(NULL,DELEM_STR);
 		a_pDelta = atof(token);
 		newValueType = deltaHg;
-	}
+	} else if (!strcmp(token,"ct_alarm")) {
+		token = strtok(NULL,DELEM_STR);
+		ct_alarm = (bool) atoi(token);
+		newValueType = overTempAlarm;
+	} else if (!strcmp(token,"op_alarm")) {
+		token = strtok(NULL,DELEM_STR);
+		op_alarm = (bool) atoi(token);
+		newValueType = oilPsiAlarm;
+	} else if (!strcmp(token,"rpm")) {
+		token = strtok(NULL,DELEM_STR);
+		rpm = atoi(token);
+		newValueType = engineRPM;
+	} else if (!strcmp(token,"fuel")) {
+		token = strtok(NULL,DELEM_STR);
+		fuelVal = atof(token);
+		newValueType = fuel;
+	} 
 	newVal = true;
 	freeStr(&aStr);
 }
@@ -159,6 +175,7 @@ void wristDisp::setupDisp() {
    barometerBox->setValue(NAN);
    viewList.addObj(barometerBox);
    
+   /*
    dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
    fuelBox = new valueBarBox(&dBoxRect);
    if (fuelBox) {
@@ -167,7 +184,13 @@ void wristDisp::setupDisp() {
    	fuelBox->setValue(5);
    	viewList.addObj(fuelBox);
    }
+   */
    
+   dBoxRect.setLocation(dBoxRect.x,dBoxRect.y+boxHeight);
+   enginePanel = new engineBox(&dBoxRect);
+   if (enginePanel) {
+   	viewList.addObj(enginePanel);
+   }
 }
 
 
@@ -264,7 +287,7 @@ valueBox::~valueBox(void) {  }
 
 void valueBox::setup(void) {
 	
-	colorObj	blueText(LC_LIGHT_BLUE);
+	//colorObj	blueText(LC_LIGHT_BLUE);
 	
 	typeLabel = new fontLabel();
 	typeLabel->setFont(&FreeSansBoldOblique12pt7b,-8);
@@ -485,4 +508,107 @@ void  fuelBargraph::drawSelf(void) {
 
 
 
+// **************************************************
+// *******************  engineBox  ****************** 
+// **************************************************	
+
+
+idiotLight::idiotLight(rect* inRect)
+	: drawObj(inRect) { active = false; }
+	
+	
+idiotLight::~idiotLight(void) {  }
+	
+	
+void idiotLight::setActive(bool onOff) {
+
+		active = onOff;
+		setNeedRefresh();
+}
+
+
+
+tempLight::tempLight(rect* inRect)
+	: idiotLight(inRect) {  }
+	
+	
+tempLight::~tempLight(void) {  }
+
+
+void tempLight::drawSelf(void) {
+
+	int	radius;
+	int	radiusII;
+	int	centerX;
+	int	centerXII;
+	int	centerY;
+	int	centerYII;
+	rect	aRect;
+	
+	radius		= width/2;
+	radiusII		= THERMO_W2/2;
+	centerX		= x+radius;
+	centerY		= y+height-radius;
+	centerYII	= y + radiusII;
+	screen->fillCircle(centerX,centerY,radius,&blueText);
+	aRect.x = centerX-radiusII;
+	aRect.y = centerYII;
+	aRect.width = THERMO_W2;
+	aRect.height = centerY - centerYII;
+	screen->fillRect(&aRect,&blueText);
+	screen->fillCircle(centerX,centerYII,radiusII,&blueText);
+}
+
+
+oilLight::oilLight(rect* inRect)
+	: idiotLight(inRect) {  }
+	
+	
+oilLight::~oilLight(void) {  }
+
+
+void oilLight::drawSelf(void) {
+
+	int	radius;
+	int	centerX;
+	int	centerY;
+	point	pt0;
+	point	pt1;
+	point	pt2;
+	
+	radius		= width/2;
+	centerX		= x+radius;
+	centerY		= y+height-radius;
+	pt0.x = x;
+	pt0.y = centerY;
+	pt1.x = centerX;
+	pt1.y = y;
+	pt2.x = x + width;
+	pt2.y = centerY;
+	screen->fillCircle(centerX,centerY,radius,&blueText);
+	screen->fillTriangle(&pt1,&pt0,&pt2,&blueText);
+}
+
+	
+	
+engineBox::engineBox(rect* inRect)
+	: dataBox(inRect) { setup(); }
+	
+	
+engineBox::~engineBox(void) { }
+
+
+void engineBox::setup(void) {
+ST
+	rect	aRect;
+	
+	aRect.setRect(THERMO_X,THERMO_Y,THERMO_W,THERMO_H);
+	ourTempLight = new tempLight(&aRect);
+	addObj(ourTempLight);
+	aRect.setRect(OIL_X,OIL_Y,OIL_W,OIL_H);
+	ourOilLight = new oilLight(&aRect);
+	addObj(ourOilLight);
+}
+
+	
 

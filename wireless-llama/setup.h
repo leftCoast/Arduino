@@ -9,7 +9,7 @@
 #include <SAE_J1939.h>
 
 
-#define DEF_2515_RST_PIN   8
+#define DEF_2515_RST_PIN   6
 #define DEF_2515_INT_PIN   2
 
 

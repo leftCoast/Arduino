@@ -3,13 +3,14 @@
 
 #include <Arduino.h>
 
-#define outPort      Serial1	// Change to fit your hardware.
-#define inPort       Serial1	// Change to fit your hardware.
-#define SYNK_CHAR    '$'
-#define DELEM_CHAR   ' '
-#define END_CHR      '\n'
+#define DEF_IN_PORT		&Serial1	// Change to fit your hardware.
+#define DEF_OUT_PORT		&Serial1	// Change to fit your hardware.
+#define SYNK_CHAR    	'$'
+#define DELEM_CHAR   	','
+#define END_CHR      	'\n'
+#define DEF_TOKEN_BYTES	20
 
-
+/*
 class numStreamOut {
 
    public:
@@ -21,7 +22,7 @@ class numStreamOut {
 
             int   mNumParams;
 };
-
+*/
 
 // **************************************  //
 
@@ -29,17 +30,20 @@ class numStreamOut {
 class numStreamIn {
 
    public:
-            numStreamIn(int tokenBuffBytes=15);
+            //numStreamIn(void);
+            numStreamIn(Stream* inStream=DEF_IN_PORT,int tokenBuffBytes=DEF_TOKEN_BYTES);
    virtual  ~numStreamIn(void);
 
+				void	copyStream(numStreamIn* inNumStream);
 				void  reset(void);
    virtual  void  readStream(void);
    virtual  void  readVar(int index);
 
-            bool  mSynk;
-            bool	mComplete;
-            char* mTokenBuff;
-            int   mIndex;
+				Stream*	mStream;
+            bool  	mSynk;
+            char* 	mTokenBuff;
+            int		mNumTokenBytes;
+            int   	mIndex;
 };
 
 

@@ -10,9 +10,11 @@
 #include <offscreen.h>
 #include <serialStr.h>
 
+
 class valueBox;
 class valueBarBox;
 class fuelBargraph;
+class engineBox;
 
 extern void startSerial(void);
 
@@ -52,6 +54,7 @@ class wristDisp {
 				valueBox*		COGBox;
 				valueBox*		barometerBox;
 				valueBarBox*	fuelBox;
+				engineBox*		enginePanel;
 };
 
 
@@ -132,7 +135,6 @@ class valueBarBox :	public dataBox {
 	virtual	void	setTypeText(const char* inStr);
 	virtual	void	setUnitText(const char* inStr);
 	virtual	void	setValue(float inValue);
-	//virtual	void  drawSelf(void);
 	
 	protected:
 	
@@ -162,4 +164,89 @@ class fuelBargraph :	public colorBargraph {
 
 };
 
+
+
+// **************************************************
+// *******************  engineBox  ****************** 
+// **************************************************	
+
+
+class idiotLight : public drawObj {
+
+	public:
+				idiotLight(rect* inRect);
+	virtual	~idiotLight(void);
+	
+	virtual	void setActive(bool onOff);
+	
+				bool	active;		
+};
+
+
+
+#define THERMO_X	110
+#define THERMO_Y	30
+#define THERMO_W	18
+#define THERMO_H	38
+#define THERMO_W2	8
+
+class tempLight :	public idiotLight {
+
+	public:
+				tempLight(rect* inRect);
+	virtual	~tempLight(void);
+	
+	virtual	void drawSelf(void);			
+};
+	
+
+#define OIL_X	THERMO_X + 40
+#define OIL_Y	THERMO_Y
+#define OIL_W	THERMO_W
+#define OIL_H	THERMO_H
+	
+class oilLight :	public idiotLight {
+
+	public:
+				oilLight(rect* inRect);
+	virtual	~oilLight(void);
+	
+	virtual	void drawSelf(void);			
+};
+
+
+// **************************************************
+// ********************  tachObj  ******************* 
+// **************************************************	
+
+
+class tachObj :	public dataBox {
+
+	public:
+				tachObj(rect* inRect);
+	virtual	~tachObj(void);
+	
+				void	setRPM(void);
+	virtual	void	drawSelf(void);
+
+};
+
+
+class engineBox :	public dataBox {
+	
+	public:
+				engineBox(rect* inRect);
+	virtual	~engineBox(void);
+	
+	//virtual	void	drawSelf(void);
+	
+		
+	protected:
+	virtual	void	setup(void);
+	
+				tempLight*	ourTempLight;
+				oilLight*	ourOilLight;
+				tachObj*		ourTach;
+};
+	
 #endif

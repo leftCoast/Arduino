@@ -1,7 +1,7 @@
 #include "numStream.h"
 #include "resizeBuff.h"
 
-
+/*
 numStreamOut::numStreamOut(int numParams) {  mNumParams = numParams; }
 
 
@@ -24,18 +24,20 @@ void numStreamOut::writeStream(void) {
 
 
 void numStreamOut::writeVar(int index) {  } 
-
+*/
 
 
 // **************************************  //
 
 
-numStreamIn::numStreamIn(int tokenBuffBytes) {
+numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes) {
    
-   
-   mTokenBuff = NULL;
+   mStream			= inStream;
+   mNumTokenBytes	= 0;
+   mTokenBuff		= NULL;
    if (resizeBuff(tokenBuffBytes,&mTokenBuff)) {
       mTokenBuff[0] = '\0';
+      mNumTokenBytes = tokenBuffBytes;
    }
    reset();
 }
@@ -43,11 +45,24 @@ numStreamIn::numStreamIn(int tokenBuffBytes) {
 
 numStreamIn::~numStreamIn(void) { resizeBuff(0,&mTokenBuff); }
 
+
+void numStreamIn::copyStream(numStreamIn* inNumStream) {
+
+	mStream			= inNumStream->mStream;
+   mNumTokenBytes	= 0;
+   if (resizeBuff(inNumStream->mNumTokenBytes,&mTokenBuff)) {
+      mTokenBuff[0]	= '\0';
+      mNumTokenBytes = inNumStream->mNumTokenBytes;
+   }
+   mSynk			= inNumStream->mSynk;
+   mIndex		= inNumStream->mIndex;
+}
+
+
 void numStreamIn::reset(void) {
 	 
-	mSynk = false;
-   mComplete = false;
-   mIndex = 0;
+	mSynk			= false;
+   mIndex		= 0;
 }
 
 
@@ -57,10 +72,8 @@ void numStreamIn::readStream(void) {
    int   i;
 
    if (!mTokenBuff) return;                  // If we don't have a token buffer, we can't do this.
-   if (mComplete) return;							// We're done. Need a reset to do more.
-   if (inPort.available()) {                 // Ok, If we have any bytes to read..
-      aChar = inPort.read();                 // Read one.
-      //Serial.println(aChar);
+   if (mStream->available()) {               // Ok, If we have any bytes to read..
+      aChar = mStream->read();               // Read one.
       if (!mSynk) {                          // If we're not in synk..
          if (aChar==SYNK_CHAR) {             // If this char is the syk char..
             mSynk = true;                    // We are now in synk.
