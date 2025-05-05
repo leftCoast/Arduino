@@ -30,14 +30,13 @@ class numStreamOut {
 class numStreamIn {
 
    public:
-            //numStreamIn(void);
             numStreamIn(Stream* inStream=DEF_IN_PORT,int tokenBuffBytes=DEF_TOKEN_BYTES);
    virtual  ~numStreamIn(void);
 
 				void	copyStream(numStreamIn* inNumStream);
 				void  reset(void);
    virtual  void  readStream(void);
-   virtual  void  readVar(int index);
+   virtual  void  readVar(int index,bool lastField);
 
 				Stream*	mStream;
             bool  	mSynk;

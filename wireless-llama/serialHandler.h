@@ -1,4 +1,4 @@
-#include "setup.h"
+#include <setup.h>
 #include <strTools.h>
 
 class serialHandler : public msgHandler {

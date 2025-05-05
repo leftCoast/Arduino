@@ -1,5 +1,5 @@
-#ifndef setup_h
-#define setup_h
+#ifndef llama2000_h
+#define llama2000_h
 
 
 #include <idlers.h>
@@ -7,10 +7,6 @@
 #include <runningAvg.h>
 #include <CAN.h>
 #include <SAE_J1939.h>
-
-
-#define DEF_2515_RST_PIN   6
-#define DEF_2515_INT_PIN   2
 
 
 // ************ llama2000 ************
@@ -37,34 +33,15 @@ setArbitraryAddrBit(?);          // Will be set when we choose our addressing mo
 */
 
 
-#define LC_MANF   35    // As in J/35.  (My J/35) What all this was designed for.
 
-#define FIRST_LLAMA  // Comment out for second llama, un-comment for first llama.
-
-#ifdef FIRST_LLAMA
-
-// First llama.
-#define DEVICE_ID    6387              // 6387 Foxtrot. 
-#define MANF_CODE    LC_MANF           // J/35
-#define DEF_ADDR     45                // Easy to spot.
-#define ADDR_CAT     arbitraryConfig   // Can do the address dance.
-#define OTHER_ADDR   44                // The other guy's address. (For testing with two)
-
-#else
-
-// Second llama. The "other device" for testing.
-#define DEVICE_ID    1706              // 1706 Mike. 
-#define MANF_CODE    LC_MANF           // J/35
-#define DEF_ADDR     44                // Also easy to spot.
-#define ADDR_CAT     arbitraryConfig   // Can do the address dance.
-#define OTHER_ADDR   45                // The other guy's address. (For testing with two)
-
-#endif
 
 
 // To "attach" the SAE J1939/NMEA2000 prototcal stack to your hardware, you will need to
 // create a c++ class inheriting and extending the netObj class of the J1939 library.
 // This is an example of such a class.
+//
+// This example is designed to work with the Left Coast llama2K board.
+//
 //
 // These six functions you need to create and fill out as they are the attachment points
 // to your code and CAN BUS hardware.
@@ -75,10 +52,10 @@ setArbitraryAddrBit(?);          // Will be set when we choose our addressing mo
 class llama2000 : public netObj {
 
    public:
-   llama2000(byte inECUInst=0,int inResetPin=DEF_2515_RST_PIN,int inIntPin=DEF_2515_INT_PIN);
+   llama2000(int inResetPin,int inIntPin);
    ~llama2000(void);
    
-   virtual  bool  begin(int inCSPin);
+   virtual  bool  begin(byte inAddr,addrCat inAddrCat,int inCS);
    virtual  void  sendMsg(message* outMsg);
    virtual  void  recieveMsg(void);
    virtual  void  idle(void);

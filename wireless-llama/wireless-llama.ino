@@ -1,5 +1,5 @@
 
-#include "setup.h"
+#include <setup.h>
 #include "handlers.h"
 #include <lilParser.h>
 
@@ -20,7 +20,7 @@ lilParser         cmdParser;              // Toolkit for implementing a command 
 bool              gettingDevList;         // Getting a device list takes time. This says we're waiting.
 timeObj           devListTimer(LIST_MS);  // A timer to time how long we allow before calling the list "stale".
 bool              devListNeedsRefresh;    // This holds the current state of the device list.
-netName           ourName;                // We save a copt of our net name when starting up.
+netName           ourName;                // We save a copy of our net name when starting up.
 byte              ourAddr;                // And our address.
 netName           aName;                  // A place to save a net name. (For copy/paste)
 

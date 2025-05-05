@@ -60,7 +60,7 @@ class msgHandler :   public linkListObj {
 };
  */
 //                                                                                       |
-// So, what I have here is some example handlers I wrote for devices I could fing "cheap"
+// So, what I have here is some example handlers I wrote for devices I could find "cheap"
 // on Amazon. And a nifty chat handler to type messages between devices. Like doing text
 // but down the NMEA2000 network.
 

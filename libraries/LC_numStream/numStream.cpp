@@ -81,10 +81,10 @@ void numStreamIn::readStream(void) {
          }                                   // Basically we'll exit now.
       } else {                               // Else, we are in synk..
          if (aChar == DELEM_CHAR) {          // If the char is a delemiter..
-            readVar(mIndex++);               // We send index out for buffer decoded. (bump up index)
+            readVar(mIndex++,false);        	// We send index out for buffer decoded. (bump up index)
             mTokenBuff[0] = '\0';            // Reset the token buffer.
          } else if (aChar == END_CHR) {      // If it is the end char..
-            readVar(mIndex);                 // We send index out for buffer decoded. (Don't bump up index)        
+            readVar(mIndex,true);            // We send index out for buffer decoded. (Don't bump up index)        
             mTokenBuff[0] = '\0';            // Reset the token buffer
             mSynk = false;                   // String of data is complete, de-synk.
          } else {                            // Else, its just a char..
@@ -100,4 +100,4 @@ void numStreamIn::readStream(void) {
 }
 
 
-void numStreamIn::readVar(int index) {  }
+void numStreamIn::readVar(int index,bool lastField) {  }

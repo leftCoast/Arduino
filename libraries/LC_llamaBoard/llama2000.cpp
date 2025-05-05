@@ -1,12 +1,11 @@
-#include "setup.h"
-#include "serialHandler.h"
+#include <llama2000.h>
 #include <resizeBuff.h>
 
 
-// ************ llama_NMEA2000 ************
+// ************ llama2000 ************
 
 
-llama2000::llama2000(byte inECUInst, int inResetPin, int inIntPin)
+llama2000::llama2000(int inResetPin, int inIntPin)
   : netObj() {
 
   resetPin = inResetPin;  // We have a reset pin.
@@ -17,26 +16,17 @@ llama2000::llama2000(byte inECUInst, int inResetPin, int inIntPin)
 llama2000::~llama2000(void) {  }
 
 
-bool llama2000::begin(int inCSPin) {
+bool llama2000::begin(byte inAddr,addrCat inAddrCat,int inCSPin) {
 
-   netName aName;
-   
-   aName.setID(DEVICE_ID);                      // Device ID. We make these up. You get 21 bits. (2,097,151 or less)
-   aName.setManufCode(MANF_CODE);               // This would be assigned to you by NMEA people. Or was it SAE people?
-   aName.setECUInst(0);                         // First netObj (Electronic control unit.)
-   aName.setFunctInst(0);                       // First of this kind or thing. (Example engine, fuel tank, et)
-   aName.setFunction(DEV_FUNC_GP_SENSE);        // Kind of function. This is a sensor box of some sort.
-   aName.setVehSys(DEV_CLASS_INST);             // What system are we in? Example : We are being an instrument.
-   aName.setSystemInst(0);                      // We are the first of our system class.
-   aName.setIndGroup(Marine);                   // What kind of machine are we ridin' on? Boat? Tractor?
-   netObj::begin(&aName, DEF_ADDR, ADDR_CAT);   // Here's our name, default address and address category.
-   pinMode(resetPin, OUTPUT);                   // Setup our reset pin.
-   delay(50);                                   // Sit for a bit..
-   digitalWrite(resetPin, LOW);                 // Set reset low.
-   delay(50);                                   // Set for a bit, again.
-   digitalWrite(resetPin, HIGH);                // Flick it high and leave it there.
-   hookup();                                    // Hook ourselves into the ideler queue.
-   return CAN.begin(500E3);                     // Fire up the hardware.
+
+   netObj::begin(inAddr,inAddrCat);		// Here's our default address and address category.
+   pinMode(resetPin, OUTPUT);				// Setup our reset pin.
+   delay(50);									// Sit for a bit..
+   digitalWrite(resetPin, LOW);			// Set reset low.
+   delay(50);									// Set for a bit, again.
+   digitalWrite(resetPin, HIGH);			// Flick it high and leave it there.
+   hookup();									// Hook ourselves into the ideler queue.
+   return CAN.begin(500E3);				// Fire up the hardware.
 }
 
 
@@ -56,7 +46,7 @@ bool llama2000::begin(int inCSPin) {
 // to us in the handlers, as a complete message with a larger than eight byte data pack.
 
 
-// The transmitting gateway from NEMA2000/SAE J1939 protocol to the actual CAN bushardware.
+// The transmitting gateway from NEMA2000/SAE J1939 protocol to the actual CAN bus hardware.
 void llama2000::sendMsg(message* outMsg) {
 
    uint32_t CANID;
