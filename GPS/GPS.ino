@@ -14,7 +14,7 @@
 
 llama2000*           llamaBrd;   // The class that inherits netObj, adding our attachment to hardware.
 PGN0x1F801Handler*   ourPGN0x1F801;
-
+PGN0x1F802Handler*   ourPGN0x1F802;
 GPSInStr ourGPS;
 
 void setup() {
@@ -24,9 +24,12 @@ void setup() {
    delay(100);
    llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
    if (llamaBrd) {
+      
       ourPGN0x1F801 = new PGN0x1F801Handler(llamaBrd);
-      llamaBrd->addMsgHandler(ourPGN0x1F801);  // 
-
+      llamaBrd->addMsgHandler(ourPGN0x1F801);
+      ourPGN0x1F802 = new PGN0x1F802Handler(llamaBrd);
+      llamaBrd->addMsgHandler(ourPGN0x1F802);
+   
       llamaBrd->setID(6387);                    // Device ID. We make these up. You get 21 bits.
       llamaBrd->setManufCode(LC_MANF);          // This would be assigned to you by NMEA people.
       llamaBrd->setECUInst(0);                  // First netObj (Electronic control unit.)
