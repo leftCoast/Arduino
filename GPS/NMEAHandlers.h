@@ -77,4 +77,22 @@ class PGN0x1F802Handler :  public msgHandler {
 };
 
 
+
+// ****************************************************
+// PGN 0x1F805: PGN 129029 - GNSS Position Data
+// ****************************************************
+
+
+class PGN0x1F805Handler :  public msgHandler {
+
+    public:
+            PGN0x1F805Handler(netObj* inNetObj);
+            ~PGN0x1F805Handler(void);
+            
+   virtual  void  newMsg(void);                 // Fill in to create messages.
+};
+
+
+
+
 #endif
