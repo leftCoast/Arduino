@@ -112,7 +112,7 @@ void PGN0x1F805Handler::newMsg(void) {
    
    numBytes = 43;                                              // With no station data, it's just the 43 bytes.
    outMsg.setNumBytes(numBytes);                               // Try for the block of RAM.
-   if (!getNumBytes()) return;                                 // If we didn't get them, we bail.
+   if (!outMsg.getNumBytes()) return;                          // If we didn't get them, we bail.
    outMsg.setPGN(0x1F805);                                     // Set in our PGN.
    outMsg.setPriority(3);                                      // Priority.
    outMsg.setSourceAddr(ourNetObj->getAddr());                 // Our address as source.
