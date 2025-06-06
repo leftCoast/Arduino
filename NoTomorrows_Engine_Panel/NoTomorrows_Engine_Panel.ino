@@ -7,6 +7,8 @@
 #define TEMP_PIN     21
 #define TACH_IN_PIN  22
 #define TACH_OUT_PIN 23
+#define BEEP_OUT_PIN 16    // Purple on tycho's test board. Low for beep.
+#define FUTURE_PIN   17
 #define TEETH_ROTATE 97
 #define WAIT_TIME_MS 1000  // One second
 

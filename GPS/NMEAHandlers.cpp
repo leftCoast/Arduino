@@ -37,7 +37,10 @@ void PGN0x1F801Handler::newMsg(void) {
      outMsg.setSourceAddr(ourNetObj->getAddr());
      outMsg.setLongInData(0,fixData.latLon.getLatAsInt32());
      outMsg.setLongInData(4,fixData.latLon.getLonAsInt32());
-     outMsg.showMessage();
+     Serial.print(fixData.latLon.getLatStr());
+     Serial.print("\t");
+     Serial.println(fixData.latLon.getLonStr());
+     //outMsg.showMessage();
      sendMsg(&outMsg);
 }
 
@@ -77,7 +80,7 @@ void PGN0x1F802Handler::newMsg(void) {
       SOGMpS = SOGDbl * 100;                                    // Multiply that by 100 gives our decimal value.
       outMsg.setIntInData(4,SOGMpS);                            // pop it in.
       outMsg.setUIntInData(6,0xFFFF);                           // Last two buytes are unused. Set to FF.
-      outMsg.showMessage();
+      //outMsg.showMessage();
       sendMsg(&outMsg);                                         // Off this version goes..
 }
 
