@@ -6,7 +6,7 @@
 #include <GPSHandlers.h>
 #include "NMEAHandlers.h"
 
-#define LC_MANF      35    // Left coast's manufacturrere # (I made it up.) As in J/35. My J/35. What all this was designed for.
+#define LC_MANF      35    // Left coast's manufactur's # (I made it up.) As in J/35. My J/35. What all this was designed for.
 #define LLAMA_CS     10    // llama board chip select pin.
 #define LLAMA_RST    6     // llama board reset pin.
 #define LLAMA_INT    2     // llama board inturrupt pin.
