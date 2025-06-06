@@ -22,7 +22,6 @@ void setup() {
 
    Serial.begin(9600);
    Serial1.begin(9600);
-   delay(100);
    llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
    if (llamaBrd) {
       

@@ -37,9 +37,14 @@ void PGN0x1F801Handler::newMsg(void) {
      outMsg.setSourceAddr(ourNetObj->getAddr());
      outMsg.setLongInData(0,fixData.latLon.getLatAsInt32());
      outMsg.setLongInData(4,fixData.latLon.getLonAsInt32());
-     Serial.print(fixData.latLon.getLatStr());
-     Serial.print("\t");
-     Serial.println(fixData.latLon.getLonStr());
+     //Serial.print(fixData.latLon.getLatAsDbl(),5);
+     //Serial.print("\t");
+     //Serial.println(fixData.latLon.getLonAsDbl(),5);
+     Serial.print(fixData.latLon.getLatQuadStr());Serial.print(" ");Serial.print(fixData.latLon.getLatDeg());Serial.print("º ");
+     Serial.print(fixData.latLon.getLatMin(),3);Serial.println("'");
+     Serial.print(fixData.latLon.getLonQuadStr());Serial.print(" ");Serial.print(fixData.latLon.getLonDeg());Serial.print("º ");
+     Serial.print(fixData.latLon.getLonMin(),3);Serial.println("'");
+     Serial.println();
      //outMsg.showMessage();
      sendMsg(&outMsg);
 }
