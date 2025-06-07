@@ -57,7 +57,7 @@ void	gotStr(char* cmdStr) {
 		speedVal = atof(token);
 		newValueType = speed;
 	} else if (!strcmp(token,"depth")) {
-		token = strtok(NULL,DELEM_STR);
+		tokend = strtok(NULL,DELEM_STR);
 		depthVal = atof(token);
 		newValueType = depth;
 	} else if (!strcmp(token,"a_pressure")) {
@@ -599,7 +599,7 @@ engineBox::~engineBox(void) { }
 
 
 void engineBox::setup(void) {
-ST
+//ST
 	rect	aRect;
 	
 	aRect.setRect(THERMO_X,THERMO_Y,THERMO_W,THERMO_H);

@@ -1,5 +1,7 @@
-#include "setup.h"
 #include "serialHandler.h"
+#include <mapper.h>
+#include <runningAvg.h>
+
 //                                                                                        |
 // Each type of device that comunicates with the network needs to be able to perform
 // certain functions. We try to automate most of these using the J1939 library. BUT, the

@@ -1,13 +1,16 @@
 
-#include <setup.h>
 #include "handlers.h"
 #include <lilParser.h>
+#include <llama2000.h>
 
 
-#define CAN_CS 10          // The chip select for the SPI connection to the CAN board.
-#define LIST_MS   30000    // How long before we decide we need to refresh address list?
-#define MAX_DEC   10       // Max digits beyond decimal point.
-
+#define LIST_MS      30000 // How long before we decide we need to refresh address list?
+#define MAX_DEC      10    // Max digits beyond decimal point.
+#define LC_MANF      35    // Left coast's manufactur's # (I made it up.) As in J/35. My J/35. What all this was designed for.
+#define LLAMA_CS     10    // llama board chip select pin.
+#define LLAMA_RST    6     // llama board reset pin.
+#define LLAMA_INT    2     // llama board inturrupt pin.
+#define LLAMA_ADDR   44    // our llama board default starting address.
 
 llama2000*     llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
 waterSpeedObj* knotMeter;     // Handler to read boatspeed.
@@ -51,7 +54,18 @@ void setup() {
    delay(100);
    //Serial3.begin(9600);
    //  delay(100);
-   llamaBrd = new llama2000();
+   llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
+
+   // Our ID stuff.
+   llamaBrd->setID(1706);                    // Device ID. We make these up. You get 21 bits.
+   llamaBrd->setManufCode(LC_MANF);          // This would be assigned to you by NMEA people.
+   llamaBrd->setECUInst(0);                  // First netObj (Electronic control unit.)
+   llamaBrd->setFunctInst(0);                // First display.
+   llamaBrd->setFunction(DEV_FUNC_DISP);     // Display kinda' thing.
+   llamaBrd->setVehSys(DEV_CLASS_DISP);      // We are a data display.
+   llamaBrd->setSystemInst(0);               // We are the first of our device class.
+   llamaBrd->setIndGroup(Marine);            // What kind of machine are we ridin' on?
+   
    // Creating and adding the message handlers.
    knotMeter   = new waterSpeedObj(llamaBrd);
    thermometer = new waterTempObj(llamaBrd);
@@ -65,7 +79,7 @@ void setup() {
    //llamaBrd->addMsgHandler(chatObj);
 
    // Resetting the hardware.
-   if (!llamaBrd->begin(CAN_CS)) {
+   if (!llamaBrd->begin(LLAMA_ADDR,arbitraryConfig,LLAMA_CS)) {
       Serial.println("Starting llama failed!");
       while (1);
    }

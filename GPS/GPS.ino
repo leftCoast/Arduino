@@ -10,7 +10,7 @@
 #define LLAMA_CS     10    // llama board chip select pin.
 #define LLAMA_RST    6     // llama board reset pin.
 #define LLAMA_INT    2     // llama board inturrupt pin.
-#define LLAMA_ADDR   46    // llama board default starting address.
+#define LLAMA_ADDR   46    // our llama board default starting address.
 
 llama2000*           llamaBrd;   // The class that inherits netObj, adding our attachment to hardware.
 PGN0x1F801Handler*   ourPGN0x1F801;

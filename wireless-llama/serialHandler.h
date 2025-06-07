@@ -1,5 +1,6 @@
-#include <setup.h>
+
 #include <strTools.h>
+#include <SAE_J1939.h>
 
 class serialHandler : public msgHandler {
 
