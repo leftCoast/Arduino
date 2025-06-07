@@ -79,7 +79,7 @@ void llama2000::recieveMsg(void) {
       while (CAN.available() && i < newMsg.getNumBytes()) {    // While we have a byte to read and a place to put it..
          newMsg.setDataByte(i, CAN.read());                    // Read and store the byte into the message.
          i++;                                                  // Bump of the storage index.
-      }                                                        //
+      }																			//
       incomingMsg(&newMsg);                                    // All stored, let our netObj deal with it.
    }
 }
