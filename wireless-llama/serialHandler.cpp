@@ -68,8 +68,8 @@ void  serialHandler::idleTime() {
    }                                      // Do.
 }
 
-
-bool  serialHandler::valueChanged(void) {  }
+// Default?
+bool  serialHandler::valueChanged(void) { return false; }
 
 
 bool  serialHandler::xMissionDone(void) {
