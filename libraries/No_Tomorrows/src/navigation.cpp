@@ -10,6 +10,8 @@
 #define NAV_DEVICE_CLASS	DEV_CLASS_NAV
 #define NAV_DEVICE_FUNCT	DEV_FUNC_GNSS
 
+timeObj     timer(5000);
+
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT)
 	{  }
@@ -20,6 +22,7 @@ navigation::~navigation(void) {  }
 	
 void navigation::setup(void) {
 	
+	ourGPS.begin();
 	NMEA2kBase::setup();
 	
 }
@@ -28,12 +31,13 @@ void navigation::setup(void) {
 void navigation::loop(void) {
 
 	NMEA2kBase::loop();
-	
+	if (timer.ding()) {
+      fixData.showData();
+      timer.start();
+   }
 }
 
 
 // Allocate and add the handlers for our different NMEA messages we are going to handle or
 // create.
-void navigation::addNMEAHandlers(void) {
-
-}
+bool navigation::addNMEAHandlers(void) { return addGPSHandlers(llamaBrd); }

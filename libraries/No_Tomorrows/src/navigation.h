@@ -2,6 +2,8 @@
 #define navigation_h
 
 #include <NMEA2kBase.h>
+#include <GPSReader.h>
+#include <GPS_NMEA2K.h>
 
 class navigation : public	NMEA2kBase {
 
@@ -11,7 +13,10 @@ class navigation : public	NMEA2kBase {
 	
 	virtual	void	setup(void);
 	virtual	void	loop(void);
-	virtual	void	addNMEAHandlers(void);		// Without handlers, who are we anyway?
+	virtual	bool	addNMEAHandlers(void);		// Without handlers, who are we anyway?
+				
+				GPSReader	ourGPS;
 };
+
 			
 #endif

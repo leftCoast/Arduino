@@ -1,6 +1,7 @@
 #include <navigation.h>
 
-navigation ourNavApp;
+navigation  ourNavApp;
+
 
 void setup() { ourNavApp.setup(); }
    
