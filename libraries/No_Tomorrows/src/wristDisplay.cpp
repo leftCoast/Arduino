@@ -12,8 +12,12 @@
 #define DBOX_Y			0
 #define DBOX_W			TFT_WIDTH
 #define DBOX_H			TFT_HEIGHT/4
+#define DEF_TIMEOUT	10000				// Default Ms before calling data stale and telling the user.
+#define PARSE_BUFF	65					// Max length of input string.
 
-#define PARSE_BUFF	65
+#define out		delay(25);Serial.print
+#define outln	delay(25);Serial.println
+
 
 offscreen	vPort;
 bitmap		gBitmap(DBOX_W,DBOX_H);
@@ -43,13 +47,13 @@ void wristDisplay::setup(void) {
 			success = true;														// Calling this as a good start.
 		}
 	} if (!success) {
-		Serial.println("Initialization error.");
+		outln("Initialization error.");
 		while(1);
 	}
 	USBParser = new lilParser(PARSE_BUFF);
 	wlessParser = new lilParser(PARSE_BUFF);
 	if (!USBParser || !wlessParser) {
-		Serial.println("Can't create parsers.");
+		outln("Can't create parsers.");
 		while(1);
 	}
 	addCmd(setSpeedCmd,"setSpeed");
@@ -184,7 +188,7 @@ void  wristDisplay::handleSetSpeed(bool debug) {
 		if (USBParser->numParams()==1) {							// We only expect one param. If this is the case..
 			speedVal = atof(USBParser->getNextParam());		// Decode the parameter.
 			Serial.print("Setting speed to : ");				// Tell the user about what's up.
-			Serial.println(speedVal);								//
+			outln(speedVal);								//
 		}																	//
 	} else {																// Else, it came though the wireless port.
 		if (wlessParser->numParams()==1) {						// Again, we only expect one param. If this is the case..
@@ -211,7 +215,7 @@ void  wristDisplay::handleSetDepth(bool debug) {
 		if (USBParser->numParams()==1) {							// We only expect one param. If this is the case..
 			depthVal = atof(USBParser->getNextParam());		// Decode the parameter.
 			Serial.print("Setting depth to : ");				// Tell the user about what's up.
-			Serial.println(depthVal);								//
+			outln(depthVal);								//
 		}																	//
 	} else {																// Else, it came though the wireless port.
 		if (wlessParser->numParams()==1) {						// Again, we only expect one param. If this is the case..
@@ -238,7 +242,7 @@ void  wristDisplay::handleSetBearing(bool debug) {
 		if (USBParser->numParams()==1) {							// We only expect one param. If this is the case..
 			bearingVal = atof(USBParser->getNextParam());	// Decode the parameter.
 			Serial.print("Setting bearing to : ");				// Tell the user about what's up.
-			Serial.println(bearingVal);							//
+			outln(bearingVal);							//
 		}																	//
 	} else {																// Else, it came though the wireless port.
 		if (wlessParser->numParams()==1) {						// Again, we only expect one param. If this is the case..
@@ -265,7 +269,7 @@ void  wristDisplay::handleSetCOG(bool debug) {
 		if (USBParser->numParams()==1) {							// We only expect one param. If this is the case..
 			COGVal = atof(USBParser->getNextParam());			// Decode the parameter.
 			Serial.print("Setting COG to : ");					// Tell the user about what's up.
-			Serial.println(COGVal);									//
+			outln(COGVal);									//
 		}																	//
 	} else {																// Else, it came though the wireless port.
 		if (wlessParser->numParams()==1) {						// Again, we only expect one param. If this is the case..
@@ -285,16 +289,16 @@ void  wristDisplay::handleSetCOG(bool debug) {
 void  wristDisplay::handleHelp(bool debug) {
 	
 	if (debug) {
-		Serial.println();
-		Serial.println("---------------------------------");
-		Serial.println("setSpeed speed               : Set boatspeed in Knots.");
-		Serial.println("setDepth depth               : Set water depth in Fathoms.");
-		Serial.println("setBearing bearing           : Set the bearing to next mark in degrees magnetic.");
-		Serial.println("setCOG COG                   : Set the course over ground in degrees magnetic.");
-		Serial.println("setEngine fuel RPM oil water : Set engine parameters. Fuel level, RPM, Oil PSI alarm, Water temp alarm.");
-		Serial.println("Anything else?               : See this printout.");
-		Serial.println();
-		Serial.println();
+		outln();
+		outln("---------------------------------");
+		outln("setSpeed speed               : Set boatspeed in Knots.");
+		outln("setDepth depth               : Set water depth in Fathoms.");
+		outln("setBearing bearing           : Set the bearing to next mark in degrees magnetic.");
+		outln("setCOG COG                   : Set the course over ground in degrees magnetic.");
+		outln("setEngine fuel RPM oil water : Set engine parameters. Fuel level, RPM, Oil PSI alarm, Water temp alarm.");
+		outln("Anything else?               : See this printout.");
+		outln();
+		outln();
 	}
 }
 
@@ -312,7 +316,9 @@ OSDataBox::OSDataBox(void)
 	
 	oldVariableArea.setRect(0,0,0,0);	// Empty rect for now.
 	newVariableArea.setRect(0,0,0,0);	// Same here..
-	position = -1;								// Our position on the screen -1 = Not on screen.	
+	position = -1;								// Our position on the screen -1 = Not on screen.
+	timeoutTimer.setTime(0,false);		// Not using this feature yet. Children might.
+	hookup();	
 }
 
 
@@ -341,7 +347,33 @@ void OSDataBox::draw(void) {
 	vPort.endDraw();
 	screen->blit(0,position*DBOX_H,&gBitmap);
 }
+
+
+void OSDataBox::timedOut(void) { outln("does nothing"); }
+
 	
+void OSDataBox::OSDataBox::idle(void) {
+	
+	drawGroup::idle();
+	if (timeoutTimer.ding()) {
+		timedOut();
+		timeoutTimer.reset();
+	}
+}
+
+
+// Set the timeout timer. If we run out of time between updates. We show the user our 
+// "no Value" string. This tells us when, if set to >0 ms.
+void OSDataBox::setTimeout(float inMs) {
+
+	if (inMs>0) {
+		timeoutTimer.setTime(inMs);
+		timeoutTimer.start();
+	} else {
+		timeoutTimer.reset();
+		timeoutTimer.setTime(0);
+	}
+}
 
 
 // **************************************************
@@ -361,7 +393,8 @@ valueBox::valueBox(void)
 	precision	= 1;
 	decMult		= 10;
 	sawNAN		= false;
-	setup();										// We are ASSUMING these will be created dynamically.								
+	setTimeout(DEF_TIMEOUT);	// We default to using timeout.
+	setup();							// We are ASSUMING these will be created dynamically.								
 }
 	
 	
@@ -441,6 +474,9 @@ void valueBox::setValue(float inValue) {
 				}
 			}
 		}
+		if (timeoutTimer.getTime()) {	// Not zero, we are using timeout.
+			timeoutTimer.start();		// Fire it off, we got a message.
+		}
 	}
 }
 
@@ -459,4 +495,5 @@ void valueBox::setPrecision(int inPrecision) {
 
 void valueBox::setNoValueStr(const char* inStr) { heapStr(&noValueStr,inStr); }
 		
-						
+		
+void valueBox::timedOut(void) { setValue(NAN); }				

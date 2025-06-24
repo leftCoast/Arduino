@@ -77,10 +77,14 @@ class OSDataBox :	public drawGroup {
 	virtual	void	setup(void);
 	virtual	void	drawSelf(void);
 	virtual	void  draw(void);
+	virtual	void  timedOut(void);
+	virtual	void	idle(void);
+	virtual	void	setTimeout(float inMs);
 	
-				rect	oldVariableArea;
-				rect	newVariableArea;
-				int	position;
+				rect		oldVariableArea;
+				rect		newVariableArea;
+				int		position;
+				timeObj	timeoutTimer;
 };
 
 
@@ -103,6 +107,7 @@ class valueBox :	public OSDataBox {
 	virtual	void	setValue(float inValue);
 	virtual	void	setPrecision(int inPrecision);
 	virtual	void	setNoValueStr(const char* inStr);
+	virtual	void  timedOut(void);
 			
 	protected:
 	
