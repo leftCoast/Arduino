@@ -11,6 +11,21 @@
 #include <offscreen.h>
 
 
+enum cmds {
+
+	noCmd,
+	setSpeedCmd,		// Boat speed though water.
+	setDepthCmd,		// Water depth in fathoms.
+	setBearingCmd,		// Magnetic bearing to next mark.
+	setCOGCmd,			// Magnetic course over ground.
+	setEngineCmd,		// Fuel%, RPM, Oil PSI alarm, Water temp alarm.
+	helpCmd
+};
+
+
+class valueBox;
+
+
 class wristDisplay {
 
 	public:
@@ -18,68 +33,44 @@ class wristDisplay {
 	virtual	~wristDisplay(void);
 	
 				void	setup(void);
+				void	addCmd(cmds cmd,const char* text);
 				void	setupDisplay(void);
 				void	light(bool onOff);
+				void	loop(void);
 				void	checkUSBParser(void);
 				void	checkWlessParser(void);
-				void	loop(void);
+				void  checkCom(int cmd,bool debug);
+				void  handleSetSpeed(bool debug);		// Sanity check values here. Much harder at the display level.
+				void  handleSetDepth(bool debug);
+				void  handleSetBearing(bool debug);
+				void  handleSetCOG(bool debug);
+				void  handleHelp(bool debug);
 				
+				lilParser*	USBParser;
+				lilParser*	wlessParser;
 				
-				lilParser	USBParser;
-				lilParser	wlessParser;
+				valueBox*	speed;
+				valueBox*	depth;
+				valueBox*	bearing;
+				valueBox*	cog;
 };
 
 
-/*
-// **************************************************
-// ******************     disp     ****************** 
-// **************************************************
 
+// **************************************************
+// *****************   OSDataBox    ***************** 
+// **************************************************
+//
+// Base rectangle box that defaults to a color sweep
+// background, and is drawn offline.
 
-class disp {
+class OSDataBox :	public drawGroup {
 
 	public:
-				disp(void);			//(int inChipSelect,int inReset,int inBacklight,int inDataCommand);
-	virtual	~disp(void);
+				OSDataBox(void);
+	virtual	~OSDataBox(void);
 	
-	virtual	bool		begin(void);
-	virtual	dispErr	errMsg(void);
-	virtual	void		setupDisp(void);
-				void		light(bool onOff);		
-	virtual	void		checkDisp(void);
-	
-	protected:
-				
-				int				chipSelect;
-				int				reset;
-				int				backlight;
-				int				dataCommand;
-				dispErr			currentErr;
-				valueBox*		speedBox;
-				valueBox*		depthBox;
-				valueBox*		COGBox;
-				valueBox*		barometerBox;
-				valueBarBox*	fuelBox;
-				engineBox*		enginePanel;
-};
-
-
-// **************************************************
-// *****************    dataBox     ***************** 
-// **************************************************
-
-
-#define DBOX_X	0
-#define DBOX_Y	0
-#define DBOX_W	TFT_WIDTH
-#define DBOX_H	TFT_HEIGHT/4
-
-
-class dataBox :	public drawGroup {
-
-	public:
-				dataBox(rect* inRect);
-	virtual	~dataBox(void);
+	virtual	void	setPos(int newPos);
 	
 	protected:
 	
@@ -87,12 +78,46 @@ class dataBox :	public drawGroup {
 	virtual	void	drawSelf(void);
 	virtual	void  draw(void);
 	
-				colorObj 	startColor;
-				colorObj 	endColor;
-				offscreen	vPort;
+				rect	oldVariableArea;
+				rect	newVariableArea;
+				int	position;
 };
 
-*/
+
+
+// **************************************************
+// *****************    valueBox     **************** 
+// **************************************************
+//
+// A box based on ISDataBox with label, units and a
+// numeric value.
+//
+class valueBox :	public OSDataBox {
+
+	public:
+				valueBox(void);
+	virtual	~valueBox(void);
+	
+	virtual	void	setTypeText(const char* inStr);
+	virtual	void	setUnitText(const char* inStr);
+	virtual	void	setValue(float inValue);
+	virtual	void	setPrecision(int inPrecision);
+	virtual	void	setNoValueStr(const char* inStr);
+			
+	protected:
+	
+	virtual	void	setup(void);
+				
+				fontLabel*	typeLabel;
+				fontLabel*	valueLabel;
+				fontLabel* 	unitsLabel;
+				float			value;
+				int			precision;
+				int			decMult;
+				char*			noValueStr;
+				bool			sawNAN;			
+};
+
 
 #endif
 

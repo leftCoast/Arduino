@@ -7,5 +7,5 @@ void setup() { ourDisp.setup(); }
 void loop() {
 
 	idle();
-	ourDisp.setup();
+	ourDisp.loop();
 }
