@@ -56,6 +56,7 @@ void wristDisplay::setup(void) {
 		outln("Can't create parsers.");
 		while(1);
 	}
+	addCmd(setOrderCmd,"setOrder");
 	addCmd(setSpeedCmd,"setSpeed");
 	addCmd(setDepthCmd,"setDepth");
 	addCmd(setBearingCmd,"setBearing");
@@ -103,6 +104,7 @@ void wristDisplay::setupDisplay(void) {
 		bearing->setValue(NAN);
 		viewList.addObj(bearing);
 	}
+	/*
 	cog = new valueBox;
 	if (cog) {
 		cog->setPos(3);
@@ -111,6 +113,12 @@ void wristDisplay::setupDisplay(void) {
 		cog->setPrecision(0);
 		cog->setValue(NAN);
 		viewList.addObj(cog);
+	}
+	*/
+	engine = new engineBox;
+	if (engine) {
+		engine->setPos(3);
+		viewList.addObj(engine);
 	}
 }
 
@@ -169,12 +177,38 @@ void  wristDisplay::checkCom(int cmd,bool debug) {
 
 	switch(cmd) {
 		case noCmd				: break;
+		case setOrderCmd		: handleSetOrder(debug);	break;
 		case setSpeedCmd 		: handleSetSpeed(debug);	break;
 		case setDepthCmd		: handleSetDepth(debug);	break;
 		case setBearingCmd	: handleSetBearing(debug);	break;
 		case setCOGCmd			: handleSetCOG(debug);		break;
 		default					: handleHelp(debug);			break;
 	};
+}
+
+
+OSDataBox* wristDisplay::selectdBox(const char* inStr) {
+	
+	if (!strcmp(inStr,"speed")) return speed;
+	if (!strcmp(inStr,"depth")) return depth;
+	if (!strcmp(inStr,"bearing")) return bearing;
+	if (!strcmp(inStr,"cog")) return cog;
+	return NULL;
+}
+
+
+void wristDisplay::handleSetOrder(bool debug) {
+
+	OSDataBox*	dBoxPtr;
+	
+	if (USBParser->numParams()==4) {							// We expect four params. If this is the case..
+		for(int i=0;i<4;i++) {
+			dBoxPtr = selectdBox(USBParser->getNextParam());
+			if (dBoxPtr) {
+				dBoxPtr->setPos(i);
+			}
+		}
+	}
 }
 
 
@@ -188,7 +222,7 @@ void  wristDisplay::handleSetSpeed(bool debug) {
 		if (USBParser->numParams()==1) {							// We only expect one param. If this is the case..
 			speedVal = atof(USBParser->getNextParam());		// Decode the parameter.
 			Serial.print("Setting speed to : ");				// Tell the user about what's up.
-			outln(speedVal);								//
+			outln(speedVal);											//
 		}																	//
 	} else {																// Else, it came though the wireless port.
 		if (wlessParser->numParams()==1) {						// Again, we only expect one param. If this is the case..
@@ -314,8 +348,7 @@ void  wristDisplay::handleHelp(bool debug) {
 OSDataBox::OSDataBox(void)
 	: drawGroup(DBOX_X,DBOX_Y,DBOX_W,DBOX_H) {
 	
-	oldVariableArea.setRect(0,0,0,0);	// Empty rect for now.
-	newVariableArea.setRect(0,0,0,0);	// Same here..
+	useRect = false;
 	position = -1;								// Our position on the screen -1 = Not on screen.
 	timeoutTimer.setTime(0,false);		// Not using this feature yet. Children might.
 	hookup();	
@@ -340,12 +373,33 @@ void OSDataBox::setup(void) { }
 void OSDataBox::drawSelf(void) { screen->fillRectGradient(this,&startColor,&endColor); }
 
 
+void OSDataBox::setDrawRect(rect* inRect) {
+
+	drawRect.setRect(inRect);
+	useRect = true;
+}
+
+
 void OSDataBox::draw(void) {
 
+	colorObj	theColor;
+	
 	vPort.beginDraw(&gBitmap,0,0);
 	drawGroup::draw();
 	vPort.endDraw();
-	screen->blit(0,position*DBOX_H,&gBitmap);
+	if (useRect) {
+		for(int y=0;y<=height;y++) {
+			for(int x=0;x<=width;x++) {
+				theColor = gBitmap.getColor(x,y);
+				if(drawRect.inRect(x,y)) {
+					screen->drawPixel(x,y+position*DBOX_H,&theColor);
+				}
+			}
+		}
+		useRect = false;
+	} else {
+		screen->blit(0,position*DBOX_H,&gBitmap);
+	}
 }
 
 
@@ -496,4 +550,161 @@ void valueBox::setPrecision(int inPrecision) {
 void valueBox::setNoValueStr(const char* inStr) { heapStr(&noValueStr,inStr); }
 		
 		
-void valueBox::timedOut(void) { setValue(NAN); }				
+void valueBox::timedOut(void) { setValue(NAN); }
+
+
+
+// **************************************************
+// *******************  engineBox  ****************** 
+// **************************************************	
+// And all the bits that come with it.
+
+
+// -------------------- idiotLight ------------------
+
+
+idiotLight::idiotLight(rect* inRect,OSDataBox* inBox)
+	: flasher(inRect,&red,&blueText) { ourBox = inBox; }
+	
+	
+idiotLight::~idiotLight(void) {  }
+	
+	
+void idiotLight::setActive(bool onOff) { setOnOff(onOff); }
+
+
+void idiotLight::pulseOn(void) {
+
+	flasher::pulseOn();
+	ourBox->setDrawRect(this);
+}
+
+void idiotLight::pulseOff(void) {
+
+	flasher::pulseOff();
+	ourBox->setDrawRect(this);
+}
+
+// -------------------- tempLight  ------------------
+
+
+tempLight::tempLight(rect* inRect,OSDataBox* inBox)
+	: idiotLight(inRect,inBox) { setActive(true);  }
+	
+	
+tempLight::~tempLight(void) {  }
+
+
+void tempLight::drawSelf(void) {
+
+	int			radius;
+	int			radiusII;
+	int			centerX;
+	int			centerY;
+	int			centerYII;
+	rect			aRect;
+	colorObj*	currentColor;
+	
+	if (mFlash) {
+		currentColor = &mForeColor;
+	} else {
+		currentColor = &mBackColor;
+	}
+	radius		= width/2;
+	radiusII		= THERMO_W2/2;
+	centerX		= x+radius;
+	centerY		= y+height-radius;
+	centerYII	= y + radiusII;
+	screen->fillCircle(centerX,centerY,radius,currentColor);
+	aRect.x = centerX-radiusII;
+	aRect.y = centerYII;
+	aRect.width = THERMO_W2;
+	aRect.height = centerY - centerYII;
+	screen->fillRect(&aRect,currentColor);
+	screen->fillCircle(centerX,centerYII,radiusII,currentColor);
+}
+
+
+
+// --------------------  oilLight  ------------------
+
+
+oilLight::oilLight(rect* inRect,OSDataBox* inBox)
+	: idiotLight(inRect,inBox) { setActive(false); }
+	
+	
+oilLight::~oilLight(void) {  }
+
+
+void oilLight::drawSelf(void) {
+
+	int			radius;
+	int			centerX;
+	int			centerY;
+	point			pt0;
+	point			pt1;
+	point			pt2;
+	colorObj*	currentColor;
+	
+	if (mFlash) {
+		currentColor = &mForeColor;
+	} else {
+		currentColor = &mBackColor;
+	}
+	radius		= width/2;
+	centerX		= x+radius;
+	centerY		= y+height-radius;
+	pt0.x = x;
+	pt0.y = centerY;
+	pt1.x = centerX;
+	pt1.y = y;
+	pt2.x = x + width;
+	pt2.y = centerY;
+	screen->fillCircle(centerX,centerY,radius,currentColor);
+	screen->fillTriangle(&pt1,&pt0,&pt2,currentColor);
+}
+
+
+
+// --------------------  tachObj   ------------------
+
+
+tachObj::tachObj(rect* inRect)
+	:drawGroup(inRect) {  }
+	
+	 
+tachObj::~tachObj(void) {  }
+	
+	
+void tachObj::setRPM(void) {
+
+}
+
+
+void tachObj::drawSelf(void) {
+
+}
+
+
+
+// -------------------- engineBox  ------------------	
+
+	
+engineBox::engineBox(void)
+	: OSDataBox() { setup(); }
+	
+	
+engineBox::~engineBox(void) { }
+
+
+void engineBox::setup(void) {
+
+	rect	aRect;
+	
+	aRect.setRect(THERMO_X,THERMO_Y,THERMO_W,THERMO_H);
+	ourTempLight = new tempLight(&aRect,this);
+	addObj(ourTempLight);
+	aRect.setRect(OIL_X,OIL_Y,OIL_W,OIL_H);
+	ourOilLight = new oilLight(&aRect,this);
+	addObj(ourOilLight);
+}		
