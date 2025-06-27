@@ -41,7 +41,8 @@ void setup() {
       llamaBrd->setSystemInst(0);               // We are the first of our device class.
       llamaBrd->setIndGroup(Marine);            // What kind of machine are we ridin' on?
       
-      if (llamaBrd->begin(LLAMA_ADDR,arbitraryConfig,LLAMA_CS)) {
+      //if (llamaBrd->begin(LLAMA_ADDR,arbitraryConfig,LLAMA_CS)) {
+      if (llamaBrd->begin(LLAMA_ADDR,commandConfig,LLAMA_CS)) {
          ourGPS.addHandler(&trackMadeGood);
          ourGPS.addHandler(&fixData);
          ourGPS.addHandler(&activeSatellites);
