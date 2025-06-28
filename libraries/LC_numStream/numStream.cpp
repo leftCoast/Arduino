@@ -72,6 +72,7 @@ void numStreamIn::readStream(void) {
    int   i;
 
    if (!mTokenBuff) return;                  // If we don't have a token buffer, we can't do this.
+   Serial.println("Checking for a char to read.. ");
    if (mStream->available()) {               // Ok, If we have any bytes to read..
       aChar = mStream->read();               // Read one.
       if (!mSynk) {                          // If we're not in synk..

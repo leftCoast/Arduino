@@ -24,7 +24,6 @@ void navigation::setup(void) {
 	
 	ourGPS.begin();
 	NMEA2kBase::setup();
-	
 }
 
 
