@@ -237,6 +237,35 @@ class engParam  : public msgHandler {
 };
 
 
+
+// ************* engParamII *************
+// 0x1F201
+
+struct alarms {
+
+	bool	lowOilPSI;
+	bool	overTemp;
+};
+
+
+class engParamII  : public msgHandler {
+
+   public:
+            engParamII(netObj* inNetObj);
+            ~engParamII(void);
+          
+   virtual  bool  	handleMsg(message* inMsg);
+   virtual  void		newMsg(void);
+   			void		setEngInst(int inst);
+    			float 	getEngInst(void);
+            void		setAlarms(alarms* inAlrams);
+            alarms	getAlarms(void);
+    			
+    			int		engInst;
+            alarms	ourAlarms;        
+};
+
+
 // ************* LC_ChatObj *************
 /*
 class LC_ChatObj  : public msgHandler {

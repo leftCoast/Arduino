@@ -150,7 +150,7 @@ bool fluidLevelObj::handleMsg(message* inMsg) {
       level = rawLevel/250.0;
       //rawCap = inMsg->getULongFromData(3);
       //liters = rawCap/10.0;
-      
+      /*
       Serial.print("instance : ");
       Serial.println(instance);
       Serial.print("fluid Type : ");
@@ -159,6 +159,7 @@ bool fluidLevelObj::handleMsg(message* inMsg) {
       Serial.print("level : ");
       Serial.print(level);
       Serial.println(" %");
+      */
       return true;
    }
    return false;
@@ -347,8 +348,8 @@ void engParam::newMsg(void) {
 
 void engParam::setEngInst(int inst) {
 
-	if (inst>100) {
-		engInst = 100;
+	if (inst>252) {
+		engInst = 252;
 	} else if (inst<0) {
 		engInst = 0;
 	} else {
@@ -386,6 +387,86 @@ void engParam::setTilt(float tilt) {
 
 
 float engParam::getTilt(void) { return tiltPerc; }
+
+
+
+// ************* engParamII *************
+
+#define ENG_PARAMII_BYTES	26
+
+engParamII::engParamII(netObj* inNetObj)
+	: msgHandler(inNetObj) {
+	
+	engInst	= 0;
+	setSendInterval(500);  // Refresh the outgoing data every 100 ms. 
+}
+	
+	
+engParamII::~engParamII(void) {  }
+
+        
+bool engParamII::handleMsg(message* inMsg) {
+	
+	uint16_t	status1;
+	
+	if (inMsg->getPGN()== 0x1F201) {					// If it's our PGN..
+		if (inMsg->getDataByte(0)==engInst) {		// If it's OUR engine..
+			status1 = inMsg->getUIntFromData(20);	// Grab the the info.
+			ourAlarms.overTemp = bitRead(status1,1);
+			ourAlarms.lowOilPSI = bitRead(status1,2);
+			return true;		
+		}
+	}
+	return false;
+}
+
+
+void engParamII::newMsg(void) {
+
+	message	outMsg;
+	uint16_t	status1;
+	
+	outMsg.setNumBytes(ENG_PARAMII_BYTES);				// It's bigger than usual.
+	if (outMsg.getNumBytes()==ENG_PARAMII_BYTES) {	// If we got them..
+		for (int i=0;i<ENG_PARAMII_BYTES;i++) {		// Stomp FF into all the data to flag as unused.
+			outMsg.setDataByte(i,0xFF);					// Stomp stomp stomp!
+		}															// Because we're not using most of it.
+		outMsg.setPGN(0x1F201);								// PGN we will be broadcasting.
+		outMsg.setPriority(2);								// I read 2 is the value in this case.
+		outMsg.setSourceAddr(ourNetObj->getAddr());	// Our current return address.
+		outMsg.setDataByte(0,engInst);					// Our engine.
+		status1 = 0;											// Clear this one.
+		if (ourAlarms.overTemp) {							// Grab temp value.
+			bitSet(status1,1);								// Set bit if alarm is active.
+		}															// Take a breath!
+		if (ourAlarms.lowOilPSI) {							// Grab temp value.
+			bitSet(status1,2);								// Set bit if alarm is active.
+		}															//
+		outMsg.setUIntInData(20,status1);				// 
+		sendMsg(&outMsg);										// Zoom! Off it goes!
+	}
+}
+
+
+void engParamII::setEngInst(int inst) {
+
+	if (inst>252) {
+		engInst = 252;
+	} else if (inst<0) {
+		engInst = 0;
+	} else {
+		engInst = inst;
+	}
+}
+
+
+float engParamII::getEngInst(void) { return engInst; }
+
+
+void engParamII::setAlarms(alarms* inAlarms) { ourAlarms = *inAlarms; }
+	
+
+alarms engParamII::getAlarms(void) { return ourAlarms; }
 
 
 

@@ -28,6 +28,7 @@ engine::~engine(void) {
 	if (tempSender) delete(tempSender);
 	if (ourBeeper) delete(ourBeeper);
 	if (engHdler) delete(engHdler);
+	if (engHdlerII) delete(engHdlerII);
 	if (fuelHdlr) delete(fuelHdlr);
 	if (updateTimer) delete(updateTimer);
 }
@@ -58,29 +59,37 @@ void engine::setup() {
 		
 void 	engine::loop() {
 
-	float	currentRPM;
+	float		currentRPM;
+	alarms	alarmState;
 	
-	NMEA2kBase::loop();
+	NMEA2kBase::loop();															// Let our ancestors do their thing.
+	alarmState.lowOilPSI = false;												// Clear out the alarm block.
+	alarmState.overTemp = false;												//
 	if (!oilPSI_Sender->getState() || !tempSender->getState()) {	// If switches say alarm?!
 		if (ourTachMgr->getTach()>MIN_RPM) {								// And the engine is running!
 			if (!ourBeeper->running()) {										// And, and.. The alarm has NOT been turned on!
 				ourBeeper->setOnOff(true);										// Sound the alarm!
-			}
-		} else {
-			if (ourBeeper->running()) {											// If its beeping..
-				ourBeeper->setOnOff(false);										// Shut it off.
-			}
-		}
+				alarmState.lowOilPSI = oilPSI_Sender->getState();		// Set up the alarm block.
+				alarmState.overTemp = tempSender->getState();			//
+				engHdlerII->setAlarms(&alarmState);							// On change, send the alarm block.
+			}																			//
+		} else {																		// Else.. Engine is off.
+			if (ourBeeper->running()) {										// If its beeping..
+				ourBeeper->setOnOff(false);									// Shut it off.
+				engHdlerII->setAlarms(&alarmState);							// On change, change the network.
+			}																			//
+		}																				//
 	} else {																			// Else, we don't want the alarm on..
 		if (ourBeeper->running()) {											// If its beeping..
 			ourBeeper->setOnOff(false);										// Shut it off.
-		}
-	}
-	if (updateTimer->ding()) {
-		currentRPM = ourTachMgr->getTach();
-		engHdler->setRPM(currentRPM);
-		updateTimer->stepTime();
-	}
+			engHdlerII->setAlarms(&alarmState);								// On change, send the alarm block.
+		}																				//
+	}																					//
+	if (updateTimer->ding()) {													// When our timer expires..
+		currentRPM = ourTachMgr->getTach();									// Get the tach info.
+		engHdler->setRPM(currentRPM);											// Send it out the wire.
+		updateTimer->stepTime();												// And, reset the timer.
+	}																					//
 }
 
 
@@ -91,15 +100,21 @@ void 	engine::loop() {
 bool	engine::addNMEAHandlers(void) {
 
 	engHdler = new engParam(llamaBrd);
+	engHdlerII = new engParamII(llamaBrd);
 	fuelHdlr = new fluidLevelObj(llamaBrd);
-	if (engHdler && fuelHdlr) {
+	if (engHdler && engHdlerII && fuelHdlr) {
 		llamaBrd->addMsgHandler(engHdler);
+		llamaBrd->addMsgHandler(engHdlerII);
 		llamaBrd->addMsgHandler(fuelHdlr);
 		return true;
 	} else {
 		if (engHdler) {
 			delete(engHdler);
 			engHdler = NULL;
+		}
+		if (engHdlerII) {
+			delete(engHdlerII);
+			engHdlerII = NULL;
 		}
 		if (fuelHdlr) {
 			delete(fuelHdlr);
@@ -198,8 +213,6 @@ void engine::doReadFuel(void) {
 
 
 void engine::doSetAuto(void) {
-
-	char*	paramStr;
 	 
 	if (cmdParser.numParams()==0) {
 		ourTachMgr->setAuto(!ourTachMgr->runAuto);

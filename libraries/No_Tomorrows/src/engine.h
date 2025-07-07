@@ -54,6 +54,7 @@ class engine : public	NMEA2kBase {
 				timeObj*			updateTimer;
 				
 				engParam*		engHdler;
+				engParamII*		engHdlerII;
 				fluidLevelObj*	fuelHdlr;
 };
 	
