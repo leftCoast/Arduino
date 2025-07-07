@@ -281,17 +281,21 @@ float barometerObj::getInHg(void) { return inHg; }
 engParam::engParam(netObj* inNetObj)
 	: msgHandler(inNetObj) {
 	
-	engInst	= 0;
-	RPM		= 0;
-  	boostPSI	= 0;
-	tiltPerc	= 0;
+	encodeRPM	= false;		// Docs. say RPM should be radians/sec * 4. Reality says no.
+	engInst		= 0;
+	RPM			= 0;
+  	boostPSI		= 0;
+	tiltPerc		= 0;
 	setSendInterval(100);  // Refresh the outgoing data every 100 ms. 
 }
 	
 	
 engParam::~engParam(void) {  }
 
-         
+
+void engParam::setEncodeRPM(bool trueFalse) { encodeRPM = trueFalse; }
+
+        
 bool engParam::handleMsg(message* inMsg) {
 	
 	uint16_t	rawRPM;
@@ -300,6 +304,11 @@ bool engParam::handleMsg(message* inMsg) {
 	if (inMsg->getPGN()== 0x1F200) {					// If it's our PGN..
 		if (inMsg->getDataByte(0)==engInst) {		// If it's OUR engine..
 			rawRPM = inMsg->getUIntFromData(1);		// Grab the RPM info.
+			if (encodeRPM) {
+				RPM = (rawRPM * RADPS_RPM)/4.0;		// Do the calculation.
+			} else {
+				RPM = rawRPM/4;							// Or not..
+			}
 			RPM = (rawRPM * RADPS_RPM)/4.0;			// Do the calculation.
 			rawBoost = inMsg->getUIntFromData(3);	// Grab the boost info.
 			rawBoost = rawBoost * 100;
@@ -318,13 +327,17 @@ void engParam::newMsg(void) {
 	int		NMEA_rps;
 	int		NMEA_boost;
 	
-	NMEA_rps = round(RPM*RPM_RADPS*4);
+	if (encodeRPM) {											
+		NMEA_rps = round(RPM*RPM_RADPS*4);				// Docs say radians/sec.
+	} else {
+		NMEA_rps = round(RPM*4);							// In the field its RPM.
+	}
 	NMEA_boost = round((boostPSI*PSI_PAS)/100.0);
 	outMsg.setPGN(0x1F200);									// PGN we will be broadcasting.
    outMsg.setPriority(2);									// I read 2 is the value in this case.
    outMsg.setSourceAddr(ourNetObj->getAddr());		// Our current return address.
    outMsg.setDataByte(0,engInst);						// Our engine.
-   outMsg.setUIntInData(1,NMEA_rps);					// RPM converted.
+   outMsg.setUIntInData(1,NMEA_rps);					// RPM converted. Or not.
    outMsg.setUIntInData(3,NMEA_boost);					// Bost value converted.
    outMsg.setDataByte(5,tiltPerc);						// Tilt percent..
    outMsg.setUIntInData(6,0xFFFF);						// Reserved, so..

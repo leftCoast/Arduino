@@ -17,6 +17,7 @@ engine::engine(void)
 	ourBeeper		= NULL;
 	engHdler			= NULL;
 	fuelHdlr			= NULL;
+	updateTimer		= NULL;
 }
 
 
@@ -28,6 +29,7 @@ engine::~engine(void) {
 	if (ourBeeper) delete(ourBeeper);
 	if (engHdler) delete(engHdler);
 	if (fuelHdlr) delete(fuelHdlr);
+	if (updateTimer) delete(updateTimer);
 }
 
 
@@ -43,10 +45,11 @@ void engine::setup() {
       Serial.println("Can't start up Tach!");
       while(1);
    }
-   oilPSI_Sender = new mechButton(OIL_PIN);
-   tempSender = new mechButton(TEMP_PIN);
-   ourBeeper = new blinker(BEEP_OUT_PIN,ENG_ALARM_PULSE,ENG_ALARM_PERIOD);
-   if (!oilPSI_Sender||!tempSender||!ourBeeper) {
+   updateTimer		= new timeObj(100);
+   oilPSI_Sender	= new mechButton(OIL_PIN);
+   tempSender		= new mechButton(TEMP_PIN);
+   ourBeeper		= new blinker(BEEP_OUT_PIN,ENG_ALARM_PULSE,ENG_ALARM_PERIOD);
+   if (!oilPSI_Sender||!tempSender||!ourBeeper||!updateTimer) {
    	Serial.println("Allocations failed!");
       while(1);
    }
@@ -55,8 +58,9 @@ void engine::setup() {
 		
 void 	engine::loop() {
 
-	NMEA2kBase::loop();
+	float	currentRPM;
 	
+	NMEA2kBase::loop();
 	if (!oilPSI_Sender->getState() || !tempSender->getState()) {	// If switches say alarm?!
 		if (ourTachMgr->getTach()>MIN_RPM) {								// And the engine is running!
 			if (!ourBeeper->running()) {										// And, and.. The alarm has NOT been turned on!
@@ -71,6 +75,11 @@ void 	engine::loop() {
 		if (ourBeeper->running()) {											// If its beeping..
 			ourBeeper->setOnOff(false);										// Shut it off.
 		}
+	}
+	if (updateTimer->ding()) {
+		currentRPM = ourTachMgr->getTach();
+		engHdler->setRPM(currentRPM);
+		updateTimer->stepTime();
 	}
 }
 
@@ -107,8 +116,6 @@ void 	engine::addCommands(void) {
 	cmdParser.addCmd(setRPM,"setrpm");
 	cmdParser.addCmd(setRPM,"rpm");
 	cmdParser.addCmd(setMs,"ms");
-	cmdParser.addCmd(setAlarm,"setalarm");
-	cmdParser.addCmd(setAlarm,"alarm");
 	cmdParser.addCmd(setFuel,"setfuel");
 	cmdParser.addCmd(readFuel,"readfuel");
 	cmdParser.addCmd(setAuto,"auto");
@@ -120,7 +127,6 @@ void 	engine::checkAddedComs(int comVal) {
 	switch(comVal) {
 		case setRPM		: doSetRPM();		break;
 		case setMs		: doSetMS();		break;
-		case setAlarm	: doSetAlarm();	break;
 		case setFuel	: doSetFuel();		break;
 		case readFuel	: doReadFuel();	break;
 		case setAuto	: doSetAuto();		break;
@@ -133,8 +139,8 @@ void engine::printHelp(void) {
 
 	NMEA2kBase::printHelp();
 	Serial.println("                                   Engine panel commands.");
+	Serial.println("           ----------------------------------------------------------------------");
 	Serial.println("RPM manually sets the RPM gauge to an RPM level.");
-	Serial.println("setAlarm then on or off controls the beeper manually.");
 	Serial.println("setFuel followed by a level percent, sends the fuel level out the NEMA network.");
 	Serial.println("readFuel reads the fuel level being sent in by the NEMA network.");
 	Serial.println("auto toggles auto reading and broacasting RPM values");
@@ -171,25 +177,6 @@ void engine::doSetMS(void) {
 }
 
 
-void engine::doSetAlarm(void) {
-	
-	char*	paramStr;
-	
-	if (cmdParser.numParams()==0) {
-		ourBeeper->setOnOff(false);
-	} else if (cmdParser.numParams()==1) {
-		heapStr(&paramStr,cmdParser.getNextParam());
-		lwrCase(paramStr);
-		if (!strcmp(paramStr,"on")) {
-			ourBeeper->setOnOff(true);
-		} else {
-			ourBeeper->setOnOff(false);
-		}
-		freeStr(&paramStr);
-	}
-}
-
-
 void engine::doSetFuel(void) {
 
 	float level;
@@ -216,20 +203,12 @@ void engine::doSetAuto(void) {
 	 
 	if (cmdParser.numParams()==0) {
 		ourTachMgr->setAuto(!ourTachMgr->runAuto);
-	} else if (cmdParser.numParams()==1) {
-		heapStr(&paramStr,cmdParser.getNextParam());
-		lwrCase(paramStr);
-		if (!strcmp(paramStr,"on")) {
-			ourTachMgr->setAuto(true);
+		Serial.print("Auto set to ");
+		if (ourTachMgr->runAuto) {
+			Serial.println("on");
 		} else {
-			ourTachMgr->setAuto(false);
+			Serial.println("off");
 		}
-	}
-	Serial.print("Auto set to ");
-	if (ourTachMgr->runAuto) {
-		Serial.println("on");
-	} else {
-		Serial.println("off");
 	}
 }
 

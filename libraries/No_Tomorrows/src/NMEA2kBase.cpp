@@ -264,6 +264,7 @@ void NMEA2kBase::changeAnAddr(void) {
    if (cmdParser.numParams()==1) {
       addr1 = atoi(cmdParser.getNextParam());
       llamaBrd->setAddr(addr1);
+      changeAddress(addr1);
    } else if (cmdParser.numParams()==2) {
       addr1 = atoi(cmdParser.getNextParam());
       addr2 = atoi(cmdParser.getNextParam());
@@ -311,6 +312,5 @@ void NMEA2kBase::printHelp(void) {
    Serial.println("changeAddr folowed by two values - tells the device at the first address to change to the second value.");
    Serial.println("reset - This resets your name and address to what it was when the program started.");
    Serial.println("help, or ? - Well, that's this. The command list.");
-   Serial.println("           ----------------------------------------------------------------------");
    Serial.println();
 }

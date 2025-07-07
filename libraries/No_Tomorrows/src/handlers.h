@@ -217,6 +217,7 @@ class engParam  : public msgHandler {
             engParam(netObj* inNetObj);
             ~engParam(void);
           
+          	void	setEncodeRPM(bool trueFalse);
    virtual  bool  handleMsg(message* inMsg);
    virtual  void	newMsg(void);
    			void	setEngInst(int inst);
@@ -228,6 +229,7 @@ class engParam  : public msgHandler {
     			void	setTilt(float tilt);
     			float getTilt(void);
     			
+    			bool	encodeRPM;
     			int	engInst;
             float	RPM;
             float	boostPSI;

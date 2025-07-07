@@ -23,7 +23,6 @@ enum engComs {
 
 	setRPM = lastCom,
 	setMs,
-	setAlarm,
 	setFuel,
 	readFuel,
 	setAuto
@@ -44,7 +43,6 @@ class engine : public	NMEA2kBase {
 	virtual	void	printHelp(void);					// Print list of commands.
 				void	doSetRPM(void);					// Commmand handlers
 				void	doSetMS(void);
-				void	doSetAlarm(void);
 				void	doSetFuel(void);
 				void	doReadFuel(void);
 				void	doSetAuto(void);
@@ -53,6 +51,7 @@ class engine : public	NMEA2kBase {
 				mechButton*		oilPSI_Sender;
 				mechButton*		tempSender;
 				blinker*			ourBeeper;
+				timeObj*			updateTimer;
 				
 				engParam*		engHdler;
 				fluidLevelObj*	fuelHdlr;
