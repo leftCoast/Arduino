@@ -37,6 +37,7 @@ NMEA2kBase::~NMEA2kBase(void) {
 void NMEA2kBase::setup(void) {
 
 	Serial.begin(9600);
+	delay(4000);
 	llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
 	if (!llamaBrd) {
 		Serial.println("Can not allocate llama board.");
@@ -51,6 +52,7 @@ void NMEA2kBase::setup(void) {
       Serial.println("Starting llama board failed!");
       while (1);
    }
+   addCommands();
 }
 
 
@@ -150,6 +152,7 @@ void NMEA2kBase::loop(void) {
       }
    }
 }
+
 
 // Offspring should inherit this to check for extended commands that it adds to this default list.
 void NMEA2kBase::checkAddedComs(int comVal) {  }
@@ -297,7 +300,7 @@ void NMEA2kBase::error(int errNum) {
 void NMEA2kBase::printHelp(void) {
    
    Serial.println();
-   Serial.println("                             Our list of available commands.");
+   Serial.println("                                      Base commands.");
    Serial.println("           ----------------------------------------------------------------------");
    Serial.println("list - Gives a list of the connected devices on the network.");
    Serial.println("seeName,showName or just name - This will display our device name.");
@@ -305,7 +308,7 @@ void NMEA2kBase::printHelp(void) {
    Serial.println("copyName folowed by a network address - If found, copies the name of the item at that address.");
    Serial.println("pasteName or paste - Changes our name to the last one we copied.");
    Serial.println("changeAddr folowed by one value - Changes our address to that value.");
-   Serial.println("changeAddr folowed by two values - tells the device at the first address to chnage to the second value.");
+   Serial.println("changeAddr folowed by two values - tells the device at the first address to change to the second value.");
    Serial.println("reset - This resets your name and address to what it was when the program started.");
    Serial.println("help, or ? - Well, that's this. The command list.");
    Serial.println("           ----------------------------------------------------------------------");

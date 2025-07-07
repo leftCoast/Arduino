@@ -3,6 +3,7 @@
 
 #include <llama2000.h>
 #include <lilParser.h>
+#include <handlers.h>
 
 enum baseComs {
 	noCommand,
@@ -40,7 +41,7 @@ class NMEA2kBase {
 				void	changeAnAddr(void);				// (One value) change our addr to this. (Two values) Change theirs to that.
 				void	resetNameNAddr(void);			// Put back our name and address to power up state.
 				void	error(int errNum);				// Show's parse error. (Not like you could actually fix it.)
-				void	printHelp(void);					// Print list of commands.
+	virtual	void	printHelp(void);					// Print list of commands.
 	virtual	void	checkAddedComs(int comVal);	// For adding your own typed commands.
 
 	
