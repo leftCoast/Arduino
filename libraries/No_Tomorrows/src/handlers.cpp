@@ -97,7 +97,7 @@ fluidLevelObj::fluidLevelObj(netObj* inNetObj)
    
    fluidType = fuel;       // This is 0.
    level       = 0;        // Good as any for a default.
-   setSendInterval(2500);  // Refresh the outgoing data every 2.5 seconds.
+   //setSendInterval(2500);  // Refresh the outgoing data every 2.5 seconds.
 }
 
  

@@ -196,6 +196,7 @@ void engine::doSetFuel(void) {
 
 	float level;
 	
+	level = 0;
 	if (cmdParser.numParams()==1) {
 		level = atof(cmdParser.getNextParam());
 		fuelHdlr->setLevel(level);
