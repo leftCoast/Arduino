@@ -5,6 +5,16 @@
 #include <GPSReader.h>
 #include <GPS_NMEA2K.h>
 
+
+enum engComs {
+
+	getPos = lastCom,
+	getCOG,
+	getGPSData,
+	setMark
+};
+
+
 class navigation : public	NMEA2kBase {
 
 	public:
@@ -13,9 +23,19 @@ class navigation : public	NMEA2kBase {
 	
 	virtual	void	setup(void);
 	virtual	void	loop(void);
-	virtual	bool	addNMEAHandlers(void);		// Without handlers, who are we anyway?
+	virtual	void	checkAddedComs(int comVal);
+	virtual	bool	addNMEAHandlers(void);			// Without handlers, who are we anyway?
+	virtual	void	addCommands(void);
+	virtual	void	printHelp(void);					// Print list of commands.			
+				void	doGetPos(void);
+				void	doGetCOG(void);
+				void	doGetData(void);
+				void	doSetMark(void);
+				void	getBearing(void);
+				void	getDist(void);
 				
 				GPSReader	ourGPS;
+				globalPos	destMark;
 };
 
 			

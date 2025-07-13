@@ -60,6 +60,9 @@ class globalPos {
 				char*		getLonStr(void);
 				char*		getLonQuadStr(void);
 				
+				char*		showLatStr(void);			// Formatted for humans.
+				char*		showLonStr(void);			// This one too.
+				
 				int		getLatDeg(void);
 				double	getLatMin(void);
 				quad		getLatQuad(void);

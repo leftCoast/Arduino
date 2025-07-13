@@ -2,32 +2,41 @@
 #include <timestamp32bits.h>     // Gives the UNIX Epoch timestamp for PGN 0x1F805
 
 
+
+byte     sid = 0;						// Gobal.. Err.. forgot what.
+
+
 // Call this with your netObj and it'll add in all the GPS broadcasting handlers.
 bool addGPSHandlers(netObj* inNetObj) {
 
-	PGN0x1F801Handler*   ourPGN0x1F801;
-	PGN0x1F802Handler*   ourPGN0x1F802;	
-	PGN0x1F805Handler*   ourPGN0x1F805;
+	PGN0x1F801Handler*   ourPGN0x1F801;									// Pointers to our set.
+	PGN0x1F802Handler*   ourPGN0x1F802;									// we have these three.
+	PGN0x1F805Handler*   ourPGN0x1F805;									// To make up.
 		
-	ourPGN0x1F801 = new PGN0x1F801Handler(inNetObj);
-	ourPGN0x1F802 = new PGN0x1F802Handler(inNetObj);
-	ourPGN0x1F805 = new PGN0x1F805Handler(inNetObj);
-	
-	if (ourPGN0x1F801 && ourPGN0x1F802 && ourPGN0x1F805) {
-		inNetObj->addMsgHandler(ourPGN0x1F801);
-		inNetObj->addMsgHandler(ourPGN0x1F802);
-		inNetObj->addMsgHandler(ourPGN0x1F805);
-		return true;
-	}
-	return false;
+	ourPGN0x1F801 = new PGN0x1F801Handler(inNetObj);				// Create handelr for PGN 1F801
+	ourPGN0x1F802 = new PGN0x1F802Handler(inNetObj);				// PGN 1F802
+	ourPGN0x1F805 = new PGN0x1F805Handler(inNetObj);				// And 1F805
+	if (ourPGN0x1F801 && ourPGN0x1F802 && ourPGN0x1F805) {		// If we got them all..
+		inNetObj->addMsgHandler(ourPGN0x1F801);						// Add to netObj and let them deal with them.
+		inNetObj->addMsgHandler(ourPGN0x1F802);						// If netObj gets deleted? It'll delete these as well.
+		inNetObj->addMsgHandler(ourPGN0x1F805);						// 
+		return true;															// Let 'em know it all worked out.
+	}																				//
+	if (ourPGN0x1F801) delete(ourPGN0x1F801);							// If we get here one or more failed to allocate.
+	if (ourPGN0x1F802) delete(ourPGN0x1F802);							// So we clean up the mess.
+	if (ourPGN0x1F805) delete(ourPGN0x1F805);							// Bt recycling them all.
+	return false;																// Let 'em know it was a failure.
 }
 
-byte     sid = 0;
 
+// Handy to have, currently don't have a god spot to store this. Hence we'll leave it
+// here.
 double degToRad(double inDeg) {
 
    return (inDeg * PI) / 180.0;
 }
+
+
 
 // ****************************************************
 // PGN 0x1F801 - Position, Rapid Update

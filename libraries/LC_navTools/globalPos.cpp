@@ -44,10 +44,10 @@ bool globalPos::valid(void) {
 
 	if (!checkLatDeg(latDeg))	return false;
 	if (!checkMin(latMin))		return false;
-	if (latQuad==north||latQuad==south) return false;
 	if (!checkLonDeg(lonDeg))	return false;
 	if (!checkMin(lonMin))		return false;
-	if (lonQuad==east||lonQuad==west) return false;
+	if (latQuad==east||latQuad==west) return false;
+	if (lonQuad==north||lonQuad==south) return false;
 	return true;
 }
 	
@@ -413,8 +413,52 @@ char* globalPos::getLonQuadStr(void) {
 	}
 	return outStr;
 }
-	
 
+
+// Formatted for humans.	
+char* globalPos::showLatStr(void) {
+
+	char	tempStr[G_POS_BUFF_BYTES];
+	
+	if (valid()) {
+		switch(latQuad) {
+			case north	: strcpy(outStr, "North ");	break;
+			case south	: strcpy(outStr, "South ");	break;
+			default		:										break;
+		}
+		sprintf(tempStr,"%3u%s",latDeg," Deg. ");
+		strcat(outStr,tempStr);
+		sprintf(tempStr,"%6..3lf%s",latMin," Min.");
+		strcat(outStr,tempStr);
+	} else {
+		strcpy(outStr,"Invalid fix");
+	}
+	return outStr;
+}
+
+
+// This one too.			
+char* globalPos::showLonStr(void) {
+
+	char	tempStr[G_POS_BUFF_BYTES];
+	
+	if (valid()) {
+		switch(lonQuad) {
+			case east	: strcpy(outStr, "East  ");	break;
+			case west	: strcpy(outStr, "West  ");	break;
+			default		:										break;
+		}
+		sprintf(tempStr,"%3u%s",lonDeg," Deg. ");
+		strcat(outStr,tempStr);
+		sprintf(tempStr,"%6..3lf%s",lonMin," Min.");
+		strcat(outStr,tempStr);
+	} else {
+		strcpy(outStr,"Invalid fix");
+	}
+	return outStr;
+}			
+
+				
 int globalPos::getLatDeg(void)	{ return latDeg; }
 
 double globalPos::getLatMin(void)	{ return latMin; }
