@@ -6,12 +6,22 @@
 #include <GPS_NMEA2K.h>
 
 
+//
+// Forms for entering lat/lon
+// three values : int float str : 38 26.2 east
+// two values   : float str : 38.65934 west
+//
+
+
 enum engComs {
 
 	getPos = lastCom,
 	getCOG,
 	getGPSData,
-	setMark
+	setMarkLat,
+	setMarklon,
+	getCourse,
+	getDist
 };
 
 
@@ -30,9 +40,10 @@ class navigation : public	NMEA2kBase {
 				void	doGetPos(void);
 				void	doGetCOG(void);
 				void	doGetData(void);
-				void	doSetMark(void);
-				void	getBearing(void);
-				void	getDist(void);
+				void	doSetLat(void);
+				void	doSetLon(void);
+				void	doGetBearing(void);
+				void	doGetDist(void);
 				
 				GPSReader	ourGPS;
 				globalPos	destMark;

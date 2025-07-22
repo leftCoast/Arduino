@@ -56,16 +56,34 @@ bool globalPos::valid(void) {
 void globalPos::copyPos(globalPos* aLatLon) {
 
 	if (aLatLon) {
+		copyLat(aLatLon);
+		copyLon(aLatLon);
+	}
+}
+
+
+// I wanna' be like.. Half of you euooo.
+void globalPos::copyLat(globalPos* aLatLon) {
+
+	if (aLatLon) {
 		latDeg	= aLatLon->latDeg;
 		latMin	= aLatLon->latMin;
 		latQuad	= aLatLon->latQuad;
+	}
+}
+
+
+// Or the other half of you euooo.
+void globalPos::copyLon(globalPos* aLatLon) {
+
+	if (aLatLon) {
 		lonDeg	= aLatLon->lonDeg;
 		lonMin	= aLatLon->lonMin;
 		lonQuad	= aLatLon->lonQuad;
 	}
 }
-
-
+		
+				
 // In the format DD MM.MMM	Does not look for Quadrent. See below.
 void globalPos::setLatValue(const char* inLatStr) {
 
@@ -154,6 +172,48 @@ void globalPos::setLonQuad(const char* inQuad) {
 }
 
 
+void globalPos::setLat(double inLat) {
+	
+	int		latDeg;
+	double	latMin;
+	quad		latQuad;
+	
+	latDeg = trunc(inLat);
+	latDeg = abs(latDeg);
+	latMin = abs(inLat) - latDeg;
+	latMin = latMin * 60.0;
+	if (inLat>=0) {
+		latQuad = north;
+	} else {
+		latQuad = south;
+	}
+	setLatValue(latDeg,latMin);
+	setLatQuad(latQuad);
+}
+
+
+void globalPos::setLon(double inLon) {
+
+	
+	int		lonDeg;
+	double	lonMin;
+	quad		lonQuad;
+	
+	lonDeg = trunc(inLon);
+	lonDeg = abs(lonDeg);
+	lonMin = abs(inLon) - lonDeg;
+	lonMin = lonMin * 60.0;
+	if (inLon>=0) {
+		lonQuad = east;
+	} else {
+		lonQuad = west;
+	}
+	setLonValue(lonDeg,lonMin);
+	setLonQuad(lonQuad);
+	
+}
+				
+				
 void globalPos::setPosValues(const char* latStr,const char* lonStr) {
 
 	setLatValue(latStr);
@@ -428,7 +488,7 @@ char* globalPos::showLatStr(void) {
 		}
 		sprintf(tempStr,"%3u%s",latDeg," Deg. ");
 		strcat(outStr,tempStr);
-		sprintf(tempStr,"%6..3lf%s",latMin," Min.");
+		sprintf(tempStr,"%6.3lf%s",latMin," Min.");
 		strcat(outStr,tempStr);
 	} else {
 		strcpy(outStr,"Invalid fix");
@@ -450,7 +510,7 @@ char* globalPos::showLonStr(void) {
 		}
 		sprintf(tempStr,"%3u%s",lonDeg," Deg. ");
 		strcat(outStr,tempStr);
-		sprintf(tempStr,"%6..3lf%s",lonMin," Min.");
+		sprintf(tempStr,"%6.3lf%s",lonMin," Min.");
 		strcat(outStr,tempStr);
 	} else {
 		strcpy(outStr,"Invalid fix");

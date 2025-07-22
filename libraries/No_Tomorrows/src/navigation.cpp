@@ -41,10 +41,14 @@ void navigation::loop(void) {
 void navigation::checkAddedComs(int comVal) {
 
 	switch(comVal) {
-		case getPos			: doGetPos();	break;
-		case getCOG			: doGetCOG();	break;
-		case getGPSData	: doGetData();	break;
-		default				: printHelp();	break;
+		case getPos			: doGetPos();		break;
+		case getCOG			: doGetCOG();		break;
+		case getGPSData	: doGetData();		break;
+		case setMarkLat	: doSetLat();		break;
+		case setMarklon	: doSetLon();		break;
+		case getCourse		: doGetBearing();	break;
+		case getDist		: doGetDist();		break;
+		default				: printHelp();		break;
 	}
 }
 
@@ -61,6 +65,10 @@ void 	navigation::addCommands(void) {
 	cmdParser.addCmd(getPos,"pos");
 	cmdParser.addCmd(getCOG,"cog");
 	cmdParser.addCmd(getGPSData,"gpsdata");
+	cmdParser.addCmd(setMarkLat,"setLat");
+	cmdParser.addCmd(setMarklon,"setLon");
+	cmdParser.addCmd(getCourse,"bearing");
+	cmdParser.addCmd(getDist,"dist");
 }
 
 
@@ -69,16 +77,30 @@ void navigation::printHelp(void) {
 	NMEA2kBase::printHelp();
 	Serial.println("                                   Navigation commands.");
 	Serial.println("           ----------------------------------------------------------------------");
-	Serial.println("Pos Shows us our current GPS position.");
-	Serial.println("COG Shows us our current course over ground.");
-	Serial.println("GPSData  Shows us data about our GPS fix.");	
+	Serial.println("Pos Shows   us our current GPS position.");
+	Serial.println("COG Shows   us our current course over ground.");
+	Serial.println("GPSData     Shows us data about our GPS fix.");
+	Serial.println("setLat      Set latitude of mark.");
+	Serial.println("setLon      Set longitude of mark.");
+	Serial.println("bearing     Get true course from here to mark.");
+	Serial.println("dist        Get nautical miles from here to mark.");
 }
 
 
+// This one seems to have had issues overwriting the reused string, while the first one
+// was being sent to the host computer. So, I tried doing a local copy. That seems to have
+// solved the issue.
 void navigation::doGetPos(void) {
-
-	Serial.println(fixData.latLon.showLatStr());
-	Serial.println(fixData.latLon.showLonStr());
+	
+	char* outStr = NULL;					
+	
+	Serial.print("Latitude          : ");				// Send to first bit..
+	heapStr(&outStr,fixData.latLon.showLatStr());	// Save off a local copy of the string.
+	Serial.println(outStr);									// Send out the local copy, while..
+	Serial.print("Longitude         : ");				// Send out the second label.
+	heapStr(&outStr,fixData.latLon.showLonStr());	// Save off a copy of the second string.
+	Serial.println(outStr);									// Send out the local copy.
+	freeStr(&outStr);											// Release the local string memory.
 }
 
 
@@ -87,20 +109,32 @@ void navigation::doGetCOG(void) {
 	float	COG;
 	
 	COG =  trackMadeGood.trueCourse;
-	Serial.print("Course over ground : ");
+	Serial.print("COG True          : ");
 	Serial.print(COG,1);
-	Serial.println(" Deg T");
-	Serial.print("Magnetic deviation : ");
-	Serial.println(minTransData.magVar,1);
-	COG =  trackMadeGood.magCourse;
-	Serial.print("Course over ground : ");
+	Serial.println(" Deg.");
+	Serial.print("Mag. deviation    : ");
+	Serial.print(minTransData.magVar,3);
+	Serial.print(" ");
+	if (minTransData.vEastWest==east) {
+		Serial.println(" East");
+	} else {
+		Serial.println(" West");
+	}
+	Serial.print("COG Magnetic      : ");
 	Serial.print(COG,1);
-	Serial.println(" Deg M");
+	Serial.println(" Deg.");
 }
 
 
 void navigation::doGetData(void) {
 
+	Serial.print("Date              : ");
+   Serial.print(minTransData.month);
+   Serial.print("/");
+	Serial.print(minTransData.day);
+	Serial.print("/");
+	Serial.println(minTransData.year);
+	
 	Serial.print("Time              : ");
 	Serial.print(fixData.hours);
 	Serial.print(":");
@@ -108,7 +142,13 @@ void navigation::doGetData(void) {
 	Serial.print(":");
 	Serial.print(fixData.sec,0);
 	Serial.println(" Zulu.");
-
+	
+	doGetPos();
+	doGetCOG();
+	
+	Serial.print("Speed over ground : ");
+	Serial.print(minTransData.groundSpeed,1);
+	Serial.println(" kn.");
 	
 	Serial.print("Fix quality       : ");
 	switch(fixData.qualVal) {
@@ -155,21 +195,125 @@ void navigation::doGetData(void) {
 	Serial.print("PDOP              :");Serial.println(activeSatellites.PDOP,1);
 	Serial.print("HDOP              :");Serial.println(activeSatellites.HDOP,1);
 	Serial.print("VDOP              :");Serial.println(activeSatellites.VDOP,1);
-}
-
-
-void navigation::doSetMark(void) {
 	
+	int		numItems;
+	satData*	dataNode;
+	
+	numItems = SatellitesInView.satDataList.getCount();
+	Serial.println("-------------------------------");
+	Serial.print("Satelites in view : ");Serial.println(numItems);
+	for (int i=0;i<numItems;i++) {
+		dataNode = (satData*)SatellitesInView.satDataList.getByIndex(i);
+		if (dataNode) {
+			Serial.print("Satellite ID      : ");Serial.println(dataNode->PRNNum);
+			Serial.print("Elevation         : ");Serial.println(dataNode->elevation);
+			Serial.print("Azmuth            : ");Serial.println(dataNode->azmuth);
+			Serial.print("Sig / Noise       : ");Serial.println(dataNode->SigToNoise);
+			if (i==numItems-1) {
+				Serial.println("-------------------------------");
+			} else {
+				Serial.println(".....");
+			}
+		}
+	}
 }
 
 
-void navigation::getBearing(void) {
+void navigation::doSetLat(void) {
 
+	int			degInt;
+	double		degDou;
+	double		min;
+	globalPos	localPos;
+	bool			validPos;
+	
+	validPos = false;													// Ain't valid yet.
+	if (cmdParser.numParams()==2) {
+		degDou = atof(cmdParser.getNextParam());
+		localPos.setLat(degDou);
+		localPos.setLatQuad(cmdParser.getNextParam());
+		validPos = localPos.valid();
+	} else if (cmdParser.numParams()==3) {
+		degInt = atoi(cmdParser.getNextParam());
+		min =  atoi(cmdParser.getNextParam());
+		localPos.setLatValue(degInt,min);
+		localPos.setLatQuad(cmdParser.getNextParam());
+		validPos = localPos.valid();
+	}
+	if (validPos) {
+		destMark.copyLat(&localPos);
+	} else {
+		Serial.println("We're looking for either, latitude value & quadrant, (N/S kinda' thing).");
+		Serial.println("Or, latitude degree value, minute value and then quadrant.");
+		Serial.println("I can't make what you typed match any of these.");
+	}
 }
 
 
-void navigation::getDist(void) {
+void navigation::doSetLon(void) {
 
+	int			degInt;
+	double		degDou;
+	double		min;
+	globalPos	localPos;
+	bool			validPos;
+	
+	validPos = false;													// Ain't valid yet.
+	if (cmdParser.numParams()==2) {
+		degDou = atof(cmdParser.getNextParam());
+		localPos.setLon(degDou);
+		localPos.setLonQuad(cmdParser.getNextParam());
+		validPos = localPos.valid();
+	} else if (cmdParser.numParams()==3) {
+		degInt = atoi(cmdParser.getNextParam());
+		min =  atoi(cmdParser.getNextParam());
+		localPos.setLonValue(degInt,min);
+		localPos.setLonQuad(cmdParser.getNextParam());
+		validPos = localPos.valid();
+	}
+	if (validPos) {
+		destMark.copyLon(&localPos);
+	} else {
+		Serial.println("We're looking for, longitude value & quadrant, (E/W kinda' thing).");
+		Serial.println("Or, longitude degree value, minute value and then quadrant.");
+		Serial.println("I can't make what you typed match any of these.");
+	}
+}
+
+
+void navigation::doGetBearing(void) {
+
+	float	bearing;
+	
+	if (destMark.valid()) {
+		if (fixData.qualVal!=fixInvalid) {
+			bearing = fixData.latLon.trueBearingTo(&destMark);
+			Serial.print(bearing,1);
+			Serial.println(" Degrees true.");
+		} else {
+			Serial.println("We don't have a valid position fix.");
+		}
+	} else {
+		Serial.println("We don't have a marker to aim at.");
+	}
+}
+
+
+void navigation::doGetDist(void) {
+
+	float	dist;
+	
+	if (destMark.valid()) {
+		if (fixData.qualVal!=fixInvalid) {
+			dist = fixData.latLon.distanceTo(&destMark);
+			Serial.print(dist,1);
+			Serial.println(" Nautical miles.");
+		} else {
+			Serial.println("We don't have a valid position fix.");
+		}
+	} else {
+		Serial.println("We don't have a marker to aim at.");
+	}
 }
 
 

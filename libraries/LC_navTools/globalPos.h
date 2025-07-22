@@ -34,11 +34,16 @@ class globalPos {
 				bool		valid(void);
 				
 				void		copyPos(globalPos* aLatLon);
+				void		copyLat(globalPos* aLatLon);
+				void		copyLon(globalPos* aLatLon);
 				
 				void		setLatValue(const char* inLatStr);
 				void		setLatQuad(const char* inQuad);
 				void		setLonValue(const char* inLonStr);
 				void		setLonQuad(const char* inQuad);
+				
+				void		setLat(double inLat);
+				void		setLon(double inLon);
 				
 				void		setPosValues(const char* latStr,const char* lonStr);
 				void		setQuads(const char*  inLatQuad,const char*  inLonQuad);
