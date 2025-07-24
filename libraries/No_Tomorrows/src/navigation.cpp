@@ -4,13 +4,17 @@
 // position.
 
 #include <navigation.h>
+#include <navDisp.h>
+#include <displayObj.h>
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
 #define NAV_DEFAULT_ADDR	46					// This initial value will be set using the serial monitor.
 #define NAV_DEVICE_CLASS	DEV_CLASS_NAV
 #define NAV_DEVICE_FUNCT	DEV_FUNC_GNSS
 
-timeObj     timer(5000);
+timeObj     timer(2000);
+navDisp		ourNavDisp;
+
 
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT)
@@ -25,6 +29,9 @@ void navigation::setup(void) {
 	NMEA2kBase::setup();
 	ourGPS.begin();
 	Serial1.begin(9600);
+	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
+	screen->begin();
+	ourNavDisp.setup();
 }
 
 
@@ -32,7 +39,8 @@ void navigation::loop(void) {
 	
 	NMEA2kBase::loop();						// Let our ancestors do their thing.
 	if (timer.ding()) {
-      fixData.showData();
+      ourNavDisp.showPos(&(fixData.latLon));
+      //fixData.showData();
       timer.start();
    }
 }
