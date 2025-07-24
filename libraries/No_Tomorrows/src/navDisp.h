@@ -39,6 +39,7 @@ class navDisp : public idler {
 				
 				label*	latLabel;
 				label*	lonLabel;
+				label*	timeLabel;
 };
 
 
