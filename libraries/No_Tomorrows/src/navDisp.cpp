@@ -11,13 +11,14 @@ void navDisp::setup(void) {
 
 	
 	screen->fillScreen(&black);
-	latLabel = new label(60,40,200,16);
+	latLabel = new label(20,40,300,32);
 	latLabel->setColors(&white,&black);
+	latLabel->setTextSize(1);
 	viewList.addObj(latLabel);
-	lonLabel = new label(60,60,200,16);
+	lonLabel = new label(20,80,300,32);
 	lonLabel->setColors(&white,&black);
+	lonLabel->setTextSize(1);
 	viewList.addObj(lonLabel);
-	
 }
 
 void navDisp::showPos(globalPos* fix) {
