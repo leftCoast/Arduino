@@ -1,104 +1,170 @@
-#include "numStream.h"
-#include "resizeBuff.h"
+#include <numStream.h>
+#include <resizeBuff.h>
+#include <timeObj.h>
 
-/*
-numStreamOut::numStreamOut(int numParams) {  mNumParams = numParams; }
-
-
-numStreamOut::~numStreamOut(void) {  }
-
-
-void numStreamOut::writeStream(void) {
-
-   for(int i=0;i<mNumParams;i++) {
-      if (i==0) {
-         outPort.print(SYNK_CHAR);
-      }
-      writeVar(i);
-      if (i<mNumParams-1) {
-         outPort.print(DELEM_CHAR);
-      }
-   }
-   outPort.print(END_CHR);
-}
-
-
-void numStreamOut::writeVar(int index) {  } 
-*/
-
-
-// **************************************  //
-
-
-numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes) {
+numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes)
+	: extSerial(inStream) {
    
-   mStream			= inStream;
-   mNumTokenBytes	= 0;
-   mTokenBuff		= NULL;
-   if (resizeBuff(tokenBuffBytes,&mTokenBuff)) {
-      mTokenBuff[0] = '\0';
-      mNumTokenBytes = tokenBuffBytes;
+   tokenBytes	= 0;
+   tokenBuff	= NULL;
+	if (resizeBuff(tokenBuffBytes,&tokenBuff)) {
+		tokenBuff[0] = '\0';
+      tokenBytes = tokenBuffBytes;
    }
    reset();
 }
 
 
-numStreamIn::~numStreamIn(void) { resizeBuff(0,&mTokenBuff); }
-
-
-void numStreamIn::copyStream(numStreamIn* inNumStream) {
-
-	mStream			= inNumStream->mStream;
-   mNumTokenBytes	= 0;
-   if (resizeBuff(inNumStream->mNumTokenBytes,&mTokenBuff)) {
-      mTokenBuff[0]	= '\0';
-      mNumTokenBytes = inNumStream->mNumTokenBytes;
-   }
-   mSynk			= inNumStream->mSynk;
-   mIndex		= inNumStream->mIndex;
-}
+numStreamIn::~numStreamIn(void) { resizeBuff(0,&tokenBuff); }
 
 
 void numStreamIn::reset(void) {
 	 
-	mSynk			= false;
-   mIndex		= 0;
+	synk			= false;
+   tokenIndex 	= 0;
+   paramIndex	= 0;
+   ourState 	= lookForSynk;
 }
 
 
-void numStreamIn::readStream(void) {
+// Default is no we can't. Override to handle different data sets.
+bool numStreamIn::canHandle(const char* inType) { return false; }
 
-   char  aChar;
-   int   i;
 
-   if (!mTokenBuff) return;                  // If we don't have a token buffer, we can't do this.
-   if (mStream->available()) {               // Ok, If we have any bytes to read..
-      aChar = mStream->read();					// Read one.
-		// Serial.print(aChar);						// (DEBUG) Write it out.
-      if (!mSynk) {                          // If we're not in synk..
-         if (aChar==SYNK_CHAR) {             // If this char is the syk char..
-            mSynk = true;                    // We are now in synk.
-            mIndex = 0;                      // Just to make sure, we reset the index to zero.
-         }                                   // Basically we'll exit now.
-      } else {                               // Else, we are in synk..
-         if (aChar == DELEM_CHAR) {          // If the char is a delemiter..
-            readVar(mIndex++,false);        	// We send index out for buffer decoded. (bump up index)
-            mTokenBuff[0] = '\0';            // Reset the token buffer.
-         } else if (aChar == END_CHR) {      // If it is the end char..
-            readVar(mIndex,true);            // We send index out for buffer decoded. (Don't bump up index)        
-            mTokenBuff[0] = '\0';            // Reset the token buffer
-            mSynk = false;                   // String of data is complete, de-synk.
-         } else {                            // Else, its just a char..
-            i = 0;                           // Starting at zero.
-            while(mTokenBuff[i] != '\0') {   // We find the end of the token buffer string.
-               i++;                          // Bumping along..
-            }
-            mTokenBuff[i] = aChar;           // Stomp in the char here.
-            mTokenBuff[i+1] = '\0';          // Stomp in an end of string in this next char.
-         }
-      }
-   }
+// Override to handle different data sets.
+bool numStreamIn::addValue(char* param,int paramIndex,bool isLast) { return false; }
+
+
+// If it's nothing special..
+bool numStreamIn::dataChar(char inChar) {
+
+	if (inChar=='\0') return false;
+	if (inChar==SYNK_CHAR) return false;
+	if (inChar==DELEM_CHAR) return false;
+	if (inChar==END_CHAR) return false;
+	return true;
 }
 
 
-void numStreamIn::readVar(int index,bool lastField) {  }
+// Spin though the data looking for the synk char.
+exitStates numStreamIn::findSynkChar(void) {
+	
+	timeObj	timoutTimer(MAX_MS);
+	char		aChar;
+	
+	while(!timoutTimer.ding()) {					// Looping for a time..
+		if (available()) {							// If there are bytes to be had..
+			aChar = read();							// We grab one..
+			if (aChar==SYNK_CHAR) {					// It its the synk char..
+				return(completed);					// Return that we found it!
+			} else {										// Else, we ran out of data..
+				return(noData);						// Return we ran out of data.
+			}												// 
+		}													//
+	}														//
+	return erroredOut;								// Timed out? Just toss an error and reset.
+}
+
+
+// We're (think) we are sitting at the start of a data string. Grab it!
+exitStates numStreamIn::readToken(void) {
+
+	timeObj	timoutTimer(MAX_MS);
+	char		aChar;
+	
+	while(!timoutTimer.ding()) {						// Looping for a time..
+		if (available()) {								// If there are bytes to be had..
+			aChar = read();								// We grab one..
+			if (dataChar(aChar)) {						// If it's a data char?
+				if (tokenIndex<tokenBytes-2) {		// If we have enough room for it.
+					tokenBuff[tokenIndex] = aChar;	// Stuff in the char.
+					tokenIndex++;							// Bump up the char index.
+					tokenBuff[tokenIndex] = '\0';		// Keep a running end-of-string thing going.
+				} else {										// Else we ran out of room!
+					return erroredOut;					// We error out for a reset.
+				}												//
+			} else if (aChar==DELEM_CHAR) {			// Got the delimiter char.
+				return completed;							// We return that got a complete parameter.
+			} else if (aChar==END_CHAR) {				// We got the end of set char.
+				return finalValue;						// Return success. But last value.
+			} else {											// Anything else?
+				return erroredOut;						// Just toss an error and reset.
+			}													//
+		} else {												// Else we have no data to read.
+			return noData;									// No problem, be back later.
+		}														//
+	}															//
+	return erroredOut;									// Shouldn't be here. Just toss an error and reset.
+}
+			
+
+
+// This is what we do to earn our living. Sip on a stream and parcel out tokens.
+void numStreamIn::idle(void) {
+   
+   extSerial::idle();											// First we let the old folks go. Respect and all.
+   if (!tokenBuff) return;										// If we don't have a token buffer, we can't do this.
+   switch(ourState) {											// What are we up to?
+   	case lookForSynk	:										// We're looking for the synk char.
+   		switch(findSynkChar()) {							// Why did we stop looking for a synk char?
+   			case noData 		:	break;					// No problem, we'll come back later.		
+   			case completed		:								// We had success. And there's more to come.
+   				synk = true;									// We are now in synk!
+            	paramIndex = 0;								// Just to make sure, we reset the paramIndex to zero.
+            	tokenBuff[0] = '\0';							// Clear out the tolken buffer.
+            	tokenIndex = 0;								//	Set where next char goes in the token string.
+            	ourState = readingType;						// Next task is to read out the type of data we are.
+            break;												//
+   			case finalValue	:	break;					// Found terminator. Keep going
+   			case erroredOut	:	break;					// Can we actually have an error here? Keep running.
+         }															//
+   	break;														//
+   	case readingType	:										// We are reading out the initial data type text.
+   		switch(readToken()) {								// We'll read a token from the stream..
+   			case noData 		:	break;					// No data? Again, no problem. We'll swing back later.
+   			case completed		:								// Success with more to follow.
+   				if (canHandle(tokenBuff)) {				// If we can handle this type of data..
+						paramIndex++;								// Bump up the paramIndex.
+						tokenBuff[0] = '\0';						// Clear out the tolken buffer.
+						tokenIndex = 0;							//	Set where next char goes in the token string.
+						ourState = readingParam;				// We slide into reading params.
+					}													//
+            break;												//
+            case finalValue	:								// Well here is a conundrum. Good read but no data.
+            case erroredOut	:								// We'll toss it into the error pot.
+   				reset();											// reset to start over again.
+   			break;												//
+         }															//
+      break;														//
+      case readingParam	:										// We are busy reading out a param..
+   		switch(readToken()) {								// Why'd we exit?
+   			case noData 		:	break;					// Ran out of data, it happens.
+   			case completed		:										// Got a parameter!
+   				if (addValue(tokenBuff,paramIndex,false)) {	// If we can add this data value... (There's more!)
+						paramIndex++;										// Bump up the paramIndex.
+						tokenBuff[0] = '\0';								// Clear out the tolken buffer.
+						tokenIndex = 0;									//	Set where next char goes in the token string.
+					} else {													// Else something went horribly wrong..
+						reset();												// We reset and look for the next one.
+					}															//
+            break;														//
+   			case finalValue	:										// Got a value AND it's the last of this set.
+   				addValue(tokenBuff,paramIndex,true);			// Here's a data value for you! (The last!)
+					reset();													// No matter if it failed or not, we're looking for synk again.
+            break;														//
+   			case erroredOut	:										// Had an error..
+   				reset();													// Again, reset for the next set.
+   			break;														//
+         }																	//
+   	break;																//
+   }																			//
+}
+
+   		
+   
+   
+   
+   
+   
+   
+   

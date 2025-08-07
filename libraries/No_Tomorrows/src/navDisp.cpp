@@ -36,10 +36,10 @@ void navDisp::showPos(globalPos* fix) {
 	char	numStr[20];
 	
 	strcpy(outStr,"GMT ");
-	sprintf(numStr,"%d",fixData.hours);
+	sprintf(numStr,"%d",ourGPS->hours);
 	strcat(outStr,numStr);
 	strcat(outStr,":");
-	sprintf(numStr,"%d",fixData.min);
+	sprintf(numStr,"%d",ourGPS->min);
 	strcat(outStr,numStr);
 	//strcat(outStr,":");
 	//sprintf(numStr,"%d",round(fixData.sec));

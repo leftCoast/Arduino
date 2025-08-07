@@ -45,7 +45,7 @@ class navigation : public	NMEA2kBase {
 				void	doGetBearing(void);
 				void	doGetDist(void);
 				
-				GPSReader	ourGPS;
+				//GPSReader	ourGPS;
 				globalPos	destMark;
 };
 

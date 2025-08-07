@@ -29,7 +29,7 @@ bool addGPSHandlers(netObj* inNetObj) {
 }
 
 
-// Handy to have, currently don't have a god spot to store this. Hence we'll leave it
+// Handy to have, currently don't have a good spot to store this. Hence we'll leave it
 // here.
 double degToRad(double inDeg) {
 
@@ -58,8 +58,8 @@ void PGN0x1F801Handler::newMsg(void) {
      outMsg.setPGN(0x1F801);
      outMsg.setPriority(2);
      outMsg.setSourceAddr(ourNetObj->getAddr());
-     outMsg.setLongInData(0,fixData.latLon.getLatAsInt32());
-     outMsg.setLongInData(4,fixData.latLon.getLonAsInt32());
+     outMsg.setLongInData(0,ourGPS->latLon.getLatAsInt32());
+     outMsg.setLongInData(4,ourGPS->latLon.getLonAsInt32());
       /*
      Serial.print(fixData.latLon.getLatQuadStr());Serial.print(" ");Serial.print(fixData.latLon.getLatDeg());Serial.print("º ");
      Serial.print(fixData.latLon.getLatMin(),3);Serial.println("'");
@@ -100,10 +100,10 @@ void PGN0x1F802Handler::newMsg(void) {
       outMsg.setSourceAddr(ourNetObj->getAddr());               // Our address as source.
       outMsg.setDataByte(0,sid);                                // serial ID. Basically a group ID for position data packets.
       outMsg.setDataByte(1,0);                                  // We're talking true course here.
-      COGDbl = degToRad(trackMadeGood.trueCourse);              // We want true course, as a double.
+      COGDbl = degToRad(ourGPS->trueCourse);              // We want true course, as a double.
       COGRad = round(COGDbl*1000);                              // The integer version is that * 1000.
       outMsg.setIntInData(2,COGRad);                            // And in it goes.
-      SOGDbl = trackMadeGood.groundSpeedKilosPH * 0.277778;     // We have Kilometers per hour. We want meters per sec.
+      SOGDbl = ourGPS->groundSpeedKilos * 0.277778;     // We have Kilometers per hour. We want meters per sec.
       SOGMpS = SOGDbl * 100;                                    // Multiply that by 100 gives our decimal value.
       outMsg.setIntInData(4,SOGMpS);                            // pop it in.
       outMsg.setUIntInData(6,0xFFFF);                           // Last two buytes are unused. Set to FF.
@@ -147,29 +147,29 @@ void PGN0x1F805Handler::newMsg(void) {
    outMsg.setPriority(3);                                      // Priority.
    outMsg.setSourceAddr(ourNetObj->getAddr());                 // Our address as source.
    outMsg.setDataByte(0,sid);                                  // serial ID. Basically a group ID for position data packets.
-   year = minTransData.year;                                   // Today's date comes from trasit data.
-   month = minTransData.month;                                 // month
-   day = minTransData.day;                                     // day
+   year = ourGPS->year;                                   // Today's date comes from trasit data.
+   month = ourGPS->month;                                 // month
+   day = ourGPS->day;                                     // day
    mins = round(stamp.timestamp(year,month,day,0,0,0)/60.0);   // Here's the UNIX Epoch thing..
    hours = round(mins/60.0);                                   // Boild down to hours.
    days  = round(hours/24.0);                                  // Further reduced to days, what they want.
    outMsg.setUIntInData(1,days);                               // Stuff in the data.
-   secs = minTransData.sec;                                    // Now they want seconds since midnight.
-   secs = secs + minTransData.min * 60;                        // Add in the minutes as seconds.
-   secs = secs + minTransData.hours * 60 * 60;                 // And the hours as seconds.
+   secs = ourGPS->sec;                                    // Now they want seconds since midnight.
+   secs = secs + ourGPS->min * 60;                        // Add in the minutes as seconds.
+   secs = secs + ourGPS->hours * 60 * 60;                 // And the hours as seconds.
    outMsg.setULongInData(3,secs);                              // Whatever! The docs are ambiguous on this point.
-   ourInt64 = fixData.latLon.getLatAsInt64();                  // Grab the giant lat value.
+   ourInt64 = ourGPS->latLon.getLatAsInt64();                  // Grab the giant lat value.
    outMsg.setDLongInData(7,ourInt64);                          // Stuff it in.
-   ourInt64 = fixData.latLon.getLonAsInt64();                  // Grab the giant lon value.
+   ourInt64 = ourGPS->latLon.getLonAsInt64();                  // Grab the giant lon value.
    outMsg.setDLongInData(15,ourInt64);                         // Stuff it in.
-   ourInt64 = round(fixData.altitude * 1000000);               // Setup giant alt. data.
+   ourInt64 = round(ourGPS->altitude * 1000000);               // Setup giant alt. data.
    outMsg.setDLongInData(23,ourInt64);                         // Stuff it in.
-   aByte = (byte)fixData.qualVal;                              // This gives GPS type and quality all in one shot!
+   aByte = (byte)ourGPS->qualVal;                              // This gives GPS type and quality all in one shot!
    outMsg.setDataByte(31,aByte);                               // In it goes.
    outMsg.setDataByte(32,0);                                   // We got no checking I can see. And the rest is reserved.
-   outMsg.setDataByte(33,activeSatellites.numSatellites);      // Stuff in the number of sattelites we found.
-   outMsg.setIntInData(34,round(activeSatellites.HDOP*100));   // We have HDOP.
-   outMsg.setIntInData(36,round(activeSatellites.PDOP*100));   // We have PDOP
-   outMsg.setLongInData(38,round(fixData.GeoidalHeight*100));  // Got this too..
+   outMsg.setDataByte(33,ourGPS->numSatellites);      // Stuff in the number of sattelites we found.
+   outMsg.setIntInData(34,round(ourGPS->HDOP*100));   // We have HDOP.
+   outMsg.setIntInData(36,round(ourGPS->PDOP*100));   // We have PDOP
+   outMsg.setLongInData(38,round(ourGPS->GeoidalHeight*100));  // Got this too..
    outMsg.setDataByte(42,0);                                   // We don't seem to have any station ID's to give out.
 }

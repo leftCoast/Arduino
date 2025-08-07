@@ -6,6 +6,7 @@
 #include <navigation.h>
 #include <navDisp.h>
 #include <displayObj.h>
+#include <strTools.h>
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
 #define NAV_DEFAULT_ADDR	46					// This initial value will be set using the serial monitor.
@@ -27,7 +28,8 @@ navigation::~navigation(void) {  }
 void navigation::setup(void) {
 	
 	NMEA2kBase::setup();
-	ourGPS.begin();
+	ourGPS = new GPSReader;
+	ourGPS->begin();
 	Serial1.begin(9600);
 	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
 	screen->begin();
@@ -39,7 +41,7 @@ void navigation::loop(void) {
 	
 	NMEA2kBase::loop();						// Let our ancestors do their thing.
 	if (timer.ding()) {
-      ourNavDisp.showPos(&(fixData.latLon));
+      ourNavDisp.showPos(&(ourGPS->latLon));
       //fixData.showData();
       timer.start();
    }
@@ -103,10 +105,10 @@ void navigation::doGetPos(void) {
 	char* outStr = NULL;					
 	
 	Serial.print("Latitude          : ");				// Send to first bit..
-	heapStr(&outStr,fixData.latLon.showLatStr());	// Save off a local copy of the string.
+	heapStr(&outStr,ourGPS->latLon.showLatStr());	// Save off a local copy of the string.
 	Serial.println(outStr);									// Send out the local copy, while..
 	Serial.print("Longitude         : ");				// Send out the second label.
-	heapStr(&outStr,fixData.latLon.showLonStr());	// Save off a copy of the second string.
+	heapStr(&outStr,ourGPS->latLon.showLonStr());	// Save off a copy of the second string.
 	Serial.println(outStr);									// Send out the local copy.
 	freeStr(&outStr);											// Release the local string memory.
 }
@@ -116,14 +118,14 @@ void navigation::doGetCOG(void) {
 	
 	float	COG;
 	
-	COG =  trackMadeGood.trueCourse;
+	COG =  ourGPS->trueCourse;
 	Serial.print("COG True          : ");
 	Serial.print(COG,1);
 	Serial.println(" Deg.");
 	Serial.print("Mag. deviation    : ");
-	Serial.print(minTransData.magVar,3);
+	Serial.print(ourGPS->magVar,3);
 	Serial.print(" ");
-	if (minTransData.vEastWest==east) {
+	if (ourGPS->vEastWest=='E') {
 		Serial.println(" East");
 	} else {
 		Serial.println(" West");
@@ -137,62 +139,62 @@ void navigation::doGetCOG(void) {
 void navigation::doGetData(void) {
 
 	Serial.print("Date              : ");
-   Serial.print(minTransData.month);
+   Serial.print(ourGPS->month);
    Serial.print("/");
-	Serial.print(minTransData.day);
+	Serial.print(ourGPS->day);
 	Serial.print("/");
-	Serial.println(minTransData.year);
+	Serial.println(ourGPS->year);
 	
 	Serial.print("Time              : ");
-	Serial.print(fixData.hours);
+	Serial.print(ourGPS->hours);
 	Serial.print(":");
-	Serial.print(fixData.min);
+	Serial.print(ourGPS->min);
 	Serial.print(":");
-	Serial.print(fixData.sec,0);
+	Serial.print(ourGPS->sec,0);
 	Serial.println(" Zulu.");
 	
 	doGetPos();
 	doGetCOG();
 	
 	Serial.print("Speed over ground : ");
-	Serial.print(minTransData.groundSpeed,1);
+	Serial.print(ourGPS->groudSpeedKnots,1);
 	Serial.println(" kn.");
 	
 	Serial.print("Fix quality       : ");
-	switch(fixData.qualVal) {
+	switch(ourGPS->qualVal) {
 		case fixInvalid	: Serial.println("Fix invalid.");					break;
 		case fixByGPS		: Serial.println("Fix by GPS.");						break; 
 		case fixByDGPS		: Serial.println("Fix by differentail GPS.");	break;  
 	}
 	
 	Serial.print("Number satellites : ");
-	Serial.println(fixData.numSatellites);
+	Serial.println(ourGPS->numSatellites);
 	
 	Serial.print("Altitude          : ");
-	Serial.println(fixData.altitude,2);
+	Serial.println(ourGPS->altitude,2);
 	Serial.print("Geoid height      : ");
-   Serial.println(fixData.GeoidalHeight);
+   Serial.println(ourGPS->GeoidalHeight);
    Serial.print("Age of data       : ");
-   Serial.println(fixData.ageOfDGPSData);
+   Serial.println(ourGPS->ageOfDGPSData);
    Serial.print("GPS Station ID    : ");
-   Serial.println(fixData.DGPSStationID);		
+   Serial.println(ourGPS->DGPSStationID);		
 				
 	Serial.print("GPS mode          : ");
-	switch(activeSatellites.operationMode) {
+	switch(ourGPS->operationMode) {
 		case manual	: Serial.println("Manual mode.");
 		case automatic	: Serial.println("Automatic mode.");
 	}
 	
    Serial.print("Fix type          : ");
-	switch(activeSatellites.fixType) {
+	switch(ourGPS->fixType) {
 		case noFix	: Serial.println("No fix available.");	break;
 		case twoD	: Serial.println("2D fix only.");		break;
 		case threeD	: Serial.println("3D Fix.");				break;
 	}
 	Serial.print("Satellite IDs     :\t");
 	for(int i=0;i<11;i++) {
-		if (activeSatellites.SVID[i]) {
-			Serial.print(activeSatellites.SVID[i]);
+		if (ourGPS->SVID[i]) {
+			Serial.print(ourGPS->SVID[i]);
 		} else {
 			Serial.print("..");
 		}
@@ -200,18 +202,18 @@ void navigation::doGetData(void) {
 	}
 	Serial.println();
 	
-	Serial.print("PDOP              :");Serial.println(activeSatellites.PDOP,1);
-	Serial.print("HDOP              :");Serial.println(activeSatellites.HDOP,1);
-	Serial.print("VDOP              :");Serial.println(activeSatellites.VDOP,1);
+	Serial.print("PDOP              :");Serial.println(ourGPS->PDOP,1);
+	Serial.print("HDOP              :");Serial.println(ourGPS->HDOP,1);
+	Serial.print("VDOP              :");Serial.println(ourGPS->VDOP,1);
 	
 	int		numItems;
 	satData*	dataNode;
 	
-	numItems = SatellitesInView.satDataList.getCount();
+	numItems = ourGPS->satDataList.getCount();
 	Serial.println("-------------------------------");
 	Serial.print("Satelites in view : ");Serial.println(numItems);
 	for (int i=0;i<numItems;i++) {
-		dataNode = (satData*)SatellitesInView.satDataList.getByIndex(i);
+		dataNode = (satData*)ourGPS->satDataList.getByIndex(i);
 		if (dataNode) {
 			Serial.print("Satellite ID      : ");Serial.println(dataNode->PRNNum);
 			Serial.print("Elevation         : ");Serial.println(dataNode->elevation);
@@ -294,8 +296,8 @@ void navigation::doGetBearing(void) {
 	float	bearing;
 	
 	if (destMark.valid()) {
-		if (fixData.qualVal!=fixInvalid) {
-			bearing = fixData.latLon.trueBearingTo(&destMark);
+		if (ourGPS->qualVal!=fixInvalid) {
+			bearing = ourGPS->latLon.trueBearingTo(&destMark);
 			Serial.print(bearing,1);
 			Serial.println(" Degrees true.");
 		} else {
@@ -312,8 +314,8 @@ void navigation::doGetDist(void) {
 	float	dist;
 	
 	if (destMark.valid()) {
-		if (fixData.qualVal!=fixInvalid) {
-			dist = fixData.latLon.distanceTo(&destMark);
+		if (ourGPS->qualVal!=fixInvalid) {
+			dist = ourGPS->latLon.distanceTo(&destMark);
 			Serial.print(dist,1);
 			Serial.println(" Nautical miles.");
 		} else {
