@@ -209,15 +209,15 @@ void navigation::doGetData(void) {
 	int		numItems;
 	satData*	dataNode;
 	
-	numItems = ourGPS->satDataList.getCount();
+	numItems = ourGPS->satInViewList.getCount();
 	Serial.println("-------------------------------");
 	Serial.print("Satelites in view : ");Serial.println(numItems);
 	for (int i=0;i<numItems;i++) {
-		dataNode = (satData*)ourGPS->satDataList.getByIndex(i);
+		dataNode = (satData*)ourGPS->satInViewList.getByIndex(i);
 		if (dataNode) {
 			Serial.print("Satellite ID      : ");Serial.println(dataNode->PRNNum);
 			Serial.print("Elevation         : ");Serial.println(dataNode->elevation);
-			Serial.print("Azmuth            : ");Serial.println(dataNode->azmuth);
+			Serial.print("Azimuth            : ");Serial.println(dataNode->azimuth);
 			Serial.print("Sig / Noise       : ");Serial.println(dataNode->SigToNoise);
 			if (i==numItems-1) {
 				Serial.println("-------------------------------");

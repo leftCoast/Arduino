@@ -8,7 +8,7 @@
 #define DELEM_CHAR   	','		// Marker between data items.
 #define END_CHAR      	'\n'		// Noting the end of a data set.
 #define DEF_TOKEN_BYTES	20			// Size of the token buffer.
-#define MAX_MS				100		// How long we allow a search before calling it.
+#define MAX_MS				200		// How long we allow a search before calling it.
 
 
 /* One day..
@@ -33,7 +33,9 @@ enum exitStates {
 	completed,
 	finalValue,
 	erroredOut
-};			
+};
+
+
 class numStreamIn :	public extSerial {
 
    public:
@@ -46,6 +48,7 @@ class numStreamIn :	public extSerial {
             numStreamIn(Stream* inStream=DEF_IN_PORT,int tokenBuffBytes=DEF_TOKEN_BYTES);
    virtual  ~numStreamIn(void);
 
+	virtual	void			begin(void);
 	virtual	void  		reset(void);
 	virtual	bool			canHandle(const char* inType);
 	virtual  bool  		addValue(char* param,int paramIndex,bool isLast);	

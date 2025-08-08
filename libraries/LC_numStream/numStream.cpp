@@ -18,6 +18,14 @@ numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes)
 numStreamIn::~numStreamIn(void) { resizeBuff(0,&tokenBuff); }
 
 
+void numStreamIn::begin(void) {
+
+	if (tokenBuff) {	// If we were able to allocate our token buffer..
+		hookup();		// We can fire up the machine.
+	}						//
+}
+
+
 void numStreamIn::reset(void) {
 	 
 	synk			= false;
@@ -56,12 +64,15 @@ exitStates numStreamIn::findSynkChar(void) {
 		if (available()) {							// If there are bytes to be had..
 			aChar = read();							// We grab one..
 			if (aChar==SYNK_CHAR) {					// It its the synk char..
+				//Serial.println("Got SYNK");
 				return(completed);					// Return that we found it!
-			} else {										// Else, we ran out of data..
-				return(noData);						// Return we ran out of data.
 			}												// 
-		}													//
+		} else {											// Else, we ran out of data..
+			//Serial.println("findSynkChar - noData");
+			return(noData);							// Return we ran out of data.	
+		}												//
 	}														//
+	Serial.println("**** findSynkChar() timed out. ****");
 	return erroredOut;								// Timed out? Just toss an error and reset.
 }
 
@@ -84,16 +95,32 @@ exitStates numStreamIn::readToken(void) {
 					return erroredOut;					// We error out for a reset.
 				}												//
 			} else if (aChar==DELEM_CHAR) {			// Got the delimiter char.
+				//Serial.print("**** readToken()[");
+				//Serial.print(tokenBuff);
+				//Serial.println("]****");
 				return completed;							// We return that got a complete parameter.
 			} else if (aChar==END_CHAR) {				// We got the end of set char.
+				//Serial.print("**** readToken()[");
+				//Serial.print(tokenBuff);
+				//Serial.println("] FINAL ****");
 				return finalValue;						// Return success. But last value.
 			} else {											// Anything else?
+				Serial.print("**** messed up token() **** Got : ");
+				if (aChar=='\0') {
+					Serial.println("NULL Char");
+				} else if (aChar==SYNK_CHAR) {
+					Serial.println("SYNK_CHAR");
+				} else {
+					Serial.println(aChar);
+				}
 				return erroredOut;						// Just toss an error and reset.
 			}													//
 		} else {												// Else we have no data to read.
+			//Serial.println("readToken - noData");
 			return noData;									// No problem, be back later.
 		}														//
 	}															//
+	Serial.println("**** readToken() timed out. ****");
 	return erroredOut;									// Shouldn't be here. Just toss an error and reset.
 }
 			
@@ -111,7 +138,7 @@ void numStreamIn::idle(void) {
    			case completed		:								// We had success. And there's more to come.
    				synk = true;									// We are now in synk!
             	paramIndex = 0;								// Just to make sure, we reset the paramIndex to zero.
-            	tokenBuff[0] = '\0';							// Clear out the tolken buffer.
+            	tokenBuff[0] = '\0';							// Clear out the token buffer.
             	tokenIndex = 0;								//	Set where next char goes in the token string.
             	ourState = readingType;						// Next task is to read out the type of data we are.
             break;												//
@@ -128,6 +155,8 @@ void numStreamIn::idle(void) {
 						tokenBuff[0] = '\0';						// Clear out the tolken buffer.
 						tokenIndex = 0;							//	Set where next char goes in the token string.
 						ourState = readingParam;				// We slide into reading params.
+					} else {											// else we can't handle that type?
+						reset();										// reset for synk again.
 					}													//
             break;												//
             case finalValue	:								// Well here is a conundrum. Good read but no data.
