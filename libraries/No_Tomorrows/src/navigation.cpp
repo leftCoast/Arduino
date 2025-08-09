@@ -31,6 +31,7 @@ void navigation::setup(void) {
 	ourGPS = new GPSReader;
 	ourGPS->begin();
 	Serial1.begin(9600);
+	delay(250);
 	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
 	screen->begin();
 	ourNavDisp.setup();
@@ -75,8 +76,8 @@ void 	navigation::addCommands(void) {
 	cmdParser.addCmd(getPos,"pos");
 	cmdParser.addCmd(getCOG,"cog");
 	cmdParser.addCmd(getGPSData,"gpsdata");
-	cmdParser.addCmd(setMarkLat,"setLat");
-	cmdParser.addCmd(setMarklon,"setLon");
+	cmdParser.addCmd(setMarkLat,"setlat");
+	cmdParser.addCmd(setMarklon,"setlon");
 	cmdParser.addCmd(getCourse,"bearing");
 	cmdParser.addCmd(getDist,"dist");
 }
@@ -87,8 +88,8 @@ void navigation::printHelp(void) {
 	NMEA2kBase::printHelp();
 	Serial.println("                                   Navigation commands.");
 	Serial.println("           ----------------------------------------------------------------------");
-	Serial.println("Pos Shows   us our current GPS position.");
-	Serial.println("COG Shows   us our current course over ground.");
+	Serial.println("Pos         Shows us our current GPS position.");
+	Serial.println("COG         Shows us our current course over ground.");
 	Serial.println("GPSData     Shows us data about our GPS fix.");
 	Serial.println("setLat      Set latitude of mark.");
 	Serial.println("setLon      Set longitude of mark.");
@@ -252,6 +253,8 @@ void navigation::doSetLat(void) {
 	}
 	if (validPos) {
 		destMark.copyLat(&localPos);
+		Serial.print("Latitude was set to : ");
+		Serial.println(destMark.showLatStr());
 	} else {
 		Serial.println("We're looking for either, latitude value & quadrant, (N/S kinda' thing).");
 		Serial.println("Or, latitude degree value, minute value and then quadrant.");
@@ -283,6 +286,8 @@ void navigation::doSetLon(void) {
 	}
 	if (validPos) {
 		destMark.copyLon(&localPos);
+		Serial.print("Longitude was set to : ");
+		Serial.println(destMark.showLonStr());
 	} else {
 		Serial.println("We're looking for, longitude value & quadrant, (E/W kinda' thing).");
 		Serial.println("Or, longitude degree value, minute value and then quadrant.");

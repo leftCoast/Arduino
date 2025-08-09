@@ -3,12 +3,14 @@
 
 #include <extSerial.h>
 
+//#define SHOW_DATA
+
 #define DEF_IN_PORT		&Serial1	// Change to fit your hardware.
 #define SYNK_CHAR    	'$'		// Marker of the start of a data set.
 #define DELEM_CHAR   	','		// Marker between data items.
 #define END_CHAR      	'\n'		// Noting the end of a data set.
 #define DEF_TOKEN_BYTES	20			// Size of the token buffer.
-#define MAX_MS				200		// How long we allow a search before calling it.
+#define MAX_MS				50		// How long we allow a search before calling it.
 
 
 /* One day..

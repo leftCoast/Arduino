@@ -118,15 +118,15 @@ void globalPos::setLatQuad(const char* inQuad) {
 	quadStr = NULL;																// ALWAYS initialize at NULL for this.
 	if (heapStr(&quadStr,inQuad)) {											// If we can alocate a copy.
 		upCase(quadStr);															// Make it all uppercase.
-		if (!strcmp("N",inQuad)||!strcmp("NORTH",inQuad)) {			// We'll take either of these.
+		if (!strcmp("N",quadStr)||!strcmp("NORTH",quadStr)) {			// We'll take either of these.
 			latQuad = north;														// Call it north.
-		}else if (!strcmp("S",inQuad)||!strcmp("SOUTH",inQuad)) {	// Else we'll take either of these.
+		}else if (!strcmp("S",quadStr)||!strcmp("SOUTH",quadStr)) {	// Else we'll take either of these.
 			latQuad = south;														// Calling them south.
 		}																				//
 		freeStr(&quadStr);														// Recycle the local string.
 	}																					//
 }
-	
+	 
 
 // In the format DDD MM.MMM	Does not look for Quadrent. See below.		 
 void globalPos::setLonValue(const char* inLonStr) {
@@ -162,9 +162,9 @@ void globalPos::setLonQuad(const char* inQuad) {
 	quadStr = NULL;															// ALWAYS initialize at NULL for this.
 	if (heapStr(&quadStr,inQuad)) {										// If we can alocate a copy.
 		upCase(quadStr);														// Make it all uppercase.
-		if (!strcmp("E",inQuad)||!strcmp("EAST",inQuad)) {			// We'll take either of these.
+		if (!strcmp("E",quadStr)||!strcmp("EAST",quadStr)) {		// We'll take either of these.
 			lonQuad = east;													// Call it north.
-		}else if (!strcmp("W",inQuad)||!strcmp("WEST",inQuad)) {	// Else we'll take either of these.
+		} else if (!strcmp("W",quadStr)||!strcmp("WEST",quadStr)) {	// Else we'll take either of these.
 			lonQuad = west;													// Calling them south.
 		}																			//
 		freeStr(&quadStr);													// Recycle the local string.

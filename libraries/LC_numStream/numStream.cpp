@@ -64,15 +64,19 @@ exitStates numStreamIn::findSynkChar(void) {
 		if (available()) {							// If there are bytes to be had..
 			aChar = read();							// We grab one..
 			if (aChar==SYNK_CHAR) {					// It its the synk char..
-				//Serial.println("Got SYNK");
+#ifdef SHOW_DATA	
+				Serial.println("Got SYNK");
+#endif
 				return(completed);					// Return that we found it!
 			}												// 
 		} else {											// Else, we ran out of data..
 			//Serial.println("findSynkChar - noData");
 			return(noData);							// Return we ran out of data.	
 		}												//
-	}														//
+	}
+#ifdef SHOW_DATA														//
 	Serial.println("**** findSynkChar() timed out. ****");
+#endif
 	return erroredOut;								// Timed out? Just toss an error and reset.
 }
 
@@ -95,16 +99,21 @@ exitStates numStreamIn::readToken(void) {
 					return erroredOut;					// We error out for a reset.
 				}												//
 			} else if (aChar==DELEM_CHAR) {			// Got the delimiter char.
-				//Serial.print("**** readToken()[");
-				//Serial.print(tokenBuff);
-				//Serial.println("]****");
+#ifdef SHOW_DATA
+				Serial.print("**** readToken()[");
+				Serial.print(tokenBuff);
+				Serial.println("]****");
+#endif
 				return completed;							// We return that got a complete parameter.
 			} else if (aChar==END_CHAR) {				// We got the end of set char.
-				//Serial.print("**** readToken()[");
-				//Serial.print(tokenBuff);
-				//Serial.println("] FINAL ****");
+#ifdef SHOW_DATA
+				Serial.print("**** readToken()[");
+				Serial.print(tokenBuff);
+				Serial.println("] FINAL ****");
+#endif
 				return finalValue;						// Return success. But last value.
 			} else {											// Anything else?
+#ifdef SHOW_DATA
 				Serial.print("**** messed up token() **** Got : ");
 				if (aChar=='\0') {
 					Serial.println("NULL Char");
@@ -113,14 +122,17 @@ exitStates numStreamIn::readToken(void) {
 				} else {
 					Serial.println(aChar);
 				}
-				return erroredOut;						// Just toss an error and reset.
+#endif
+				return erroredOut;						// Just toss an error and reset.			
 			}													//
 		} else {												// Else we have no data to read.
 			//Serial.println("readToken - noData");
 			return noData;									// No problem, be back later.
 		}														//
-	}															//
+	}
+#ifdef SHOW_DATA															//
 	Serial.println("**** readToken() timed out. ****");
+#endif
 	return erroredOut;									// Shouldn't be here. Just toss an error and reset.
 }
 			
