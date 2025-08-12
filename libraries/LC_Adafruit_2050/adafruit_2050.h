@@ -40,6 +40,7 @@ class adafruit_2050 : public displayObj {
 	virtual	void	setTextColor(colorObj* tColor,colorObj* bColor);
 	virtual	void	setTextSize(byte inSize);
 	virtual	void	setTextWrap(boolean wrap);
+	virtual	rect	getTextRect(const char* inText);
 	virtual	void	setFont(const GFXfont* font);
 	virtual	void	setCursor(int inX,int inY);
 	virtual	void	drawText(const char* inText);

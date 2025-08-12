@@ -53,6 +53,45 @@ bool numStreamIn::dataChar(char inChar) {
 	return true;
 }
 
+char msgBuf[200];
+int	msgIndex;
+
+void checkTheSum(void) {
+
+	int	i;
+	byte	chkSumVal;
+	char	sumStr[4];
+	byte	sumStrVal;
+	
+	if (strchr( msgBuf,'*')) {
+		i=0;
+		chkSumVal = 0;
+		while(msgBuf[i]!='*') {
+			chkSumVal ^= msgBuf[i];					//xor the incoming char
+			i++;
+		}
+		i++;	
+		sumStr[0] = msgBuf[i++];
+		sumStr[1] = msgBuf[i];
+		sumStr[2] = '\0';
+		sumStrVal = (byte)strtol(sumStr, NULL, 16);
+		if (chkSumVal!=sumStrVal) {
+			Serial.println("***** Checksum failed! *****");
+			Serial.print("The message [");
+			Serial.print(msgBuf);
+			Serial.println("]");
+			Serial.print("Msg length : ");
+			Serial.println(strlen(msgBuf));
+			Serial.println(sumStrVal);
+			Serial.println(chkSumVal,HEX);
+		} else {
+			//Serial.println("It's ok");
+		}
+	}	else {
+		Serial.println("***** Missing Checksum! *****");
+	}	
+}
+
 
 // Spin though the data looking for the synk char.
 exitStates numStreamIn::findSynkChar(void) {
@@ -64,13 +103,14 @@ exitStates numStreamIn::findSynkChar(void) {
 		if (available()) {							// If there are bytes to be had..
 			aChar = read();							// We grab one..
 			if (aChar==SYNK_CHAR) {					// It its the synk char..
+			msgIndex = 0;
+			msgBuf[msgIndex] = '\0';
 #ifdef SHOW_DATA	
 				Serial.println("Got SYNK");
 #endif
 				return(completed);					// Return that we found it!
 			}												// 
 		} else {											// Else, we ran out of data..
-			//Serial.println("findSynkChar - noData");
 			return(noData);							// Return we ran out of data.	
 		}												//
 	}
@@ -79,6 +119,7 @@ exitStates numStreamIn::findSynkChar(void) {
 #endif
 	return erroredOut;								// Timed out? Just toss an error and reset.
 }
+
 
 
 // We're (think) we are sitting at the start of a data string. Grab it!
@@ -90,6 +131,11 @@ exitStates numStreamIn::readToken(void) {
 	while(!timoutTimer.ding()) {						// Looping for a time..
 		if (available()) {								// If there are bytes to be had..
 			aChar = read();								// We grab one..
+			if (aChar=='\n') {
+				checkTheSum();
+			}
+			msgBuf[msgIndex++] = aChar;
+			msgBuf[msgIndex] = '\0';
 			if (dataChar(aChar)) {						// If it's a data char?
 				if (tokenIndex<tokenBytes-2) {		// If we have enough room for it.
 					tokenBuff[tokenIndex] = aChar;	// Stuff in the char.

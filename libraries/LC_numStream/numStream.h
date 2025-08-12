@@ -29,7 +29,9 @@ class numStreamOut {
 
 // **************************************  //
 
-
+extern char msgBuf[];
+extern int	msgIndex;
+ 
 enum exitStates {
 	noData,
 	completed,

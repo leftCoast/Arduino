@@ -15,11 +15,13 @@
 
 timeObj     timer(2000);
 navDisp		ourNavDisp;
-
+navigation  ourNavApp;
 
 navigation::navigation(void) 
-	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT)
-	{  }
+	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
+	
+	bearingVal = NAN; 
+}
 	
 	
 navigation::~navigation(void) {  }
@@ -43,9 +45,23 @@ void navigation::loop(void) {
 	NMEA2kBase::loop();						// Let our ancestors do their thing.
 	if (timer.ding()) {
       ourNavDisp.showPos(&(ourGPS->latLon));
-      //fixData.showData();
+      bearing();
       timer.start();
    }
+}
+
+
+float navigation::bearing(void) {
+	
+	bearingVal = NAN;
+	if (destMark.valid()) {
+		if (ourGPS->qualVal!=fixInvalid) {
+			bearingVal = (float)ourGPS->latLon.trueBearingTo(&destMark);
+			if (bearingVal<0) bearingVal = NAN;
+			else if (bearingVal>360)  bearingVal = NAN;
+		}
+	}
+	return bearingVal;
 }
 
 
@@ -239,23 +255,23 @@ void navigation::doSetLat(void) {
 	bool			validPos;
 	
 	validPos = false;													// Ain't valid yet.
-	if (cmdParser.numParams()==2) {
-		degDou = atof(cmdParser.getNextParam());
-		localPos.setLat(degDou);
-		localPos.setLatQuad(cmdParser.getNextParam());
-		validPos = localPos.valid();
-	} else if (cmdParser.numParams()==3) {
-		degInt = atoi(cmdParser.getNextParam());
-		min =  atoi(cmdParser.getNextParam());
-		localPos.setLatValue(degInt,min);
-		localPos.setLatQuad(cmdParser.getNextParam());
-		validPos = localPos.valid();
-	}
-	if (validPos) {
-		destMark.copyLat(&localPos);
-		Serial.print("Latitude was set to : ");
-		Serial.println(destMark.showLatStr());
-	} else {
+	if (cmdParser.numParams()==2) {								// If we're looking at 2 params..
+		degDou = atof(cmdParser.getNextParam());				// Grab the first param and decode it as a double.
+		localPos.setLat(degDou);									// Drop it into our local position object.
+		localPos.setLatQuad(cmdParser.getNextParam());		// Next param should be text version of quad. Drop it in as well.
+		validPos = localPos.valid();								// Check to see if this is a sane latitude value.
+	} else if (cmdParser.numParams()==3) {						// Else, if it has 3 parameters.. Different format here.
+		degInt = atoi(cmdParser.getNextParam());				// Grab first param and decode as an integer degree value.
+		min =  atof(cmdParser.getNextParam());					// Second param decoded as an double minute value.
+		localPos.setLatValue(degInt,min);						// Stuff these two, degree & minute values into our local position object.
+		localPos.setLatQuad(cmdParser.getNextParam());		// Third param should be text version of our quadrant.
+		validPos = localPos.valid();								// Sanity check the position.
+	}																		//
+	if (validPos) {													// If this passed the sanity text..
+		destMark.copyLat(&localPos);								// We basically tell the user everything was ok.
+		Serial.print("Latitude was set to : ");				// Bla bla bla.
+		Serial.println(destMark.showLatStr());					// Bla.
+	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for either, latitude value & quadrant, (N/S kinda' thing).");
 		Serial.println("Or, latitude degree value, minute value and then quadrant.");
 		Serial.println("I can't make what you typed match any of these.");
@@ -272,23 +288,23 @@ void navigation::doSetLon(void) {
 	bool			validPos;
 	
 	validPos = false;													// Ain't valid yet.
-	if (cmdParser.numParams()==2) {
-		degDou = atof(cmdParser.getNextParam());
-		localPos.setLon(degDou);
-		localPos.setLonQuad(cmdParser.getNextParam());
-		validPos = localPos.valid();
-	} else if (cmdParser.numParams()==3) {
-		degInt = atoi(cmdParser.getNextParam());
-		min =  atoi(cmdParser.getNextParam());
-		localPos.setLonValue(degInt,min);
-		localPos.setLonQuad(cmdParser.getNextParam());
-		validPos = localPos.valid();
-	}
-	if (validPos) {
-		destMark.copyLon(&localPos);
-		Serial.print("Longitude was set to : ");
-		Serial.println(destMark.showLonStr());
-	} else {
+	if (cmdParser.numParams()==2) {								// If we're looking at 2 params..
+		degDou = atof(cmdParser.getNextParam());				// Grab the first param and decode it as a double.
+		localPos.setLon(degDou);									// Drop it into our local position object.
+		localPos.setLonQuad(cmdParser.getNextParam());		// Next param should be text version of quad. Drop it in as well.
+		validPos = localPos.valid();								// Check to see if this is a sane latitude value.
+	} else if (cmdParser.numParams()==3) {						// Else, if it has 3 parameters.. Different format here.
+		degInt = atoi(cmdParser.getNextParam());				// Grab first param and decode as an integer degree value.
+		min =  atof(cmdParser.getNextParam());					// Second param decoded as an double minute value.
+		localPos.setLonValue(degInt,min);						// Stuff these two, degree & minute values into our local position object.
+		localPos.setLonQuad(cmdParser.getNextParam());		// Third param should be text version of our quadrant.
+		validPos = localPos.valid();								// Sanity check the position.
+	}																		//
+	if (validPos) {													// If this passed the sanity text..
+		destMark.copyLon(&localPos);								// We basically tell the user everything was ok.
+		Serial.print("Longitude was set to : ");				// Bla bla bla.
+		Serial.println(destMark.showLonStr());					// Bla.
+	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for, longitude value & quadrant, (E/W kinda' thing).");
 		Serial.println("Or, longitude degree value, minute value and then quadrant.");
 		Serial.println("I can't make what you typed match any of these.");
@@ -298,12 +314,12 @@ void navigation::doSetLon(void) {
 
 void navigation::doGetBearing(void) {
 
-	float	bearing;
+	float	bearDegT;
 	
 	if (destMark.valid()) {
 		if (ourGPS->qualVal!=fixInvalid) {
-			bearing = ourGPS->latLon.trueBearingTo(&destMark);
-			Serial.print(bearing,1);
+			bearDegT = bearing();
+			Serial.print(bearDegT,0);
 			Serial.println(" Degrees true.");
 		} else {
 			Serial.println("We don't have a valid position fix.");

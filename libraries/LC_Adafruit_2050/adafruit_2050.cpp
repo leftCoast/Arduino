@@ -110,6 +110,24 @@ void adafruit_2050::setTextColor(colorObj* inColor)																{ theTFT->set
 void adafruit_2050::setTextColor(colorObj* tColor,colorObj* bColor) 										{ theTFT->setTextColor(tColor->getColor16(),bColor->getColor16()); }
 void adafruit_2050::setTextSize(byte inSize)																		{ theTFT->setTextSize(inSize); }
 void adafruit_2050::setTextWrap(boolean wrap)																		{ theTFT->setTextWrap(wrap); }
+
+rect	adafruit_2050::getTextRect(const char* inText) {
+
+	rect bounds(0,0,0,0);
+	int16_t	bX;
+	int16_t	bY;
+	uint16_t	bW;
+	uint16_t	bH;
+	
+	bX = 0;
+	bY = 0;
+	bW = 0;
+	bH = 0;
+	theTFT->getTextBounds(inText,getCursorX(),getCursorY(),&bX,&bY,&bW,&bH);
+	bounds.setRect(bX,bY,bW,bH);
+	return bounds;
+}
+
 void adafruit_2050::setFont(const GFXfont* font)																	{ theTFT->setFont(font); }
 //void adafruit_2050::setFont(const GFXfont* font)																	{ theTFT->setFontAdafruit(); }
 void adafruit_2050::setCursor(int x,int y)																			{ theTFT->setCursor(gX(x),gY(y)); }

@@ -31,23 +31,25 @@ class navigation : public	NMEA2kBase {
 				navigation(void);
 	virtual	~navigation(void);
 	
-	virtual	void	setup(void);
-	virtual	void	loop(void);
-	virtual	void	checkAddedComs(int comVal);
-	virtual	bool	addNMEAHandlers(void);			// Without handlers, who are we anyway?
-	virtual	void	addCommands(void);
-	virtual	void	printHelp(void);					// Print list of commands.			
-				void	doGetPos(void);
-				void	doGetCOG(void);
-				void	doGetData(void);
-				void	doSetLat(void);
-				void	doSetLon(void);
-				void	doGetBearing(void);
-				void	doGetDist(void);
+	virtual	void		setup(void);
+	virtual	void		loop(void);
+				float		bearing(void);
+	virtual	void		checkAddedComs(int comVal);
+	virtual	bool		addNMEAHandlers(void);			// Without handlers, who are we anyway?
+	virtual	void		addCommands(void);
+	virtual	void		printHelp(void);					// Print list of commands.		
+				void		doGetPos(void);
+				void		doGetCOG(void);
+				void		doGetData(void);
+				void		doSetLat(void);
+				void		doSetLon(void);
+				void		doGetBearing(void);
+				void		doGetDist(void);
 				
-				//GPSReader	ourGPS;
 				globalPos	destMark;
+				float			bearingVal;
 };
 
-			
+
+extern navigation  ourNavApp;			
 #endif
