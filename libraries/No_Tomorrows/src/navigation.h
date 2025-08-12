@@ -34,6 +34,7 @@ class navigation : public	NMEA2kBase {
 	virtual	void		setup(void);
 	virtual	void		loop(void);
 				float		bearing(void);
+				float		distance(void);
 	virtual	void		checkAddedComs(int comVal);
 	virtual	bool		addNMEAHandlers(void);			// Without handlers, who are we anyway?
 	virtual	void		addCommands(void);
@@ -48,6 +49,7 @@ class navigation : public	NMEA2kBase {
 				
 				globalPos	destMark;
 				float			bearingVal;
+				float			distanceVal;
 };
 
 

@@ -352,6 +352,9 @@ double globalPos::trueBearingTo(globalPos* inDest) {
 	Y = cos(latA) * sin(latB) - sin(latA) * cos(latB) * cos(deltaLon);	// Calculate the Y thing.
 	bearing = atan2(X,Y);																// Do the atan2() thing.
 	bearing = rad2deg(bearing);														// Convert it back to degrees. (For sailors)
+	if (bearing<0) {																		// Negative values?
+		bearing = 360 + bearing;														// Would this be the fix?
+	}																							// Seems so.
 	return bearing;																		// Hand it off.
 }
 

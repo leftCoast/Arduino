@@ -21,6 +21,7 @@ navigation::navigation(void)
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
 	
 	bearingVal = NAN; 
+	distanceVal = NAN;
 }
 	
 	
@@ -46,6 +47,7 @@ void navigation::loop(void) {
 	if (timer.ding()) {
       ourNavDisp.showPos(&(ourGPS->latLon));
       bearing();
+      distance();
       timer.start();
    }
 }
@@ -62,6 +64,19 @@ float navigation::bearing(void) {
 		}
 	}
 	return bearingVal;
+}
+
+
+float navigation::distance(void) {
+	
+	distanceVal = NAN;
+	if (destMark.valid()) {
+		if (ourGPS->qualVal!=fixInvalid) {
+			distanceVal = (float)ourGPS->latLon.distanceTo(&destMark);
+			if (distanceVal<0) bearingVal = NAN;
+		}
+	}
+	return distanceVal;
 }
 
 

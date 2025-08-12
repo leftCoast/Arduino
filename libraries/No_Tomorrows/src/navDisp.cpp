@@ -11,7 +11,8 @@
 #define SPEEDBOX_RECT			40,100,240,64
 #define DEPTHBOX_RECT			40,175,240,64
 #define BEARINGBOX_RECT			40,250,240,64
-#define BOROMETERBOX_RECT		40,325,240,64
+#define DISTANCEBOX_RECT		40,325,240,64
+#define BOROMETERBOX_RECT		40,400,240,64
 
 #define AFF_SANS_BOLD_24_OB	&FreeSansBoldOblique24pt7b,45,-12
 #define AFF_SANS_BOLD_12_OB	&FreeSansBoldOblique12pt7b,24,-6
@@ -58,6 +59,12 @@ void navDisp::setup(void) {
 	if (bearingGauge) {
 		bearingGauge->setup((float*)&(ourNavApp.bearingVal));
 		viewList.addObj(bearingGauge);
+	}
+	
+	distanceGauge = new valueBox(DISTANCEBOX_RECT,"N miles",1);
+	if (distanceGauge) {
+		distanceGauge->setup((float*)&(ourNavApp.distanceVal));
+		viewList.addObj(distanceGauge);
 	}
 	
 	barometerGauge = new valueBox(BOROMETERBOX_RECT,"In Hg",0);
@@ -115,7 +122,7 @@ void erasibleText::drawSelf(void) {
 
 	rect	aRect(this);
 	
-	aRect.width = aRect.width+6;
+	aRect.width = aRect.width+8;
 	screen->fillRect(&aRect,&backColor);
 	//screen->drawRect(&aRect,&green);
 	fontLabel::drawSelf();

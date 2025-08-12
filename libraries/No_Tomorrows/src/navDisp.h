@@ -82,6 +82,7 @@ class navDisp {
 				valueBox*	knotGauge;
 				valueBox*	depthGauge;
 				valueBox*	bearingGauge;
+				valueBox*	distanceGauge;
 				valueBox*	barometerGauge;
 				timeObj*		updateTimer;
 };
