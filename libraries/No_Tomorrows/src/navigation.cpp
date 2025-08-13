@@ -7,6 +7,8 @@
 #include <navDisp.h>
 #include <displayObj.h>
 #include <strTools.h>
+#include <wlessHdlers.h>
+
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
 #define NAV_DEFAULT_ADDR	46					// This initial value will be set using the serial monitor.
@@ -20,8 +22,10 @@ navigation  ourNavApp;
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
 	
-	bearingVal = NAN; 
-	distanceVal = NAN;
+	NMEA2KBarometer = new barometerHdlr(llamaBrd);
+	bearingVal	= NAN; 
+	distanceVal	= NAN;
+	airPSI		= NAN;
 }
 	
 	
@@ -48,6 +52,7 @@ void navigation::loop(void) {
       ourNavDisp.showPos(&(ourGPS->latLon));
       bearing();
       distance();
+      airPSI = NMEA2KBarometer->inHg;
       timer.start();
    }
 }
@@ -98,7 +103,18 @@ void navigation::checkAddedComs(int comVal) {
 
 // Allocate and add the handlers for our different NMEA messages we are going to handle or
 // create.
-bool navigation::addNMEAHandlers(void) { return addGPSHandlers(llamaBrd); }
+bool navigation::addNMEAHandlers(void) {
+
+	
+	
+	if (addGPSHandlers(llamaBrd)) {
+		if (NMEA2KBarometer) {
+			llamaBrd->addMsgHandler(NMEA2KBarometer);
+			return true;
+		}
+	}
+	return false;
+}
 
 
 void 	navigation::addCommands(void) {

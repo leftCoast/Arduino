@@ -5,6 +5,12 @@
 #include <llama2000.h>
 #include <GPSReader.h>
 
+// These handlers, once added to your netObj, automatically grab GPS data from your global
+// GPS pointer ourGPS. This is set into the various navigation PGN groups and sent out.
+// Add 'em, and forget 'em.
+//
+// And you add them by calling...
+//
 // Call this with your netObj and it'll add in all the GPS broadcasting handlers.
 extern bool addGPSHandlers(netObj* inNetObj);
 

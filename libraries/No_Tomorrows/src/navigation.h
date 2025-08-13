@@ -4,7 +4,7 @@
 #include <NMEA2kBase.h>
 #include <GPSReader.h>
 #include <GPS_NMEA2K.h>
-
+#include <wlessHdlers.h>
 
 //
 // Forms for entering lat/lon
@@ -47,9 +47,11 @@ class navigation : public	NMEA2kBase {
 				void		doGetBearing(void);
 				void		doGetDist(void);
 				
-				globalPos	destMark;
-				float			bearingVal;
-				float			distanceVal;
+				globalPos		destMark;
+				float				bearingVal;
+				float				distanceVal;
+				barometerHdlr*	NMEA2KBarometer;
+				float				airPSI;
 };
 
 

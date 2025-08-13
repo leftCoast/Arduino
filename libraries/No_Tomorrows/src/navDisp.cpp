@@ -69,7 +69,7 @@ void navDisp::setup(void) {
 	
 	barometerGauge = new valueBox(BOROMETERBOX_RECT,"In Hg",0);
 	if (barometerGauge) {
-		barometerGauge->setup();
+		barometerGauge->setup(&(ourNavApp.airPSI));
 		viewList.addObj(barometerGauge);
 	}
 }
