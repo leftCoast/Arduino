@@ -55,5 +55,6 @@ class navigation : public	NMEA2kBase {
 };
 
 
-extern navigation  ourNavApp;			
+extern navigation  ourNavApp;
+			
 #endif

@@ -2,20 +2,35 @@
 #include <resizeBuff.h>
 #include <timeObj.h>
 
-numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes)
-	: extSerial(inStream) {
+
+
+uint8_t		rx_buffer[255-64];	// On teensy you can add memory to the incoming serial message buffer.
+
+
+numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes) {
    
+   ourPort		= inStream;
    tokenBytes	= 0;
    tokenBuff	= NULL;
 	if (resizeBuff(tokenBuffBytes,&tokenBuff)) {
 		tokenBuff[0] = '\0';
       tokenBytes = tokenBuffBytes;
    }
+   msgBufBytes = 0;
+   msgBuf		= NULL;
+   if (resizeBuff(MAX_MSG_BYTES,&msgBuf)) {
+   	msgBufBytes = MAX_MSG_BYTES;
+   }
+   Serial1.addMemoryForRead(rx_buffer, sizeof(rx_buffer));
    reset();
 }
 
 
-numStreamIn::~numStreamIn(void) { resizeBuff(0,&tokenBuff); }
+numStreamIn::~numStreamIn(void) {
+
+	resizeBuff(0,&tokenBuff);
+	
+}
 
 
 void numStreamIn::begin(void) {
@@ -53,9 +68,7 @@ bool numStreamIn::dataChar(char inChar) {
 	return true;
 }
 
-char msgBuf[200];
-int	msgIndex;
-
+/*
 void checkTheSum(void) {
 
 	int	i;
@@ -63,7 +76,7 @@ void checkTheSum(void) {
 	char	sumStr[4];
 	byte	sumStrVal;
 	
-	if (strchr( msgBuf,'*')) {
+	if (strchr(msgBuf,'*')) {
 		i=0;
 		chkSumVal = 0;
 		while(msgBuf[i]!='*') {
@@ -91,6 +104,32 @@ void checkTheSum(void) {
 		Serial.println("***** Missing Checksum! *****");
 	}	
 }
+*/
+
+
+bool numStreamIn::checkTheSum(void) {
+
+	int	i;
+	byte	chkSumVal;
+	char	sumStr[4];
+	byte	sumStrVal;
+	
+	if (strchr(msgBuf,'*')) {								// If we find an astrick..
+		i=0;														// We start at first byte.
+		chkSumVal = 0;											// Zero out our check sum.
+		while(msgBuf[i]!='*') {								// For every byte 'till the astrick.
+			chkSumVal ^= msgBuf[i];							// XOR the incoming char.
+			i++;													// bump index.
+		}															//
+		i++;														// bump index past astrick.
+		sumStr[0] = msgBuf[i++];							// Grab first char after.
+		sumStr[1] = msgBuf[i];								// Second char.
+		sumStr[2] = '\0';										// Set in the null char.
+		sumStrVal = (byte)strtol(sumStr, NULL, 16);	// Decode these two bytes as hex text.
+		return chkSumVal==sumStrVal;						// Return if they match.
+	}																//
+	return false;												// No astrick!	
+}
 
 
 // Spin though the data looking for the synk char.
@@ -99,43 +138,38 @@ exitStates numStreamIn::findSynkChar(void) {
 	timeObj	timoutTimer(MAX_MS);
 	char		aChar;
 	
-	while(!timoutTimer.ding()) {					// Looping for a time..
-		if (available()) {							// If there are bytes to be had..
-			aChar = read();							// We grab one..
-			if (aChar==SYNK_CHAR) {					// It its the synk char..
-			msgIndex = 0;
-			msgBuf[msgIndex] = '\0';
-#ifdef SHOW_DATA	
-				Serial.println("Got SYNK");
-#endif
-				return(completed);					// Return that we found it!
-			}												// 
-		} else {											// Else, we ran out of data..
-			return(noData);							// Return we ran out of data.	
+	while(!timoutTimer.ding()) {				// Looping for a time..
+		if (ourPort->available()) {			// If there are bytes to be had..
+			aChar = ourPort->read();			// We grab one..
+			if (aChar==SYNK_CHAR) {				// If it's the synk char..
+				msgIndex = 0;						// Setup to read a message.
+				msgBuf[0] = '\0';					// Used to compare checksums.
+				return(completed);				// Return that we found it!
+			}											// 
+		} else {										// Else, we ran out of data..
+			return(noData);						// Return we ran out of data.	
 		}												//
-	}
-#ifdef SHOW_DATA														//
-	Serial.println("**** findSynkChar() timed out. ****");
-#endif
-	return erroredOut;								// Timed out? Just toss an error and reset.
+	}													//
+	return erroredOut;							// Timed out? Just toss an error and reset.
 }
 
 
-
-// We're (think) we are sitting at the start of a data string. Grab it!
+// We're (think) we are sitting at the start or middle of a data string. Grab a parameter!
 exitStates numStreamIn::readToken(void) {
 
 	timeObj	timoutTimer(MAX_MS);
 	char		aChar;
 	
 	while(!timoutTimer.ding()) {						// Looping for a time..
-		if (available()) {								// If there are bytes to be had..
-			aChar = read();								// We grab one..
-			if (aChar=='\n') {
-				checkTheSum();
-			}
-			msgBuf[msgIndex++] = aChar;
-			msgBuf[msgIndex] = '\0';
+		if (ourPort->available()) {					// If there are bytes to be had..
+			aChar = ourPort->read();					// We grab one..										
+			if (msgIndex<msgBufBytes-2) {				// If we have enough room..
+				msgBuf[msgIndex] = aChar;				// Add the char to the checksum buffer.
+				msgIndex++;									// Bump up the char index.
+				msgBuf[msgIndex] = '\0';				//	Add a null afer it.
+			} else {											// Else we ran out of room!
+				return erroredOut;						// So, error out for a reset.
+			}													//
 			if (dataChar(aChar)) {						// If it's a data char?
 				if (tokenIndex<tokenBytes-2) {		// If we have enough room for it.
 					tokenBuff[tokenIndex] = aChar;	// Stuff in the char.
@@ -145,41 +179,21 @@ exitStates numStreamIn::readToken(void) {
 					return erroredOut;					// We error out for a reset.
 				}												//
 			} else if (aChar==DELEM_CHAR) {			// Got the delimiter char.
-#ifdef SHOW_DATA
-				Serial.print("**** readToken()[");
-				Serial.print(tokenBuff);
-				Serial.println("]****");
-#endif
 				return completed;							// We return that got a complete parameter.
 			} else if (aChar==END_CHAR) {				// We got the end of set char.
-#ifdef SHOW_DATA
-				Serial.print("**** readToken()[");
-				Serial.print(tokenBuff);
-				Serial.println("] FINAL ****");
-#endif
-				return finalValue;						// Return success. But last value.
-			} else {											// Anything else?
-#ifdef SHOW_DATA
-				Serial.print("**** messed up token() **** Got : ");
-				if (aChar=='\0') {
-					Serial.println("NULL Char");
-				} else if (aChar==SYNK_CHAR) {
-					Serial.println("SYNK_CHAR");
-				} else {
-					Serial.println(aChar);
-				}
-#endif
+				if (checkTheSum()) {						// If the checksum matches.
+					return finalValue;					// Return success. But last value.
+				} else {										// else the checksum failed.
+					return erroredOut;					// Toss an error and reset.
+				}												
+			} else {											// Anything else? Who knows at this point?
 				return erroredOut;						// Just toss an error and reset.			
 			}													//
-		} else {												// Else we have no data to read.
-			//Serial.println("readToken - noData");
+		} else {												// Else, we have no data to read.
 			return noData;									// No problem, be back later.
 		}														//
-	}
-#ifdef SHOW_DATA															//
-	Serial.println("**** readToken() timed out. ****");
-#endif
-	return erroredOut;									// Shouldn't be here. Just toss an error and reset.
+	}															// 
+	return erroredOut;									// If we time out we end up here. Toss error and give up.
 }
 			
 
@@ -187,8 +201,6 @@ exitStates numStreamIn::readToken(void) {
 // This is what we do to earn our living. Sip on a stream and parcel out tokens.
 void numStreamIn::idle(void) {
    
-   extSerial::idle();											// First we let the old folks go. Respect and all.
-   if (!tokenBuff) return;										// If we don't have a token buffer, we can't do this.
    switch(ourState) {											// What are we up to?
    	case lookForSynk	:										// We're looking for the synk char.
    		switch(findSynkChar()) {							// Why did we stop looking for a synk char?

@@ -8,17 +8,27 @@
 #include <fonts/FreeSansBoldOblique12pt7b.h>
 
 
-#define SPEEDBOX_RECT			40,100,240,64
-#define DEPTHBOX_RECT			40,175,240,64
-#define BEARINGBOX_RECT			40,250,240,64
-#define DISTANCEBOX_RECT		40,325,240,64
-#define BOROMETERBOX_RECT		40,400,240,64
+#define SPEEDBOX_RECT			30,30,250,64
+#define DEPTHBOX_RECT			30,105,250,64
+#define BEARINGBOX_RECT			30,180,250,64
+#define DISTANCEBOX_RECT		30,255,250,64
+#define BOROMETERBOX_RECT		30,330,250,64
+
+#define LAT_X						55
+#define LAT_Y						420
+#define LAT_W						480
+#define LAT_H						36
+#define LON_X						LAT_X
+#define LON_Y						LAT_Y+30
+#define LON_W						LAT_W
+#define LON_H						LAT_H
+
 
 #define AFF_SANS_BOLD_24_OB	&FreeSansBoldOblique24pt7b,45,-12
 #define AFF_SANS_BOLD_12_OB	&FreeSansBoldOblique12pt7b,24,-6
 
 
-navDisp::navDisp (void) { updateTimer = new timeObj(5000); }
+navDisp::navDisp (void) { updateTimer = new timeObj(2000); }
 
 
 navDisp::~navDisp(void) { if (updateTimer) delete(updateTimer); }
@@ -28,46 +38,46 @@ void navDisp::setup(void) {
 
 	screen->fillScreen(&black);
 	
-	timeLabel = new label(125,20,200,32);
-	timeLabel->setColors(&white,&black);
-	timeLabel->setTextSize(1);
+	timeLabel = new label(100,0,200,32);
+	timeLabel->setColors(&yellow,&black);
+	timeLabel->setTextSize(2);
 	viewList.addObj(timeLabel);
 	
-	latLabel = new label(20,40,300,32);
-	latLabel->setColors(&white,&black);
-	latLabel->setTextSize(1);
+	latLabel = new label(LAT_X,LAT_Y,LAT_W,LAT_H);
+	latLabel->setColors(&yellow,&black);
+	latLabel->setTextSize(2);
 	viewList.addObj(latLabel);
 	
-	lonLabel = new label(20,80,300,32);
-	lonLabel->setColors(&white,&black);
-	lonLabel->setTextSize(1);
+	lonLabel = new label(LON_X,LON_Y,LON_W,LON_H);
+	lonLabel->setColors(&yellow,&black);
+	lonLabel->setTextSize(2);
 	viewList.addObj(lonLabel);
 	
-	knotGauge = new valueBox(SPEEDBOX_RECT,"Knots",1);
+	knotGauge = new valueBox(SPEEDBOX_RECT,"Kn",1);
 	if (knotGauge) {
 		knotGauge->setup();
 		viewList.addObj(knotGauge);
 	}
 	
-	depthGauge = new valueBox(DEPTHBOX_RECT,"Fathoms",1);
+	depthGauge = new valueBox(DEPTHBOX_RECT,"Fm",1);
 	if (depthGauge) {
 		depthGauge->setup();
 		viewList.addObj(depthGauge);
 	}
 	
-	bearingGauge = new valueBox(BEARINGBOX_RECT,"Deg. M",0);
+	bearingGauge = new valueBox(BEARINGBOX_RECT,"Deg m",0);
 	if (bearingGauge) {
 		bearingGauge->setup((float*)&(ourNavApp.bearingVal));
 		viewList.addObj(bearingGauge);
 	}
 	
-	distanceGauge = new valueBox(DISTANCEBOX_RECT,"N miles",1);
+	distanceGauge = new valueBox(DISTANCEBOX_RECT,"Nmi",1);
 	if (distanceGauge) {
 		distanceGauge->setup((float*)&(ourNavApp.distanceVal));
 		viewList.addObj(distanceGauge);
 	}
 	
-	barometerGauge = new valueBox(BOROMETERBOX_RECT,"In Hg",0);
+	barometerGauge = new valueBox(BOROMETERBOX_RECT,"InHg",2);
 	if (barometerGauge) {
 		barometerGauge->setup(&(ourNavApp.airPSI));
 		viewList.addObj(barometerGauge);
@@ -77,26 +87,29 @@ void navDisp::setup(void) {
 
 void navDisp::showPos(globalPos* fix) {
 
-	char	outStr[40];
-	char	numStr[20];
+	char		outStr[40];
+	double	value;
+	char		qStr[3];
 	
-	strcpy(outStr,"GMT ");
-	sprintf(numStr,"%d",ourGPS->hours);
-	strcat(outStr,numStr);
-	strcat(outStr,":");
-	sprintf(numStr,"%d",ourGPS->min);
-	strcat(outStr,numStr);
-	//strcat(outStr,":");
-	//sprintf(numStr,"%d",round(fixData.sec));
-	//strcat(outStr,numStr);
+	sprintf(outStr,"GMT %02d:%02d",ourGPS->hours,ourGPS->min);
 	timeLabel->setValue(outStr);
 	
-	strcpy(outStr,"Latitude  : ");
-	strcat(outStr,fix->showLatStr());
+	strcpy(qStr," N");
+	if (fix->getLatQuad()==south) {
+		strcpy(qStr," S");
+	}
+	value = fix->getLatAsDbl();
+	if (value<0) value = -value;
+	sprintf (outStr,"Lat : %*f%s",10,value,qStr);
 	latLabel->setValue(outStr);
 	
-	strcpy(outStr,"Longitude : ");
-	strcat(outStr,fix->showLonStr());
+	strcpy(qStr," W");
+	if (fix->getLonQuad()==east) {
+		strcpy(qStr," E");
+	}
+	value = fix->getLonAsDbl();
+	if (value<0) value = -value;
+	sprintf (outStr,"Lon : %*f%s",10,value,qStr);
 	lonLabel->setValue(outStr);
 }
 
@@ -124,7 +137,7 @@ void erasibleText::drawSelf(void) {
 	
 	aRect.width = aRect.width+8;
 	screen->fillRect(&aRect,&backColor);
-	//screen->drawRect(&aRect,&green);
+	//screen->drawRect(&aRect,&green);			// GREEN
 	fontLabel::drawSelf();
 }
 	
@@ -159,9 +172,9 @@ void valueBox::setup(float* inSource) {
 	valueLabel = new erasibleText();
 	if (valueLabel) {
 		valueLabel->setFont(AFF_SANS_BOLD_24_OB);
-		valueLabel->x = 15;
+		valueLabel->x = 5;
 		valueLabel->y = 10;
-		valueLabel->width = 100;
+		valueLabel->width = 120;
 		valueLabel->setColors(&yellow,&black);
 		valueLabel->setPrecision(prec);
 		valueLabel->setJustify(TEXT_RIGHT);
@@ -171,7 +184,7 @@ void valueBox::setup(float* inSource) {
 	unitsLabel = new fontLabel();
 	if (unitsLabel) {
 		unitsLabel->setFont(AFF_SANS_BOLD_12_OB);
-		unitsLabel->x = 140;
+		unitsLabel->x = 150;
 		unitsLabel->y = 24;
 		unitsLabel->width = 80;
 		unitsLabel->setColors(&yellow,&black);
@@ -182,7 +195,7 @@ void valueBox::setup(float* inSource) {
 }
 
 
-void valueBox::drawSelf(void) { }
+void valueBox::drawSelf(void) { /*screen->drawRect(this,&blue);*/ }
 
 
 void valueBox::setValue(float value) {

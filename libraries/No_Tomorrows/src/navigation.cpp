@@ -19,6 +19,8 @@ timeObj     timer(2000);
 navDisp		ourNavDisp;
 navigation  ourNavApp;
 
+
+
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
 	
@@ -35,6 +37,7 @@ navigation::~navigation(void) {  }
 void navigation::setup(void) {
 	
 	NMEA2kBase::setup();
+	
 	ourGPS = new GPSReader;
 	ourGPS->begin();
 	Serial1.begin(9600);
@@ -78,6 +81,8 @@ float navigation::distance(void) {
 	if (destMark.valid()) {
 		if (ourGPS->qualVal!=fixInvalid) {
 			distanceVal = (float)ourGPS->latLon.distanceTo(&destMark);
+			//Serial.print("Raw dist : ");
+			//Serial.println(distanceVal);
 			if (distanceVal<0) bearingVal = NAN;
 		}
 	}
@@ -105,8 +110,6 @@ void navigation::checkAddedComs(int comVal) {
 // create.
 bool navigation::addNMEAHandlers(void) {
 
-	
-	
 	if (addGPSHandlers(llamaBrd)) {
 		if (NMEA2KBarometer) {
 			llamaBrd->addMsgHandler(NMEA2KBarometer);

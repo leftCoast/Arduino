@@ -1,7 +1,9 @@
 #ifndef numStream_h
 #define numStream_h
 
-#include <extSerial.h>
+
+#include <idlers.h>
+
 
 //#define SHOW_DATA
 
@@ -10,8 +12,8 @@
 #define DELEM_CHAR   	','		// Marker between data items.
 #define END_CHAR      	'\n'		// Noting the end of a data set.
 #define DEF_TOKEN_BYTES	20			// Size of the token buffer.
-#define MAX_MS				50		// How long we allow a search before calling it.
-
+#define MAX_MS				50			// How long we allow a search before calling it.
+#define MAX_MSG_BYTES	200		// Max bytes for complete message. For checksum.
 
 /* One day..
 class numStreamOut {
@@ -29,8 +31,6 @@ class numStreamOut {
 
 // **************************************  //
 
-extern char msgBuf[];
-extern int	msgIndex;
  
 enum exitStates {
 	noData,
@@ -40,7 +40,7 @@ enum exitStates {
 };
 
 
-class numStreamIn :	public extSerial {
+class numStreamIn : public idler {
 
    public:
 				enum states {
@@ -57,16 +57,21 @@ class numStreamIn :	public extSerial {
 	virtual	bool			canHandle(const char* inType);
 	virtual  bool  		addValue(char* param,int paramIndex,bool isLast);	
 	virtual	bool			dataChar(char inChar);
+	virtual	bool			checkTheSum(void);
 	virtual	exitStates	findSynkChar(void);
 	virtual	exitStates	readToken(void);
    virtual  void  		idle(void);
 
+				Stream*	ourPort;
             bool		synk;
             states	ourState;
             char*		tokenBuff;
             int		tokenBytes;
             int		tokenIndex;
             int		paramIndex;
+            char* 	msgBuf;
+            int		msgBufBytes;
+				int		msgIndex;
 };
 
 

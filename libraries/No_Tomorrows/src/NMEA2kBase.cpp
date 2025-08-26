@@ -37,7 +37,8 @@ NMEA2kBase::~NMEA2kBase(void) {
 void NMEA2kBase::setup(void) {
 
 	Serial.begin(9600);
-	delay(4000);
+	Serial.println("Waiting for 5 sec. before booting up the screen.");
+	delay(5000);
 	llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
 	if (!llamaBrd) {
 		Serial.println("Can not allocate llama board.");
