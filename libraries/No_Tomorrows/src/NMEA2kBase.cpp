@@ -37,20 +37,21 @@ NMEA2kBase::~NMEA2kBase(void) {
 void NMEA2kBase::setup(void) {
 
 	Serial.begin(9600);
-	Serial.println("Waiting for 5 sec. before booting up the screen.");
-	delay(5000);
 	llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
 	if (!llamaBrd) {
 		Serial.println("Can not allocate llama board.");
+		Serial.println("Stopping process.");
 		while(1);
 	}
 	setupName();
 	if (!addNMEAHandlers()) {
 		Serial.println("Can not allocate NMEA2k Handlers.");
+		Serial.println("Stopping process.");
 		while(1);
 	}
 	if (!llamaBrd->begin(getInitialAddr(),arbitraryConfig,LLAMA_CS)) {
       Serial.println("Starting llama board failed!");
+      Serial.println("Stopping process.");
       while (1);
    }
    addCommands();

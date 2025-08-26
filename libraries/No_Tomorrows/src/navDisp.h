@@ -7,6 +7,8 @@
 #include <globalPos.h>
 #include <fontLabel.h>
 #include <label.h>
+#include <colorRect.h>
+
 
 #define SD_CS        4		// wht
 #define SD_Detect    5		// grn
@@ -66,6 +68,22 @@ class valueBox	: public drawGroup {
 
 
 
+class LED :	public colorRect {
+
+	public:
+				LED(rect* inRect,colorObj* inOnColor,colorObj* inOffColor);
+	virtual	~LED(void);
+	
+	virtual	void	setColors(colorObj* inOnColor,colorObj* inOffColor);
+	virtual	void	setState(bool onOff);
+	virtual	void	drawSelf(void);
+	
+				colorObj	offColor;
+				colorObj	onColor;
+				bool		ourState;
+};
+
+
 class navDisp {
 
 	public:
@@ -74,6 +92,8 @@ class navDisp {
 
 				void	setup(void);
 				void	showPos(globalPos* fix);
+				
+				LED*		fixLED;
 				
 				label*	latLabel;
 				label*	lonLabel;

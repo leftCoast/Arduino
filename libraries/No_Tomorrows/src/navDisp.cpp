@@ -7,6 +7,7 @@
 #include <fonts/FreeSansBoldOblique24pt7b.h>
 #include <fonts/FreeSansBoldOblique12pt7b.h>
 
+#define LED_RECT					300,5,10,10
 
 #define SPEEDBOX_RECT			30,30,250,64
 #define DEPTHBOX_RECT			30,105,250,64
@@ -36,7 +37,13 @@ navDisp::~navDisp(void) { if (updateTimer) delete(updateTimer); }
 
 void navDisp::setup(void) {
 
+	rect	LEDRect;
+	
 	screen->fillScreen(&black);
+	
+	LEDRect.setRect(LED_RECT);
+	fixLED = new LED(&LEDRect,&green,&red);
+	viewList.addObj(fixLED);
 	
 	timeLabel = new label(100,0,200,32);
 	timeLabel->setColors(&yellow,&black);
@@ -91,27 +98,84 @@ void navDisp::showPos(globalPos* fix) {
 	double	value;
 	char		qStr[3];
 	
-	sprintf(outStr,"GMT %02d:%02d",ourGPS->hours,ourGPS->min);
-	timeLabel->setValue(outStr);
-	
-	strcpy(qStr," N");
-	if (fix->getLatQuad()==south) {
-		strcpy(qStr," S");
+	if (ourGPS->valid) {
+		
+		fixLED->setState(true);
+		
+		sprintf(outStr,"GMT %02d:%02d",ourGPS->hours,ourGPS->min);
+		timeLabel->setValue(outStr);
+		
+		strcpy(qStr," N");
+		if (fix->getLatQuad()==south) {
+			strcpy(qStr," S");
+		}
+		value = fix->getLatAsDbl();
+		if (value<0) value = -value;
+		sprintf (outStr,"Lat : %*f%s",10,value,qStr);
+		latLabel->setValue(outStr);
+		
+		strcpy(qStr," W");
+		if (fix->getLonQuad()==east) {
+			strcpy(qStr," E");
+		}
+		value = fix->getLonAsDbl();
+		if (value<0) value = -value;
+		sprintf (outStr,"Lon : %*f%s",10,value,qStr);
+		lonLabel->setValue(outStr);
+	} else {
+		fixLED->setState(false);
+		sprintf(outStr,"GMT --:--");
+		timeLabel->setValue(outStr);
+		sprintf (outStr,"Lat : ---.--");
+		latLabel->setValue(outStr);
+		sprintf (outStr,"Lon : ---.--");
+		lonLabel->setValue(outStr);
 	}
-	value = fix->getLatAsDbl();
-	if (value<0) value = -value;
-	sprintf (outStr,"Lat : %*f%s",10,value,qStr);
-	latLabel->setValue(outStr);
-	
-	strcpy(qStr," W");
-	if (fix->getLonQuad()==east) {
-		strcpy(qStr," E");
-	}
-	value = fix->getLonAsDbl();
-	if (value<0) value = -value;
-	sprintf (outStr,"Lon : %*f%s",10,value,qStr);
-	lonLabel->setValue(outStr);
 }
+
+
+
+// *************     LED      *************
+
+
+LED::LED(rect* inRect,colorObj* inOnColor,colorObj* inOffColor)
+	: colorRect(inRect,inOnColor) {
+	
+	setColors(inOnColor,inOffColor);
+	setState(false);
+}
+	
+	
+LED::~LED(void) {  }
+	
+	
+void LED::setColors(colorObj* inOnColor,colorObj* inOffColor) {
+
+	onColor.setColor(inOnColor);
+	offColor.setColor(inOffColor);
+	needRefresh = true;
+}
+
+
+void LED::setState(bool onOff) {
+
+	if (onOff) {
+		setColor(&onColor);
+	} else {
+		setColor(&offColor);
+	}
+	ourState = onOff;
+}
+
+
+void LED::drawSelf(void) {
+
+	int	dia;
+	
+	dia = (width+height)/2;
+	screen->fillCircle(x,y,dia,(colorObj*)this);
+}
+
 
 
 // ************* erasibleText *************

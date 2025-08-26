@@ -68,44 +68,6 @@ bool numStreamIn::dataChar(char inChar) {
 	return true;
 }
 
-/*
-void checkTheSum(void) {
-
-	int	i;
-	byte	chkSumVal;
-	char	sumStr[4];
-	byte	sumStrVal;
-	
-	if (strchr(msgBuf,'*')) {
-		i=0;
-		chkSumVal = 0;
-		while(msgBuf[i]!='*') {
-			chkSumVal ^= msgBuf[i];					//xor the incoming char
-			i++;
-		}
-		i++;	
-		sumStr[0] = msgBuf[i++];
-		sumStr[1] = msgBuf[i];
-		sumStr[2] = '\0';
-		sumStrVal = (byte)strtol(sumStr, NULL, 16);
-		if (chkSumVal!=sumStrVal) {
-			Serial.println("***** Checksum failed! *****");
-			Serial.print("The message [");
-			Serial.print(msgBuf);
-			Serial.println("]");
-			Serial.print("Msg length : ");
-			Serial.println(strlen(msgBuf));
-			Serial.println(sumStrVal);
-			Serial.println(chkSumVal,HEX);
-		} else {
-			//Serial.println("It's ok");
-		}
-	}	else {
-		Serial.println("***** Missing Checksum! *****");
-	}	
-}
-*/
-
 
 bool numStreamIn::checkTheSum(void) {
 
@@ -149,7 +111,8 @@ exitStates numStreamIn::findSynkChar(void) {
 		} else {										// Else, we ran out of data..
 			return(noData);						// Return we ran out of data.	
 		}												//
-	}													//
+	}
+	errMsg(synkTimOut);
 	return erroredOut;							// Timed out? Just toss an error and reset.
 }
 
@@ -168,6 +131,7 @@ exitStates numStreamIn::readToken(void) {
 				msgIndex++;									// Bump up the char index.
 				msgBuf[msgIndex] = '\0';				//	Add a null afer it.
 			} else {											// Else we ran out of room!
+				errMsg(msgBufOverflow);					// Ran out of room.
 				return erroredOut;						// So, error out for a reset.
 			}													//
 			if (dataChar(aChar)) {						// If it's a data char?
@@ -176,6 +140,7 @@ exitStates numStreamIn::readToken(void) {
 					tokenIndex++;							// Bump up the char index.
 					tokenBuff[tokenIndex] = '\0';		// Keep a running end-of-string thing going.
 				} else {										// Else we ran out of room!
+					errMsg(tokenOverflow);				// Ran out of room.
 					return erroredOut;					// We error out for a reset.
 				}												//
 			} else if (aChar==DELEM_CHAR) {			// Got the delimiter char.
@@ -184,15 +149,18 @@ exitStates numStreamIn::readToken(void) {
 				if (checkTheSum()) {						// If the checksum matches.
 					return finalValue;					// Return success. But last value.
 				} else {										// else the checksum failed.
+					errMsg(badChecksum);					// Tell 'em checksum failed.
 					return erroredOut;					// Toss an error and reset.
 				}												
 			} else {											// Anything else? Who knows at this point?
+				errMsg(unknownErr);						// No idea what went wrong.
 				return erroredOut;						// Just toss an error and reset.			
 			}													//
 		} else {												// Else, we have no data to read.
 			return noData;									// No problem, be back later.
 		}														//
 	}															// 
+	errMsg(tokenTimOut);
 	return erroredOut;									// If we time out we end up here. Toss error and give up.
 }
 			
@@ -201,49 +169,51 @@ exitStates numStreamIn::readToken(void) {
 // This is what we do to earn our living. Sip on a stream and parcel out tokens.
 void numStreamIn::idle(void) {
    
-   switch(ourState) {											// What are we up to?
-   	case lookForSynk	:										// We're looking for the synk char.
-   		switch(findSynkChar()) {							// Why did we stop looking for a synk char?
-   			case noData 		:	break;					// No problem, we'll come back later.		
-   			case completed		:								// We had success. And there's more to come.
-   				synk = true;									// We are now in synk!
-            	paramIndex = 0;								// Just to make sure, we reset the paramIndex to zero.
-            	tokenBuff[0] = '\0';							// Clear out the token buffer.
-            	tokenIndex = 0;								//	Set where next char goes in the token string.
-            	ourState = readingType;						// Next task is to read out the type of data we are.
-            break;												//
-   			case finalValue	:	break;					// Found terminator. Keep going
-   			case erroredOut	:	break;					// Can we actually have an error here? Keep running.
-         }															//
-   	break;														//
-   	case readingType	:										// We are reading out the initial data type text.
-   		switch(readToken()) {								// We'll read a token from the stream..
-   			case noData 		:	break;					// No data? Again, no problem. We'll swing back later.
-   			case completed		:								// Success with more to follow.
-   				if (canHandle(tokenBuff)) {				// If we can handle this type of data..
-						paramIndex++;								// Bump up the paramIndex.
-						tokenBuff[0] = '\0';						// Clear out the tolken buffer.
-						tokenIndex = 0;							//	Set where next char goes in the token string.
-						ourState = readingParam;				// We slide into reading params.
-					} else {											// else we can't handle that type?
-						reset();										// reset for synk again.
-					}													//
-            break;												//
-            case finalValue	:								// Well here is a conundrum. Good read but no data.
-            case erroredOut	:								// We'll toss it into the error pot.
-   				reset();											// reset to start over again.
-   			break;												//
-         }															//
-      break;														//
-      case readingParam	:										// We are busy reading out a param..
-   		switch(readToken()) {								// Why'd we exit?
-   			case noData 		:	break;					// Ran out of data, it happens.
+   switch(ourState) {													// What are we up to?
+   	case lookForSynk	:												// We're looking for the synk char.
+   		switch(findSynkChar()) {									// Why did we stop looking for a synk char?
+   			case noData 		:	break;							// No problem, we'll come back later.		
+   			case completed		:										// We had success. And there's more to come.
+   				synk = true;											// We are now in synk!
+            	paramIndex = 0;										// Just to make sure, we reset the paramIndex to zero.
+            	tokenBuff[0] = '\0';									// Clear out the token buffer.
+            	tokenIndex = 0;										//	Set where next char goes in the token string.
+            	ourState = readingType;								// Next task is to read out the type of data we are.
+            break;														//
+   			case finalValue	:	break;							// Found terminator. Keep going
+   			case erroredOut	:	break;							// Can we actually have an error here? Keep running.
+         }																	//
+   	break;																//
+   	case readingType	:												// We are reading out the initial data type text.
+   		switch(readToken()) {										// We'll read a token from the stream..
+   			case noData 		:	break;							// No data? Again, no problem. We'll swing back later.
+   			case completed		:										// Success with more to follow.
+   				if (canHandle(tokenBuff)) {						// If we can handle this type of data..
+						paramIndex++;										// Bump up the paramIndex.
+						tokenBuff[0] = '\0';								// Clear out the tolken buffer.
+						tokenIndex = 0;									//	Set where next char goes in the token string.
+						ourState = readingParam;						// We slide into reading params.
+					} else {													// else we can't handle that type?
+						errMsg(noHandler);								// If debugging, toss a message.
+						reset();												// reset for synk again.
+					}															//
+            break;														//
+            case finalValue	:										// Well here is a conundrum. Good read but no data.
+            case erroredOut	:										// We'll toss it into the error pot.
+   				reset();													// reset to start over again.
+   			break;														//
+         }																	//
+      break;																//
+      case readingParam	:												// We are busy reading out a param..
+   		switch(readToken()) {										// Why'd we exit?
+   			case noData 		:	break;							// Ran out of data, it happens.
    			case completed		:										// Got a parameter!
    				if (addValue(tokenBuff,paramIndex,false)) {	// If we can add this data value... (There's more!)
 						paramIndex++;										// Bump up the paramIndex.
 						tokenBuff[0] = '\0';								// Clear out the tolken buffer.
 						tokenIndex = 0;									//	Set where next char goes in the token string.
 					} else {													// Else something went horribly wrong..
+						errMsg(addValueFail);							// If debugging, toss a message.
 						reset();												// We reset and look for the next one.
 					}															//
             break;														//
@@ -259,9 +229,47 @@ void numStreamIn::idle(void) {
    }																			//
 }
 
-   		
-   
-   
+
+void numStreamIn::errMsg(errType inErr) {
+
+#ifdef SHOW_DATA																// Are we allowing debugging data today?
+	switch(inErr) {															// Choose the message..
+		case unknownErr		:
+			Serial.println("***** Unknown error?");
+		break;
+		case synkTimOut		:													
+			Serial.println("***** findSynkChar() timed out.");	
+		break;
+		case tokenTimOut		:													
+			Serial.println("***** readToken() timed out.");	
+		break;																	
+   	case noHandler			:
+   		Serial.print("***** Cannot find handler for [");
+			Serial.print(tokenBuff);
+			Serial.println("]");
+		break;
+		case addValueFail		:
+   		Serial.print("***** addValue() failed for [");
+			Serial.print(tokenBuff);
+			Serial.println("]");
+		break;
+		case badChecksum		:
+			Serial.print("***** checkTheSum() failed for [");
+			Serial.print(msgBuf);
+			Serial.println("]");
+		break;
+		case tokenOverflow	:
+			Serial.println("***** tokenBuff overflow.");	
+		break;
+		case msgBufOverflow	:
+			Serial.println("***** msgBuf overflow.");	
+		break;
+		default					:
+			Serial.println("***** Some new kind of error we don't know about yet?");
+		break;	
+	}
+#endif
+}
    
    
    

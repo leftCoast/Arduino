@@ -5,7 +5,7 @@
 #include <idlers.h>
 
 
-//#define SHOW_DATA
+#define SHOW_DATA
 
 #define DEF_IN_PORT		&Serial1	// Change to fit your hardware.
 #define SYNK_CHAR    	'$'		// Marker of the start of a data set.
@@ -40,6 +40,18 @@ enum exitStates {
 };
 
 
+enum errType {
+	unknownErr,
+	synkTimOut,
+	tokenTimOut,
+	noHandler,
+	addValueFail,
+	badChecksum	,	
+	tokenOverflow,
+	msgBufOverflow
+};
+
+
 class numStreamIn : public idler {
 
    public:
@@ -61,7 +73,8 @@ class numStreamIn : public idler {
 	virtual	exitStates	findSynkChar(void);
 	virtual	exitStates	readToken(void);
    virtual  void  		idle(void);
-
+				void			errMsg(errType inErr);
+	
 				Stream*	ourPort;
             bool		synk;
             states	ourState;
