@@ -5,7 +5,7 @@
 #include <GPSReader.h>
 #include <GPS_NMEA2K.h>
 #include <wlessHdlers.h>
-
+#include <RTClib.h>
 //
 // Forms for entering lat/lon
 // three values : int float str : 38 26.2 east
@@ -52,6 +52,7 @@ class navigation : public	NMEA2kBase {
 				float				distanceVal;
 				barometerHdlr*	NMEA2KBarometer;
 				float				airPSI;
+				int				hoursOffUTC;
 };
 
 

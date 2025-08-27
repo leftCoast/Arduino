@@ -5,7 +5,7 @@
 #include <idlers.h>
 
 
-#define SHOW_DATA
+//#define SHOW_DATA
 
 #define DEF_IN_PORT		&Serial1	// Change to fit your hardware.
 #define SYNK_CHAR    	'$'		// Marker of the start of a data set.

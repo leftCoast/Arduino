@@ -6,18 +6,32 @@
 //#include <fonts/FreeSansOblique24pt7b.h>
 #include <fonts/FreeSansBoldOblique24pt7b.h>
 #include <fonts/FreeSansBoldOblique12pt7b.h>
+#include <fonts/FreeSansBoldOblique9pt7b.h>
+#include <fonts/FreeMono12pt7b.h>
+#include <fonts/FreeMono9pt7b.h>
+#include <fonts/FreeSansOblique9pt7b.h>
 
-#define LED_RECT					300,5,10,10
+#define LED_RECT					310,5,10,10
+#define FIX_RECT					275,0,30,20
+				
+#define SPEEDBOX_RECT			10,30,250,64
+#define DEPTHBOX_RECT			10,105,250,64
+#define BEARINGBOX_RECT			10,180,250,64
+#define DISTANCEBOX_RECT		10,255,250,64
+#define BOROMETERBOX_RECT		10,330,250,64
 
-#define SPEEDBOX_RECT			30,30,250,64
-#define DEPTHBOX_RECT			30,105,250,64
-#define BEARINGBOX_RECT			30,180,250,64
-#define DISTANCEBOX_RECT		30,255,250,64
-#define BOROMETERBOX_RECT		30,330,250,64
+#define LATT_X						10
+#define LATT_Y						420
+#define LATT_W						70
+#define LATT_H						36
+#define LONT_X						LATT_X
+#define LONT_Y						LATT_Y+30
+#define LONT_W						LATT_W
+#define LONT_H						LATT_H
 
-#define LAT_X						55
+#define LAT_X						90
 #define LAT_Y						420
-#define LAT_W						480
+#define LAT_W						175
 #define LAT_H						36
 #define LON_X						LAT_X
 #define LON_Y						LAT_Y+30
@@ -27,7 +41,10 @@
 
 #define AFF_SANS_BOLD_24_OB	&FreeSansBoldOblique24pt7b,45,-12
 #define AFF_SANS_BOLD_12_OB	&FreeSansBoldOblique12pt7b,24,-6
-
+#define AFF_SANS_BOLD_9_OB		&FreeSansBoldOblique9pt7b,18,-5
+#define AFF_SANS_9_OB			&FreeSansOblique9pt7b,18,-5
+#define AFF_MONO_12				&FreeMono12pt7b,20,-6
+#define AFF_MONO_9				&FreeMono9pt7b,17,-3
 
 navDisp::navDisp (void) { updateTimer = new timeObj(2000); }
 
@@ -37,27 +54,48 @@ navDisp::~navDisp(void) { if (updateTimer) delete(updateTimer); }
 
 void navDisp::setup(void) {
 
-	rect	LEDRect;
+	rect			LEDRect;
+	fontLabel*	latText;
+	fontLabel*	lonText;
+	fontLabel*	fixText;
 	
 	screen->fillScreen(&black);
+	
+	fixText = new fontLabel(FIX_RECT);
+	fixText->setColors(&yellow,&black);
+	fixText->setFont(AFF_SANS_9_OB);
+	fixText->setValue("Fix");
+	viewList.addObj(fixText);
 	
 	LEDRect.setRect(LED_RECT);
 	fixLED = new LED(&LEDRect,&green,&red);
 	viewList.addObj(fixLED);
 	
-	timeLabel = new label(100,0,200,32);
+	timeLabel = new erasibleText(10,0,250,32);
 	timeLabel->setColors(&yellow,&black);
-	timeLabel->setTextSize(2);
+	timeLabel->setFont(AFF_MONO_12);
 	viewList.addObj(timeLabel);
 	
-	latLabel = new label(LAT_X,LAT_Y,LAT_W,LAT_H);
+	latText = new fontLabel(LATT_X,LATT_Y,LATT_W,LATT_H);
+	latText->setColors(&yellow,&black);
+	latText->setFont(AFF_MONO_12);
+	latText->setValue("Lat :");
+	viewList.addObj(latText);
+	
+	latLabel = new erasibleText(LAT_X,LAT_Y,LAT_W,LAT_H);
 	latLabel->setColors(&yellow,&black);
-	latLabel->setTextSize(2);
+	latLabel->setFont(AFF_MONO_12);
 	viewList.addObj(latLabel);
 	
-	lonLabel = new label(LON_X,LON_Y,LON_W,LON_H);
+	lonText = new fontLabel(LONT_X,LONT_Y,LONT_W,LONT_H);
+	lonText->setColors(&yellow,&black);
+	lonText->setFont(AFF_MONO_12);
+	lonText->setValue("Lon :");
+	viewList.addObj(lonText);
+	
+	lonLabel = new erasibleText(LON_X,LON_Y,LON_W,LON_H);
 	lonLabel->setColors(&yellow,&black);
-	lonLabel->setTextSize(2);
+	lonLabel->setFont(AFF_MONO_12);
 	viewList.addObj(lonLabel);
 	
 	knotGauge = new valueBox(SPEEDBOX_RECT,"Kn",1);
@@ -78,7 +116,7 @@ void navDisp::setup(void) {
 		viewList.addObj(bearingGauge);
 	}
 	
-	distanceGauge = new valueBox(DISTANCEBOX_RECT,"Nmi",1);
+	distanceGauge = new valueBox(DISTANCEBOX_RECT,"N mi",1);
 	if (distanceGauge) {
 		distanceGauge->setup((float*)&(ourNavApp.distanceVal));
 		viewList.addObj(distanceGauge);
@@ -97,12 +135,19 @@ void navDisp::showPos(globalPos* fix) {
 	char		outStr[40];
 	double	value;
 	char		qStr[3];
+	DateTime	timeStamp(ourGPS->year,ourGPS->month,ourGPS->day,ourGPS->hours,ourGPS->min,ourGPS->sec);
+	TimeSpan	deltaTime(0,ourNavApp.hoursOffUTC,0,0);
 	
 	if (ourGPS->valid) {
 		
 		fixLED->setState(true);
-		
-		sprintf(outStr,"GMT %02d:%02d",ourGPS->hours,ourGPS->min);
+		timeStamp = timeStamp + deltaTime;
+		sprintf(outStr,"%02d/%02d/%4d  %02d:%02d",
+		timeStamp.month(),
+		timeStamp.day(),
+		timeStamp.year(),
+		timeStamp.hour(),
+		timeStamp.minute());
 		timeLabel->setValue(outStr);
 		
 		strcpy(qStr," N");
@@ -111,7 +156,7 @@ void navDisp::showPos(globalPos* fix) {
 		}
 		value = fix->getLatAsDbl();
 		if (value<0) value = -value;
-		sprintf (outStr,"Lat : %*f%s",10,value,qStr);
+		sprintf (outStr,"%*f%s",10,value,qStr);
 		latLabel->setValue(outStr);
 		
 		strcpy(qStr," W");
@@ -120,15 +165,14 @@ void navDisp::showPos(globalPos* fix) {
 		}
 		value = fix->getLonAsDbl();
 		if (value<0) value = -value;
-		sprintf (outStr,"Lon : %*f%s",10,value,qStr);
+		sprintf (outStr,"%*f%s",10,value,qStr);
 		lonLabel->setValue(outStr);
 	} else {
 		fixLED->setState(false);
-		sprintf(outStr,"GMT --:--");
+		sprintf(outStr,"--/--/----  --:--");
 		timeLabel->setValue(outStr);
-		sprintf (outStr,"Lat : ---.--");
+		sprintf (outStr,"---.------");
 		latLabel->setValue(outStr);
-		sprintf (outStr,"Lon : ---.--");
 		lonLabel->setValue(outStr);
 	}
 }

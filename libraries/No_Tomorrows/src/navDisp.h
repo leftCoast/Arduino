@@ -93,18 +93,16 @@ class navDisp {
 				void	setup(void);
 				void	showPos(globalPos* fix);
 				
-				LED*		fixLED;
-				
-				label*	latLabel;
-				label*	lonLabel;
-				label*	timeLabel;
-				
-				valueBox*	knotGauge;
-				valueBox*	depthGauge;
-				valueBox*	bearingGauge;
-				valueBox*	distanceGauge;
-				valueBox*	barometerGauge;
-				timeObj*		updateTimer;
+				LED*				fixLED;
+				erasibleText*	timeLabel;
+				erasibleText*	latLabel;
+				erasibleText*	lonLabel;
+				valueBox*		knotGauge;
+				valueBox*		depthGauge;
+				valueBox*		bearingGauge;
+				valueBox*		distanceGauge;
+				valueBox*		barometerGauge;
+				timeObj*			updateTimer;
 };
 
 

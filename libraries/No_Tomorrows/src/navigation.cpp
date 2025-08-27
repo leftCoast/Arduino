@@ -28,6 +28,7 @@ navigation::navigation(void)
 	bearingVal	= NAN; 
 	distanceVal	= NAN;
 	airPSI		= NAN;
+	hoursOffUTC	= -7;
 }
 	
 	
