@@ -14,11 +14,11 @@
 #define LED_RECT					310,5,10,10
 #define FIX_RECT					275,0,30,20
 				
-#define SPEEDBOX_RECT			10,30,250,64
-#define DEPTHBOX_RECT			10,105,250,64
-#define BEARINGBOX_RECT			10,180,250,64
-#define DISTANCEBOX_RECT		10,255,250,64
-#define BOROMETERBOX_RECT		10,330,250,64
+#define SPEED_RECT				10,30,250,64
+#define DEPTH_RECT				10,105,250,64
+#define BEARING_RECT				10,180,250,64
+#define DISTANCE_RECT			10,255,250,64
+#define BOROMETER_RECT			10,330,250,64
 
 #define LATT_X						10
 #define LATT_Y						420
@@ -46,10 +46,27 @@
 #define AFF_MONO_12				&FreeMono12pt7b,20,-6
 #define AFF_MONO_9				&FreeMono9pt7b,17,-3
 
-navDisp::navDisp (void) { updateTimer = new timeObj(2000); }
+
+// What flavor data is the GPS databox wanting to display?
+#define BEARING	0
+#define DIST		1
+#define COG			2
+#define SOG			3
+
+// What flavor of data is the NMEA databox wanting to display?
+#define	RPM_VAL		0
+#define	FUEL		1
+#define	SPEED		2
+#define	DEPTH		3
+#define	BARO		4
+
+runningAvg	baroSmoother(10);
 
 
-navDisp::~navDisp(void) { if (updateTimer) delete(updateTimer); }
+navDisp::navDisp (void) { savedStamp = NULL; }
+
+
+navDisp::~navDisp(void) { freeStr(&savedStamp); }
 
 
 void navDisp::setup(void) {
@@ -71,7 +88,7 @@ void navDisp::setup(void) {
 	fixLED = new LED(&LEDRect,&green,&red);
 	viewList.addObj(fixLED);
 	
-	timeLabel = new erasibleText(10,0,250,32);
+	timeLabel = new erasableText(10,0,250,32);
 	timeLabel->setColors(&yellow,&black);
 	timeLabel->setFont(AFF_MONO_12);
 	viewList.addObj(timeLabel);
@@ -82,7 +99,7 @@ void navDisp::setup(void) {
 	latText->setValue("Lat :");
 	viewList.addObj(latText);
 	
-	latLabel = new erasibleText(LAT_X,LAT_Y,LAT_W,LAT_H);
+	latLabel = new erasableText(LAT_X,LAT_Y,LAT_W,LAT_H);
 	latLabel->setColors(&yellow,&black);
 	latLabel->setFont(AFF_MONO_12);
 	viewList.addObj(latLabel);
@@ -93,38 +110,37 @@ void navDisp::setup(void) {
 	lonText->setValue("Lon :");
 	viewList.addObj(lonText);
 	
-	lonLabel = new erasibleText(LON_X,LON_Y,LON_W,LON_H);
+	lonLabel = new erasableText(LON_X,LON_Y,LON_W,LON_H);
 	lonLabel->setColors(&yellow,&black);
 	lonLabel->setFont(AFF_MONO_12);
 	viewList.addObj(lonLabel);
 	
-	knotGauge = new valueBox(SPEEDBOX_RECT,"Kn",1);
+	knotGauge = new NMEABox(SPEED_RECT,"Kn",1);
 	if (knotGauge) {
-		knotGauge->setup();
+		knotGauge->setup(SPEED);
 		viewList.addObj(knotGauge);
 	}
 	
-	depthGauge = new valueBox(DEPTHBOX_RECT,"Fm",1);
+	depthGauge = new NMEABox(DEPTH_RECT,"Fm",1);
 	if (depthGauge) {
-		depthGauge->setup();
+		depthGauge->setup(DEPTH);
 		viewList.addObj(depthGauge);
 	}
 	
-	bearingGauge = new valueBox(BEARINGBOX_RECT,"Deg m",0);
+	bearingGauge = new GPSBox(BEARING_RECT,"Deg m",0);
 	if (bearingGauge) {
-		bearingGauge->setup((float*)&(ourNavApp.bearingVal));
+		bearingGauge->setup(BEARING);
 		viewList.addObj(bearingGauge);
 	}
 	
-	distanceGauge = new valueBox(DISTANCEBOX_RECT,"N mi",1);
+	distanceGauge = new GPSBox(DISTANCE_RECT,"N mi",1);
 	if (distanceGauge) {
-		distanceGauge->setup((float*)&(ourNavApp.distanceVal));
+		distanceGauge->setup(DIST);
 		viewList.addObj(distanceGauge);
 	}
-	
-	barometerGauge = new valueBox(BOROMETERBOX_RECT,"InHg",2);
+	barometerGauge = new NMEABox(BOROMETER_RECT,"InHg",2);
 	if (barometerGauge) {
-		barometerGauge->setup(&(ourNavApp.airPSI));
+		barometerGauge->setup(BARO);
 		viewList.addObj(barometerGauge);
 	}
 }
@@ -139,7 +155,6 @@ void navDisp::showPos(globalPos* fix) {
 	TimeSpan	deltaTime(0,ourNavApp.hoursOffUTC,0,0);
 	
 	if (ourGPS->valid) {
-		
 		fixLED->setState(true);
 		timeStamp = timeStamp + deltaTime;
 		sprintf(outStr,"%02d/%02d/%4d  %02d:%02d",
@@ -148,7 +163,10 @@ void navDisp::showPos(globalPos* fix) {
 		timeStamp.year(),
 		timeStamp.hour(),
 		timeStamp.minute());
-		timeLabel->setValue(outStr);
+		if (strcmp(savedStamp,outStr)) {
+			timeLabel->setValue(outStr);
+			heapStr(&savedStamp,outStr);
+		}
 		
 		strcpy(qStr," N");
 		if (fix->getLatQuad()==south) {
@@ -222,25 +240,25 @@ void LED::drawSelf(void) {
 
 
 
-// ************* erasibleText *************
+// ************* erasableText *************
 
 
-erasibleText::erasibleText(void)
-	: fontLabel() {  }
+erasableText::erasableText(void)
+	: fontLabel() { }
 	
-erasibleText::erasibleText(rect* inRect)
-	: fontLabel(inRect) {  }
-	
-	
-erasibleText::erasibleText(int inX, int inY, int inW,int inH)
-	: fontLabel(inX,inY,inW,inH) {  }	
+erasableText::erasableText(rect* inRect)
+	: fontLabel(inRect) { }
 	
 	
-erasibleText::~erasibleText(void) {  }
+erasableText::erasableText(int inX, int inY, int inW,int inH)
+	: fontLabel(inX,inY,inW,inH) { }	
 	
 	
-void erasibleText::drawSelf(void) {
+erasableText::~erasableText(void) { }
 
+	
+void erasableText::drawSelf(void) {
+	
 	rect	aRect(this);
 	
 	aRect.width = aRect.width+8;
@@ -248,9 +266,62 @@ void erasibleText::drawSelf(void) {
 	//screen->drawRect(&aRect,&green);			// GREEN
 	fontLabel::drawSelf();
 }
+
+
+
+// *************  NMEABox  *************
+
+
+NMEABox::NMEABox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec)
+	: valueBox(inX,inY,inWidth,inHeight,inLabel,inPrec) {  }
+
 	
+NMEABox::~NMEABox(void) {  }
+
+
+float NMEABox::checkData(void) {
+  
+	float	value;
 	
+	switch(dataChoice) {
+		case RPM_VAL	: value = ourNavApp.engHdler->RPM;			break;
+		case FUEL		: value = ourNavApp.fuelGauge->level;		break;
+		case SPEED		: value = ourNavApp.knotMeter->knots;		break;
+		case DEPTH		: value = ourNavApp.depthSounder->feet;	break;
+		case BARO		: value = baroSmoother.addData(ourNavApp.barometer->inHg);	break;
+		default		: value = NAN;
+	}
+	return value;
+}
+
+
+// *************  GPSBox  *************
+
+
+GPSBox::GPSBox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec)
+	: valueBox(inX,inY,inWidth,inHeight,inLabel,inPrec) {  }
+
 	
+GPSBox::~GPSBox(void) {  }
+
+
+float GPSBox::checkData(void) {
+  
+	float	value;
+	
+	value = NAN;
+	if (ourGPS->valid) {
+		switch(dataChoice) {
+			case BEARING	: value = ourNavApp.bearing();	break;
+			case DIST		: value = ourNavApp.distance();	break; 
+			default			: value = NAN;
+		}
+	}
+	return value;
+}
+
+
+		
 // ************* valueBox *************	
 
 
@@ -258,26 +329,26 @@ valueBox::valueBox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,
 	: drawGroup(inX,inY,inWidth,inHeight) {
 	
 	label	= NULL;
-	prec	= inPrec;
-	heapStr(&label,inLabel);
-	dataSource = NULL;
-	savedIntVal = 0;
-	updateTimer = new timeObj(1000);
-	isNanNow = true;
+	heapStr(&label,inLabel);				// Save off copy of the units label.
+	prec = inPrec;								// We'll need this later.
+	factor = pow(10,inPrec);				// Calculate the multiplication factor.
+	isNanNow = true;							// We'll start at NAN. Because  we really have no value.
+	updateTimer = new timeObj(1000);		// refresh once a second as default.
+	dataChoice = 0;
 }
 	
 	
 valueBox::~valueBox(void) {
 
-	freeStr(&label);
+	if (label)	freeStr(&label);
 	if (updateTimer) delete(updateTimer);
 }
 
 
-void valueBox::setup(float* inSource) {
+void valueBox::setup(int inDataChoice) {
 
-	dataSource = inSource;
-	valueLabel = new erasibleText();
+	dataChoice = inDataChoice;
+	valueLabel = new erasableText();
 	if (valueLabel) {
 		valueLabel->setFont(AFF_SANS_BOLD_24_OB);
 		valueLabel->x = 5;
@@ -286,7 +357,7 @@ void valueBox::setup(float* inSource) {
 		valueLabel->setColors(&yellow,&black);
 		valueLabel->setPrecision(prec);
 		valueLabel->setJustify(TEXT_RIGHT);
-		valueLabel->setValue("--");
+		valueLabel->setValue("-- ");
 		addObj(valueLabel);
 	}
 	unitsLabel = new fontLabel();
@@ -297,6 +368,7 @@ void valueBox::setup(float* inSource) {
 		unitsLabel->width = 80;
 		unitsLabel->setColors(&yellow,&black);
 		unitsLabel->setValue(label);
+		freeStr(&label);
 		addObj(unitsLabel);
 	}
 	hookup();
@@ -308,39 +380,38 @@ void valueBox::drawSelf(void) { /*screen->drawRect(this,&blue);*/ }
 
 void valueBox::setValue(float value) {
 	
+	int	newIntVal;
 	
-	if (isnan(value)&&!isNanNow) {
-		valueLabel->setValue("--");
-		isNanNow = true;
-	} else if (!isnan(value)) {
-		valueLabel->setValue(value);
-		isNanNow = false;
+	if (isnan(value)&&isNanNow) return;					// If we got a nan, it's already showing a nan.. Bail.
+	else if (isnan(value)) {								// Else if we got a NAN and it's showing a value..
+		valueLabel->setValue("-- ");						// Set label to dashes.
+		isNanNow = true;										// We are NOW showing NAN.
+	} else if (!isnan(value)&&isNanNow) {				// Else if we got a value and it's showing a NAN..
+		savedIntVal = round(value * factor);			// Setup a integer version of the value.
+		valueLabel->setValue(savedIntVal/factor);		// Set the new value to the screen.
+		isNanNow = false;										// And we are no longer showing a NAN.
+	} else {														// Else.. 
+		newIntVal = round(value * factor);				// Setup a integer version of the value.
+		if (newIntVal!=savedIntVal) {						// If it's different than the saved integer of what we have now..
+			valueLabel->setValue(newIntVal/factor);	// Set the new value to the screen.
+			savedIntVal = newIntVal;
+		}
 	}
 }
 
 
 void valueBox::idle(void) {
 
-	int	newIntVal;
-	float	factor;
+	float	value;
 	
-	drawGroup::idle();										// Let our parent have a go.
-	if (updateTimer->ding()) {								// If our timer goes off..								
-		if (dataSource) {										// If we have a data source..
-			if (isnan(*dataSource)) {						// Quick sanity check.
-				setValue(NAN);									// Is a nan? Send it.
-				return;											// And exit.
-			}														//
-			factor = pow(10,prec);							// Calculate the multiplication factor.
-			newIntVal = round(*dataSource * factor);	// Setup a integer version of the value.
-			if (newIntVal!=savedIntVal) {					// If it's different than the saved integer of what we have now..
-				setValue(newIntVal/factor);				// Set the new value to the screen.
-				savedIntVal = newIntVal;					// Save off our new integer value for later.
-			}														//
-		}															//
-		updateTimer->start();								// Reset the timer.
+	drawGroup::idle();			// Let our parent have a go.
+	if (updateTimer->ding()) {	// If our timer goes off..
+		value = checkData();		// Grab fresh data value.
+		setValue(value);			// Update the display.
+		updateTimer->start();	// Reset the timer.
 	}
 }
+
 
 
 

@@ -4,7 +4,7 @@
 #include <NMEA2kBase.h>
 #include <GPSReader.h>
 #include <GPS_NMEA2K.h>
-#include <wlessHdlers.h>
+#include <handlers.h>
 #include <RTClib.h>
 //
 // Forms for entering lat/lon
@@ -33,8 +33,10 @@ class navigation : public	NMEA2kBase {
 	
 	virtual	void		setup(void);
 	virtual	void		loop(void);
+				bool		haveMark(void);
 				float		bearing(void);
 				float		distance(void);
+				float		inHg(void);
 	virtual	void		checkAddedComs(int comVal);
 	virtual	bool		addNMEAHandlers(void);			// Without handlers, who are we anyway?
 	virtual	void		addCommands(void);
@@ -47,11 +49,15 @@ class navigation : public	NMEA2kBase {
 				void		doGetBearing(void);
 				void		doGetDist(void);
 				
+				bool				haveMarkLat;
+				bool				haveMarkLon;
 				globalPos		destMark;
-				float				bearingVal;
-				float				distanceVal;
-				barometerHdlr*	NMEA2KBarometer;
-				float				airPSI;
+				barometerObj*	barometer;
+				waterSpeedObj*	knotMeter;
+				waterDepthObj*	depthSounder;
+				fluidLevelObj*	fuelGauge;
+				engParam*		engHdler;
+				timeObj     	timer;
 				int				hoursOffUTC;
 };
 

@@ -7,7 +7,7 @@
 #include <navDisp.h>
 #include <displayObj.h>
 #include <strTools.h>
-#include <wlessHdlers.h>
+
 
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
@@ -15,7 +15,6 @@
 #define NAV_DEVICE_CLASS	DEV_CLASS_NAV
 #define NAV_DEVICE_FUNCT	DEV_FUNC_GNSS
 
-timeObj     timer(2000);
 navDisp		ourNavDisp;
 navigation  ourNavApp;
 
@@ -24,10 +23,14 @@ navigation  ourNavApp;
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
 	
-	NMEA2KBarometer = new barometerHdlr(llamaBrd);
-	bearingVal	= NAN; 
-	distanceVal	= NAN;
-	airPSI		= NAN;
+	barometer		= new barometerObj(llamaBrd);
+	knotMeter 		= new waterSpeedObj(llamaBrd);
+	depthSounder	= new waterDepthObj(llamaBrd);
+	fuelGauge		= new fluidLevelObj(llamaBrd);
+	engHdler			= new engParam(llamaBrd);
+	haveMarkLat		= false;
+	haveMarkLon		= false;
+	timer.setTime(2000);
 	hoursOffUTC	= -7;
 }
 	
@@ -38,7 +41,6 @@ navigation::~navigation(void) {  }
 void navigation::setup(void) {
 	
 	NMEA2kBase::setup();
-	
 	ourGPS = new GPSReader;
 	ourGPS->begin();
 	Serial1.begin(9600);
@@ -54,19 +56,27 @@ void navigation::loop(void) {
 	NMEA2kBase::loop();						// Let our ancestors do their thing.
 	if (timer.ding()) {
       ourNavDisp.showPos(&(ourGPS->latLon));
-      bearing();
-      distance();
-      airPSI = NMEA2KBarometer->inHg;
       timer.start();
    }
 }
 
 
+bool navigation::haveMark(void) {
+
+	if (haveMarkLat && haveMarkLon) {
+		return destMark.valid();
+	}
+	return false;
+}
+
+
 float navigation::bearing(void) {
 	
+	float	bearingVal;
+	
 	bearingVal = NAN;
-	if (destMark.valid()) {
-		if (ourGPS->qualVal!=fixInvalid) {
+	if (haveMark()) {
+		if (ourGPS->valid) {
 			bearingVal = (float)ourGPS->latLon.trueBearingTo(&destMark);
 			if (bearingVal<0) bearingVal = NAN;
 			else if (bearingVal>360)  bearingVal = NAN;
@@ -78,13 +88,13 @@ float navigation::bearing(void) {
 
 float navigation::distance(void) {
 	
+	float	distanceVal;
+
 	distanceVal = NAN;
-	if (destMark.valid()) {
-		if (ourGPS->qualVal!=fixInvalid) {
+	if (haveMark()) {
+		if (ourGPS->valid) {
 			distanceVal = (float)ourGPS->latLon.distanceTo(&destMark);
-			//Serial.print("Raw dist : ");
-			//Serial.println(distanceVal);
-			if (distanceVal<0) bearingVal = NAN;
+			if (distanceVal<0) distanceVal = NAN;
 		}
 	}
 	return distanceVal;
@@ -112,9 +122,24 @@ void navigation::checkAddedComs(int comVal) {
 bool navigation::addNMEAHandlers(void) {
 
 	if (addGPSHandlers(llamaBrd)) {
-		if (NMEA2KBarometer) {
-			llamaBrd->addMsgHandler(NMEA2KBarometer);
-			return true;
+		if (barometer) {
+			llamaBrd->addMsgHandler(barometer);
+			if (knotMeter) {
+				llamaBrd->addMsgHandler(knotMeter);
+				if (depthSounder) {
+					llamaBrd->addMsgHandler(depthSounder);
+					if (fuelGauge) {
+						llamaBrd->addMsgHandler(fuelGauge);						
+						if (engHdler) {
+							llamaBrd->addMsgHandler(engHdler);
+							return true;
+						}
+					}
+					
+				}
+				
+			}
+			
 		}
 	}
 	return false;
@@ -306,6 +331,7 @@ void navigation::doSetLat(void) {
 		destMark.copyLat(&localPos);								// We basically tell the user everything was ok.
 		Serial.print("Latitude was set to : ");				// Bla bla bla.
 		Serial.println(destMark.showLatStr());					// Bla.
+		haveMarkLat = true;											// 
 	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for either, latitude value & quadrant, (N/S kinda' thing).");
 		Serial.println("Or, latitude degree value, minute value and then quadrant.");
@@ -339,6 +365,7 @@ void navigation::doSetLon(void) {
 		destMark.copyLon(&localPos);								// We basically tell the user everything was ok.
 		Serial.print("Longitude was set to : ");				// Bla bla bla.
 		Serial.println(destMark.showLonStr());					// Bla.
+		haveMarkLon = true;											// 
 	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for, longitude value & quadrant, (E/W kinda' thing).");
 		Serial.println("Or, longitude degree value, minute value and then quadrant.");
@@ -351,7 +378,7 @@ void navigation::doGetBearing(void) {
 
 	float	bearDegT;
 	
-	if (destMark.valid()) {
+	if (haveMark()) {
 		if (ourGPS->qualVal!=fixInvalid) {
 			bearDegT = bearing();
 			Serial.print(bearDegT,0);
@@ -369,7 +396,7 @@ void navigation::doGetDist(void) {
 
 	float	dist;
 	
-	if (destMark.valid()) {
+	if (haveMark()) {
 		if (ourGPS->qualVal!=fixInvalid) {
 			dist = ourGPS->latLon.distanceTo(&destMark);
 			Serial.print(dist,1);

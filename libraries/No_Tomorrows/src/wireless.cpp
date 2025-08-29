@@ -3,7 +3,7 @@
 // wrist displays.
 
 #include <wireless.h>
-#include <wlessHdlers.h>
+//#include <wlessHdlers.h>
 
 #define WIRELESS_DEVICE_ID			1706				// You get 21 bits. Think serial number.
 #define WIRELESS_DEFAULT_ADDR		45					// This initial value will be set using the serial monitor.

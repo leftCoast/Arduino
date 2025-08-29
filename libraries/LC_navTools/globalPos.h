@@ -23,7 +23,7 @@ extern double deg2rad(double angleDeg);
 // ****************  globalPos  *****************
 // **********************************************
 
-#define	G_POS_BUFF_BYTES	20
+#define	G_POS_BUFF_BYTES	40
 
 class globalPos {
 

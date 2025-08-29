@@ -3,11 +3,10 @@
 
 #include <adafruit_2050.h>
 #include <displayObj.h>
-#include <idlers.h>
-#include <globalPos.h>
 #include <fontLabel.h>
 #include <label.h>
 #include <colorRect.h>
+#include <navigation.h>
 
 
 #define SD_CS        4		// wht
@@ -28,44 +27,23 @@
 // RX 0
 // TX 1
 
+// *********** erasableText ***********
 
 
-// ************* valueBox *************
-
-class erasibleText :	public fontLabel {
+class erasableText :	public fontLabel {
 
 	public:
-				erasibleText(void);
-				erasibleText(rect* inRect);
-				erasibleText(int inX, int inY, int inW,int inH);
-	virtual	~erasibleText(void);
+				erasableText(void);
+				erasableText(rect* inRect);
+				erasableText(int inX, int inY, int inW,int inH);
+	virtual	~erasableText(void);
 	
 	virtual	void	drawSelf(void);	// Fixing up fontLabel..
 };
 
 
-// You get a number and units.
-class valueBox	: public drawGroup {
 
-	public:
-				valueBox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec);
-	virtual	~valueBox(void);
-
-	virtual	void	setup(float* inSource=NULL);
-	virtual	void	drawSelf(void);
-	virtual	void	setValue(float inValue);
-	virtual	void	idle(void);
-			
-				char*				label;
-				int				prec;
-				erasibleText*	valueLabel;
-				fontLabel*		unitsLabel;
-				float*			dataSource;
-				int				savedIntVal;
-				timeObj*			updateTimer;
-				bool				isNanNow;
-};
-
+// *************** LED  ***************
 
 
 class LED :	public colorRect {
@@ -84,6 +62,67 @@ class LED :	public colorRect {
 };
 
 
+
+// ************* valueBox *************
+
+
+// You get a number and units.
+class valueBox	: public drawGroup {
+
+	public:
+				valueBox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec);
+	virtual	~valueBox(void);
+
+	virtual	void	setup(int inDataChoice=0);
+	virtual	void	drawSelf(void);
+	virtual	void	setValue(float inValue);
+	virtual	float	checkData(void)=0;
+	virtual	void	idle(void);
+			
+				char*				label;
+				int				prec;
+				float				factor;
+				erasableText*	valueLabel;
+				fontLabel*		unitsLabel;
+				int				savedIntVal;
+				timeObj*			updateTimer;
+				bool				isNanNow;
+				int				dataChoice;
+};
+
+
+
+// *************  NMEABox  *************
+
+
+class NMEABox	: public valueBox {
+
+	public:
+				NMEABox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec);
+	virtual	~NMEABox(void);
+
+	virtual	float	checkData(void);
+};
+
+
+
+// *************  GPSBox  *************
+
+
+class GPSBox	: public valueBox {
+
+	public:
+				GPSBox(int inX,int inY,int inWidth,int inHeight,const char* inLabel,int inPrec);
+	virtual	~GPSBox(void);
+
+	virtual	float	checkData(void);
+};
+
+
+
+// ************* navDisp  *************
+
+
 class navDisp {
 
 	public:
@@ -94,23 +133,16 @@ class navDisp {
 				void	showPos(globalPos* fix);
 				
 				LED*				fixLED;
-				erasibleText*	timeLabel;
-				erasibleText*	latLabel;
-				erasibleText*	lonLabel;
-				valueBox*		knotGauge;
-				valueBox*		depthGauge;
-				valueBox*		bearingGauge;
-				valueBox*		distanceGauge;
-				valueBox*		barometerGauge;
-				timeObj*			updateTimer;
+				erasableText*	timeLabel;
+				erasableText*	latLabel;
+				erasableText*	lonLabel;
+				NMEABox*			knotGauge;
+				NMEABox*			depthGauge;
+				GPSBox*			bearingGauge;
+				GPSBox*			distanceGauge;
+				NMEABox*			barometerGauge;
+				char*				savedStamp;
 };
 
-
-
-
-
-				
-				
-				
 				
 #endif

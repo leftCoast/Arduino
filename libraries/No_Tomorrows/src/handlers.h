@@ -1,3 +1,6 @@
+#ifndef handlers_h
+#define handlers_h
+
 #include <mapper.h>
 #include <runningAvg.h>
 #include <SAE_J1939.h>
@@ -283,3 +286,5 @@ class LC_ChatObj  : public msgHandler {
 };
 
 */
+
+#endif

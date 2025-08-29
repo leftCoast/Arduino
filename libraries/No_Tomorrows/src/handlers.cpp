@@ -287,7 +287,7 @@ engParam::engParam(netObj* inNetObj)
 	RPM			= 0;
   	boostPSI		= 0;
 	tiltPerc		= 0;
-	setSendInterval(100);  // Refresh the outgoing data every 100 ms. 
+	//setSendInterval(100);  // Refresh the outgoing data every 100 ms. 
 }
 	
 	
