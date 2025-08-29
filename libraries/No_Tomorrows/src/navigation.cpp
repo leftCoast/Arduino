@@ -48,6 +48,7 @@ void navigation::setup(void) {
 	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
 	screen->begin();
 	ourNavDisp.setup();
+	 while(Serial1.available()) Serial1.read();
 }
 
 

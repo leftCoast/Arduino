@@ -286,9 +286,22 @@ float NMEABox::checkData(void) {
 	switch(dataChoice) {
 		case RPM_VAL	: value = ourNavApp.engHdler->RPM;			break;
 		case FUEL		: value = ourNavApp.fuelGauge->level;		break;
-		case SPEED		: value = ourNavApp.knotMeter->knots;		break;
-		case DEPTH		: value = ourNavApp.depthSounder->feet;	break;
-		case BARO		: value = baroSmoother.addData(ourNavApp.barometer->inHg);	break;
+		case SPEED		: 
+			value = ourNavApp.knotMeter->knots;
+			if (value>99||value<0) {
+				value = NAN;
+			}
+		break;
+		case DEPTH		: value = ourNavApp.depthSounder->feet/6.0;	break;
+			if (value>99||value<0) {
+				value = NAN;
+			}
+		case BARO		: 
+			value = baroSmoother.addData(ourNavApp.barometer->inHg);
+			if (value>33||value<20) {
+				value = NAN;
+			}
+		break;
 		default		: value = NAN;
 	}
 	return value;

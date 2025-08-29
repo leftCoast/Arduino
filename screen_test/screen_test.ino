@@ -1,8 +1,8 @@
-//#include <adafruit_2050.h>
-//#include <displayObj.h>
-//#include <idlers.h>
+#include <adafruit_2050.h>
+#include <displayObj.h>
+#include <idlers.h>
 
-#define SD_CS        4      // wht
+#define SD_CS        4     // wht
 #define SD_Detect    5     // grn
 #define LC_DC        9     // Data/command   - YELLOW WIRE 30AWG
 #define SCREEN_RST   14    // red
@@ -13,12 +13,14 @@
 void setup() {
    Serial.begin(9600);
    Serial1.begin(9600);
-   ///screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
-   //screen->begin();
-   //screen->fillScreen(&green);
-
+   screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
+   screen->begin();
+   screen->fillScreen(&green);
+   while(Serial1.available()) Serial1.read();
 }
 
+char  buff[200];
+int   buffIndex;
 
 void resetBuff(void) {
    
@@ -68,8 +70,7 @@ void   checkSum(void) {
    }  
 }
 
-char  buff[200];
-int   buffIndex;
+
 bool  inSynk = false;
 
 void loop() {
