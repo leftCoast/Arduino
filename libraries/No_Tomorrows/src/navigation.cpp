@@ -7,13 +7,15 @@
 #include <navDisp.h>
 #include <displayObj.h>
 #include <strTools.h>
-
+#include <EEPROM.h>
 
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
 #define NAV_DEFAULT_ADDR	46					// This initial value will be set using the serial monitor.
 #define NAV_DEVICE_CLASS	DEV_CLASS_NAV
 #define NAV_DEVICE_FUNCT	DEV_FUNC_GNSS
+
+
 
 navDisp		ourNavDisp;
 navigation  ourNavApp;
@@ -30,8 +32,12 @@ navigation::navigation(void)
 	engHdler			= new engParam(llamaBrd);
 	haveMarkLat		= false;
 	haveMarkLon		= false;
+	EEPROM.get(UTC_DELTA_E_LOC,hoursOffUTC);
+	mPole.copyFromEEPROM(MAG_POLE_E_LOC);
+	havePoleLat		= true;
+	havePoleLon		= true;
+	
 	timer.setTime(2000);
-	hoursOffUTC	= -7;
 }
 	
 	
@@ -71,7 +77,16 @@ bool navigation::haveMark(void) {
 }
 
 
-float navigation::bearing(void) {
+bool navigation::haveMPole(void) {
+
+	if (havePoleLat && havePoleLon) {
+		return mPole.valid();
+	}
+	return false;
+}
+
+
+float navigation::bearingMark(void) {
 	
 	float	bearingVal;
 	
@@ -79,6 +94,22 @@ float navigation::bearing(void) {
 	if (haveMark()) {
 		if (ourGPS->valid) {
 			bearingVal = (float)ourGPS->latLon.trueBearingTo(&destMark);
+			if (bearingVal<0) bearingVal = NAN;
+			else if (bearingVal>360)  bearingVal = NAN;
+		}
+	}
+	return bearingVal;
+}
+
+
+float navigation::bearingMPole(void) {
+	
+	float	bearingVal;
+	
+	bearingVal = NAN;
+	if (haveMPole()) {
+		if (ourGPS->valid) {
+			bearingVal = (float)ourGPS->latLon.trueBearingTo(&mPole);
 			if (bearingVal<0) bearingVal = NAN;
 			else if (bearingVal>360)  bearingVal = NAN;
 		}
@@ -102,17 +133,50 @@ float navigation::distance(void) {
 }
 
 
+void 	navigation::addCommands(void) {
+
+	NMEA2kBase::addCommands();
+	cmdParser.addCmd(getPos,"pos");
+	cmdParser.addCmd(getCOG,"cog");
+	cmdParser.addCmd(getGPSData,"gpsdata");
+	cmdParser.addCmd(setMarkLat,"setlat");
+	cmdParser.addCmd(setMarklon,"setlon");
+	cmdParser.addCmd(getCourse,"bearing");
+	cmdParser.addCmd(getDist,"dist");
+	cmdParser.addCmd(deltaUTC,"utc");
+	cmdParser.addCmd(setNPoleLat,"setplat");
+	cmdParser.addCmd(setNPoleLon,"setplon");
+	cmdParser.addCmd(getMPPos,"mpole");
+	cmdParser.addCmd(getMCorrect,"mcorrect");
+}
+
+
 void navigation::checkAddedComs(int comVal) {
 
 	switch(comVal) {
-		case getPos			: doGetPos();		break;
-		case getCOG			: doGetCOG();		break;
-		case getGPSData	: doGetData();		break;
-		case setMarkLat	: doSetLat();		break;
-		case setMarklon	: doSetLon();		break;
-		case getCourse		: doGetBearing();	break;
-		case getDist		: doGetDist();		break;
-		default				: printHelp();		break;
+		case getPos			: doGetPos();									break;
+		case getCOG			: doGetCOG();									break;
+		case getGPSData	: doGetData();									break;
+		case setMarkLat	: haveMarkLat = doSetLat(&destMark);	break;
+		case setMarklon	: haveMarkLon = doSetLon(&destMark);	break;
+		case getCourse		: doGetBearing();								break;
+		case getDist		: doGetDist();									break;
+		case deltaUTC		: doUTC();										break;
+		case setNPoleLat	:
+			havePoleLat = doSetLat(&mPole);
+			if (haveMPole()) {
+				mPole.writeToEEPROM(MAG_POLE_E_LOC);
+			}
+		break;
+		case setNPoleLon	:
+			havePoleLon = doSetLon(&mPole);
+			if (haveMPole()) {
+				mPole.writeToEEPROM(MAG_POLE_E_LOC);
+			}
+		break;
+		case	getMPPos		: doMPole();									break;
+		case	getMCorrect	: doMCorrect();								break;
+		default				: printHelp();									break;
 	}
 }
 
@@ -136,27 +200,11 @@ bool navigation::addNMEAHandlers(void) {
 							return true;
 						}
 					}
-					
 				}
-				
 			}
-			
 		}
 	}
 	return false;
-}
-
-
-void 	navigation::addCommands(void) {
-
-	NMEA2kBase::addCommands();
-	cmdParser.addCmd(getPos,"pos");
-	cmdParser.addCmd(getCOG,"cog");
-	cmdParser.addCmd(getGPSData,"gpsdata");
-	cmdParser.addCmd(setMarkLat,"setlat");
-	cmdParser.addCmd(setMarklon,"setlon");
-	cmdParser.addCmd(getCourse,"bearing");
-	cmdParser.addCmd(getDist,"dist");
 }
 
 
@@ -172,6 +220,11 @@ void navigation::printHelp(void) {
 	Serial.println("setLon      Set longitude of mark.");
 	Serial.println("bearing     Get true course from here to mark.");
 	Serial.println("dist        Get nautical miles from here to mark.");
+	Serial.println("UTC         Get time delta from UTC we are using. Or, if a parameter is added, set it.");
+	Serial.println("setPlat     Set latitude of magnetic pole.");
+	Serial.println("setPlon     Set longitude of magnetic pole.");
+	Serial.println("mPole       Get position of magnetic pole we are using now.");
+	Serial.println("mCorrect    Get correction value from trur to magnetic course.");
 }
 
 
@@ -307,7 +360,7 @@ void navigation::doGetData(void) {
 }
 
 
-void navigation::doSetLat(void) {
+bool navigation::doSetLat(globalPos* inPos) {
 
 	int			degInt;
 	double		degDou;
@@ -315,6 +368,7 @@ void navigation::doSetLat(void) {
 	globalPos	localPos;
 	bool			validPos;
 	
+	if (!inPos) return false;										// Sanity, pass in a NULL? Get a fail.
 	validPos = false;													// Ain't valid yet.
 	if (cmdParser.numParams()==2) {								// If we're looking at 2 params..
 		degDou = atof(cmdParser.getNextParam());				// Grab the first param and decode it as a double.
@@ -329,19 +383,20 @@ void navigation::doSetLat(void) {
 		validPos = localPos.valid();								// Sanity check the position.
 	}																		//
 	if (validPos) {													// If this passed the sanity text..
-		destMark.copyLat(&localPos);								// We basically tell the user everything was ok.
-		Serial.print("Latitude was set to : ");				// Bla bla bla.
-		Serial.println(destMark.showLatStr());					// Bla.
-		haveMarkLat = true;											// 
+		inPos->copyLat(&localPos);									// Write it to our destination mark.
+		Serial.print("Latitude was set to : ");				// We basically tell the user everything was ok.
+		Serial.println(inPos->showLatStr());					// Show the value.
+		return true;													// Tell 'em it worked.
 	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for either, latitude value & quadrant, (N/S kinda' thing).");
 		Serial.println("Or, latitude degree value, minute value and then quadrant.");
 		Serial.println("I can't make what you typed match any of these.");
 	}
+	return false;
 }
 
 
-void navigation::doSetLon(void) {
+bool navigation::doSetLon(globalPos* inPos) {
 
 	int			degInt;
 	double		degDou;
@@ -349,6 +404,7 @@ void navigation::doSetLon(void) {
 	globalPos	localPos;
 	bool			validPos;
 	
+	if (!inPos) return false;										// Sanity, pass in a NULL? Get a fail.
 	validPos = false;													// Ain't valid yet.
 	if (cmdParser.numParams()==2) {								// If we're looking at 2 params..
 		degDou = atof(cmdParser.getNextParam());				// Grab the first param and decode it as a double.
@@ -363,15 +419,16 @@ void navigation::doSetLon(void) {
 		validPos = localPos.valid();								// Sanity check the position.
 	}																		//
 	if (validPos) {													// If this passed the sanity text..
-		destMark.copyLon(&localPos);								// We basically tell the user everything was ok.
-		Serial.print("Longitude was set to : ");				// Bla bla bla.
-		Serial.println(destMark.showLonStr());					// Bla.
-		haveMarkLon = true;											// 
+		inPos->copyLon(&localPos);									// Write it to our destination mark.
+		Serial.print("Longitude was set to : ");				// We basically tell the user everything was ok.
+		Serial.println(inPos->showLonStr());					// Show the value.
+		return true;													// Success!
 	} else {																// Else we give them a kick to do better next time.
 		Serial.println("We're looking for, longitude value & quadrant, (E/W kinda' thing).");
 		Serial.println("Or, longitude degree value, minute value and then quadrant.");
 		Serial.println("I can't make what you typed match any of these.");
 	}
+	return false;
 }
 
 
@@ -381,7 +438,7 @@ void navigation::doGetBearing(void) {
 	
 	if (haveMark()) {
 		if (ourGPS->qualVal!=fixInvalid) {
-			bearDegT = bearing();
+			bearDegT = bearingMark();
 			Serial.print(bearDegT,0);
 			Serial.println(" Degrees true.");
 		} else {
@@ -411,4 +468,70 @@ void navigation::doGetDist(void) {
 }
 
 
+void navigation::doUTC(void) {
+	
+	int	UTCOffset;
+	
+	if (cmdParser.numParams()==0) {								// If we're looking at no params..
+		Serial.print("Time offset from UTC : ");
+		Serial.println(hoursOffUTC);
+	} else if (cmdParser.numParams()==1) {						// If we got a param..
+		UTCOffset = atoi(cmdParser.getNextParam());			// Decode it as an integer.
+		if (UTCOffset>=-12&&UTCOffset<=12) {					// Sanity check.
+			hoursOffUTC = UTCOffset;								// We can use this value.
+			EEPROM.put(UTC_DELTA_E_LOC,hoursOffUTC);			// We save this byte in EEPROM for next time.
+			Serial.print("Time offset from UTC set to : ");	// Tell 'em
+			Serial.println(hoursOffUTC);							//
+		}
+	} else {
+		Serial.println("Looking for either no param. I'll show you the offset.");
+		Serial.println("Or one param and I'll set that as offset for you.");
+	}
+}
 
+
+void navigation::doMPole(void) {
+
+	if (haveMPole()) {
+		Serial.print("Magnetic pole location : ");
+		Serial.print(mPole.showLatStr());
+		Serial.print("  ");
+		Serial.println(mPole.showLonStr());
+	} else {
+		Serial.println("No vaid magnetic pole available.");
+	}
+}
+
+
+void navigation::doMCorrect(void) {
+
+	float			correction;
+	
+	if (haveMPole()) {
+		if (ourGPS->qualVal!=fixInvalid) {
+			correction = bearingMPole();
+			if (correction>180) {
+				correction = 360 - correction;
+			} else {
+				correction = - correction;
+			}
+			Serial.print("Our magnetic correction value : ");
+			Serial.print(correction,1);
+			Serial.println(" Deg.");
+			
+		} else {
+			Serial.println("Sorry, no idea where we are. No GPS fix available.");
+		}
+	} else {
+		Serial.println("Sorry, no magnetic pole location saved.");
+	}
+}
+		
+		
+		
+		
+		
+		
+		
+		
+		

@@ -1,5 +1,6 @@
 #include <globalPos.h>
 #include <strTools.h>
+#include <EEPROM.h>
 
 //#define RADIUS_EARTH_KNOTS  3443.98		// Calculated this from www map.
 //#define RADIUS_EARTH_KNOTS  3440			// Saw this on google earth.
@@ -51,7 +52,34 @@ bool globalPos::valid(void) {
 	return true;
 }
 	
+int globalPos::writeToEEPROM(int addr) {
+
 	
+	double	value;
+	
+	value = getLatAsDbl();
+	EEPROM.put(addr,value);
+	addr = addr + sizeof(double);
+	value = getLonAsDbl();
+	EEPROM.put(addr,value);
+	return 2*sizeof(double);
+}
+
+
+int globalPos::copyFromEEPROM(int addr) {
+
+	double	value;
+	
+	EEPROM.get(addr,value);
+	setLat(value);
+	addr = addr + sizeof(double);
+	EEPROM.get(addr,value);
+	setLon(value);
+	return 2*sizeof(double);
+}
+
+				
+					
 // I wanna' be like you euooo.
 void globalPos::copyPos(globalPos* aLatLon) {
 

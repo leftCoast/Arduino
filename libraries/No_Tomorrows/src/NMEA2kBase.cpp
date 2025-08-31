@@ -19,6 +19,7 @@ NMEA2kBase::NMEA2kBase(uint32_t inDeviceID,byte inDeviceClass,byte inDeviceFunct
 	devListTimer = new timeObj(LIST_MS);
    gettingDevList = false;
    devListNeedsRefresh = true;
+   EEPROMUsed = 1;						// NOTE we use one byte.
 }
 
 
@@ -54,6 +55,7 @@ void NMEA2kBase::setup(void) {
       Serial.println("Stopping process.");
       while (1);
    }
+   
    addCommands();
 }
 
@@ -110,8 +112,8 @@ byte NMEA2kBase::getInitialAddr(void) {
  	
  	byte addr;
  	
- 	EEPROM.get(0,addr);	// Read in the address.
- 	return addr;			// Pass it back.
+ 	EEPROM.get(NMEA_ADDR_E_LOC,addr);	// Read in the address.
+ 	return addr;							// Pass it back.
 }
 
 
@@ -119,8 +121,8 @@ byte NMEA2kBase::getInitialAddr(void) {
 // storage. It will be used as the default address on next power-up.		
 void NMEA2kBase::changeAddress(byte inAddr) {
 	
-	llamaBrd->setAddr(inAddr);	// Set this as our new address.
-	EEPROM.put(0,inAddr);		// Save the new address into long term storage.
+	llamaBrd->setAddr(inAddr);				// Set this as our new address.
+	EEPROM.put(NMEA_ADDR_E_LOC,inAddr);	// We saved ONE byte in EEPROM.
 }
 
 

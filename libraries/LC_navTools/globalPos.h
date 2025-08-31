@@ -33,6 +33,9 @@ class globalPos {
 	
 				bool		valid(void);
 				
+				int		writeToEEPROM(int addr);
+				int		copyFromEEPROM(int addr);
+				
 				void		copyPos(globalPos* aLatLon);
 				void		copyLat(globalPos* aLatLon);
 				void		copyLon(globalPos* aLatLon);

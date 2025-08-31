@@ -5,6 +5,10 @@
 #include <lilParser.h>
 #include <handlers.h>
 
+
+#define NMEA_ADDR_E_LOC	0
+
+
 enum baseComs {
 	noCommand,
    devList,
@@ -57,6 +61,7 @@ class NMEA2kBase {
    			bool			devListNeedsRefresh;	// List is too old to bother with.
    			netName		ourName;					// We save a copy of our net name when starting up.
 				byte			ourAddr;					// And our address.
+				int			EEPROMUsed;				// Amount of bytes we use at the start of the EEPROM.
 		     	netName		aName;					// A place to save a net name. (For copy/paste)
 
 };
