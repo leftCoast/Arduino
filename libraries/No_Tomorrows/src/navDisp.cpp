@@ -292,10 +292,12 @@ float NMEABox::checkData(void) {
 				value = NAN;
 			}
 		break;
-		case DEPTH		: value = ourNavApp.depthSounder->feet/6.0;	break;
+		case DEPTH		: 
+			value = ourNavApp.depthSounder->feet/6.0;
 			if (value>99||value<0) {
 				value = NAN;
 			}
+		break;
 		case BARO		: 
 			value = baroSmoother.addData(ourNavApp.barometer->inHg);
 			if (value>33||value<20) {

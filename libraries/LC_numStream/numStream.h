@@ -70,12 +70,14 @@ class numStreamIn : public idler {
 	virtual  bool  		addValue(char* param,int paramIndex,bool isLast);	
 	virtual	bool			dataChar(char inChar);
 	virtual	bool			checkTheSum(void);
+	virtual	void			setSpew(bool onOff);
 	virtual	exitStates	findSynkChar(void);
 	virtual	exitStates	readToken(void);
    virtual  void  		idle(void);
 				void			errMsg(errType inErr);
 	
 				Stream*	ourPort;
+				bool		spew;
             bool		synk;
             states	ourState;
             char*		tokenBuff;

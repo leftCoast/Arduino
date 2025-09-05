@@ -10,6 +10,7 @@ uint8_t		rx_buffer[255-64];	// On teensy you can add memory to the incoming seri
 numStreamIn::numStreamIn(Stream* inStream,int tokenBuffBytes) {
    
    ourPort		= inStream;
+   spew			= true;
    tokenBytes	= 0;
    tokenBuff	= NULL;
 	if (resizeBuff(tokenBuffBytes,&tokenBuff)) {
@@ -94,6 +95,10 @@ bool numStreamIn::checkTheSum(void) {
 }
 
 
+// True we send every char we see out the serial port. False, we don't.
+void numStreamIn::setSpew(bool onOff) { spew = onOff; }
+
+
 // Spin though the data looking for the synk char.
 exitStates numStreamIn::findSynkChar(void) {
 	
@@ -103,6 +108,7 @@ exitStates numStreamIn::findSynkChar(void) {
 	while(!timoutTimer.ding()) {				// Looping for a time..
 		if (ourPort->available()) {			// If there are bytes to be had..
 			aChar = ourPort->read();			// We grab one..
+			if (spew) Serial.print(aChar);	// If spewing, lets see it.
 			if (aChar==SYNK_CHAR) {				// If it's the synk char..
 				msgIndex = 0;						// Setup to read a message.
 				msgBuf[0] = '\0';					// Used to compare checksums.
@@ -125,7 +131,8 @@ exitStates numStreamIn::readToken(void) {
 	
 	while(!timoutTimer.ding()) {						// Looping for a time..
 		if (ourPort->available()) {					// If there are bytes to be had..
-			aChar = ourPort->read();					// We grab one..										
+			aChar = ourPort->read();					// We grab one..
+			if (spew) Serial.print(aChar);			// If spewing, lets see it.									
 			if (msgIndex<msgBufBytes-2) {				// If we have enough room..
 				msgBuf[msgIndex] = aChar;				// Add the char to the checksum buffer.
 				msgIndex++;									// Bump up the char index.

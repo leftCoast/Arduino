@@ -148,6 +148,7 @@ void 	navigation::addCommands(void) {
 	cmdParser.addCmd(setNPoleLon,"setplon");
 	cmdParser.addCmd(getMPPos,"mpole");
 	cmdParser.addCmd(getMCorrect,"mcorrect");
+	cmdParser.addCmd(spew,"spew");
 }
 
 
@@ -174,8 +175,9 @@ void navigation::checkAddedComs(int comVal) {
 				mPole.writeToEEPROM(MAG_POLE_E_LOC);
 			}
 		break;
-		case	getMPPos		: doMPole();									break;
-		case	getMCorrect	: doMCorrect();								break;
+		case getMPPos		: doMPole();									break;
+		case getMCorrect	: doMCorrect();								break;
+		case spew			: doSpew();										break;
 		default				: printHelp();									break;
 	}
 }
@@ -224,7 +226,8 @@ void navigation::printHelp(void) {
 	Serial.println("setPlat     Set latitude of magnetic pole.");
 	Serial.println("setPlon     Set longitude of magnetic pole.");
 	Serial.println("mPole       Get position of magnetic pole we are using now.");
-	Serial.println("mCorrect    Get correction value from trur to magnetic course.");
+	Serial.println("mCorrect    Get correction value from true to magnetic course.");
+	Serial.println("spew			 Just spew toggles GPSvdata spewing. Adding on or off works too.");
 }
 
 
@@ -528,9 +531,19 @@ void navigation::doMCorrect(void) {
 }
 		
 		
-		
-		
-		
+void navigation::doSpew(void) {
+
+	if (cmdParser.numParams()==0) {							// If we're looking at no params..
+		ourGPS->setSpew(!(ourGPS->spew));					// We toggle spewing.
+	} else if (cmdParser.numParams()==1) {					// If we're looking at one param..
+		if (!strcmp(cmdParser.getNextParam(),"on")) {
+			ourGPS->setSpew(true);
+		} else {
+			ourGPS->setSpew(false);
+		}
+	}
+	if (!ourGPS->spew) Serial.print("Spewing off.");
+}
 		
 		
 		

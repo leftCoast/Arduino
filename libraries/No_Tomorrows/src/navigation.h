@@ -28,7 +28,8 @@ enum engComs {
 	setNPoleLat,
 	setNPoleLon,
 	getMPPos,
-	getMCorrect
+	getMCorrect,
+	spew
 };
 
 
@@ -60,6 +61,7 @@ class navigation : public	NMEA2kBase {
 				void		doUTC(void);
 				void		doMPole(void);
 				void		doMCorrect(void);
+				void		doSpew(void);
 				
 				bool				haveMarkLat;
 				bool				haveMarkLon;
