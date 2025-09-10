@@ -327,9 +327,9 @@ float GPSBox::checkData(void) {
 	value = NAN;
 	if (ourGPS->valid) {
 		switch(dataChoice) {
-			case BEARING	: value = ourNavApp.bearingMark();	break;
-			case DIST		: value = ourNavApp.distance();	break; 
-			default			: value = NAN;
+			case BEARING	: value = ourNavApp.bearingMark(true);	break;
+			case DIST		: value = ourNavApp.distance();			break;
+			default			: value = NAN;									break;
 		}
 	}
 	return value;

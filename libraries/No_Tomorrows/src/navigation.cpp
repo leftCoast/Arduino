@@ -33,37 +33,47 @@ navigation::navigation(void)
 	haveMarkLat		= false;
 	haveMarkLon		= false;
 	EEPROM.get(UTC_DELTA_E_LOC,hoursOffUTC);
-	mPole.copyFromEEPROM(MAG_POLE_E_LOC);
-	havePoleLat		= true;
-	havePoleLon		= true;
-	
+	EEPROM.get(MAG_CORRECT_LOC,magCorrect);
 	timer.setTime(2000);
 }
 	
-	
-navigation::~navigation(void) {  }
+
+// I really doubt this will ever get called. And even if it does, Adafruit typically
+// doesn't make their display destructors virtual. So who knows what'll happen?	
+navigation::~navigation(void) {
+
+	if (screen) {
+		delete(screen);
+		screen = NULL;
+	}
+	if (ourGPS) {
+		delete(ourGPS);
+		ourGPS = NULL;
+	}
+}
 
 	
 void navigation::setup(void) {
 	
-	NMEA2kBase::setup();
-	ourGPS = new GPSReader;
-	ourGPS->begin();
-	Serial1.begin(9600);
-	delay(250);
-	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);
-	screen->begin();
-	ourNavDisp.setup();
-	 while(Serial1.available()) Serial1.read();
+	NMEA2kBase::setup();																		// Ancestors get to be setup first.
+	ourGPS = new GPSReader;																	// I guess we own the GPS reader?
+	ourGPS->begin();																			// Give it a kick to start it.
+	Serial1.begin(9600);																		// Fire up the GPS's serial port for it.
+	delay(250);																					// DO we -really- need to delay here?
+	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);		// Create the display.
+	screen->begin();																			// Give the display a kick to get going.
+	ourNavDisp.setup();																		// Call the display's setup function.
+	 while(Serial1.available()) Serial1.read();										// Flush out the GPS Serial data before letting it read nonsense.
 }
 
 
+// Pretty soon we can dump the timer from up here. Let the display deal with it.
 void navigation::loop(void) {
 	
-	NMEA2kBase::loop();						// Let our ancestors do their thing.
-	if (timer.ding()) {
-      ourNavDisp.showPos(&(ourGPS->latLon));
-      timer.start();
+	NMEA2kBase::loop();								// Let our ancestors do their thing.
+	if (timer.ding()) {								// If the timer dings..
+      ourNavDisp.showPos(&(ourGPS->latLon));	// Tell 'em it's time to refresh screen info.
+      timer.start();									// restart the timer.
    }
 }
 
@@ -77,44 +87,27 @@ bool navigation::haveMark(void) {
 }
 
 
-bool navigation::haveMPole(void) {
-
-	if (havePoleLat && havePoleLon) {
-		return mPole.valid();
-	}
-	return false;
-}
-
-
-float navigation::bearingMark(void) {
+float navigation::bearingMark(bool magnetic) {
 	
 	float	bearingVal;
 	
-	bearingVal = NAN;
-	if (haveMark()) {
-		if (ourGPS->valid) {
-			bearingVal = (float)ourGPS->latLon.trueBearingTo(&destMark);
-			if (bearingVal<0) bearingVal = NAN;
-			else if (bearingVal>360)  bearingVal = NAN;
-		}
-	}
-	return bearingVal;
-}
-
-
-float navigation::bearingMPole(void) {
-	
-	float	bearingVal;
-	
-	bearingVal = NAN;
-	if (haveMPole()) {
-		if (ourGPS->valid) {
-			bearingVal = (float)ourGPS->latLon.trueBearingTo(&mPole);
-			if (bearingVal<0) bearingVal = NAN;
-			else if (bearingVal>360)  bearingVal = NAN;
-		}
-	}
-	return bearingVal;
+	bearingVal = NAN;																		// Well, assume failure.
+	if (haveMark()) {																		// If we -have- a mark.
+		if (ourGPS->valid) {																// And we have a vlid fix..
+			bearingVal = (float)ourGPS->latLon.trueBearingTo(&destMark);	// Calculate the true bearing to the mark.
+			if (bearingVal<0) bearingVal = NAN;										// Got a negative? Fail.
+			else if (bearingVal>360)  bearingVal = NAN;							// Got more than 360? Fail.
+			else if (magnetic) {															// Else it's a good bearing, if magnetic though..
+				bearingVal = bearingVal + magCorrect;								// We'll add the correction.
+				if (bearingVal>360) {													// If it's bigger n 360 now..
+					bearingVal = bearingVal - 360;									// Calculate the real magnetic bearing.
+				} else if (bearingVal<0) {												// If it's less n zero now..
+					bearingVal = bearingVal + 360;									// Calculate the real magnetic bearing.
+				}																				//
+			}																					//
+		}																						//
+	}																							//
+	return bearingVal;																	// Return the result.
 }
 
 
@@ -144,10 +137,7 @@ void 	navigation::addCommands(void) {
 	cmdParser.addCmd(getCourse,"bearing");
 	cmdParser.addCmd(getDist,"dist");
 	cmdParser.addCmd(deltaUTC,"utc");
-	cmdParser.addCmd(setNPoleLat,"setplat");
-	cmdParser.addCmd(setNPoleLon,"setplon");
-	cmdParser.addCmd(getMPPos,"mpole");
-	cmdParser.addCmd(getMCorrect,"mcorrect");
+	cmdParser.addCmd(MCorrect,"mcorrect");
 	cmdParser.addCmd(spew,"spew");
 }
 
@@ -163,20 +153,7 @@ void navigation::checkAddedComs(int comVal) {
 		case getCourse		: doGetBearing();								break;
 		case getDist		: doGetDist();									break;
 		case deltaUTC		: doUTC();										break;
-		case setNPoleLat	:
-			havePoleLat = doSetLat(&mPole);
-			if (haveMPole()) {
-				mPole.writeToEEPROM(MAG_POLE_E_LOC);
-			}
-		break;
-		case setNPoleLon	:
-			havePoleLon = doSetLon(&mPole);
-			if (haveMPole()) {
-				mPole.writeToEEPROM(MAG_POLE_E_LOC);
-			}
-		break;
-		case getMPPos		: doMPole();									break;
-		case getMCorrect	: doMCorrect();								break;
+		case MCorrect		: doMCorrect();								break;
 		case spew			: doSpew();										break;
 		default				: printHelp();									break;
 	}
@@ -223,10 +200,7 @@ void navigation::printHelp(void) {
 	Serial.println("bearing     Get true course from here to mark.");
 	Serial.println("dist        Get nautical miles from here to mark.");
 	Serial.println("UTC         Get time delta from UTC we are using. Or, if a parameter is added, set it.");
-	Serial.println("setPlat     Set latitude of magnetic pole.");
-	Serial.println("setPlon     Set longitude of magnetic pole.");
-	Serial.println("mPole       Get position of magnetic pole we are using now.");
-	Serial.println("mCorrect    Get correction value from true to magnetic course.");
+	Serial.println("mCorrect    Get or set correction value from true to magnetic course.");
 	Serial.println("spew			 Just spew toggles GPSvdata spewing. Adding on or off works too.");
 }
 
@@ -493,43 +467,28 @@ void navigation::doUTC(void) {
 }
 
 
-void navigation::doMPole(void) {
-
-	if (haveMPole()) {
-		Serial.print("Magnetic pole location : ");
-		Serial.print(mPole.showLatStr());
-		Serial.print("  ");
-		Serial.println(mPole.showLonStr());
-	} else {
-		Serial.println("No vaid magnetic pole available.");
-	}
-}
-
-
 void navigation::doMCorrect(void) {
-
-	float			correction;
 	
-	if (haveMPole()) {
-		if (ourGPS->qualVal!=fixInvalid) {
-			correction = bearingMPole();
-			if (correction>180) {
-				correction = 360 - correction;
-			} else {
-				correction = - correction;
-			}
-			Serial.print("Our magnetic correction value : ");
-			Serial.print(correction,1);
-			Serial.println(" Deg.");
-			
-		} else {
-			Serial.println("Sorry, no idea where we are. No GPS fix available.");
-		}
-	} else {
-		Serial.println("Sorry, no magnetic pole location saved.");
-	}
+	float	value;
+	
+	if (cmdParser.numParams()==0) {																	// If we're looking at no params..
+		Serial.print("Magnetic correction from true : ");										// We tell 'em..
+		Serial.println(magCorrect);																	// What we have.
+	} else if (cmdParser.numParams()==1) {															// If we got one param..
+		value = atof(cmdParser.getNextParam());													// Decode it as a float.
+		if (value<=180&&value>=-180) {																// Sanity check.
+			magCorrect = value;																			// We can use this value.
+			EEPROM.put(MAG_CORRECT_LOC,magCorrect);												// We save this value in EEPROM for next time.
+			Serial.print("Magnetic correction  set to : ");										// Tell 'em
+			Serial.println(magCorrect);																//
+		} else {																								// Else wacky value?
+			Serial.println("Sorry, looking for a value between -180 & 180 degrees.");	// Tell 'em no.
+		}																										// 
+	} else {																									// Else the wrong number of params.
+		Serial.println("Looking for either no param. I'll show you the correction.");	// Tell 'em.
+		Serial.println("Or one param and I'll set that as correction for you.");		// At length.
+	}																											//
 }
-		
 		
 void navigation::doSpew(void) {
 

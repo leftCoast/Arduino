@@ -12,8 +12,8 @@
 // two values   : float str : 38.65934 west
 //
 
-#define	UTC_DELTA_E_LOC	1											// The UTC offset byte's EEPROM address.
-#define	MAG_POLE_E_LOC		UTC_DELTA_E_LOC + sizeof(int)		// The magnetic pole's lat lon EEPROM address.
+#define	UTC_DELTA_E_LOC	1											// The UTC offset byte's EEPROM address. (int)
+#define	MAG_CORRECT_LOC	UTC_DELTA_E_LOC + sizeof(int)		// The magnetic pole's lat lon EEPROM address. (float)
 
 enum engComs {
 
@@ -25,10 +25,7 @@ enum engComs {
 	getCourse,
 	getDist,
 	deltaUTC,
-	setNPoleLat,
-	setNPoleLon,
-	getMPPos,
-	getMCorrect,
+	MCorrect,
 	spew
 };
 
@@ -43,7 +40,7 @@ class navigation : public	NMEA2kBase {
 	virtual	void		loop(void);
 				bool		haveMark(void);
 				bool		haveMPole(void);
-				float		bearingMark(void);
+				float		bearingMark(bool magnetic=false);
 				float		bearingMPole(void);
 				float		distance(void);
 				float		inHg(void);
@@ -59,16 +56,12 @@ class navigation : public	NMEA2kBase {
 				void		doGetBearing(void);
 				void		doGetDist(void);
 				void		doUTC(void);
-				void		doMPole(void);
 				void		doMCorrect(void);
 				void		doSpew(void);
 				
 				bool				haveMarkLat;
 				bool				haveMarkLon;
 				globalPos		destMark;
-				bool				havePoleLat;
-				bool				havePoleLon;
-				globalPos		mPole;
 				barometerObj*	barometer;
 				waterSpeedObj*	knotMeter;
 				waterDepthObj*	depthSounder;
@@ -76,6 +69,7 @@ class navigation : public	NMEA2kBase {
 				engParam*		engHdler;
 				timeObj     	timer;
 				int				hoursOffUTC;
+				float				magCorrect;
 };
 
 
