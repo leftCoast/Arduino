@@ -470,6 +470,70 @@ alarms engParamII::getAlarms(void) { return ourAlarms; }
 
 
 
+// ****************************************************
+// PGN 0x1F904: PGN 129029 - Navigation Data
+// ****************************************************
+
+
+PGN0x1F904Handler::PGN0x1F904Handler(netObj* inNetObj)
+   : msgHandler(inNetObj) { setSendInterval(1000); }
+
+   
+PGN0x1F904Handler::~PGN0x1F904Handler(void) {  }
+
+
+// Fill in to create messages.           
+void PGN0x1F904Handler::newMsg(void) {                 
+
+   message	outMsg;
+   int		numBytes;
+   byte     sid;
+   float		meters;
+   int32_t	meters32;
+   byte		aByte;
+   uint16_t	bearingU16;
+   int16_t	knotsMadeGood;
+
+   numBytes = 34;													// Doc. says 34 bytes.
+   outMsg.setNumBytes(numBytes);								// Try for the block of RAM.
+   if (!outMsg.getNumBytes()) return;						// If we didn't get them, we bail.
+   outMsg.setPGN(0x1F904);										// Set in our PGN.
+   outMsg.setPriority(3);										// Priority.
+   outMsg.setSourceAddr(ourNetObj->getAddr());			// Our address as source.
+  	sid = 0;															// Gobal.. Err.. Forgot what.
+   outMsg.setDataByte(0,sid);									// serial ID. Serial ID for data packets?
+   meters = distToWP * 1852;									// They want meters?! Nm -> meters;
+   meters32 = round(meters * 100);							// Integer x 100.
+   outMsg.setLongInData(1,meters32);						// And we stuff it in.
+   aByte = 0;														// Clear out the byte
+   if (magnetic) {												// Magnetic means 1 (lower two bits).
+   	aByte = 1;													// Good enough.
+   }																	//
+   if (perpCrossed) {											// Perpendicular crossed?
+   	aByte = aByte | 0b00000100;							// Next two bits set to value one.
+   }																	//
+   if (inMinRange) {												// Close enough to the mark to say we're there?
+   	aByte = aByte | 0b00010000;							// Next two bits set to value one.
+   }																	//
+   aByte = aByte | 0b01000000;								// Next two bits? Always using great circle.
+   outMsg.setDataByte(5,aByte);								// Stuff in the byte.
+   outMsg.setLongInData(6,0);									// No idea what they want here.
+   outMsg.setUIntInData(10,0);								// Here either.
+   bearingU16 = round(bearingFromStart * 10000);		// Calculate the int bearing.
+   outMsg.setUIntInData(12,bearingU16);					// Bearing from start.
+   bearingU16 = round(bearingFromFix * 10000);			// Calculate the int bearing.
+   outMsg.setUIntInData(14,bearingU16);					// Bearing from fix.
+   outMsg.setULongInData(16,startWPNum);					// Set in waypoint number. If we have one..
+   outMsg.setULongInData(20,endWPNum);						// Set the endpoint waypoint number. If we have one.
+   outMsg.setLongInData(24,endPos.getLatAsInt32());	// Set Destination lat.
+   outMsg.setLongInData(28,endPos.getLonAsInt32());	// Set Destination lon.
+	knotsMadeGood = round(knMadeGood * 100);				// Calculate the int version.
+	outMsg.setIntInData(32,knotsMadeGood);					// Stuff it into the message.
+	sendMsg(&outMsg);												// And off it goes!
+}
+
+
+
 // ************* LC_ChatObj *************
 /*
 LC_ChatObj::LC_ChatObj(netObj* inNetObj)

@@ -25,11 +25,12 @@ navigation  ourNavApp;
 navigation::navigation(void) 
 	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
 	
-	barometer		= new barometerObj(llamaBrd);
-	knotMeter 		= new waterSpeedObj(llamaBrd);
-	depthSounder	= new waterDepthObj(llamaBrd);
-	fuelGauge		= new fluidLevelObj(llamaBrd);
-	engHdler			= new engParam(llamaBrd);
+	barometer		= NULL;
+	knotMeter 		= NULL;
+	depthSounder	= NULL;
+	fuelGauge		= NULL;
+	engHdler			= NULL;
+	navDataHdlr		= NULL;
 	haveMarkLat		= false;
 	haveMarkLon		= false;
 	EEPROM.get(UTC_DELTA_E_LOC,hoursOffUTC);
@@ -41,7 +42,7 @@ navigation::navigation(void)
 // I really doubt this will ever get called. And even if it does, Adafruit typically
 // doesn't make their display destructors virtual. So who knows what'll happen?	
 navigation::~navigation(void) {
-
+	
 	if (screen) {
 		delete(screen);
 		screen = NULL;
@@ -58,6 +59,7 @@ void navigation::setup(void) {
 	NMEA2kBase::setup();																		// Ancestors get to be setup first.
 	ourGPS = new GPSReader;																	// I guess we own the GPS reader?
 	ourGPS->begin();																			// Give it a kick to start it.
+	ourGPS->setSpew(false);																	// Shut up spew!
 	Serial1.begin(9600);																		// Fire up the GPS's serial port for it.
 	delay(250);																					// DO we -really- need to delay here?
 	screen = (displayObj*)new adafruit_2050(SCREEN_CS,LC_DC,SCREEN_RST);		// Create the display.
@@ -73,6 +75,7 @@ void navigation::loop(void) {
 	NMEA2kBase::loop();								// Let our ancestors do their thing.
 	if (timer.ding()) {								// If the timer dings..
       ourNavDisp.showPos(&(ourGPS->latLon));	// Tell 'em it's time to refresh screen info.
+      fillNavPGN();									// Check data and send it off to the NMEA2K stuff.
       timer.start();									// restart the timer.
    }
 }
@@ -126,6 +129,41 @@ float navigation::distance(void) {
 }
 
 
+void navigation::fillNavPGN(bool inMagnetic) {
+
+	if (haveMark() && ourGPS->valid) {
+		navDataHdlr->distToWP = distance();								// Set distance in NM.
+		navDataHdlr->courseToWP = bearingMark(inMagnetic);			// Set the course, magnetic or true.
+		navDataHdlr->magnetic = inMagnetic;								// Tell 'em what we chose.
+		navDataHdlr->perpCrossed = true;//false;								// Crossed the perpendicular? Donno'.
+		navDataHdlr->inMinRange = true;//false;									// Close enough to say we're there? Donno'.
+		navDataHdlr->greatCircle = true;									// We only do great circle.k
+		navDataHdlr->ETAHours = 0;											// NEED TO WORK ON THIS ONE.
+		navDataHdlr->ETADate = 0;											// NEED TO WORK ON THIS ONE. Days since 1 January 1970! :D
+		navDataHdlr->bearingFromStart = navDataHdlr->courseToWP;	// Only doing one WP so this IS the start.
+		navDataHdlr->bearingFromFix = navDataHdlr->courseToWP;	// Ditto.
+		navDataHdlr->startWPNum = 0;										// Not using WP numbers at this time.
+		navDataHdlr->endWPNum = 0;											// Ditto.
+		navDataHdlr->endPos.copyPos(&destMark);						// Where we want to go.
+		navDataHdlr->knMadeGood = 0;										// NEED TO SETUP LOG.
+	} else {
+		navDataHdlr->distToWP = 0;
+		navDataHdlr->courseToWP = 0;
+		navDataHdlr->magnetic = 0;
+		navDataHdlr->perpCrossed = 0;
+		navDataHdlr->inMinRange = 0;
+		navDataHdlr->greatCircle = 0;
+		navDataHdlr->ETAHours = 0;
+		navDataHdlr->ETADate = 0;				
+		navDataHdlr->bearingFromStart = 0;
+		navDataHdlr->bearingFromFix = 0;
+		navDataHdlr->startWPNum = 0;
+		navDataHdlr->endWPNum = 0;
+		navDataHdlr->knMadeGood = 0;
+	}
+}
+
+
 void 	navigation::addCommands(void) {
 
 	NMEA2kBase::addCommands();
@@ -164,7 +202,14 @@ void navigation::checkAddedComs(int comVal) {
 // Allocate and add the handlers for our different NMEA messages we are going to handle or
 // create.
 bool navigation::addNMEAHandlers(void) {
-
+	
+	barometer		= new barometerObj(llamaBrd);
+	knotMeter 		= new waterSpeedObj(llamaBrd);
+	depthSounder	= new waterDepthObj(llamaBrd);
+	fuelGauge		= new fluidLevelObj(llamaBrd);
+	engHdler			= new engParam(llamaBrd);
+	navDataHdlr		= new PGN0x1F904Handler(llamaBrd);
+	
 	if (addGPSHandlers(llamaBrd)) {
 		if (barometer) {
 			llamaBrd->addMsgHandler(barometer);
@@ -176,7 +221,10 @@ bool navigation::addNMEAHandlers(void) {
 						llamaBrd->addMsgHandler(fuelGauge);						
 						if (engHdler) {
 							llamaBrd->addMsgHandler(engHdler);
-							return true;
+							if (navDataHdlr) {
+								llamaBrd->addMsgHandler(navDataHdlr);
+								return true;
+							}
 						}
 					}
 				}
@@ -320,12 +368,13 @@ void navigation::doGetData(void) {
 	numItems = ourGPS->satInViewList.getCount();
 	Serial.println("-------------------------------");
 	Serial.print("Satelites in view : ");Serial.println(numItems);
+	Serial.println(".....");
 	for (int i=0;i<numItems;i++) {
 		dataNode = (satData*)ourGPS->satInViewList.getByIndex(i);
 		if (dataNode) {
 			Serial.print("Satellite ID      : ");Serial.println(dataNode->PRNNum);
 			Serial.print("Elevation         : ");Serial.println(dataNode->elevation);
-			Serial.print("Azimuth            : ");Serial.println(dataNode->azimuth);
+			Serial.print("Azimuth           : ");Serial.println(dataNode->azimuth);
 			Serial.print("Sig / Noise       : ");Serial.println(dataNode->SigToNoise);
 			if (i==numItems-1) {
 				Serial.println("-------------------------------");

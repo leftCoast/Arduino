@@ -4,6 +4,8 @@
 #include <mapper.h>
 #include <runningAvg.h>
 #include <SAE_J1939.h>
+#include <globalPos.h>
+
 
 //                                                                                        |
 // Each type of device that comunicates with the network needs to be able to perform
@@ -204,8 +206,10 @@ class barometerObj  : public msgHandler {
 };
 
 
-// ************* engParam *************
-// 0x1F200
+
+// ****************************************************
+// PGN 0x1F200: PGN 127488 - engParam
+// ****************************************************
 
 
 #define RPM_RADPS	0.10472				// Close enough.
@@ -241,8 +245,11 @@ class engParam  : public msgHandler {
 
 
 
-// ************* engParamII *************
-// 0x1F201
+
+// ****************************************************
+// PGN 0x1F201: PGN 127489 - engParamII
+// ****************************************************
+
 
 struct alarms {
 
@@ -267,6 +274,38 @@ class engParamII  : public msgHandler {
     			int		engInst;
             alarms	ourAlarms;        
 };
+
+
+
+// ****************************************************
+// PGN 0x1F904: PGN 129029 - Navigation Data
+// ****************************************************
+
+
+class PGN0x1F904Handler :  public msgHandler {
+
+    public:
+            PGN0x1F904Handler(netObj* inNetObj);
+            ~PGN0x1F904Handler(void);
+
+   virtual  void  newMsg(void);                 // Fill in to create messages.
+   
+   			double		distToWP;
+   			float			courseToWP;
+   			bool			magnetic;
+   			bool			perpCrossed;
+   			bool			inMinRange;
+   			bool			greatCircle;
+   			uint32_t		ETAHours;
+   			uint16_t		ETADate;					// Days since 1 January 1970! :D
+   			double		bearingFromStart;
+   			float			bearingFromFix;
+   			double		startWPNum;
+   			double		endWPNum;
+   			globalPos	endPos;
+   			float			knMadeGood;				// Velocity made good toward waypoint;
+};
+
 
 
 // ************* LC_ChatObj *************

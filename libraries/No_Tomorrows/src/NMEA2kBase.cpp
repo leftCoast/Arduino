@@ -37,7 +37,12 @@ NMEA2kBase::~NMEA2kBase(void) {
 // extended by whatever function this is used for.	
 void NMEA2kBase::setup(void) {
 
+	timeObj	serialTimer(3000);
+	
 	Serial.begin(9600);
+	do {
+		 delay(1000);
+	} while(!Serial && !serialTimer.ding());
 	llamaBrd = new llama2000(LLAMA_RST,LLAMA_INT);
 	if (!llamaBrd) {
 		Serial.println("Can not allocate llama board.");
@@ -55,7 +60,6 @@ void NMEA2kBase::setup(void) {
       Serial.println("Stopping process.");
       while (1);
    }
-   
    addCommands();
 }
 

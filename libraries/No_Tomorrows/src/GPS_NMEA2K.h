@@ -92,11 +92,5 @@ class PGN0x1F805Handler :  public msgHandler {
    virtual  void  newMsg(void);                 // Fill in to create messages.
 };
 
-/*
-// GPS to NMEA2K handlers.
-extern	PGN0x1F801Handler   ourPGN0x1F801;
-extern	PGN0x1F802Handler   ourPGN0x1F802;
-extern	PGN0x1F805Handler   ourPGN0x1F805;
-*/
 
 #endif

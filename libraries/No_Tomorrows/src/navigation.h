@@ -41,9 +41,8 @@ class navigation : public	NMEA2kBase {
 				bool		haveMark(void);
 				bool		haveMPole(void);
 				float		bearingMark(bool magnetic=false);
-				float		bearingMPole(void);
 				float		distance(void);
-				float		inHg(void);
+				void		fillNavPGN(bool inMagnetic=true);
 	virtual	void		checkAddedComs(int comVal);
 	virtual	bool		addNMEAHandlers(void);			// Without handlers, who are we anyway?
 	virtual	void		addCommands(void);
@@ -59,17 +58,18 @@ class navigation : public	NMEA2kBase {
 				void		doMCorrect(void);
 				void		doSpew(void);
 				
-				bool				haveMarkLat;
-				bool				haveMarkLon;
-				globalPos		destMark;
-				barometerObj*	barometer;
-				waterSpeedObj*	knotMeter;
-				waterDepthObj*	depthSounder;
-				fluidLevelObj*	fuelGauge;
-				engParam*		engHdler;
-				timeObj     	timer;
-				int				hoursOffUTC;
-				float				magCorrect;
+				bool						haveMarkLat;
+				bool						haveMarkLon;
+				globalPos				destMark;
+				barometerObj*			barometer;
+				waterSpeedObj*			knotMeter;
+				waterDepthObj*			depthSounder;
+				fluidLevelObj*			fuelGauge;
+				engParam*				engHdler;
+				PGN0x1F904Handler*	navDataHdlr;
+				timeObj     			timer;
+				int						hoursOffUTC;
+				float						magCorrect;
 };
 
 
