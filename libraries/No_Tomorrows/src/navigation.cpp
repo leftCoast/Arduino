@@ -538,19 +538,21 @@ void navigation::doMCorrect(void) {
 		Serial.println("Or one param and I'll set that as correction for you.");		// At length.
 	}																											//
 }
-		
+
+
+// Turn GPS raw text data out the serial port on or off. (PC or Mac)		
 void navigation::doSpew(void) {
 
 	if (cmdParser.numParams()==0) {							// If we're looking at no params..
 		ourGPS->setSpew(!(ourGPS->spew));					// We toggle spewing.
 	} else if (cmdParser.numParams()==1) {					// If we're looking at one param..
-		if (!strcmp(cmdParser.getNextParam(),"on")) {
-			ourGPS->setSpew(true);
-		} else {
-			ourGPS->setSpew(false);
-		}
-	}
-	if (!ourGPS->spew) Serial.print("Spewing off.");
+		if (!strcmp(cmdParser.getNextParam(),"on")) {	// If we get "on"..
+			ourGPS->setSpew(true);								// We force it to spew data.
+		} else {														// Else, anything else..
+			ourGPS->setSpew(false);								// We shut the spewing off.
+		}																//
+	}																	//
+	if (!ourGPS->spew) Serial.print("Spewing off.");	// We ONLY say when it's off. Else it gets into spew stream.
 }
 		
 		

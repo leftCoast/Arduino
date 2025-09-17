@@ -6,6 +6,7 @@
 #include <grenade.h>
 #include <sett.h>
 #include <rpnCalc.h>
+#include <navTest.h>
 
 //#include <starTrek.h>
 //#include "src/regionTest/regionTest.h"
@@ -70,6 +71,7 @@ panel* handheldOS::createPanel(int panelID) {
       case settApp         : return new sett(settApp);
       //case rgnTestApp    : return new regionTest();
       //case iconEditApp   : return new iconEdit();
+      case navTestApp      : return new navTest(navTestApp);
       default              : return NULL;
    }
 }

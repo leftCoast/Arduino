@@ -28,6 +28,8 @@
 #define SETT_Y      283
 #define CALC_X      160
 #define CALC_Y      283
+#define NAV_APP_X   200
+#define NAV_APP_Y   283
 
 #define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 //#define SPLASH_SCR_BMP        "/system/images/lake.bmp"
@@ -68,7 +70,9 @@ void homeScreen::setup(void) {
 
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    addObj(calc);
-   
+
+   appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,OSPtr->stdIconPath(app32));
+   addObj(navTest);
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
    addObj(rgnTest);
