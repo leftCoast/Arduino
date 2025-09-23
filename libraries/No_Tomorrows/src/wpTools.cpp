@@ -1,25 +1,20 @@
 #include <wpTools.h>
 #include <strTools.h>
+#include <SD.h>
 
-#define FORMAT_BYTES	150
+#define BUFF_BYTES	150
 
 //*********************************************
 //		wayPoint
 //*********************************************
 
-char	formatStr[FORMAT_BYTES];
+char	strBuff[BUFF_BYTES];
 
 wayPoint::wayPoint(void)
-	:globalPos() {
-	
-	ourName		= NULL;
-}
+	:globalPos() { ourName = NULL; }
 
 
-wayPoint::~wayPoint(void) {
-
-	freeStr(&ourName);
-}
+wayPoint::~wayPoint(void) { freeStr(&ourName); }
 
 				
 void wayPoint::setName(const char* inName) { heapStr(&ourName,inName); }	
@@ -53,15 +48,45 @@ bool wayPoint::sameName(wayPoint* inWP) {
 	freeStr(&theirs);
 	return false;
 }
-	
 
+	
+// Create a string [Waypoint name] \t [lat in degrees] \t [lon in degrees] \0
 char*	wayPoint::formatFileStr(void) {
 
-	sprintf(formatStr,"%s\t%11.6f\t%11.6f",ourName,getLatAsDbl(),getLonAsDbl());
-	return(formatStr);
+	sprintf(strBuff,"%s\t%11.6f\t%11.6f",ourName,getLatAsDbl(),getLonAsDbl());
+	return(strBuff);
 }
 
-		
+
+// decode a string [Waypoint name] \t [lat in degrees] \t [lon in degrees] \0 Then use
+// this to set our values.
+bool	wayPoint::readFileStr(const char* aStr) {
+
+	char*		strCpy;
+	char*		token;
+	double	lat;
+	double	lon;
+	
+	if (aStr) {										// Sanity, we did get something, right?
+		strCpy = NULL;								// We need to setup our own copy. Because?
+		heapStr(&strCpy,aStr);					// Using strtok() hashes the original.
+		if (strCpy) {								// Got a copy to work with?
+			token = strtok(strCpy,"\t");		// First token is the name string.
+			setName(token);						// Set it in there.
+			token = strtok(NULL,"\t");			// Next is latitude as a signed double.
+			lat = atof(token);					// Save the value.
+			token = strtok(NULL,"\t");			// lastly is logitude.
+			lon = atof(token);					// Save the value.
+			setPos(lat,lon);						// Use the values to set our position.
+			freeStr(&strCpy);						// Recycle our copy.
+			return true;							// return our success.
+		}												//
+	}													//
+	return false;									// Or something went terribly wrong. Send a fail.
+}
+
+
+
 //*********************************************
 //		wpObj
 //*********************************************
@@ -80,7 +105,9 @@ wpObj::wpObj(wpList* inMgr,const char* inName)
 	: wayPoint(), linkListObj() {
 	
 	ourMgr = inMgr;
-	setName(inName);
+	if (inName) {
+		setName(inName);
+	}
 }
 	
 	
@@ -204,6 +231,65 @@ void wpList::outputList(void) {
 	while(trace) {
 		Serial.println(trace->formatFileStr());
 		trace = (wpObj*)trace->getNext();
+	}
+}
+
+
+// If this can read a list of waypoints it will dump any waypoints it currently has and
+// replaces them with the waypoints in the file. Expects : [name \t	lat \t lon \n]	
+void wpList::readList(const char* filePath) {
+
+	File		readFile;
+	int		buffIndex;
+	char		aChar;
+	wpObj*	aWPObj;
+	
+	if (filePath) {
+		readFile = SD.open(filePath,FILE_READ);
+		if (readFile) {
+			buffIndex = 0;
+			dumpList();
+			while(readFile.available()) {
+				aChar = readFile.read();
+				if (aChar=='\n') {
+					strBuff[buffIndex] = '\0';
+					aWPObj = new wpObj(this);
+					if (aWPObj) {
+						if (aWPObj->readFileStr(strBuff)) {
+							addToEnd(aWPObj);
+						}
+					}
+					buffIndex = 0;
+				} else {
+					strBuff[buffIndex] = aChar;
+					buffIndex++;
+				}
+			}
+			readFile.close();
+		}
+	}
+}
+		
+		
+// Saves each waypoint as [name \t	lat \t lon \n]	
+void wpList::saveList(const char* filePath) {
+	
+	File		saveFile;
+	wpObj*	trace;
+	
+	if (filePath) {	
+		if (SD.exists(filePath)) {
+			SD.remove(filePath);
+		}
+		saveFile = SD.open(filePath,FILE_WRITE);
+		if (saveFile) {
+			trace = (wpObj*)getFirst();
+			while(trace) {
+				saveFile.println(trace->formatFileStr());
+				trace = (wpObj*)trace->getNext();
+			}
+			saveFile.close();
+		}
 	}
 }
 

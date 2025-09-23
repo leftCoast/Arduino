@@ -39,6 +39,8 @@ class navTest	:  public panel {
 				void	doListWP(void);
 				void	doDeteWP(void);
 				void	doSortNames(void);
+				void  doReadWPFile();
+				void  doSaveWPFile();
 				void 	printHelp(void);
 				
 				bool			checkFile(pathItem*	item);

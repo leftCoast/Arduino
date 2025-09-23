@@ -2,10 +2,8 @@
 #include <strTools.h>
 
 
-
-#define WPFILE_NAME		"wpList"
 #define NAV_TEST_PATH	 "/system/appFiles/navtest/"
-
+#define FILE_PATH			"/system/appFiles/navtest/wpList"
 
 // **************************************************
 // ***************** navTest ************************
@@ -17,6 +15,8 @@ enum testCmds {
 	noCommand,
 	addWP,
 	editWP,
+	readWPFile,
+	saveWPFile,
 	listWP,
 	deleteWP,
 	sortNames,
@@ -68,6 +68,8 @@ bool navTest::setupParser(void) {
 	cmdParser->addCmd(listWP,"listwp");
 	cmdParser->addCmd(deleteWP,"deletewp");
 	cmdParser->addCmd(sortNames,"sortwp");
+	cmdParser->addCmd(readWPFile,"readwp");
+	cmdParser->addCmd(saveWPFile,"savewp");
 	
 	cmdParser->addCmd(printWD, "pwd");		// Add pwd command  [ If they type "pwd" they mean printWD ]
 	cmdParser->addCmd(changeDir, "cd");		// Add cd command
@@ -96,9 +98,7 @@ bool navTest::setupWPList(void) {
 	
 	ourWPList = new wpList(fakeFix);
 	if (ourWPList) {
-		aWP.setName("No Tomorrows slip");
-		aWP.setPos(48.49213,-122.68186);
-		ourWPList->addWP(&aWP);
+		ourWPList->readList(FILE_PATH);
 		return true;
 	}
 	return false;
@@ -154,6 +154,8 @@ void navTest::loop(void) {
       	case listWP			: doListWP();		break;
          case deleteWP		: doDeteWP();		break;
       	case sortNames		: doSortNames();	break;
+      	case readWPFile	: doReadWPFile();	break;
+      	case saveWPFile	: doSaveWPFile();	break;
       	
       	case printWD      : Serial.println(wd.getPath());  break;   // Easy peasy! Just print wd out.
 			case listDir      : listDirectory();               break;   // Print out a listing of the working directory.
@@ -238,7 +240,18 @@ void  navTest::doSortNames(void) {
 }
 	
 
+void  navTest::doReadWPFile() {
 
+	ourWPList->readList(FILE_PATH);
+	Serial.println("File read.");
+}
+
+
+void  navTest::doSaveWPFile() {
+
+	ourWPList->saveList(FILE_PATH);
+	Serial.println("File saved, I think.");
+}
 
 
 // **************************************************

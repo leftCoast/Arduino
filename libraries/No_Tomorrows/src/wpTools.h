@@ -24,6 +24,7 @@ class wayPoint :	public globalPos {
 			
 				bool	sameName(wayPoint* inWP);
 				char*	formatFileStr(void);
+				bool	readFileStr(const char* aStr);
 				
 				char*	ourName;
 };
@@ -47,7 +48,7 @@ class wpObj :	public wayPoint,
 					public linkListObj {
 		
 		public:
-				wpObj(wpList* inMgr,const char* inName);
+				wpObj(wpList* inMgr,const char* inName=NULL);
 	virtual	~wpObj(void);
 				
     virtual bool			isGreaterThan(linkListObj* compObj);	// Are we greater than the obj being passed in? Primary sorting function.
@@ -71,6 +72,8 @@ class wpList :	public linkList {
 	
 	virtual	void			addWP(wayPoint* inWP);
 	virtual	void			outputList(void);
+				void			readList(const char* filePath);
+				void			saveList(const char* filePath);
 				wpObj*		findWPByName(const char* inName);
 				void			setSortOrder(sortOrder inOrder);
 				sortOrder	getSortOrder(void);
