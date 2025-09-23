@@ -6,7 +6,6 @@
 //	Adafruit_HX8357 with the ability to have a mask added.	
 // **********************************************************
 
-mask* gMask = NULL;
 
 maskableHX8357::maskableHX8357(int inCS, int inDC, int inRst)
 	: Adafruit_HX8357(inCS,inDC,inRst) { }

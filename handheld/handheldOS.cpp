@@ -143,6 +143,7 @@ const char* handheldOS::getPanelFolder(int panelID) {
     case grenadeApp   : return "/system/appFiles/grenade/";
     case settApp      : return "/system/appFiles/sett/";
     case calcApp      : return "/system/appFiles/rpnCalc/";
+    case navTestApp   : return "/system/appFiles/navTest/";
     default           : return NULL;
   }
 }

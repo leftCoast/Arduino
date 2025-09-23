@@ -9,7 +9,6 @@
 #include <displayObj.h>
 #include <mask.h>
 
-extern mask* gMask;
 
 class maskableHX8357 :	public Adafruit_HX8357 {
 								
