@@ -229,7 +229,8 @@ void wpList::outputList(void) {
 	Serial.println("*** Waypoint list ***"); 
 	trace = (wpObj*)getFirst();
 	while(trace) {
-		Serial.println(trace->formatFileStr());
+		sprintf(strBuff,"%18s\t%11.6f\t%11.6f",trace->getName(),trace->getLatAsDbl(),trace->getLonAsDbl());
+		Serial.println(strBuff);
 		trace = (wpObj*)trace->getNext();
 	}
 }

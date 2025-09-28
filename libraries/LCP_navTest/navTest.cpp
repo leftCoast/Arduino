@@ -222,21 +222,58 @@ void navTest::doEditWP(void) {
 
 void navTest::doListWP(void) {
 
-	ourWPList->outputList();
+	wpObj*	trace;
+	char		strBuff[150];
+	double	bearing;
+	double	distance;
+	
+	Serial.println("*** Waypoint list ***"); 
+	trace = (wpObj*)ourWPList->getFirst();
+	while(trace) {
+		bearing = fakeFix->trueBearingTo(trace);
+		distance = fakeFix->distanceTo(trace);
+		sprintf(strBuff,"%-18s\t%11.6f\t%11.6f\t",trace->getName(),trace->getLatAsDbl(),trace->getLonAsDbl());
+		Serial.print(strBuff);
+		Serial.print(bearing);
+		Serial.print("\t");
+		Serial.println(distance);
+		trace = (wpObj*)trace->getNext();
+	}
 	Serial.println();
 }
 
 
 void navTest::doDeteWP(void) {
-	Serial.println("Delete a way point");
+	/*
+	char*		strBuff;
+	wpObj*	theWPObj;
+	
+	strBuff = NULL;
+	if (cmdParser->numParams()>0) {							// If we have any params.
+		heapStr(&strBuff,cmdParser->getParamBuff());		// Grab local copy.
+		theWPObj = ourWPList->findWPByName(strBuff);
+		*/
 }
+
 
 
 void  navTest::doSortNames(void) {
 
-	ourWPList->setSortOrder(byName);
-	ourWPList->sort(true);
-	ourWPList->outputList();
+	char* sortTxt;
+	
+	ourWPList->setSortOrder(byName);						// Default sort order is by name.
+	if (cmdParser->numParams()) {							// If we have any params.
+		sortTxt = NULL;										// Start local string at NULL.
+		heapStr(&sortTxt,cmdParser->getNextParam());	// Grab local copy of the first param.
+		if (!strcmp(sortTxt,"distance")) {				// Did they type distance?
+			ourWPList->setSortOrder(byDistance);		// Sort by distance.
+		} else if (!strcmp(sortTxt,"bearing")) {		// Did they say bearing?
+			ourWPList->setSortOrder(byBearing);			// Sort by bearing.
+		}															// 
+		freeStr(&sortTxt);										// Recycle our string.
+	}																//
+	ourWPList->sort(true);									// Do the sort.
+	doListWP();													// Show the result.
 }
 	
 
@@ -460,10 +497,13 @@ void navTest::printHelp(void) {
 	Serial.println("This is the testbed for developing the waypoint database.");
 	Serial.println();
 	Serial.println("Commands :");
-	Serial.println("addWP - followed by [name][lat][lon] as decimal degrees, adds a new waypoint.");
-	Serial.println("editWP - followed by [name], edits a new waypoint. Somehow..");
-	Serial.println("listWP - prints out a list of the waypoints.");
+	Serial.println("addWP    - followed by [name][lat][lon] as decimal degrees, adds a new waypoint.");
+	Serial.println("editWP   - followed by [name], edits a new waypoint. Somehow..");
+	Serial.println("listWP   - prints out a list of the waypoints.");
 	Serial.println("deleteWP - followed by [name], deletes a waypoint.");
+	Serial.println("sortWP   - followed by name, distance or bearing. Sorts the list in that way.");
+	Serial.println("saveWP   - Saves our current list of waypoints to disk.");
+	Serial.println("readWP   - Replaces our current list of waypoints with those on disk.");
 	Serial.println();
 	Serial.println("Low level file commands..");
 	Serial.println("pwd           show working directory.");
