@@ -41,7 +41,7 @@
 //#define STAR_TREK_PANEL_BMP   "/system/appFiles/starTrek/sTrek32.bmp"
 //#define REGION_TEST_PANEL_BMP	"/system/appFiles/rgnTest/test32.bmp"
 //#define ICON_EDIT_PANEL_BMP   "/system/appFiles/iconEdit/iconEd32.bmp"
-#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTest32.bmp"
+#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTst32.bmp"
 
 homeScreen::homeScreen(void)
    : homePanel() { }
@@ -72,7 +72,7 @@ void homeScreen::setup(void) {
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    addObj(calc);
 
-   appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,/*NAV_TEST_PANEL_BMP*/OSPtr->stdIconPath(app32));   // Don't have one yet.
+   appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,NAV_TEST_PANEL_BMP);  
    addObj(navTest);
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
