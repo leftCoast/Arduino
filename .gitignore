@@ -53,3 +53,4 @@ libraries/arduino-CAN*
 libraries/LC_DFRobot*
 libraries/LC_Adafruit_GPS/
 libraries/LC_extSerial*
+libraries/LC_Standards*
