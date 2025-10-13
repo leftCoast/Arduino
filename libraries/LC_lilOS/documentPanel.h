@@ -6,10 +6,10 @@
 #include <fSelectObj.h>
 #include <fSaveObj.h>
 
-// Base framework for a document editing panel. This ties in all the state and dilog boxes
-// for doing something like this. New file, open file, save file, do you really want to
-// loose unsaved changes? All that jazz. Seeing its for a document file, you can use it as
-// a base class for for anything derived from the document class.
+// Base framework for a document editing panel. This ties in all the state and dialog
+// boxes for doing something like this. New file, open file, save file, do you really want
+// to loose unsaved changes? All that jazz. Seeing its for a document file, you can use it
+// as a base class for for anything derived from the document class.
 //
 // For more in-depth documentation on how it works, see the .cpp file.
 
@@ -100,6 +100,7 @@ class askOkObj :	public alertObj,
 // document object of the class that it will edit. Use this to create the fileObj of your
 // design and be able to edit it.
 //
+//
 // Note on createNewDocFile(void). This is also one that the class that inherits this
 // fills out. The result of this function is to send back an okCmd or cancelCmd through
 // the command/listener channel. Depending on whether or not a new doc was created and
@@ -112,6 +113,9 @@ class askOkObj :	public alertObj,
 // good chance that this may involve asking the user for information using an alert
 // Object. So, this gives the child object the option to dovetail it's own alert object
 // into the UI.
+//
+// NOTE: Sadly you have to put -something- in your newly created file or the SD stuff
+// doesn't work and everything falls apart. No empty file allowed, I guess.
 
 
 class documentPanel :	public panel {

@@ -55,7 +55,8 @@ void setup() {
    
    // If we get here, looks like we have hardware running.
    ourEventMgr.begin();                                           // Kickstart our event manager.
-   ourOS.begin();                                                 // Fire up our OS sevices.
+   ourOS.begin();                                               // Fire up our OS sevices.
+   nextPanel = navTestApp;
 }
 
 

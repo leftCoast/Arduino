@@ -126,4 +126,5 @@ extern lilOS*	OSPtr;			// Need OS things? Here's the address.
 extern panel*	ourPanel;
 extern int		panelWith;
 extern int		panelHeight;
+
 #endif

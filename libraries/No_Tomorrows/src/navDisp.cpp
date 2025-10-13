@@ -2,7 +2,7 @@
 #include <navDisp.h>
 #include <GPSReader.h>
 #include <navigation.h>
-
+/*
 //#include <fonts/FreeSansOblique24pt7b.h>
 #include <fonts/FreeSansBoldOblique24pt7b.h>
 #include <fonts/FreeSansBoldOblique12pt7b.h>
@@ -10,7 +10,7 @@
 #include <fonts/FreeMono12pt7b.h>
 #include <fonts/FreeMono9pt7b.h>
 #include <fonts/FreeSansOblique9pt7b.h>
-
+*/
 #define LED_RECT					310,5,10,10
 #define FIX_RECT					275,0,30,20
 				
@@ -38,14 +38,14 @@
 #define LON_W						LAT_W
 #define LON_H						LAT_H
 
-
+/*
 #define AFF_SANS_BOLD_24_OB	&FreeSansBoldOblique24pt7b,45,-12
 #define AFF_SANS_BOLD_12_OB	&FreeSansBoldOblique12pt7b,24,-6
 #define AFF_SANS_BOLD_9_OB		&FreeSansBoldOblique9pt7b,18,-5
 #define AFF_SANS_9_OB			&FreeSansOblique9pt7b,18,-5
 #define AFF_MONO_12				&FreeMono12pt7b,20,-6
 #define AFF_MONO_9				&FreeMono9pt7b,17,-3
-
+*/
 
 // What flavor data is the GPS databox wanting to display?
 #define BEARING	0

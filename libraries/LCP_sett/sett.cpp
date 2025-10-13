@@ -310,7 +310,9 @@ void sett::selectMe(settCard* inCard) {
 			addSet();
 			if (groupIndex==6) {
 				setMsg("CONGRATS YOU WIN!!",MSG_MS);
-				setPoints(points+2);
+				//setPoints(points+2);
+				setPoints(points+groupIndex);
+				if (haveExtras) setPoints(points-2);
 				winTune.startTune(ourPlayer);
 				ourState = winning;
 			} else {
@@ -319,7 +321,9 @@ void sett::selectMe(settCard* inCard) {
 				strcat(buffs,buffi);
 				strcat(buffs," of 6");
 				setMsg(buffs,MSG_MS);
-				setPoints(points+1);
+				//setPoints(points+1);
+				setPoints(points+groupIndex);
+				if (haveExtras) setPoints(points-2);
 				if (groupIndex<=5) {
 					sets[groupIndex-1].startTune(ourPlayer);
 					ourState = scoring;
@@ -327,7 +331,8 @@ void sett::selectMe(settCard* inCard) {
 			}
 		} else {
 			setMsg("Already got that one.",MSG_MS);
-			setPoints(points-1);
+			tone(OSPtr->getTonePin(), 100,200);
+			//setPoints(points-1);
 			clearSelect();
 		}
 	}

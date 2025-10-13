@@ -10,9 +10,9 @@
 
 #define X_CARDS		3
 #define Y_CARDS		4
-#define CARD_H		74
+#define CARD_H			74
 #define TOTAL_CARDS	81
-#define MAX_CARDS	15
+#define MAX_CARDS		15
 #define MAX_GROUPS	6
 
 #define NUM_EXTRAS	3

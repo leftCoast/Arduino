@@ -19,16 +19,16 @@
 #define EDIT_X       BREAKOUT_X + 148
 #define EDIT_Y       BREAKOUT_Y+55
 */
-
-#define BREAKOUT_X  40
+#define X_OFFSET    -16
+#define BREAKOUT_X  40 + X_OFFSET
 #define BREAKOUT_Y  283 
-#define GRENADE_X   80
+#define GRENADE_X   80 + X_OFFSET
 #define GRENADE_Y   283
-#define SETT_X      120
+#define SETT_X      120 + X_OFFSET
 #define SETT_Y      283
-#define CALC_X      160
+#define CALC_X      160 + X_OFFSET
 #define CALC_Y      283
-#define NAV_APP_X   200
+#define NAV_APP_X   200 + X_OFFSET
 #define NAV_APP_Y   283
 
 #define SPLASH_SCR_BMP          "/system/images/sunset.bmp"

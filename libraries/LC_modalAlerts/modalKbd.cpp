@@ -1,6 +1,5 @@
 #include <modalKbd.h>
 
-//#include <debug.h>
 
 modalKbd*		theKbd	= NULL;
 int				kbdUsers	= 0;
@@ -12,7 +11,7 @@ int				kbdUsers	= 0;
 // **************************************************************
 
 
-// OUr modal keyboard constructor..
+// Our modal keyboard constructor..
 modalKbd::modalKbd(void)
 	: bmpKeyboard(NULL,true) {		// Make me a modal with no editing field.
 	

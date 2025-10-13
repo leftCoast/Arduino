@@ -1,3 +1,4 @@
+#include <lilOS.h>
 #include <wpTools.h>
 #include <strTools.h>
 #include <SD.h>

@@ -5,6 +5,127 @@
 #define NAV_TEST_PATH	 "/system/appFiles/navtest/"
 #define FILE_PATH			"/system/appFiles/navtest/wpList"
 
+
+void failBeep(void) { tone(OSPtr->getTonePin(), 100,200); }
+
+
+// **************************************************
+// *************** setMarkBtn ***********************
+// **************************************************
+
+
+setMarkBtn::setMarkBtn(const char* path,navTest* inListener)
+	:iconButton(SET_WP_BTN_X,SET_WP_BTN_Y,path) { ourListener = inListener; }
+	
+	
+setMarkBtn::~setMarkBtn(void) { }
+
+
+void setMarkBtn::doAction(void) { 
+
+	if(ourListener) {
+		ourListener->setMark();
+		setFocusPtr(NULL);
+	}
+}
+
+
+
+// **************************************************
+// *************** wpListItem ***********************
+// **************************************************		
+	
+colorObj backColor;
+
+				
+wpListItem::wpListItem(wpObj* inWpObj,wpDispList* inListMgr)
+	: drawGroup(0,0,WP_ITEM_W,WP_ITEM_H) {
+	
+	rect labelRect;
+	
+	ourWP = inWpObj;
+	ourListMgr = inListMgr;
+	setEventSet(touchLift);
+	labelRect.setRect(4,2,150,10);
+	wpName = new fontLabel(&labelRect);
+	if (wpName) {
+		wpName->setColors(&yellow,&backColor);
+		wpName->setFont(AFF_SANS_BOLD_9_OB);
+		wpName->setValue(ourWP->getName());
+		addObj(wpName);
+	}
+}
+
+	
+wpListItem::~wpListItem(void) {
+
+	if (haveFocus()) {			// If we have focus..
+		currentFocus = NULL;		// We QUIETLY point it to NULL without calling stuff. (Because? We're a ghost!)
+	}
+}
+
+
+void wpListItem::doAction(void) { setFocusPtr(this); }
+
+
+void wpListItem::setThisFocus(bool setLoose) {
+
+	if (setLoose) {
+		ourListMgr->setSelected(this);
+		wpName->setColors(&white,&blue);
+	} else {
+		ourListMgr->setSelected(NULL);
+		wpName->setColors(&yellow,&backColor);
+	}
+	drawObj::setThisFocus(setLoose);
+}
+
+						
+void wpListItem::drawSelf(void) {
+	
+	if (haveFocus()) {
+		screen->fillRect(this,&blue);
+	} else {
+		screen->fillRect(this,&black);
+	}
+}
+
+
+				
+// **************************************************
+// *************** wpDispList ***********************
+// **************************************************	
+
+
+wpDispList::wpDispList(int inX,int inY,int inW,int inH)
+	: drawList(inX,inY,inW,inH,dragEvents) {
+	
+	selected = NULL;
+	backColor.setColor(LC_CHARCOAL);
+}
+	
+	
+wpDispList::~wpDispList(void) {  }
+
+					
+void wpDispList::drawSelf(void) {
+
+	rect drawRect;
+	
+	drawRect.setRect(this);
+	drawRect.insetRect(-1);
+	screen->fillRect(this,&black);
+	screen->drawRect(&drawRect,&red);
+}
+		
+		
+void wpDispList::setSelected(wpListItem* inSelect) { selected = inSelect; }
+
+
+wpListItem* wpDispList::getSelected(void) { return selected; }	
+
+
+				
 // **************************************************
 // ***************** navTest ************************
 // **************************************************
@@ -47,12 +168,40 @@ navTest::~navTest(void) {
 
 bool navTest::setupScreen(void) {
 	
+	setMarkBtn*	markBtn;
+	stdComBtn*	addBtn;
+	stdComBtn*	deleteBtn;
+	stdComBtn*	editBtn;
+	char*			pathBuff;
+	
 	screen->fillScreen(&black);
-	screen->setCursor(5,40);     // Move cursor to the top left somewhere.
+	screen->setCursor(25,25);     // Move cursor to the top left somewhere.
    screen->setTextColor(&white); // Drawing in white..
    screen->setTextSize(1);       // Small enough to fit.
 	screen->drawText("Type ? into the serial monitor.");
-	return true;
+	setFilePath(SET_WP_BTN_N);
+	markBtn = new setMarkBtn(mFilePath,this);
+	if (markBtn) {
+		addObj(markBtn);
+		addBtn = newStdBtn(ADD_WP_BTN_X,ADD_WP_BTN_Y,icon32,newItemCmd,this);
+		if (addBtn) {
+			addObj(addBtn);
+			deleteBtn = newStdBtn(DELETE_WP_BTN_X,DELETE_WP_BTN_Y,icon32,deleteItemCmd,this);
+			if (deleteBtn) {
+				addObj(deleteBtn);
+				editBtn = newStdBtn(EDIT_WP_BTN_X,EDIT_WP_BTN_Y,icon32,editCmd,this);
+				if (editBtn) {
+					addObj(editBtn);
+					ourWPDisplay = new wpDispList( WP_LIST_X, WP_LIST_Y,WP_LIST_W,WP_LIST_H);
+					if (ourWPDisplay) {
+						addObj(ourWPDisplay);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -105,6 +254,26 @@ bool navTest::setupWPList(void) {
 }
 
 
+bool navTest::fillScreenList(void) {
+
+	wpObj* 		trace;
+	wpListItem*	newListItem;
+	
+	trace = (wpObj*) ourWPList->getFirst();
+	while(trace) {
+		newListItem = new wpListItem(trace,ourWPDisplay);
+		if (newListItem) {
+			ourWPDisplay->addObj(newListItem);
+			trace = (wpObj*)trace->getNext();
+		} else {
+			trace = NULL;
+			return false;
+		}
+	}
+	return true;
+}
+
+
 bool navTest::setupLowLevel(void) {
 
 	wd.setPath("/");	// Initial path setting.
@@ -118,14 +287,16 @@ void navTest::setup(void) {
 		if (setupParser()) {										// If we can setup the parser..
 			if (setupFakeFix()) {
 				if (setupWPList()) {	
-					if (setupLowLevel()) {							// If we can setup the low level stuff..
-						Serial.println("Setup looks good!");	// Let 'me know
-						Serial.print("Fake fix is : ");
-						Serial.print(fakeFix->showLatStr());
-						Serial.print("   ");
-						Serial.println(fakeFix->showLonStr());
-						showCurs();                         	// Default curser setting.
-						return;											// Then we're good to go!
+					if (fillScreenList()) {
+						if (setupLowLevel()) {							// If we can setup the low level stuff..
+							Serial.println("Setup looks good!");	// Let 'me know
+							Serial.print("Fake fix is : ");
+							Serial.print(fakeFix->showLatStr());
+							Serial.print("   ");
+							Serial.println(fakeFix->showLonStr());
+							showCurs();                         	// Default curser setting.
+							return;											// Then we're good to go!
+						}
 					}
 				}
 			}														//
@@ -166,6 +337,54 @@ void navTest::loop(void) {
       }
       if (curs) showCurs();
    }
+}
+
+
+void navTest::setMark(void) {
+	
+	wpListItem*	trace;
+	wpObj*		wpNode;
+	
+	trace = ourWPDisplay->getSelected();
+	if (trace) {
+		wpNode = trace->ourWP;
+		OSPtr->beep();
+		Serial.print("Setting : ");
+		Serial.println(wpNode->getName());
+	} else {
+		failBeep();
+		Serial.println("Nothing selected.");
+	}
+}
+			
+			
+// Handle the commands from the standard buttons.
+void navTest::handleCom(stdComs comID) {
+	
+	panel::handleCom(comID);
+	switch(comID) {
+		case cancelCmd			:
+			OSPtr->beep();
+		break;
+		case okCmd				:
+			OSPtr->beep();
+		break;
+		case newItemCmd		:
+			OSPtr->beep();
+		break;
+		case saveFileCmd		:
+			OSPtr->beep();
+		break;
+		case deleteItemCmd	:
+			OSPtr->beep();
+		break;
+		case sortCmd			:
+			OSPtr->beep();
+		break;
+		case editCmd			:
+			OSPtr->beep();
+		break;
+	}
 }
 
 
