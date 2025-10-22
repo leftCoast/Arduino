@@ -15,7 +15,7 @@
 #define MAX_MS				50			// How long we allow a search before calling it.
 #define MAX_MSG_BYTES	200		// Max bytes for complete message. For checksum.
 
-/* One day..
+/* One day. But this is not that day!
 class numStreamOut {
 
    public:
