@@ -1,6 +1,4 @@
 .DS_Store
-.DS_Store
-.DS_Store
 forum_post/*
 libraries/Adafruit*
 libraries/arduino_146782
@@ -55,3 +53,4 @@ libraries/LC_Adafruit_GPS/
 libraries/LC_extSerial*
 libraries/LC_Standards*
 libraries/LC_numStream/*
+libraries/LC_navTools
