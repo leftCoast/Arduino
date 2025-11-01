@@ -465,7 +465,7 @@ void quickLabel::setColors(colorObj* tColor, colorObj* bColor) {
 }
 
 
-void quickLabel::setValue(char* str) {
+void quickLabel::setValue(const char* str) {
 
 	if (buff) {
 		heapStr(&savedStr,buff);

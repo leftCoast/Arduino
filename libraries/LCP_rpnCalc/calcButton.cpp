@@ -12,7 +12,7 @@
 // ****************** calcButton ******************
 
 
-calcButton::calcButton(char* inFStr, word inLocX, word iny, byte width, byte inType,rpnCalc* inCalc)
+calcButton::calcButton(const char* inFStr, word inLocX, word iny, byte width, byte inType,rpnCalc* inCalc)
   : drawObj(inLocX, iny, width, BUTTON_HEIGHT, touchLift) {
 
 	
@@ -27,7 +27,7 @@ calcButton::calcButton(char* inFStr, word inLocX, word iny, byte width, byte inT
 }
 
 
-calcButton::calcButton(char* inFStr, char* inAFStr, word inLocX, word iny, byte width, byte inType,rpnCalc* inCalc)
+calcButton::calcButton(const char* inFStr,const char* inAFStr, word inLocX, word iny, byte width, byte inType,rpnCalc* inCalc)
   : drawObj(inLocX, iny, width, BUTTON_HEIGHT, touchLift) {
 
 	int numChars = strlen(inFStr) + 1;
@@ -138,7 +138,7 @@ void calcButton::doAction(void) {
 // ****************** secondfxButton ******************
 
   
-secondfxButton::secondfxButton(char* inFStr,word inLocX, word iny,byte width,byte inType,rpnCalc* inCalc)
+secondfxButton::secondfxButton(const char* inFStr,word inLocX, word iny,byte width,byte inType,rpnCalc* inCalc)
   : calcButton(inFStr,inLocX,iny,width,inType,inCalc) { }
 
 

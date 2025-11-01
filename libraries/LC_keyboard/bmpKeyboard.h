@@ -40,7 +40,7 @@ class bmpKeyboard : public keyboard {
 class bmpInputKey :  public inputKey {
 
 	public:
-				bmpInputKey(char* inLabel,char* inNum,char* inSym,int inX,int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard);
+				bmpInputKey(const char* inLabel,const char* inNum,const char* inSym,int inX,int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard);
 	virtual	~bmpInputKey(void);
 
 	virtual	void	drawSelf(void);
@@ -58,7 +58,7 @@ class bmpInputKey :  public inputKey {
 class bmpControlKey : public controlKey {
 
   public:
-          bmpControlKey(char* inLabel,keyCommands inCom,int inX, int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard,char* bmpPath);
+          bmpControlKey(const char* inLabel,keyCommands inCom,int inX, int inY,int inWidth,int inHeight,bmpKeyboard* inKeyboard,const char* bmpPath);
   virtual ~bmpControlKey(void);
 
   virtual void    drawSelf(void);

@@ -189,7 +189,7 @@ void sett::dealCards(int srtX,int srtY) {
 	int			cardNum;
 	int			i;
 	settCard*	aCard;
-	bmpObj*		qcard;
+	//bmpObj*		qcard;
 	int			extraY;
 	
 	setPoints(0);																	// Player starts at 0 points.
@@ -518,7 +518,7 @@ void selectQ::push(linkListObj* newObj) {
 
 	queue::push(newObj);
 	if (getCount()>3) {
-		oldCardObj = pop();
+		oldCardObj = (cardListObj*)pop();
 		delete(oldCardObj);
 	}
 }
@@ -533,7 +533,7 @@ void selectQ::deSelectObj(settCard* aCard) {
 	i = 0;
 	done = false;
 	while(!done) {
-		trace = getByIndex(i++);
+		trace = (cardListObj*)getByIndex(i++);
 		if (trace) {
 			if (trace->cardPtr==aCard) {
 				unlinkObj(trace);

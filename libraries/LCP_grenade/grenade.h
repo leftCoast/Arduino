@@ -59,7 +59,7 @@ class quickLabel :	public label {
 	virtual	~quickLabel(void);
 	
 	virtual	void 	setColors(colorObj* tColor, colorObj* bColor);
-	virtual	void 	setValue(char* str);
+	virtual	void 	setValue(const char* str);
 	virtual	void	eraseSelf(void);										
 	
 				colorObj	savedBColor;

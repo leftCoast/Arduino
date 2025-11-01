@@ -14,8 +14,8 @@ class rpnCalc;
 class calcButton : public drawObj, public idler {
   
 	public :
-				calcButton(char* inFStr,word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
-				calcButton(char* inFStr,char* inAFStr, word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
+				calcButton(const char* inFStr,word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
+				calcButton(const char* inFStr,const char* inAFStr, word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
 	virtual	~calcButton(void);
                   
 	virtual	void	idle(void);
@@ -34,7 +34,7 @@ class calcButton : public drawObj, public idler {
 class secondfxButton : public calcButton {
 
 	public :
-				secondfxButton(char* inFStr,word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
+				secondfxButton(const char* inFStr,word inLocX, word inLocY,byte width,byte inType,rpnCalc* inCalc);
 	virtual	~secondfxButton(void);
   
 	virtual	void	doAction(void);

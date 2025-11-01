@@ -190,7 +190,7 @@ void editLabel::doAction(event* inEvent,point* locaPt) {
 	
 	int		touchLoc;
 	int		deltaX;
-	int		newIndex;
+
 	mapper	touchMapper(0,width,0,getViewChars()); 
 	
 	if (mEditing) {

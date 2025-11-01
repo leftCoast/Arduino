@@ -4,12 +4,12 @@
 
 #define ENG_DEVICE_ID		7484				// You get 21 bits. Think serial number.
 #define ENG_DEFAULT_ADDR	47					// This initial value will be set using the serial monitor.
-#define ENG_DEVICE_CLASS	DEV_CLASS_PROPEL
+#define ENG_DEVICE_SYSTEM	DEV_SYSTEM_PROPEL
 #define ENG_DEVICE_FUNCT	DEV_FUNC_ENG_GATEWAY
 
 
 engine::engine(void) 
-: NMEA2kBase(ENG_DEVICE_ID,ENG_DEVICE_CLASS,ENG_DEVICE_FUNCT) {
+: NMEA2kBase(ENG_DEVICE_ID,ENG_DEVICE_SYSTEM,ENG_DEVICE_FUNCT) {
 
 	ourTachMgr		= NULL;
 	oilPSI_Sender	= NULL;

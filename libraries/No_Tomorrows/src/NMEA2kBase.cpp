@@ -12,9 +12,9 @@
 // Create and pass in some necessary setup values. 
 NMEA2kBase::NMEA2kBase(uint32_t inDeviceID,byte inDeviceClass,byte inDeviceFunct) {
 	
-	deviceID		= inDeviceID;			// These three are just to hold the values
-	deviceClass	= inDeviceClass;		//  'till used in setupName().
-	deviceFunct	= inDeviceFunct;		//
+	deviceID			= inDeviceID;			// These three are just to hold the values
+	deviceSystem	= inDeviceClass;		// 'till used in setupName().
+	deviceFunct		= inDeviceFunct;		//
 	
 	devListTimer = new timeObj(LIST_MS);
    gettingDevList = false;
@@ -69,14 +69,14 @@ void NMEA2kBase::setup(void) {
 void NMEA2kBase::setupName(void) {
 
 	// Our ID stuff.
-   llamaBrd->setID(deviceID);				// Device ID. We make these up. You get 21 bits.
-   llamaBrd->setManufCode(LC_MANF);		// This would be assigned to you by NMEA people.
-   llamaBrd->setECUInst(0);				// First netObj (Electronic control unit.)
-   llamaBrd->setFunctInst(0);				// First display.
-   llamaBrd->setFunction(deviceFunct);	// What kinda' thing OF our device class are we?
-   llamaBrd->setVehSys(deviceClass);	// We class of thing are we?
-   llamaBrd->setSystemInst(0);			// We are the first of our device class.
    llamaBrd->setIndGroup(Marine);		// What kind of machine are we ridin' on?
+   llamaBrd->setSystemInst(0);			// We belong to this instance of our system type.
+   llamaBrd->setVehSys(deviceSystem);	// The system type we belong to?
+   llamaBrd->setFunction(deviceFunct);	// What kinda' thing, of our system, are we?
+   llamaBrd->setFunctInst(0);				// Of that function, what instance are we?
+   llamaBrd->setECUInst(0);				// First netObj (Electronic control unit.)
+   llamaBrd->setManufCode(LC_MANF);		// This would be assigned to you by NMEA people.
+   llamaBrd->setID(deviceID);				// Device ID. We make these up. You get 21 bits. 
 }
  
 

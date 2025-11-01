@@ -105,6 +105,8 @@ void scrollingList::setScrollValue(float percent) {
     case dSOpenTop  : itemMapper.setValues(0,100,-1,numItems-1); break; // Setup the mapper,0-100 to -1..last item. The list and "above".
     case dSOpenBtm  : itemMapper.setValues(0,100,0,numItems); break;    // Setup the mapper,0-100 to 0..last item + 1. The list and "below".
     case dSOpenBoth : itemMapper.setValues(0,100,-1,numItems); break;   // Setup the mapper,0-100 to -1..last item +1 . The list above and below.
+    case touchScroll		: break;	// These next two are for shutting up the compiler.
+    case buttonScroll	: break;
   }
   itemIndex = round(itemMapper.map(percent));   // Map to get item index.
   if (itemIndex==-1) {                          // Below 0, abovve list.

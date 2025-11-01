@@ -172,7 +172,6 @@ bool navTest::setupScreen(void) {
 	stdComBtn*	addBtn;
 	stdComBtn*	deleteBtn;
 	stdComBtn*	editBtn;
-	char*			pathBuff;
 	
 	screen->fillScreen(&black);
 	screen->setCursor(25,25);     // Move cursor to the top left somewhere.
@@ -383,6 +382,8 @@ void navTest::handleCom(stdComs comID) {
 		break;
 		case editCmd			:
 			OSPtr->beep();
+		break;
+		default					:
 		break;
 	}
 }

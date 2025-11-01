@@ -74,7 +74,7 @@ void keyboardKey::beenClicked(void) { if (mKeyboard) mKeyboard->keyClicked(this)
 // ********************************************************************************
 
 
-inputKey::inputKey(char* inLabel,char* inNum,char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
+inputKey::inputKey(const char* inLabel,const char* inNum,const char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
   : keyboardKey(inKeyboard),
   label(locX,locY,width-1,height-1,inLabel) {
     
@@ -156,7 +156,7 @@ void inputKey::idle() {
 // ********************************************************************************
 
 
-controlKey::controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
+controlKey::controlKey(const char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard)
   : keyboardKey(inKeyboard),
   label(locX,locY,width-1,height-1,inLabel) {
 

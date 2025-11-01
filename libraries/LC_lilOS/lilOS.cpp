@@ -70,7 +70,7 @@ int panel::getPanelID(void) { return mPanelID; }
 
 
 // Given a filename from our folder, generate the fullpath to it.
-bool panel::setFilePath(char* inName) {
+bool panel::setFilePath(const char* inName) {
 	
 	char*			folderPtr;
 	int			pathLen;

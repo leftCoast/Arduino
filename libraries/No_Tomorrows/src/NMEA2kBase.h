@@ -51,8 +51,8 @@ class NMEA2kBase {
 	
 				llama2000*	llamaBrd;      // The class that inherits netObj, adding our attachmet to hardware.
 				uint32_t		deviceID;		// You get 21 bits. Think serial number. You decide.
-				byte			deviceClass;	// See SAE_J1939.h for a list of device class #defines. Choose one.
-				byte			deviceFunct;	// See SAE_J1939.h for list of functions of that class. Choose one.
+				byte			deviceSystem;	// See SAE_J1939.h for a list of device system #defines. Choose one.
+				byte			deviceFunct;	// See SAE_J1939.h for list of functions of that system. Choose one.
 				
 				// Debug/setup command parser.
 				lilParser	cmdParser;

@@ -12,7 +12,7 @@
 
 #define NAV_DEVICE_ID		6387				// You get 21 bits. Think serial number.
 #define NAV_DEFAULT_ADDR	46					// This initial value will be set using the serial monitor.
-#define NAV_DEVICE_CLASS	DEV_CLASS_NAV
+#define NAV_DEVICE_SYSTEM	DEV_SYSTEM_NAV
 #define NAV_DEVICE_FUNCT	DEV_FUNC_GNSS
 
 
@@ -23,7 +23,7 @@ navigation  ourNavApp;
 
 
 navigation::navigation(void) 
-	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_CLASS,NAV_DEVICE_FUNCT) {
+	: NMEA2kBase(NAV_DEVICE_ID,NAV_DEVICE_SYSTEM,NAV_DEVICE_FUNCT) {
 	
 	barometer		= NULL;
 	knotMeter 		= NULL;

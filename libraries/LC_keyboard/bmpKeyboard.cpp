@@ -191,7 +191,7 @@ void bmpKeyboard::loadKeys(void) {
 
 
 
-bmpInputKey::bmpInputKey(char* inLabel, char* inNum, char* inSym, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard)
+bmpInputKey::bmpInputKey(const char* inLabel, const char* inNum, const char* inSym, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard)
 : inputKey(inLabel, inNum, inSym, inX, inY, inWidth, inHeight, inKeyboard) {
 
 	mKeyBMap = inKeyboard->getKeyMap();			// The keyboard has the bitmap background.
@@ -253,7 +253,7 @@ void bmpInputKey::drawSelf(void) {
 
 
 
-bmpControlKey::bmpControlKey(char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard, char* bmpName)
+bmpControlKey::bmpControlKey(const char* inLabel, keyCommands inCom, int inX, int inY, int inWidth, int inHeight, bmpKeyboard* inKeyboard, const char* bmpName)
 	: controlKey(inLabel, inCom, inX, inY, inWidth, inHeight, inKeyboard) { ourBMPObj = new bmpObj(inX,inY,inWidth,inHeight,bmpName); }
 
 

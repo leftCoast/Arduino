@@ -25,7 +25,7 @@ setECUInst(0);                   // First netObj (Electronic control unit.)
 setFunctInst(0);                 // First depth transducer.
 setFunction(DEV_FUNC_GP_TRANS);  // Depth transducer.
                                  // Some spare bit here..
-setVehSys(DEV_CLASS_INST);       //  We are an instrument.
+setVehSys(DEV_SYSTEM_INST);       //  We are an instrument.
 setSystemInst(0);                // We are the first of our device class.
 setIndGroup(Marine);             // What kind of machine are we ridin' on?
 setArbitraryAddrBit(?);          // Will be set when we choose our addressing mode.

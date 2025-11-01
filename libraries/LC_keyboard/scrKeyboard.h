@@ -59,7 +59,7 @@ class keyboardKey : public idler {
 class inputKey : public keyboardKey, public label {
 
   public:
-          inputKey(char* inLabel,char* inNum,char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
+          inputKey(const char* inLabel,const char* inNum,const char* inSym,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
   virtual ~inputKey(void);
 
   virtual void    idle();     // Use this to keep updated.
@@ -72,7 +72,7 @@ class inputKey : public keyboardKey, public label {
 class controlKey : public keyboardKey, public label {
 
   public:
-          controlKey(char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
+          controlKey(const char* inLabel,keyCommands inCom,word locX, word locY,byte width,byte height,keyboard* inKeyboard);
   virtual ~controlKey(void);
 
   virtual void    drawSelf(void);

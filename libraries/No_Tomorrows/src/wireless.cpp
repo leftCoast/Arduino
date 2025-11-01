@@ -7,13 +7,13 @@
 
 #define WIRELESS_DEVICE_ID			1706				// You get 21 bits. Think serial number.
 #define WIRELESS_DEFAULT_ADDR		45					// This initial value will be set using the serial monitor.
-#define WIRELESS_DEVICE_CLASS		DEV_CLASS_DISP
+#define WIRELESS_DEVICE_SYSTEM	DEV_SYSTEM_DISP
 #define WIRELESS_DEVICE_FUNCT		DEV_FUNC_DISP
 
 timeObj     timer(5000);
 
 wireless::wireless(void) 
-	: NMEA2kBase(WIRELESS_DEVICE_ID,WIRELESS_DEVICE_CLASS,WIRELESS_DEVICE_FUNCT)
+	: NMEA2kBase(WIRELESS_DEVICE_ID,WIRELESS_DEVICE_SYSTEM,WIRELESS_DEVICE_FUNCT)
 	{  }
 	
 	
