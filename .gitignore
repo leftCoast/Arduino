@@ -56,3 +56,6 @@ libraries/LC_numStream/*
 libraries/LC_navTools*
 libraries/LC_bmpObj*
 libraries/LC_GUITools*
+/libraries/LC_numStream
+/libraries/LCP_sett
+/libraries/LCP_sett
