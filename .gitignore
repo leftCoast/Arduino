@@ -53,4 +53,5 @@ libraries/LC_Adafruit_GPS/
 libraries/LC_extSerial*
 libraries/LC_Standards*
 libraries/LC_numStream/*
-libraries/LC_navTools
+libraries/LC_navTools*
+libraries/LC_bmpObj*
