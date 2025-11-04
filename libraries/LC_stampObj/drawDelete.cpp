@@ -1,4 +1,4 @@
-#include <drawDelete.h>
+#include <drawDelete.h>  // <<=== THIS HAS GOT TO GO!!
 
 drawDelete::drawDelete(rect* inRect)
   : stampObj(inRect) { }
