@@ -31,17 +31,18 @@
 #define NAV_APP_X   200 + X_OFFSET
 #define NAV_APP_Y   283
 
-#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
-//#define SPLASH_SCR_BMP        "/system/images/lake.bmp"
-//#define SPLASH_SCR_BMP        "/system/images/starTrek/StTrkScr.bmp"
-#define CALC_PANEL_BMP        "/system/appFiles/RPNCalc/calc32.bmp"
-#define BREAKOUT_PANEL_BMP      "/system/appFiles/breakout/breakout.bmp"
-#define GRENADE_PANEL_BMP       "/system/appFiles/grenade/grenade.bmp"
-#define SETT_PANEL_BMP          "/system/appFiles/sett/sett.bmp"
-//#define STAR_TREK_PANEL_BMP   "/system/appFiles/starTrek/sTrek32.bmp"
-//#define REGION_TEST_PANEL_BMP	"/system/appFiles/rgnTest/test32.bmp"
-//#define ICON_EDIT_PANEL_BMP   "/system/appFiles/iconEdit/iconEd32.bmp"
-#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTst32.bmp"
+//#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
+#define SPLASH_SCR_BMP           "/system/images/lake.bmp"
+//#define SPLASH_SCR_BMP         "/system/images/starTrek/StTrkScr.bmp"
+#define CALC_PANEL_BMP           "/system/appFiles/RPNCalc/calc32.bmp"
+#define BREAKOUT_PANEL_BMP       "/system/appFiles/breakout/breakout.bmp"
+#define GRENADE_PANEL_BMP        "/system/appFiles/grenade/grenade.bmp"
+#define SETT_PANEL_BMP           "/system/appFiles/sett/sett.bmp"
+//#define STAR_TREK_PANEL_BMP    "/system/appFiles/starTrek/sTrek32.bmp"
+//#define REGION_TEST_PANEL_BMP  "/system/appFiles/rgnTest/test32.bmp"
+//#define ICON_EDIT_PANEL_BMP    "/system/appFiles/iconEdit/iconEd32.bmp"
+//#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTst32.bmp"
+#define STERM_PANEL_BMP          "/system/appFiles/sTerm/term32.bmp"
 
 homeScreen::homeScreen(void)
    : homePanel() { }
@@ -57,7 +58,7 @@ void homeScreen::setup(void) {
    mBackImage = new bmpObj(&imageRect,SPLASH_SCR_BMP);
   
    //appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
-   //addObj(starTrek);
+   //addObj(starTrek);z
 
    
    appIcon*  breakOut = new appIcon(BREAKOUT_X,BREAKOUT_Y,breakoutApp,BREAKOUT_PANEL_BMP);
@@ -72,8 +73,12 @@ void homeScreen::setup(void) {
    appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
    addObj(calc);
 
-   appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,NAV_TEST_PANEL_BMP);  
-   addObj(navTest);
+   //appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,NAV_TEST_PANEL_BMP);  
+   //addObj(navTest);
+   
+   appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,STERM_PANEL_BMP);  
+   addObj(sTerm);
+   
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
    addObj(rgnTest);

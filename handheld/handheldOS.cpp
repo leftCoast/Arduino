@@ -7,6 +7,7 @@
 #include <sett.h>
 #include <rpnCalc.h>
 #include <navTest.h>
+#include <sTerm.h>
 
 //#include <starTrek.h>
 //#include "src/regionTest/regionTest.h"
@@ -71,7 +72,8 @@ panel* handheldOS::createPanel(int panelID) {
       case settApp         : return new sett(settApp);
       //case rgnTestApp    : return new regionTest();
       //case iconEditApp   : return new iconEdit();
-      case navTestApp      : return new navTest(navTestApp);
+      //case navTestApp      : return new navTest(navTestApp);
+      case sTermApp        : return new sTerm(sTermApp);
       default              : return NULL;
    }
 }
@@ -138,12 +140,14 @@ const char* handheldOS::getSystemFolder() { return "/system/"; }
 
 const char* handheldOS::getPanelFolder(int panelID) {
   
-  switch(panelID) {
-    case breakoutApp  : return "/system/appFiles/breakout/";
-    case grenadeApp   : return "/system/appFiles/grenade/";
-    case settApp      : return "/system/appFiles/sett/";
-    case calcApp      : return "/system/appFiles/rpnCalc/";
-    case navTestApp   : return "/system/appFiles/navTest/";
+   switch(panelID) {
+      case breakoutApp  : return "/system/appFiles/breakout/";
+      case grenadeApp   : return "/system/appFiles/grenade/";
+      case settApp      : return "/system/appFiles/sett/";
+      case calcApp      : return "/system/appFiles/rpnCalc/";
+      case navTestApp   : return "/system/appFiles/navTest/";
+      case sTermApp     : return "/system/appFiles/sTerm/";
+    
     default           : return NULL;
   }
 }
