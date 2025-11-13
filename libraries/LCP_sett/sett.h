@@ -4,7 +4,7 @@
 #include <lilOS.h>
 #include <toneObj.h>
 #include <cardIndex.h>
-#include <flasher.h>
+#include <bmpFlasher.h>
 #include <label.h>
 
 

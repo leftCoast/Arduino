@@ -7,7 +7,7 @@
 #include <idlers.h>
 #include <label.h>
 #include <fontLabel.h>
-#include <colorBargraph.h>
+#include <bargraph.h>
 #include <offscreen.h>
 #include <flasher.h>
 
