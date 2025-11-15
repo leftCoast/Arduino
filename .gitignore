@@ -61,3 +61,4 @@ libraries/LC_GUITools*
 /libraries/LCP_sTerm*
 /libraries/LC_Adafruit_2050*
 /libraries/LC_offscreen*
+/libraries/LC_bmpTools*
