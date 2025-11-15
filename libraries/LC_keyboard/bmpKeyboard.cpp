@@ -204,7 +204,7 @@ bmpInputKey::~bmpInputKey(void) {  }
 
 void bmpInputKey::drawSelf(void) {
 	
-	bitmap ourBMap(mKeyBMap);
+	bitmap		ourBMap(mKeyBMap); // Ah! we make a copy of the background.
 	rect			sRect;
 	offscreen	vPort; 
 	colorObj		aPixel;
@@ -223,7 +223,7 @@ void bmpInputKey::drawSelf(void) {
 	} else {                          // "Normal printing
 		center.x = width/2;
 		center.y = height/2;
-		vPort.beginDraw(&ourBMap,x,y);
+		vPort.beginDraw(&ourBMap,x,y);	// We start drawing to it, it already has background image.
 		x = x + 7;
 		y = y + 9;
 		label::drawSelf();
