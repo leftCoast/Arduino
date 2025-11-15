@@ -55,7 +55,7 @@ void pumpObj::setSpeed(void) {
     if (mSpeedFrame>mPeriod) {
       mSpeedFrame = 0;
     }
-    setPercent(mSpeedPlot.Map(mSpeedFrame));
+    setPercent(mSpeedPlot.map(mSpeedFrame));
     mSpeedFrame = mSpeedFrame + DELTA_SPEED_TIME;
     if (mSpeedTimer.ding()) mSpeedTimer.stepTime();
   }

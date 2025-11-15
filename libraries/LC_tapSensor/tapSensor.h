@@ -7,7 +7,7 @@
 #include <runningAvg.h>
 
 /*
-This orgiginated from the old shakeNTinkle code written for the kiddie's 8x8 backpack LED
+This originated from the old shakeNTinkle code written for the kiddie's 8x8 backpack LED
 matrix. That version originally was written to run both sensors at the same time. That was
 just to specific. This version does one sensor and is much more general purpose.
 
@@ -65,7 +65,6 @@ class tapSensor : public idler {
 	protected:
 	
 		int			mTapSum;
-		//int			mReadings;
 		int			mSensorPin;
 		timeObj*		mTapTimer;
 		runningAvg*	mSmoother;

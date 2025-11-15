@@ -126,7 +126,7 @@ void doReading(void) {
   ourDisplay.addRawCap(capread);
 
   capread = cSmoother.addData(capread);     // Pop the capacitive value into the capacitive smoother. (Running avarage)
-  moisture = mudMapper->Map(capread);       // Map the resulting capacitive value to a percent.
+  moisture = mudMapper->map(capread);       // Map the resulting capacitive value to a percent.
   moisture = round(moisture);               // Round it to an int.
 
   ourDisplay.addAveCap(capread);

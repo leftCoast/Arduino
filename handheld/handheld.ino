@@ -33,8 +33,8 @@ void setup() {
   Serial.begin(115200);
    haveScreen = false;
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
-   screen = (displayObj*) new adafruit_1947(DSP_CS,-1);
-   //screen = (displayObj*) new teensy_1947(DSP_CS,-1);
+   //screen = (displayObj*) new adafruit_1947(DSP_CS,-1);
+   screen = (displayObj*) new adafruit_1947();
    if (screen) {
       if (screen->begin()) {
          screen->setRotation(PORTRAIT);

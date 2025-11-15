@@ -21,6 +21,7 @@ class textComObj : public idler {
           void  handleTextCom(char* buff);
 
   protected:
+          void  showCommands(void);
           void  initParams(void);
           void  printParams(void);
           void  printReadings(void);

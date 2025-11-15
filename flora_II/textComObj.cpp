@@ -1,3 +1,4 @@
+#include <strTools.h>
 #include "textComObj.h"
 #include "parameters.h"
 #include "pumpObj.h"
@@ -19,7 +20,6 @@ enum commands { noCommand,
                 setPercent,
                 setPeriod,
                 logCom,
-
                 listDir
               };
 
@@ -54,7 +54,6 @@ void textComObj::begin(void) {
   mParser.addCmd(setPercent, "percent");
   mParser.addCmd(setPeriod, "period");
   mParser.addCmd(logCom, "log");
-
   mParser.addCmd(listDir, "ls");
 }
 
@@ -93,10 +92,31 @@ void textComObj::checkTextCom(char inChar) {
       case setMudMapLimit : setMud();        break;
       case logCom         : logCommand();    break;
       case listDir        : listDirectory(); break;
-      default             : ourPort->println("Sorry, have no idea what you want.");
+      default             : showCommands();  break;
     }
   }
 }
+
+
+void textComObj::showCommands(void) {
+
+  Serial.println("reset\tResets everything to defaults.");
+  Serial.println("see\tPrints out the list of params.");
+  Serial.println("read\tPrints the cap value, mosture value and our state.");
+  Serial.println("graph\tDoesn't do aything. Never written.");
+  Serial.println("mud\tEnter a value and mud is set to that. No value? Set to current reading.");
+  Serial.println("dry\t");
+  Serial.println("limit\t");
+  Serial.println("wtime\t");
+  Serial.println("stime\t");
+  Serial.println("name\tSets new name. Or, if no params? Shows name.");
+  Serial.println("pump\tTurns pump on or off IE \"pump on\" or \"pump off\" ");
+  Serial.println("percent\t");
+  Serial.println("period\t");
+  Serial.println("log\t");
+  Serial.println("ls\tList directory.");
+}
+
 
 
 void textComObj::handleTextCom(char* buff) {
@@ -148,9 +168,8 @@ void textComObj::printReadings(void) {
   timeVal = 0;
   mAutoRead = false;
   if (mParser.numParams()) {
-    buff = mParser.getParam();
+    buff = mParser.getNextParam();
     timeVal = atoi (buff);
-    free(buff);
   }
   readTimer.setTime(timeVal);
   readTimer.start();
@@ -161,7 +180,6 @@ void textComObj::printReadings(void) {
 
 void textComObj::doPrintReadings(void) {
 
-  //ourPort->print("Temperature : "); ourPort->print(tempC); ourPort->println(" *C");
   ourPort->print("Capacitive  : "); ourPort->print(capread); ourPort->println(" mf");
   ourPort->print("Moisture    : "); ourPort->print((int)moisture); ourPort->println(" %");
   ourPort->print("And we are  : ");
@@ -177,8 +195,6 @@ void textComObj::doPrintReadings(void) {
 
 void textComObj::doPrintGReadings(void) {
 
-  //ourPort->print(tempC);ourPort->print(" ");
-  //ourPort->print(capread);ourPort->print(" ");
   ourPort->print((int)moisture);
   ourPort->println();
   if (mAutoRead) readTimer.start();
@@ -192,7 +208,7 @@ void textComObj::printGReadings(void) {
   timeVal = 0;
   mAutoRead = false;
   if (mParser.numParams()) {
-    buff = mParser.getParam();
+    buff = mParser.getNextParam();
     timeVal = atoi (buff);
   }
   readTimer.setTime(timeVal);
@@ -207,9 +223,8 @@ void textComObj::setDryLimit(void) {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     newVal = atoi (paramBuff);
-    free(paramBuff);
     ourParamObj.setDryLimit(newVal);
     ourPort->print("Moisture set point now set to ");
     ourPort->println(ourParamObj.getDryLimit());
@@ -223,9 +238,8 @@ void textComObj::setWaterTime(void) {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     newVal = atoi(paramBuff);
-    free(paramBuff);
     ourParamObj.setWaterTime(newVal);
     ourPort->print("Watering tmie now set to ");
     ourPort->println(ourParamObj.getWaterTime());
@@ -239,9 +253,8 @@ void textComObj::setSoakTime(void) {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     newVal = atoi (paramBuff);
-    free(paramBuff);
     ourParamObj.setSoakTime(newVal);
     ourPort->print("Soak time now set to ");
     ourPort->println(ourParamObj.getSoakTime());
@@ -251,16 +264,19 @@ void textComObj::setSoakTime(void) {
 
 void textComObj::setPlantName(void) {
 
-  char* charBuff;
+  char*  nameStr;
 
-  if (mParser.numParams()) {
-    charBuff = mParser.getParamBuff();
-    ourParamObj.setName(charBuff);
-    free(charBuff);
-    charBuff = ourParamObj.getName();
-    ourPort->print("Plant name is now set to ");
-    ourPort->println(charBuff);
-  }
+   nameStr = NULL;                                 // Start it off as NULL.
+   if (mParser.numParams()) {                      // We got params?
+      heapStr(&nameStr,mParser.getParamBuff());    // Grab and copy the entire param buff.
+      ourParamObj.setName(nameStr);                // Save off this as our name. Can hack the string.
+      freeStr(&nameStr);                           // Done with our copy, recycle it.
+      ourPort->print("Plant name is now set to "); // Lets see the result.
+      ourPort->println(ourParamObj.getName());     // Print the new name.
+   } else {                                        // No params? Then show name.
+      ourPort->print("Plant name : ");             // Let's see.
+      ourPort->println(ourParamObj.getName());     // Print the name.
+   }
 }
 
 
@@ -270,9 +286,8 @@ void textComObj::setPWMPercent(void) {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     newVal = atoi (paramBuff);
-    free(paramBuff);
     ourParamObj.setPWMPercent(newVal);
     ourPort->print("Percent now set to ");
     ourPort->println(ourParamObj.getPWMPercent());
@@ -286,11 +301,10 @@ void textComObj::setPWMPeriod(void) {
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
+    paramBuff = mParser.getNextParam();
     ourPort->print("Param buff :"); ourPort->println(paramBuff);
     newVal = atoi (paramBuff);
     ourPort->print("newVal :"); ourPort->println(newVal);
-    free(paramBuff);
     ourParamObj.setPWMPeriod(newVal);
     ourPort->print("Period now set to ");
     ourPort->println(ourParamObj.getPWMPeriod());
@@ -300,21 +314,26 @@ void textComObj::setPWMPeriod(void) {
 
 void textComObj::turnPump(void) {
 
-  int numChars;
-  char* paramBuff;
+  char*  paramBuff;
 
-  pumpCom = false;
-  if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    numChars = strlen(paramBuff);
-    for (int i = 0; i < numChars; i++) {
-      paramBuff[i] = toupper(paramBuff[i]);
-    }
-    if (!strcmp(paramBuff, "ON")) {
-      pumpCom = true;
-    }
-    free(paramBuff);
-  }
+   paramBuff = NULL;
+   pumpCom = false;
+   if (mParser.numParams()) {
+      heapStr(&paramBuff,mParser.getNextParam());
+      upCase(paramBuff);
+      Serial.print("Pump is going ");
+      if (!strcmp(paramBuff, "ON")) {
+         pumpCom = true;
+         Serial.println("on");
+      } else {
+         if (weAre==watering) {
+            weAre = sitting; 
+         }
+         pumpCom = false;
+         Serial.println("off");
+      }
+      freeStr(&paramBuff);
+   }
 }
 
 
@@ -324,9 +343,8 @@ void textComObj::setDry(void) {
   int   dryVal;
 
   if (mParser.numParams()) {
-    buff = mParser.getParam();
+    buff = mParser.getNextParam();
     dryVal = atoi(buff);
-    free(buff);
     ourParamObj.setDry(dryVal);
   } else {
     ourParamObj.setDry(capread);
@@ -342,9 +360,8 @@ void textComObj::setMud(void) {
   int   mudVal;
 
   if (mParser.numParams()) {
-    buff = mParser.getParam();
+    buff = mParser.getNextParam();
     mudVal = atoi(buff);
-    free(buff);
     ourParamObj.setMud(mudVal);
   } else {
     ourParamObj.setMud(capread);
@@ -356,15 +373,11 @@ void textComObj::setMud(void) {
 
 void textComObj::logCommand(void) {
 
-  int   numChars;
   char* paramBuff;
 
   if (mParser.numParams()) {
-    paramBuff = mParser.getParam();
-    numChars = strlen(paramBuff);
-    for (int i = 0; i < numChars; i++) {
-      paramBuff[i] = toupper(paramBuff[i]);
-    }
+    paramBuff = mParser.getNextParam();
+    upCase(paramBuff);
     if (!strcmp(paramBuff, "RESET")) {
       ourDisplay.deleteLog();
       ourPort->println("Logfile deleted.");
@@ -380,15 +393,14 @@ void textComObj::logCommand(void) {
     }
     else if (!strcmp(paramBuff, "LINES")) {
       ourDisplay.showLogLines(ourPort);
-    }
-    else {
+    } else {
       ourPort->println("You can say on, off, show, lines or reset. That's all I understand.");
     }
-    free(paramBuff);
   } else {                                    // No params? Power user!
     ourDisplay.setLogging(!ourDisplay.isLogging());
   }
 }
+
 
 void textComObj::listDirectory(void) {
 

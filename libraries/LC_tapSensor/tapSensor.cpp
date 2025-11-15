@@ -43,7 +43,7 @@ void tapSensor::idle(void) {
 
 
 // Pass back the current vibration average.
-float  tapSensor::getTapVal(void) { return mSmoother->getAve(); }
+float  tapSensor::getTapVal(void) { return mSmoother->getAvg(); }
 
 
 
