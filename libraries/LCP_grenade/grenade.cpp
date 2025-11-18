@@ -173,7 +173,7 @@ void grenade::setup(void) {
 		}
 	}
 	
-	ourBeeper = new alarmBeeper(mOSPtr->getTonePin(),GAME_MS,NOTE_A3,NOTE_G2);
+	ourBeeper = new alarmBeeper(OSPtr->getTonePin(),GAME_MS,NOTE_A3,NOTE_G2);
 	playTimer.setTime(GAME_MS,false);
 	message = new label(MESS_X,MESS_Y,MESS_W,MESS_H,MESS_START);
 	if (message) {
@@ -181,7 +181,7 @@ void grenade::setup(void) {
 		message->setColors(&white,BACK_COLOR);
 		addObj(message);
 	}
-	ourPlayer = new toneObj(mOSPtr->getTonePin());
+	ourPlayer = new toneObj(OSPtr->getTonePin());
 	createSounds();
 	if (
 		blueCross
@@ -285,7 +285,7 @@ void grenade::nextBtnClick(void) {
 	switch(ourState) {
 		case pregame	: break;						// Do nothing.
 		case waiting	:								// Start a game.
-			mOSPtr->beep();							// Hear the beep.
+			OSPtr->beep();							// Hear the beep.
 			message->setValue(MESS_PLAY);			// Tell 'em what to do.
 			chooseWord();								// Choose the first word.
 			ourBeeper->setOnOff(true);				// Fire up beeper.
@@ -293,7 +293,7 @@ void grenade::nextBtnClick(void) {
 			ourState = playing;						// Now we're playing.
 		break;											//
 		case playing	:								// Game in process.
-			mOSPtr->beep();							// Hear the beep.
+			OSPtr->beep();							// Hear the beep.
 			chooseWord();								// Next word.
 		break;											//
 		case exploding	: 								// All of these.. Do nothing.
@@ -308,7 +308,7 @@ void grenade::nextBtnClick(void) {
 void grenade::greenBtnClick(void) {
 
 	if (ourState==scoring) {
-		mOSPtr->beep();								// Hear the beep.
+		OSPtr->beep();								// Hear the beep.
 		greenScore++;									// Bump the score.
 		greenScoreLbl->setValue(greenScore);	// Show the score.
 		if (greenScore>=MAX_SCORE) {				// If we won..
@@ -327,7 +327,7 @@ void grenade::greenBtnClick(void) {
 void grenade::blueBtnClick(void) {
 	
 	if (ourState==scoring) {
-		mOSPtr->beep();								// Hear the beep.
+		OSPtr->beep();								// Hear the beep.
 		blueScore++;									// Bump the score.
 		blueScoreLbl->setValue(blueScore);		// Update the score.
 		if (blueScore>=MAX_SCORE) {				// If we won..

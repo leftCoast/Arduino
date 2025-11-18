@@ -116,7 +116,7 @@ void sett::setup(void) {
 				}
 				cardIndexList = new cardIndex(TOTAL_CARDS);					// Create the card index list.
 				if (cardIndexList) {													// If we got it..
-					ourPlayer = new toneObj(mOSPtr->getTonePin());			// Set up the beeper stuff.
+					ourPlayer = new toneObj(OSPtr->getTonePin());			// Set up the beeper stuff.
 					createSounds();													// Make up some ditties.
 					dealCards(GRID_X,GRID_Y);										// Do the initial deal.
 					ourState = playing;												// Got all the bits? We play!

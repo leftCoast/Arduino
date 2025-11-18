@@ -43,6 +43,7 @@
 //#define ICON_EDIT_PANEL_BMP    "/system/appFiles/iconEdit/iconEd32.bmp"
 //#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTst32.bmp"
 #define STERM_PANEL_BMP          "/system/appFiles/sTerm/term32.bmp"
+#define SLIDER_PANEL_BMP          "/system/appFiles/slider/slider.bmp"
 
 homeScreen::homeScreen(void)
    : homePanel() { }
@@ -78,6 +79,9 @@ void homeScreen::setup(void) {
    
    appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,STERM_PANEL_BMP);  
    addObj(sTerm);
+
+   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,sPuzzleApp,SLIDER_PANEL_BMP);  
+   addObj(sliderPuzzle);
    
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);

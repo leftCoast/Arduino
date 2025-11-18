@@ -37,7 +37,7 @@ panel::panel(int panelID,menuBarChoices menuBarChoice,eventSet inEventSet)
   : drawGroup(0,0,panelWith,panelHeight,inEventSet) {
   
 	mPanelID		= panelID;							// Save what "kind" of panel we are.
-	mOSPtr		= OSPtr;								// Save off our copy to the OS.
+	//mOSPtr		= OSPtr;								// Save off our copy to the OS.
 	mMenuBar		= NULL;								// Default to NULL.
 	mFilePath	= NULL;								// This too.
 	switch (menuBarChoice) {						// Lets see what kind of bar they wish for?
@@ -79,7 +79,8 @@ bool panel::setFilePath(const char* inName) {
 
 	success = false;
 	folderPtr = NULL;
-	if (heapStr(&folderPtr,mOSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
+	//if (heapStr(&folderPtr,mOSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
+	if (heapStr(&folderPtr,OSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
 		pathLen = strlen(folderPtr);										// Num chars in this path..
 		pathLen = pathLen + strlen(inName) + 1;						// Add more for the file name and '\0'.
 		if (resizeBuff(pathLen,&mFilePath)) {							// If we can get the RAM for the path..
