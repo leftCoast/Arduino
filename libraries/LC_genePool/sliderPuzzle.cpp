@@ -52,10 +52,10 @@ void scramble::doAction(void) {
 
 
 sliderPuzzle::sliderPuzzle(int ourAppID)
-  : panel(ourAppID) { }
+  : panel(ourAppID) { ourFileIndex = NULL; }
 
 
-sliderPuzzle::~sliderPuzzle(void) {  }
+sliderPuzzle::~sliderPuzzle(void) { if (ourFileIndex) delete(ourFileIndex); }
 
 
 void sliderPuzzle::setup(void) {
@@ -77,9 +77,67 @@ void sliderPuzzle::setup(void) {
 			mixBtn->setGame(this);
 			addObj(mixBtn);
 		}
+		buildPixIndex();
 	}
 }
 
+
+void sliderPuzzle::buildPixIndex(void) {
+	/* IN PROCESS!!
+	filePath		imageFolder;
+	pathItem*	trace;
+	int			numFiles;
+	
+	if (setFilePath("pix/")) {
+		imageFolder.setPath(mFilePath);
+		trace = imageFolder.childList;
+		numFiles = 0;;
+		while(trace) {
+			if (isPixFile(trace)) {
+				numFiles++;
+			}
+			trace  = (pathItem*)trace->dllNext;
+		}
+		if (numFiles) {
+			ourFileIndex = new cardIndex(numFiles);
+		}
+	}
+	*/
+}
+
+
+void sliderPuzzle::doNextImage(void) { 
+
+	int		pixNum;
+	filePath	pixFolder;
+	int		fileNum;
+	/* IN PROCESS!!
+	if (ourFileIndex) {
+		if (!ourFileIndex->getNumRemain()) {
+			ourFileIndex->loadList();
+		}
+		pixNum = ourFileIndex->dealCard();
+		if (pixNum) {
+			if (setFilePath("pix/")) {
+				pixFolder.setPath(mFilePath);
+				trace = pixFolder.childList;
+				fileNum = 0;;
+				while(trace) {
+					if (isPixFile(trace)) {
+						fileNum++;
+						if (fileNum==pixNum) {
+							pixFolder.pushItem(trace);
+							
+							return;
+						}
+					}
+					trace  = (pathItem*)trace->dllNext;
+				}
+			}
+		}
+	}
+	*/ 
+}
 
 
 void sliderPuzzle::drawSelf(void) {
@@ -94,23 +152,6 @@ void sliderPuzzle::drawSelf(void) {
 	barColor.setColor(&blue);
 	barColor.blend(&black,50);
 	screen->drawHLine(0,241+26,240,&barColor);
-}
-
-
-void sliderPuzzle::doNextImage(void) { 
-
-	filePath	imageFolder;
-	char*		path;
-	int		numFiles;
-	
-	path = NULL;
-	if (setFilePath("pix/")) {
-		imageFolder.setPath(mFilePath);
-		numFiles = imageFolder.numChildItems();
-		Serial.println(numFiles);
-	
-	ourBoard->setImage(path);
-	} 
 }
 
 

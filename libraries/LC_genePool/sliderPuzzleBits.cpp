@@ -1,5 +1,4 @@
 #include <sliderPuzzleBits.h>
-#include <cardIndex.h>
 #include <offscreen.h>
 
 
@@ -126,7 +125,7 @@ void sliderBoard::setup(void) {
 	sliderRect* aSlider;
 	int			numSquares;
 	int			i;
-	cardIndex	deck(NUM_SQR * NUM_SQR);
+	//cardIndex	deck(NUM_SQR * NUM_SQR);
 	
 	dumpDrawObjList();
 	numSquares = NUM_SQR * NUM_SQR;

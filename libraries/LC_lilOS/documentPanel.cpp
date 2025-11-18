@@ -24,7 +24,7 @@ char* docStateStr(docPanelStates aState) {
 	return stateStr;
 }
 
-
+/*
 bool appleFilter(pathItem* inItem) {
 
 	if (inItem->getName()[0]=='_') 					return false;
@@ -38,7 +38,7 @@ bool appleFilter(pathItem* inItem) {
 	if (strstr(inItem->getName(),".FSEVE"))		return false;
 	else return true;
 }
-
+*/
 
 bool hasExtension(char* inStr,const char* extension) {
 
@@ -133,7 +133,7 @@ documentPanel::documentPanel(int panelID,menuBarChoices menuBarChoice,eventSet i
 	saveAlert	= NULL;							// NULL
 	ourDoc		= NULL;							//
 	defaultPath	= NULL;							//
-	filter		= appleFilter;					// Filter function gets defaulted to Apple junk stripper.
+	filter		= MacOSFilter;					// Filter function gets defaulted to Apple junk stripper.
 	ourState		= haveFileNoNameNoEdits;	// Well, it'll be this once the docObj is created..
 }
 

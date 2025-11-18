@@ -1,4 +1,5 @@
 #include <lilOS.h> 
+#include <cardIndex.h>
 #include <sliderPuzzleBits.h>	
 
 class sliderPuzzle;
@@ -40,13 +41,16 @@ class sliderPuzzle :  public panel {
 	virtual	~sliderPuzzle(void);
           
 	virtual	void	setup(void);
+				void	buildPixIndex(void);
 	virtual	void	drawSelf(void);
 				void	doNextImage(void);
 				void	doScramble(void);
 	virtual	void	loop(void);
 	virtual	void	closing(void);
 	
-	sliderBoard*	ourBoard;		// Our game board.  
+	sliderBoard*	ourBoard;		// Our game board.
+	cardIndex*		ourFileIndex;
+	  
 };
 
 

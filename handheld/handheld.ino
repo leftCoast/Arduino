@@ -1,4 +1,3 @@
-//#include <teensy_1947.h>
 #include <adafruit_1947.h>
 #include <colorObj.h>
 #include <idlers.h>

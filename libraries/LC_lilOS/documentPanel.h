@@ -1,6 +1,7 @@
 #ifndef documentPanel_h
 #define documentPanel_h
 
+
 #include <docFileObj.h>
 #include <lilOS.h>
 #include <fSelectObj.h>
@@ -14,8 +15,8 @@
 // For more in-depth documentation on how it works, see the .cpp file.
 
 
-// Couple tools for filtering out file lists.
-bool appleFilter(pathItem* inItem);
+// Some tools for filtering out file lists.
+
 bool hasExtension(char* inStr,const char* extension);
 
 
