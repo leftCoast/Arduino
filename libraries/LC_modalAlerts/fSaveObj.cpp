@@ -277,7 +277,7 @@ char* saveFileDir::endChoice(void) {
 
 
 	
-fSaveObj::fSaveObj(listener* inListener,bool(*funct)(pathItem*))
+fSaveObj::fSaveObj(listener* inListener,bool(*funct)(const char*))
 	:fileViewer(inListener,funct),
 	kbdUser(this) {
 	

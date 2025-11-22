@@ -71,7 +71,6 @@ class panel :	public drawGroup,
 				int		mPanelID;   // What panal am I?
 				menuBar*	mMenuBar;	// My menu bar, if so desired.
 				char*		mFilePath;	// Temp file path to a named file. (Used to find our stuff)
-				//lilOS*	mOSPtr;		// Handy pointer to our OS object.
 };
 
 

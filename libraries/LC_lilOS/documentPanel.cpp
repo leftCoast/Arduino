@@ -82,7 +82,7 @@ stdComs	stateHolder::getLastComID(void) { return lastComID; }
 // **************************************************************
 
 
-selectFileObj::selectFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(pathItem*))
+selectFileObj::selectFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(const char*))
 	: fSelectObj(inListener,funct),
 	stateHolder(inLastState,inLastComID) { }
 
@@ -96,7 +96,7 @@ selectFileObj::~selectFileObj(void) {  }
 // **************************************************************
 
 
-saveFileObj::saveFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(pathItem*))
+saveFileObj::saveFileObj(listener* inListener,docPanelStates inLastState,stdComs inLastComID,bool(*funct)(const char*))
 	: fSaveObj(inListener,funct),
 	stateHolder(inLastState,inLastComID) { }
 	
@@ -163,7 +163,7 @@ void documentPanel::setup(void) {
 void documentPanel::closing(void) { if (ourDoc) ourDoc->closeDocFile(); }
 	
 // Let the children set the filter..				
-void documentPanel::setFilter(bool(*funct)(pathItem*)) { filter = funct; }
+void documentPanel::setFilter(bool(*funct)(const char*)) { filter = funct; }
 
 
 // Let the descendants set a default folder path for saving/retrieving documents.

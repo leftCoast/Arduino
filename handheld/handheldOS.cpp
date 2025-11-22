@@ -75,7 +75,7 @@ panel* handheldOS::createPanel(int panelID) {
       //case iconEditApp   : return new iconEdit();
       //case navTestApp    : return new navTest(navTestApp);
       //case sTermApp        : return new sTerm(sTermApp);
-      case sPuzzleApp      : return new sliderPuzzle(sPuzzleApp);
+      case puzzleApp      : return new sliderPuzzle(puzzleApp);
       default              : return NULL;
    }
 }
@@ -149,7 +149,7 @@ const char* handheldOS::getPanelFolder(int panelID) {
       case calcApp      : return "/system/appFiles/rpnCalc/";
       case navTestApp   : return "/system/appFiles/navTest/";
       case sTermApp     : return "/system/appFiles/sTerm/";
-      case sPuzzleApp   : return "/system/appFiles/slider/";
+      case puzzleApp   : return "/system/appFiles/slider/";
     
     default           : return NULL;
   }

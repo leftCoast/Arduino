@@ -38,7 +38,7 @@ class selectFileDir :	public fileDir {
 class fSelectObj :	public fileViewer {
 
 	public:
-				fSelectObj(listener* inListener,bool(*funct)(pathItem*)=NULL,selectType inSelectType=filesOnly);
+				fSelectObj(listener* inListener,bool(*funct)(const char*)=NULL,selectType inSelectType=filesOnly);
 	virtual	~fSelectObj(void);
 	
 	virtual	void	setInitialPath(char* inPath);

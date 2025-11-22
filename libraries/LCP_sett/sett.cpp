@@ -205,8 +205,8 @@ void sett::dealCards(int srtX,int srtY) {
 			cardPtrs[i] = NULL;													// NULL out the item as a flag.
 		}																				//
 	}																					//
-	if (cardIndexList->getNumRemain()<=14) {								// If we don't have enough left..
-		cardIndexList->loadList();												// Re-stack and shuffle the cards.
+	if (cardIndexList->cardsLeft()<=14) {									// If we don't have enough left..
+		cardIndexList->shuffle();												// Re-stack and shuffle the cards.
 	}																					// Thanks Ma, for finding this one.
 	i = 0;																			// Reset the card count.
 	for (int row=0;row<Y_CARDS;row++) {										// For every row..

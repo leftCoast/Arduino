@@ -158,7 +158,7 @@ void fileListItem::setThisFocus(bool setLoose) {
 // **************************************************************
 
 
-fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(pathItem*))
+fileListBox::fileListBox(int x, int y, int width,int height,bool(*funct)(const char*))
 	:scrollingList(x,y,width,height,touchScroll,dragEvents) {
 	
 	filterFx			= funct;
@@ -202,7 +202,7 @@ void fileListBox::fillList(void) {
 	
 	dumpDrawObjList();																						// Dump anything we may have from before.
 	if (ourFileDir) {																							// If we have a fileDir. (Sanity)
-		trace = ourFileDir->childList;																	// Grab a pointer to the first child.
+		trace = ourFileDir->getChildList();																// Grab a pointer to the first child.
 		while(trace) {																							// While we have a non-NULL pointer..
 			if (checkFile(trace)) {																			// Pass this child through the crucible of the user's filter function.
 				newListItem = new fileListItem(this,trace->getType(),trace->getName());		// If this 
@@ -349,7 +349,7 @@ char* fileDir::endChoice(void) {
 // **************************************************************
 
 
-fileViewer::fileViewer(listener* inListener,bool(*funct)(pathItem*))
+fileViewer::fileViewer(listener* inListener,bool(*funct)(const char*))
 	:alertObj("Default name",NULL,noIconAlert,true,true) {
 	
 	ourListener		= inListener;

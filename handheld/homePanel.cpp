@@ -80,7 +80,7 @@ void homeScreen::setup(void) {
    appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,STERM_PANEL_BMP);  
    addObj(sTerm);
 
-   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,sPuzzleApp,SLIDER_PANEL_BMP);  
+   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,puzzleApp,SLIDER_PANEL_BMP);  
    addObj(sliderPuzzle);
    
    /*

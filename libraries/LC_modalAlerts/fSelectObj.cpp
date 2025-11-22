@@ -132,7 +132,7 @@ char* selectFileDir::endChoice(void) {
 // **************************************************************
 
 
-fSelectObj::fSelectObj(listener* inListener,bool(*funct)(pathItem*),selectType inSelectType)
+fSelectObj::fSelectObj(listener* inListener,bool(*funct)(const char*),selectType inSelectType)
 	:fileViewer(inListener,funct) {
 	
 	currentItem = NULL;

@@ -537,33 +537,33 @@ pathPrefix navTest::decodePrefix(const char* param) {
 // [ls] Lists all the files in the working direcotory.
 void navTest::listDirectory(void) {
 
-  pathItem*		trace;
+	pathItem*		trace;
 
-  if (cmdParser->numParams()) {                                  // If they typed in something past the command.
-    Serial.println("Sorry, ls takes no params. Ignoring..");    // Let 'em know..
-  }                                                             //
-  if (wd.getPathType()==fileType) {                             // If this is pointing to a file..? 
-    Serial.println("Sorry, this is a file, not a directory.");	// Just wrong, we can't list a file.
-    return;                                                     // Just walk away..
-  } else {                                                      // Else, not a file. Good!
-    wd.refreshChildList();                                      // Make sure we have an up to date child list..
-    if (wd.numChildItems()==0) {                                // Wait, no children to list?
-      Serial.println("This directory is empty.");               // Tell the user.
-      return;                                                   // And walk away.
-    } else {                                                    // Else, we DO have kids to list.
-      trace = wd.childList;																	// Grab a pointer to the first child.
-      while(trace) {															// While we have a non-NULL pointer..
-        if (checkFile(trace)) {											// Pass this child through the crucible of the user's filter function.
-          Serial.print(trace->getName());                       // If passed, print it's name.
-          if (trace->getType()!=fileType) {                     // If it's a directory..
-            Serial.print("/");                                  // Add the "I'm a direcotry" slash to it.
-          }                                                     // 
-          Serial.println();                                     // Line feed..
-        }                                                       //
-        trace = (pathItem*)trace->dllNext;											// Jump to the next item on the list.
-      }
-    }
-  }
+	if (cmdParser->numParams()) {												// If they typed in something past the command.
+		Serial.println("Sorry, ls takes no params. Ignoring..");		// Let 'em know..
+	}																					//
+	if (wd.getPathType()==fileType) {										// If this is pointing to a file..? 
+		Serial.println("Sorry, this is a file, not a directory.");	// Just wrong, we can't list a file.
+		return;                                                     // Just walk away..
+	} else {																			// Else, not a file. Good!
+		wd.refreshChildList();													// Make sure we have an up to date child list..
+		if (wd.numChildItems()==0) {											// Wait, no children to list?
+			Serial.println("This directory is empty.");					// Tell the user.
+			return;																	// And walk away.
+		} else {																		// Else, we DO have kids to list.
+			trace = wd.getChildList();											// Grab a pointer to the first child.
+			while(trace) {															// While we have a non-NULL pointer..
+				if (checkFile(trace)) {											// Pass this child through the crucible of the user's filter function.
+					Serial.print(trace->getName());							// If passed, print it's name.
+					if (trace->getType()!=fileType) {						// If it's a directory..
+						Serial.print("/");										// Add the "I'm a direcotry" slash to it.
+					}																	// 
+					Serial.println();												// Line feed..
+				}																		//
+				trace = (pathItem*)trace->dllNext;							// Jump to the next item on the list.
+			}																			//
+		}																				//
+	}																					//
 }
 
 

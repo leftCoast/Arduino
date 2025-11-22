@@ -21,7 +21,7 @@ enum  apps {
    settApp,
    navTestApp,
    sTermApp,
-   sPuzzleApp,
+   puzzleApp,
    nextApp
 }; 
 

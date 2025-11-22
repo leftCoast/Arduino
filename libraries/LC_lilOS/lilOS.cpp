@@ -82,7 +82,7 @@ bool panel::setFilePath(const char* inName) {
 	//if (heapStr(&folderPtr,mOSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
 	if (heapStr(&folderPtr,OSPtr->getPanelFolder(mPanelID))) {	// If we got a folder path..
 		pathLen = strlen(folderPtr);										// Num chars in this path..
-		pathLen = pathLen + strlen(inName) + 1;						// Add more for the file name and '\0'.
+		pathLen = pathLen + strlen(inName) + 1;						// Add more for the file name, '\' and '\0'.
 		if (resizeBuff(pathLen,&mFilePath)) {							// If we can get the RAM for the path..
 			strcpy(mFilePath,folderPtr);									// Our folder path goes in.
 			strcat(mFilePath,inName);										// File name goes in.

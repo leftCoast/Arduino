@@ -2,20 +2,14 @@
 #include <offscreen.h>
 
 
-#define NUM_SQR   4 
-#define SQR_SIZE 60
-#define BRD_SIZE NUM_SQR * SQR_SIZE
-
-
-#define IMAGE_PATH "/system/images/lake.bmp"
-class sliderBoard;
-
+#define SAVE_FILE_NAME	"SAVEFILE"
+#define SAVE_BUFF_BYTES	40				// Has to be biffer that #squares * 2.
 
 // ************** sliderRect **************
 
 
 sliderRect::sliderRect(sliderBoard* inBoard,int inID)
-  :iconButton(0,0,IMAGE_PATH,SQR_SIZE) {
+  :iconButton(0,0,inBoard->ourImagePath.getPath(),SQR_SIZE) {
 
     ourBoard  = inBoard;
     ourID     = inID;
@@ -39,21 +33,21 @@ void sliderRect::doAction(void) { ourBoard->clicked(this); }
 				
 void sliderRect::swapWith(sliderRect* inRect) {
 
-  int xLoc;
-  int yLoc;
+	int xLoc;
+	int yLoc;
 
-  if (visable && inRect->isClear()) {
-    xLoc = x;
-    yLoc = y;
-    x = inRect->x;
-    y = inRect->y;
-    inRect->x = xLoc;
-    inRect->y = yLoc;
-    setNeedRefresh();
-    inRect->setNeedRefresh();
-  }
+	if (visable && inRect->isClear()) {
+		xLoc = x;
+		yLoc = y;
+		x = inRect->x;
+		y = inRect->y;
+		inRect->x = xLoc;
+		inRect->y = yLoc;
+		setNeedRefresh();
+		inRect->setNeedRefresh();
+	}
 }
-
+		
 
 void sliderRect::drawOffscreen(void) {
 
@@ -73,7 +67,7 @@ void sliderRect::drawOffscreen(void) {
 		ourBoard->ourBmp->setColor(x+drawObj::width-1,i,&aPixel);
 		
 	}
-	for(int i=1;i<ourBoard->ourBmp->getHeight()-1;i++) {
+	for(int i=1;i<ourBoard->ourBmp->getWidth()-1;i++) {
 		aPixel = ourBoard->ourBmp->getColor(i,0);
 		aPixel.blend(&white,30);
 		ourBoard->ourBmp->setColor(i,0,&aPixel);
@@ -106,6 +100,7 @@ void sliderRect::drawSelf(void) {
 }
 
 
+
 // ************* sliderBoard **************
 
 
@@ -113,20 +108,30 @@ void sliderRect::drawSelf(void) {
 sliderBoard::sliderBoard(int x, int y)
   : drawGroup(x,y,BRD_SIZE,BRD_SIZE) {
   
-  ourBmp = new bitmap(SQR_SIZE,SQR_SIZE);
+	saveFileName	= NULL;
+	numSquares		= 0;
+	ourBmp			= NULL;
+	ourBmp			= new bitmap(SQR_SIZE,SQR_SIZE);
 }
 
 
-sliderBoard::~sliderBoard(void) { if (ourBmp) delete(ourBmp); }
+sliderBoard::~sliderBoard(void) { 
+
+	if (ourBmp) delete(ourBmp);
+	freeStr(&saveFileName);
+}
 
 
-void sliderBoard::setup(void) {
+void sliderBoard::setup(filePath* imagePath) {
 	
 	sliderRect* aSlider;
 	int			numSquares;
 	int			i;
-	//cardIndex	deck(NUM_SQR * NUM_SQR);
-	
+
+	ourImagePath.setPath(imagePath->getPath());
+	//if (savePath) {
+	//	ourSavePath.setPath(savePath->getPath());
+	//}
 	dumpDrawObjList();
 	numSquares = NUM_SQR * NUM_SQR;
 	i = 1;
@@ -144,14 +149,45 @@ void sliderBoard::setup(void) {
 			}
 		}
 	}
-	
+	scramble();
 }
-	
-	
-void sliderBoard::setImage(const char* path) {   }
 
 
-void sliderBoard::scramble() {  }
+void sliderBoard::blindSwap(sliderRect* rectA,sliderRect* rectB) {
+
+	int xLoc;
+	int yLoc;
+	
+	xLoc = rectA->x;
+	yLoc = rectA->y;
+	rectA->setRect(rectB);
+	rectB->x = xLoc;
+	rectB->y = yLoc;
+	rectA->setNeedRefresh();
+	rectB->setNeedRefresh();
+}
+
+	
+void sliderBoard::scramble() {
+
+	int			IDA;
+	int			IDB;
+	sliderRect* rectA;
+	sliderRect* rectB;
+	cardIndex	deck(numObjects());
+	
+	while(deck.cardsLeft()) {
+		IDA = deck.dealCard();
+		IDB = deck.dealCard();
+		IDA--;
+		IDB--;
+		rectA = (sliderRect*)getObj(IDA);
+		rectB = (sliderRect*)getObj(IDB);
+		if (rectA && rectB) {
+			blindSwap(rectA,rectB);
+		}
+	}
+}
 
 
 sliderRect* sliderBoard::findSlider(rect* aRect) {
@@ -213,8 +249,81 @@ void sliderBoard::clicked(sliderRect* theClicked) {
 		}
 	}
 }
+		
 
 
+// Reads a line of text into a buffer with number of bytes. From an o=already open file. 
+// Stops reading if it sees a null char or a newline char.
+void sliderBoard::readLine(File src,char* buff,int numBytes) {
+
+	int				i;
+	int				maxI;
+	char				aChar;
+			
+	maxI = numBytes-1;			// Leave some room for '\0'.
+	i = 0;							// Clear i.
+	buff[i] = '\0';				// Drop in a '\0' just in case it ain't used.
+	aChar = src.read();			// Grab the first char.
+	while(aChar!='\0'				// If it ain't NULL char..
+		&& aChar!='\n' 			// If it ain't newline..
+		&& (uint8_t)aChar!=255	// If it ain't end of file..	
+		&& i<maxI) {				// If we ain't run out of buffer. Then..
+		buff[i] = aChar;			// Stuff in the char.
+		i++;							// Bump up for the next read.
+		buff[i] = '\0';			// Drop a NULL char here, In case we're done.
+		aChar = src.read();		// read the next char.
+	}
+}
+		
+
+// Reads all the data and returns if it's successful or not. Get it all and does it still
+// match?
+bool sliderBoard::readState(void) {
+
+	File	saveFile;
+	char	buff[SAVE_BUFF_BYTES];
+	int	i;
+	
+
+	saveFile = SD.open(ourSavePath.getPath(), FILE_READ);
+	if (saveFile) {
+		readLine(saveFile,buff,SAVE_BUFF_BYTES);
+		heapStr(&saveFileName,buff);
+		readLine(saveFile,buff,SAVE_BUFF_BYTES);
+		numSquares = atoi(buff);
+		if (numSquares==(NUM_SQR*NUM_SQR)) {
+			readLine(saveFile,(char*)locList,SAVE_BUFF_BYTES);
+			saveFile.close();
+			for(i=0;i<numSquares*2;i++) {
+				locList[i] = (byte)(locList[i])-1;
+			}
+			return true;
+		}
+	}
+	return false;					
+}
+
+
+void sliderBoard::writeState(void) {
+	
+	File	saveFile;
+	int	i;
+	
+	saveFile = SD.open(ourSavePath.getPath(),FILE_WRITE);
+	if (saveFile) {
+		saveFile.seek(0);
+		saveFile.println(saveFileName);
+		saveFile.println(numSquares);
+		for(i=0;i<numSquares*2;i++) {
+			saveFile.write((byte)(locList[i]+1));
+		}
+		saveFile.write((byte)(0));
+		saveFile.close();
+	}
+}
+
+				
+				
 void sliderBoard::drawSelf(void) { screen->fillRect(this,&black); }
 
 

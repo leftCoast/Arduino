@@ -358,7 +358,7 @@ void grenade::chooseWord(void) {
 		if (wordList) {												// If we got the file open..
 			wordNum = wordIndex->dealCard();						// Get a word index from the card index.
 			if (wordNum==-1) {										// If we ran out of choices..
-				wordIndex->loadList();								// Grab them all up and reload the list.
+				wordIndex->shuffle();								// Grab them all up and reload the list.
 				wordNum = wordIndex->dealCard();					// Try dealing again, should work.
 			}																//
 			wordNum--;													// 'Cause we start at zero, not one.

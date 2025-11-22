@@ -43,7 +43,7 @@ class fileListItem :	public drawGroup {
 class fileListBox :	public scrollingList {
 
 	public:
-				fileListBox(int x, int y, int width,int height,bool(*funct)(pathItem*));
+				fileListBox(int x, int y, int width,int height,bool(*funct)(const char*));
 	virtual	~fileListBox(void);
 				
 				void	setFileDir(fileDir* inFileDir);
@@ -98,7 +98,7 @@ class fileDir :	public drawGroup,
 class fileViewer :	public alertObj {
 
 	public:
-				fileViewer(listener* inListener,bool(*funct)(pathItem*));
+				fileViewer(listener* inListener,bool(*funct)(const char*));
 	virtual	~fileViewer(void);
 	
 	virtual	void	setPath(char* inPath);
