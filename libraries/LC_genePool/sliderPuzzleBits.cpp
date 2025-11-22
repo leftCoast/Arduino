@@ -271,7 +271,7 @@ void sliderBoard::readLine(File src,char* buff,int numBytes) {
 		buff[i] = aChar;			// Stuff in the char.
 		i++;							// Bump up for the next read.
 		buff[i] = '\0';			// Drop a NULL char here, In case we're done.
-		aChar = src.read();		// read the next char.
+		aChar = src.read();		// Read the next char.
 	}
 }
 		
