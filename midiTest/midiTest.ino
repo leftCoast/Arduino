@@ -58,8 +58,8 @@ void setup() {
       while (true);
    }
    
-   theTune.createTune("set5.mid");
-   //theTune.adjustSpeed(2);
+   theTune.createTune("tsttune.mid");
+   theTune.adjustSpeed(2);
    theTune.startTune(&theVoice);
    //Serial.println("Calling decode");
    //decodeFile("fith2.mid");

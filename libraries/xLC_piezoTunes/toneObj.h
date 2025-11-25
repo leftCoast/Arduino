@@ -7,7 +7,7 @@
 #include <idlers.h>
 
 // The notes!
-#define REST		0
+#define REST		0	// Freq. of zero means "rest".
 
 #define NOTE_B0  31
 #define NOTE_C1  33
@@ -100,7 +100,7 @@
 #define NOTE_DS8 4978
 
 
-#define Q_NOTE			250.0
+#define Q_NOTE			250.0		// Milliseconds
 
 #define H_NOTE			2 * Q_NOTE
 #define DH_NOTE		3 * Q_NOTE
@@ -156,7 +156,7 @@ class note :	public linkListObj {
 
 	public:
 				note(int inHz,float inMs);
-				~note(void);
+	virtual	~note(void);
 			
 				note* getNext(void);
 				void	playSelf(toneObj* inTone,float timeMult);
