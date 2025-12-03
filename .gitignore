@@ -64,3 +64,4 @@ libraries/LC_GUITools*
 /libraries/LC_keyboard*
 /libraries/LC_piezoTunes*
 /libraries/LC_modalAlerts*
+/libraries/LC_J1939
