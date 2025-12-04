@@ -43,8 +43,11 @@ libraries/LC_slowServo
 libraries/LC_SoundCard
 libraries/LC_SPI
 libraries/LC_tapSensor
+
 libraries/LCP_*
 
-libraries/starTrekArduino/
-libraries/arduino-CAN
+libraries/No_Tomorrows
+
+libraries/starTrekArduino
+
 
