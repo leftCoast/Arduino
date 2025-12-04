@@ -42,7 +42,7 @@ libraries/LC_SDTools
 libraries/LC_slowServo
 libraries/LC_SoundCard
 libraries/LC_SPI
-
+libraries/LC_tapSensor
 libraries/LCP_*
 
 libraries/starTrekArduino/
