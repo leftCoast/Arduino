@@ -109,6 +109,6 @@ void controlPanel::doPotVal(int aVal) {
 
   float pcnt;
   
-  pcnt = potToControl->Map(aVal);
+  pcnt = potToControl->map(aVal);
   setScrollValue(pcnt);
 }

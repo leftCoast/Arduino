@@ -2,22 +2,21 @@
 #include <adafruit_1431_Obj.h>
 #include <LC_SPI.h>
 
+#include <SD.h>
+
 #include <colorObj.h>
 #include <idlers.h>
-#include <lists.h>
 #include <mapper.h>
 #include <multiMap.h>
 #include <runningAvg.h>
 #include <timeObj.h>
 #include <mechButton.h>
 
-#include <bmpPipe.h>
 #include <bmpLabel.h>
 #include <displayObj.h>
 #include <drawObj.h>
 #include <label.h>
 #include <lineObj.h>
-#include <screen.h>
 #include <scrollingList.h>
 #include <pushPotGUI.h>
 #include <soundCard.h>
@@ -46,6 +45,8 @@
 // writing, (1/9/2019) this stuff works. But it is a complete
 // and utter bailing-wired-together hack!
 //
+// Dec. 2025 - Got it working again. Still a hack.
+//
 // But, just by accadent, I wrote in this cool navy-white-yellow-red
 // interface that Julie likes. Maybe I'll used that for my
 // cell phone?
@@ -54,10 +55,10 @@
 #define SOUND_CS    20
 #define SOUND_SDCS  21
 #define SOUND_DRQ   1
-#define SOUND_RST   15
+#define SOUND_R   15
 
 #define OLED_CS     10
-#define OLED_RST    6
+#define OLED_R    6
 #define OLED_SDCS   -1    // Not wired
 
 #define POT_BTN     4
@@ -88,61 +89,43 @@ runningAvg      potSmoother(25);
 
 
 void setup() {
-
+Serial.begin(9600);
  
   screenBColor = colorObj(LC_NAVY);
   textUHColor    = colorObj(LC_WHITE);
   textHColor   = colorObj(LC_YELLOW);
   textActiveColor  = colorObj(LC_RED);
   
-  if (initScreen(ADAFRUIT_1431, OLED_CS, OLED_RST, INV_PORTRAIT)) {
-    screen->fillScreen(&screenBColor);
+   screen = (displayObj*) new adafruit_1431_Obj(OLED_CS,OLED_R);
+  
+  //if (initScreen(ADAFRUIT_1431, OLED_CS, OLED_R, INV_PORTRAIT)) {
+  if (screen) {  
+     if (screen->begin()) {
+         screen->setRotation(INV_PORTRAIT);
+         screen->fillScreen(&screenBColor);
+     }
   } else {
     Serial.println(F("Init screen card FAIL."));
   }
 
   if (SD.begin(SOUND_SDCS)) {
-    
+    //Serial.println("SD seems good.");
   } else {
-    Serial.println(F("File system FAIL."));
+    Serial.println(F("File syem FAIL."));
   }
-  /*
-  debugger.trace("Holding.. Click return in the serial monitor.");
-  debugger.trace("\nReleased\n",false);
-  debugger.trace("Holding again with a number : ", 45);
-  debugger.trace("\nReleased again!\n",false);
-  */
-  
-  player = new soundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_RST);
+  player = new soundCard(soundCard_BREAKOUT,SOUND_CS,SOUND_DRQ,SOUND_R);
   player->begin();
   runVolume = false;
   randomPlay = true;
   playing = NULL;
   
-  /*
-  if (paper.openPipe(DISP_BG_FILE)) {
-    Serial.println(F("Background .bmp file OPENED."));
-  } else {
-    Serial.println(F("Background .bmp file FAIL."));
-  }
-*/
-  Serial.println("Building songList");
-  Serial.flush();
   ourList = new songList(10,24,118,100);
   viewList.addObj(ourList);
   SDCleaner();
   fillList("/");
-  
-  //Serial.println("Building toggleBtn");
-  //Serial.flush();
-  //ourToggler = new toggleBtn(107,6,12,12);
-  //viewList.addObj(ourToggler);
-  
-  Serial.println("Building controlPanel");
-  Serial.flush();
+
   ourController = new controlPanel(10,7,90,10);
   viewList.addObj(ourController);
-  Serial.print("songListItems cost : ");Serial.print(sizeof(songListItem)+13);Serial.println(" Bytes");
   setControlPtr(ourList);
 }
 
@@ -175,10 +158,6 @@ bool validFilename(char* fileName) {
 
   
 void SDCleaner(void) {
-
-// FSEVEN~1/
-// TRASHE~1/
-// SPOTLI~1/
 
   File  wd;
   File  entry;
@@ -221,7 +200,7 @@ void fillList(const char* workingDir) {
       entry = wd.openNextFile();
       if (entry) {
         if (!entry.isDirectory()) {
-          if (strstr(entry.name(),".MP3")) {
+          if (strstr(entry.name(),".mp3")) {
             newItem = new songListItem(ourList,entry.name());
             ourList->addObj(newItem);
           }
@@ -239,6 +218,7 @@ void fillList(const char* workingDir) {
 }
 
 
+
 void selectAnother() {
 
   int           numSongs;
@@ -246,9 +226,7 @@ void selectAnother() {
   songListItem* ourChoice;
   
   numSongs = ourList->numObjects();
-  Serial.print("Song count : ");Serial.println(numSongs);
   choice = random(0,numSongs-1);
-  Serial.print("Our chosen index : ");Serial.println(choice);
   ourChoice = (songListItem*)ourList->getObj(choice);
   if(ourChoice) {
     ourChoice->doAction();
@@ -261,11 +239,12 @@ void selectAnother() {
 
 
 void doRunVolume(void) {
+ 
   int vol;
   int potNum;
   
   potNum = analogRead(POT_ANLG);
-  vol = potToVol.Map(potNum);
+  vol = potToVol.map(potNum);
   if (volumeDelay.ding()) {
     volumeDelay.start();
     player->setVolume(vol);
@@ -277,14 +256,12 @@ void doRunVolume(void) {
     }
     if (randomPlay) {
       selectAnother();
-      Serial.println("they want to select another");
-      Serial.flush();
     } else {
       runVolume = false;
       setControlPtr(ourList);
     }
   }
-   if (ourClicker.clicked()) {
+   if (!ourClicker.getState()) {
     player->command(fullStop);
     runVolume = false;
     randomPlay = false;
@@ -292,7 +269,7 @@ void doRunVolume(void) {
       playing->setNeedRefresh();
       playing = NULL;
     }
-    while(ourClicker.clicked());
+    while(!ourClicker.getState());
     setControlPtr(ourList);
   }
 }
@@ -304,8 +281,8 @@ void loop() {
   if (runVolume) {
     doRunVolume();
   } else {
-    if (ourClicker.clicked()) {
-      while(ourClicker.clicked());
+    if (!ourClicker.getState()) {
+      while(!ourClicker.getState());
       buttonClick();
     }
     potVal(analogRead(POT_ANLG));

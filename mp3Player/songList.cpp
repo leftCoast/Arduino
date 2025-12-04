@@ -20,7 +20,7 @@ extern colorObj       textActiveColor;
 // ************************************
 
 
-songListItem::songListItem(drawList* myList,char* name)
+songListItem::songListItem(drawList* myList,const char* name)
   : label(0,0,78,12,name,1) { mList = myList; }
 
 
@@ -30,8 +30,8 @@ songListItem::~songListItem(void) {  }
 void songListItem::drawSelf(void) {
 
   char  buff[20];
-  
   int offst = 2;
+  
   getText(buff);
   if (mList->isVisible(this)) {
     if (playing == this) {
@@ -41,13 +41,10 @@ void songListItem::drawSelf(void) {
     } else {
       setColors(&textUHColor);
     }
-    //debugger.trace("Blank out item\n");
     screen->fillRect(x,y,width,height,&screenBColor);
     x=x+offst;
     y=y+offst;
-      //debugger.trace("Draw item\n");
       label::drawSelf();
-      //debugger.trace("Item should be drawn..\n");
     x=x-offst;
     y=y-offst;
   }
@@ -106,7 +103,7 @@ void songList::doPotVal(int aVal) {
 
   float pcnt;
   
-  pcnt = potToList->Map(aVal);
+  pcnt = potToList->map(aVal);
   setScrollValue(pcnt);
 }
 

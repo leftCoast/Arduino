@@ -4,6 +4,7 @@
 #include <drawObj.h>
 #include <runningAvg.h>
 #include <mapper.h>
+#include <debug.h>
 
 #include "pushPotGUI.h"
 #include "scrollingList.h"

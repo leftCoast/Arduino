@@ -8,6 +8,7 @@
 
 #include <SD.h>
 #include <adafruit_1947.h>
+//#include <adafruit_1431_Obj.h>
 #include <strTools.h>
 #include <lilParser.h>
 #include <SDTools.h>
@@ -15,7 +16,7 @@
 
 
 #define DSP_CS      10		// We need to fire up the display because it's on the SPI bus.
-#define SD_CS        4     // SD chip select pin number. Change to suit your setup.
+#define SD_CS       4 //21 // 4     // SD chip select pin number. Change to suit your setup.
 
 
 enum pathPrefix { setRoot, upOne, upNPath, fullPath, relPath };  // Prefixes people typically use for entering path paramiters.
@@ -34,7 +35,10 @@ filePath    wd;
 
 void setup() {
 
+   bool screenInit;
+   
 	Serial.begin(9600);
+	
 	screen = (displayObj*)new adafruit_1947(DSP_CS,-1);
 	if (!screen) {                                      // If we can't get the screen running..
 		Serial.println("NO SCREEN!");                     // Send an error out the serial port.
@@ -43,7 +47,21 @@ void setup() {
 	}                                                   //
   screen->begin();                                    //
 	screen->fillScreen(&black);                         // Looks like we have a screen.
-                                                      //
+   /*
+   screenInit = false;
+   screen = (displayObj*) new adafruit_1431_Obj(10,6);
+   if (screen) {
+      if (screen->begin()) {
+         screen->setRotation(INV_PORTRAIT);
+         screen->fillScreen(&black);
+         screenInit = true;
+      }
+   }
+   if (!screenInit) {
+      Serial.println("Screen is not working");
+      while(true);                               
+   }
+   */
 	if (!SD.begin(SD_CS)) {                             // If we can not initialze a SD drive.
 		Serial.println("No SD Drive!");                   // Tell the user.
 		while (1);                                        // Just stop here.
@@ -190,7 +208,7 @@ void makeDirectory(void) {
   tempStr param;
   int     numBytes;
   char*   pathBuff;
-  Serial.println("Create directory?");
+  
   pathBuff = NULL;                                // Make SURE these start at NULL.
   if (ourParser.numParams()==1) {                 // If they typed in something past the command.
     param.setStr(ourParser.getParamBuff());       // We get the first parameter. Should be the new folder's name/path.

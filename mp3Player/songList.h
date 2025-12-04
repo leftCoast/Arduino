@@ -15,7 +15,7 @@
 class songListItem : public label {
 
 public:
-          songListItem(drawList* myList,char* name);
+          songListItem(drawList* myList,const char* name);
   virtual ~songListItem(void);
 
   virtual void drawSelf(void);
