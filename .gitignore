@@ -40,6 +40,7 @@ libraries/LC_RPNCalculator
 libraries/LC_RCTools
 libraries/LC_SDTools
 libraries/LC_slowServo
+libraries/LC_sonar
 libraries/LC_SoundCard
 libraries/LC_SPI
 libraries/LC_tapSensor
