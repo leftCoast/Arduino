@@ -24,6 +24,7 @@ enum cmds { noCmd,      // ALWAYS start with no Command. Or something simlar.
             playVol,
             shuffle,
             autoPlay,
+            hwRestart,
             printWD,    
             changeDir,
             listDir,
@@ -60,6 +61,7 @@ void setup() {
    ourParser.addCmd(playVol,"volume");    // Add volume command.
    ourParser.addCmd(playVol,"vol");       // Add other volume command.
    ourParser.addCmd(autoPlay,"auto");     // Add Toggle auto play command.
+   ourParser.addCmd(hwRestart,"restart"); // Add reset command. Stops current song and restartes it.
    ourParser.addCmd(printWD, "pwd");      // Add pwd command. Print working directory.
    ourParser.addCmd(changeDir,"cd");      // Add cd command. Change directory.
    ourParser.addCmd(listDir,"ls");        // Add ls command. List directory.
@@ -119,6 +121,7 @@ void loop(void) {
          case stopPlay     : doStop();                      break;
          case playVol      : doVolume();                    break;
          case autoPlay     : doAutoPlay();                  break;
+         case hwRestart    : doRestart();                   break;
          case printWD      : Serial.println(wd.getPath());  break;   // Easy peasy! Just print wd out.
          case listDir      : listDirectory();               break;   // Print out a listing of the working directory.
          case makeDir      : makeDirectory();               break;   // See if we can create a directory in the working directory.
@@ -146,6 +149,7 @@ void showComs(void) {
   Serial.println("stop          Stops playing.");
   Serial.println("volume 0..100 Sets valume level.");
   //Serial.println("auto          Auto play random somgs..");
+  Serial.println("restart       Stops current song and restarts it from beginning.");
   Serial.println("pwd           show working directory.");
   Serial.println("ls            list items in the working directory.");
   Serial.println("cd *path*     Can be fullpath starting at '/' or");
@@ -196,14 +200,12 @@ void doStop() {
 
 void doVolume(void) {
 
-   byte     volume;
-   int      percent;
-   mapper   vMapper(0,100,255,0);
-   
+   float volume;
    
    if (ourParser.numParams()) {                    // If we vot a param..
-      percent = atoi(ourParser.getNextParam());    // Grab it and decode it as a percent.
-      volume = vMapper.map(percent);               // Map the percent to a volume byte.
+      volume = atof(ourParser.getNextParam());    // Grab it and decode it as a percent.
+      Serial.print("Setting volume : ");
+      Serial.println(volume);
       player->setVolume(volume);                   // Send it to the machine.
    }
 }
@@ -217,7 +219,15 @@ void doAutoPlay() {
    goingAuto = true;
 }              
 
-         
+
+void doRestart() {
+
+   if (player->isPlaying()) {
+      player->command(restart);
+   }
+}
+
+
 bool checkFile(pathItem* item) {
 
   if (item->name[0]=='.') return false;

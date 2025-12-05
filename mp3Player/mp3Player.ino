@@ -77,7 +77,7 @@ songListItem*   playing;
 controlPanel*   ourController;
 
 mechButton      ourClicker(POT_BTN);
-mapper          potToVol(0,1024,0,60);
+mapper          potToVol(0,1023,100,0);
 timeObj         volumeDelay(10);
 bool            runVolume;
 bool            randomPlay;
@@ -240,7 +240,7 @@ void selectAnother() {
 
 void doRunVolume(void) {
  
-  int vol;
+  float vol;
   int potNum;
   
   potNum = analogRead(POT_ANLG);
