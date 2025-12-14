@@ -2,6 +2,7 @@
 #include <lilOS.h>
 #include "handheldOS.h"
 #include "homePanel.h"
+
 #include <breakout.h>
 #include <grenade.h>
 #include <sett.h>
@@ -9,18 +10,16 @@
 //#include <navTest.h>
 //#include <sTerm.h>
 #include <sliderPuzzle.h>
-
 //#include <starTrek.h>
-//#include "src/regionTest/regionTest.h"
+//#include "regionTest.h"
 //#include <iconEdit.h>
-//#include "src/fileDBox/fileDBox.h"
 
 
 #define RAMPUP_START  0
-#define RAMPUP_END    2000
+#define RAMPUP_END    1000
 #define RAMPDN_START  RAMPUP_END
-#define RAMPDN_END    RAMPDN_START + 500
-#define STEPTIME      10 //ms
+#define RAMPDN_END    RAMPDN_START + 250
+#define STEPTIME      5 //ms
 
 // *****************************************************
 //                     handheldOS
@@ -61,7 +60,6 @@ bool handheldOS::begin(void) {
 // Used to create our custom panels..
 panel* handheldOS::createPanel(int panelID) {
 
-   beep();
    switch (panelID) {
       case homeApp         : return new homeScreen();
       //case fileOpenApp   : return new fileOpen();
@@ -74,8 +72,8 @@ panel* handheldOS::createPanel(int panelID) {
       //case rgnTestApp    : return new regionTest();
       //case iconEditApp   : return new iconEdit();
       //case navTestApp    : return new navTest(navTestApp);
-      //case sTermApp        : return new sTerm(sTermApp);
-      case puzzleApp      : return new sliderPuzzle(puzzleApp);
+      //case sTermApp       : return new sTerm(sTermApp);
+      case sliderApp      : return new sliderPuzzle(sliderApp);
       default              : return NULL;
    }
 }
@@ -85,9 +83,10 @@ void handheldOS::beep() { tone(BEEP_PIN, 500,35); }
 
 
 void handheldOS::launchPanel(void) {
-
-  hideRedraw();
-  lilOS::launchPanel();
+   
+   beep();
+   hideRedraw();
+   lilOS::launchPanel();
 }
 
 
@@ -130,27 +129,20 @@ void handheldOS::idle(void) {
 
 // Calls to be overwritten by user version.
 
-int handheldOS::getPanelWidth(void) { return 240; }
-
-int handheldOS::getPanelHeight(void) { return 320; }
-
 int handheldOS::getTonePin(void) { return BEEP_PIN; }
-
-void handheldOS::setBrightness(byte brightness) {  }
 
 const char* handheldOS::getSystemFolder() { return "/system/"; }
 
-const char* handheldOS::getPanelFolder(int panelID) {
-  
-   switch(panelID) {
-      case breakoutApp  : return "/system/appFiles/breakout/";
-      case grenadeApp   : return "/system/appFiles/grenade/";
-      case settApp      : return "/system/appFiles/sett/";
-      case calcApp      : return "/system/appFiles/rpnCalc/";
-      case navTestApp   : return "/system/appFiles/navTest/";
-      case sTermApp     : return "/system/appFiles/sTerm/";
-      case puzzleApp   : return "/system/appFiles/slider/";
-    
-    default           : return NULL;
-  }
+const char* handheldOS::getPanelName(int panelID) {
+
+    switch(panelID) {
+      case breakoutApp  : return "breakout";
+      case grenadeApp   : return "grenade";
+      case settApp      : return "sett";
+      case calcApp      : return "rpnCalc";
+      case sliderApp    : return "slider";
+      case navTestApp   : return "navTest";
+      case sTermApp     : return "sTerm";
+      default           : return NULL;
+    }
 }

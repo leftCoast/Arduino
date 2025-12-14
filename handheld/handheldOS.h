@@ -21,7 +21,7 @@ enum  apps {
    settApp,
    navTestApp,
    sTermApp,
-   puzzleApp,
+   sliderApp,
    nextApp
 }; 
 
@@ -47,12 +47,9 @@ class handheldOS : public lilOS {
    virtual  void     idle(void);               // If we need to do something in the background, here we are.
 
   // Calls to be overwritten by used version.
-   virtual  int         getPanelWidth(void);
-   virtual  int         getPanelHeight(void);
    virtual  int         getTonePin(void);
-   virtual  void        setBrightness(byte brightness);
    virtual  const char* getSystemFolder(void);
-   virtual  const char* getPanelFolder(int panelID);
+   virtual  const char* getPanelName(int panelID);
    
             bool     mDimScreen;
             int      mNowTime;

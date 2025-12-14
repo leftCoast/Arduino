@@ -33,22 +33,12 @@
 
 //#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 #define SPLASH_SCR_BMP           "/system/images/lake.bmp"
-//#define SPLASH_SCR_BMP         "/system/images/starTrek/StTrkScr.bmp"
-#define CALC_PANEL_BMP           "/system/appFiles/RPNCalc/calc32.bmp"
-#define BREAKOUT_PANEL_BMP       "/system/appFiles/breakout/breakout.bmp"
-#define GRENADE_PANEL_BMP        "/system/appFiles/grenade/grenade.bmp"
-#define SETT_PANEL_BMP           "/system/appFiles/sett/sett.bmp"
-//#define STAR_TREK_PANEL_BMP    "/system/appFiles/starTrek/sTrek32.bmp"
-//#define REGION_TEST_PANEL_BMP  "/system/appFiles/rgnTest/test32.bmp"
-//#define ICON_EDIT_PANEL_BMP    "/system/appFiles/iconEdit/iconEd32.bmp"
-//#define NAV_TEST_PANEL_BMP       "/system/appFiles/navtest/navTst32.bmp"
-#define STERM_PANEL_BMP          "/system/appFiles/sTerm/term32.bmp"
-#define SLIDER_PANEL_BMP          "/system/appFiles/slider/slider.bmp"
+
 
 homeScreen::homeScreen(void)
-   : homePanel() { }
+   : homePanel() { mBackImage = NULL; }
 
-homeScreen::~homeScreen(void) { }
+homeScreen::~homeScreen(void) { if (mBackImage) delete(mBackImage); }
   
 void homeScreen::setup(void) {
    
@@ -59,35 +49,35 @@ void homeScreen::setup(void) {
    mBackImage = new bmpObj(&imageRect,SPLASH_SCR_BMP);
   
    //appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
-   //addObj(starTrek);z
+   //addObj(starTrek);
 
    
-   appIcon*  breakOut = new appIcon(BREAKOUT_X,BREAKOUT_Y,breakoutApp,BREAKOUT_PANEL_BMP);
+   appIcon*  breakOut = new appIcon(BREAKOUT_X,BREAKOUT_Y,breakoutApp,iconPath(breakoutApp));
    addObj(breakOut);
 
-   appIcon*  grenade = new appIcon(GRENADE_X,GRENADE_Y,grenadeApp,GRENADE_PANEL_BMP);
+   appIcon*  grenade = new appIcon(GRENADE_X,GRENADE_Y,grenadeApp,iconPath(grenadeApp));
    addObj(grenade);
 
-   appIcon*  sett = new appIcon(SETT_X,SETT_Y,settApp,SETT_PANEL_BMP);
+   appIcon*  sett = new appIcon(SETT_X,SETT_Y,settApp,iconPath(settApp));
    addObj(sett);
 
-   appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,CALC_PANEL_BMP);
+   appIcon*  calc = new appIcon(CALC_X,CALC_Y,calcApp,iconPath(calcApp));
    addObj(calc);
 
-   //appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,NAV_TEST_PANEL_BMP);  
+   //appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,iconPath(navTestApp));  
    //addObj(navTest);
    
-   appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,STERM_PANEL_BMP);  
+   appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,iconPath(sTermApp));  
    addObj(sTerm);
 
-   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,puzzleApp,SLIDER_PANEL_BMP);  
+   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,sliderApp,iconPath(sliderApp));  
    addObj(sliderPuzzle);
    
    /*
-   appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,REGION_TEST_PANEL_BMP);
+   appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,iconPath(rgnTestApp));
    addObj(rgnTest);
 
-   appIcon*  iconEdit = new appIcon(EDIT_X,EDIT_Y,iconEditApp,ICON_EDIT_PANEL_BMP);
+   appIcon*  iconEdit = new appIcon(EDIT_X,EDIT_Y,iconEditApp,iconPath(iconEditApp));
    addObj(iconEdit);
 
    
