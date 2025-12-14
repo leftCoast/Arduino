@@ -119,7 +119,7 @@ void triDVector::normalize(void) {
 	z = z/mag;
 }
 
-// If I recall correctly. To invert a vector you ojust multiply the three values by -1.
+// If I recall correctly. To invert a vector you just multiply the three values by -1.
 void triDVector::invert(void) {
 
 	x = -x;
