@@ -29,8 +29,8 @@ void setup() {
 
    bool haveScreen;
 
-  //Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  //Serial.begin(9600);
    haveScreen = false;
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    //screen = (displayObj*) new adafruit_1947(DSP_CS,-1);

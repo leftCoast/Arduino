@@ -18,7 +18,7 @@
 #define TEST_Y       BREAKOUT_Y
 #define EDIT_X       BREAKOUT_X + 148
 #define EDIT_Y       BREAKOUT_Y+55
-*/
+
 #define X_OFFSET    -16
 #define BREAKOUT_X  40 + X_OFFSET
 #define BREAKOUT_Y  283 
@@ -30,6 +30,20 @@
 #define CALC_Y      283
 #define NAV_APP_X   200 + X_OFFSET
 #define NAV_APP_Y   283
+*/
+#define X_OFFSET    32 + 8
+#define BREAKOUT_X  4
+#define BREAKOUT_Y  283 
+#define GRENADE_X   BREAKOUT_X + X_OFFSET
+#define GRENADE_Y   283
+#define SETT_X      GRENADE_X + X_OFFSET
+#define SETT_Y      283
+#define CALC_X      SETT_X + X_OFFSET
+#define CALC_Y      283
+#define SLIDER_X    CALC_X + X_OFFSET
+#define SLIDER_Y    283
+#define S_LIST_X    SLIDER_X + X_OFFSET
+#define S_LIST_Y    283
 
 //#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 #define SPLASH_SCR_BMP           "/system/images/lake.bmp"
@@ -67,12 +81,14 @@ void homeScreen::setup(void) {
    //appIcon* navTest = new appIcon(NAV_APP_X,NAV_APP_Y,navTestApp,iconPath(navTestApp));  
    //addObj(navTest);
    
-   appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,iconPath(sTermApp));  
-   addObj(sTerm);
+   //appIcon* sTerm = new appIcon(NAV_APP_X,NAV_APP_Y,sTermApp,iconPath(sTermApp));  
+   //addObj(sTerm);
 
-   appIcon* sliderPuzzle = new appIcon(NAV_APP_X,NAV_APP_Y,sliderApp,iconPath(sliderApp));  
+   appIcon* sliderPuzzle = new appIcon(SLIDER_X,SLIDER_Y,sliderApp,iconPath(sliderApp));  
    addObj(sliderPuzzle);
-   
+
+   appIcon* shoppingList = new appIcon(S_LIST_X,S_LIST_Y,shopListApp,iconPath(shopListApp));
+   addObj(shoppingList);
    /*
    appIcon*  rgnTest = new appIcon(TEST_X,TEST_Y,rgnTestApp,iconPath(rgnTestApp));
    addObj(rgnTest);

@@ -13,6 +13,7 @@
 //#include <starTrek.h>
 //#include "regionTest.h"
 //#include <iconEdit.h>
+#include <shopList.h>
 
 
 #define RAMPUP_START  0
@@ -62,18 +63,12 @@ panel* handheldOS::createPanel(int panelID) {
 
    switch (panelID) {
       case homeApp         : return new homeScreen();
-      //case fileOpenApp   : return new fileOpen();
-      //case fileSaveApp   : return new fileSave();
       case calcApp         : return new rpnCalc(calcApp);
-      //case starTrekApp   : return new starTrekPanel(starTrekApp);
       case breakoutApp     : return new breakout(breakoutApp);
       case grenadeApp      : return new grenade(grenadeApp);
       case settApp         : return new sett(settApp);
-      //case rgnTestApp    : return new regionTest();
-      //case iconEditApp   : return new iconEdit();
-      //case navTestApp    : return new navTest(navTestApp);
-      //case sTermApp       : return new sTerm(sTermApp);
-      case sliderApp      : return new sliderPuzzle(sliderApp);
+      case sliderApp       : return new sliderPuzzle(sliderApp);
+      case shopListApp     : return new shopList(shopListApp);
       default              : return NULL;
    }
 }
@@ -143,6 +138,7 @@ const char* handheldOS::getPanelName(int panelID) {
       case sliderApp    : return "slider";
       case navTestApp   : return "navTest";
       case sTermApp     : return "sTerm";
+      case shopListApp  : return "shopList";
       default           : return NULL;
     }
 }

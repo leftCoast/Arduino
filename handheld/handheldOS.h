@@ -22,6 +22,7 @@ enum  apps {
    navTestApp,
    sTermApp,
    sliderApp,
+   shopListApp,
    nextApp
 }; 
 
