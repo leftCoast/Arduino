@@ -17,7 +17,7 @@ void bootError(const char* errStr) {
    screen->fillScreen(&black);   // Fill the screen black.
    screen->setCursor(10,10);     // Move cursor to the top left.
    screen->setTextColor(&white); // Drawing in white..
-   screen->setTextSize(2);       // Big enought to notice.
+   screen->setTextSize(2);       // Big enough to notice.
    screen->drawText(errStr);     // Draw the error message.
    analogWrite(SCREEN_PIN,255);  // Bring up the screen.
    while(1);                     // Lock down.
