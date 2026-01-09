@@ -28,6 +28,7 @@ class debug {
 };
 
 extern debug db;
+
 #define ST db.trace(__func__,false);
 
 
