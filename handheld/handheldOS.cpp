@@ -65,7 +65,7 @@ panel* handheldOS::createPanel(int panelID) {
       case homeApp         : return new homeScreen();
       case calcApp         : return new rpnCalc(calcApp);
       case breakoutApp     : return new breakout(breakoutApp);
-      case grenadeApp      : return new grenade(grenadeApp);
+      //case grenadeApp      : return new grenade(grenadeApp);
       case settApp         : return new sett(settApp);
       case sliderApp       : return new sliderPuzzle(sliderApp);
       case shopListApp     : return new shopList(shopListApp);
@@ -132,12 +132,12 @@ const char* handheldOS::getPanelName(int panelID) {
 
     switch(panelID) {
       case breakoutApp  : return "breakout";
-      case grenadeApp   : return "grenade";
+      //case grenadeApp   : return "grenade";
       case settApp      : return "sett";
       case calcApp      : return "rpnCalc";
       case sliderApp    : return "slider";
-      case navTestApp   : return "navTest";
-      case sTermApp     : return "sTerm";
+      //case navTestApp   : return "navTest";
+      //case sTermApp     : return "sTerm";
       case shopListApp  : return "shopList";
       default           : return NULL;
     }

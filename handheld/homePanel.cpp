@@ -50,8 +50,8 @@ void homeScreen::setup(void) {
   appIcon*  breakOut = new appIcon(BREAKOUT_X, BREAKOUT_Y, breakoutApp, iconPath(breakoutApp));
   addObj(breakOut);
 
-  appIcon*  grenade = new appIcon(GRENADE_X, GRENADE_Y, grenadeApp, iconPath(grenadeApp));
-  addObj(grenade);
+  //appIcon*  grenade = new appIcon(GRENADE_X, GRENADE_Y, grenadeApp, iconPath(grenadeApp));
+  //addObj(grenade);
 
   appIcon*  sett = new appIcon(SETT_X, SETT_Y, settApp, iconPath(settApp));
   addObj(sett);

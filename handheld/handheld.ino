@@ -1,4 +1,5 @@
 #include <adafruit_1947.h>
+//#include <DFRobot_0669.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -8,8 +9,15 @@
 #include <lilOS.h>
 #include "handheldOS.h"
 
-#define DSP_CS      10
-#define SD_CS       4
+// For 1947
+#define DSP_CS     10
+#define SD_CS      4
+#define DSP_RST    -1
+
+// For DFRobot_0669
+//#define DSP_CS    10
+//#define SD_CS     4
+//#define DSP_RST   26
 
 
 void bootError(const char* errStr) {
@@ -28,31 +36,28 @@ void bootError(const char* errStr) {
 void setup() {
 
    bool haveScreen;
-
-  Serial.begin(115200);
-  //Serial.begin(9600);
-   haveScreen = false;
+   
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
-   //screen = (displayObj*) new adafruit_1947(DSP_CS,-1);
+   Serial.begin(9600);
+   haveScreen = false;
+   //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    screen = (displayObj*) new adafruit_1947();
+   //screen =  (displayObj*) new DFRobot_0669(DSP_CS,DSP_RST);
    if (screen) {
-      if (screen->begin()) {
+       if (screen->begin()) {
          screen->setRotation(PORTRAIT);
          haveScreen = true;
       }
    }
    if (!haveScreen) {
       Serial.println("NO SCREEN!");                               // Send an error out the serial port.
-      Serial.flush();                                             // Make sure it goes out!
       while(true);                                                // Lock processor here forever.
    }
    if (!SD.begin(SD_CS)) {                                        // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
-      Serial.flush();                                             // Make sure it goes out!
       bootError("No SD card.");                                   // Since we have a display, display the error.
       analogWrite(SCREEN_PIN,255);                                // Turn on backlight.
    }
-   
    // If we get here, looks like we have hardware running.
    ourEventMgr.begin();                                           // Kickstart our event manager.
    ourOS.begin();                                               // Fire up our OS sevices.
