@@ -10,17 +10,17 @@
 
 #define X_OFFSET    32 + 8
 #define BREAKOUT_X  4
-#define BREAKOUT_Y  283
+#define BREAKOUT_Y  445
 #define GRENADE_X   BREAKOUT_X + X_OFFSET
-#define GRENADE_Y   283
+#define GRENADE_Y   445 //283
 #define SETT_X      GRENADE_X + X_OFFSET
-#define SETT_Y      283
+#define SETT_Y      445 //283
 #define CALC_X      SETT_X + X_OFFSET
-#define CALC_Y      283
+#define CALC_Y      445 //283
 #define SLIDER_X    CALC_X + X_OFFSET
-#define SLIDER_Y    283
+#define SLIDER_Y    445 //283
 #define S_LIST_X    SLIDER_X + X_OFFSET
-#define S_LIST_Y    283
+#define S_LIST_Y    445 //283
 
 //#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 #define SPLASH_SCR_BMP           "/system/images/lake.bmp"

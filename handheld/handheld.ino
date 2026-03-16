@@ -1,5 +1,5 @@
-#include <adafruit_1947.h>
-//#include <DFRobot_0669.h>
+//#include <adafruit_1947.h>
+#include <MSP3526_T.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -10,14 +10,14 @@
 #include "handheldOS.h"
 
 // For 1947
-#define DSP_CS     10
-#define SD_CS      4
-#define DSP_RST    -1
+//#define DSP_CS     10
+//#define SD_CS      4
+//#define DSP_RST    -1
 
-// For DFRobot_0669
-//#define DSP_CS    10
-//#define SD_CS     4
-//#define DSP_RST   26
+// For ST7796_T
+#define DSP_CS    10
+#define SD_CS     4
+#define DSP_RST   26
 
 
 void bootError(const char* errStr) {
@@ -38,11 +38,11 @@ void setup() {
    bool haveScreen;
    
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
-   Serial.begin(9600);
+   Serial.begin(115200);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
-   screen = (displayObj*) new adafruit_1947();
-   //screen =  (displayObj*) new DFRobot_0669(DSP_CS,DSP_RST);
+   //screen = (displayObj*) new adafruit_1947();
+   screen =  (displayObj*) new MSP3526_T(DSP_CS,DSP_RST);
    if (screen) {
        if (screen->begin()) {
          screen->setRotation(PORTRAIT);
@@ -56,11 +56,10 @@ void setup() {
    if (!SD.begin(SD_CS)) {                                        // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
       bootError("No SD card.");                                   // Since we have a display, display the error.
-      analogWrite(SCREEN_PIN,255);                                // Turn on backlight.
+      //analogWrite(SCREEN_PIN,255);                                // Turn on backlight.
    }
-   // If we get here, looks like we have hardware running.
    ourEventMgr.begin();                                           // Kickstart our event manager.
-   ourOS.begin();                                               // Fire up our OS sevices.
+   ourOS.begin();                                                 // Fire up our OS sevices.
 }
 
 

@@ -9,7 +9,7 @@
 #include <rpnCalc.h>
 //#include <navTest.h>
 //#include <sTerm.h>
-#include <sliderPuzzle.h>
+#include <sliderPz.h>
 //#include <starTrek.h>
 //#include "regionTest.h"
 //#include <iconEdit.h>
@@ -66,8 +66,8 @@ panel* handheldOS::createPanel(int panelID) {
       case calcApp         : return new rpnCalc(calcApp);
       case breakoutApp     : return new breakout(breakoutApp);
       //case grenadeApp      : return new grenade(grenadeApp);
-      case settApp         : return new sett(settApp);
-      case sliderApp       : return new sliderPuzzle(sliderApp);
+      case settApp         : return new sett(settApp);  
+      case sliderApp       : return new sliderPz(sliderApp);
       case shopListApp     : return new shopList(shopListApp);
       default              : return NULL;
    }
