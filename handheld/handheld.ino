@@ -1,5 +1,5 @@
-//#include <adafruit_1947.h>
-#include <MSP3526_T.h>
+#include <adafruit_1947.h>
+//#include <MSP3526_T.h>
 #include <colorObj.h>
 #include <idlers.h>
 #include <lists.h>
@@ -10,14 +10,14 @@
 #include "handheldOS.h"
 
 // For 1947
-//#define DSP_CS     10
-//#define SD_CS      4
-//#define DSP_RST    -1
+#define DSP_CS     10
+#define SD_CS      4
+#define DSP_RST    -1
 
 // For ST7796_T
-#define DSP_CS    10
-#define SD_CS     4
-#define DSP_RST   26
+//#define DSP_CS    10
+//#define SD_CS     4
+//#define DSP_RST   26
 
 
 void bootError(const char* errStr) {
@@ -40,9 +40,9 @@ void setup() {
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    Serial.begin(115200);
    haveScreen = false;
-   //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
-   //screen = (displayObj*) new adafruit_1947();
-   screen =  (displayObj*) new MSP3526_T(DSP_CS,DSP_RST);
+   screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
+   screen = (displayObj*) new adafruit_1947();
+   //screen =  (displayObj*) new MSP3526_T(DSP_CS,DSP_RST);
    if (screen) {
        if (screen->begin()) {
          screen->setRotation(PORTRAIT);
