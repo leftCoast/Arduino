@@ -14,7 +14,7 @@
 #define SD_CS      4
 #define DSP_RST    -1
 
-// For ST7796_T
+// For MSP3526_T
 //#define DSP_CS    10
 //#define SD_CS     4
 //#define DSP_RST   26
@@ -41,7 +41,7 @@ void setup() {
    Serial.begin(115200);
    haveScreen = false;
    screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
-   screen = (displayObj*) new adafruit_1947();
+   //screen = (displayObj*) new adafruit_1947();
    //screen =  (displayObj*) new MSP3526_T(DSP_CS,DSP_RST);
    if (screen) {
        if (screen->begin()) {
