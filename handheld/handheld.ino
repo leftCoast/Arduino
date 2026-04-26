@@ -39,8 +39,8 @@ void setup() {
    
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    Serial.begin(115200);
-   //pinMode(VIBE_PIN,OUTPUT);
-   //digitalWrite(VIBE_PIN,LOW);
+   pinMode(VIBE_PIN,OUTPUT);
+   digitalWrite(VIBE_PIN,HIGH);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    //screen = (displayObj*) new adafruit_1947();
