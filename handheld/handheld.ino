@@ -41,6 +41,8 @@ void setup() {
    Serial.begin(115200);
    pinMode(VIBE_PIN,OUTPUT);
    digitalWrite(VIBE_PIN,HIGH);
+   delay(15);
+   digitalWrite(VIBE_PIN,LOW);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    //screen = (displayObj*) new adafruit_1947();
