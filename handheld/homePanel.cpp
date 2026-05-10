@@ -154,6 +154,7 @@ void homeScreen::drawSelf(void) {
 	endColor.blend(&blue,5);
 	screen->fillRectGradient(0, 0, width, height-APP_ICON_H, &startColor, &endColor);
 	screen->fillRect(&iconBar,&black);
+	analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
 }
 
 

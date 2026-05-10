@@ -40,9 +40,9 @@ void setup() {
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    Serial.begin(115200);
    pinMode(VIBE_PIN,OUTPUT);
-   digitalWrite(VIBE_PIN,HIGH);
-   delay(15);
-   digitalWrite(VIBE_PIN,LOW);
+   //digitalWrite(VIBE_PIN,HIGH);
+   //delay(15);
+   //digitalWrite(VIBE_PIN,LOW);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    //screen = (displayObj*) new adafruit_1947();
@@ -60,8 +60,8 @@ void setup() {
    if (!SD.begin(SD_CS)) {                                        // With icons, we now MUST have an SD card.
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
       bootError("No SD card.");                                   // Since we have a display, display the error.
-      //analogWrite(SCREEN_PIN,255);                                // Turn on backlight.
    }
+   delay(10);                                                     // Suspect SD may need a little time to settle.
    ourEventMgr.begin();                                           // Kickstart our event manager.
    ourOS.begin();                                                 // Fire up our OS sevices.
 }

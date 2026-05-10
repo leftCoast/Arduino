@@ -5,7 +5,7 @@ libraries/Adafruit*
 libraries/arduino-CAN
 libraries/DHT-sensor-library
 *_t3
-
+libraries/SD*
 libraries/LC_*
 libraries/LCP_*
 

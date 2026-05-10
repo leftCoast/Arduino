@@ -74,7 +74,13 @@ panel* handheldOS::createPanel(int panelID) {
 }
 
 
-void handheldOS::beep() { tone(BEEP_PIN, 500,35); }
+void handheldOS::beep() { 
+  
+  tone(BEEP_PIN, 500,35);
+  digitalWrite(VIBE_PIN,HIGH);
+  delay(10);
+  digitalWrite(VIBE_PIN,LOW);
+}
 
 
 void handheldOS::launchPanel(void) {
