@@ -4,8 +4,9 @@
 #include <lilOS.h>
 
 #define SCREEN_PIN  25
-#define VIBE_PIN    22
 #define BEEP_PIN    23
+#define VIBE_PIN    22
+
 
 
 enum  apps {

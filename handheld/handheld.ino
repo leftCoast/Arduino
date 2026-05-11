@@ -18,7 +18,7 @@
 #define DSP_CS    10
 #define SD_CS     4
 #define DSP_RST   26
-
+#define BAT_VPIN  21
 
 void bootError(const char* errStr) {
     
@@ -66,10 +66,20 @@ void setup() {
    ourOS.begin();                                                 // Fire up our OS sevices.
 }
 
+timeObj  vTimer(5000);
+mapper   vMapper(0,1023,0,3.3);
+int      vRaw;
+float    volts;
 
 // During loop..
 void loop() {
       
-  idle();         // Idlers get their time.
-  ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
+   idle();         // Idlers get their time.
+   ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
+   if (vTimer.ding()) {
+      vRaw = analogRead(BAT_VPIN);
+      volts = vMapper.map(vRaw);
+      Serial.println(volts);
+      vTimer.reset();
+   }
 }
