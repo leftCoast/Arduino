@@ -35,9 +35,9 @@ iconArrange::~iconArrange(void) { }
 
 void iconArrange::arrangeList(void) {
 
-	int				xLoc;
-	int				space;
-	rectListObj*	trace;
+	int				    xLoc;
+	int				    space;
+	rectListObj*  trace;
 
 	if (minWidth()<=areaRect.width) {							// If we can make it fit.
 		if (maxWidth()<=areaRect.width) {						// No matter, it'll fit..

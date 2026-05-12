@@ -66,20 +66,11 @@ void setup() {
    ourOS.begin();                                                 // Fire up our OS sevices.
 }
 
-timeObj  vTimer(2000);
-mapper   vMapper(0,1023,0,3.3);
-int      vRaw;
-float    volts;
+
 
 // During loop..
 void loop() {
       
    idle();         // Idlers get their time.
    ourOS.loop();   // ourOS gets a kick to pass on to the current panel.
-   if (vTimer.ding()) {
-      vRaw = analogRead(BAT_VPIN);
-      volts = vMapper.map(vRaw)*2.0;
-      Serial.println(volts);
-      vTimer.reset();
-   }
 }
