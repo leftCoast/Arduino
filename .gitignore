@@ -14,3 +14,7 @@ libraries/No_Tomorrows
 libraries/starTrekArduino
 
 
+*.eep
+*.hex
+*.lst
+*.sym
