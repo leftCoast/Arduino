@@ -4,6 +4,7 @@
 #include <lilOS.h> 
 #include <bmpObj.h> 
 #include <rectArrange.h>
+#include <debug.h>
 
 // *****************************************************
 //                      iconArrange

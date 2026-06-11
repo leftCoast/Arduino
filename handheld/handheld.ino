@@ -18,6 +18,7 @@
 #define DSP_CS    10
 #define SD_CS     4
 #define DSP_RST   26
+
 #define BAT_VPIN  21
 
 void bootError(const char* errStr) {
@@ -38,11 +39,15 @@ void setup() {
    bool haveScreen;
    
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
-   Serial.begin(115200);
-   pinMode(VIBE_PIN,OUTPUT);
-   //digitalWrite(VIBE_PIN,HIGH);
-   //delay(15);
-   //digitalWrite(VIBE_PIN,LOW);
+   Serial.begin(9600);
+   if (CrashReport) {
+    delay(3000);
+    Serial.println(">>>>> GOT REPORT <<<<<<<");
+    Serial.print(CrashReport);
+    Serial.println(">>>>> GOT REPORT <<<<<<<");
+    while(!Serial.available()) delay(10);
+  }
+   //pinMode(VIBE_PIN,OUTPUT);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    //screen = (displayObj*) new adafruit_1947();
@@ -61,9 +66,11 @@ void setup() {
       Serial.println("NO SD CARD!");                              // Send an error out the serial port.
       bootError("No SD card.");                                   // Since we have a display, display the error.
    }
-   delay(10);                                                     // Suspect SD may need a little time to settle.
    ourEventMgr.begin();                                           // Kickstart our event manager.
    ourOS.begin();                                                 // Fire up our OS sevices.
+   Serial.println("setup() seems ok.");
+   Serial.print(">>> Size of docFileObj : ");
+   Serial.println(sizeof(docFileObj));
 }
 
 

@@ -60,16 +60,16 @@ bool handheldOS::begin(void) {
   
 // Used to create our custom panels..
 panel* handheldOS::createPanel(int panelID) {
-
+ST Serial.print("Panel ID : "); Serial.println(panelID);
    switch (panelID) {
-      case homeApp         : return new homeScreen();
-      case calcApp         : return new rpnCalc(calcApp);
-      case breakoutApp     : return new breakout(breakoutApp);
+      case homeApp         : Serial.println("---OPEN homeScreen---"); return new homeScreen();
+      case calcApp         : Serial.println("---OPEN calcApp---");return new rpnCalc(calcApp);
+      case breakoutApp     : Serial.println("---OPEN breakoutApp---");return new breakout(breakoutApp);
       //case grenadeApp      : return new grenade(grenadeApp);
-      case settApp         : return new sett(settApp);  
-      case sliderApp       : return new sliderPz(sliderApp);
-      case shopListApp     : return new shopList(shopListApp);
-      default              : return NULL;
+      case settApp         : Serial.println("---OPEN settApp---");return new sett(settApp);  
+      case sliderApp       : Serial.println("---OPEN sliderApp---");return new sliderPz(sliderApp);
+      case shopListApp     : Serial.println("---OPEN shopListApp---");return new shopList(shopListApp);
+      default              : Serial.println("*** Bad PanelID!! ***");return NULL;
    }
 }
 
@@ -77,9 +77,9 @@ panel* handheldOS::createPanel(int panelID) {
 void handheldOS::beep() { 
   
   tone(BEEP_PIN, 500,35);
-  digitalWrite(VIBE_PIN,HIGH);
-  delay(10);
-  digitalWrite(VIBE_PIN,LOW);
+  //digitalWrite(VIBE_PIN,HIGH);
+  //delay(10);
+  //digitalWrite(VIBE_PIN,LOW);
 }
 
 

@@ -66,7 +66,7 @@ void iconArrange::arrangeList(void) {
 
 
 //#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
-#define SPLASH_SCR_BMP           "/system/images/lake.bmp"
+//#define SPLASH_SCR_BMP           "/system/images/lake.bmp"
 
 
 homeScreen::homeScreen(void)
@@ -75,6 +75,7 @@ homeScreen::homeScreen(void)
 }
 
 homeScreen::~homeScreen(void) {
+  Serial.println("CLOSE HOME SCREEN");
   if (mBackImage) delete(mBackImage);
 }
 
@@ -94,7 +95,7 @@ void homeScreen::setup(void) {
 	spreader.settings(&iconBar,10,20);
 
 	imageRect.setRect(0, 0, 240, 280);
-	mBackImage = new bmpObj(&imageRect, SPLASH_SCR_BMP);
+	//mBackImage = new bmpObj(&imageRect, SPLASH_SCR_BMP);
 
   //appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
   //addObj(starTrek);
