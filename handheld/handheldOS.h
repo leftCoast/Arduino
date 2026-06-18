@@ -13,8 +13,8 @@
 enum  apps {
     
    homeApp = HOME_PANEL_ID,
-   fileOpenApp,
-   fileSaveApp,
+   //fileOpenApp,
+   //fileSaveApp,
    //starTrekApp,
    breakoutApp,
    calcApp,
@@ -55,11 +55,11 @@ class handheldOS : public lilOS {
    virtual  const char* getSystemFolder(void);
    virtual  const char* getPanelName(int panelID);
    
-            bool     mDimScreen;
-            int      mNowTime;
-            int      mEndTime;
-            multiMap screenMap;
-            timeObj  mScreenTimer;
+            //bool     mDimScreen;
+            //int      mNowTime;
+            //int      mEndTime;
+            //multiMap screenMap;
+            //timeObj  mScreenTimer;
 };
 
 extern handheldOS ourOS;

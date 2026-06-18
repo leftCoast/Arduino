@@ -3,7 +3,7 @@
 #include <liveText.h>
 #include <rectArrange.h>
 
-/*
+
 #define X_OFFSET    32 + 8
 #define BREAKOUT_X  4
 #define BREAKOUT_Y  445
@@ -17,7 +17,7 @@
 #define SLIDER_Y    445 //283
 #define S_LIST_X    SLIDER_X + X_OFFSET
 #define S_LIST_Y    445 //283
-*/
+
 #define APP_ICON_H	40
 #define APP_ICON_Y	4
 
@@ -25,7 +25,7 @@
 //                      iconArrange
 // *****************************************************
 
-	
+
 iconArrange::iconArrange(void)
   : rectArrange() {  }
 
@@ -127,7 +127,7 @@ void homeScreen::setup(void) {
 	addObj(sliderPuzzle);
 	spreader.addRect(sliderPuzzle);
 
-	appIcon* shoppingList = new appIcon(defX++, defY++, shopListApp, iconPath(shopListApp));
+  appIcon* shoppingList = new appIcon(defX++, defY++, shopListApp, iconPath(shopListApp));
 	addObj(shoppingList);
 	spreader.addRect(shoppingList);
 }

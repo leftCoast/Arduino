@@ -4,7 +4,7 @@
 #include "homePanel.h"
 
 #include <breakout.h>
-#include <grenade.h>
+//#include <grenade.h>
 #include <sett.h>
 #include <rpnCalc.h>
 //#include <navTest.h>
@@ -45,11 +45,11 @@ bool handheldOS::begin(void) {
    if (lilOS::begin()) {                        // Sets up the global OSPtr.
       pinMode(BEEP_PIN, OUTPUT);
       digitalWrite(BEEP_PIN, HIGH);          // Means off.
-      mScreenTimer.setTime(STEPTIME);
-      screenMap.addPoint(RAMPUP_START,0);
-      screenMap.addPoint(RAMPUP_END,255);
-      screenMap.addPoint(RAMPDN_START,255);
-      screenMap.addPoint(RAMPDN_END,0);
+      //mScreenTimer.setTime(STEPTIME);
+      //screenMap.addPoint(RAMPUP_START,0);
+      //screenMap.addPoint(RAMPUP_END,255);
+      //screenMap.addPoint(RAMPDN_START,255);
+      //screenMap.addPoint(RAMPDN_END,0);
    } else {
       Serial.println("OS begin() fail.");
       while(true);
@@ -60,16 +60,16 @@ bool handheldOS::begin(void) {
   
 // Used to create our custom panels..
 panel* handheldOS::createPanel(int panelID) {
-ST Serial.print("Panel ID : "); Serial.println(panelID);
+
    switch (panelID) {
-      case homeApp         : Serial.println("---OPEN homeScreen---"); return new homeScreen();
-      case calcApp         : Serial.println("---OPEN calcApp---");return new rpnCalc(calcApp);
-      case breakoutApp     : Serial.println("---OPEN breakoutApp---");return new breakout(breakoutApp);
+      case homeApp         : return new homeScreen();
+      case calcApp         : return new rpnCalc(calcApp);
+      case breakoutApp     : return new breakout(breakoutApp);
       //case grenadeApp      : return new grenade(grenadeApp);
-      case settApp         : Serial.println("---OPEN settApp---");return new sett(settApp);  
-      case sliderApp       : Serial.println("---OPEN sliderApp---");return new sliderPz(sliderApp);
-      case shopListApp     : Serial.println("---OPEN shopListApp---");return new shopList(shopListApp);
-      default              : Serial.println("*** Bad PanelID!! ***");return NULL;
+      case settApp         : return new sett(settApp);  
+      case sliderApp       : return new sliderPz(sliderApp);
+      case shopListApp     : return new shopList(shopListApp);
+      default              : return NULL;
    }
 }
 
@@ -92,7 +92,8 @@ void handheldOS::launchPanel(void) {
 
 
 void handheldOS::hideRedraw() {
-
+  analogWrite(SCREEN_PIN,0);
+  /*
   for(int i=RAMPDN_START;i<=RAMPDN_END;i=i+STEPTIME) {
     analogWrite(SCREEN_PIN,screenMap.map(i));
     delay(STEPTIME);
@@ -102,21 +103,24 @@ void handheldOS::hideRedraw() {
   mNowTime = RAMPUP_START;
   mEndTime = RAMPUP_END;
   mScreenTimer.start();
+  */
 }
 
 
 void handheldOS::bringUp() {
-  
+  analogWrite(SCREEN_PIN,255);
+  /*
   mDimScreen = true;
   mNowTime = RAMPUP_START;
   mEndTime = RAMPUP_END;
   mScreenTimer.start();
+  */
 }
 
 
 /// Things we do behind close doors..
 void handheldOS::idle(void) { 
-
+  /*
   if (mDimScreen) {
     if (mScreenTimer.ding()) {
       analogWrite(SCREEN_PIN,screenMap.map(mNowTime));
@@ -125,6 +129,8 @@ void handheldOS::idle(void) {
     }
     if (!mDimScreen) analogWrite(SCREEN_PIN,255);
   }
+  */
+  analogWrite(SCREEN_PIN,255);
 }
 
 

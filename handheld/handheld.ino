@@ -40,14 +40,7 @@ void setup() {
    
    analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
    Serial.begin(9600);
-   if (CrashReport) {
-    delay(3000);
-    Serial.println(">>>>> GOT REPORT <<<<<<<");
-    Serial.print(CrashReport);
-    Serial.println(">>>>> GOT REPORT <<<<<<<");
-    while(!Serial.available()) delay(10);
-  }
-   //pinMode(VIBE_PIN,OUTPUT);
+   pinMode(VIBE_PIN,OUTPUT);
    haveScreen = false;
    //screen = (displayObj*) new adafruit_1947(DSP_CS,DSP_RST);
    //screen = (displayObj*) new adafruit_1947();
@@ -68,9 +61,6 @@ void setup() {
    }
    ourEventMgr.begin();                                           // Kickstart our event manager.
    ourOS.begin();                                                 // Fire up our OS sevices.
-   Serial.println("setup() seems ok.");
-   Serial.print(">>> Size of docFileObj : ");
-   Serial.println(sizeof(docFileObj));
 }
 
 
