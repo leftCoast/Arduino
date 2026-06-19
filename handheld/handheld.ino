@@ -60,6 +60,7 @@ void setup() {
       bootError("No SD card.");                                   // Since we have a display, display the error.
    }
    ourEventMgr.begin();                                           // Kickstart our event manager.
+   Serial.println("Firing up the OS.");
    ourOS.begin();                                                 // Fire up our OS sevices.
 }
 

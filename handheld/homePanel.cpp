@@ -75,7 +75,7 @@ homeScreen::homeScreen(void)
 }
 
 homeScreen::~homeScreen(void) {
-  Serial.println("CLOSE HOME SCREEN");
+
   if (mBackImage) delete(mBackImage);
 }
 
@@ -88,6 +88,7 @@ void homeScreen::setup(void) {
 	int			defX;
 	int			defY;
 
+  ourOS.setScr(0);
 	iconBar.x = 0;
 	iconBar.y = screen->height() - APP_ICON_H;
 	iconBar.width = screen->width();
@@ -155,7 +156,7 @@ void homeScreen::drawSelf(void) {
 	endColor.blend(&blue,5);
 	screen->fillRectGradient(0, 0, width, height-APP_ICON_H, &startColor, &endColor);
 	screen->fillRect(&iconBar,&black);
-	analogWrite(SCREEN_PIN,0);                                     // Turn off backlight.
+	ourOS.setScr(100);                              // Make it so! 0..100 percent 0 being black.
 }
 
 
