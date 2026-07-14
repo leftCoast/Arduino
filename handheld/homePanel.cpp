@@ -67,17 +67,21 @@ void iconArrange::arrangeList(void) {
 
 //#define SPLASH_SCR_BMP          "/system/images/sunset.bmp"
 //#define SPLASH_SCR_BMP           "/system/images/lake.bmp"
-
+#define SPLASH_SCR_BMP           "/system/images/fBoat.bmp"
 
 homeScreen::homeScreen(void)
   : homePanel() {
   mBackImage = NULL;
+  ourOS.setScr(false);
+  updating = true;
 }
+
 
 homeScreen::~homeScreen(void) {
 
   if (mBackImage) delete(mBackImage);
 }
+
 
 void homeScreen::setup(void) {
 
@@ -88,7 +92,6 @@ void homeScreen::setup(void) {
 	int			defX;
 	int			defY;
 
-  ourOS.setScr(0);
 	iconBar.x = 0;
 	iconBar.y = screen->height() - APP_ICON_H;
 	iconBar.width = screen->width();
@@ -96,7 +99,9 @@ void homeScreen::setup(void) {
 	spreader.settings(&iconBar,10,20);
 
 	imageRect.setRect(0, 0, 240, 280);
-	//mBackImage = new bmpObj(&imageRect, SPLASH_SCR_BMP);
+  imageRect.setRect(0, 0, 320, 440);
+	mBackImage = new bmpObj(&imageRect, SPLASH_SCR_BMP);
+  addObj(mBackImage);
 
   //appIcon*  starTrek = new appIcon(STARTREK_X,STARTREK_Y,starTrekApp,STAR_TREK_PANEL_BMP);
   //addObj(starTrek);
@@ -136,28 +141,29 @@ void homeScreen::setup(void) {
 
 void homeScreen::drawSelf(void) {
 
-  /*
-    rect  bBar(0,280,240,40);
-
-    screen->fillRect(&bBar,&black);
-    mBackImage->draw();
-  */
 	rect	iconBar;
 	colorObj	startColor;
 	colorObj	endColor;
-
+  
 	iconBar.x = 0;
 	iconBar.y = screen->height() - APP_ICON_H;
 	iconBar.width = screen->width();
 	iconBar.height = APP_ICON_H;
 
-	startColor.setColor(&blue);
-	endColor.setColor(&black);
-	endColor.blend(&blue,5);
-	screen->fillRectGradient(0, 0, width, height-APP_ICON_H, &startColor, &endColor);
+	//startColor.setColor(&blue);
+	//endColor.setColor(&black);
+	//endColor.blend(&blue,5);
+	//screen->fillRectGradient(0, 0, width, height-APP_ICON_H, &startColor, &endColor);
 	screen->fillRect(&iconBar,&black);
-	ourOS.setScr(100);                              // Make it so! 0..100 percent 0 being black.
 }
 
 
-void homeScreen::loop(void) { }
+void homeScreen::loop(void) {
+
+  if (updating) {
+    if (listIdle()) {
+      ourOS.setScr(true);
+      updating = false;
+    }
+  }
+}

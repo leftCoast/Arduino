@@ -1,0 +1,24 @@
+#######################################
+# Syntax Coloring Map For timestamp32bits
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+timestamp32bits	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+timestamp	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+YEAR	LITERAL1
+DAY	LITERAL1
+HOUR	LITERAL1
+MINUTE	LITERAL1

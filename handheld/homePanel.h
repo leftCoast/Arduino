@@ -37,6 +37,7 @@ class homeScreen : public homePanel {
 	virtual	void	drawSelf(void);
 
          	bmpObj*	mBackImage;
+          bool    updating;     // How many loops through loop() 'till we try to turn it back on.
 };
 
 

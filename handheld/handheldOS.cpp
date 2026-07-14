@@ -45,14 +45,6 @@ handheldOS::~handheldOS(void) {}
 bool handheldOS::begin(void) {
 
   if (lilOS::begin()) {                     // Sets up the global OSPtr.
-    /*
-    rampUpMap.setValues(RAMPUP_START,RAMPUP_END,0,100);
-    rampDnMap.setValues(RAMPDN_START,RAMPDN_END,100,0);
-    scrTimer.setTime(STEPTIME,false);
-    scrBvalMapper.setValues(0, 100, 0,255);
-    scrMode = scrOff;                       // Screen is off!
-    */
-    scrBvalMapper.setValues(0, 100, 0,255);
     setScr(0);                              // Make it so! 0..100 percent 0 being black.
     pinMode(BEEP_PIN, OUTPUT);
     digitalWrite(BEEP_PIN, HIGH);           // Means off.
@@ -84,9 +76,9 @@ panel* handheldOS::createPanel(int panelID) {
 void handheldOS::beep() {
 
   tone(BEEP_PIN, 500, 35);
-  //digitalWrite(VIBE_PIN,HIGH);
-  //delay(10);
-  //digitalWrite(VIBE_PIN,LOW);
+  digitalWrite(VIBE_PIN,HIGH);
+  delay(10);
+  digitalWrite(VIBE_PIN,LOW);
 }
 
 
@@ -99,91 +91,11 @@ void handheldOS::launchPanel(void) {
 
 
 // 0..100 percent 0 being black.
-void handheldOS::setScr(float brightness) {
+void handheldOS::setScr(bool onOff) { digitalWrite(SCREEN_PIN,onOff); }                                              
 
-  int bVal;
-
-  bVal = round(scrBvalMapper.map(brightness));  // Map it to 0..255
-  Serial.println(bVal);
-  analogWrite(SCREEN_PIN, bVal);                // Set in the value for the screen.
-  /*
-  switch(scrMode) {                             // Now, check the mode we were in when we got here.
-    case scrOff :                               // The screen was off.
-      if (bVal==255) {                          // If we got 100%
-          scrMode = scrOn;                      // we'll say it's on.
-      }                                         //
-    break;                                      // Bail.
-    case scrOn  :                               // If it was completly off..
-      if (bVal==0) {                            // And was set to off..
-          scrMode = scrOff;                     // Then it's off.
-      }                                         //
-    break;                                      // We'll bail.
-    case scrRising  :                           // Rising?
-      if (bVal==255) {                          // And we hit the top?
-          scrMode = scrOn;                      // Flag it as on.
-      }                                         //
-    break;                                      // We're outta' here.
-    case scrSetting :                           // Dimming?
-      if (bVal==0) {                            // We hit the bottom?
-          scrMode = scrOff;                     // then we'll flag it as off.
-      }                                         //
-    break;                                      // We're off.
-  }                                             // For now..
-  */
-}                                               // Best we can do.
-
-/*
-void handheldOS::hideRedraw() {
-  ST
-  if (scrMode!=scrOff) {
-    mNowTime = 0;
-    mEndTime = RAMPDN_END;
-    scrMode = scrSetting;
-  }
-  scrTimer.start();
-}
-
-
-void handheldOS::bringUp() {
-  ST
-  mNowTime = 0;
-  mEndTime = RAMPUP_END;
-  scrTimer.start();
-  scrMode = scrRising;
-}
-*/
 
 // Things we do behind close doors..
-void handheldOS::idle(void) {
-/*
-  if (scrTimer.ding()) {
-    if (scrMode == scrSetting) {
-      setScr(rampDnMap.map(mNowTime));
-      mNowTime = mNowTime + STEPTIME;
-      if (scrMode == scrOff) {
-        Serial.println("Screen's off resetting.");
-        scrTimer.reset();
-      } else {
-        scrTimer.start();
-      }
-    } else if (scrMode == scrRising) {
-      setScr(rampUpMap.map(mNowTime));
-      mNowTime = mNowTime + STEPTIME;
-      if (scrMode == scrOn) {
-       Serial.println("Screen's on resetting.");
-        scrTimer.reset();
-      } else {
-        scrTimer.start();
-      }
-    }
-    if (scrMode == scrOff) {
-      if (viewList.listIdle()) {
-        bringUp();
-      }
-    }
-  }
-  */
-}
+void handheldOS::idle(void) { }
 
 
   // Calls to be overwritten by user version.

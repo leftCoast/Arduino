@@ -35,14 +35,6 @@ enum  apps {
 // ******************   handheldOS    ******************
 // *****************************************************
 
-/*
-enum scrModes {
-  scrOn,
-  scrOff,
-  scrRising,
-  scrSetting
-};
-*/
 
 class handheldOS : public lilOS {
 
@@ -50,30 +42,17 @@ class handheldOS : public lilOS {
             handheldOS(void);
    virtual  ~handheldOS(void);
   
-	virtual  bool		   begin(void);              // The global world is online, do hookups.
+   virtual  bool		   begin(void);              // The global world is online, do hookups.
    virtual  panel*	 createPanel(int panelID);
    virtual  void     launchPanel(void);        // Dispose of current and launch a newly created panel.
             void     beep(void);
-            void     setScr(float brightness);  // 0 .. 100 percent 0 being black.
-            //void     hideRedraw(void);
-            //void     bringUp(void);
+            void     setScr(bool onOff);  // 0 .. 100 percent 0 being black.
    virtual  void     idle(void);               // If we need to do something in the background, here we are.
 
   // Calls to be overwritten by used version.
    virtual  int         getTonePin(void);
    virtual  const char* getSystemFolder(void);
    virtual  const char* getPanelName(int panelID);
-   
-            /*
-            bool     hidingRedraw;
-            scrModes scrMode;
-            int      mNowTime;
-            int      mEndTime;
-            mapper  rampUpMap;
-            mapper  rampDnMap;
-            timeObj scrTimer;
-            */
-            mapper  scrBvalMapper;
 };
 
 extern handheldOS ourOS;
