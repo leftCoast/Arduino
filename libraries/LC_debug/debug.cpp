@@ -1,110 +1,101 @@
 #include <debug.h>
 #include <resizeBuff.h>
 
+int		stacklevel	= 0;
+int32_t	exitRAM		= 0;
+bool		pop			= true;
 
-// ******************************************
-// ***************   debug    ***************
-// ******************************************
+RamMonitor ram;
 
-debug::debug(void) { }
-debug::~debug(void) { }
+void out(void) { out(""); }
 
-void debug::trace(const char* message,bool hold) {
+void out(const char* msg) {
 
-  Serial.print(message);
-  Serial.flush();
-  if (hold) {
-    while(!Serial.available());
-    Serial.read();
-  }
-  Serial.println(); 
+	for(int i=0;i<stacklevel;i++) { Serial.print(F(TAB)); }
+	Serial.print(msg);
+}
+
+void outln(void) { outln(""); }
+
+
+void outln(const char* msg) {
+
+	out(msg);
+	Serial.println();
 }
 
 
-void debug::trace(const char* message,const char* inStr,bool hold) {
+// If a function name starts with "virtual" we'd like to remove that bit. Pretend it
+// wasn't there. So, to this end, we'll see if it's there. If so, go beyond the white
+// space, then pass back the address to the first printing char after.
+char* cleanName(const char* inName) {
 
-	Serial.print(message);
-	trace(inStr,hold);
-}
-
+	int	i;
+	char*	strPtr;
 	
-void debug::trace(const char* message,int inNum,bool hold) {
-
-  char* buff;
-  int   numChars;
-  
-  buff = NULL;
-  numChars = strlen(message);
-  if (resizeBuff(numChars+10,&buff)) {
-    strcpy(buff,message);
-    snprintf(&(buff[numChars]),9,"%d",inNum);
-    trace(buff,hold);
-    resizeBuff(0,&buff);
-  } else {
-    Serial.println(F("NO RAM!!"));
-  }
-}
-
-debug db;
-
-
-//****************************************************************************************
-//	traceLoop
-// Used for things that repeat a LOT. Like loop() or idle(). This gives a global that can
-// be switched on in your code and a limit as to how many to print. So as to not flood the
-// serial monitor.
-//****************************************************************************************
-
-
-traceLoop::traceLoop(int inLoops) {
-	
-	loops		= inLoops;
-	count		= 0;
-	ourState	= idle;
-}
-
-
-traceLoop::~traceLoop(void) {  }
-
-
-void traceLoop::trace(const char* msg) {  
-	
-	switch(ourState) {
-		case idle	:
-			if (traceLoopActive) {
-				count = 0;
-				db.trace(msg);
-				count++;
-				if (count>=loops) {
-					ourState = done;
-				} else {
-					ourState = active;
+	if (inName) {
+		strPtr = strstr(inName,"virtual");
+		if (strPtr) {
+			i = 7;
+			while(strPtr[i]) {
+				if (!isspace(strPtr[i])) {
+					return &(strPtr[i]);
 				}
+				i++;
 			}
-		break;
-		case active	:
-			if (traceLoopActive) {
-				db.trace(msg);
-				count++;
-				if (count>=loops) {
-					ourState = done;
-				}
-			} else {
-				ourState	= idle;
-			}
-		break;
-		case done	:
-			if (!traceLoopActive) {
-				ourState	= idle;
-			}
-		break;
+		} else {
+			return inName;
+		}
 	}
+	return NULL;
+}
+	
+	
+stackTrace::stackTrace(const char* fxName) {
+	
+	fName = NULL;
+	startRAM = ram.adj_free();
+	for(int i=0;i<stacklevel;i++) { Serial.print(TAB); }
+	if (heapStr(&fName,fxName)) {
+		Serial.print(cleanName(fName));
+		Serial.print(F("\tin  RAM : "));
+		Serial.print(startRAM);
+		if (pop && exitRAM) {
+			if (startRAM!=exitRAM) {
+				Serial.print(F("\tDelta : "));
+				Serial.print(startRAM - exitRAM);
+			}
+		}
+		Serial.println();
+	} else {
+		Serial.print(cleanName(fxName));
+		Serial.println(F("\tALLOCATION FAIL"));
+	}
+	pop = false;
+	stacklevel++;
 }
 
 
-bool traceLoopActive = false;
-
-traceLoop traceList[5];
+stackTrace::~stackTrace(void) {
+	
+	stacklevel--;
+	for(int i=0;i<stacklevel;i++) { Serial.print(TAB); }
+	if (fName) {
+		Serial.print(cleanName(fName));								// Print the function name.
+		freeStr(&fName);													// Loose it asap.
+		exitRAM = ram.adj_free();
+		Serial.print(F("\tout RAM : "));
+		Serial.print(exitRAM);
+		if (startRAM != exitRAM) {
+			Serial.print(F("\tDelta : "));
+			Serial.print(exitRAM - startRAM);
+		}
+		Serial.println();
+	} else {
+		Serial.println(F("\tALLOCATION FAIL"));
+	}
+	pop = true;
+}
 
 
 // ******************************************
@@ -197,3 +188,4 @@ void RAMMonitor::idle(void) {
 }
 
 #endif //RAM_MONITOR
+

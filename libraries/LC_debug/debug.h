@@ -5,57 +5,33 @@
 #include <idlers.h>
 #include <timeObj.h>
 #include <strTools.h>
+#include <RamMonitor.h>
 
 
+#define TAB	"  "
+#define ST stackTrace stackTracer(__PRETTY_FUNCTION__);
 
-// ******************************************
-// ***************   debug    ***************
-// ******************************************
-		
-// Debug class : Prints out a message and optionally stops the process there.
+extern	void out(void);
+extern	void outln(void);
+extern	void out(const char* msg);
+extern	void outln(const char* msg);
+extern	char* cleanName(const char* inName);
 
+extern	RamMonitor ram;
 
-class debug {
+extern	int		stacklevel;
+extern	int32_t	exitRAM;
+extern	bool		pop;
 
-  public :
-                debug(void);
-  virtual       ~debug(void);
-  
-				void  trace(const char* message,bool hold=false);
-				void  trace(const char* message,int inNum,bool hold=false);
-				//void  trace(const char* message,float inNum,bool hold=false);
-				void  trace(const char* message,const char* inStr,bool hold=false);
-};
+class stackTrace {
 
-extern debug db;
-
-#define ST db.trace(__func__,false);
-
-
-
-
-// ******************************************
-// *************   traceLoop   **************
-// ******************************************
-
-
-class traceLoop {
-
-	public :
-				enum traceStates { idle, active, done };
-				
-            traceLoop(int inLoops=5);
-	virtual	~traceLoop(void);
+	public:
+				stackTrace(const char* fxName);
+	virtual	~stackTrace(void);
 	
-				void	trace(const char* msg);
-  				
-  				traceStates	ourState;
-  				int 			count;
-  				int 			loops;
+				char*		fName;
+				int32_t	startRAM;	
 };
-
-extern bool			traceLoopActive;
-extern traceLoop	traceList[];
 
 
 
@@ -103,7 +79,7 @@ class fxTimer {
 
 #ifdef RAM_MONITOR
 
-#include <RamMonitor.h>
+//#include <RamMonitor.h>
 
 class RAMMonitor :	public idler,
 							public timeObj {

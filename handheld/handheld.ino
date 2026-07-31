@@ -1,11 +1,11 @@
 //#include <adafruit_1947.h>
 #include <MSP3526_T.h>
-#include <colorObj.h>
-#include <idlers.h>
-#include <lists.h>
-#include <mapper.h>
+//#include <colorObj.h>
+//#include <idlers.h>
+//#include <lists.h>
+//#include <mapper.h>
 
-#include <drawObj.h>
+//#include <drawObj.h>
 #include <lilOS.h>
 #include "handheldOS.h"
 
