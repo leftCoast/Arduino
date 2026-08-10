@@ -6,19 +6,6 @@
 #include <rectArrange.h>
 #include <debug.h>
 
-// *****************************************************
-//                      iconArrange
-// *****************************************************
-
-class iconArrange :     public rectArrange {
-
-	public:	
-				iconArrange(void);
-	virtual	~iconArrange(void);
-
-	virtual	void arrangeList(void);
-};
-
 
 
 // *****************************************************

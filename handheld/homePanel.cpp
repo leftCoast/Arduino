@@ -21,43 +21,6 @@
 #define APP_ICON_H	40
 #define APP_ICON_Y	4
 
-// *****************************************************
-//                      iconArrange
-// *****************************************************
-
-
-iconArrange::iconArrange(void)
-  : rectArrange() {  }
-
-
-iconArrange::~iconArrange(void) { }
-
-
-void iconArrange::arrangeList(void) {
-
-	int				    xLoc;
-	int				    space;
-	rectListObj*  trace;
-
-	if (minWidth()<=areaRect.width) {							// If we can make it fit.
-		if (maxWidth()<=areaRect.width) {						// No matter, it'll fit..
-			xLoc = areaRect.width - maxWidth();					// Streach 'em out.
-			space = maxWSpace;										// Choose max space.
-		} else {															// Too many?
-			xLoc = areaRect.width - minWidth();					// Shrink 'em up.
-			space = minWSpace;										// Choose narrow.
-		}																	//
-		xLoc = (xLoc + areaRect.x)/2;								// Don't forget the offset..
-		trace = (rectListObj*)getFirst();						// Grab the first one on the list.
-		while(trace) {													// For ever rect we can find..
-			trace->ourRect->x = xLoc;								// Set this rect's x location.
-			trace->ourRect->y = areaRect.y + APP_ICON_Y;		// Set this rect's y location.
-			xLoc = xLoc + trace->ourRect->width + space;		// Calcualte the next rect's location.
-			trace = (rectListObj*)trace->getNext();			// Hop to the next rect on the list.
-		}																	//
-	}																		// If they don't fit? Leave 'em be.
-}
-
 
 
 // *****************************************************
