@@ -5,7 +5,7 @@ void setup(void) {
   Serial.begin(115200); delay(400);
   pinMode(6, OUTPUT); digitalWrite(6, LOW); /* optional tranceiver enable pin */
   Can0.begin();
-  Can0.setBaudRate(1000000);
+  Can0.setBaudRate(250E3);
   Can0.setMaxMB(16);
   Can0.enableFIFO();
   Can0.enableFIFOInterrupt();
